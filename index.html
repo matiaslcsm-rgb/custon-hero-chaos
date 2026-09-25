@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Hero Chaos - ASCII Edition</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace; }
+        body { background-color: #0d0e11; color: #e0e0e0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        #app { display: flex; flex-direction: column; align-items: stretch; }
+        #game-container { display: flex; gap: 20px; background-color: #16181d; padding: 20px; border: 2px solid #333; box-shadow: 0 0 20px rgba(0,0,0,0.8); }
+        #viewport { display: flex; flex-direction: column; gap: 8px; }
+        #controls-hint { font-size: 0.72rem; color: #888; text-align: center; line-height: 1.4; }
+        #ascii-canvas { border: 1px solid #444; background-color: #050507; image-rendering: pixelated; }
+        #ui-panel { width: 360px; display: flex; flex-direction: column; gap: 12px; }
+        h2 { color: #ffb703; font-size: 1.2rem; text-align: center; }
+        h3 { color: #00b4d8; font-size: 1rem; margin-bottom: 5px; }
+        .subtitle { font-size: 0.8rem; color: #aaa; margin-bottom: 10px; }
+        hr { border: 0; height: 1px; background: #333; }
+        #game-state-text { color: #00f5d4; font-weight: bold; }
+        #lives-text { color: #ff477e; font-weight: bold; }
+        .options-grid { display: flex; flex-direction: column; gap: 8px; }
+        .skill-card { background: #22252e; border: 1px solid #444; padding: 8px; cursor: pointer; transition: all 0.2s ease; }
+        .skill-card:hover { border-color: #00b4d8; background: #2a2e3a; }
+        .skill-card.disabled { opacity: 0.5; cursor: default; }
+        .skill-card.disabled:hover { border-color: #444; background: #22252e; }
+        .skill-card h4 { color: #00f5d4; font-size: 0.9rem; }
+        .skill-card p { font-size: 0.75rem; color: #bbb; margin-top: 4px; }
+        .skill-card .keybind { color: #ffb703; font-weight: bold; }
+        #skills-owned { font-size: 0.75rem; color: #9d4edd; margin-top: 4px; }
+        button.primary-btn { background: #00b4d8; color: #000; font-weight: bold; border: none; padding: 8px; cursor: pointer; font-family: inherit; width: 100%; margin-top: 8px; }
+        button.primary-btn:hover { background: #48cae4; }
+        #log-panel { margin-top: auto; }
+        #combat-log { height: 150px; background: #090a0c; border: 1px solid #333; padding: 6px; overflow-y: auto; font-size: 0.75rem; color: #72efdd; display: flex; flex-direction: column; gap: 4px; }
+        #cooldown-bar { display: flex; gap: 6px; font-size: 0.7rem; color: #aaa; flex-wrap: wrap; }
+        #cooldown-bar span { background: #1c1f26; border: 1px solid #333; padding: 3px 6px; }
+        #cooldown-bar span.ready { color: #00f5d4; border-color: #00f5d4; }
+        #top-nav { display: flex; gap: 6px; margin-bottom: 14px; }
+        #top-nav button { flex: 1; background: #1c1f26; color: #ccc; border: 1px solid #444; padding: 8px; cursor: pointer; font-family: inherit; font-size: 0.85rem; }
+        #top-nav button.active { background: #ffb703; color: #000; font-weight: bold; border-color: #ffb703; }
+        #top-nav button.disabled { opacity: 0.4; cursor: default; }
+        #view-heroes { display: none; width: 940px; }
+        .codex-layout { display: flex; gap: 20px; background-color: #16181d; padding: 20px; border: 2px solid #333; box-shadow: 0 0 20px rgba(0,0,0,0.8); }
+        #codex-hero-list { width: 260px; display: flex; flex-direction: column; gap: 8px; }
+        #codex-detail { flex: 1; background: #0d0e11; border: 1px solid #333; padding: 16px; min-height: 500px; }
+        #codex-detail h3 { color: #ffb703; font-size: 1.3rem; }
+        #codex-detail .codex-sub { color: #00b4d8; font-size: 0.95rem; margin: 14px 0 6px; border-bottom: 1px solid #333; padding-bottom: 4px; }
+        #codex-detail .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; font-size: 0.8rem; }
+        #codex-detail .ability-row { background: #1c1f26; border: 1px solid #333; padding: 8px; margin-bottom: 6px; }
+        #codex-detail .ability-row.fixed { border-color: #ff9f1c; }
+        #codex-detail .ability-row h4 { color: #00f5d4; font-size: 0.9rem; }
+        #codex-detail .ability-row.fixed h4 { color: #ff9f1c; }
+        #codex-detail .ability-row p { font-size: 0.78rem; color: #bbb; margin-top: 4px; }
+        #codex-empty { color: #888; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <div id="app">
+    <div id="top-nav">
+        <button id="nav-game" class="active">🎮 Jugar</button>
+        <button id="nav-heroes">🦸 Héroes</button>
+        <button class="disabled" title="Próximamente">👹 Creeps y Jefes</button>
+        <button class="disabled" title="Próximamente">🎒 Ítems</button>
+    </div>
+
+    <div id="view-game" style="display:flex;">
+    <div id="game-container">
+        <div id="viewport">
+            <canvas id="ascii-canvas"></canvas>
+            <div id="controls-hint">Mover: [W,A,S,D] / Flechas &mdash; Habilidades activas: ver barra de abajo (varían según el héroe)</div>
+            <div id="cooldown-bar"></div>
+        </div>
+
+        <div id="ui-panel">
+            <h2>CUSTOM HERO CHAOS</h2>
+
+            <div id="status-panel">
+                <p><strong>Héroe:</strong> <span id="player-name">Ninguno</span> (<span id="player-hp">100/100</span> HP, <span id="player-mana">0/0</span> Maná)</p>
+                <p><strong>Stats:</strong> STR: <span id="stat-str">0</span> | AGI: <span id="stat-agi">0</span> | INT: <span id="stat-int">0</span> | ARM: <span id="stat-armor">0</span></p>
+                <p style="font-size: 0.72rem; color: #8ecae6;" id="extra-stats"></p>
+                <p><strong>Oro:</strong> <span id="player-gold">100</span> g | <strong>Oleada:</strong> <span id="round-num">1</span>/4 | <strong>Vidas:</strong> <span id="lives-text">♥♥</span></p>
+                <p><strong>Estado:</strong> <span id="game-state-text">SELECCIÓN DE HÉROE</span></p>
+                <p id="skills-owned"></p>
+                <p id="scaling-info" style="font-size: 0.75rem; color: #ffb703;"></p>
+            </div>
+
+            <hr>
+
+            <!-- Selección de Héroe -->
+            <div id="hero-select-panel">
+                <h3>Selección de Héroe</h3>
+                <p class="subtitle">Cada arquetipo tiene su propio kit y su propia mecánica de escalado.</p>
+                <div id="hero-options" class="options-grid"></div>
+            </div>
+
+            <!-- Draft de habilidades -->
+            <div id="draft-container" style="display: none;">
+                <h3>Draft de Habilidades</h3>
+                <p class="subtitle">Elige una habilidad nueva:</p>
+                <div id="draft-options" class="options-grid"></div>
+            </div>
+
+            <!-- Preparación / Tienda -->
+            <div id="shop-container" style="display: none;">
+                <h3>Tienda de Artículos</h3>
+                <p class="subtitle">Mejora tus atributos antes de la oleada:</p>
+                <div id="shop-options" class="options-grid"></div>
+                <button id="start-wave-btn" class="primary-btn">Comenzar Oleada</button>
+            </div>
+
+            <!-- Registro de Combate -->
+            <div id="log-panel">
+                <h4>Registro de Combate</h4>
+                <div id="combat-log"></div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Códice de Héroes -->
+    <div id="view-heroes">
+        <div class="codex-layout">
+            <div id="codex-hero-list"></div>
+            <div id="codex-detail"><p id="codex-empty">Elegí un héroe de la lista para ver sus stats y habilidades.</p></div>
+        </div>
+    </div>
+    </div>
+
+    <script>
+        // --- 1. DATOS DE LOS HÉROES ---
+        // Cada arquetipo define su propia mecánica de escalado: qué stat sube, cuánto por cada N creeps
+        // eliminados (acumulado durante toda la partida) y cuánto por ganar un duelo 1v1 contra otro héroe
+        // (perHeroKill queda listo para cuando se implementen los duelos PvP del loop completo).
+        const HERO_TEMPLATES = {
+            AXE: {
+                key: 'AXE', name: 'Axe', symbol: '@', primaryAttr: 'STR', role: 'Tanque de contraataque',
+                baseHp: 120, baseAtk: 16, baseAtkSpeed: 0.9, baseAttackRange: 1.5,
+                baseArmor: 2, baseMagicResist: 15, baseHpRegen: 1.5,
+                baseMaxMana: 100, baseManaRegen: 1.2, baseMoveSpeed: 2.8, baseProjectileSpeed: 0,
+                baseCritChance: 5, baseEvasion: 4, baseSpellAmp: 0, baseLifesteal: 0,
+                description: 'Fuerza: tanque de primera línea. Provoca enemigos y castiga a quien lo golpea. Escala armadura.',
+                scaling: { stat: 'armor', perKills: 10, perKillsAmount: 0.5, perHeroKill: 1.5 },
+                archetypePassive: {
+                    id: 'COUNTERATTACK', name: 'Contraataque', chance: 20, tauntBonusChance: 20,
+                    description: 'Pasiva fija de Fuerza: 20% de probabilidad de responder automáticamente con un golpe físico (100% de tu daño) contra quien te golpeó. La probabilidad sube mientras Llamado Provocador está activo.'
+                }
+            },
+            SNIPER: {
+                key: 'SNIPER', name: 'Sniper', symbol: 'S', primaryAttr: 'AGI', role: 'Francotirador de largo alcance',
+                baseHp: 85, baseAtk: 14, baseAtkSpeed: 1.2, baseAttackRange: 5,
+                baseArmor: 0, baseMagicResist: 10, baseHpRegen: 0.5,
+                baseMaxMana: 150, baseManaRegen: 1.5, baseMoveSpeed: 2.6, baseProjectileSpeed: 11,
+                baseCritChance: 12, baseEvasion: 8, baseSpellAmp: 8, baseLifesteal: 0,
+                description: 'Agilidad: DPS físico de largo alcance. Cuanto más lejos dispara, más daño hace. Frágil de cerca.',
+                scaling: { stat: 'atk', perKills: 8, perKillsAmount: 3, perHeroKill: 8 },
+                archetypePassive: {
+                    id: 'PERFECT_AIM', name: 'Puntería Perfecta',
+                    description: 'Pasiva fija de Agilidad: el daño de tus ataques básicos crece con la distancia al objetivo (hasta +35% a distancia máxima).'
+                }
+            },
+            ASSASSIN: {
+                key: 'ASSASSIN', name: 'Asesino', symbol: 'K', primaryAttr: 'AGI', role: 'Asesino de críticos',
+                baseHp: 90, baseAtk: 15, baseAtkSpeed: 1.1, baseAttackRange: 1.3,
+                baseArmor: 1, baseMagicResist: 8, baseHpRegen: 0.8,
+                baseMaxMana: 90, baseManaRegen: 1.3, baseMoveSpeed: 3.4, baseProjectileSpeed: 0,
+                baseCritChance: 20, baseEvasion: 10, baseSpellAmp: 0, baseLifesteal: 0,
+                description: 'Agilidad: asesino explosivo de altísimo daño crítico. Entra, elimina un objetivo y sale antes de que lo rodeen.',
+                scaling: { stat: 'critChance', perKills: 8, perKillsAmount: 2, perHeroKill: 5 },
+                archetypePassive: {
+                    id: 'DEADLY_STRIKE', name: 'Golpe Mortal',
+                    description: 'Pasiva fija de Agilidad: alta probabilidad base de golpe crítico (x2 daño) en cada ataque básico.'
+                }
+            },
+            VAMPIRE: {
+                key: 'VAMPIRE', name: 'Guerrero Vampiro', symbol: 'V', primaryAttr: 'STR', role: 'Guerrero vampiro cuerpo a cuerpo',
+                baseHp: 140, baseAtk: 15, baseAtkSpeed: 0.85, baseAttackRange: 1.4,
+                baseArmor: 3, baseMagicResist: 12, baseHpRegen: 1.0,
+                baseMaxMana: 100, baseManaRegen: 1.0, baseMoveSpeed: 2.9, baseProjectileSpeed: 0,
+                baseCritChance: 6, baseEvasion: 5, baseSpellAmp: 0, baseLifesteal: 15,
+                description: 'Fuerza: guerrero resistente que se cura con el daño que hace. Dominante en peleas largas.',
+                scaling: { stat: 'lifesteal', perKills: 9, perKillsAmount: 1, perHeroKill: 3 },
+                archetypePassive: {
+                    id: 'BLOODLUST', name: 'Hambre',
+                    description: 'Pasiva fija de Fuerza: convierte una parte de tu daño físico en vida (Robo de Vida). Se duplica contra enemigos con menos de 30% HP.'
+                }
+            }
+        };
+
+        function scalingStatLabel(stat) {
+            return stat === 'armor' ? 'armadura' : stat === 'atk' ? 'daño de ataque' :
+                stat === 'critChance' ? '% crítico' : stat === 'lifesteal' ? '% robo de vida' : stat;
+        }
+
+        // Kit de habilidades drafteables por héroe: exactamente 3 normales cada uno. No incluye la pasiva fija
+        // de arquetipo (esa la trae el héroe desde que lo elegís, ver HERO_TEMPLATES.archetypePassive) ni la
+        // definitiva (ver HERO_ULTIMATES, se desbloquea sola al aprender las 3 normales). Se draftea 1 al
+        // inicio + 1 por cada oleada superada hasta agotar el pool de normales.
+        const HERO_SKILLS = {
+            AXE: {
+                AXE_HACHAZO: {
+                    id: 'AXE_HACHAZO', name: 'Golpe de Hacha', keybind: 'e', cooldown: 5, manaCost: 30,
+                    description: '[E] 30 maná. Golpe frontal: 120% de tu daño físico al enemigo más cercano. 25% de probabilidad de aturdirlo 1s.'
+                },
+                AXE_PROVOCACION: {
+                    id: 'AXE_PROVOCACION', name: 'Llamado Provocador', keybind: 'r', cooldown: 14, manaCost: 45,
+                    description: '[R] 45 maná. Provoca a los enemigos en radio 5 por 2.5s y te da 25% de reducción de daño mientras dura.'
+                },
+                AXE_GIRO: {
+                    id: 'AXE_GIRO', name: 'Giro de Combate', keybind: 't', cooldown: 10, manaCost: 40,
+                    description: '[T] 40 maná. Gira con su arma: 70% de tu daño físico a todos los enemigos en radio 2.'
+                }
+            },
+            SNIPER: {
+                SNIPER_POTENTE: {
+                    id: 'SNIPER_POTENTE', name: 'Disparo Potente', keybind: 'e', cooldown: 7, manaCost: 35,
+                    description: '[E] 35 maná. Disparo preciso: 180% de tu daño físico al enemigo más cercano.'
+                },
+                SNIPER_CONGELANTE: {
+                    id: 'SNIPER_CONGELANTE', name: 'Disparo Congelante', keybind: 'r', cooldown: 9, manaCost: 30,
+                    description: '[R] 30 maná. 100% de tu daño físico y ralentiza 50% por 3s (más si el objetivo está a distancia máxima).'
+                },
+                SNIPER_VISION: {
+                    id: 'SNIPER_VISION', name: 'Visión de Cazador', keybind: 't', cooldown: 16, manaCost: 40, duration: 5,
+                    description: '[T] 40 maná. 5s: +40% de rango y +25% de daño físico, pero -50% de velocidad de movimiento.'
+                }
+            },
+            ASSASSIN: {
+                ASSASSIN_BLINK: {
+                    id: 'ASSASSIN_BLINK', name: 'Parpadeo', keybind: 'e', cooldown: 12, manaCost: 35,
+                    description: '[E] 35 maná. Teletransporte de hasta 8 casillas junto al enemigo más cercano: +20% vel. ataque 2s y ataca de inmediato.'
+                },
+                ASSASSIN_CRITSTRIKE: {
+                    id: 'ASSASSIN_CRITSTRIKE', name: 'Golpe Crítico', keybind: 'r', cooldown: 8, manaCost: 40,
+                    description: '[R] 40 maná. 150% de tu daño físico al enemigo más cercano, con +25% de probabilidad extra de crítico.'
+                },
+                ASSASSIN_LETHALSPEED: {
+                    id: 'ASSASSIN_LETHALSPEED', name: 'Velocidad Letal', keybind: 't', cooldown: 14, manaCost: 35, duration: 4,
+                    description: '[T] 35 maná. 4s: +60% velocidad de ataque. Cada golpe consecutivo al mismo enemigo suma daño (se reinicia si cambiás de objetivo).'
+                }
+            },
+            VAMPIRE: {
+                VAMP_DARKBLOOD: {
+                    id: 'VAMP_DARKBLOOD', name: 'Sangre Oscura', keybind: 'e', cooldown: 12, manaCost: 25, duration: 5,
+                    description: '[E] 25 maná. Consumís 8% de tu vida actual y ganás +30% daño físico por 5s; tu robo de vida aumenta mientras dura.'
+                },
+                VAMP_CLAW: {
+                    id: 'VAMP_CLAW', name: 'Garra Vampírica', keybind: 'r', cooldown: 6, manaCost: 30,
+                    description: '[R] 30 maná. 130% de tu daño físico al enemigo más cercano; recuperás 20% del daño como vida (más si tiene <30% HP).'
+                },
+                VAMP_LEAP: {
+                    id: 'VAMP_LEAP', name: 'Salto Sangriento', keybind: 't', cooldown: 10, manaCost: 35,
+                    description: '[T] 35 maná. Saltás hasta 6 casillas hacia el enemigo más cercano: 100% de daño físico de impacto y -40% velocidad 2s.'
+                }
+            }
+        };
+
+        // Habilidad definitiva única por héroe: se desbloquea automáticamente (no se draftea) al aprender
+        // las 3 habilidades normales del kit. Usa la tecla [F] y comparte el mismo sistema de maná/cooldown.
+        const HERO_ULTIMATES = {
+            AXE: {
+                id: 'AXE_FURIA', name: 'Furia del Guerrero', keybind: 'f', cooldown: 45, manaCost: 80, duration: 8,
+                description: '[F] DEFINITIVA. 80 maná. 8s: +40% daño físico, +30% vel. ataque, +20% reducción de daño. Cada golpe recibido suma daño extra.'
+            },
+            SNIPER: {
+                id: 'SNIPER_MORTAL', name: 'Disparo Mortal', keybind: 'f', cooldown: 50, manaCost: 90,
+                description: '[F] DEFINITIVA. 90 maná. Apunta y dispara un proyectil devastador: 300% de tu daño físico, hasta 450% a distancia máxima, con alta probabilidad de crítico.'
+            },
+            ASSASSIN: {
+                id: 'ASSASSIN_MASACRE', name: 'Masacre', keybind: 'f', cooldown: 50, manaCost: 90, duration: 6,
+                description: '[F] DEFINITIVA. 90 maná. 6s: +50% prob. crítico, +40% vel. ataque, +25% vel. movimiento. Cada baja extiende la duración +1.5s.'
+            },
+            VAMPIRE: {
+                id: 'VAMP_IMMORTAL', name: 'Forma Inmortal', keybind: 'f', cooldown: 60, manaCost: 100, duration: 6,
+                description: '[F] DEFINITIVA. 100 maná. 6s: +30% daño físico, +30% vel. ataque, +25% robo de vida, y tu vida no puede bajar de 1. Al terminar, recibís parte del daño acumulado.'
+            }
+        };
+
+        const ITEMS = {
+            BELT: { name: 'Cinturón de Fuerza (75g)', cost: 75, desc: '+6 STR (más HP y daño)', apply: h => { h.str += 6; } },
+            GLOVES: { name: 'Guantes de Celeridad (100g)', cost: 100, desc: '+10 AGI (más vel. ataque y movimiento)', apply: h => { h.agi += 10; } },
+            POTION: { name: 'Poción de Vida (40g)', cost: 40, desc: 'Cura 50 HP al instante', apply: h => { h.hp = Math.min(h.maxHp, h.hp + 50); } }
+        };
+
+        // --- 2. POZO DE ENEMIGOS ---
+        const CREEP_POOL = [
+            { key: 'CHUSMA', symbol: 'x', color: '#6c757d', hp: 1, atk: 4, atkSpeed: 1.0, moveInterval: 220, range: 1.0, gold: 4, label: 'Chusma', oneHit: true },
+            { key: 'GRUNT', symbol: 'g', color: '#ffb703', hp: 35, atk: 8, atkSpeed: 0.8, moveInterval: 260, range: 1.3, gold: 6, label: 'Grunt' },
+            { key: 'ARCHER', symbol: 'r', color: '#8ecae6', hp: 22, atk: 10, atkSpeed: 0.9, moveInterval: 300, range: 4.5, gold: 7, label: 'Arquero' },
+            { key: 'SCOUT', symbol: 's', color: '#ff477e', hp: 18, atk: 6, atkSpeed: 1.4, moveInterval: 150, range: 1.2, gold: 5, label: 'Explorador' },
+            { key: 'BRUTE', symbol: 'b', color: '#e63946', hp: 60, atk: 14, atkSpeed: 0.6, moveInterval: 340, range: 1.4, gold: 10, label: 'Bruto' }
+        ];
+        // Plantillas normales, sin contar la Chusma (no debe aparecer como base del jefe: un jefe de 1 HP no tiene sentido)
+        const BOSS_BASE_POOL = CREEP_POOL.filter(t => !t.oneHit);
+
+        const NORMAL_WAVES = 4; // ciclos de oleada+draft antes de la oleada de jefe final
+
+        // Bonus de oro por velocidad de muerte: cuanto antes muere un creep tras aparecer, más oro paga.
+        function speedGoldMultiplier(timeAliveSeconds) {
+            if (timeAliveSeconds <= 1) return 3;
+            if (timeAliveSeconds >= 6) return 1;
+            return 3 - (timeAliveSeconds - 1) * (2 / 5);
+        }
+
+        // --- 3. ENTIDAD HÉROE ---
+        class Hero {
+            constructor(template) {
+                this.key = template.key; this.name = template.name; this.symbol = template.symbol; this.primaryAttr = template.primaryAttr;
+                this.str = 20; this.agi = 15; this.int = 15;
+                this.baseHp = template.baseHp; this.baseAtk = template.baseAtk; this.baseAtkSpeed = template.baseAtkSpeed;
+                this.baseAttackRange = template.baseAttackRange; this.baseArmor = template.baseArmor || 0;
+                this.baseMagicResist = template.baseMagicResist || 0; this.baseHpRegen = template.baseHpRegen || 0;
+                this.baseMaxMana = template.baseMaxMana || 0; this.baseManaRegen = template.baseManaRegen || 0;
+                this.baseMoveSpeed = template.baseMoveSpeed || 3; this.baseProjectileSpeed = template.baseProjectileSpeed || 0;
+                this.baseCritChance = template.baseCritChance || 0; this.baseEvasion = template.baseEvasion || 0;
+                this.baseSpellAmp = template.baseSpellAmp || 0; this.baseLifesteal = template.baseLifesteal || 0;
+                this.scaling = template.scaling || null;
+                this.archetypePassive = template.archetypePassive || null;
+                this.creepKillCount = 0; this.heroKillCount = 0;
+                this.bonusArmor = 0; this.bonusAtk = 0; this.bonusCritChance = 0; this.bonusLifesteal = 0;
+                this.x = 3; this.y = 6; this.gold = 100; this.lives = 2;
+                this.skills = []; this.cooldowns = {}; this.attackTimer = 0;
+                // Ventanas temporales ("Until") de las distintas habilidades activas y definitivas.
+                // Se consultan en el punto de uso (ataque, movimiento, daño recibido) en vez de recalcularse en recalculateStats().
+                this.dmgReductionUntil = 0; this.dmgReductionPct = 0.3; this.tauntActiveUntil = 0;
+                this.invulnerableUntil = 0;
+                this.atkSpeedBuffUntil = 0; this.visionUntil = 0; this.darkBloodUntil = 0;
+                this.furiaUntil = 0; this.furiaBonusAtk = 0;
+                this.masacreUntil = 0; this.lethalSpeedUntil = 0; this.lethalSpeedComboUntil = 0;
+                this.comboTarget = null; this.comboStacks = 0;
+                this.immortalUntil = 0; this.immortalAccumulatedDmg = 0;
+                this.recalculateStats(); this.hp = this.maxHp; this.mana = this.maxMana;
+            }
+            hasSkill(id) { return this.skills.some(s => s.id === id); }
+            hasArchetypePassive(id) { return !!this.archetypePassive && this.archetypePassive.id === id; }
+            recalculateStats() {
+                const primaryVal = this.primaryAttr === 'STR' ? this.str : this.primaryAttr === 'AGI' ? this.agi : this.int;
+                this.maxHp = Math.round(this.baseHp + (this.str * 5));
+                this.maxMana = Math.round(this.baseMaxMana + (this.int * 4));
+                this.atk = Math.round(this.baseAtk + (primaryVal * 0.8)) + Math.round(this.bonusAtk || 0);
+                this.atkSpeed = this.baseAtkSpeed * (1 + (this.agi * 0.01));
+                this.moveSpeed = this.baseMoveSpeed * (1 + Math.min(this.agi, 40) * 0.01);
+                this.moveInterval = Math.max(0.05, 1 / this.moveSpeed);
+                this.attackRange = this.baseAttackRange;
+                this.armor = (this.baseArmor || 0) + (this.bonusArmor || 0);
+                this.magicResist = this.baseMagicResist;
+                this.hpRegen = this.baseHpRegen + this.str * 0.05;
+                this.manaRegen = this.baseManaRegen + this.int * 0.05;
+                this.projectileSpeed = this.baseProjectileSpeed;
+                this.critChance = this.baseCritChance + this.agi * 0.1 + (this.bonusCritChance || 0);
+                this.evasion = this.baseEvasion;
+                this.spellAmp = this.baseSpellAmp + this.int * 0.1;
+                this.lifesteal = (this.baseLifesteal || 0) + (this.bonusLifesteal || 0);
+            }
+            addSkill(skill) { this.skills.push(skill); if (skill.cooldown) this.cooldowns[skill.id] = 0; this.recalculateStats(); }
+            regenTick(dt) {
+                this.hp = Math.min(this.maxHp, this.hp + this.hpRegen * dt);
+                this.mana = Math.min(this.maxMana, this.mana + this.manaRegen * dt);
+            }
+            // type: 'physical' | 'magical' | 'pure' (el daño puro ignora armadura y resistencia mágica).
+            // Devuelve { dealt, evaded } para que el llamador sepa si hubo esquive.
+            takeDamage(amt, type) {
+                if (this.invulnerableUntil > gameClock) return { dealt: 0, evaded: false };
+                if (Math.random() < (this.evasion || 0) / 100) return { dealt: 0, evaded: true };
+                let final = amt;
+                let reductionPct = 0;
+                if (this.dmgReductionUntil > gameClock) reductionPct = Math.max(reductionPct, this.dmgReductionPct);
+                if (this.furiaUntil > gameClock) reductionPct = Math.max(reductionPct, 0.20);
+                final *= (1 - reductionPct);
+                if (type === 'magical') final *= Math.max(0.25, 1 - (this.magicResist || 0) / 100);
+                else if (type === 'physical') final *= Math.max(0.2, 1 - (this.armor || 0) * 0.04);
+                // type === 'pure': sin mitigación.
+                final = Math.round(final);
+                if (this.immortalUntil > gameClock) {
+                    this.immortalAccumulatedDmg += final;
+                    this.hp = Math.max(1, this.hp - final);
+                } else {
+                    this.hp = Math.max(0, this.hp - final);
+                }
+                return { dealt: final, evaded: false };
+            }
+            isAlive() { return this.hp > 0; }
+        }
+
+        // --- 4. MOTOR Y RENDER ---
+        const canvas = document.getElementById('ascii-canvas');
+        const ctx = canvas.getContext('2d');
+        const COLS = 20, ROWS = 12, TILE = 26;
+        canvas.width = COLS * TILE; canvas.height = ROWS * TILE;
+
+        let player = null, creeps = [], boss = null;
+        let gameState = 'HERO_SELECT', waveNumber = 1, isBossWave = false, lastTime = 0, gameClock = 0, keys = {};
+        let skillsGranted = 0;
+
+        window.addEventListener('keydown', e => {
+            const k = e.key.toLowerCase();
+            keys[k] = true;
+            if (gameState === 'WAVE') handleSkillKeypress(k);
+        });
+        window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+
+        function log(msg) {
+            const box = document.getElementById('combat-log');
+            const p = document.createElement('p'); p.textContent = msg;
+            box.appendChild(p); box.scrollTop = box.scrollHeight;
+        }
+
+        function shuffle(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // --- 5. INTERFAZ ---
+        function initHeroSelect() {
+            const container = document.getElementById('hero-options');
+            container.innerHTML = '';
+            Object.values(HERO_TEMPLATES).forEach(t => {
+                const card = document.createElement('div');
+                card.className = 'skill-card';
+                const scalingText = `Escalado: +${t.scaling.perKillsAmount} ${scalingStatLabel(t.scaling.stat)} cada ${t.scaling.perKills} bajas &middot; +${t.scaling.perHeroKill} al ganar un duelo.`;
+                card.innerHTML = `<h4>[${t.symbol}] ${t.name} (${t.primaryAttr})</h4><p>${t.description}</p><p style="color:#ffb703; margin-top:4px;">${scalingText}</p>`;
+                card.onclick = () => {
+                    player = new Hero(t);
+                    document.getElementById('hero-select-panel').style.display = 'none';
+                    log(`Seleccionaste a ${player.name}.`);
+                    startSkillDraft();
+                };
+                container.appendChild(card);
+            });
+        }
+
+        // --- CÓDICE DE HÉROES (referencia navegable, no afecta una partida en curso) ---
+        function renderHeroCodex() {
+            const list = document.getElementById('codex-hero-list');
+            list.innerHTML = '';
+            Object.values(HERO_TEMPLATES).forEach(t => {
+                const card = document.createElement('div');
+                card.className = 'skill-card';
+                card.innerHTML = `<h4>[${t.symbol}] ${t.name}</h4><p>${t.primaryAttr} &middot; ${t.description}</p>`;
+                card.onclick = () => renderCodexDetail(t);
+                list.appendChild(card);
+            });
+        }
+
+        function renderCodexDetail(t) {
+            const ref = new Hero(t); // instancia de referencia solo para calcular stats base (str 20/agi 15/int 15, sin ítems ni skills)
+            const detail = document.getElementById('codex-detail');
+            const draftable = Object.values(HERO_SKILLS[t.key]);
+            const statRows = [
+                ['HP máx.', ref.maxHp], ['Maná máx.', ref.maxMana],
+                ['Daño de ataque', ref.atk], ['Vel. de ataque', ref.atkSpeed.toFixed(2)],
+                ['Rango de ataque', ref.attackRange], ['Vel. de proyectil', ref.projectileSpeed || 'Melé (instantáneo)'],
+                ['Armadura física', ref.armor], ['Resistencia mágica', ref.magicResist + '%'],
+                ['Regen. HP', ref.hpRegen.toFixed(2) + '/s'], ['Regen. Maná', ref.manaRegen.toFixed(2) + '/s'],
+                ['Vel. de movimiento', ref.moveSpeed.toFixed(2)], ['Prob. de crítico', ref.critChance.toFixed(1) + '%'],
+                ['Prob. de esquivar', ref.evasion + '%'], ['Amp. de hechizo', ref.spellAmp.toFixed(1) + '%'],
+                ['Robo de vida', ref.lifesteal + '%'], ['Rol', t.role]
+            ];
+            const ult = HERO_ULTIMATES[t.key];
+            let html = `<h3>[${t.symbol}] ${t.name} &mdash; ${t.primaryAttr}</h3><p style="color:#bbb;">${t.description}</p>`;
+            html += `<div class="codex-sub">Stats base (STR 20 / AGI 15 / INT 15, sin ítems)</div>`;
+            html += `<div class="stat-grid">${statRows.map(r => `<div>${r[0]}: <strong>${r[1]}</strong></div>`).join('')}</div>`;
+            html += `<div class="codex-sub">Escalado de arquetipo</div>`;
+            html += `<div class="ability-row"><p>+${t.scaling.perKillsAmount} ${scalingStatLabel(t.scaling.stat)} cada ${t.scaling.perKills} bajas de creeps &middot; +${t.scaling.perHeroKill} al ganar un duelo 1v1.</p></div>`;
+            html += `<div class="codex-sub">Pasiva fija (siempre activa, no se draftea)</div>`;
+            html += `<div class="ability-row fixed"><h4>${t.archetypePassive.name}</h4><p>${t.archetypePassive.description}</p></div>`;
+            html += `<div class="codex-sub">Habilidades normales (elegís ${draftable.length} de ${draftable.length} a lo largo de la partida, 1 por vez)</div>`;
+            html += draftable.map(s => `<div class="ability-row"><h4>${s.name}</h4><p>${s.description}</p></div>`).join('');
+            html += `<div class="codex-sub">Habilidad definitiva (se desbloquea sola al aprender las 3 normales)</div>`;
+            html += `<div class="ability-row fixed"><h4>${ult.name}</h4><p>${ult.description}</p></div>`;
+            detail.innerHTML = html;
+        }
+
+        function showView(view) {
+            document.getElementById('view-game').style.display = view === 'game' ? 'flex' : 'none';
+            document.getElementById('view-heroes').style.display = view === 'heroes' ? 'block' : 'none';
+            document.getElementById('nav-game').classList.toggle('active', view === 'game');
+            document.getElementById('nav-heroes').classList.toggle('active', view === 'heroes');
+        }
+        document.getElementById('nav-game').onclick = () => showView('game');
+        document.getElementById('nav-heroes').onclick = () => showView('heroes');
+
+        function startSkillDraft() {
+            gameState = 'DRAFT';
+            document.getElementById('game-state-text').textContent = 'DRAFT DE HABILIDAD';
+            document.getElementById('draft-container').style.display = 'block';
+            renderDraft();
+        }
+
+        function renderDraft() {
+            const c = document.getElementById('draft-options'); c.innerHTML = '';
+            const remaining = Object.values(HERO_SKILLS[player.key]).filter(s => !player.hasSkill(s.id));
+            const pool = shuffle(remaining.slice()).slice(0, 3);
+            pool.forEach(s => {
+                const card = document.createElement('div'); card.className = 'skill-card';
+                card.innerHTML = `<h4>${s.name}</h4><p>${s.description}</p>`;
+                card.onclick = () => {
+                    player.addSkill(s);
+                    skillsGranted++;
+                    log(`✨ Aprendiste: ${s.name}`);
+                    const totalDraftable = Object.keys(HERO_SKILLS[player.key]).length;
+                    if (skillsGranted >= totalDraftable && !player.hasSkill(HERO_ULTIMATES[player.key].id)) {
+                        const ult = HERO_ULTIMATES[player.key];
+                        player.addSkill(ult);
+                        log(`🌟 ¡Definitiva desbloqueada! ${ult.name}`);
+                    }
+                    document.getElementById('draft-container').style.display = 'none';
+                    startPreparation();
+                };
+                c.appendChild(card);
+            });
+        }
+
+        function startPreparation() {
+            gameState = 'PREP';
+            document.getElementById('game-state-text').textContent = 'PREPARACIÓN';
+            document.getElementById('shop-container').style.display = 'block';
+            renderShop();
+        }
+
+        function renderShop() {
+            const c = document.getElementById('shop-options'); c.innerHTML = '';
+            Object.values(ITEMS).forEach(i => {
+                const card = document.createElement('div'); card.className = 'skill-card';
+                card.innerHTML = `<h4>${i.name}</h4><p>${i.desc}</p>`;
+                card.onclick = () => {
+                    if (player.gold >= i.cost) {
+                        player.gold -= i.cost; i.apply(player); player.recalculateStats();
+                        log(`Compraste: ${i.name}`); renderShop();
+                    } else log('❌ Oro insuficiente');
+                };
+                c.appendChild(card);
+            });
+        }
+
+        document.getElementById('start-wave-btn').onclick = () => {
+            document.getElementById('shop-container').style.display = 'none';
+            isBossWave = waveNumber > NORMAL_WAVES;
+            startWave();
+        };
+
+        function renderCooldownBar() {
+            const bar = document.getElementById('cooldown-bar'); bar.innerHTML = '';
+            player.skills.filter(s => s.cooldown).forEach(s => {
+                const remaining = Math.max(0, (player.cooldowns[s.id] || 0));
+                const span = document.createElement('span');
+                span.className = remaining <= 0 ? 'ready' : '';
+                span.textContent = `[${s.keybind.toUpperCase()}] ${s.name}: ${remaining <= 0 ? 'Listo' : remaining.toFixed(1) + 's'}`;
+                bar.appendChild(span);
+            });
+        }
+
+        // --- 6. ENEMIGOS: SPAWN ---
+        function makeCreep(t, x, y, statMult, isBossUnit, bossAuraBonus) {
+            const hpMult = isBossUnit ? 4 : 1;
+            const atkMult = isBossUnit ? 1.6 : 1;
+            const oneHit = !!t.oneHit && !isBossUnit;
+            const hp = oneHit ? 1 : Math.round(t.hp * statMult * hpMult);
+            const atk = Math.round(t.atk * statMult * atkMult);
+            return {
+                key: t.key, label: isBossUnit ? 'Jefe ' + t.label : t.label,
+                symbol: isBossUnit ? 'J' : t.symbol, color: isBossUnit ? '#ff0055' : t.color,
+                hp, maxHp: hp, atk, atkSpeed: t.atkSpeed * (isBossUnit ? 0.85 : 1),
+                moveInterval: t.moveInterval * (isBossUnit ? 1.15 : 1),
+                range: isBossUnit ? Math.max(t.range, 1.8) : t.range,
+                gold: isBossUnit ? 40 : t.gold, oneHit,
+                x, y, moveTimer: 0, attackTimer: 0, isBoss: !!isBossUnit, spawnTime: gameClock,
+                auraRadius: isBossUnit ? 4 : 0, auraAtkBonus: isBossUnit ? bossAuraBonus : 0,
+                stunnedUntil: 0, slowUntil: 0, dot: null,
+                isAlive() { return this.hp > 0; }
+            };
+        }
+
+        // Aplica daño a un creep respetando la regla de "un solo golpe" (oneHit) y dispara la muerte si corresponde.
+        // opts.isMagical aplica la amplificación de hechizo (spellAmp) del jugador al daño. Devuelve el daño
+        // realmente aplicado (para robo de vida y otros efectos que dependen del daño causado).
+        function damageCreep(c, dmg, opts) {
+            if (!c.isAlive()) return 0;
+            let final = dmg;
+            if (opts && opts.isMagical) final = Math.round(final * (1 + (player.spellAmp || 0) / 100));
+            final = c.oneHit ? c.hp : Math.min(c.hp, final);
+            c.hp = Math.max(0, c.hp - final);
+            if (c.hp <= 0) killCreep(c);
+            return final;
+        }
+
+        // Robo de vida: cura al jugador según su stat de robo de vida (se duplica vs objetivos con <30% HP
+        // gracias a la pasiva Hambre del Vampiro, y aumenta durante Sangre Oscura).
+        function applyLifesteal(dmgDealt, target) {
+            const ls = player.lifesteal || 0;
+            if (ls <= 0 || dmgDealt <= 0) return;
+            let mult = 1;
+            if (player.hasArchetypePassive('BLOODLUST') && target && target.maxHp && target.hp / target.maxHp < 0.3) mult = 2;
+            if (gameClock < player.darkBloodUntil) mult += 0.5;
+            const heal = Math.round(dmgDealt * (ls / 100) * mult);
+            if (heal > 0) player.hp = Math.min(player.maxHp, player.hp + heal);
+        }
+
+        // Tira el crítico y aplica todos los multiplicadores de daño activos (Puntería Perfecta, Furia,
+        // Sangre Oscura, combo de Velocidad Letal, Masacre) para un golpe de ataque básico.
+        function rollAttackDamage(target) {
+            let dmg = player.atk;
+            if (player.hasArchetypePassive('PERFECT_AIM') && target && player.attackRange > 0) {
+                const dist = Math.hypot(player.x - target.x, player.y - target.y);
+                const distPct = dist / player.attackRange;
+                if (distPct > 0.8) dmg *= 1.35; else if (distPct > 0.45) dmg *= 1.15;
+            }
+            if (gameClock < player.furiaUntil) dmg = dmg * 1.4 + (player.furiaBonusAtk || 0);
+            if (gameClock < player.darkBloodUntil) dmg *= 1.3;
+            if (gameClock < player.visionUntil) dmg *= 1.25;
+            if (gameClock < player.lethalSpeedComboUntil && target && player.comboTarget === target) {
+                dmg *= (1 + Math.min(0.4, player.comboStacks * 0.05));
+            }
+            dmg = Math.round(dmg);
+            let critChance = player.critChance || 0;
+            if (gameClock < player.masacreUntil) critChance += 50;
+            let isCrit = false;
+            if (Math.random() < critChance / 100) { dmg = Math.round(dmg * 2); isCrit = true; }
+            if (gameClock < player.lethalSpeedComboUntil && target) {
+                if (player.comboTarget !== target) { player.comboTarget = target; player.comboStacks = 0; }
+                player.comboStacks++;
+            }
+            return { dmg, isCrit };
+        }
+
+        // Resuelve el impacto de un ataque básico ya calculado (instantáneo o al llegar un proyectil).
+        function resolveBasicHit(target, dmg, isCrit) {
+            if (!target.isAlive()) return; // el objetivo murió mientras el proyectil viajaba
+            if (isCrit) log(`💥 ¡Golpe crítico a ${target.label}!`);
+            const dealt = damageCreep(target, dmg);
+            applyLifesteal(dealt, target);
+        }
+
+        // --- PROYECTILES (ataques básicos a distancia con velocidad de proyectil) ---
+        let projectiles = [];
+        function fireProjectile(x, y, target, dmg, isCrit) {
+            projectiles.push({ x, y, target, dmg, isCrit, speed: player.projectileSpeed || 10 });
+        }
+        function updateProjectiles(dt) {
+            for (let i = projectiles.length - 1; i >= 0; i--) {
+                const p = projectiles[i];
+                if (!p.target.isAlive()) { projectiles.splice(i, 1); continue; }
+                const dx = p.target.x - p.x, dy = p.target.y - p.y;
+                const dist = Math.hypot(dx, dy);
+                const step = p.speed * dt;
+                if (dist < 0.35 || step >= dist) {
+                    resolveBasicHit(p.target, p.dmg, p.isCrit);
+                    projectiles.splice(i, 1);
+                    continue;
+                }
+                p.x += (dx / dist) * step;
+                p.y += (dy / dist) * step;
+            }
+        }
+
+        function spawnWave() {
+            creeps = []; boss = null; projectiles = [];
+            const statMult = isBossWave ? 1.6 : 1 + (waveNumber - 1) * 0.10;
+            const rows = shuffle(Array.from({ length: ROWS }, (_, i) => i));
+            const creepRows = rows.slice(0, 10);
+            creepRows.forEach((row, i) => {
+                const t = CREEP_POOL[Math.floor(Math.random() * CREEP_POOL.length)];
+                creeps.push(makeCreep(t, 15 + (i % 4), row, statMult, false, 0));
+            });
+            const bossRow = rows[10] !== undefined ? rows[10] : Math.floor(ROWS / 2);
+            const bossBase = BOSS_BASE_POOL[Math.floor(Math.random() * BOSS_BASE_POOL.length)];
+            boss = makeCreep(bossBase, COLS - 1, bossRow, statMult, true, isBossWave ? 0.5 : 0.35);
+            creeps.push(boss);
+        }
+
+        function startWave() {
+            gameState = 'WAVE';
+            document.getElementById('game-state-text').textContent = isBossWave ? 'OLEADA DE JEFE FINAL' : `OLEADA PVE (${waveNumber}/${NORMAL_WAVES})`;
+            spawnWave();
+            log(isBossWave ? '👹 ¡Comienza la oleada de jefe final! 10 creeps mejorados + élite.' : `🌊 Comienza la oleada ${waveNumber}: 10 creeps + 1 jefe.`);
+        }
+
+        // --- 7. HABILIDADES ACTIVAS ---
+        function handleSkillKeypress(k) {
+            if (!player || !player.isAlive()) return;
+            const skill = player.skills.find(s => s.keybind === k);
+            if (!skill) return;
+            const cd = player.cooldowns[skill.id] || 0;
+            if (cd > 0) return;
+            if (skill.manaCost && player.mana < skill.manaCost) { log(`❌ Maná insuficiente para ${skill.name} (necesitás ${skill.manaCost}).`); return; }
+            if (skill.manaCost) player.mana -= skill.manaCost;
+            castSkill(skill);
+        }
+
+        function nearestAliveCreep(fromX, fromY, maxRange) {
+            let best = null, bestDist = Infinity;
+            creeps.forEach(c => {
+                if (!c.isAlive()) return;
+                const d = Math.hypot(c.x - fromX, c.y - fromY);
+                if (d < bestDist && (maxRange === undefined || d <= maxRange)) { bestDist = d; best = c; }
+            });
+            return best;
+        }
+
+        // Teletransporta al jugador junto a un objetivo (para Parpadeo y Salto Sangriento), dejándolo a 1 casilla de distancia.
+        function blinkNextTo(target) {
+            const dx = target.x - player.x, dy = target.y - player.y;
+            player.x = Math.max(0, Math.min(COLS - 1, target.x - Math.sign(dx || 1)));
+            player.y = Math.max(0, Math.min(ROWS - 1, dy === 0 ? target.y : target.y - Math.sign(dy)));
+        }
+
+        function castSkill(skill) {
+            // --- AXE ---
+            if (skill.id === 'AXE_HACHAZO') {
+                const target = nearestAliveCreep(player.x, player.y, player.attackRange + 0.5);
+                if (target) {
+                    const dmg = Math.round(player.atk * 1.2);
+                    damageCreep(target, dmg);
+                    if (target.isAlive() && Math.random() < 0.25) target.stunnedUntil = gameClock + 1;
+                    log(`🪓 ¡Golpe de Hacha a ${target.label}! (-${dmg} HP)`);
+                } else { log('Golpe de Hacha: sin objetivo en rango.'); }
+            } else if (skill.id === 'AXE_PROVOCACION') {
+                player.dmgReductionUntil = gameClock + 2.5; player.dmgReductionPct = 0.25;
+                player.tauntActiveUntil = gameClock + 2.5;
+                let count = 0;
+                creeps.forEach(c => { if (c.isAlive() && Math.hypot(c.x - player.x, c.y - player.y) <= 5) count++; });
+                log(`🛡️ ¡Llamado Provocador! ${count} enemigos provocados (te atacan a vos). +25% reducción de daño por 2.5s.`);
+            } else if (skill.id === 'AXE_GIRO') {
+                const dmg = Math.round(player.atk * 0.7);
+                let hits = 0;
+                creeps.forEach(c => { if (c.isAlive() && Math.hypot(c.x - player.x, c.y - player.y) <= 2) { damageCreep(c, dmg); hits++; } });
+                log(`🌀 ¡Giro de Combate! Golpeaste a ${hits} enemigo(s) por ${dmg} c/u.`);
+            } else if (skill.id === 'AXE_FURIA') {
+                player.furiaUntil = gameClock + skill.duration; player.furiaBonusAtk = 0;
+                log('🔥 ¡FURIA DEL GUERRERO! +40% daño, +30% vel. ataque, +20% reducción de daño por 8s.');
+
+            // --- SNIPER ---
+            } else if (skill.id === 'SNIPER_POTENTE') {
+                const target = nearestAliveCreep(player.x, player.y, player.attackRange + 2);
+                if (target) {
+                    const dmg = Math.round(player.atk * 1.8);
+                    damageCreep(target, dmg);
+                    log(`🎯 ¡Disparo Potente a ${target.label}! (-${dmg} HP)`);
+                } else { log('Disparo Potente: sin objetivo en rango.'); }
+            } else if (skill.id === 'SNIPER_CONGELANTE') {
+                const target = nearestAliveCreep(player.x, player.y, player.attackRange + 2);
+                if (target) {
+                    const dmg = Math.round(player.atk * 1.0);
+                    damageCreep(target, dmg);
+                    if (target.isAlive()) target.slowUntil = gameClock + 3;
+                    log(`❄️ ¡Disparo Congelante a ${target.label}! -50% velocidad 3s.`);
+                } else { log('Disparo Congelante: sin objetivo en rango.'); }
+            } else if (skill.id === 'SNIPER_VISION') {
+                player.visionUntil = gameClock + skill.duration;
+                log('👁️ ¡Visión de Cazador! +40% rango, +25% daño, -50% velocidad de movimiento por 5s.');
+            } else if (skill.id === 'SNIPER_MORTAL') {
+                const target = nearestAliveCreep(player.x, player.y, player.attackRange * 3);
+                if (target) {
+                    const dist = Math.hypot(player.x - target.x, player.y - target.y);
+                    const distPct = dist / player.attackRange;
+                    const mult = distPct > 0.8 ? 4.5 : distPct > 0.45 ? 3.75 : 3.0;
+                    let dmg = Math.round(player.atk * mult);
+                    const isCrit = Math.random() < 0.6;
+                    if (isCrit) dmg = Math.round(dmg * 2);
+                    damageCreep(target, dmg);
+                    log(`💀 ¡DISPARO MORTAL a ${target.label}!${isCrit ? ' ¡CRÍTICO!' : ''} (-${dmg} HP)`);
+                } else { log('Disparo Mortal: sin objetivo en rango.'); }
+
+            // --- ASESINO ---
+            } else if (skill.id === 'ASSASSIN_BLINK') {
+                const target = nearestAliveCreep(player.x, player.y, 8);
+                if (target) {
+                    blinkNextTo(target);
+                    player.atkSpeedBuffUntil = gameClock + 2;
+                    const { dmg, isCrit } = rollAttackDamage(target);
+                    resolveBasicHit(target, dmg, isCrit);
+                    log(`💨 ¡Parpadeo junto a ${target.label}! +20% vel. ataque 2s.`);
+                } else { log('Parpadeo: sin objetivo en rango.'); }
+            } else if (skill.id === 'ASSASSIN_CRITSTRIKE') {
+                const target = nearestAliveCreep(player.x, player.y, player.attackRange + 1);
+                if (target) {
+                    let dmg = Math.round(player.atk * 1.5);
+                    const isCrit = Math.random() < ((player.critChance || 0) + 25) / 100;
+                    if (isCrit) dmg = Math.round(dmg * 2);
+                    damageCreep(target, dmg);
+                    log(`⚔️ ¡Golpe Crítico a ${target.label}!${isCrit ? ' ¡CRÍTICO!' : ''} (-${dmg} HP)`);
+                } else { log('Golpe Crítico: sin objetivo en rango.'); }
+            } else if (skill.id === 'ASSASSIN_LETHALSPEED') {
+                player.lethalSpeedUntil = gameClock + skill.duration;
+                player.lethalSpeedComboUntil = gameClock + skill.duration;
+                player.comboTarget = null; player.comboStacks = 0;
+                log('⚡ ¡Velocidad Letal! +60% vel. ataque por 4s. Combo activo.');
+            } else if (skill.id === 'ASSASSIN_MASACRE') {
+                player.masacreUntil = gameClock + skill.duration;
+                log('🔪 ¡MASACRE! +50% crítico, +40% vel. ataque, +25% vel. movimiento por 6s.');
+
+            // --- VAMPIRO ---
+            } else if (skill.id === 'VAMP_DARKBLOOD') {
+                const cost = Math.round(player.hp * 0.08);
+                player.hp = Math.max(1, player.hp - cost);
+                player.darkBloodUntil = gameClock + skill.duration;
+                log(`🩸 ¡Sangre Oscura! -${cost} HP propia, +30% daño físico por 5s.`);
+            } else if (skill.id === 'VAMP_CLAW') {
+                const target = nearestAliveCreep(player.x, player.y, player.attackRange + 1);
+                if (target) {
+                    const dmg = Math.round(player.atk * 1.3);
+                    const lowHp = target.maxHp && target.hp / target.maxHp < 0.3;
+                    const dealt = damageCreep(target, dmg);
+                    const heal = Math.round(dealt * (lowHp ? 0.4 : 0.2));
+                    player.hp = Math.min(player.maxHp, player.hp + heal);
+                    log(`🐾 ¡Garra Vampírica a ${target.label}! (-${dmg} HP, +${heal} HP propia)`);
+                } else { log('Garra Vampírica: sin objetivo en rango.'); }
+            } else if (skill.id === 'VAMP_LEAP') {
+                const target = nearestAliveCreep(player.x, player.y, 6);
+                if (target) {
+                    blinkNextTo(target);
+                    const dmg = Math.round(player.atk * 1.0);
+                    damageCreep(target, dmg);
+                    if (target.isAlive()) target.slowUntil = gameClock + 2;
+                    log(`🦇 ¡Salto Sangriento sobre ${target.label}! (-${dmg} HP, -40% velocidad)`);
+                } else { log('Salto Sangriento: sin objetivo en rango.'); }
+            } else if (skill.id === 'VAMP_IMMORTAL') {
+                player.immortalUntil = gameClock + skill.duration;
+                player.immortalAccumulatedDmg = 0;
+                log('🧛 ¡FORMA INMORTAL! No podés morir por 6s. +30% daño, +30% vel. ataque, +25% robo de vida.');
+            }
+            if (skill.cooldown) player.cooldowns[skill.id] = skill.cooldown;
+        }
+
+        // Aplica el bonus de escalado del héroe activo (armadura, daño, etc. según su arquetipo) y recalcula stats.
+        function applyScalingBonus(amount) {
+            if (!player.scaling) return;
+            if (player.scaling.stat === 'armor') player.bonusArmor = (player.bonusArmor || 0) + amount;
+            else if (player.scaling.stat === 'atk') player.bonusAtk = (player.bonusAtk || 0) + amount;
+            else if (player.scaling.stat === 'critChance') player.bonusCritChance = (player.bonusCritChance || 0) + amount;
+            else if (player.scaling.stat === 'lifesteal') player.bonusLifesteal = (player.bonusLifesteal || 0) + amount;
+            player.recalculateStats();
+        }
+
+        function applyScalingOnCreepKill() {
+            if (!player.scaling) return;
+            player.creepKillCount++;
+            if (player.creepKillCount % player.scaling.perKills === 0) {
+                applyScalingBonus(player.scaling.perKillsAmount);
+                log(`📈 ¡Escalado! +${player.scaling.perKillsAmount} ${scalingStatLabel(player.scaling.stat)} (${player.creepKillCount} bajas totales)`);
+            }
+        }
+
+        // Lista para cuando existan duelos PvP en el loop completo: otorga el bonus de escalado por ganar un duelo.
+        function awardHeroKillScaling() {
+            if (!player.scaling) return;
+            player.heroKillCount++;
+            applyScalingBonus(player.scaling.perHeroKill);
+            log(`🏅 ¡Escalado por duelo! +${player.scaling.perHeroKill} ${scalingStatLabel(player.scaling.stat)}`);
+        }
+
+        function killCreep(c) {
+            c.hp = 0;
+            const timeAlive = gameClock - (c.spawnTime || gameClock);
+            const speedMult = speedGoldMultiplier(timeAlive);
+            const gold = Math.max(1, Math.round(c.gold * speedMult));
+            player.gold += gold;
+            applyScalingOnCreepKill();
+            if (gameClock < player.masacreUntil) player.masacreUntil += 1.5; // Masacre: cada baja extiende la duración
+            const bonusTag = speedMult > 1.05 ? ` ⚡x${speedMult.toFixed(1)}` : '';
+            log(`${c.isBoss ? '👹 ¡Eliminaste al Jefe!' : '⚔️ Eliminaste un ' + c.label} (+${gold}g${bonusTag})`);
+        }
+
+        // --- 8. FIN DE OLEADA / MUERTE ---
+        function onWaveCleared() {
+            if (isBossWave) {
+                gameState = 'VICTORY';
+                document.getElementById('game-state-text').textContent = '¡VICTORIA!';
+                log('🏆 ¡Derrotaste al jefe final! Fin del prototipo de héroe único.');
+                return;
+            }
+            log(`🏆 Oleada ${waveNumber} superada.`);
+            const interest = Math.min(5, Math.floor(player.gold / 10));
+            if (interest > 0) { player.gold += interest; log(`💰 Interés por oro ahorrado: +${interest}g`); }
+            waveNumber++;
+            const totalDraftable = Object.keys(HERO_SKILLS[player.key]).length;
+            if (skillsGranted < totalDraftable) {
+                startSkillDraft();
+            } else {
+                startPreparation();
+            }
+        }
+
+        function handlePlayerDeath() {
+            player.lives--;
+            if (player.lives <= 0) {
+                gameState = 'GAMEOVER';
+                document.getElementById('game-state-text').textContent = 'GAME OVER';
+                log('💀 Sin vidas restantes. GAME OVER.');
+            } else {
+                log(`💀 Te derrotaron. Te queda ${player.lives} vida. Reapareciendo con 2.5s de invulnerabilidad...`);
+                player.hp = player.maxHp;
+                player.x = 0; player.y = Math.floor(ROWS / 2);
+                player.invulnerableUntil = gameClock + 2.5;
+            }
+        }
+
+        // --- 9. BUCLE PRINCIPAL ---
+        let moveTimer = 0;
+        function loop(ts) {
+            const dt = Math.max(0, Math.min(0.1, (ts - lastTime) / 1000 || 0)); lastTime = ts;
+            if (gameState === 'WAVE') gameClock += dt;
+
+            if (player) {
+                document.getElementById('player-name').textContent = player.name;
+                document.getElementById('player-hp').textContent = `${Math.round(player.hp)}/${player.maxHp}`;
+                document.getElementById('player-mana').textContent = `${Math.round(player.mana)}/${player.maxMana}`;
+                document.getElementById('player-gold').textContent = player.gold;
+                document.getElementById('round-num').textContent = Math.min(waveNumber, NORMAL_WAVES) + (isBossWave ? ' (JEFE)' : '');
+                document.getElementById('stat-str').textContent = player.str;
+                document.getElementById('stat-agi').textContent = player.agi;
+                document.getElementById('stat-int').textContent = player.int;
+                document.getElementById('stat-armor').textContent = player.armor.toFixed(1);
+                document.getElementById('extra-stats').textContent =
+                    `RM: ${player.magicResist.toFixed(0)}% | Crít: ${player.critChance.toFixed(1)}% | Evasión: ${player.evasion.toFixed(1)}% | ` +
+                    `Amp.Hechizo: ${player.spellAmp.toFixed(1)}% | Robo Vida: ${player.lifesteal.toFixed(1)}% | Regen: ${player.hpRegen.toFixed(1)} HP/s, ${player.manaRegen.toFixed(1)} Maná/s | ` +
+                    `Vel.Mov: ${player.moveSpeed.toFixed(1)}${player.projectileSpeed > 0 ? ` | Vel.Proyectil: ${player.projectileSpeed.toFixed(1)}` : ''}`;
+                document.getElementById('lives-text').textContent = '♥'.repeat(Math.max(0, player.lives)) + '♡'.repeat(Math.max(0, 2 - player.lives));
+                document.getElementById('skills-owned').textContent = player.skills.length ? ('Habilidades: ' + player.skills.map(s => s.name).join(', ')) : '';
+                if (player.scaling) {
+                    const bonusMap = { armor: player.bonusArmor, atk: player.bonusAtk, critChance: player.bonusCritChance, lifesteal: player.bonusLifesteal };
+                    const bonusSoFar = bonusMap[player.scaling.stat] || 0;
+                    const toNext = player.scaling.perKills - (player.creepKillCount % player.scaling.perKills);
+                    document.getElementById('scaling-info').textContent = `Escalado: +${bonusSoFar.toFixed(1)} ${scalingStatLabel(player.scaling.stat)} acumulado (${player.creepKillCount} bajas, próximo bonus en ${toNext})`;
+                }
+                if (gameState === 'WAVE') renderCooldownBar();
+            }
+
+            if (gameState === 'WAVE' && player.isAlive()) {
+                // Multiplicadores temporales de velocidad de movimiento (Masacre +25%, Visión de Cazador -50%)
+                let moveSpeedMult = 1;
+                if (gameClock < player.masacreUntil) moveSpeedMult *= 1.25;
+                if (gameClock < player.visionUntil) moveSpeedMult *= 0.5;
+                const effMoveInterval = player.moveInterval / moveSpeedMult;
+                moveTimer += dt;
+                if (moveTimer > effMoveInterval) {
+                    if (keys['w'] || keys['arrowup']) player.y = Math.max(0, player.y - 1);
+                    if (keys['s'] || keys['arrowdown']) player.y = Math.min(ROWS - 1, player.y + 1);
+                    if (keys['a'] || keys['arrowleft']) player.x = Math.max(0, player.x - 1);
+                    if (keys['d'] || keys['arrowright']) player.x = Math.min(COLS - 1, player.x + 1);
+                    moveTimer = 0;
+                }
+
+                // Multiplicadores temporales de velocidad de ataque y rango (Parpadeo, Furia, Masacre, Forma Inmortal, Velocidad Letal, Visión)
+                let atkSpeedMult = 1;
+                if (gameClock < player.atkSpeedBuffUntil) atkSpeedMult += 0.20;
+                if (gameClock < player.furiaUntil) atkSpeedMult += 0.30;
+                if (gameClock < player.masacreUntil) atkSpeedMult += 0.40;
+                if (gameClock < player.immortalUntil) atkSpeedMult += 0.30;
+                if (gameClock < player.lethalSpeedUntil) atkSpeedMult += 0.60;
+                const effAtkSpeed = player.atkSpeed * atkSpeedMult;
+                const effRange = player.attackRange * (gameClock < player.visionUntil ? 1.4 : 1);
+
+                // Ataque del jugador al enemigo vivo más cercano en rango
+                const target = nearestAliveCreep(player.x, player.y, effRange);
+                if (target) {
+                    player.attackTimer += dt;
+                    if (player.attackTimer >= (1 / effAtkSpeed)) {
+                        player.attackTimer = 0;
+                        const { dmg, isCrit } = rollAttackDamage(target);
+                        if (player.projectileSpeed > 0) fireProjectile(player.x, player.y, target, dmg, isCrit);
+                        else resolveBasicHit(target, dmg, isCrit);
+                    }
+                } else {
+                    player.attackTimer = 0;
+                }
+                updateProjectiles(dt);
+                player.regenTick(dt);
+
+                // Forma Inmortal: al terminar, paga una fracción del daño acumulado durante la protección
+                if (player.immortalUntil > 0 && gameClock >= player.immortalUntil) {
+                    const payback = Math.round(player.immortalAccumulatedDmg * 0.3);
+                    player.immortalUntil = 0; player.immortalAccumulatedDmg = 0;
+                    if (payback > 0) {
+                        player.hp = Math.max(0, player.hp - payback);
+                        log(`⚠️ Forma Inmortal termina: recibís ${payback} de daño acumulado.`);
+                        if (!player.isAlive()) handlePlayerDeath();
+                    }
+                }
+
+                // IA y ataque de cada enemigo
+                creeps.forEach(c => {
+                    if (!c.isAlive()) return;
+                    if (c.dot && gameClock < c.dot.until) {
+                        c.hp = c.oneHit ? 0 : Math.max(0, c.hp - c.dot.dps * dt);
+                        if (c.hp <= 0) { killCreep(c); return; }
+                    }
+                    if (c.stunnedUntil > gameClock) return;
+
+                    let effAtk = c.atk;
+                    if (!c.isBoss && boss && boss.isAlive()) {
+                        const dBoss = Math.hypot(c.x - boss.x, c.y - boss.y);
+                        if (dBoss <= boss.auraRadius) effAtk = Math.round(c.atk * (1 + boss.auraAtkBonus));
+                    }
+
+                    const dPlayer = Math.hypot(c.x - player.x, c.y - player.y);
+                    if (dPlayer > c.range) {
+                        const slowed = c.slowUntil > gameClock;
+                        c.moveTimer += dt * 1000;
+                        const interval = slowed ? c.moveInterval * 2 : c.moveInterval;
+                        if (c.moveTimer >= interval) {
+                            c.moveTimer = 0;
+                            const dx = player.x - c.x, dy = player.y - c.y;
+                            if (Math.abs(dx) >= Math.abs(dy)) c.x += Math.sign(dx); else c.y += Math.sign(dy);
+                        }
+                    } else {
+                        c.attackTimer += dt;
+                        if (c.attackTimer >= (1 / c.atkSpeed)) {
+                            c.attackTimer = 0;
+                            const result = player.takeDamage(effAtk, 'physical');
+                            if (result.evaded) {
+                                log(`💨 Esquivaste el ataque de ${c.label}.`);
+                            } else {
+                                if (player.hasArchetypePassive('COUNTERATTACK') && result.dealt > 0 && c.isAlive()) {
+                                    const ca = player.archetypePassive;
+                                    let chance = ca.chance / 100;
+                                    if (gameClock < player.tauntActiveUntil) chance += ca.tauntBonusChance / 100;
+                                    if (Math.random() < chance) {
+                                        damageCreep(c, player.atk);
+                                        log(`🪓 ¡Contraataque! Golpeaste de vuelta a ${c.label}.`);
+                                    }
+                                }
+                                if (!player.isAlive()) handlePlayerDeath();
+                            }
+                        }
+                    }
+                });
+
+                // Reducir cooldowns
+                for (let id in player.cooldowns) if (player.cooldowns[id] > 0) player.cooldowns[id] = Math.max(0, player.cooldowns[id] - dt);
+
+                // ¿Oleada limpia?
+                if (creeps.every(c => !c.isAlive())) onWaveCleared();
+            }
+
+            // --- RENDER ---
+            ctx.fillStyle = '#050507'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = '#151821';
+            for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) ctx.strokeRect(c * TILE, r * TILE, TILE, TILE);
+
+            // Aura del jefe
+            if (gameState === 'WAVE' && boss && boss.isAlive()) {
+                ctx.beginPath();
+                ctx.strokeStyle = 'rgba(255,0,85,0.4)';
+                ctx.arc(boss.x * TILE + TILE / 2, boss.y * TILE + TILE / 2, boss.auraRadius * TILE, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            ctx.font = '18px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+
+            function drawUnit(u, color, symbol) {
+                const cx = u.x * TILE + TILE / 2, cy = u.y * TILE + TILE / 2;
+                ctx.fillStyle = color; ctx.fillText(symbol, cx, cy);
+                if (u.maxHp) {
+                    const pct = Math.max(0, u.hp / u.maxHp);
+                    ctx.fillStyle = '#333'; ctx.fillRect(cx - TILE / 2 + 2, cy - TILE / 2 + 2, TILE - 4, 3);
+                    ctx.fillStyle = pct > 0.5 ? '#00f5d4' : pct > 0.25 ? '#ffb703' : '#ff0055';
+                    ctx.fillRect(cx - TILE / 2 + 2, cy - TILE / 2 + 2, (TILE - 4) * pct, 3);
+                }
+            }
+
+            if (gameState === 'WAVE') {
+                creeps.forEach(c => { if (c.isAlive()) drawUnit(c, c.color, c.symbol); });
+                ctx.fillStyle = '#fefae0';
+                projectiles.forEach(p => { ctx.beginPath(); ctx.arc(p.x * TILE + TILE / 2, p.y * TILE + TILE / 2, 3, 0, Math.PI * 2); ctx.fill(); });
+            }
+            if (player && player.isAlive() && (gameState === 'WAVE' || gameState === 'PREP')) {
+                const invulnerable = gameState === 'WAVE' && player.invulnerableUntil > gameClock;
+                drawUnit({ x: player.x, y: player.y, hp: player.hp, maxHp: player.maxHp }, invulnerable ? '#ffffff' : '#00f5d4', player.symbol);
+            }
+
+            requestAnimationFrame(loop);
+        }
+
+        initHeroSelect();
+        renderHeroCodex();
+        requestAnimationFrame(loop);
+    </script>
+</body>
+</html>
