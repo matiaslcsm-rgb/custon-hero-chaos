@@ -31,14 +31,25 @@ function validateContent() {
         if (!t.innate) problems.push(`${t.key}: no tiene innato`);
         else checkAbility(t.innate, `${t.key} (innato)`);
         const skills = Object.values(HERO_SKILLS[t.key] || {});
-        const ult = HERO_ULTIMATES[t.key];
-        if (skills.length !== 3) problems.push(`${t.key}: tiene ${skills.length} habilidades normales (deben ser 3)`);
-        if (!ult) problems.push(`${t.key}: no tiene definitiva`);
-        [...skills, ...(ult ? [ult] : [])].forEach(s => {
-            checkAbility(s, `${t.key}/${s.id}`);
-            if (s.kind === 'active' && typeof s.cast !== 'function') problems.push(`${t.key}/${s.id}: es activa pero no tiene cast()`);
-            if (s.kind === 'passive' && !s.hooks) problems.push(`${t.key}/${s.id}: es pasiva pero no tiene hooks`);
-            if (s.kind !== 'active' && s.kind !== 'passive') problems.push(`${t.key}/${s.id}: kind debe ser 'active' o 'passive'`);
+        const ults = skills.filter(s => s.isUltimate);
+        if (skills.length - ults.length !== 3) problems.push(`${t.key}: tiene ${skills.length - ults.length} habilidades normales (deben ser 3)`);
+        if (ults.length !== 1) problems.push(`${t.key}: tiene ${ults.length} definitivas (debe ser 1)`);
+        skills.forEach(s => {
+            const where = `${t.key}/${s.id}`;
+            checkAbility(s, where);
+            if (s.kind === 'active' && typeof s.cast !== 'function') problems.push(`${where}: es activa pero no tiene cast()`);
+            if (s.kind === 'passive' && !s.hooks) problems.push(`${where}: es pasiva pero no tiene hooks`);
+            if (s.kind !== 'active' && s.kind !== 'passive') problems.push(`${where}: kind debe ser 'active' o 'passive'`);
+            if (!s.values) { problems.push(`${where}: no tiene values`); return; }
+            if (s.kind === 'active' && (s.values.cooldown === undefined || s.values.manaCost === undefined)) problems.push(`${where}: falta cooldown o manaCost en values`);
+            // Los valores por nivel tienen que tener exactamente tantos niveles como la habilidad
+            Object.entries(s.values).forEach(([key, v]) => {
+                if (Array.isArray(v) && v.length !== maxSkillLevel(s)) problems.push(`${where}: values.${key} tiene ${v.length} niveles (deben ser ${maxSkillLevel(s)})`);
+            });
+            // Cada marcador {clave} de la descripción tiene que existir en values
+            [...s.description.matchAll(/\{(\w+)%?\}/g)].forEach(([, key]) => {
+                if (s.values[key] === undefined) problems.push(`${where}: la descripción usa {${key}} pero no existe en values`);
+            });
         });
     });
     if (problems.length) console.warn('⚠️ Problemas en el contenido del juego:\n- ' + problems.join('\n- '));

@@ -88,7 +88,4 @@ const HERO_TEMPLATES = {
     }
 };
 
-function scalingStatLabel(stat) {
-    return stat === 'armor' ? 'armadura' : stat === 'atk' ? 'daño de ataque' :
-        stat === 'critChance' ? '% crítico' : stat === 'lifesteal' ? '% robo de vida' : stat;
-}
+function scalingStatLabel(stat) { return PERMANENT_LABELS[stat] || stat; }

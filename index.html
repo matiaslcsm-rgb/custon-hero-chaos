@@ -32,8 +32,15 @@
                 <p style="font-size: 0.72rem; color: #8ecae6;" id="extra-stats"></p>
                 <p><strong>Oro:</strong> <span id="player-gold">100</span> g | <strong>Oleada:</strong> <span id="round-num">1</span>/4 | <strong>Vidas:</strong> <span id="lives-text">♥♥</span></p>
                 <p><strong>Estado:</strong> <span id="game-state-text">SELECCIÓN DE HÉROE</span></p>
-                <p id="skills-owned"></p>
                 <p id="scaling-info" style="font-size: 0.75rem; color: #ffb703;"></p>
+            </div>
+
+            <!-- Kit: nivel, experiencia, puntos y habilidades (se sube de nivel con [+]) -->
+            <div id="kit-panel" style="display: none;">
+                <div id="level-line"></div>
+                <div id="xp-bar"><div id="xp-fill"></div></div>
+                <div id="kit-active"></div>
+                <div id="kit-passive"></div>
             </div>
 
             <hr>
@@ -47,8 +54,8 @@
 
             <!-- Draft de habilidades -->
             <div id="draft-container" style="display: none;">
-                <h3>Draft de Habilidades</h3>
-                <p class="subtitle">Elige una habilidad nueva:</p>
+                <h3 id="draft-title">Draft de Habilidades</h3>
+                <p class="subtitle" id="draft-subtitle">Elegí una habilidad nueva:</p>
                 <div id="draft-options" class="options-grid"></div>
             </div>
 
@@ -57,6 +64,7 @@
                 <h3>Tienda de Artículos</h3>
                 <p class="subtitle">Mejora tus atributos antes de la oleada:</p>
                 <div id="shop-options" class="options-grid"></div>
+                <div id="destiny-panel"></div>
                 <button id="start-wave-btn" class="primary-btn">Comenzar Oleada</button>
             </div>
 
@@ -88,6 +96,7 @@
     <script src="js/data/items.js"></script>
     <script src="js/data/creeps.js"></script>
     <script src="js/effects.js"></script>
+    <script src="js/progression.js"></script>
     <script src="js/hero.js"></script>
     <script src="js/combat.js"></script>
     <script src="js/game.js"></script>

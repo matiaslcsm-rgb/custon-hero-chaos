@@ -27,6 +27,7 @@
 //   onKill           { victim }                 la unidad eliminó a un enemigo
 //   onDamaged        { source, dealt, type }    la unidad recibió daño (no se emite si lo esquivó)
 //   beforeLifesteal  { target, mult }           antes de curar por robo de vida; se puede modificar mult
+//   onHeal           { amount }                 la unidad se curó (robo de vida, habilidades...)
 //   onCast           { skill }                  la unidad lanzó una habilidad
 //   onTick           { dt }                     cada frame de la oleada
 

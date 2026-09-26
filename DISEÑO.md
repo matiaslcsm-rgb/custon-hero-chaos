@@ -64,6 +64,9 @@ Así, drafteando la definitiva de otro héroe te llevás también su forma de es
 
 **Fuentes de experiencia (propuesta, a balancear):** bajas de creeps, oleada superada, duelo ganado (más), duelo perdido (menos).
 
+*Implementado (valores provisorios):* creeps 6–28 XP, jefe 120, oleada superada 40 + 20 × n.º de oleada.
+Nivel siguiente: 100 + 40 × (nivel − 1). En el prototipo de 5 oleadas el héroe termina cerca del nivel 8.
+
 ---
 
 ## 4. Draft de habilidades
@@ -214,7 +217,7 @@ Cada fase deja el juego jugable.
 | Fase | Qué | Por qué en este orden |
 |---|---|---|
 | **A. Cimientos** ✅ | Quién lanza como parámetro, sistema genérico de mejoras, eventos, etiquetas, teclas por espacio | Sin esto, cada habilidad, ítem y creep nuevo hay que programarlo a mano contra todos los demás |
-| **B. Draft y niveles** | Draft mezclado, definitiva drafteable, experiencia y niveles de habilidad, escalado en la definitiva, pasivas sin espacio, Fragmento del Destino en la tienda | Es lo que define al modo; los niveles cambian cómo se draftea, así que van juntos |
+| **B. Draft y niveles** ✅ | Draft mezclado, definitiva drafteable, experiencia y niveles de habilidad, escalado en la definitiva, pasivas sin espacio, Fragmento del Destino en la tienda | Es lo que define al modo; los niveles cambian cómo se draftea, así que van juntos |
 | **C. Roster** | Aplicar los criterios, pasar los 4 héroes actuales, sumar héroes de INT (daño mágico) | Da variedad para que el draft mezclado tenga gracia |
 | **D. Ítems** | Contras por etiqueta, niveles/recetas, inventario limitado | Necesita las etiquetas y habilidades variadas para tener qué contrarrestar |
 | **E. Creeps** | Tipos con mecánica, aviso de oleada, oleadas compuestas | Es el campo de prueba de los ítems situacionales |
@@ -225,7 +228,10 @@ Cada fase deja el juego jugable.
 ## 11. Preguntas abiertas
 
 1. **Definitiva en el pool:** ¿aparece en el draft con la misma probabilidad que una normal, o más baja?
-2. **Precio del Fragmento del Destino** en la tienda, y cuánto se recupera al venderlo.
+   *(Hoy: misma probabilidad. Con 4 definitivas en 16 habilidades, ~59% de los drafts ofrece al menos una.)*
+4. **Largo de la partida:** con 5 oleadas se llega a nivel ~8, así que la definitiva nunca pasa de nivel 1.
+   Hay que decidir cuántas rondas tiene una partida completa (con duelos) o ajustar la experiencia.
+2. **Precio del Fragmento del Destino** en la tienda, y cuánto se recupera al venderlo. *(Provisorio: 150g, se vende por 75g.)*
 3. **Puntos del ranking:** ¿qué da puntos? (duelos ganados, apuestas acertadas, oleadas…)
 
 ### Decisiones tomadas

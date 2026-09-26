@@ -38,7 +38,7 @@ function renderHeroCodex() {
 function renderCodexDetail(t) {
     const ref = new Hero(t); // instancia de referencia solo para calcular stats base (str 20/agi 15/int 15, sin ítems ni skills)
     const detail = document.getElementById('codex-detail');
-    const draftable = Object.values(HERO_SKILLS[t.key]);
+    const natural = Object.values(HERO_SKILLS[t.key]);
     const statRows = [
         ['HP máx.', ref.maxHp], ['Maná máx.', ref.maxMana],
         ['Daño de ataque', ref.atk], ['Vel. de ataque', ref.atkSpeed.toFixed(2)],
@@ -49,18 +49,15 @@ function renderCodexDetail(t) {
         ['Prob. de esquivar', ref.evasion + '%'], ['Amp. de hechizo', ref.spellAmp.toFixed(1) + '%'],
         ['Robo de vida', ref.lifesteal + '%'], ['Rol', t.role]
     ];
-    const ult = HERO_ULTIMATES[t.key];
     let html = `<h3>[${t.symbol}] ${t.name} &mdash; ${t.primaryAttr}</h3><p style="color:#bbb;">${t.description}</p>`;
     html += `<div class="codex-sub">Stats base (STR 20 / AGI 15 / INT 15, sin ítems)</div>`;
     html += `<div class="stat-grid">${statRows.map(r => `<div>${r[0]}: <strong>${r[1]}</strong></div>`).join('')}</div>`;
-    html += `<div class="codex-sub">Escalado de arquetipo</div>`;
+    html += `<div class="codex-sub">Escalado del héroe</div>`;
     html += `<div class="ability-row"><p>+${t.scaling.perKillsAmount} ${scalingStatLabel(t.scaling.stat)} cada ${t.scaling.perKills} bajas de creeps &middot; +${t.scaling.perHeroKill} al ganar un duelo 1v1.</p></div>`;
     html += `<div class="codex-sub">Innato (siempre activo, no se draftea)</div>`;
     html += abilityRow(t.innate, true);
-    html += `<div class="codex-sub">Habilidades normales (elegís ${draftable.length} de ${draftable.length} a lo largo de la partida, 1 por vez)</div>`;
-    html += draftable.map(s => abilityRow(s, false)).join('');
-    html += `<div class="codex-sub">Habilidad definitiva (se desbloquea sola al aprender las 3 normales)</div>`;
-    html += abilityRow(ult, true);
+    html += `<div class="codex-sub">Habilidades naturales (4 niveles las normales, 3 la definitiva: niveles 6/12/18 del héroe)</div>`;
+    html += natural.map(s => abilityRow(s, s.isUltimate)).join('');
     detail.innerHTML = html;
 }
 
@@ -68,9 +65,14 @@ function tagChips(tags) {
     return (tags || []).map(tag => `<span class="tag" title="${TAGS[tag] || ''}">${tag}</span>`).join('');
 }
 
+// Fila del códice. Los innatos no tienen `values`: se muestran con su descripción tal cual.
 function abilityRow(a, fixed) {
-    return `<div class="ability-row${fixed ? ' fixed' : ''}"><h4>${a.name}</h4><p>${a.description}</p><div class="tags">${tagChips(a.tags)}</div></div>`;
+    const desc = a.values ? describeSkill(a, 0) : a.description;
+    const meta = a.values ? `<p class="meta">${skillCostLine(a, 0)}</p>` : '';
+    return `<div class="ability-row${fixed ? ' fixed' : ''}"><h4>${a.name}</h4><p>${desc}</p>${meta}<div class="tags">${tagChips(a.tags)}</div></div>`;
 }
+
+function stripHtml(html) { return html.replace(/<[^>]+>/g, ''); }
 
 function showView(view) {
     document.getElementById('view-game').style.display = view === 'game' ? 'flex' : 'none';
@@ -80,14 +82,44 @@ function showView(view) {
 }
 
 // --- DRAFT Y TIENDA ---
-function renderDraft() {
+const DRAFT_TITLES = {
+    normal: ['Draft de Habilidades', 'Elegí una habilidad (★ = natural de tu héroe). Llega en nivel 0.'],
+    fragment: ['Fragmento del Destino', 'Elegí 1 de estas 4 habilidades para reemplazar la que perdiste.'],
+    book: ['Libro del Destino', 'Elegí 1 de estas 6 habilidades para reemplazar la que cambiaste.']
+};
+
+function skillCardHtml(s) {
+    const natural = s.heroKey === player.key;
+    const type = s.isUltimate ? 'Definitiva' : s.kind === 'passive' ? 'Pasiva' : 'Activa';
+    return `<h4>${s.name}</h4>` +
+        `<p class="meta"><span class="${natural ? 'natural' : ''}">${natural ? '★ Natural' : 'De ' + naturalHeroName(s)}</span> &middot; ${type} &middot; ${skillCostLine(s, 0)}</p>` +
+        `<p>${describeSkill(s, 0)}</p><div class="tags">${tagChips(s.tags)}</div>`;
+}
+
+function renderDraft(options, mode) {
+    const [title, subtitle] = DRAFT_TITLES[mode];
+    document.getElementById('draft-title').textContent = title;
+    document.getElementById('draft-subtitle').textContent = subtitle;
     const c = document.getElementById('draft-options'); c.innerHTML = '';
-    const remaining = Object.values(HERO_SKILLS[player.key]).filter(s => !player.hasSkill(s.id));
-    const pool = shuffle(remaining.slice()).slice(0, 3);
-    pool.forEach(s => {
-        const card = document.createElement('div'); card.className = 'skill-card';
-        card.innerHTML = `<h4>${s.name}</h4><p>${s.description}</p>`;
+    options.forEach(s => {
+        const card = document.createElement('div');
+        card.className = 'skill-card' + (s.isUltimate ? ' ult' : '');
+        card.innerHTML = skillCardHtml(s);
         card.onclick = () => learnSkill(s);
+        c.appendChild(card);
+    });
+}
+
+// Libro del Destino, paso 1: elegir qué habilidad del kit cambiar.
+function renderBookChoice() {
+    document.getElementById('draft-title').textContent = 'Libro del Destino';
+    document.getElementById('draft-subtitle').textContent = '¿Qué habilidad querés cambiar? Recuperás sus puntos y elegís entre 6 nuevas.';
+    const c = document.getElementById('draft-options'); c.innerHTML = '';
+    player.skills.forEach(s => {
+        const card = document.createElement('div');
+        card.className = 'skill-card' + (s.isUltimate ? ' ult' : '');
+        card.innerHTML = `<h4>${s.name} (nivel ${skillLevel(player, s)})</h4><p>${describeSkill(s, skillLevel(player, s))}</p>`;
+        card.onclick = () => useBookOn(s);
         c.appendChild(card);
     });
 }
@@ -100,17 +132,92 @@ function renderShop() {
         card.onclick = () => buyItem(i);
         c.appendChild(card);
     });
+    renderDestinyPanel();
+}
+
+// Inventario de objetos del destino (solo se usan fuera de las oleadas).
+function renderDestinyPanel() {
+    const panel = document.getElementById('destiny-panel'); panel.innerHTML = '';
+    const { fragments, books } = player.destiny;
+    if (fragments > 0) {
+        const row = document.createElement('div'); row.className = 'destiny-row';
+        row.innerHTML = `<span>🔮 Fragmentos del Destino: ${fragments}</span>`;
+        const use = document.createElement('button'); use.textContent = 'Usar'; use.onclick = useFragment;
+        const sell = document.createElement('button'); sell.textContent = `Vender (${FRAGMENT_SELL_PRICE}g)`; sell.onclick = sellFragment;
+        use.disabled = !player.skills.length;
+        row.append(use, sell); panel.appendChild(row);
+    }
+    if (books > 0) {
+        const row = document.createElement('div'); row.className = 'destiny-row';
+        row.innerHTML = `<span>📖 Libros del Destino: ${books}</span>`;
+        const use = document.createElement('button'); use.textContent = 'Usar'; use.onclick = useBook;
+        use.disabled = !player.skills.length;
+        row.appendChild(use); panel.appendChild(row);
+    }
+}
+
+// --- KIT (nivel, experiencia, puntos y habilidades) ---
+let lastKitSignature = '';
+
+// Se redibuja solo cuando cambia algo (nivel, puntos, habilidades), para no romper los clics en cada frame.
+function renderKit() {
+    document.getElementById('kit-panel').style.display = 'flex';
+    document.getElementById('xp-fill').style.width = `${Math.min(100, player.xp / xpToNext(player.level) * 100)}%`;
+    const signature = [player.level, player.skillPoints, ...player.skills.map(s => s.id + ':' + skillLevel(player, s) + ':' + player.keyBindings[s.id])].join('|');
+    if (signature === lastKitSignature) return;
+    lastKitSignature = signature;
+
+    document.getElementById('level-line').innerHTML = `<strong>Nivel ${player.level}</strong>` +
+        (player.skillPoints > 0 ? ` &middot; <span class="points">${player.skillPoints} punto${player.skillPoints > 1 ? 's' : ''} de habilidad</span>` : '');
+
+    const active = document.getElementById('kit-active'); active.innerHTML = '';
+    player.skills.filter(s => s.kind === 'active').forEach(s => {
+        const lvl = skillLevel(player, s), max = maxSkillLevel(s), blocker = levelUpBlocker(player, s);
+        const row = document.createElement('div');
+        row.className = 'kit-row' + (lvl === 0 ? ' locked' : '') + (s.isUltimate ? ' ult' : '');
+        row.title = `${s.name}\n${stripHtml(skillCostLine(s, lvl))}\n${stripHtml(describeSkill(s, lvl))}`;
+        const pips = Array.from({ length: max }, (_, i) => i < lvl ? '■' : '<span class="off">□</span>').join('');
+        row.innerHTML = `<span class="key">[${(player.keyBindings[s.id] || '—').toUpperCase()}]</span><span class="name">${s.name}</span><span class="pips">${pips}</span>`;
+        const btn = document.createElement('button');
+        btn.textContent = '+'; btn.disabled = !!blocker; btn.title = blocker || 'Subir de nivel';
+        btn.onclick = e => { e.stopPropagation(); levelUpSkill(player, s); renderKit(); };
+        row.appendChild(btn);
+        active.appendChild(row);
+    });
+    for (let i = player.skills.length; i < KIT_SIZE; i++) {
+        const row = document.createElement('div'); row.className = 'kit-row empty';
+        row.textContent = '— espacio libre (se llena en el draft) —';
+        active.appendChild(row);
+    }
+
+    // Innato y pasivas: recuadros chicos siempre visibles. Las pasivas drafteadas también se suben con [+].
+    const passive = document.getElementById('kit-passive'); passive.innerHTML = '';
+    const boxes = [{ a: player.innate, innate: true }, ...player.skills.filter(s => s.kind === 'passive').map(a => ({ a }))];
+    boxes.forEach(({ a, innate }) => {
+        if (!a) return;
+        const box = document.createElement('div'); box.className = 'passive-box';
+        const lvl = innate ? null : skillLevel(player, a);
+        box.innerHTML = `<h5>${innate ? 'Innato: ' : ''}${a.name}${innate ? '' : ` (nv ${lvl}/${maxSkillLevel(a)})`}</h5><div>${innate ? a.description : describeSkill(a, lvl)}</div>`;
+        if (!innate) {
+            const btn = document.createElement('button');
+            btn.textContent = '+'; btn.disabled = !!levelUpBlocker(player, a);
+            btn.onclick = () => { levelUpSkill(player, a); renderKit(); };
+            box.appendChild(btn);
+        }
+        passive.appendChild(box);
+    });
 }
 
 // --- HUD ---
 function renderCooldownBar() {
     const bar = document.getElementById('cooldown-bar'); bar.innerHTML = '';
-    player.skills.filter(s => s.cooldown).forEach(s => {
+    player.skills.filter(s => s.kind === 'active').forEach(s => {
         const remaining = Math.max(0, (player.cooldowns[s.id] || 0));
+        const locked = skillLevel(player, s) === 0;
         const span = document.createElement('span');
-        span.className = remaining <= 0 ? 'ready' : '';
+        span.className = !locked && remaining <= 0 ? 'ready' : '';
         const key = player.keyBindings[s.id];
-        span.textContent = `[${key ? key.toUpperCase() : '—'}] ${s.name}: ${remaining <= 0 ? 'Listo' : remaining.toFixed(1) + 's'}`;
+        span.textContent = `[${key ? key.toUpperCase() : '—'}] ${s.name}: ${locked ? 'Nivel 0' : remaining <= 0 ? 'Listo' : remaining.toFixed(1) + 's'}`;
         bar.appendChild(span);
     });
     // Efectos activos sobre el jugador (mejoras propias, invulnerabilidad al reaparecer...)
@@ -138,10 +245,9 @@ function updateHud() {
         `Amp.Hechizo: ${player.spellAmp.toFixed(1)}% | Robo Vida: ${player.lifesteal.toFixed(1)}% | Regen: ${player.hpRegen.toFixed(1)} HP/s, ${player.manaRegen.toFixed(1)} Maná/s | ` +
         `Vel.Mov: ${player.moveSpeed.toFixed(1)}${player.projectileSpeed > 0 ? ` | Vel.Proyectil: ${player.projectileSpeed.toFixed(1)}` : ''}`;
     document.getElementById('lives-text').textContent = '♥'.repeat(Math.max(0, player.lives)) + '♡'.repeat(Math.max(0, 2 - player.lives));
-    document.getElementById('skills-owned').textContent = player.skills.length ? ('Habilidades: ' + player.skills.map(s => s.name).join(', ')) : '';
+    renderKit();
     if (player.scaling) {
-        const bonusMap = { armor: player.bonusArmor, atk: player.bonusAtk, critChance: player.bonusCritChance, lifesteal: player.bonusLifesteal };
-        const bonusSoFar = bonusMap[player.scaling.stat] || 0;
+        const bonusSoFar = player.bonus[player.scaling.stat] || 0;
         const toNext = player.scaling.perKills - (player.creepKillCount % player.scaling.perKills);
         document.getElementById('scaling-info').textContent = `Escalado: +${bonusSoFar.toFixed(1)} ${scalingStatLabel(player.scaling.stat)} acumulado (${player.creepKillCount} bajas, próximo bonus en ${toNext})`;
     }
@@ -156,7 +262,9 @@ function resetHud() {
     document.getElementById('player-name').textContent = 'Ninguno';
     document.getElementById('round-num').textContent = '1';
     ['cooldown-bar', 'combat-log'].forEach(id => document.getElementById(id).innerHTML = '');
-    ['skills-owned', 'scaling-info', 'extra-stats'].forEach(id => document.getElementById(id).textContent = '');
+    ['scaling-info', 'extra-stats'].forEach(id => document.getElementById(id).textContent = '');
+    document.getElementById('kit-panel').style.display = 'none';
+    lastKitSignature = '';
 }
 
 // --- RENDER DEL CANVAS ---

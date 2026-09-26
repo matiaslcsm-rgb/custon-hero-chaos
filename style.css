@@ -48,3 +48,32 @@ button.primary-btn:hover { background: #48cae4; }
 #cooldown-bar span.effect { color: #ffb703; border-color: #ffb703; }
 .tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
 .tag { font-size: 0.65rem; color: #9d4edd; border: 1px solid #9d4edd; padding: 1px 5px; cursor: help; }
+#kit-panel { display: flex; flex-direction: column; gap: 6px; }
+#level-line { font-size: 0.8rem; }
+#level-line .points { color: #ffb703; font-weight: bold; }
+#xp-bar { height: 5px; background: #22252e; border: 1px solid #333; }
+#xp-fill { height: 100%; width: 0; background: #9d4edd; }
+#kit-active { display: flex; flex-direction: column; gap: 4px; }
+.kit-row { display: flex; align-items: center; gap: 6px; background: #1c1f26; border: 1px solid #333; padding: 4px 6px; font-size: 0.78rem; cursor: help; }
+.kit-row.locked { opacity: 0.6; }
+.kit-row.ult { border-color: #ff9f1c; }
+.kit-row .key { color: #ffb703; font-weight: bold; min-width: 22px; }
+.kit-row .name { flex: 1; color: #00f5d4; }
+.kit-row.ult .name { color: #ff9f1c; }
+.kit-row .pips { letter-spacing: 1px; color: #00f5d4; }
+.kit-row .pips .off { color: #444; }
+.kit-row button { background: #ffb703; color: #000; border: none; font-family: inherit; font-weight: bold; width: 22px; cursor: pointer; }
+.kit-row button:disabled { background: #333; color: #666; cursor: default; }
+.kit-row.empty { color: #555; border-style: dashed; cursor: default; }
+#kit-passive { display: flex; flex-wrap: wrap; gap: 4px; }
+.passive-box { flex: 1 1 45%; background: #1c1f26; border: 1px solid #9d4edd; padding: 4px 6px; font-size: 0.68rem; color: #bbb; }
+.passive-box h5 { color: #c77dff; font-size: 0.72rem; }
+.skill-card .meta { font-size: 0.68rem; color: #8ecae6; margin-top: 3px; }
+.skill-card .natural { color: #ffb703; }
+.skill-card.ult { border-color: #ff9f1c; }
+.skill-card.ult h4 { color: #ff9f1c; }
+b.cur { color: #ffb703; }
+#destiny-panel { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; font-size: 0.78rem; }
+#destiny-panel .destiny-row { display: flex; align-items: center; gap: 6px; background: #1c1f26; border: 1px solid #9d4edd; padding: 6px; }
+#destiny-panel .destiny-row span { flex: 1; }
+#destiny-panel button { background: #9d4edd; color: #fff; border: none; font-family: inherit; padding: 3px 8px; cursor: pointer; }

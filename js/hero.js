@@ -17,7 +17,11 @@ class Hero {
         this.scaling = template.scaling || null;
         this.innate = template.innate || null;
         this.creepKillCount = 0; this.heroKillCount = 0;
-        this.bonusArmor = 0; this.bonusAtk = 0; this.bonusCritChance = 0; this.bonusLifesteal = 0;
+        // Bonus permanentes acumulados (escalado del héroe y de las definitivas), ver grantPermanent().
+        this.bonus = { armor: 0, atk: 0, critChance: 0, lifesteal: 0, maxHp: 0 };
+        this.level = 1; this.xp = 0; this.skillPoints = 1;
+        this.skillLevels = {}; // id de habilidad -> nivel (0 = drafteada pero sin aprender)
+        this.destiny = { fragments: 0, books: 0 }; // Fragmentos y Libros del Destino sin usar
         this.x = 3; this.y = 6; this.gold = 100; this.lives = 2;
         this.skills = []; this.cooldowns = {}; this.keyBindings = {}; this.attackTimer = 0;
         this.effects = []; // efectos temporales activos (mejoras/perjuicios), ver effects.js
@@ -26,33 +30,44 @@ class Hero {
     hasSkill(id) { return this.skills.some(s => s.id === id); }
     recalculateStats() {
         const primaryVal = this.primaryAttr === 'STR' ? this.str : this.primaryAttr === 'AGI' ? this.agi : this.int;
-        this.maxHp = Math.round(this.baseHp + (this.str * 5));
+        this.maxHp = Math.round(this.baseHp + (this.str * 5) + this.bonus.maxHp);
         this.maxMana = Math.round(this.baseMaxMana + (this.int * 4));
-        this.atk = Math.round(this.baseAtk + (primaryVal * 0.8)) + Math.round(this.bonusAtk || 0);
+        this.atk = Math.round(this.baseAtk + (primaryVal * 0.8)) + Math.round(this.bonus.atk);
         this.atkSpeed = this.baseAtkSpeed * (1 + (this.agi * 0.01));
         this.moveSpeed = this.baseMoveSpeed * (1 + Math.min(this.agi, 40) * 0.01);
         this.moveInterval = Math.max(0.05, 1 / this.moveSpeed);
         this.attackRange = this.baseAttackRange;
-        this.armor = (this.baseArmor || 0) + (this.bonusArmor || 0);
+        this.armor = (this.baseArmor || 0) + this.bonus.armor;
         this.magicResist = this.baseMagicResist;
         this.hpRegen = this.baseHpRegen + this.str * 0.05;
         this.manaRegen = this.baseManaRegen + this.int * 0.05;
         this.projectileSpeed = this.baseProjectileSpeed;
-        this.critChance = this.baseCritChance + this.agi * 0.1 + (this.bonusCritChance || 0);
+        this.critChance = this.baseCritChance + this.agi * 0.1 + this.bonus.critChance;
         this.evasion = this.baseEvasion;
         this.spellAmp = this.baseSpellAmp + this.int * 0.1;
-        this.lifesteal = (this.baseLifesteal || 0) + (this.bonusLifesteal || 0);
+        this.lifesteal = (this.baseLifesteal || 0) + this.bonus.lifesteal;
     }
     // Las activas toman la primera tecla libre de SKILL_KEYS (por orden de aprendizaje); las pasivas no usan tecla.
+    // Una habilidad drafteada llega en nivel 0: hay que invertir un punto para poder usarla.
     addSkill(skill) {
         this.skills.push(skill);
-        if (skill.cooldown) this.cooldowns[skill.id] = 0;
+        this.skillLevels[skill.id] = 0;
+        if (skill.kind === 'active') this.cooldowns[skill.id] = 0;
         if (skill.kind !== 'passive') {
             const used = Object.values(this.keyBindings);
             const key = SKILL_KEYS.find(k => !used.includes(k));
             if (key) this.keyBindings[skill.id] = key;
         }
         this.recalculateStats();
+    }
+    // Quita una habilidad del kit (Fragmento/Libro del Destino) y devuelve los puntos invertidos en ella.
+    // Su tecla queda libre para la próxima habilidad que se aprenda.
+    removeSkill(skill) {
+        const refund = this.skillLevels[skill.id] || 0;
+        this.skills = this.skills.filter(s => s !== skill);
+        delete this.skillLevels[skill.id]; delete this.keyBindings[skill.id]; delete this.cooldowns[skill.id];
+        this.skillPoints += refund;
+        return refund;
     }
     skillForKey(k) { return this.skills.find(s => this.keyBindings[s.id] === k) || null; }
     regenTick(dt) {

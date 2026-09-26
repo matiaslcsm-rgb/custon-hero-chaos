@@ -15,7 +15,7 @@ function makeCreep(t, x, y, statMult, isBossUnit, bossAuraBonus) {
         hp, maxHp: hp, atk, atkSpeed: t.atkSpeed * (isBossUnit ? 0.85 : 1),
         moveInterval: t.moveInterval * (isBossUnit ? 1.15 : 1),
         range: isBossUnit ? Math.max(t.range, 1.8) : t.range,
-        gold: isBossUnit ? 40 : t.gold, oneHit,
+        gold: isBossUnit ? 40 : t.gold, xp: isBossUnit ? BOSS_XP : t.xp, oneHit,
         x, y, moveTimer: 0, attackTimer: 0, isBoss: !!isBossUnit, spawnTime: gameClock,
         auraRadius: isBossUnit ? 4 : 0, auraAtkBonus: isBossUnit ? bossAuraBonus : 0,
         effects: [],
@@ -58,6 +58,15 @@ function damageCreep(source, c, dmg, opts) {
     return final;
 }
 
+// Cura a una unidad (sin pasar su máximo), emite onHeal y devuelve cuánto curó realmente.
+function healUnit(unit, amount) {
+    const healed = Math.max(0, Math.min(unit.maxHp - unit.hp, Math.round(amount)));
+    if (healed <= 0) return 0;
+    unit.hp += healed;
+    emit(unit, 'onHeal', { amount: healed });
+    return healed;
+}
+
 // Robo de vida: cura según el robo de vida efectivo (base + efectos). El innato Hambre y Sangre Oscura
 // modifican el multiplicador a través del evento beforeLifesteal.
 function applyLifesteal(unit, dmgDealt, target) {
@@ -65,8 +74,7 @@ function applyLifesteal(unit, dmgDealt, target) {
     if (ls <= 0 || dmgDealt <= 0) return;
     const ctx = { target, mult: 1 };
     emit(unit, 'beforeLifesteal', ctx);
-    const heal = Math.round(dmgDealt * (ls / 100) * ctx.mult);
-    if (heal > 0) unit.hp = Math.min(unit.maxHp, unit.hp + heal);
+    healUnit(unit, dmgDealt * (ls / 100) * ctx.mult);
 }
 
 // Calcula el daño de un ataque básico: daño efectivo (base + efectos), luego los modificadores de
@@ -112,14 +120,9 @@ function updateProjectiles(dt) {
 }
 
 // --- ESCALADO Y BAJAS ---
-// Aplica el bonus de escalado del héroe (armadura, daño, etc. según su plantilla) y recalcula stats.
+// Escalado chico del héroe (definido en su plantilla): suma un bonus permanente al stat que corresponde.
 function applyScalingBonus(hero, amount) {
-    if (!hero.scaling) return;
-    if (hero.scaling.stat === 'armor') hero.bonusArmor = (hero.bonusArmor || 0) + amount;
-    else if (hero.scaling.stat === 'atk') hero.bonusAtk = (hero.bonusAtk || 0) + amount;
-    else if (hero.scaling.stat === 'critChance') hero.bonusCritChance = (hero.bonusCritChance || 0) + amount;
-    else if (hero.scaling.stat === 'lifesteal') hero.bonusLifesteal = (hero.bonusLifesteal || 0) + amount;
-    hero.recalculateStats();
+    if (hero.scaling) grantPermanent(hero, hero.scaling.stat, amount);
 }
 
 function applyScalingOnCreepKill(hero) {
@@ -146,6 +149,7 @@ function killCreep(c, killer) {
     const gold = Math.max(1, Math.round(c.gold * speedMult));
     killer.gold += gold;
     applyScalingOnCreepKill(killer);
+    gainXp(killer, c.xp || 0);
     emit(killer, 'onKill', { victim: c });
     const bonusTag = speedMult > 1.05 ? ` ⚡x${speedMult.toFixed(1)}` : '';
     log(`${c.isBoss ? '👹 ¡Eliminaste al Jefe!' : '⚔️ Eliminaste un ' + c.label} (+${gold}g${bonusTag})`);

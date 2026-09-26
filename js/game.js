@@ -5,7 +5,7 @@ const COLS = 20, ROWS = 12;
 
 let player = null, creeps = [], boss = null;
 let gameState = 'HERO_SELECT', waveNumber = 1, isBossWave = false, gameClock = 0, keys = {};
-let skillsGranted = 0, moveTimer = 0;
+let moveTimer = 0;
 
 window.addEventListener('keydown', e => {
     const k = e.key.toLowerCase();
@@ -22,26 +22,60 @@ function selectHero(template) {
     startSkillDraft();
 }
 
-function startSkillDraft() {
+// Abre un draft. mode: 'normal' (3 opciones), 'fragment' (4) o 'book' (6).
+// exclude: habilidades que no se pueden ofrecer (ej: la que se acaba de reemplazar).
+function startSkillDraft(mode = 'normal', exclude = []) {
     gameState = 'DRAFT';
-    setStateText('DRAFT DE HABILIDAD');
+    setStateText(mode === 'normal' ? 'DRAFT DE HABILIDAD' : 'DRAFT DEL DESTINO');
+    showPanel('shop-container', false);
     showPanel('draft-container', true);
-    renderDraft();
+    renderDraft(draftOptions(player, DRAFT_OPTIONS[mode], exclude), mode);
 }
 
-// Aprende una habilidad del draft; al completar las 3 normales se desbloquea la definitiva.
+// Suma la habilidad elegida al kit. Llega en nivel 0: hay que invertirle un punto para usarla.
 function learnSkill(skill) {
     player.addSkill(skill);
-    skillsGranted++;
-    log(`✨ Aprendiste: ${skill.name}`);
-    const totalDraftable = Object.keys(HERO_SKILLS[player.key]).length;
-    const ult = HERO_ULTIMATES[player.key];
-    if (skillsGranted >= totalDraftable && !player.hasSkill(ult.id)) {
-        player.addSkill(ult);
-        log(`🌟 ¡Definitiva desbloqueada! ${ult.name}`);
-    }
+    log(`✨ Drafteaste: ${skill.name}${skill.heroKey !== player.key ? ` (de ${naturalHeroName(skill)})` : ''}. Invertile un punto para usarla.`);
     showPanel('draft-container', false);
     startPreparation();
+}
+
+// --- OBJETOS DEL DESTINO ---
+// Fragmento: quita una habilidad al azar (devolviendo sus puntos) y abre un draft de 4 opciones.
+function useFragment() {
+    if (gameState !== 'PREP' || player.destiny.fragments <= 0 || !player.skills.length) return;
+    player.destiny.fragments--;
+    const removed = player.skills[Math.floor(Math.random() * player.skills.length)];
+    replaceSkill(removed, 'fragment', 'Fragmento del Destino');
+}
+
+function sellFragment() {
+    if (gameState !== 'PREP' || player.destiny.fragments <= 0) return;
+    player.destiny.fragments--;
+    player.gold += FRAGMENT_SELL_PRICE;
+    log(`💰 Vendiste un Fragmento del Destino (+${FRAGMENT_SELL_PRICE}g).`);
+    renderShop();
+}
+
+// Libro: primero se elige qué habilidad cambiar (ver renderBookChoice) y después se abre un draft de 6.
+function useBook() {
+    if (gameState !== 'PREP' || player.destiny.books <= 0 || !player.skills.length) return;
+    gameState = 'DRAFT';
+    setStateText('LIBRO DEL DESTINO');
+    showPanel('shop-container', false);
+    showPanel('draft-container', true);
+    renderBookChoice();
+}
+
+function useBookOn(skill) {
+    player.destiny.books--;
+    replaceSkill(skill, 'book', 'Libro del Destino');
+}
+
+function replaceSkill(skill, mode, sourceName) {
+    const refund = player.removeSkill(skill);
+    log(`🔮 ${sourceName}: perdiste ${skill.name}${refund ? ` (recuperás ${refund} punto${refund > 1 ? 's' : ''})` : ''}.`);
+    startSkillDraft(mode, [skill.id]);
 }
 
 function startPreparation() {
@@ -92,11 +126,11 @@ function onWaveCleared() {
         return;
     }
     log(`🏆 Oleada ${waveNumber} superada.`);
+    gainXp(player, 40 + 20 * waveNumber);
     const interest = Math.min(5, Math.floor(player.gold / 10));
     if (interest > 0) { player.gold += interest; log(`💰 Interés por oro ahorrado: +${interest}g`); }
     waveNumber++;
-    const totalDraftable = Object.keys(HERO_SKILLS[player.key]).length;
-    if (skillsGranted < totalDraftable) startSkillDraft();
+    if (player.skills.length < KIT_SIZE) startSkillDraft();
     else startPreparation();
 }
 
@@ -125,7 +159,7 @@ function onHeroDeath(hero) {
 // Vuelve todo al estado inicial (selección de héroe) sin recargar la página.
 function resetGame() {
     player = null; creeps = []; boss = null; projectiles = [];
-    gameState = 'HERO_SELECT'; waveNumber = 1; isBossWave = false; gameClock = 0; skillsGranted = 0;
+    gameState = 'HERO_SELECT'; waveNumber = 1; isBossWave = false; gameClock = 0;
     resetHud();
     log('🔄 Nueva partida. Elegí un héroe.');
 }
@@ -135,13 +169,15 @@ function handleSkillKeypress(k) {
     if (!player || !player.isAlive()) return;
     const skill = player.skillForKey(k);
     if (!skill) return;
+    if (skillLevel(player, skill) === 0) { log(`🔒 ${skill.name} está en nivel 0: invertile un punto para usarla.`); return; }
     const cd = player.cooldowns[skill.id] || 0;
     if (cd > 0) return;
-    if (skill.manaCost && player.mana < skill.manaCost) { log(`❌ Maná insuficiente para ${skill.name} (necesitás ${skill.manaCost}).`); return; }
+    const manaCost = val(skill, player, 'manaCost') || 0;
+    if (player.mana < manaCost) { log(`❌ Maná insuficiente para ${skill.name} (necesitás ${manaCost}).`); return; }
     // Solo se cobra maná y cooldown si la habilidad realmente se lanzó (ej: había objetivo en rango)
     if (!skill.cast(player)) return;
-    if (skill.manaCost) player.mana -= skill.manaCost;
-    if (skill.cooldown) player.cooldowns[skill.id] = skill.cooldown;
+    player.mana -= manaCost;
+    player.cooldowns[skill.id] = val(skill, player, 'cooldown') || 0;
     emit(player, 'onCast', { skill });
 }
 
