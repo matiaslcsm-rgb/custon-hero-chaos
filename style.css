@@ -1,0 +1,47 @@
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace; }
+body { background-color: #0d0e11; color: #e0e0e0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+#app { display: flex; flex-direction: column; align-items: stretch; }
+#game-container { display: flex; gap: 20px; background-color: #16181d; padding: 20px; border: 2px solid #333; box-shadow: 0 0 20px rgba(0,0,0,0.8); }
+#viewport { display: flex; flex-direction: column; gap: 8px; }
+#controls-hint { font-size: 0.72rem; color: #888; text-align: center; line-height: 1.4; }
+#ascii-canvas { border: 1px solid #444; background-color: #050507; image-rendering: pixelated; }
+#ui-panel { width: 360px; display: flex; flex-direction: column; gap: 12px; }
+h2 { color: #ffb703; font-size: 1.2rem; text-align: center; }
+h3 { color: #00b4d8; font-size: 1rem; margin-bottom: 5px; }
+.subtitle { font-size: 0.8rem; color: #aaa; margin-bottom: 10px; }
+hr { border: 0; height: 1px; background: #333; }
+#game-state-text { color: #00f5d4; font-weight: bold; }
+#lives-text { color: #ff477e; font-weight: bold; }
+.options-grid { display: flex; flex-direction: column; gap: 8px; }
+.skill-card { background: #22252e; border: 1px solid #444; padding: 8px; cursor: pointer; transition: all 0.2s ease; }
+.skill-card:hover { border-color: #00b4d8; background: #2a2e3a; }
+.skill-card.disabled { opacity: 0.5; cursor: default; }
+.skill-card.disabled:hover { border-color: #444; background: #22252e; }
+.skill-card h4 { color: #00f5d4; font-size: 0.9rem; }
+.skill-card p { font-size: 0.75rem; color: #bbb; margin-top: 4px; }
+.skill-card .keybind { color: #ffb703; font-weight: bold; }
+#skills-owned { font-size: 0.75rem; color: #9d4edd; margin-top: 4px; }
+button.primary-btn { background: #00b4d8; color: #000; font-weight: bold; border: none; padding: 8px; cursor: pointer; font-family: inherit; width: 100%; margin-top: 8px; }
+button.primary-btn:hover { background: #48cae4; }
+#log-panel { margin-top: auto; }
+#combat-log { height: 150px; background: #090a0c; border: 1px solid #333; padding: 6px; overflow-y: auto; font-size: 0.75rem; color: #72efdd; display: flex; flex-direction: column; gap: 4px; }
+#cooldown-bar { display: flex; gap: 6px; font-size: 0.7rem; color: #aaa; flex-wrap: wrap; }
+#cooldown-bar span { background: #1c1f26; border: 1px solid #333; padding: 3px 6px; }
+#cooldown-bar span.ready { color: #00f5d4; border-color: #00f5d4; }
+#top-nav { display: flex; gap: 6px; margin-bottom: 14px; }
+#top-nav button { flex: 1; background: #1c1f26; color: #ccc; border: 1px solid #444; padding: 8px; cursor: pointer; font-family: inherit; font-size: 0.85rem; }
+#top-nav button.active { background: #ffb703; color: #000; font-weight: bold; border-color: #ffb703; }
+#top-nav button.disabled { opacity: 0.4; cursor: default; }
+#view-heroes { display: none; width: 940px; }
+.codex-layout { display: flex; gap: 20px; background-color: #16181d; padding: 20px; border: 2px solid #333; box-shadow: 0 0 20px rgba(0,0,0,0.8); }
+#codex-hero-list { width: 260px; display: flex; flex-direction: column; gap: 8px; }
+#codex-detail { flex: 1; background: #0d0e11; border: 1px solid #333; padding: 16px; min-height: 500px; }
+#codex-detail h3 { color: #ffb703; font-size: 1.3rem; }
+#codex-detail .codex-sub { color: #00b4d8; font-size: 0.95rem; margin: 14px 0 6px; border-bottom: 1px solid #333; padding-bottom: 4px; }
+#codex-detail .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; font-size: 0.8rem; }
+#codex-detail .ability-row { background: #1c1f26; border: 1px solid #333; padding: 8px; margin-bottom: 6px; }
+#codex-detail .ability-row.fixed { border-color: #ff9f1c; }
+#codex-detail .ability-row h4 { color: #00f5d4; font-size: 0.9rem; }
+#codex-detail .ability-row.fixed h4 { color: #ff9f1c; }
+#codex-detail .ability-row p { font-size: 0.78rem; color: #bbb; margin-top: 4px; }
+#codex-empty { color: #888; font-size: 0.9rem; }
