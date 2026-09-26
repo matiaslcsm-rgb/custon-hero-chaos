@@ -22,9 +22,12 @@ con la definitiva y contrarrestar las del rival con ítems.
 
 | Parte | Cantidad | ¿Se draftea? | Descripción |
 |---|---|---|---|
-| **Innato** | 1 | No, viene con el héroe | Mecánica permanente que define su identidad. Funciona con cualquier combinación de habilidades. |
+| **Innato** | 1 | No, viene con el héroe | Mecánica permanente que define su identidad. Funciona con cualquier combinación de habilidades. Conserva un **escalado chico** propio del héroe. |
 | **Habilidades naturales** | 4 | Sí | 3 normales + 1 definitiva. Pueden ser activas o pasivas. |
-| └ **Definitiva** | 1 de las 4 | Sí | La más fuerte del héroe. Siempre trae una **mecánica de escalado** permanente. |
+| └ **Definitiva** | 1 de las 4 | Sí | La más fuerte del héroe. Siempre trae una **mecánica de escalado fuerte** y permanente. |
+
+**Decisión — escalado repartido:** el héroe (vía su innato) tiene un escalado chico por bajas y duelos; la definitiva
+trae el escalado fuerte. Si drafteás la definitiva de otro héroe, sumás su escalado al tuyo.
 | **Stats base** | — | — | Atributo principal (STR/AGI/INT), HP, daño, rango, etc. |
 
 ### Estado actual vs. modelo nuevo
@@ -34,13 +37,13 @@ con la definitiva y contrarrestar las del rival con ítems.
 | Innato | `archetypePassive` (Contraataque, Puntería Perfecta, Golpe Mortal, Hambre) | Igual | Ninguno: ya encaja |
 | Habilidades naturales | 3 normales + definitiva = 4 | 4 (incluye la definitiva) | Ninguno en cantidad |
 | Definitiva | Se desbloquea sola al aprender las 3 normales | Se draftea como una más | Cambiar la regla del draft |
-| Escalado | Del héroe (`scaling`: +stat cada N bajas) | Lo trae la definitiva | Mover el escalado a cada definitiva |
+| Escalado | Del héroe (`scaling`: +stat cada N bajas) | Repartido: chico en el innato, fuerte en la definitiva | Reducir el del héroe y agregar el de cada definitiva |
 | Teclas | Fijas por habilidad (`keybind: 'e'`) | Por espacio del kit | Si mezclás, dos habilidades podrían usar la misma tecla |
 | Quién lanza | Las habilidades usan `player` directamente | Cualquier héroe (jugador o rival) | Necesario para PvP |
 
 ### Escalado propuesto para las definitivas actuales
 
-El escalado que hoy tiene cada héroe pasa a su definitiva, con una condición que invita a usarla bien:
+Cada definitiva suma un escalado fuerte con una condición que invita a usarla bien (el escalado del héroe se mantiene, más chico):
 
 | Héroe | Definitiva | Escalado (permanente, toda la partida) |
 |---|---|---|
@@ -55,7 +58,10 @@ Así, drafteando la definitiva de otro héroe te llevás también su forma de es
 
 ## 3. Draft de habilidades
 
-**Espacios del kit:** 3 normales + 1 definitiva. Las teclas son por espacio: **E, R, T** para las normales y **F** para la definitiva.
+**Espacios del kit:** 4 espacios **libres**. Cualquier habilidad (normal o definitiva) puede ir en cualquier espacio,
+así que se puede terminar con 2 definitivas o ninguna. *(Decisión tomada: más caos, más riesgo de balance; se controla con cooldowns y costos.)*
+
+**Teclas por orden de aprendizaje:** las habilidades activas toman la primera tecla libre entre **E, R, T, F**.
 Las pasivas ocupan espacio pero no usan tecla.
 
 **Cada ronda de draft ofrece 3 opciones:**
@@ -66,7 +72,7 @@ Las pasivas ocupan espacio pero no usan tecla.
 Con suerte armás el héroe "natural"; si no, mezclás a gusto.
 
 **Rondas:** 1 al empezar + 1 después de cada oleada, hasta llenar los 4 espacios.
-*(Pendiente: cómo se ofrece la definitiva, ver preguntas abiertas.)*
+Las definitivas entran al pool como cualquier otra habilidad.
 
 ---
 
@@ -181,8 +187,11 @@ Cada fase deja el juego jugable.
 
 ## 10. Preguntas abiertas
 
-1. **Definitiva en el draft:** ¿hay un espacio reservado de definitiva (en las rondas de definitiva solo se ofrecen definitivas),
-   o es libre y podrías terminar con 2 definitivas o ninguna?
-2. **Escalado del héroe:** ¿se mueve todo a la definitiva, o el innato también conserva un escalado chico?
-3. **Pasivas:** ¿las pasivas drafteadas cuentan como uno de los 4 espacios?
-4. **Rondas de draft:** ¿se puede pagar oro para volver a tirar las 3 opciones?
+1. **Pasivas:** ¿las pasivas drafteadas cuentan como uno de los 4 espacios? *(Por ahora: sí.)*
+2. **Rondas de draft:** ¿se puede pagar oro para volver a tirar las 3 opciones?
+3. **Definitiva en el pool:** con espacios libres, ¿la probabilidad de que aparezca una definitiva es igual a la de una normal, o más baja?
+
+### Decisiones tomadas
+- Definitiva **libre** (no tiene espacio reservado).
+- Escalado **repartido** (chico en el héroe, fuerte en la definitiva).
+- Orden: fase **A** (cimientos) y después **B** (draft mezclado).
