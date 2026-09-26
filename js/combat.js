@@ -16,7 +16,8 @@ function makeCreep(t, x, y, statMult, isBossUnit, bossAuraBonus) {
         moveInterval: t.moveInterval * (isBossUnit ? 1.15 : 1),
         range: isBossUnit ? Math.max(t.range, 1.8) : t.range,
         gold: isBossUnit ? 40 : t.gold, xp: isBossUnit ? BOSS_XP : t.xp, oneHit,
-        armor: (t.armor || 0) + (isBossUnit ? 2 : 0), magicResist: t.magicResist || 0, evasion: 0,
+        armor: (t.armor || 0) + (isBossUnit ? 2 : 0), magicResist: t.magicResist || 0, evasion: t.evasion || 0,
+        attackType: t.attackType || 'physical', type: t, statMult, priority: t.priority || 0, // type: el tipo de creep (comportamiento propio en data/creeps.js)
         x, y, spawnX: x, spawnY: y, moveTimer: 0, attackTimer: 0, isBoss: !!isBossUnit, spawnTime: gameClock,
         auraRadius: isBossUnit ? 4 : 0, auraAtkBonus: isBossUnit ? bossAuraBonus : 0,
         effects: [],
@@ -34,6 +35,20 @@ function nearestEnemy(unit, maxRange) {
         if (!c.isAlive()) return;
         const d = Math.hypot(c.x - unit.x, c.y - unit.y);
         if (d < bestDist && (maxRange === undefined || d <= maxRange)) { bestDist = d; best = c; }
+    });
+    return best;
+}
+
+// Objetivo del ataque automático: entre los enemigos en rango, el de mayor prioridad (ej: Sanadores) y, a igual
+// prioridad, el más cercano.
+function pickAttackTarget(unit, range) {
+    let best = null, bestKey = null;
+    enemiesOf(unit).forEach(c => {
+        if (!c.isAlive()) return;
+        const d = Math.hypot(c.x - unit.x, c.y - unit.y);
+        if (d > range) return;
+        const key = [-(c.priority || 0), d];
+        if (!best || key[0] < bestKey[0] || (key[0] === bestKey[0] && key[1] < bestKey[1])) { best = c; bestKey = key; }
     });
     return best;
 }
@@ -63,7 +78,8 @@ function mitigate(target, amount, type) {
 // Devuelve { dealt, evaded }: dealt es la vida que realmente perdió el objetivo (para robo de vida).
 function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     if (!target.isAlive() || hasFlag(target, 'invulnerable')) return { dealt: 0, evaded: false };
-    if (opts.isAttack && Math.random() < effEvasion(target) / 100) return { dealt: 0, evaded: true };
+    const canEvade = opts.isAttack && !(source && hasFlag(source, 'trueStrike'));
+    if (canEvade && Math.random() < effEvasion(target) / 100) return { dealt: 0, evaded: true };
     let final = amount;
     if (type === 'magical' && source) final *= 1 + effSpellAmp(source) / 100;
     final = mitigate(target, final * (1 - effDmgReduction(target)), type);
@@ -85,7 +101,9 @@ function onUnitDeath(unit, killer) {
 }
 
 // Cura a una unidad (sin pasar su máximo), emite onHeal y devuelve cuánto curó realmente.
+// La anticuración (mod healingTakenPct negativo) reduce la curación.
 function healUnit(unit, amount) {
+    amount *= Math.max(0, 1 + sumMod(unit, 'healingTakenPct'));
     const healed = Math.max(0, Math.min(unit.maxHp - unit.hp, Math.round(amount)));
     if (healed <= 0) return 0;
     unit.hp += healed;
@@ -171,6 +189,7 @@ function awardHeroKillScaling(hero) {
 function killCreep(c, killer) {
     c.hp = 0;
     if (!killer || !killer.isHero) return;
+    if (c.type && c.type.onDeath) c.type.onDeath(c, killer);
     const timeAlive = gameClock - (c.spawnTime || gameClock);
     const speedMult = speedGoldMultiplier(timeAlive);
     const gold = Math.max(1, Math.round(c.gold * speedMult));

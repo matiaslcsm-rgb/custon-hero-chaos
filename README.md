@@ -26,6 +26,7 @@ js/
 ├── death.js     vidas, revivir, Condenado, Injusticia de los Codiciosos
 ├── timers.js    temporizadores de fase y enfurecimiento de creeps
 ├── ai.js        IA de héroes y Piloto automático (tecla P)
+├── creeps.js    oleadas con tema, aparición y comportamiento de los creeps
 ├── ui.js        paneles, kit, códice y dibujo del mapa
 ├── main.js      arranque y validador de contenido
 └── tests.js     pruebas automáticas

@@ -22,8 +22,6 @@ function tickPhaseTimer(dt) {
     if (phaseTimeLeft <= 0) onPhaseTimeout();
 }
 
-function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-
 function onPhaseTimeout() {
     if (gameState === 'HERO_SELECT') {
         const t = pickRandom(Object.values(HERO_TEMPLATES));

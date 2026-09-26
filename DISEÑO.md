@@ -258,22 +258,59 @@ Tres familias:
 
 ---
 
-## 8. Creeps: desafío situacional
+## 8. Creeps: desafío situacional ✅
 
-Cada tipo de creep tiene una **mecánica** y un **contra**. Si no te armás para lo que viene, te matan.
+Cada tipo de creep tiene una **mecánica** y un **contra**. Todo está en `js/data/creeps.js` y se ve en la pestaña
+**👹 Creeps y Jefes** del juego.
 
-| Creep | Mecánica | Contra |
+| Creep | Mecánica | Contra (ítem) |
 |---|---|---|
-| Chamán | Daño mágico a distancia | Resistencia mágica |
-| Sanador | Cura a los demás creeps | Anticuración o daño explosivo |
-| Espectro | 50% de evasión | Hoja certera o daño mágico |
-| Acorazado | Armadura muy alta | Daño mágico/puro o reducción de armadura |
-| Enjambre | Muchos creeps débiles | Daño en área |
-| Kamikaze | Explota al llegar a vos | Rango o movilidad |
-| Aturdidor | Controles frecuentes | Resistencia a control |
-| Ladrón | Te roba oro y escapa | Ralentizaciones o movilidad |
+| Chusma `x` | Muere de un golpe, viene en cantidad | Área |
+| Grunt `g` | Soldado básico | — |
+| Arquero `r` | Ataca desde rango 4,5 | Más rango, movilidad |
+| Explorador `s` | Muy rápido | Ralentizar, aturdir |
+| Bruto `b` | Lento, resistente, pega fuerte | Distancia |
+| **Chamán** `c` | Daño **mágico** a distancia | Resistencia mágica (**Capa Antimagia**) |
+| **Sanador** `h` | Cada 3 s cura 20 de vida (crece con la oleada) al creep más herido; **objetivo prioritario** | Anticuración (**Lanza Cortacuras**) o matarlo primero |
+| **Espectro** `e` | 60% de evasión contra ataques básicos | Ataques que no fallan (**Hoja Certera**) o habilidades |
+| **Acorazado** `a` | Armadura 12 (−48% daño físico) | Daño mágico/puro o reducir armadura (**Martillo Rompecorazas**) |
+| **Enjambre** `·` | Vienen de a 4, débiles y rápidos | Área |
+| **Kamikaze** `k` | Explota al llegar a vos | Matarlo a distancia |
+| **Aturdidor** `t` | Cada 2 golpes aturde 1,5 s | Resistencia al control (**Botas Firmes**) |
+| **Ladrón** `$` | Roba 20 de oro por golpe y huye; si lo matás, recuperás +50% | Ralentizar, aturdir, rango |
 
-- **Aviso de la próxima oleada:** en la tienda se ve qué tipos de creeps vienen, para comprar en consecuencia.
+### Oleadas con tema
+Cada oleada sortea un tema de su nivel (en la tienda se ve **el aviso de la próxima oleada**: qué viene y cómo contrarrestarlo):
+
+| Oleada | Temas posibles |
+|---|---|
+| 1 | Avanzada · Enjambre |
+| 2 | Hechiceros · Espectros |
+| 3 | Muralla · Kamikazes |
+| 4 | Emboscada · Asedio |
+| 5 (jefe final) | Jefe Final |
+
+Cada oleada trae además un **jefe** (4x vida, +2 armadura y aura que potencia a los creeps cercanos) del tipo que indica el tema.
+
+### Ítems de contra
+Se compran una vez y quedan permanentes: Capa Antimagia (60g), Hoja Certera (75g), Lanza Cortacuras (65g),
+Martillo Rompecorazas (70g), Botas Firmes (50g).
+
+### Reglas nuevas
+- **Prioridad de objetivo:** el ataque automático va primero por los objetivos prioritarios en rango (Sanadores), y la IA camina hacia ellos.
+- **Inmunidad tras aturdimiento:** un héroe no puede ser aturdido de nuevo hasta 1,5 s después de que termina un aturdimiento
+  (con 2 Aturdidores enfurecidos quedaba aturdido para siempre). A los creeps no se les aplica.
+- **Resistencia al control** (`statusResist`): acorta aturdimientos y ralentizaciones.
+
+### Balance medido (IA sin modo dios)
+- Antes de la fase E la IA ganaba ~97%: el PvE era fácil. Con los creeps nuevos gana **~78%** (Sniper y Bruja del Hielo 12/12,
+  Arcanista 11/12, Alquimista y Sabio 9/12, Asesino, Vampiro y Nigromante 8/12, **Axe 7/12**). Los cuerpo a cuerpo sufren más
+  las oleadas con muchos atacantes a distancia.
+- **Los contras funcionan pero compiten con los atributos:** dados gratis subían las victorias de 69% a 89%; a 100-150g rendían
+  *menos* que gastar el oro en atributos. A mitad de precio (los actuales) ya ayudan (72%, menos muertes). El equilibrio fino
+  queda para la economía de ítems (fase D).
+- Problemas encontrados y corregidos al medir: el Sanador curaba un % de la vida del objetivo (un jefe con 2 Sanadores era
+  imposible de matar) y el bloqueo por aturdimiento.
 
 ### Muerte, vidas y Condenado ✅
 
@@ -340,7 +377,7 @@ Cada fase deja el juego jugable.
 | **B. Draft y niveles** ✅ | Draft mezclado, definitiva drafteable, experiencia y niveles de habilidad, escalado en la definitiva, pasivas sin espacio, Fragmento del Destino en la tienda | Es lo que define al modo; los niveles cambian cómo se draftea, así que van juntos |
 | **C. Roster** | Aplicar los criterios, pasar los 4 héroes actuales, sumar héroes de INT (daño mágico) | Da variedad para que el draft mezclado tenga gracia |
 | **D. Ítems** | Contras por etiqueta, niveles/recetas, inventario limitado | Necesita las etiquetas y habilidades variadas para tener qué contrarrestar |
-| **E. Creeps** | Tipos con mecánica, aviso de oleada, oleadas compuestas | Es el campo de prueba de los ítems situacionales |
+| **E. Creeps** ✅ | Tipos con mecánica, aviso de oleada, oleadas compuestas | Es el campo de prueba de los ítems situacionales |
 | **F. PvP** | Rivales con IA, duelos, apuestas, ranking top 8, Fragmentos/Libro para los últimos | Usa todo lo anterior: la IA draftea, compra y pelea con las mismas reglas |
 
 ---
@@ -415,6 +452,10 @@ si un nombre no te gusta, se cambia acá y después en el código.
 | **Efecto** (mejora / perjuicio) | Estado temporal sobre una unidad (Furia, Aturdido…) | `addEffect()` |
 | **Evento** | Algo que pasa en combate y activa reacciones | `emit()` |
 | **Etiqueta** | Categoría de una habilidad (`FÍSICO`, `ROBO_VIDA`…) | `TAGS` |
+| **Tema de oleada** | Composición de una oleada (Muralla, Hechiceros…) | `WAVE_THEMES`, `rollWave()` |
+| **Aviso de oleada** | Qué viene en la próxima oleada, visible en la tienda | `nextWave`, `renderWavePreview()` |
+| **Objetivo prioritario** | Creep al que el ataque automático va primero (Sanador) | `priority`, `pickAttackTarget()` |
+| **Inmunidad tras aturdimiento** | 1,5 s sin poder ser aturdido de nuevo (héroes) | `STUN_IMMUNITY_AFTER` |
 | **Enfurecimiento** 🆕 | Los creeps ganan daño y vel. de ataque al pasarse el tiempo de la oleada | `enrageMult()` (timers.js) |
 | **Piloto automático** | La IA juega por el jugador (botón o tecla P) | `autopilot`, `js/ai.js` |
 | **Temporizador de fase** | Tiempo de cada fase; al vencer, el juego decide | `PHASE_TIMES`, `tickPhaseTimer()` |

@@ -5,6 +5,7 @@
 //   A distancia (tiradores y magos): atacan al enemigo más cercano y retroceden si alguno se acerca
 //   demasiado, sin salir de su rango de ataque. Si no hay nadie a tiro, avanzan.
 //   Cuerpo a cuerpo: van al enemigo más cercano.
+//   Los dos persiguen primero a los objetivos prioritarios cercanos (ej: Sanadores).
 //   Habilidades: de área con 2+ enemigos cerca, definitiva con 3+ o con el jefe cerca, mejoras cuando hay pelea,
 //   de un objetivo cuando están listas.
 
@@ -12,7 +13,8 @@ const AI = {
     thinkInterval: 0.25,  // cada cuánto decide qué habilidades lanzar (segundos)
     rangedFrom: 2.5,      // desde este rango de ataque se considera héroe a distancia
     kiteDistance: 0.6,    // retrocede si el enemigo más cercano está a menos de este % de su rango
-    nearRadius: 3.5       // radio para contar enemigos "cerca" (decidir habilidades de área y definitivas)
+    nearRadius: 3.5,      // radio para contar enemigos "cerca" (decidir habilidades de área y definitivas)
+    focusRadius: 8        // busca objetivos prioritarios (ej: Sanadores) hasta esta distancia
 };
 
 function distance(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
@@ -24,13 +26,15 @@ function aiMoveDirection(hero) {
     const enemies = enemiesOf(hero).filter(c => c.isAlive());
     if (!enemies.length) return { dx: 0, dy: 0 };
     const nearest = nearestEnemy(hero);
-    const d = distance(hero, nearest), range = effRange(hero);
+    const range = effRange(hero);
+    // Objetivo a perseguir: uno prioritario cercano (ej: Sanador) o, si no hay, el más cercano
+    const focus = enemies.filter(c => c.priority > 0 && distance(hero, c) <= AI.focusRadius)
+        .sort((a, b) => b.priority - a.priority || distance(hero, a) - distance(hero, b))[0] || nearest;
     if (isRanged(hero)) {
-        if (d > range) return stepToward(hero, nearest);
-        if (d < range * AI.kiteDistance) return retreatStep(hero, enemies);
-        return { dx: 0, dy: 0 };
+        if (distance(hero, nearest) < range * AI.kiteDistance) return retreatStep(hero, enemies);
+        return distance(hero, focus) > range ? stepToward(hero, focus) : { dx: 0, dy: 0 };
     }
-    return d > Math.max(1, hero.attackRange) ? stepToward(hero, nearest) : { dx: 0, dy: 0 };
+    return distance(hero, focus) > Math.max(1, hero.attackRange) ? stepToward(hero, focus) : { dx: 0, dy: 0 };
 }
 
 function stepToward(hero, target) {
@@ -92,9 +96,18 @@ function aiPickDraft(hero, options) {
         || options[0];
 }
 
-// Tienda: si está Condenado compra una vida; si no, ítems de su atributo principal mientras le alcance.
+// Tienda: si está Condenado compra una vida; después, los contras de la próxima oleada (mirando el aviso);
+// con lo que sobre, ítems de su atributo principal.
+let aiBuysCounters = true; // se puede apagar para medir cuánto importan los contras
 function aiShop(hero) {
     if (itemAvailable(ITEMS.GREED, hero) && hero.gold >= itemCost(ITEMS.GREED, hero)) buyItem(ITEMS.GREED);
+    if (aiBuysCounters && nextWave) {
+        // Solo contras que valen la pena: tipos que vienen de a 2 o más, o el tipo del jefe
+        waveSummary(nextWave).filter(({ type, count }) => count >= 2 || type.key === nextWave.boss).forEach(({ type }) => {
+            const item = type.counterItem && ITEMS[type.counterItem];
+            if (item && itemAvailable(item, hero) && hero.gold >= itemCost(item, hero)) buyItem(item);
+        });
+    }
     const byAttr = { STR: ITEMS.BELT, AGI: ITEMS.GLOVES, INT: ITEMS.TOME };
     const item = byAttr[hero.primaryAttr];
     while (item && hero.gold >= itemCost(item, hero)) buyItem(item);

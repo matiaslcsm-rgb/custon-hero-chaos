@@ -20,8 +20,11 @@
 //               magicResist  resistencia mágica extra en % (se suman)
 //               evasion      probabilidad de esquivar ataques básicos en % (se suman)
 //               spellAmp     amplificación de hechizo en % (se suman)
+//               healingTakenPct  +% de curación recibida (negativo = anticuración; se suman)
+//               statusResist reduce la duración de aturdimientos y ralentizaciones que recibe (0.4 = 40% menos)
 //   flags     estados sin número: 'stun', 'invulnerable', 'preventDeath' (la vida no baja de 1), 'taunt',
-//             'freeCast' (las habilidades no gastan maná), 'persistent' (no se pierde al morir)
+//             'freeCast' (las habilidades no gastan maná), 'persistent' (no se pierde al morir),
+//             'trueStrike' (sus ataques básicos no se pueden esquivar), 'item' (efecto de un ítem: no se muestra en la barra)
 //   tags      etiquetas (ver data/tags.js), para que ítems de contra puedan detectarlo
 //   hooks     reacciones a eventos (ver abajo) + onExpire(owner, efecto) al terminar
 //   data      estado interno libre del efecto (acumuladores, combos...)
@@ -40,10 +43,21 @@
 //   onCast           { skill }                  la unidad lanzó una habilidad
 //   onTick           { dt }                     cada frame de la oleada (para algo "por segundo", usar everyInterval)
 
+// Después de un aturdimiento, un héroe no puede ser aturdido de nuevo durante este tiempo (evita quedar
+// aturdido para siempre, ej: 2 Aturdidores enfurecidos). A los creeps no se les aplica.
+const STUN_IMMUNITY_AFTER = 1.5;
+
 function addEffect(unit, def) {
+    const isStun = (def.flags || []).includes('stun');
+    if (isStun && unit.isHero && gameClock < (unit.stunImmuneUntil || 0)) return null;
     removeEffect(unit, def.id);
+    // Resistencia al control: acorta aturdimientos y ralentizaciones
+    const isControl = isStun || (def.mods && def.mods.moveSpeedPct < 0);
+    if (isControl && isFinite(def.duration)) def = { ...def, duration: def.duration * (1 - Math.min(0.8, sumMod(unit, 'statusResist'))) };
+    if (isStun && unit.isHero) unit.stunImmuneUntil = gameClock + def.duration + STUN_IMMUNITY_AFTER;
     const effect = {
-        name: def.id, flags: [], tags: [], hooks: {}, ...def,
+        ...def, name: def.name || def.id,
+        flags: def.flags || [], tags: def.tags || [], hooks: def.hooks || {},
         mods: { ...(def.mods || {}) }, data: { ...(def.data || {}) },
         until: gameClock + def.duration
     };

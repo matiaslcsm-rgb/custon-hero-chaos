@@ -19,3 +19,5 @@ function shuffle(arr) {
     }
     return arr;
 }
+
+function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }

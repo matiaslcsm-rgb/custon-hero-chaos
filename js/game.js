@@ -88,6 +88,7 @@ function replaceSkill(skill, mode, sourceName) {
 
 function startPreparation() {
     gameState = 'PREP';
+    if (!nextWave) nextWave = rollWave(waveNumber); // se sortea ya, para avisarla en la tienda
     setPhaseTimer(savedPrepTime ?? PHASE_TIMES.prep);
     savedPrepTime = null;
     setStateText('PREPARACIÓN');
@@ -108,29 +109,16 @@ function buyItem(item) {
 }
 
 // --- OLEADAS ---
-function spawnWave() {
-    creeps = []; boss = null; projectiles = [];
-    const statMult = isBossWave ? 1.6 : 1 + (waveNumber - 1) * 0.10;
-    const rows = shuffle(Array.from({ length: ROWS }, (_, i) => i));
-    const creepRows = rows.slice(0, 10);
-    creepRows.forEach((row, i) => {
-        const t = CREEP_POOL[Math.floor(Math.random() * CREEP_POOL.length)];
-        creeps.push(makeCreep(t, 15 + (i % 4), row, statMult, false, 0));
-    });
-    const bossRow = rows[10] !== undefined ? rows[10] : Math.floor(ROWS / 2);
-    const bossBase = BOSS_BASE_POOL[Math.floor(Math.random() * BOSS_BASE_POOL.length)];
-    boss = makeCreep(bossBase, COLS - 1, bossRow, statMult, true, isBossWave ? 0.5 : 0.35);
-    creeps.push(boss);
-}
-
 function startWave() {
     showPanel('shop-container', false);
     isBossWave = waveNumber > NORMAL_WAVES;
     gameState = 'WAVE';
-    setStateText(isBossWave ? 'OLEADA DE JEFE FINAL' : `OLEADA PVE (${waveNumber}/${NORMAL_WAVES})`);
-    spawnWave();
+    const wave = nextWave || rollWave(waveNumber);
+    nextWave = null;
+    setStateText(isBossWave ? `JEFE FINAL: ${wave.name.toUpperCase()}` : `OLEADA ${waveNumber}/${NORMAL_WAVES}: ${wave.name.toUpperCase()}`);
+    spawnWave(wave);
     resetWaveTimer();
-    log(isBossWave ? '👹 ¡Comienza la oleada de jefe final! 10 creeps mejorados + élite.' : `🌊 Comienza la oleada ${waveNumber}: 10 creeps + 1 jefe.`);
+    log(`🌊 ¡Comienza la oleada ${waveNumber}: ${wave.name}! ${creeps.length - 1} creeps + 1 jefe.`);
 }
 
 function onWaveCleared() {
@@ -154,7 +142,7 @@ function onWaveCleared() {
 function resetGame() {
     player = null; creeps = []; boss = null; projectiles = [];
     gameState = 'HERO_SELECT'; waveNumber = 1; isBossWave = false; gameClock = 0;
-    currentDraft = null; savedPrepTime = null;
+    currentDraft = null; savedPrepTime = null; nextWave = null;
     setPhaseTimer(PHASE_TIMES.heroSelect);
     resetHud();
     log('🔄 Nueva partida. Elegí un héroe.');
@@ -174,6 +162,7 @@ function handleSkillKeypress(k) {
 // opts.quiet: no muestra los mensajes de un intento fallido (la IA prueba seguido y llenaría el registro).
 function tryCastSkill(hero, skill, opts = {}) {
     if (!hero.isAlive() || skillLevel(hero, skill) === 0 || (hero.cooldowns[skill.id] || 0) > 0) return false;
+    if (hasFlag(hero, 'stun')) { if (!opts.quiet) log('💫 Estás aturdido.'); return false; }
     const manaCost = hasFlag(hero, 'freeCast') ? 0 : (val(skill, hero, 'manaCost') || 0);
     if (hero.mana < manaCost) {
         if (!opts.quiet) log(`❌ Maná insuficiente para ${skill.name} (necesitás ${manaCost}).`);
@@ -216,18 +205,20 @@ function updateWave(dt) {
         aiCastSkills(player);
     }
 
+    const stunned = hasFlag(player, 'stun');
+
     // Movimiento: del teclado o de la IA (la velocidad la modifican los efectos: Masacre, Visión de Cazador...)
     const effMoveInterval = player.moveInterval / effMoveMult(player);
     moveTimer += dt;
-    if (moveTimer > effMoveInterval) {
+    if (!stunned && moveTimer > effMoveInterval) {
         const dir = autopilot ? aiMoveDirection(player) : keyboardDirection();
         player.x = Math.max(0, Math.min(COLS - 1, player.x + dir.dx));
         player.y = Math.max(0, Math.min(ROWS - 1, player.y + dir.dy));
         moveTimer = 0;
     }
 
-    // Ataque automático al enemigo vivo más cercano en rango
-    const target = nearestEnemy(player, effRange(player));
+    // Ataque automático: al enemigo en rango de mayor prioridad (ej: Sanadores) o, si no, al más cercano
+    const target = stunned ? null : pickAttackTarget(player, effRange(player));
     if (target) {
         player.attackTimer += dt;
         if (player.attackTimer >= (1 / effAtkSpeed(player))) {
@@ -259,42 +250,4 @@ function keyboardDirection() {
 
 function tickCooldowns(dt) {
     for (let id in player.cooldowns) if (player.cooldowns[id] > 0) player.cooldowns[id] = Math.max(0, player.cooldowns[id] - dt);
-}
-
-// Mueve un creep una casilla hacia (tx, ty) respetando su velocidad (y ralentizaciones).
-function stepCreepToward(c, tx, ty, dt) {
-    if (c.x === tx && c.y === ty) return;
-    c.moveTimer += dt * 1000;
-    if (c.moveTimer < c.moveInterval / effMoveMult(c)) return;
-    c.moveTimer = 0;
-    const dx = tx - c.x, dy = ty - c.y;
-    if (Math.abs(dx) >= Math.abs(dy)) c.x += Math.sign(dx); else c.y += Math.sign(dy);
-}
-
-// IA de un creep: aura del jefe, acercarse al jugador y atacarlo (si está muerto, vuelve a su lugar).
-// Pasado el tiempo de la oleada, los creeps enfurecidos pegan más fuerte y más rápido (enrageMult).
-// Las reacciones al daño (Contraataque, Furia, Forma Inmortal) las manejan los hooks onDamaged del héroe.
-function updateCreep(c, dt) {
-    if (!c.isAlive()) return;
-    // Si el jugador murió (o fue Game Over) en este mismo frame, el resto de los creeps no sigue pegando
-    if (gameState !== 'WAVE') return;
-    if (hasFlag(c, 'stun')) return;
-    if (!player.isAlive()) { stepCreepToward(c, c.spawnX, c.spawnY, dt); return; } // perdió el agro
-
-    const enrage = enrageMult();
-    let effAtk = c.atk * enrage;
-    if (!c.isBoss && boss && boss.isAlive()) {
-        const dBoss = Math.hypot(c.x - boss.x, c.y - boss.y);
-        if (dBoss <= boss.auraRadius) effAtk *= 1 + boss.auraAtkBonus;
-    }
-
-    const dPlayer = Math.hypot(c.x - player.x, c.y - player.y);
-    if (dPlayer > c.range) { stepCreepToward(c, player.x, player.y, dt); return; }
-
-    c.attackTimer += dt;
-    if (c.attackTimer < 1 / (effAtkSpeed(c) * enrage)) return;
-    c.attackTimer = 0;
-    // dealDamage resuelve la muerte del héroe (revivir, Condenado o eliminación) a través de onHeroDeath
-    const result = dealDamage(c, player, Math.round(effAtk), 'physical', { isAttack: true });
-    if (result.evaded) log(`💨 Esquivaste el ataque de ${c.label}.`);
 }

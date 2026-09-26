@@ -23,13 +23,16 @@ function withRandom(value, fn) {
 }
 
 // --- AYUDAS PARA ARMAR ESCENARIOS ---
+// Oleada fija de Grunts para que las pruebas no dependan del tema sorteado.
+const TEST_WAVE = { name: 'Prueba', groups: [{ type: 'GRUNT', count: 10 }], boss: 'GRUNT' };
+
 // Partida en curso con el héroe elegido, en medio de una oleada, con todos los creeps lejos (x = 19).
 function newGame(heroKey) {
     resetGame();
     selectHero(HERO_TEMPLATES[heroKey]);
     showPanel('draft-container', false);
     gameState = 'WAVE';
-    spawnWave();
+    spawnWave(TEST_WAVE);
     resetWaveTimer();
     creeps.forEach(c => { c.x = 19; c.spawnX = 19; });
     player.x = 5; player.y = 5;
@@ -108,7 +111,7 @@ test('Invulnerable no recibe daño; los creeps de un golpe mueren con cualquier 
     const hp = player.hp;
     dealDamage(creeps[0], player, 500, 'pure');
     checkEq(player.hp, hp, 'vida del invulnerable');
-    const chusma = makeCreep(CREEP_POOL.find(t => t.oneHit), 6, 5, 1, false, 0);
+    const chusma = makeCreep(CREEP_TYPES.CHUSMA, 6, 5, 1, false, 0);
     creeps.push(chusma);
     dealDamage(player, chusma, 1, 'physical');
     check(!chusma.isAlive(), 'la Chusma muere de un golpe');
@@ -546,6 +549,152 @@ test('Pacto de la Muerte: daño puro en área y cura lo que drena', () => {
     const expected = Math.round(valueAt(s, 'baseDmg', 1) + player.int * valueAt(s, 'intRatio', 1));
     checkEq(9999 - a.hp, expected, 'el daño puro ignora la armadura');
     checkEq(player.hp, Math.min(player.maxHp, 1 + 2 * expected), 'cura el total drenado');
+});
+
+// ============================================================ CREEPS E ÍTEMS DE CONTRA
+// Agrega un creep de un tipo al lado del jugador (o donde se indique).
+function spawnType(key, props = {}) {
+    const c = makeCreep(CREEP_TYPES[key], player.x + 1, player.y, 1, false, 0);
+    Object.assign(c, props);
+    creeps.push(c);
+    return c;
+}
+
+test('Oleadas: tema sorteado, cantidades correctas y el aviso coincide con lo que aparece', () => {
+    newGame('AXE');
+    waveNumber = 1; isBossWave = false;
+    const wave = { name: 'Enjambre', groups: [{ type: 'SWARM', count: 2 }, { type: 'GRUNT', count: 2 }], boss: 'SCOUT' };
+    spawnWave(wave);
+    checkEq(creeps.filter(c => c.key === 'SWARM').length, 8, 'el Enjambre viene de a 4');
+    checkEq(creeps.length, 8 + 2 + 1, 'total con el jefe');
+    check(boss.isBoss && boss.key === 'SCOUT', 'jefe del tipo del tema');
+    checkEq(new Set(creeps.map(c => c.x + ',' + c.y)).size, creeps.length, 'cada uno en su casilla');
+    resetGame(); selectHero(HERO_TEMPLATES.AXE); learnSkill(SKILL_INDEX.AXE_GIRO);
+    const preview = nextWave;
+    check(!!preview && document.getElementById('wave-preview').textContent.includes(preview.name), 'el aviso muestra el tema');
+    startWave();
+    const expected = preview.groups.reduce((n, g) => n + groupUnits(g), 0) + 1;
+    checkEq(creeps.length, expected, 'la oleada que aparece es la avisada');
+}, { random: true });
+
+test('Chamán: su daño es mágico (lo frena la resistencia mágica, no la armadura)', () => {
+    newGame('AXE');
+    const c = spawnType('SHAMAN', { attackTimer: 99 });
+    player.armor = 50; player.magicResist = 0;
+    let hp = player.hp; updateCreep(c, 0.016);
+    checkEq(hp - player.hp, Math.round(c.atk), 'la armadura no lo reduce');
+    ITEMS.CLOAK.apply(player);
+    hp = player.hp; c.attackTimer = 99; updateCreep(c, 0.016);
+    checkEq(hp - player.hp, Math.round(c.atk * 0.75), 'la Capa Antimagia (+25% RM) sí');
+});
+
+test('Sanador: cura al más herido cada 3s; la Lanza Cortacuras lo reduce a la mitad', () => {
+    newGame('AXE');
+    player.x = 12; // el Sanador (rango 3) ya está a distancia de ataque y no se mueve
+    const healer = spawnType('HEALER', { x: 15, y: 5 });
+    const hurt = spawnType('GRUNT', { x: 16, y: 5 }); hurt.hp = 5;
+    const heal = CREEP_TYPES.HEALER.healAmount;
+    for (let i = 0; i < 3 * 60 + 1; i++) updateCreep(healer, 1 / 60);
+    checkEq(hurt.hp, 5 + heal, 'curación fija');
+    ITEMS.SPEAR.apply(player);
+    hurt.hp = 5; dealDamage(player, hurt, 1, 'pure');
+    for (let i = 0; i < 3 * 60 + 1; i++) updateCreep(healer, 1 / 60);
+    checkEq(hurt.hp, 4 + Math.round(heal * 0.5), 'con Cortacuras cura la mitad');
+});
+
+test('Espectro: esquiva ataques básicos; la Hoja Certera no falla', () => {
+    newGame('AXE');
+    const e = spawnType('SPECTER', { hp: 9999, maxHp: 9999 });
+    check(withRandom(0.3, () => dealDamage(player, e, 10, 'physical', { isAttack: true })).evaded, 'con 50% de evasión esquiva (azar 0.3)');
+    ITEMS.TRUESTRIKE.apply(player);
+    check(!withRandom(0.3, () => dealDamage(player, e, 10, 'physical', { isAttack: true })).evaded, 'con Hoja Certera no');
+});
+
+test('Acorazado: armadura alta; el Martillo Rompecorazas se la baja golpe a golpe', () => {
+    newGame('AXE');
+    const armor = CREEP_TYPES.ARMORED.armor;
+    const a = spawnType('ARMORED', { hp: 9999, maxHp: 9999 });
+    checkEq(dealDamage(player, a, 100, 'physical').dealt, Math.round(100 * (1 - armor * 0.04)), 'reducción por armadura');
+    ITEMS.HAMMER.apply(player);
+    for (let i = 0; i < 5; i++) resolveBasicHit(player, a, 1, false);
+    checkEq(effArmor(a), armor - 8, 'hasta -8 de armadura');
+});
+
+test('Kamikaze: explota al llegar, muere y no da oro', () => {
+    newGame('AXE');
+    const k = spawnType('KAMIKAZE');
+    const hp = player.hp, gold = player.gold;
+    updateCreep(k, 0.016);
+    check(!k.isAlive(), 'se destruyó');
+    check(player.hp < hp, 'hizo daño');
+    checkEq(player.gold, gold, 'sin oro por su muerte');
+});
+
+test('Aturdidor: aturde cada N golpes; aturdido no te movés ni lanzás; las Botas Firmes lo acortan', () => {
+    newGame('AXE');
+    const s = learn('AXE_GIRO', 1);
+    const { stunEvery, stunDuration } = CREEP_TYPES.STUNNER;
+    const t = spawnType('STUNNER', { atk: 1 });
+    for (let i = 0; i < stunEvery - 1; i++) { t.attackTimer = 99; updateCreep(t, 0.016); }
+    check(!hasFlag(player, 'stun'), 'todavía no');
+    t.attackTimer = 99; updateCreep(t, 0.016);
+    check(hasFlag(player, 'stun'), 'aturdido al golpe ' + stunEvery);
+    keys = { d: true }; const x = player.x;
+    updateWave(1);
+    keys = {};
+    checkEq(player.x, x, 'no se mueve');
+    check(!tryCastSkill(player, s, { quiet: true }), 'no lanza habilidades');
+    removeEffect(player, 'STUN');
+    player.stunImmuneUntil = 0;
+    ITEMS.BOOTS.apply(player);
+    for (let i = 0; i < stunEvery; i++) { t.attackTimer = 99; updateCreep(t, 0.016); }
+    checkNear(getEffect(player, 'STUN').until - gameClock, stunDuration * 0.5, 'dura la mitad');
+});
+
+test('Inmunidad tras aturdimiento: un héroe no puede quedar aturdido para siempre', () => {
+    newGame('AXE');
+    addEffect(player, { id: 'STUN', duration: 1, flags: ['stun'] });
+    gameClock += 1.1; tickEffects(player, 0.016);
+    check(!addEffect(player, { id: 'STUN', duration: 1, flags: ['stun'] }), 'recién salido del aturdimiento, es inmune');
+    gameClock += STUN_IMMUNITY_AFTER;
+    check(!!addEffect(player, { id: 'STUN', duration: 1, flags: ['stun'] }), 'pasada la inmunidad, se lo puede aturdir');
+    const c = dummy();
+    addEffect(c, { id: 'STUN', duration: 1, flags: ['stun'] }); gameClock += 1.1;
+    check(!!addEffect(c, { id: 'STUN', duration: 1, flags: ['stun'] }), 'a los creeps no se les aplica');
+});
+
+test('Ladrón: roba oro y huye; si lo matás recuperás el oro +50%', () => {
+    newGame('AXE');
+    player.gold = 100;
+    const steal = CREEP_TYPES.THIEF.steal;
+    const t = spawnType('THIEF', { attackTimer: 99, hp: 9999, maxHp: 9999 });
+    updateCreep(t, 0.016);
+    checkEq(player.gold, 100 - steal, 'robó');
+    const x0 = t.x;
+    for (let i = 0; i < 60; i++) updateCreep(t, 1 / 60);
+    check(t.x > x0, 'huye');
+    t.hp = 1; dealDamage(player, t, 99, 'pure');
+    check(player.gold >= 100 - steal + Math.round(steal * 1.5), 'recupera lo robado +50% (más el oro por matarlo)');
+});
+
+test('IA: compra los contras de la próxima oleada', () => {
+    newGame('AXE');
+    gameState = 'PREP'; player.gold = 1000;
+    nextWave = { name: 'Muralla', groups: [{ type: 'ARMORED', count: 2 }, { type: 'SHAMAN', count: 3 }, { type: 'SPECTER', count: 1 }], boss: 'ARMORED' };
+    aiShop(player);
+    check(!!getEffect(player, 'ITEM_HAMMER'), 'Martillo contra Acorazados');
+    check(!!getEffect(player, 'ITEM_CLOAK'), 'Capa contra Chamanes');
+    check(!getEffect(player, 'ITEM_TRUESTRIKE'), 'no compra contra un solo Espectro');
+    check(!itemAvailable(ITEMS.HAMMER, player), 'no se puede comprar dos veces');
+});
+
+test('Prioridad: el ataque automático va primero por el Sanador si está a tiro', () => {
+    newGame('SNIPER');
+    const grunt = spawnType('GRUNT');
+    const healer = spawnType('HEALER', { x: player.x + 4 });
+    checkEq(pickAttackTarget(player, effRange(player)), healer, 'elige al Sanador aunque el Grunt esté más cerca');
+    healer.x = 19;
+    checkEq(pickAttackTarget(player, effRange(player)), grunt, 'fuera de rango, el más cercano');
 });
 
 // ============================================================ IA

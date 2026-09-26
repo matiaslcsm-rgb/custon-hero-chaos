@@ -1,23 +1,150 @@
-// Pozo de enemigos, tamaño de la partida y recompensa de oro.
+// Creeps: tipos con su mecánica y su contra, y los temas de las oleadas. Reglas: DISEÑO.md §8.
+//
+// Campos de un tipo de creep:
+//   key, label, symbol, color, hp, atk, atkSpeed, moveInterval (ms por casilla), range, gold, xp
+//   armor, magicResist, evasion   opcionales (0 si no se indican)
+//   attackType   'physical' (por defecto) | 'magical'
+//   oneHit       muere de un solo golpe;  groupSize: aparece en grupos de N (por cada unidad pedida)
+//   mechanic     qué hace (se muestra en el aviso de oleada y en el códice)
+//   counter      cómo contrarrestarlo;  counterItem: clave del ítem de ITEMS que lo contrarresta (lo usa la IA)
+//   bossable     puede ser la base del jefe de una oleada
+//   priority     prioridad como objetivo: el ataque automático y la IA van primero por los de prioridad más alta
+//   update(c, dt)                 comportamiento propio; devuelve true si ya decidió qué hacer este frame
+//   onAttack(c, target, result)   después de cada ataque suyo
+//   onDeath(c, killer)            al morir a manos de un héroe
 
-// xp: experiencia que da al morir (el jefe da BOSS_XP).
-// armor / magicResist: opcionales (0 si no se indican). El jefe suma +2 de armadura.
 const BOSS_XP = 120;
-const CREEP_POOL = [
-    { key: 'CHUSMA', symbol: 'x', color: '#6c757d', hp: 1, atk: 4, atkSpeed: 1.0, moveInterval: 220, range: 1.0, gold: 4, xp: 6, label: 'Chusma', oneHit: true },
-    { key: 'GRUNT', symbol: 'g', color: '#ffb703', hp: 35, atk: 8, atkSpeed: 0.8, moveInterval: 260, range: 1.3, gold: 6, xp: 18, armor: 1, label: 'Grunt' },
-    { key: 'ARCHER', symbol: 'r', color: '#8ecae6', hp: 22, atk: 10, atkSpeed: 0.9, moveInterval: 300, range: 4.5, gold: 7, xp: 18, label: 'Arquero' },
-    { key: 'SCOUT', symbol: 's', color: '#ff477e', hp: 18, atk: 6, atkSpeed: 1.4, moveInterval: 150, range: 1.2, gold: 5, xp: 14, label: 'Explorador' },
-    { key: 'BRUTE', symbol: 'b', color: '#e63946', hp: 60, atk: 14, atkSpeed: 0.6, moveInterval: 340, range: 1.4, gold: 10, xp: 28, armor: 3, label: 'Bruto' }
-];
-// Plantillas normales, sin contar la Chusma (no debe aparecer como base del jefe: un jefe de 1 HP no tiene sentido)
-const BOSS_BASE_POOL = CREEP_POOL.filter(t => !t.oneHit);
+const NORMAL_WAVES = 4; // oleadas normales antes de la oleada del jefe final
 
-const NORMAL_WAVES = 4; // ciclos de oleada+draft antes de la oleada de jefe final
-
-// Bonus de oro por velocidad de muerte: cuanto antes muere un creep tras aparecer, más oro paga.
+// Cacería Veloz: cuanto antes muere un creep tras aparecer, más oro paga (hasta x3).
 function speedGoldMultiplier(timeAliveSeconds) {
     if (timeAliveSeconds <= 1) return 3;
     if (timeAliveSeconds >= 6) return 1;
     return 3 - (timeAliveSeconds - 1) * (2 / 5);
 }
+
+const CREEP_TYPES = {
+    // --- BÁSICOS ---
+    CHUSMA: {
+        key: 'CHUSMA', label: 'Chusma', symbol: 'x', color: '#6c757d', hp: 1, atk: 4, atkSpeed: 1.0, moveInterval: 220, range: 1.0, gold: 4, xp: 6, oneHit: true,
+        mechanic: 'Muere de un golpe, pero viene en cantidad.', counter: 'Daño en área'
+    },
+    GRUNT: {
+        key: 'GRUNT', label: 'Grunt', symbol: 'g', color: '#ffb703', hp: 35, atk: 8, atkSpeed: 0.8, moveInterval: 260, range: 1.3, gold: 6, xp: 18, armor: 1, bossable: true,
+        mechanic: 'Soldado básico cuerpo a cuerpo.', counter: '—'
+    },
+    ARCHER: {
+        key: 'ARCHER', label: 'Arquero', symbol: 'r', color: '#8ecae6', hp: 22, atk: 10, atkSpeed: 0.9, moveInterval: 300, range: 4.5, gold: 7, xp: 18, bossable: true,
+        mechanic: 'Ataca desde lejos (rango 4,5).', counter: 'Más rango, movilidad o ir a buscarlo'
+    },
+    SCOUT: {
+        key: 'SCOUT', label: 'Explorador', symbol: 's', color: '#ff477e', hp: 18, atk: 6, atkSpeed: 1.4, moveInterval: 150, range: 1.2, gold: 5, xp: 14, bossable: true,
+        mechanic: 'Muy rápido y ataca seguido.', counter: 'Ralentizar o aturdir'
+    },
+    BRUTE: {
+        key: 'BRUTE', label: 'Bruto', symbol: 'b', color: '#e63946', hp: 60, atk: 14, atkSpeed: 0.6, moveInterval: 340, range: 1.4, gold: 10, xp: 28, armor: 3, bossable: true,
+        mechanic: 'Lento, resistente y pega fuerte.', counter: 'Mantener distancia'
+    },
+
+    // --- CON MECÁNICA ---
+    SHAMAN: {
+        key: 'SHAMAN', label: 'Chamán', symbol: 'c', color: '#c77dff', hp: 26, atk: 12, atkSpeed: 0.8, moveInterval: 300, range: 4, gold: 8, xp: 20, attackType: 'magical', bossable: true,
+        mechanic: 'Ataca con daño MÁGICO a distancia (ignora la armadura).', counter: 'Resistencia mágica', counterItem: 'CLOAK'
+    },
+    HEALER: {
+        key: 'HEALER', label: 'Sanador', symbol: 'h', color: '#80ffdb', hp: 40, atk: 4, atkSpeed: 0.7, moveInterval: 300, range: 3, gold: 9, xp: 22,
+        healEvery: 3, healAmount: 20, healRadius: 5, priority: 2,
+        // Cura una cantidad fija (crece con la oleada), no un % de la vida del objetivo: con % era imposible matar a un jefe con 2 Sanadores.
+        mechanic: 'Cada 3s cura 20 de vida (más en oleadas avanzadas) al creep más herido cerca. Tu ataque automático lo prioriza si está a tiro.',
+        counter: 'Anticuración o matarlo primero', counterItem: 'SPEAR',
+        update(c, dt) {
+            if (!everyInterval(c, 'heal', dt, this.healEvery)) return false;
+            const ally = creeps.filter(o => o !== c && o.isAlive() && !o.oneHit && o.hp < o.maxHp && Math.hypot(o.x - c.x, o.y - c.y) <= this.healRadius)
+                .sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
+            if (ally) healUnit(ally, this.healAmount * c.statMult);
+            return false;
+        }
+    },
+    SPECTER: {
+        key: 'SPECTER', label: 'Espectro', symbol: 'e', color: '#adb5bd', hp: 35, atk: 12, atkSpeed: 1.0, moveInterval: 180, range: 1.2, gold: 8, xp: 18, evasion: 60,
+        mechanic: 'Esquiva el 60% de los ataques básicos.', counter: 'Ataques que no fallan o habilidades', counterItem: 'TRUESTRIKE'
+    },
+    ARMORED: {
+        key: 'ARMORED', label: 'Acorazado', symbol: 'a', color: '#9a8c98', hp: 110, atk: 14, atkSpeed: 0.7, moveInterval: 380, range: 1.3, gold: 12, xp: 30, armor: 12, bossable: true,
+        mechanic: 'Armadura 12: recibe 48% menos de daño físico.', counter: 'Daño mágico o puro, o reducir armadura', counterItem: 'HAMMER'
+    },
+    SWARM: {
+        key: 'SWARM', label: 'Enjambre', symbol: '·', color: '#b5e48c', hp: 10, atk: 3, atkSpeed: 1.2, moveInterval: 160, range: 1.1, gold: 2, xp: 4, groupSize: 4,
+        mechanic: 'Aparecen de a 4, débiles y rápidos.', counter: 'Daño en área'
+    },
+    KAMIKAZE: {
+        key: 'KAMIKAZE', label: 'Kamikaze', symbol: 'k', color: '#fb8500', hp: 16, atk: 40, atkSpeed: 1, moveInterval: 150, range: 1.5, gold: 6, xp: 14,
+        mechanic: 'Corre hacia vos y EXPLOTA al llegar (mucho daño físico).', counter: 'Matarlo a distancia antes de que llegue',
+        update(c) {
+            if (Math.hypot(c.x - player.x, c.y - player.y) > this.range) return false;
+            c.hp = 0; // se destruye al explotar: no da oro ni experiencia
+            dealDamage(c, player, Math.round(c.atk * enrageMult()), 'physical');
+            log(`💥 ¡Un Kamikaze explotó a tu lado!`);
+            return true;
+        }
+    },
+    STUNNER: {
+        key: 'STUNNER', label: 'Aturdidor', symbol: 't', color: '#ffd166', hp: 55, atk: 8, atkSpeed: 0.9, moveInterval: 280, range: 1.3, gold: 10, xp: 24, bossable: true,
+        stunEvery: 2, stunDuration: 1.5,
+        mechanic: 'Cada 2 golpes te aturde 1,5s.', counter: 'Resistencia al control', counterItem: 'BOOTS',
+        onAttack(c, target, result) {
+            if (result.evaded) return;
+            c.hitCount = (c.hitCount || 0) + 1;
+            if (c.hitCount % this.stunEvery === 0 && target.isAlive()) addEffect(target, { id: 'STUN', name: 'Aturdido', duration: this.stunDuration, flags: ['stun'] });
+        }
+    },
+    THIEF: {
+        key: 'THIEF', label: 'Ladrón', symbol: '$', color: '#ffe066', hp: 24, atk: 5, atkSpeed: 1.0, moveInterval: 150, range: 1.2, gold: 8, xp: 16,
+        steal: 20, fleeFor: 3,
+        mechanic: 'Te roba 20 de oro por golpe y huye. Si lo matás, recuperás el oro +50%.', counter: 'Ralentizar, aturdir o rango',
+        update(c, dt) {
+            if (gameClock >= (c.fleeUntil || 0)) return false;
+            stepCreepAway(c, player, dt);
+            return true;
+        },
+        onAttack(c, target, result) {
+            if (result.evaded || !target.isHero) return;
+            const stolen = Math.min(target.gold, this.steal);
+            if (stolen <= 0) return;
+            target.gold -= stolen;
+            c.stolen = (c.stolen || 0) + stolen;
+            c.fleeUntil = gameClock + this.fleeFor;
+            log(`💰 ¡Un Ladrón te robó ${stolen} de oro y huye!`);
+        },
+        onDeath(c, killer) {
+            if (!c.stolen) return;
+            const back = Math.round(c.stolen * 1.5);
+            killer.gold += back;
+            log(`💰 Recuperaste ${back} de oro del Ladrón.`);
+        }
+    }
+};
+
+// Temas de oleada: para cada oleada se elige uno al azar de su nivel (la última es la del jefe final).
+// groups: tipos y cantidades; boss: tipo base del jefe de la oleada.
+const WAVE_THEMES = [
+    [ // oleada 1
+        { name: 'Avanzada', groups: [{ type: 'GRUNT', count: 4 }, { type: 'ARCHER', count: 2 }, { type: 'CHUSMA', count: 3 }, { type: 'SCOUT', count: 1 }], boss: 'GRUNT' },
+        { name: 'Enjambre', groups: [{ type: 'SWARM', count: 2 }, { type: 'GRUNT', count: 2 }, { type: 'ARCHER', count: 1 }], boss: 'SCOUT' }
+    ],
+    [ // oleada 2
+        { name: 'Hechiceros', groups: [{ type: 'SHAMAN', count: 3 }, { type: 'GRUNT', count: 3 }, { type: 'HEALER', count: 1 }, { type: 'CHUSMA', count: 2 }], boss: 'SHAMAN' },
+        { name: 'Espectros', groups: [{ type: 'SPECTER', count: 4 }, { type: 'GRUNT', count: 2 }, { type: 'ARCHER', count: 2 }], boss: 'GRUNT' }
+    ],
+    [ // oleada 3
+        { name: 'Muralla', groups: [{ type: 'ARMORED', count: 3 }, { type: 'HEALER', count: 2 }, { type: 'ARCHER', count: 3 }], boss: 'ARMORED' },
+        { name: 'Kamikazes', groups: [{ type: 'KAMIKAZE', count: 4 }, { type: 'SCOUT', count: 2 }, { type: 'BRUTE', count: 2 }], boss: 'BRUTE' }
+    ],
+    [ // oleada 4
+        { name: 'Emboscada', groups: [{ type: 'THIEF', count: 2 }, { type: 'STUNNER', count: 3 }, { type: 'SPECTER', count: 2 }, { type: 'SHAMAN', count: 2 }], boss: 'STUNNER' },
+        { name: 'Asedio', groups: [{ type: 'ARMORED', count: 2 }, { type: 'SHAMAN', count: 3 }, { type: 'HEALER', count: 2 }, { type: 'STUNNER', count: 2 }], boss: 'ARMORED' }
+    ],
+    [ // oleada 5: jefe final
+        { name: 'Jefe Final', groups: [{ type: 'BRUTE', count: 2 }, { type: 'SHAMAN', count: 2 }, { type: 'HEALER', count: 1 }, { type: 'STUNNER', count: 2 }, { type: 'ARMORED', count: 1 }, { type: 'KAMIKAZE', count: 2 }], boss: 'BRUTE' }
+    ]
+];

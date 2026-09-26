@@ -2,6 +2,7 @@
 
 document.getElementById('nav-game').onclick = () => showView('game');
 document.getElementById('nav-heroes').onclick = () => showView('heroes');
+document.getElementById('nav-creeps').onclick = () => showView('creeps');
 document.getElementById('start-wave-btn').onclick = startWave;
 document.getElementById('restart-btn').onclick = resetGame;
 document.getElementById('autopilot-btn').onclick = () => setAutopilot(!autopilot);
@@ -63,6 +64,16 @@ function validateContent() {
             });
         });
     });
+    Object.values(CREEP_TYPES).forEach(t => {
+        if (t.counterItem && !ITEMS[t.counterItem]) problems.push(`Creep ${t.key}: el ítem de contra "${t.counterItem}" no existe`);
+        if (Object.values(HERO_TEMPLATES).some(h => h.symbol === t.symbol)) problems.push(`Creep ${t.key}: su símbolo "${t.symbol}" lo usa un héroe`);
+    });
+    WAVE_THEMES.flat().forEach(th => {
+        th.groups.forEach(g => { if (!CREEP_TYPES[g.type]) problems.push(`Tema ${th.name}: el tipo "${g.type}" no existe`); });
+        if (!CREEP_TYPES[th.boss] || !CREEP_TYPES[th.boss].bossable) problems.push(`Tema ${th.name}: el jefe "${th.boss}" no existe o no puede ser jefe`);
+        const units = th.groups.reduce((n, g) => n + (CREEP_TYPES[g.type] ? groupUnits(g) : 0), 0);
+        if (units > 6 * ROWS) problems.push(`Tema ${th.name}: ${units} creeps no entran en la zona de aparición`);
+    });
     if (problems.length) console.warn('⚠️ Problemas en el contenido del juego:\n- ' + problems.join('\n- '));
     return problems;
 }
@@ -70,4 +81,5 @@ function validateContent() {
 validateContent();
 initHeroSelect();
 renderHeroCodex();
+renderCreepCodex();
 requestAnimationFrame(loop);

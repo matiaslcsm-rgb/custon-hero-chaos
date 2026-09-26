@@ -11,7 +11,7 @@
     <div id="top-nav">
         <button id="nav-game" class="active">🎮 Jugar</button>
         <button id="nav-heroes">🦸 Héroes</button>
-        <button class="disabled" title="Próximamente">👹 Creeps y Jefes</button>
+        <button id="nav-creeps">👹 Creeps y Jefes</button>
         <button class="disabled" title="Próximamente">🎒 Ítems</button>
     </div>
 
@@ -62,9 +62,11 @@
 
             <!-- Preparación / Tienda -->
             <div id="shop-container" style="display: none;">
+                <div id="wave-preview"></div>
                 <h3>Tienda de Artículos</h3>
-                <p class="subtitle">Mejora tus atributos antes de la oleada:</p>
+                <p class="subtitle">Armate según lo que viene:</p>
                 <div id="shop-options" class="options-grid"></div>
+                <p id="owned-items"></p>
                 <div id="destiny-panel"></div>
                 <button id="start-wave-btn" class="primary-btn">Comenzar Oleada</button>
             </div>
@@ -86,6 +88,11 @@
             <div id="codex-hero-list"></div>
             <div id="codex-detail"><p id="codex-empty">Elegí un héroe de la lista para ver sus stats y habilidades.</p></div>
         </div>
+    </div>
+
+    <!-- Códice de Creeps -->
+    <div id="view-creeps">
+        <div class="codex-layout"><div id="creep-codex"></div></div>
     </div>
     </div>
 
@@ -111,6 +118,7 @@
     <script src="js/game.js"></script>
     <script src="js/death.js"></script>
     <script src="js/timers.js"></script>
+    <script src="js/creeps.js"></script>
     <script src="js/ai.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/main.js"></script>

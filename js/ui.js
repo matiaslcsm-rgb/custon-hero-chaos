@@ -79,9 +79,39 @@ function stripHtml(html) { return html.replace(/<[^>]+>/g, ''); }
 
 function showView(view) {
     document.getElementById('view-game').style.display = view === 'game' ? 'flex' : 'none';
-    document.getElementById('view-heroes').style.display = view === 'heroes' ? 'block' : 'none';
-    document.getElementById('nav-game').classList.toggle('active', view === 'game');
-    document.getElementById('nav-heroes').classList.toggle('active', view === 'heroes');
+    ['heroes', 'creeps'].forEach(v => { document.getElementById('view-' + v).style.display = view === v ? 'block' : 'none'; });
+    ['game', 'heroes', 'creeps'].forEach(v => document.getElementById('nav-' + v).classList.toggle('active', view === v));
+}
+
+// --- CÓDICE DE CREEPS ---
+function creepTag(t) { return `<span class="creep-symbol" style="color:${t.color}">${t.symbol}</span>`; }
+
+function renderCreepCodex() {
+    const rows = Object.values(CREEP_TYPES).map(t => {
+        const stats = [`${t.hp} HP${t.groupSize ? ` (x${t.groupSize})` : ''}`, `${t.atk} daño${t.attackType === 'magical' ? ' mágico' : ''}`, `rango ${t.range}`];
+        if (t.armor) stats.push(`armadura ${t.armor}`);
+        if (t.evasion) stats.push(`evasión ${t.evasion}%`);
+        if (t.bossable) stats.push('puede ser jefe');
+        const item = t.counterItem ? ` <span class="counter-item">(${ITEMS[t.counterItem].name})</span>` : '';
+        return `<div class="ability-row"><h4>${creepTag(t)} ${t.label}</h4><p>${t.mechanic}</p>` +
+            `<p class="meta">${stats.join(' · ')}</p><p><strong>Contra:</strong> ${t.counter}${item}</p></div>`;
+    }).join('');
+    const themes = WAVE_THEMES.map((tier, i) => `<p><strong>${i < NORMAL_WAVES ? 'Oleada ' + (i + 1) : 'Jefe final'}:</strong> ${tier.map(th => th.name).join(' o ')}</p>`).join('');
+    document.getElementById('creep-codex').innerHTML =
+        `<h3>Creeps</h3><p class="subtitle">Cada oleada normal trae además un jefe (4x vida, +2 armadura y un aura que potencia a los creeps cercanos). Los creeps se hacen más fuertes en cada oleada.</p>${rows}` +
+        `<div class="codex-sub">Temas de oleada (se elige uno al azar)</div>${themes}`;
+}
+
+// Aviso de la próxima oleada en la tienda: qué creeps vienen, qué hacen y cómo contrarrestarlos.
+function renderWavePreview() {
+    const el = document.getElementById('wave-preview');
+    if (!nextWave) { el.innerHTML = ''; return; }
+    const title = waveNumber > NORMAL_WAVES ? 'Jefe final' : `Próxima oleada ${waveNumber}/${NORMAL_WAVES}`;
+    const rows = waveSummary(nextWave).map(({ type, count }) => {
+        const counter = type.counterItem ? ` → <span class="counter-item">${ITEMS[type.counterItem].name}</span>` : '';
+        return `<div class="preview-row">${creepTag(type)} <strong>${type.label} x${count}</strong>: ${type.mechanic}${type.counter !== '—' ? ` <em>Contra: ${type.counter}${counter}</em>` : ''}</div>`;
+    }).join('');
+    el.innerHTML = `<h3>🔭 ${title}: ${nextWave.name}</h3>${rows}<div class="preview-row">${creepTag(CREEP_TYPES[nextWave.boss])} <strong>Jefe: ${CREEP_TYPES[nextWave.boss].label}</strong></div>`;
 }
 
 // --- DRAFT Y TIENDA ---
@@ -128,13 +158,16 @@ function renderBookChoice() {
 }
 
 function renderShop() {
+    renderWavePreview();
     const c = document.getElementById('shop-options'); c.innerHTML = '';
     Object.values(ITEMS).filter(i => itemAvailable(i, player)).forEach(i => {
-        const card = document.createElement('div'); card.className = 'skill-card';
-        card.innerHTML = `<h4>${i.name} (${itemCost(i, player)}g)</h4><p>${i.desc}</p>`;
+        const card = document.createElement('div'); card.className = 'skill-card' + (player.gold < itemCost(i, player) ? ' disabled' : '');
+        card.innerHTML = `<h4>${i.name} (${itemCost(i, player)}g)</h4><p>${i.desc}</p>${i.counters ? `<p class="meta">Contra: ${i.counters}</p>` : ''}`;
         card.onclick = () => buyItem(i);
         c.appendChild(card);
     });
+    const owned = activeEffects(player).filter(e => e.flags.includes('item')).map(e => e.name);
+    document.getElementById('owned-items').textContent = owned.length ? `🎒 Tus ítems: ${owned.join(', ')}` : '';
     renderDestinyPanel();
 }
 
@@ -224,7 +257,7 @@ function renderCooldownBar() {
         bar.appendChild(span);
     });
     // Efectos activos sobre el jugador (mejoras propias, invulnerabilidad al reaparecer...)
-    activeEffects(player).forEach(e => {
+    activeEffects(player).filter(e => !e.flags.includes('item')).forEach(e => {
         const span = document.createElement('span');
         span.className = 'effect';
         span.textContent = `✦ ${e.name}${isFinite(e.until) ? ' ' + (e.until - gameClock).toFixed(1) + 's' : ''}`;
