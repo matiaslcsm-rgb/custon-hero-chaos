@@ -41,6 +41,7 @@ Además, con el kit al máximo cada punto sobrante da +1 a los tres (ver §3).
 | **Agilidad (AGI)** | +1% velocidad de ataque · +1% velocidad de movimiento (hasta 40 AGI) · +0,1% crítico · **+0,08 armadura** |
 | **Inteligencia (INT)** | +4 maná máximo · +0,05 regeneración de maná/s · +0,1% amplificación de hechizo · **+0,1% resistencia mágica** |
 | **Atributo principal** | Además: +0,8 daño de ataque |
+| **Magos** (principal Inteligencia) | Además: **+100% amplificación de hechizo** (su daño mágico se duplica) |
 
 | Héroe | Fuerza | Agilidad | Inteligencia |
 |---|---|---|---|
@@ -220,11 +221,37 @@ Cada tipo de creep tiene una **mecánica** y un **contra**. Si no te armás para
 
 - **Aviso de la próxima oleada:** en la tienda se ve qué tipos de creeps vienen, para comprar en consecuencia.
 
-### Morir en una oleada: Voluntad de Titán ✅
-Si un creep mata a un héroe y le quedan vidas, pierde 1 vida y **revive en el lugar** con la vida llena y
-**Voluntad de Titán** durante **5 segundos**: no recibe daño, **+100% velocidad de ataque** y sus habilidades **no gastan maná**
-(los enfriamientos siguen corriendo). Si era su última vida, queda eliminado.
-- Las oleadas se arman combinando tipos, cada vez más exigentes.
+### Muerte, vidas y Condenado ✅
+
+Cada héroe empieza con **2 vidas**.
+
+1. **Morir con vidas:** perdés 1 vida y quedás **3 segundos muerto**. Mientras tanto los creeps **pierden el agro**
+   y vuelven a su lugar de aparición, así podés acomodarte al revivir. El reloj de la oleada se pausa.
+2. **Revivir:** en el mismo lugar, con la vida llena y **Voluntad de Titán** durante **5 segundos**: no recibís daño,
+   **+100% velocidad de ataque** y tus habilidades **no gastan maná** (los enfriamientos siguen corriendo).
+   Al morir se pierden las mejoras temporales que tenías activas.
+3. **Sin vidas → Condenado:** al revivir de tu última vida quedás **Condenado**: recibís **+10% de daño de todas las fuentes**.
+   - Si **un creep** te mata estando Condenado, quedás **eliminado** (modo espectador).
+   - Si **un héroe** te mata en un duelo *(fase F)*, no quedás eliminado pero sumás **+10% de daño recibido** por cada duelo perdido.
+4. **Injusticia de los Codiciosos** (ítem): solo aparece en la tienda estando Condenado. Compra **1 vida** y te saca de Condenado.
+   Cuesta **400g** y **cada compra cuesta el doble** que la anterior. Si volvés a quedar sin vidas, el % de daño recibido
+   que tenías **se duplica** (ej: +30% → compra → sin vidas otra vez → +60%).
+
+### Temporizadores ✅
+Para que nadie estanque la partida, todas las fases tienen tiempo:
+
+| Fase | Tiempo | Si se acaba |
+|---|---|---|
+| Elección de héroe | 30 s | Se elige uno al azar |
+| Draft | 20 s | Se elige una opción al azar |
+| Preparación | 30 s | Empieza la oleada (usar un objeto del destino no reinicia este tiempo) |
+| Oleada | 30 s | Los creeps se **enfurecen**: +5% de daño y de velocidad de ataque por cada segundo extra |
+
+El tiempo de oleada sale de medir partidas simuladas: limpiar una oleada tarda **13–19 s** (mediana según el héroe),
+el 90% de las veces menos de 24 s y el peor caso fue 27 s. Los valores están en `timers.js`.
+
+**Balance a revisar:** un jugador automático simple (camina hacia el enemigo más cercano, sin esquivar) **perdió las 15
+partidas con cada héroe** y murió entre las oleadas 1 y 3. No juega bien, pero indica que el juego es exigente al principio.
 
 ---
 
@@ -321,7 +348,11 @@ si un nombre no te gusta, se cambia acá y después en el código.
 | **Ascenso** 🆕 | Escalado fuerte de la definitiva | `grantPermanent()` en cada definitiva |
 | **Bonus permanente** | Stats ganados por Crecimiento o Ascenso | `hero.bonus` |
 | **Vidas** | Muertes que aguanta el héroe antes de quedar eliminado | `lives` |
-| **Voluntad de Titán** | Revivir tras morir en una oleada | `TITAN_WILL`, `applyTitanWill()` |
+| **Voluntad de Titán** | Bonus al revivir tras morir en una oleada | `TITAN_WILL`, `applyTitanWill()` (death.js) |
+| **Condenado** | Estado sin vidas: más daño recibido; si te mata un creep, quedás eliminado | `setCondemned()`, `isCondemned()` |
+| **Eliminado / Espectador** | El héroe quedó fuera de la partida | `gameState = 'GAMEOVER'` |
+| **Injusticia de los Codiciosos** | Ítem que compra una vida estando Condenado | `ITEMS.GREED`, `buyGreedLife()` |
+| **Mago** | Héroe de Inteligencia: +100% amplificación de hechizo | `ATTRIBUTE_RULES.mageSpellAmp` |
 
 ### Combate
 | Nombre | Qué es | En el código |
@@ -330,6 +361,8 @@ si un nombre no te gusta, se cambia acá y después en el código.
 | **Efecto** (mejora / perjuicio) | Estado temporal sobre una unidad (Furia, Aturdido…) | `addEffect()` |
 | **Evento** | Algo que pasa en combate y activa reacciones | `emit()` |
 | **Etiqueta** | Categoría de una habilidad (`FÍSICO`, `ROBO_VIDA`…) | `TAGS` |
+| **Enfurecimiento** 🆕 | Los creeps ganan daño y vel. de ataque al pasarse el tiempo de la oleada | `enrageMult()` (timers.js) |
+| **Temporizador de fase** | Tiempo de cada fase; al vencer, el juego decide | `PHASE_TIMES`, `tickPhaseTimer()` |
 | **Aura del Jefe** 🆕 | +daño a los creeps cerca del jefe | `auraRadius`, `auraAtkBonus` |
 
 ### Economía

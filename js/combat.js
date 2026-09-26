@@ -17,7 +17,7 @@ function makeCreep(t, x, y, statMult, isBossUnit, bossAuraBonus) {
         range: isBossUnit ? Math.max(t.range, 1.8) : t.range,
         gold: isBossUnit ? 40 : t.gold, xp: isBossUnit ? BOSS_XP : t.xp, oneHit,
         armor: (t.armor || 0) + (isBossUnit ? 2 : 0), magicResist: t.magicResist || 0, evasion: 0,
-        x, y, moveTimer: 0, attackTimer: 0, isBoss: !!isBossUnit, spawnTime: gameClock,
+        x, y, spawnX: x, spawnY: y, moveTimer: 0, attackTimer: 0, isBoss: !!isBossUnit, spawnTime: gameClock,
         auraRadius: isBossUnit ? 4 : 0, auraAtkBonus: isBossUnit ? bossAuraBonus : 0,
         effects: [],
         isAlive() { return this.hp > 0; }
@@ -58,7 +58,7 @@ function mitigate(target, amount, type) {
 
 // Único punto de entrada para dañar a cualquier unidad (héroe o creep). En orden:
 // invulnerabilidad → esquive (solo ataques básicos, opts.isAttack) → amplificación de hechizo (mágico)
-// → reducción de daño por efectos → armadura/resistencia mágica → regla de un solo golpe (oneHit)
+// → reducción de daño por efectos → armadura/resistencia mágica → daño recibido extra (Condenado) → regla de un solo golpe (oneHit)
 // → no bajar de 1 con preventDeath → evento onDamaged → muerte.
 // Devuelve { dealt, evaded }: dealt es la vida que realmente perdió el objetivo (para robo de vida).
 function dealDamage(source, target, amount, type = 'physical', opts = {}) {
@@ -66,7 +66,8 @@ function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     if (opts.isAttack && Math.random() < (target.evasion || 0) / 100) return { dealt: 0, evaded: true };
     let final = amount;
     if (type === 'magical' && source) final *= 1 + (source.spellAmp || 0) / 100;
-    final = Math.round(mitigate(target, final * (1 - effDmgReduction(target)), type));
+    final = mitigate(target, final * (1 - effDmgReduction(target)), type);
+    final = Math.round(final * (1 + sumMod(target, 'dmgTakenPct'))); // ej: Condenado
     if (target.oneHit) final = target.hp;
     const floor = hasFlag(target, 'preventDeath') ? 1 : 0;
     const hpLost = Math.max(0, Math.min(final, target.hp - floor));

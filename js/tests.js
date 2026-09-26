@@ -30,7 +30,8 @@ function newGame(heroKey) {
     showPanel('draft-container', false);
     gameState = 'WAVE';
     spawnWave();
-    creeps.forEach(c => { c.x = 19; });
+    resetWaveTimer();
+    creeps.forEach(c => { c.x = 19; c.spawnX = 19; });
     player.x = 5; player.y = 5;
     return player;
 }
@@ -47,6 +48,8 @@ function dummy(props = {}) {
     Object.assign(c, { x: player.x + 1, y: player.y, armor: 0, magicResist: 0 }, props);
     return c;
 }
+// Avanza el reloj de la oleada hasta que el jugador reviva.
+function waitRespawn() { gameClock = player.respawnAt; updateWave(0.016); }
 function lastLog() { const p = document.querySelector('#combat-log p:last-child'); return p ? p.textContent : ''; }
 
 // ============================================================ CONTENIDO
@@ -305,36 +308,132 @@ test('Forma Inmortal: no baja de 1, paga al terminar y da HP máximo por curaci�
     checkEq(player.hp, 1, 'no baja de 1');
     gameClock += 10; tickEffects(player, 0.016);
     checkEq(player.lives, 1, 'el costo al terminar lo mató (pierde una vida)');
+    check(!player.isAlive(), 'queda muerto esperando revivir');
+    waitRespawn();
     check(!!getEffect(player, 'TITAN_WILL'), 'y revive con Voluntad de Titán');
 });
 
 // ============================================================ MUERTE
+test('Morir: 3s muerto, los creeps pierden el agro y vuelven a su lugar', () => {
+    newGame('AXE');
+    const c = dummy({ atk: 9999, attackTimer: 99, spawnX: 15, spawnY: 5 });
+    player.hp = 1;
+    updateCreep(c, 0.016);
+    checkEq(player.lives, 1, 'pierde una vida');
+    check(!player.isAlive(), 'queda muerto');
+    checkNear(player.respawnAt - gameClock, RESPAWN_DELAY, 'tiempo para revivir');
+    const x0 = c.x;
+    for (let i = 0; i < 20; i++) { gameClock += 0.1; updateWave(0.1); }
+    check(c.x > x0, 'el creep se aleja hacia su lugar de aparición');
+    check(!player.isAlive(), 'sigue muerto antes de los 3s');
+    waitRespawn();
+    check(player.isAlive(), 'revive a los 3s');
+});
+
 test('Voluntad de Titán: revive en el lugar, inmortal, x2 vel. ataque y sin maná', () => {
     newGame('AXE');
     const s = learn('AXE_GIRO', 1);
     const c = dummy({ atk: 9999, attackTimer: 99 });
     player.hp = 1;
     updateCreep(c, 0.016);
-    checkEq(player.lives, 1, 'vidas');
+    waitRespawn();
     checkEq(player.hp, player.maxHp, 'vida llena');
     checkEq([player.x, player.y].join(','), '5,5', 'revive en el lugar');
     checkNear(effAtkSpeed(player) / player.atkSpeed, 1 + TITAN_WILL.atkSpeedPct, 'velocidad de ataque');
     dealDamage(c, player, 500, 'pure');
     checkEq(player.hp, player.maxHp, 'no recibe daño');
-    player.mana = 0; handleSkillKeypress('e');
+    player.mana = 0; c.x = 6; c.y = 5; handleSkillKeypress('e');
     check(player.cooldowns[s.id] > 0, 'lanza sin maná');
     gameClock += TITAN_WILL.duration + 0.1; tickEffects(player, 0.016);
     check(!getEffect(player, 'TITAN_WILL'), 'dura ' + TITAN_WILL.duration + 's');
 });
 
-test('Última vida: Game Over una sola vez aunque peguen varios creeps a la vez', () => {
+test('Sin vidas: al revivir queda Condenado y recibe +10% de daño', () => {
     newGame('AXE');
     player.lives = 1; player.hp = 1;
+    const c = dummy({ atk: 9999, attackTimer: 99 });
+    updateCreep(c, 0.016);
+    checkEq(player.lives, 0, 'vidas');
+    checkEq(gameState, 'WAVE', 'no termina la partida');
+    waitRespawn();
+    check(isCondemned(player), 'queda Condenado');
+    removeEffect(player, 'TITAN_WILL');
+    const hp = player.hp;
+    dealDamage(c, player, 100, 'pure');
+    checkEq(hp - player.hp, 110, 'recibe +10% de daño');
+});
+
+test('Condenado: si lo mata un creep queda eliminado (una sola vez aunque peguen varios)', () => {
+    newGame('AXE');
+    player.lives = 0; setCondemned(player, 0.1); player.hp = 1;
     const attackers = [[4, 5], [6, 5], [5, 4], [5, 6]].map(([x, y]) => dummy({ x, y, attackTimer: 99, atk: 999 }));
     attackers.forEach(c => updateCreep(c, 0.016));
     checkEq(gameState, 'GAMEOVER', 'estado');
-    checkEq(player.lives, 0, 'vidas');
-    checkEq([...document.querySelectorAll('#combat-log p')].filter(p => p.textContent.includes('GAME OVER')).length, 1, 'mensajes de Game Over');
+    checkEq([...document.querySelectorAll('#combat-log p')].filter(p => p.textContent.includes('ELIMINADO')).length, 1, 'mensajes de eliminación');
+});
+
+test('Condenado: cada duelo perdido suma +10% de daño recibido', () => {
+    newGame('AXE');
+    setCondemned(player, CONDEMNED.initialPct);
+    registerDuelLoss(player); registerDuelLoss(player);
+    checkNear(player.condemnPct, 0.30, '10% + 2 duelos');
+    checkNear(sumMod(player, 'dmgTakenPct'), 0.30, 'el efecto aplica el 30%');
+});
+
+test('Injusticia de los Codiciosos: solo Condenado, vida, precio doble y castigo doble', () => {
+    newGame('AXE');
+    check(!itemAvailable(ITEMS.GREED, player), 'no aparece sin estar Condenado');
+    player.lives = 0; setCondemned(player, 0.3);
+    check(itemAvailable(ITEMS.GREED, player), 'aparece estando Condenado');
+    checkEq(itemCost(ITEMS.GREED, player), GREED.baseCost, 'primer precio');
+    gameState = 'PREP'; player.gold = 1000;
+    buyItem(ITEMS.GREED);
+    checkEq(player.lives, 1, 'compró una vida');
+    check(!isCondemned(player), 'deja de estar Condenado');
+    checkEq(itemCost(ITEMS.GREED, player), GREED.baseCost * 2, 'la próxima cuesta el doble');
+    gameState = 'WAVE'; player.hp = 1;
+    updateCreep(dummy({ atk: 9999, attackTimer: 99 }), 0.016);
+    waitRespawn();
+    checkNear(player.condemnPct, 0.6, 'al volver a quedar sin vidas el castigo se duplica');
+});
+
+test('Oleada: pasado el límite los creeps se enfurecen', () => {
+    newGame('AXE');
+    checkEq(enrageMult(), 1, 'sin enfurecer al empezar');
+    tickWaveTimer(WAVE_TIME.limit + 10);
+    checkNear(enrageMult(), 1 + 10 * WAVE_TIME.enragePerSecond, '10s de más');
+    const c = dummy({ atk: 100, attackTimer: 99 });
+    const hp = player.hp;
+    updateCreep(c, 0.016);
+    const expected = Math.round(mitigate(player, Math.round(100 * enrageMult()), 'physical'));
+    checkEq(hp - player.hp, expected, 'el golpe del creep enfurecido');
+});
+
+test('Temporizadores: al vencer, el juego elige por vos', () => {
+    resetGame();
+    tickPhaseTimer(PHASE_TIMES.heroSelect + 1);
+    checkEq(gameState, 'DRAFT', 'elige un héroe al azar y pasa al draft');
+    tickPhaseTimer(PHASE_TIMES.draft + 1);
+    checkEq(player.skills.length, 1, 'elige una habilidad al azar');
+    checkEq(gameState, 'PREP', 'pasa a preparación');
+    tickPhaseTimer(PHASE_TIMES.prep + 1);
+    checkEq(gameState, 'WAVE', 'empieza la oleada');
+});
+
+test('Usar un Fragmento no reinicia el tiempo de preparación', () => {
+    newGame('AXE');
+    learn('AXE_GIRO', 0);
+    gameState = 'PREP'; setPhaseTimer(12); player.destiny.fragments = 1;
+    useFragment();
+    document.querySelector('#draft-options .skill-card').click();
+    checkEq(gameState, 'PREP', 'vuelve a preparación');
+    checkEq(phaseTimeLeft, 12, 'con el tiempo que le quedaba');
+});
+
+test('Magos (Inteligencia): +100% de amplificación de hechizo', () => {
+    const mage = new Hero({ ...HERO_TEMPLATES.AXE, primaryAttr: 'INT' });
+    const warrior = new Hero(HERO_TEMPLATES.AXE);
+    checkNear(mage.spellAmp - warrior.spellAmp, ATTRIBUTE_RULES.mageSpellAmp, 'amplificación extra');
 });
 
 // ============================================================ CONTROL

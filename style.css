@@ -82,3 +82,5 @@ b.cur { color: #ffb703; }
 #test-report .fail { color: #ff477e; }
 #test-report .ok { color: #72efdd; }
 #test-report small { color: #ffb703; }
+#phase-timer { color: #8ecae6; font-weight: bold; margin-left: 6px; }
+#phase-timer.urgent { color: #ff477e; }

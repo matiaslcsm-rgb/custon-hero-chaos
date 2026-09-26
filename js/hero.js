@@ -5,7 +5,8 @@ const ATTRIBUTE_RULES = {
     str: { hp: 5, hpRegen: 0.05 },
     agi: { atkSpeedPct: 0.01, moveSpeedPct: 0.01, moveSpeedCap: 40, critChance: 0.1, armor: 0.08 },
     int: { mana: 4, manaRegen: 0.05, spellAmp: 0.1, magicResist: 0.1 },
-    primaryAtk: 0.8 // daño de ataque por punto del atributo principal
+    primaryAtk: 0.8,     // daño de ataque por punto del atributo principal
+    mageSpellAmp: 100    // los héroes de Inteligencia (magos) tienen +100% de amplificación de hechizo
 };
 
 // Teclas de habilidades activas, asignadas por orden de aprendizaje.
@@ -35,6 +36,9 @@ class Hero {
         this.skillLevels = {}; // id de habilidad -> nivel (0 = drafteada pero sin aprender)
         this.destiny = { fragments: 0, books: 0 }; // Fragmentos y Libros del Destino sin usar
         this.x = 3; this.y = 6; this.gold = 100; this.lives = 2;
+        this.respawnAt = 0;       // > 0 mientras está muerto esperando revivir (ver death.js)
+        this.condemnPct = 0;      // % de daño recibido extra acumulado como Condenado (se guarda aunque compre una vida)
+        this.greedPurchases = 0;  // compras de Injusticia de los Codiciosos (cada una cuesta el doble)
         this.skills = []; this.cooldowns = {}; this.keyBindings = {}; this.attackTimer = 0;
         this.effects = []; // efectos temporales activos (mejoras/perjuicios), ver effects.js
         this.recalculateStats(); this.hp = this.maxHp; this.mana = this.maxMana;
@@ -57,7 +61,7 @@ class Hero {
         this.projectileSpeed = this.baseProjectileSpeed;
         this.critChance = this.baseCritChance + this.agi * R.agi.critChance + this.bonus.critChance;
         this.evasion = this.baseEvasion;
-        this.spellAmp = this.baseSpellAmp + this.int * R.int.spellAmp;
+        this.spellAmp = this.baseSpellAmp + this.int * R.int.spellAmp + (this.primaryAttr === 'INT' ? R.mageSpellAmp : 0);
         this.lifesteal = this.baseLifesteal + this.bonus.lifesteal;
     }
     // Al subir de nivel: suma la ganancia de atributos del héroe (más en el principal).

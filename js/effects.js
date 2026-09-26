@@ -5,7 +5,7 @@
 // EFECTOS — cada unidad (héroe o creep) tiene una lista `effects`. Un efecto tiene:
 //   id        identificador; aplicar otro con el mismo id lo reemplaza (refresca la duración)
 //   name      nombre visible
-//   until     momento (gameClock) en que termina
+//   until     momento (gameClock) en que termina (duration: Infinity = permanente)
 //   mods      modificadores de stats mientras dura:
 //               atkPct       +% daño de ataque (se multiplican entre efectos)
 //               flatAtk      daño de ataque plano (se suma después de los %)
@@ -15,8 +15,9 @@
 //               critChance   +% probabilidad de crítico (se suman)
 //               lifesteal    +% robo de vida (se suman)
 //               dmgReduction reducción de daño recibido (se toma la mayor)
+//               dmgTakenPct  +% de daño recibido (se suman; ej: Condenado)
 //   flags     estados sin número: 'stun', 'invulnerable', 'preventDeath' (la vida no baja de 1), 'taunt',
-//             'freeCast' (las habilidades no gastan maná)
+//             'freeCast' (las habilidades no gastan maná), 'persistent' (no se pierde al morir)
 //   tags      etiquetas (ver data/tags.js), para que ítems de contra puedan detectarlo
 //   hooks     reacciones a eventos (ver abajo) + onExpire(owner, efecto) al terminar
 //   data      estado interno libre del efecto (acumuladores, combos...)

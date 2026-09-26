@@ -9,8 +9,10 @@ let lastTime = 0;
 function loop(ts) {
     const dt = Math.max(0, Math.min(0.1, (ts - lastTime) / 1000 || 0)); lastTime = ts;
     if (gameState === 'WAVE') gameClock += dt;
+    tickPhaseTimer(dt);
     updateHud();
-    if (gameState === 'WAVE' && player.isAlive()) updateWave(dt);
+    renderTimer();
+    if (gameState === 'WAVE') updateWave(dt); // también con el jugador muerto: cuenta el tiempo para revivir
     render();
     requestAnimationFrame(loop);
 }

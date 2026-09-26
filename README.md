@@ -19,6 +19,8 @@ js/
 ├── hero.js      entidad del héroe y atributos
 ├── combat.js    daño, críticos, robo de vida, proyectiles, bajas
 ├── game.js      flujo de la partida y oleadas
+├── death.js     vidas, revivir, Condenado, Injusticia de los Codiciosos
+├── timers.js    temporizadores de fase y enfurecimiento de creeps
 ├── ui.js        paneles, kit, códice y dibujo del mapa
 ├── main.js      arranque y validador de contenido
 └── tests.js     pruebas automáticas

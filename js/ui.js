@@ -129,9 +129,9 @@ function renderBookChoice() {
 
 function renderShop() {
     const c = document.getElementById('shop-options'); c.innerHTML = '';
-    Object.values(ITEMS).forEach(i => {
+    Object.values(ITEMS).filter(i => itemAvailable(i, player)).forEach(i => {
         const card = document.createElement('div'); card.className = 'skill-card';
-        card.innerHTML = `<h4>${i.name}</h4><p>${i.desc}</p>`;
+        card.innerHTML = `<h4>${i.name} (${itemCost(i, player)}g)</h4><p>${i.desc}</p>`;
         card.onclick = () => buyItem(i);
         c.appendChild(card);
     });
@@ -227,7 +227,7 @@ function renderCooldownBar() {
     activeEffects(player).forEach(e => {
         const span = document.createElement('span');
         span.className = 'effect';
-        span.textContent = `✦ ${e.name} ${(e.until - gameClock).toFixed(1)}s`;
+        span.textContent = `✦ ${e.name}${isFinite(e.until) ? ' ' + (e.until - gameClock).toFixed(1) + 's' : ''}`;
         bar.appendChild(span);
     });
 }
@@ -247,7 +247,8 @@ function updateHud() {
         `RM: ${player.magicResist.toFixed(0)}% | Crít: ${player.critChance.toFixed(1)}% | Evasión: ${player.evasion.toFixed(1)}% | ` +
         `Amp.Hechizo: ${player.spellAmp.toFixed(1)}% | Robo Vida: ${player.lifesteal.toFixed(1)}% | Regen: ${player.hpRegen.toFixed(1)} HP/s, ${player.manaRegen.toFixed(1)} Maná/s | ` +
         `Vel.Mov: ${player.moveSpeed.toFixed(1)}${player.projectileSpeed > 0 ? ` | Vel.Proyectil: ${player.projectileSpeed.toFixed(1)}` : ''}`;
-    document.getElementById('lives-text').textContent = '♥'.repeat(Math.max(0, player.lives)) + '♡'.repeat(Math.max(0, 2 - player.lives));
+    document.getElementById('lives-text').textContent = '♥'.repeat(Math.max(0, player.lives)) + '♡'.repeat(Math.max(0, 2 - player.lives)) +
+        (isCondemned(player) ? ` ☠ Condenado +${Math.round(player.condemnPct * 100)}%` : '');
     renderKit();
     if (player.scaling) {
         const bonusSoFar = player.bonus[player.scaling.stat] || 0;
@@ -255,6 +256,22 @@ function updateHud() {
         document.getElementById('scaling-info').textContent = `Escalado: +${bonusSoFar.toFixed(1)} ${scalingStatLabel(player.scaling.stat)} acumulado (${player.creepKillCount} bajas, próximo bonus en ${toNext})`;
     }
     if (gameState === 'WAVE') renderCooldownBar();
+}
+
+// Temporizador de la fase actual (o de la oleada / reaparición) al lado del estado.
+function renderTimer() {
+    const el = document.getElementById('phase-timer');
+    let text = '', cls = '';
+    if (['HERO_SELECT', 'DRAFT', 'PREP'].includes(gameState)) {
+        text = `⏱ ${Math.max(0, Math.ceil(phaseTimeLeft))}s`;
+        if (phaseTimeLeft <= 5) cls = 'urgent';
+    } else if (gameState === 'WAVE' && player) {
+        if (!player.isAlive() && player.respawnAt) { text = `☠ Revivís en ${Math.max(0, player.respawnAt - gameClock).toFixed(1)}s`; cls = 'urgent'; }
+        else if (waveTimeLeft() > 0) { text = `⏱ ${Math.ceil(waveTimeLeft())}s`; if (waveTimeLeft() <= 5) cls = 'urgent'; }
+        else { text = `🔥 Creeps enfurecidos +${Math.round((enrageMult() - 1) * 100)}%`; cls = 'urgent'; }
+    }
+    el.textContent = text;
+    el.className = cls;
 }
 
 // Deja la interfaz como al abrir el juego (usado por "Nueva Partida").
@@ -301,6 +318,10 @@ function render() {
         creeps.forEach(c => { if (c.isAlive()) drawUnit(c, c.color, c.symbol); });
         ctx.fillStyle = '#fefae0';
         projectiles.forEach(p => { ctx.beginPath(); ctx.arc(p.x * TILE + TILE / 2, p.y * TILE + TILE / 2, 3, 0, Math.PI * 2); ctx.fill(); });
+    }
+    // Jugador muerto esperando revivir: una calavera en el lugar donde va a reaparecer
+    if (player && !player.isAlive() && player.respawnAt && gameState === 'WAVE') {
+        ctx.fillStyle = '#555'; ctx.fillText('☠', player.x * TILE + TILE / 2, player.y * TILE + TILE / 2);
     }
     if (player && player.isAlive() && (gameState === 'WAVE' || gameState === 'PREP')) {
         const invulnerable = gameState === 'WAVE' && hasFlag(player, 'invulnerable');
