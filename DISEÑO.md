@@ -193,9 +193,19 @@ las 5 oleadas): Sniper 57 · Asesino 59 · Sabio del Vacío 62 · Arcanista 79 �
 Vampiro 99 · **Bruja del Hielo 44 (a observar)**. En otra medición con kit completo desde el inicio la Bruja quedó pareja
 con el Sniper (60 vs 53), así que falta jugarla para confirmar si está fuerte.
 
-**Dificultad con la IA** (12 partidas por héroe, IA sin modo dios, drafteando y comprando sola): Sniper, Asesino y
-Alquimista 12/12 · Axe, Bruja del Hielo, Nigromante y Sabio del Vacío 11/12 · **Arcanista 5/12 · Guerrero Vampiro 1/12**
-(pierden en las oleadas 4-5). Hay que revisar por qué esos dos rinden mucho menos.
+**Dificultad con la IA** (16 partidas por héroe, la IA juega sola sin modo dios: draftea, compra y pelea):
+Sniper, Asesino, Axe, Vampiro, Nigromante y Alquimista 16/16 · Bruja del Hielo 14/16 · Arcanista y Sabio del Vacío 13/16.
+
+**Ajustes hechos tras medir:**
+- **Guerrero Vampiro** ganaba 1/12. Diagnóstico: moría rodeado en las primeras oleadas; es el único sin daño en área y
+  su robo de vida (~4,5 HP/s) no alcanzaba contra 5 creeps (~34 de daño/s). Cambiar habilidades, draft o rango casi no
+  movía nada; con el innato de Axe ganaba 12/12, así que el problema era Hambre. **Hambre ahora también cura 5% de la
+  vida máxima por cada baja** → 16/16.
+- **Arcanista** ganaba 69% (Axe 88%). Moría sobre todo contra Arqueros, que tenían más alcance (4,5 contra 4).
+  **Rango 4 → 5 y +30 de vida** → 81%.
+
+**Ojo:** con una IA decente casi todos los héroes ganan casi siempre, así que el PvE hoy es fácil. La dificultad debería
+subir con los creeps con mecánicas (fase E) y los duelos (fase F).
 
 ### IA de héroes ✅
 Controla a un héroe en la oleada y fuera de ella (`js/ai.js`). La usa el **Piloto automático** del jugador

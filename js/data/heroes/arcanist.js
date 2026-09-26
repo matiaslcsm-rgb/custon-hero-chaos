@@ -2,7 +2,8 @@
 registerHero({
     key: 'ARCANIST', name: 'Arcanista', symbol: 'A', primaryAttr: 'INT', role: 'Mago de ráfaga y escalado',
     attributes: { str: [15, 1.5], agi: [13, 1.3], int: [25, 3.4] },
-    baseHp: 110, baseAtk: 8, baseAtkSpeed: 0.9, baseAttackRange: 4,
+    // Rango 5 (supera a los Arqueros, 4,5) y +30 de vida tras medir: ganaba 69% de las partidas contra 88% de Axe.
+    baseHp: 140, baseAtk: 8, baseAtkSpeed: 0.9, baseAttackRange: 5,
     baseArmor: 0, baseMagicResist: 15, baseHpRegen: 0.5,
     baseMaxMana: 140, baseManaRegen: 2.2, baseMoveSpeed: 2.7, baseProjectileSpeed: 10,
     baseCritChance: 5, baseEvasion: 5, baseSpellAmp: 0, baseLifesteal: 0,

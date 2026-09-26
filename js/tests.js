@@ -252,6 +252,13 @@ test('Hambre + Sangre Oscura multiplican el robo de vida', () => {
     checkEq(player.hp - 10, Math.round(100 * 0.15 * (2 + 0.3)), 'Sangre Oscura suma al multiplicador');
 });
 
+test('Hambre: cada baja cura 5% de la vida máxima', () => {
+    newGame('VAMPIRE');
+    player.hp = 50;
+    dealDamage(player, dummy(), 99999, 'pure');
+    checkEq(player.hp - 50, Math.round(player.maxHp * 0.05), 'curación por baja');
+});
+
 test('Velocidad Letal: +5% por golpe al mismo objetivo, se reinicia al cambiar', () => {
     newGame('ASSASSIN');
     const a = dummy({ hp: 9999, maxHp: 9999 }), b = dummy({ y: player.y + 1 });

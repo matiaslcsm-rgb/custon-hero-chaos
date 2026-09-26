@@ -10,12 +10,15 @@ registerHero({
     scaling: { stat: 'lifesteal', perKills: 9, perKillsAmount: 1, perHeroKill: 3 },
     innate: {
         id: 'BLOODLUST', name: 'Hambre',
-        tags: ['ROBO_VIDA'],
-        description: 'Innato: convierte una parte de tu daño físico en vida (Robo de Vida base 15%). La curación se duplica contra enemigos con menos de 30% HP.',
+        tags: ['ROBO_VIDA', 'CURACIÓN', 'AL_MATAR'],
+        // Cura por baja agregada tras medir: sin ella ganaba 1 de 12 partidas (sin área, no aguantaba multitudes).
+        healPerKill: 0.05,
+        description: 'Innato: convierte una parte de tu daño físico en vida (Robo de Vida base 15%). La curación se duplica contra enemigos con menos de 30% HP. Cada enemigo que eliminás te cura 5% de tu vida máxima.',
         hooks: {
             beforeLifesteal(owner, ctx) {
                 if (ctx.target && ctx.target.maxHp && ctx.target.hp / ctx.target.maxHp < 0.3) ctx.mult *= 2;
-            }
+            },
+            onKill(owner) { healUnit(owner, owner.maxHp * this.healPerKill); }
         }
     }
 }, {
