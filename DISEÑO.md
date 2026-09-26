@@ -30,6 +30,23 @@ con la definitiva y contrarrestar las del rival con ítems.
 **Decisión — escalado repartido:** el héroe (vía su innato) tiene un escalado chico por bajas y duelos; la definitiva
 trae el escalado fuerte. Si drafteás la definitiva de otro héroe, sumás su escalado al tuyo.
 
+### Atributos (Fuerza, Agilidad, Inteligencia)
+
+Qué da cada punto **hoy** en el código (`Hero.recalculateStats`):
+
+| Atributo | Por cada punto |
+|---|---|
+| **Fuerza (STR)** | +5 HP máximo · +0,05 regeneración de HP/s |
+| **Agilidad (AGI)** | +1% velocidad de ataque · +1% velocidad de movimiento (hasta 40 AGI) · +0,1% crítico |
+| **Inteligencia (INT)** | +4 maná máximo · +0,05 regeneración de maná/s · +0,1% amplificación de hechizo |
+| **Atributo principal** (el del héroe) | Además: +0,8 daño de ataque |
+
+**Problemas detectados:**
+- **Todos los héroes empiezan con 20/15/15**, sin importar su atributo principal (el Sniper, de Agilidad, tiene más Fuerza que Agilidad).
+- **La Inteligencia casi no sirve:** la amplificación de hechizo solo afecta daño mágico, y todavía no hay daño mágico.
+- **La Agilidad no da armadura** ni la Inteligencia resistencia mágica (en Dota 2 sí).
+- Los atributos solo crecen con ítems o con el kit al máximo, así que en la práctica casi no cambian durante la partida.
+
 ### Escalado propuesto para las definitivas actuales
 
 Cada definitiva suma un escalado fuerte con una condición que invita a usarla bien (el escalado del héroe se mantiene, más chico):
@@ -185,6 +202,11 @@ Cada tipo de creep tiene una **mecánica** y un **contra**. Si no te armás para
 | Ladrón | Te roba oro y escapa | Ralentizaciones o movilidad |
 
 - **Aviso de la próxima oleada:** en la tienda se ve qué tipos de creeps vienen, para comprar en consecuencia.
+
+### Morir en una oleada: Voluntad de Titán ✅
+Si un creep mata a un héroe y le quedan vidas, pierde 1 vida y **revive en el lugar** con la vida llena y
+**Voluntad de Titán** durante **5 segundos**: no recibe daño, **+100% velocidad de ataque** y sus habilidades **no gastan maná**
+(los enfriamientos siguen corriendo). Si era su última vida, queda eliminado.
 - Las oleadas se arman combinando tipos, cada vez más exigentes.
 
 ---
@@ -242,3 +264,55 @@ Cada fase deja el juego jugable.
 - **Habilidades drafteadas en nivel 0**; puntos sin gastar **se guardan**; al reemplazar una habilidad **se devuelven sus puntos**.
 - **Pasivas:** cuentan como una de las 4 elecciones del draft, pero no usan tecla.
 - **Rehacer el kit:** con Fragmento (4 opciones, habilidad al azar) o Libro (6 opciones, elegís cuál) del Destino; no se paga oro por volver a tirar el draft normal.
+
+---
+
+## Glosario
+
+Nombre oficial de cada paso y mecánica, y dónde vive en el código. Los marcados con 🆕 son propuestas:
+si un nombre no te gusta, se cambia acá y después en el código.
+
+### Estructura de la partida
+| Nombre | Qué es | En el código |
+|---|---|---|
+| **Partida** | Juego completo de 8 jugadores | — |
+| **Ronda** 🆕 | Un ciclo: Draft → Preparación → Oleada → Duelos → Ranking | `waveNumber` |
+| **Elección de Héroe** | Elegir el héroe al empezar | `gameState = 'HERO_SELECT'` |
+| **Draft** | Elegir 1 habilidad entre varias opciones | `'DRAFT'`, `startSkillDraft()` |
+| **Preparación** | Tienda, subir habilidades, usar objetos del destino | `'PREP'`, `startPreparation()` |
+| **Oleada** | Combate PvE contra creeps | `'WAVE'`, `updateWave()` |
+| **Oleada del Jefe** 🆕 | La oleada final, más difícil | `isBossWave` |
+| **Duelo** | Combate 1v1 contra otro héroe *(fase F)* | — |
+| **Ranking (Top 8)** | Orden por puntos y oro tras los duelos *(fase F)* | — |
+
+### Héroe y kit
+| Nombre | Qué es | En el código |
+|---|---|---|
+| **Innato** | Mecánica fija del héroe, no se draftea | `innate` |
+| **Kit** | Las 4 habilidades elegidas en el draft | `player.skills`, `KIT_SIZE` |
+| **Habilidad natural** | Habilidad que pertenece a tu héroe (★ en el draft) | `skill.heroKey` |
+| **Definitiva** | La habilidad más fuerte de cada héroe; 3 niveles | `isUltimate` |
+| **Pasiva** | Habilidad sin tecla que reacciona a eventos | `kind: 'passive'` |
+| **Punto de habilidad** | Se gana 1 por nivel; sube una habilidad | `skillPoints` |
+| **Crecimiento** 🆕 | Escalado chico del héroe (por bajas y duelos) | `scaling` |
+| **Ascenso** 🆕 | Escalado fuerte de la definitiva | `grantPermanent()` en cada definitiva |
+| **Bonus permanente** | Stats ganados por Crecimiento o Ascenso | `hero.bonus` |
+| **Vidas** | Muertes que aguanta el héroe antes de quedar eliminado | `lives` |
+| **Voluntad de Titán** | Revivir tras morir en una oleada | `TITAN_WILL`, `applyTitanWill()` |
+
+### Combate
+| Nombre | Qué es | En el código |
+|---|---|---|
+| **Efecto** (mejora / perjuicio) | Estado temporal sobre una unidad (Furia, Aturdido…) | `addEffect()` |
+| **Evento** | Algo que pasa en combate y activa reacciones | `emit()` |
+| **Etiqueta** | Categoría de una habilidad (`FÍSICO`, `ROBO_VIDA`…) | `TAGS` |
+| **Aura del Jefe** 🆕 | +daño a los creeps cerca del jefe | `auraRadius`, `auraAtkBonus` |
+
+### Economía
+| Nombre | Qué es | En el código |
+|---|---|---|
+| **Oro** | Moneda de la tienda y las apuestas | `gold` |
+| **Cacería Veloz** 🆕 | Hasta x3 de oro por matar un creep rápido | `speedGoldMultiplier()` |
+| **Interés** | +1 oro por cada 10 ahorrados al terminar la oleada (máx. 5) | `onWaveCleared()` |
+| **Objetos del Destino** | Fragmento y Libro del Destino | `destiny`, `useFragment()`, `useBook()` |
+| **Segunda Oportunidad** 🆕 | Premio para los 4 últimos del ranking *(fase F)* | — |
