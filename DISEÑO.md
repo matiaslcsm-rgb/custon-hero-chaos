@@ -25,21 +25,10 @@ con la definitiva y contrarrestar las del rival con ítems.
 | **Innato** | 1 | No, viene con el héroe | Mecánica permanente que define su identidad. Funciona con cualquier combinación de habilidades. Conserva un **escalado chico** propio del héroe. |
 | **Habilidades naturales** | 4 | Sí | 3 normales + 1 definitiva. Pueden ser activas o pasivas. |
 | └ **Definitiva** | 1 de las 4 | Sí | La más fuerte del héroe. Siempre trae una **mecánica de escalado fuerte** y permanente. |
+| **Stats base** | — | — | Atributo principal (STR/AGI/INT), HP, daño, rango, etc. |
 
 **Decisión — escalado repartido:** el héroe (vía su innato) tiene un escalado chico por bajas y duelos; la definitiva
 trae el escalado fuerte. Si drafteás la definitiva de otro héroe, sumás su escalado al tuyo.
-| **Stats base** | — | — | Atributo principal (STR/AGI/INT), HP, daño, rango, etc. |
-
-### Estado actual vs. modelo nuevo
-
-| Concepto | Hoy en el código | Modelo nuevo | Cambio necesario |
-|---|---|---|---|
-| Innato | `archetypePassive` (Contraataque, Puntería Perfecta, Golpe Mortal, Hambre) | Igual | Ninguno: ya encaja |
-| Habilidades naturales | 3 normales + definitiva = 4 | 4 (incluye la definitiva) | Ninguno en cantidad |
-| Definitiva | Se desbloquea sola al aprender las 3 normales | Se draftea como una más | Cambiar la regla del draft |
-| Escalado | Del héroe (`scaling`: +stat cada N bajas) | Repartido: chico en el innato, fuerte en la definitiva | Reducir el del héroe y agregar el de cada definitiva |
-| Teclas | Fijas por habilidad (`keybind: 'e'`) | Por espacio del kit | Si mezclás, dos habilidades podrían usar la misma tecla |
-| Quién lanza | Las habilidades usan `player` directamente | Cualquier héroe (jugador o rival) | Necesario para PvP |
 
 ### Escalado propuesto para las definitivas actuales
 
@@ -56,13 +45,36 @@ Así, drafteando la definitiva de otro héroe te llevás también su forma de es
 
 ---
 
-## 3. Draft de habilidades
+## 3. Niveles: experiencia y puntos de habilidad (estilo Dota 2)
 
-**Espacios del kit:** 4 espacios **libres**. Cualquier habilidad (normal o definitiva) puede ir en cualquier espacio,
-así que se puede terminar con 2 definitivas o ninguna. *(Decisión tomada: más caos, más riesgo de balance; se controla con cooldowns y costos.)*
+**El héroe gana experiencia** y sube de nivel. **Cada nivel da 1 punto de habilidad.**
+
+| Tipo de habilidad | Niveles | Restricción |
+|---|---|---|
+| Normal (activa o pasiva) | 4 | Ninguna: se sube cuando quieras |
+| Definitiva | 3 | Nivel 1 desde el nivel 6 del héroe, nivel 2 desde el 12, nivel 3 desde el 18 |
+
+- Cada nivel de habilidad mejora sus números (daño, duración, cooldown, costo…). Los valores por nivel se definen en los datos de cada habilidad.
+- **La definitiva no se puede subir de golpe:** va de a un nivel cada 6 niveles del héroe. Esto es lo que controla el poder de las definitivas
+  (sobre todo si alguien draftea 2).
+- **Las habilidades drafteadas llegan en nivel 0** (bloqueadas): hay que invertir un punto para poder usarlas.
+- **Los puntos que no se pueden gastar se guardan** (ej: normales al máximo y la definitiva esperando el nivel 12).
+- **Cuando el kit está completo y todas sus habilidades al máximo**, cada punto (guardado o nuevo) se convierte en
+  **+1 a Fuerza, Agilidad e Inteligencia**, así el héroe siempre escala.
+
+**Fuentes de experiencia (propuesta, a balancear):** bajas de creeps, oleada superada, duelo ganado (más), duelo perdido (menos).
+
+---
+
+## 4. Draft de habilidades
+
+**Espacios del kit:** 4 espacios **libres** para habilidades activas. Cualquier habilidad (normal o definitiva) puede ir en cualquier espacio,
+así que se puede terminar con 2 definitivas o ninguna. *(Decisión tomada: más caos; se controla con los niveles de la definitiva.)*
 
 **Teclas por orden de aprendizaje:** las habilidades activas toman la primera tecla libre entre **E, R, T, F**.
-Las pasivas ocupan espacio pero no usan tecla.
+
+**Pasivas:** no usan tecla ni espacio de activa, y se muestran siempre como un recuadro más chico con su información.
+Pero **cuentan como una de las 4 elecciones del draft**: el kit completo son 4 habilidades en total, sean activas o pasivas.
 
 **Cada ronda de draft ofrece 3 opciones:**
 - **1 garantizada** de las habilidades naturales de tu héroe (si te queda alguna sin elegir).
@@ -74,9 +86,20 @@ Con suerte armás el héroe "natural"; si no, mezclás a gusto.
 **Rondas:** 1 al empezar + 1 después de cada oleada, hasta llenar los 4 espacios.
 Las definitivas entran al pool como cualquier otra habilidad.
 
+### Rehacer el kit: Fragmento y Libro del Destino
+
+| Objeto | Cómo se consigue | Qué hace |
+|---|---|---|
+| **Fragmento del Destino** | Se compra en la tienda (precio a definir) o se gana por ir abajo en el ranking (ver §9) | Quita **al azar** una de tus habilidades y te ofrece **4** nuevas del pool para elegir |
+| **Libro del Destino** | Lo gana el **último** del ranking (ver §9) | **Elegís vos** qué habilidad cambiar y te ofrece **6** nuevas para elegir |
+
+- Un Fragmento se puede **usar o vender**.
+- **La habilidad reemplazada devuelve sus puntos:** recuperás los puntos invertidos para repartirlos de nuevo.
+- Solo se usan fuera de las oleadas.
+
 ---
 
-## 4. Sinergias (preparado para muchos héroes y habilidades)
+## 5. Sinergias (preparado para muchos héroes y habilidades)
 
 Para que con 50+ habilidades las combinaciones funcionen solas, sin programar cada par a mano,
 todo se apoya en tres piezas:
@@ -109,7 +132,7 @@ El cálculo de daño suma lo que haya, sin conocer cada habilidad.
 
 ---
 
-## 5. Criterios para agregar un héroe al roster
+## 6. Criterios para agregar un héroe al roster
 
 Un héroe entra solo si cumple **todo** esto:
 
@@ -119,6 +142,7 @@ Un héroe entra solo si cumple **todo** esto:
 4. **Habilidades autosuficientes:** cada una tiene que servir aunque se draftee sola en otro héroe
    (no puede depender del innato de su héroe original).
 5. **Definitiva con escalado:** la más fuerte del kit, cooldown largo, y una mecánica permanente de crecimiento con condición.
+   **Niveles definidos:** las normales traen valores para sus 4 niveles y la definitiva para sus 3.
 6. **Etiquetas declaradas:** cada habilidad aporta al menos 1 sinergia con etiquetas existentes y, a ser posible, abre 1 nueva.
 7. **Contras existentes:** al menos 1 ítem o tipo de creep que contrarreste sus habilidades principales. Si no existe, se crea junto con el héroe.
 8. **Presupuesto de poder:** los números entran en los rangos de referencia (a definir con balance: % de daño por segundo de cooldown, duración de controles, etc.).
@@ -126,7 +150,7 @@ Un héroe entra solo si cumple **todo** esto:
 
 ---
 
-## 6. Ítems: mejorar y contrarrestar
+## 7. Ítems: mejorar y contrarrestar
 
 Tres familias:
 
@@ -134,6 +158,7 @@ Tres familias:
 |---|---|---|
 | **Stats** | Base del armado | Cinturón (STR), Guantes (AGI), Túnica (INT), armadura, RM |
 | **Potenciadores** | Refuerzan etiquetas propias | +% daño crítico, +duración de mejoras, +% robo de vida |
+| **Destino** | Rehacer el kit | Fragmento del Destino (comprable/vendible), Libro del Destino (solo por ranking). Ver §4 |
 | **Contras** | Anulan etiquetas rivales | Anticuración (vs `ROBO_VIDA`), capa antimagia (vs `MÁGICO`), disipador (quita `MEJORA`), botas firmes (resistencia a `CONTROL`), hoja certera (ignora evasión), coraza de espinas (castiga `AL_GOLPEAR`) |
 
 - **Mejoras por niveles:** los ítems se pueden subir de nivel o combinar (recetas) para escalar a lo largo de la partida.
@@ -141,7 +166,7 @@ Tres familias:
 
 ---
 
-## 7. Creeps: desafío situacional
+## 8. Creeps: desafío situacional
 
 Cada tipo de creep tiene una **mecánica** y un **contra**. Si no te armás para lo que viene, te matan.
 
@@ -161,37 +186,53 @@ Cada tipo de creep tiene una **mecánica** y un **contra**. Si no te armás para
 
 ---
 
-## 8. PvP: duelos, apuestas y ranking
+## 9. PvP: duelos, apuestas y ranking
 
 - Varios héroes rivales (controlados por IA al principio) hacen el mismo recorrido: draft, tienda, oleadas.
 - Entre oleadas hay **duelos 1v1**. Ganar da el bonus de escalado por duelo.
 - Los jugadores **apuestan oro** sobre los duelos (incluidos los ajenos).
 - Se pierde con vidas en 0; gana el último en pie o el que termina primero en el ranking.
 
+### Ranking y ayuda a los que van atrás
+Partidas de **8 jugadores**. Cuando **todos ya tuvieron su duelo** de la ronda, se arma el **top 8**
+ordenado por **puntos y oro**:
+
+| Puesto | Recompensa |
+|---|---|
+| 1.º a 4.º | Nada extra |
+| 5.º a 8.º | 1 **Fragmento del Destino** cada uno (para probar suerte o venderlo) |
+| 8.º (último) | Además, 1 **Libro del Destino** |
+
+La idea es que quien va perdiendo tenga herramientas para rehacer su kit y volver a la partida.
+
 ---
 
-## 9. Orden de construcción
+## 10. Orden de construcción
 
 Cada fase deja el juego jugable.
 
 | Fase | Qué | Por qué en este orden |
 |---|---|---|
 | **A. Cimientos** ✅ | Quién lanza como parámetro, sistema genérico de mejoras, eventos, etiquetas, teclas por espacio | Sin esto, cada habilidad, ítem y creep nuevo hay que programarlo a mano contra todos los demás |
-| **B. Draft mezclado** | Nuevas reglas de draft, definitiva drafteable, escalado en la definitiva | Es lo que define al modo; con A hecha es chico |
+| **B. Draft y niveles** | Draft mezclado, definitiva drafteable, experiencia y niveles de habilidad, escalado en la definitiva, pasivas sin espacio, Fragmento del Destino en la tienda | Es lo que define al modo; los niveles cambian cómo se draftea, así que van juntos |
 | **C. Roster** | Aplicar los criterios, pasar los 4 héroes actuales, sumar héroes de INT (daño mágico) | Da variedad para que el draft mezclado tenga gracia |
 | **D. Ítems** | Contras por etiqueta, niveles/recetas, inventario limitado | Necesita las etiquetas y habilidades variadas para tener qué contrarrestar |
 | **E. Creeps** | Tipos con mecánica, aviso de oleada, oleadas compuestas | Es el campo de prueba de los ítems situacionales |
-| **F. PvP** | Rivales con IA, duelos, apuestas, ranking | Usa todo lo anterior: la IA draftea, compra y pelea con las mismas reglas |
+| **F. PvP** | Rivales con IA, duelos, apuestas, ranking top 8, Fragmentos/Libro para los últimos | Usa todo lo anterior: la IA draftea, compra y pelea con las mismas reglas |
 
 ---
 
-## 10. Preguntas abiertas
+## 11. Preguntas abiertas
 
-1. **Pasivas:** ¿las pasivas drafteadas cuentan como uno de los 4 espacios? *(Por ahora: sí.)*
-2. **Rondas de draft:** ¿se puede pagar oro para volver a tirar las 3 opciones?
-3. **Definitiva en el pool:** con espacios libres, ¿la probabilidad de que aparezca una definitiva es igual a la de una normal, o más baja?
+1. **Definitiva en el pool:** ¿aparece en el draft con la misma probabilidad que una normal, o más baja?
+2. **Precio del Fragmento del Destino** en la tienda, y cuánto se recupera al venderlo.
+3. **Puntos del ranking:** ¿qué da puntos? (duelos ganados, apuestas acertadas, oleadas…)
 
 ### Decisiones tomadas
 - Definitiva **libre** (no tiene espacio reservado).
 - Escalado **repartido** (chico en el héroe, fuerte en la definitiva).
-- Orden: fase **A** (cimientos) y después **B** (draft mezclado).
+- Orden: fase **A** (cimientos) y después **B** (draft y niveles).
+- **Niveles estilo Dota 2:** normales 4 niveles, definitiva 3 (cada 6 niveles del héroe); con todo al máximo, +1 a los 3 atributos por nivel.
+- **Habilidades drafteadas en nivel 0**; puntos sin gastar **se guardan**; al reemplazar una habilidad **se devuelven sus puntos**.
+- **Pasivas:** cuentan como una de las 4 elecciones del draft, pero no usan tecla.
+- **Rehacer el kit:** con Fragmento (4 opciones, habilidad al azar) o Libro (6 opciones, elegís cuál) del Destino; no se paga oro por volver a tirar el draft normal.

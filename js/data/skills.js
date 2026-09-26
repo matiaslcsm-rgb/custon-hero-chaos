@@ -12,7 +12,7 @@
 // La tecla NO es parte de la habilidad: se asigna por orden de aprendizaje (ver Hero.addSkill),
 // así se pueden mezclar habilidades de distintos héroes sin que choquen.
 //
-// Regla para agregar habilidades: tienen que funcionar solas en cualquier héroe (ver DISEÑO.md §5).
+// Regla para agregar habilidades: tienen que funcionar solas en cualquier héroe (ver DISEÑO.md §6).
 // Por eso no dependen del innato de su héroe original, y los efectos temporales se aplican con
 // addEffect() en vez de campos propios del héroe.
 //
