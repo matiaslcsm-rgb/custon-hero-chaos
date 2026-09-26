@@ -15,7 +15,8 @@
 //               critChance   +% probabilidad de crítico (se suman)
 //               lifesteal    +% robo de vida (se suman)
 //               dmgReduction reducción de daño recibido (se toma la mayor)
-//   flags     estados sin número: 'stun', 'invulnerable', 'preventDeath' (la vida no baja de 1), 'taunt'
+//   flags     estados sin número: 'stun', 'invulnerable', 'preventDeath' (la vida no baja de 1), 'taunt',
+//             'freeCast' (las habilidades no gastan maná)
 //   tags      etiquetas (ver data/tags.js), para que ítems de contra puedan detectarlo
 //   hooks     reacciones a eventos (ver abajo) + onExpire(owner, efecto) al terminar
 //   data      estado interno libre del efecto (acumuladores, combos...)

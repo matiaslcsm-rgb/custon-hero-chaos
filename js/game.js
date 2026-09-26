@@ -134,26 +134,38 @@ function onWaveCleared() {
     else startPreparation();
 }
 
-function handlePlayerDeath() {
+// Voluntad de Titán: al morir en una oleada (PvE), el héroe revive en el lugar con la vida llena y,
+// durante unos segundos, no recibe daño, ataca más rápido y lanza habilidades sin gastar maná.
+const TITAN_WILL = { duration: 5, atkSpeedPct: 1.0 };
+
+function applyTitanWill(hero) {
+    addEffect(hero, {
+        id: 'TITAN_WILL', name: 'Voluntad de Titán', duration: TITAN_WILL.duration,
+        mods: { atkSpeedPct: TITAN_WILL.atkSpeedPct }, flags: ['invulnerable', 'freeCast']
+    });
+}
+
+// killer: la unidad que lo mató (un creep), o null si murió por otra causa (ej: el costo de Forma Inmortal).
+function handlePlayerDeath(killer) {
     if (gameState !== 'WAVE') return; // evita procesar la misma muerte dos veces
     player.lives--;
+    const cause = killer ? `${killer.label} te mató` : 'Moriste';
     if (player.lives <= 0) {
         gameState = 'GAMEOVER';
         setStateText('GAME OVER');
-        log('💀 Sin vidas restantes. GAME OVER.');
+        log(`💀 ${cause}. Sin vidas restantes. GAME OVER.`);
         showPanel('restart-btn', true);
     } else {
-        log(`💀 Te derrotaron. Te queda ${player.lives} vida. Reapareciendo con 2.5s de invulnerabilidad...`);
         player.hp = player.maxHp;
-        player.x = 0; player.y = Math.floor(ROWS / 2);
-        addEffect(player, { id: 'RESPAWN', name: 'Invulnerable', duration: 2.5, flags: ['invulnerable'] });
+        applyTitanWill(player);
+        log(`💀 ${cause} (te queda ${player.lives} vida). ⚡ ¡Voluntad de Titán! Revivís con ${TITAN_WILL.duration}s de inmortalidad, +${TITAN_WILL.atkSpeedPct * 100}% vel. ataque y habilidades sin costo de maná.`);
     }
 }
 
 // Punto único para la muerte de cualquier héroe (lo usan los efectos que hacen daño, ej: Forma Inmortal).
 // Con PvP, acá se resuelve también la muerte de héroes rivales.
-function onHeroDeath(hero) {
-    if (hero === player) handlePlayerDeath();
+function onHeroDeath(hero, killer = null) {
+    if (hero === player) handlePlayerDeath(killer);
 }
 
 // Vuelve todo al estado inicial (selección de héroe) sin recargar la página.
@@ -172,7 +184,7 @@ function handleSkillKeypress(k) {
     if (skillLevel(player, skill) === 0) { log(`🔒 ${skill.name} está en nivel 0: invertile un punto para usarla.`); return; }
     const cd = player.cooldowns[skill.id] || 0;
     if (cd > 0) return;
-    const manaCost = val(skill, player, 'manaCost') || 0;
+    const manaCost = hasFlag(player, 'freeCast') ? 0 : (val(skill, player, 'manaCost') || 0);
     if (player.mana < manaCost) { log(`❌ Maná insuficiente para ${skill.name} (necesitás ${manaCost}).`); return; }
     // Solo se cobra maná y cooldown si la habilidad realmente se lanzó (ej: había objetivo en rango)
     if (!skill.cast(player)) return;
@@ -254,5 +266,5 @@ function updateCreep(c, dt) {
     c.attackTimer = 0;
     const result = player.takeDamage(effAtk, 'physical', c);
     if (result.evaded) { log(`💨 Esquivaste el ataque de ${c.label}.`); return; }
-    if (!player.isAlive()) handlePlayerDeath();
+    if (!player.isAlive()) handlePlayerDeath(c);
 }
