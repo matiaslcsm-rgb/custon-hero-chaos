@@ -170,7 +170,30 @@ El cálculo de daño suma lo que haya, sin conocer cada habilidad.
 
 ---
 
-## 6. Criterios para agregar un héroe al roster
+## 6. Roster y criterios para agregar un héroe
+
+### Roster actual (9 héroes)
+| Héroe | Atributo | Rol | Innato |
+|---|---|---|---|
+| Axe `@` | Fuerza | Tanque de contraataque | Contraataque |
+| Sniper `S` | Agilidad | Francotirador de largo alcance | Puntería Perfecta |
+| Asesino `K` | Agilidad | Asesino de críticos | Golpe Mortal |
+| Guerrero Vampiro `V` | Fuerza | Robo de vida cuerpo a cuerpo | Hambre |
+| Arcanista `A` | Inteligencia | Ráfaga que escala lanzando hechizos | Resonancia Arcana |
+| Bruja del Hielo `F` | Inteligencia | Control de masas y ralentización | Escarcha Profunda |
+| Nigromante `N` | Inteligencia | Drenaje de vida y desgaste | Cosecha de Almas |
+| Sabio del Vacío `Ø` | Inteligencia | Movilidad y ráfaga en área | Paso Etéreo |
+| Alquimista `L` | Inteligencia | Ácido y reducción de armadura | Gredas Transmutadoras |
+
+Los 5 magos se diseñaron con Gemini (con el prompt de `docs/prompt-heroes.md`) y se ajustaron al motor.
+Cada héroe vive en su propio archivo: `js/data/heroes/<héroe>.js`.
+
+**Balance medido** (10 partidas por héroe con su kit natural, jugador automático invulnerable; segundos para limpiar
+las 5 oleadas): Sniper 57 · Asesino 59 · Sabio del Vacío 62 · Arcanista 79 · Alquimista 87 · Axe 89 · Nigromante 91 ·
+Vampiro 99 · **Bruja del Hielo 44 (a observar)**. En otra medición con kit completo desde el inicio la Bruja quedó pareja
+con el Sniper (60 vs 53), así que falta jugarla para confirmar si está fuerte.
+
+### Criterios
 
 Un héroe entra solo si cumple **todo** esto:
 
@@ -197,6 +220,7 @@ Tres familias:
 | **Stats** | Base del armado | Cinturón (STR), Guantes (AGI), Túnica (INT), armadura, RM |
 | **Potenciadores** | Refuerzan etiquetas propias | +% daño crítico, +duración de mejoras, +% robo de vida |
 | **Destino** | Rehacer el kit | Fragmento del Destino (comprable/vendible), Libro del Destino (solo por ranking). Ver §4 |
+| **Contras pedidos por los magos** | Pendientes de crear | Silencio (impide lanzar habilidades), inmunidad mágica, anticuración (vs Nigromante y Alquimista), disipar mejoras (vs Furia Química) |
 | **Contras** | Anulan etiquetas rivales | Anticuración (vs `ROBO_VIDA`), capa antimagia (vs `MÁGICO`), disipador (quita `MEJORA`), botas firmes (resistencia a `CONTROL`), hoja certera (ignora evasión), coraza de espinas (castiga `AL_GOLPEAR`) |
 
 - **Mejoras por niveles:** los ítems se pueden subir de nivel o combinar (recetas) para escalar a lo largo de la partida.

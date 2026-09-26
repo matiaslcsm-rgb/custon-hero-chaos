@@ -449,6 +449,98 @@ test('Aturdido no se mueve; ralentizar reduce la velocidad', () => {
     checkNear(effMoveMult(c), 1 - 0.4, 'Salto Sangriento ralentiza 40%');
 });
 
+// ============================================================ MAGOS Y MOTOR
+test('Pasiva en nivel 0 no hace nada; en nivel 1 actúa una vez por segundo', () => {
+    newGame('FROSTWITCH');
+    const aura = learn('FROSTWITCH_AURA', 0);
+    const c = dummy({ hp: 9999, maxHp: 9999 });
+    for (let i = 0; i < 60; i++) tickEffects(player, 1 / 60);
+    checkEq(c.hp, 9999, 'nivel 0: sin daño');
+    player.skillLevels[aura.id] = 1;
+    for (let i = 0; i < 59; i++) tickEffects(player, 1 / 60);
+    check(c.hp > 9999 - 1, 'todavía no pasó un segundo');
+    tickEffects(player, 1 / 60); tickEffects(player, 1 / 60);
+    check(c.hp < 9999, 'al segundo hace daño');
+});
+
+test('Resonancia Arcana: +8% de amplificación por carga (máx. 5)', () => {
+    newGame('ARCANIST');
+    const base = effSpellAmp(player);
+    for (let i = 0; i < 7; i++) emit(player, 'onCast', { skill: null });
+    checkNear(effSpellAmp(player) - base, 40, '5 cargas');
+});
+
+test('Escarcha Profunda: el daño mágico ralentiza 15%', () => {
+    newGame('FROSTWITCH');
+    const c = dummy({ hp: 9999, maxHp: 9999 });
+    dealDamage(player, c, 10, 'physical');
+    checkEq(effMoveMult(c), 1, 'el físico no ralentiza');
+    dealDamage(player, c, 10, 'magical');
+    checkNear(effMoveMult(c), 0.85, 'el mágico sí');
+});
+
+test('Armadura de Escarcha: +armadura y ralentiza el ataque de quien te pega', () => {
+    newGame('FROSTWITCH');
+    const armor0 = effArmor(player);
+    const s = learn('FROSTWITCH_ARMOR', 1);
+    s.cast(player);
+    checkNear(effArmor(player) - armor0, valueAt(s, 'armorBonus', 1), 'armadura');
+    const c = dummy();
+    dealDamage(c, player, 10, 'physical');
+    checkNear(effAtkSpeed(c) / c.atkSpeed, 1 - valueAt(s, 'attackerSlow', 1), 'velocidad de ataque del atacante');
+});
+
+test('Pulverización Ácida: quita armadura y hace daño por segundo', () => {
+    newGame('ALCHEMIST');
+    const s = learn('ALCHEMIST_ACID', 1);
+    const c = dummy({ armor: 3, hp: 9999, maxHp: 9999 });
+    s.cast(player);
+    checkNear(effArmor(c), 3 - valueAt(s, 'armorReduction', 1), 'armadura del enemigo');
+    for (let i = 0; i < 61; i++) tickEffects(c, 1 / 60);
+    check(c.hp < 9999, 'daño por segundo');
+});
+
+test('Paso Etéreo: +20% de evasión al lanzar', () => {
+    newGame('VOIDSAGE');
+    const ev = effEvasion(player);
+    emit(player, 'onCast', { skill: null });
+    checkNear(effEvasion(player) - ev, 20, 'evasión');
+});
+
+test('Sobrecarga Mágica: el ataque después de lanzar suma daño mágico una sola vez', () => {
+    newGame('ARCANIST');
+    learn('ARCANIST_SURGE', 1);
+    const c = dummy({ hp: 9999, maxHp: 9999 });
+    emit(player, 'onCast', { skill: null });
+    resolveBasicHit(player, c, 10, false);
+    const withSurge = 9999 - c.hp;
+    c.hp = 9999;
+    resolveBasicHit(player, c, 10, false);
+    check(withSurge > 9999 - c.hp, 'el primer golpe hace daño extra');
+    checkEq(9999 - c.hp, 10, 'el segundo golpe es normal');
+});
+
+test('Furia Química: el Ascenso sube la Inteligencia', () => {
+    newGame('ALCHEMIST');
+    const s = learn('ALCHEMIST_CHEMICAL', 1);
+    s.cast(player);
+    const int0 = player.int, mana0 = player.maxMana;
+    dealDamage(player, dummy(), 99999, 'pure');
+    checkNear(player.int - int0, valueAt(s, 'intPerKill', 1), 'Inteligencia');
+    check(player.maxMana > mana0, 'y con ella el maná máximo');
+});
+
+test('Pacto de la Muerte: daño puro en área y cura lo que drena', () => {
+    newGame('NECROMANCER');
+    const s = learn('NECROMANCER_REAP', 1);
+    const a = dummy({ hp: 9999, maxHp: 9999, armor: 50 }), b = dummy({ y: player.y + 1, hp: 9999, maxHp: 9999 });
+    player.hp = 1;
+    s.cast(player);
+    const expected = Math.round(valueAt(s, 'baseDmg', 1) + player.int * valueAt(s, 'intRatio', 1));
+    checkEq(9999 - a.hp, expected, 'el daño puro ignora la armadura');
+    checkEq(player.hp, Math.min(player.maxHp, 1 + 2 * expected), 'cura el total drenado');
+});
+
 // ============================================================ PARTIDAS COMPLETAS
 // El "jugador" draftea la primera opción, reparte los puntos, camina hacia el enemigo más cercano y
 // lanza sus habilidades. Es invulnerable para que la prueba mida que el flujo completo funciona.

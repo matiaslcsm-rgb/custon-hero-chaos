@@ -90,7 +90,7 @@ class Hero {
         this.skillPoints += refund;
         return refund;
     }
-    skillForKey(k) { return this.skills.find(s => this.keyBindings[s.id] === k) || null; }
+    skillForKey(k) { return (k && this.skills.find(s => this.keyBindings[s.id] === k)) || null; }
     regenTick(dt) {
         this.hp = Math.min(this.maxHp, this.hp + this.hpRegen * dt);
         this.mana = Math.min(this.maxMana, this.mana + this.manaRegen * dt);

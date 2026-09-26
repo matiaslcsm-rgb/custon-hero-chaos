@@ -51,8 +51,8 @@ function blinkNextTo(unit, target) {
 //   'magical'  → resistencia mágica en % (como máximo 75%)
 //   'pure'     → sin mitigación
 function mitigate(target, amount, type) {
-    if (type === 'physical') return amount * Math.max(0.2, 1 - (target.armor || 0) * 0.04);
-    if (type === 'magical') return amount * Math.max(0.25, 1 - (target.magicResist || 0) / 100);
+    if (type === 'physical') return amount * Math.min(2, Math.max(0.2, 1 - effArmor(target) * 0.04)); // armadura negativa: más daño (hasta x2)
+    if (type === 'magical') return amount * Math.max(0.25, 1 - effMagicResist(target) / 100);
     return amount;
 }
 
@@ -63,9 +63,9 @@ function mitigate(target, amount, type) {
 // Devuelve { dealt, evaded }: dealt es la vida que realmente perdió el objetivo (para robo de vida).
 function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     if (!target.isAlive() || hasFlag(target, 'invulnerable')) return { dealt: 0, evaded: false };
-    if (opts.isAttack && Math.random() < (target.evasion || 0) / 100) return { dealt: 0, evaded: true };
+    if (opts.isAttack && Math.random() < effEvasion(target) / 100) return { dealt: 0, evaded: true };
     let final = amount;
-    if (type === 'magical' && source) final *= 1 + (source.spellAmp || 0) / 100;
+    if (type === 'magical' && source) final *= 1 + effSpellAmp(source) / 100;
     final = mitigate(target, final * (1 - effDmgReduction(target)), type);
     final = Math.round(final * (1 + sumMod(target, 'dmgTakenPct'))); // ej: Condenado
     if (target.oneHit) final = target.hp;
@@ -74,6 +74,7 @@ function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     target.hp -= hpLost;
     // dealt en el evento es el daño completo (sin recortar por la vida restante): lo usa Forma Inmortal para acumular
     emit(target, 'onDamaged', { source, dealt: final, type });
+    if (source && hpLost > 0) emit(source, 'onDealDamage', { target, dealt: hpLost, type });
     if (!target.isAlive()) onUnitDeath(target, source);
     return { dealt: hpLost, evaded: false };
 }

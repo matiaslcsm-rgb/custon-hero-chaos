@@ -16,6 +16,10 @@
 //               lifesteal    +% robo de vida (se suman)
 //               dmgReduction reducción de daño recibido (se toma la mayor)
 //               dmgTakenPct  +% de daño recibido (se suman; ej: Condenado)
+//               armor        armadura extra (se suman; negativo = reducir armadura)
+//               magicResist  resistencia mágica extra en % (se suman)
+//               evasion      probabilidad de esquivar ataques básicos en % (se suman)
+//               spellAmp     amplificación de hechizo en % (se suman)
 //   flags     estados sin número: 'stun', 'invulnerable', 'preventDeath' (la vida no baja de 1), 'taunt',
 //             'freeCast' (las habilidades no gastan maná), 'persistent' (no se pierde al morir)
 //   tags      etiquetas (ver data/tags.js), para que ítems de contra puedan detectarlo
@@ -23,15 +27,18 @@
 //   data      estado interno libre del efecto (acumuladores, combos...)
 //
 // EVENTOS — emit(unidad, evento, payload) avisa al innato, a las habilidades y a los efectos activos
-// de esa unidad. Cada hook recibe (dueño, payload, fuente). Eventos disponibles:
+// de esa unidad. Cada hook recibe (dueño, payload, fuente) y además `this` es la fuente (el innato, la
+// habilidad o el efecto), así dentro de una pasiva se puede usar val(this, owner, 'clave').
+// Las habilidades en nivel 0 (drafteadas pero sin aprender) no reaccionan. Eventos disponibles:
 //   beforeAttack     { target, dmg }            antes de tirar el crítico; se puede modificar dmg
 //   onHit            { target, dealt, isCrit }  un ataque básico impactó
 //   onKill           { victim }                 la unidad eliminó a un enemigo
+//   onDealDamage     { target, dealt, type }    la unidad hizo daño (ataque, habilidad, daño en el tiempo...)
 //   onDamaged        { source, dealt, type }    la unidad recibió daño (no se emite si lo esquivó)
 //   beforeLifesteal  { target, mult }           antes de curar por robo de vida; se puede modificar mult
 //   onHeal           { amount }                 la unidad se curó (robo de vida, habilidades...)
 //   onCast           { skill }                  la unidad lanzó una habilidad
-//   onTick           { dt }                     cada frame de la oleada
+//   onTick           { dt }                     cada frame de la oleada (para algo "por segundo", usar everyInterval)
 
 function addEffect(unit, def) {
     removeEffect(unit, def.id);
@@ -59,14 +66,26 @@ function tickEffects(unit, dt) {
     const expired = unit.effects.filter(e => e.until <= gameClock);
     if (!expired.length) return;
     unit.effects = unit.effects.filter(e => e.until > gameClock);
-    expired.forEach(e => { if (e.hooks.onExpire) e.hooks.onExpire(unit, e); });
+    expired.forEach(e => { if (e.hooks.onExpire) e.hooks.onExpire.call(e, unit, e); });
 }
 
 function emit(unit, event, payload) {
     const innate = unit.innate;
-    if (innate && innate.hooks && innate.hooks[event]) innate.hooks[event](unit, payload, innate);
-    (unit.skills || []).forEach(s => { if (s.hooks && s.hooks[event]) s.hooks[event](unit, payload, s); });
-    activeEffects(unit).forEach(e => { if (e.hooks[event]) e.hooks[event](unit, payload, e); });
+    if (innate && innate.hooks && innate.hooks[event]) innate.hooks[event].call(innate, unit, payload, innate);
+    (unit.skills || []).forEach(s => {
+        if (s.hooks && s.hooks[event] && (unit.skillLevels[s.id] || 0) > 0) s.hooks[event].call(s, unit, payload, s);
+    });
+    activeEffects(unit).forEach(e => { if (e.hooks[event]) e.hooks[event].call(e, unit, payload, e); });
+}
+
+// Para cosas que pasan "cada X segundos" (auras, daño en el tiempo, regeneración): devuelve true una vez
+// por intervalo. Hace falta porque onTick corre cada frame, y el daño por frame se redondearía a 0.
+// key identifica el temporizador dentro de la unidad (ej: el id de la habilidad).
+function everyInterval(unit, key, dt, interval = 1) {
+    unit.intervals = unit.intervals || {};
+    const t = (unit.intervals[key] || 0) + dt;
+    unit.intervals[key] = t >= interval ? t - interval : t;
+    return t >= interval;
 }
 
 // --- STATS EFECTIVOS (stats base de la unidad + efectos activos) ---
@@ -77,3 +96,7 @@ function effRange(u) { return u.attackRange * (1 + sumMod(u, 'rangePct')); }
 function effCritChance(u) { return (u.critChance || 0) + sumMod(u, 'critChance'); }
 function effLifesteal(u) { return (u.lifesteal || 0) + sumMod(u, 'lifesteal'); }
 function effDmgReduction(u) { return maxMod(u, 'dmgReduction'); }
+function effArmor(u) { return (u.armor || 0) + sumMod(u, 'armor'); }
+function effMagicResist(u) { return (u.magicResist || 0) + sumMod(u, 'magicResist'); }
+function effEvasion(u) { return (u.evasion || 0) + sumMod(u, 'evasion'); }
+function effSpellAmp(u) { return (u.spellAmp || 0) + sumMod(u, 'spellAmp'); }

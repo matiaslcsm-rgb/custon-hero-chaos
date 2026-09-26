@@ -29,7 +29,10 @@ function validateContent() {
         (a.tags || []).forEach(tag => { if (!TAGS[tag]) problems.push(`${where}: etiqueta desconocida "${tag}"`); });
         if (!a.tags || !a.tags.length) problems.push(`${where}: no declara etiquetas`);
     };
+    const symbols = {};
     Object.values(HERO_TEMPLATES).forEach(t => {
+        if (symbols[t.symbol]) problems.push(`${t.key}: usa el símbolo "${t.symbol}", igual que ${symbols[t.symbol]}`);
+        symbols[t.symbol] = t.key;
         ['str', 'agi', 'int'].forEach(a => {
             const v = t.attributes && t.attributes[a];
             if (!Array.isArray(v) || v.length !== 2) problems.push(`${t.key}: attributes.${a} debe ser [base, ganancia por nivel]`);

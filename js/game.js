@@ -163,7 +163,7 @@ function resetGame() {
 function handleSkillKeypress(k) {
     if (!player || !player.isAlive()) return;
     const skill = player.skillForKey(k);
-    if (!skill) return;
+    if (!skill || skill.kind !== 'active') return;
     if (skillLevel(player, skill) === 0) { log(`🔒 ${skill.name} está en nivel 0: invertile un punto para usarla.`); return; }
     const cd = player.cooldowns[skill.id] || 0;
     if (cd > 0) return;
@@ -263,7 +263,7 @@ function updateCreep(c, dt) {
     if (dPlayer > c.range) { stepCreepToward(c, player.x, player.y, dt); return; }
 
     c.attackTimer += dt;
-    if (c.attackTimer < 1 / (c.atkSpeed * enrage)) return;
+    if (c.attackTimer < 1 / (effAtkSpeed(c) * enrage)) return;
     c.attackTimer = 0;
     // dealDamage resuelve la muerte del héroe (revivir, Condenado o eliminación) a través de onHeroDeath
     const result = dealDamage(c, player, Math.round(effAtk), 'physical', { isAttack: true });

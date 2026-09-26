@@ -12,10 +12,12 @@ const TAGS = {
     'AL_LANZAR': 'Se activa al lanzar habilidades',
     'CRÍTICO': 'Usa o mejora los golpes críticos',
     'ROBO_VIDA': 'Cura con el daño causado',
+    'CURACIÓN': 'Recupera vida (regeneración, curaciones directas)',
     'CONTROL': 'Aturde, ralentiza o provoca',
     'MOVILIDAD': 'Desplaza al héroe',
     'ÁREA': 'Afecta a varios enemigos a la vez',
     'DAÑO_EN_EL_TIEMPO': 'Daño repartido a lo largo de varios segundos',
     'MEJORA': 'Aplica un efecto temporal positivo (se puede disipar)',
+    'PERJUICIO': 'Aplica un efecto negativo al enemigo (reducir armadura, más daño recibido...)',
     'INVOCACIÓN': 'Crea unidades aliadas'
 };

@@ -6,13 +6,17 @@ subís de nivel, comprás ítems y sobrevivís oleadas de creeps.
 - **Jugar:** abrir `index.html` (doble clic).
 - **Probar:** abrir `tests.html` (doble clic). Corre todas las pruebas automáticas y muestra ✅/❌.
 - **Diseño:** reglas, decisiones, glosario y roadmap en [`DISEÑO.md`](DISEÑO.md).
+- **Nuevos héroes con otra IA:** prompt listo en [`docs/prompt-heroes.md`](docs/prompt-heroes.md).
 
 ## Estructura
 
 ```
 index.html · style.css · tests.html
 js/
-├── data/        héroes, habilidades, ítems, creeps y etiquetas (contenido)
+├── data/        contenido del juego
+│   ├── registry.js    registro de héroes (y documentación del formato)
+│   ├── heroes/        un archivo por héroe: plantilla + sus 4 habilidades
+│   └── items.js · creeps.js · tags.js
 ├── utils.js     log y utilidades
 ├── effects.js   efectos temporales y eventos de combate
 ├── progression.js  experiencia, niveles, puntos de habilidad, draft
