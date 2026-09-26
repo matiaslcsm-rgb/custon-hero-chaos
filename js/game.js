@@ -112,8 +112,14 @@ function handlePlayerDeath() {
         log(`💀 Te derrotaron. Te queda ${player.lives} vida. Reapareciendo con 2.5s de invulnerabilidad...`);
         player.hp = player.maxHp;
         player.x = 0; player.y = Math.floor(ROWS / 2);
-        player.invulnerableUntil = gameClock + 2.5;
+        addEffect(player, { id: 'RESPAWN', name: 'Invulnerable', duration: 2.5, flags: ['invulnerable'] });
     }
+}
+
+// Punto único para la muerte de cualquier héroe (lo usan los efectos que hacen daño, ej: Forma Inmortal).
+// Con PvP, acá se resuelve también la muerte de héroes rivales.
+function onHeroDeath(hero) {
+    if (hero === player) handlePlayerDeath();
 }
 
 // Vuelve todo al estado inicial (selección de héroe) sin recargar la página.
@@ -127,24 +133,27 @@ function resetGame() {
 // --- HABILIDADES ACTIVAS ---
 function handleSkillKeypress(k) {
     if (!player || !player.isAlive()) return;
-    const skill = player.skills.find(s => s.keybind === k);
+    const skill = player.skillForKey(k);
     if (!skill) return;
     const cd = player.cooldowns[skill.id] || 0;
     if (cd > 0) return;
     if (skill.manaCost && player.mana < skill.manaCost) { log(`❌ Maná insuficiente para ${skill.name} (necesitás ${skill.manaCost}).`); return; }
     // Solo se cobra maná y cooldown si la habilidad realmente se lanzó (ej: había objetivo en rango)
-    if (!skill.cast()) return;
+    if (!skill.cast(player)) return;
     if (skill.manaCost) player.mana -= skill.manaCost;
     if (skill.cooldown) player.cooldowns[skill.id] = skill.cooldown;
+    emit(player, 'onCast', { skill });
 }
 
 // --- ACTUALIZACIÓN POR FRAME DURANTE UNA OLEADA ---
 function updateWave(dt) {
-    // Multiplicadores temporales de velocidad de movimiento (Masacre +25%, Visión de Cazador -50%)
-    let moveSpeedMult = 1;
-    if (gameClock < player.masacreUntil) moveSpeedMult *= 1.25;
-    if (gameClock < player.visionUntil) moveSpeedMult *= 0.5;
-    const effMoveInterval = player.moveInterval / moveSpeedMult;
+    // Efectos temporales: avanzan, emiten onTick y los vencidos disparan su onExpire (puede matar al jugador).
+    tickEffects(player, dt);
+    creeps.forEach(c => { if (c.isAlive()) tickEffects(c, dt); });
+    if (gameState !== 'WAVE' || !player.isAlive()) return;
+
+    // Movimiento (la velocidad la modifican los efectos: Masacre, Visión de Cazador...)
+    const effMoveInterval = player.moveInterval / effMoveMult(player);
     moveTimer += dt;
     if (moveTimer > effMoveInterval) {
         if (keys['w'] || keys['arrowup']) player.y = Math.max(0, player.y - 1);
@@ -154,42 +163,21 @@ function updateWave(dt) {
         moveTimer = 0;
     }
 
-    // Multiplicadores temporales de velocidad de ataque y rango (Parpadeo, Furia, Masacre, Forma Inmortal, Velocidad Letal, Visión)
-    let atkSpeedMult = 1;
-    if (gameClock < player.atkSpeedBuffUntil) atkSpeedMult += 0.20;
-    if (gameClock < player.furiaUntil) atkSpeedMult += 0.30;
-    if (gameClock < player.masacreUntil) atkSpeedMult += 0.40;
-    if (gameClock < player.immortalUntil) atkSpeedMult += 0.30;
-    if (gameClock < player.lethalSpeedUntil) atkSpeedMult += 0.60;
-    const effAtkSpeed = player.atkSpeed * atkSpeedMult;
-    const effRange = player.attackRange * (gameClock < player.visionUntil ? 1.4 : 1);
-
-    // Ataque del jugador al enemigo vivo más cercano en rango
-    const target = nearestAliveCreep(player.x, player.y, effRange);
+    // Ataque automático al enemigo vivo más cercano en rango
+    const target = nearestEnemy(player, effRange(player));
     if (target) {
         player.attackTimer += dt;
-        if (player.attackTimer >= (1 / effAtkSpeed)) {
+        if (player.attackTimer >= (1 / effAtkSpeed(player))) {
             player.attackTimer = 0;
-            const { dmg, isCrit } = rollAttackDamage(target);
-            if (player.projectileSpeed > 0) fireProjectile(player.x, player.y, target, dmg, isCrit);
-            else resolveBasicHit(target, dmg, isCrit);
+            const { dmg, isCrit } = rollAttackDamage(player, target);
+            if (player.projectileSpeed > 0) fireProjectile(player, target, dmg, isCrit);
+            else resolveBasicHit(player, target, dmg, isCrit);
         }
     } else {
         player.attackTimer = 0;
     }
     updateProjectiles(dt);
     player.regenTick(dt);
-
-    // Forma Inmortal: al terminar, paga una fracción del daño acumulado durante la protección
-    if (player.immortalUntil > 0 && gameClock >= player.immortalUntil) {
-        const payback = Math.round(player.immortalAccumulatedDmg * 0.3);
-        player.immortalUntil = 0; player.immortalAccumulatedDmg = 0;
-        if (payback > 0) {
-            player.hp = Math.max(0, player.hp - payback);
-            log(`⚠️ Forma Inmortal termina: recibís ${payback} de daño acumulado.`);
-            if (!player.isAlive()) handlePlayerDeath();
-        }
-    }
 
     creeps.forEach(c => updateCreep(c, dt));
 
@@ -200,16 +188,13 @@ function updateWave(dt) {
     if (gameState === 'WAVE' && creeps.every(c => !c.isAlive())) onWaveCleared();
 }
 
-// IA de un creep: daño en el tiempo, aura del jefe, acercarse al jugador y atacarlo.
+// IA de un creep: aura del jefe, acercarse al jugador y atacarlo.
+// Las reacciones al daño (Contraataque, Furia, Forma Inmortal) las manejan los hooks onDamaged del héroe.
 function updateCreep(c, dt) {
     if (!c.isAlive()) return;
     // Si el jugador murió (o fue Game Over) en este mismo frame, el resto de los creeps no sigue pegando
     if (gameState !== 'WAVE' || !player.isAlive()) return;
-    if (c.dot && gameClock < c.dot.until) {
-        c.hp = c.oneHit ? 0 : Math.max(0, c.hp - c.dot.dps * dt);
-        if (c.hp <= 0) { killCreep(c); return; }
-    }
-    if (c.stunnedUntil > gameClock) return;
+    if (hasFlag(c, 'stun')) return;
 
     let effAtk = c.atk;
     if (!c.isBoss && boss && boss.isAlive()) {
@@ -219,10 +204,8 @@ function updateCreep(c, dt) {
 
     const dPlayer = Math.hypot(c.x - player.x, c.y - player.y);
     if (dPlayer > c.range) {
-        const slowed = c.slowUntil > gameClock;
         c.moveTimer += dt * 1000;
-        const interval = slowed ? c.moveInterval * 2 : c.moveInterval;
-        if (c.moveTimer >= interval) {
+        if (c.moveTimer >= c.moveInterval / effMoveMult(c)) {
             c.moveTimer = 0;
             const dx = player.x - c.x, dy = player.y - c.y;
             if (Math.abs(dx) >= Math.abs(dy)) c.x += Math.sign(dx); else c.y += Math.sign(dy);
@@ -233,20 +216,7 @@ function updateCreep(c, dt) {
     c.attackTimer += dt;
     if (c.attackTimer < (1 / c.atkSpeed)) return;
     c.attackTimer = 0;
-    const result = player.takeDamage(effAtk, 'physical');
+    const result = player.takeDamage(effAtk, 'physical', c);
     if (result.evaded) { log(`💨 Esquivaste el ataque de ${c.label}.`); return; }
-    // Furia del Guerrero: cada golpe recibido suma +2 de daño plano (tope +30) mientras dura
-    if (gameClock < player.furiaUntil && result.dealt > 0) {
-        player.furiaBonusAtk = Math.min(30, (player.furiaBonusAtk || 0) + 2);
-    }
-    if (player.hasArchetypePassive('COUNTERATTACK') && result.dealt > 0 && c.isAlive()) {
-        const ca = player.archetypePassive;
-        let chance = ca.chance / 100;
-        if (gameClock < player.tauntActiveUntil) chance += ca.tauntBonusChance / 100;
-        if (Math.random() < chance) {
-            damageCreep(c, player.atk);
-            log(`🪓 ¡Contraataque! Golpeaste de vuelta a ${c.label}.`);
-        }
-    }
     if (!player.isAlive()) handlePlayerDeath();
 }

@@ -1,4 +1,7 @@
-// Entidad del héroe del jugador: stats derivados de atributos, regeneración y daño recibido.
+// Entidad de un héroe (el jugador y, en el futuro, los rivales): stats derivados de atributos, regeneración y daño recibido.
+
+// Teclas de habilidades activas, asignadas por orden de aprendizaje.
+const SKILL_KEYS = ['e', 'r', 't', 'f'];
 
 class Hero {
     constructor(template) {
@@ -12,24 +15,15 @@ class Hero {
         this.baseCritChance = template.baseCritChance || 0; this.baseEvasion = template.baseEvasion || 0;
         this.baseSpellAmp = template.baseSpellAmp || 0; this.baseLifesteal = template.baseLifesteal || 0;
         this.scaling = template.scaling || null;
-        this.archetypePassive = template.archetypePassive || null;
+        this.innate = template.innate || null;
         this.creepKillCount = 0; this.heroKillCount = 0;
         this.bonusArmor = 0; this.bonusAtk = 0; this.bonusCritChance = 0; this.bonusLifesteal = 0;
         this.x = 3; this.y = 6; this.gold = 100; this.lives = 2;
-        this.skills = []; this.cooldowns = {}; this.attackTimer = 0;
-        // Ventanas temporales ("Until") de las distintas habilidades activas y definitivas.
-        // Se consultan en el punto de uso (ataque, movimiento, daño recibido) en vez de recalcularse en recalculateStats().
-        this.dmgReductionUntil = 0; this.dmgReductionPct = 0.3; this.tauntActiveUntil = 0;
-        this.invulnerableUntil = 0;
-        this.atkSpeedBuffUntil = 0; this.visionUntil = 0; this.darkBloodUntil = 0;
-        this.furiaUntil = 0; this.furiaBonusAtk = 0;
-        this.masacreUntil = 0; this.lethalSpeedUntil = 0; this.lethalSpeedComboUntil = 0;
-        this.comboTarget = null; this.comboStacks = 0;
-        this.immortalUntil = 0; this.immortalAccumulatedDmg = 0;
+        this.skills = []; this.cooldowns = {}; this.keyBindings = {}; this.attackTimer = 0;
+        this.effects = []; // efectos temporales activos (mejoras/perjuicios), ver effects.js
         this.recalculateStats(); this.hp = this.maxHp; this.mana = this.maxMana;
     }
     hasSkill(id) { return this.skills.some(s => s.id === id); }
-    hasArchetypePassive(id) { return !!this.archetypePassive && this.archetypePassive.id === id; }
     recalculateStats() {
         const primaryVal = this.primaryAttr === 'STR' ? this.str : this.primaryAttr === 'AGI' ? this.agi : this.int;
         this.maxHp = Math.round(this.baseHp + (this.str * 5));
@@ -49,31 +43,36 @@ class Hero {
         this.spellAmp = this.baseSpellAmp + this.int * 0.1;
         this.lifesteal = (this.baseLifesteal || 0) + (this.bonusLifesteal || 0);
     }
-    addSkill(skill) { this.skills.push(skill); if (skill.cooldown) this.cooldowns[skill.id] = 0; this.recalculateStats(); }
+    // Las activas toman la primera tecla libre de SKILL_KEYS (por orden de aprendizaje); las pasivas no usan tecla.
+    addSkill(skill) {
+        this.skills.push(skill);
+        if (skill.cooldown) this.cooldowns[skill.id] = 0;
+        if (skill.kind !== 'passive') {
+            const used = Object.values(this.keyBindings);
+            const key = SKILL_KEYS.find(k => !used.includes(k));
+            if (key) this.keyBindings[skill.id] = key;
+        }
+        this.recalculateStats();
+    }
+    skillForKey(k) { return this.skills.find(s => this.keyBindings[s.id] === k) || null; }
     regenTick(dt) {
         this.hp = Math.min(this.maxHp, this.hp + this.hpRegen * dt);
         this.mana = Math.min(this.maxMana, this.mana + this.manaRegen * dt);
     }
     // type: 'physical' | 'magical' | 'pure' (el daño puro ignora armadura y resistencia mágica).
+    // source: quién hizo el daño (para Contraataque y otros efectos que responden al atacante).
     // Devuelve { dealt, evaded } para que el llamador sepa si hubo esquive.
-    takeDamage(amt, type) {
-        if (this.invulnerableUntil > gameClock) return { dealt: 0, evaded: false };
+    takeDamage(amt, type, source) {
+        if (hasFlag(this, 'invulnerable')) return { dealt: 0, evaded: false };
         if (Math.random() < (this.evasion || 0) / 100) return { dealt: 0, evaded: true };
-        let final = amt;
-        let reductionPct = 0;
-        if (this.dmgReductionUntil > gameClock) reductionPct = Math.max(reductionPct, this.dmgReductionPct);
-        if (this.furiaUntil > gameClock) reductionPct = Math.max(reductionPct, 0.20);
-        final *= (1 - reductionPct);
+        let final = amt * (1 - effDmgReduction(this));
         if (type === 'magical') final *= Math.max(0.25, 1 - (this.magicResist || 0) / 100);
         else if (type === 'physical') final *= Math.max(0.2, 1 - (this.armor || 0) * 0.04);
         // type === 'pure': sin mitigación.
         final = Math.round(final);
-        if (this.immortalUntil > gameClock) {
-            this.immortalAccumulatedDmg += final;
-            this.hp = Math.max(1, this.hp - final);
-        } else {
-            this.hp = Math.max(0, this.hp - final);
-        }
+        const floor = hasFlag(this, 'preventDeath') ? 1 : 0;
+        this.hp = Math.max(floor, this.hp - final);
+        emit(this, 'onDamaged', { source, dealt: final, type });
         return { dealt: final, evaded: false };
     }
     isAlive() { return this.hp > 0; }

@@ -45,3 +45,6 @@ button.primary-btn:hover { background: #48cae4; }
 #codex-detail .ability-row.fixed h4 { color: #ff9f1c; }
 #codex-detail .ability-row p { font-size: 0.78rem; color: #bbb; margin-top: 4px; }
 #codex-empty { color: #888; font-size: 0.9rem; }
+#cooldown-bar span.effect { color: #ffb703; border-color: #ffb703; }
+.tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.tag { font-size: 0.65rem; color: #9d4edd; border: 1px solid #9d4edd; padding: 1px 5px; cursor: help; }

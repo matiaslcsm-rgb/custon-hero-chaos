@@ -55,13 +55,21 @@ function renderCodexDetail(t) {
     html += `<div class="stat-grid">${statRows.map(r => `<div>${r[0]}: <strong>${r[1]}</strong></div>`).join('')}</div>`;
     html += `<div class="codex-sub">Escalado de arquetipo</div>`;
     html += `<div class="ability-row"><p>+${t.scaling.perKillsAmount} ${scalingStatLabel(t.scaling.stat)} cada ${t.scaling.perKills} bajas de creeps &middot; +${t.scaling.perHeroKill} al ganar un duelo 1v1.</p></div>`;
-    html += `<div class="codex-sub">Pasiva fija (siempre activa, no se draftea)</div>`;
-    html += `<div class="ability-row fixed"><h4>${t.archetypePassive.name}</h4><p>${t.archetypePassive.description}</p></div>`;
+    html += `<div class="codex-sub">Innato (siempre activo, no se draftea)</div>`;
+    html += abilityRow(t.innate, true);
     html += `<div class="codex-sub">Habilidades normales (elegís ${draftable.length} de ${draftable.length} a lo largo de la partida, 1 por vez)</div>`;
-    html += draftable.map(s => `<div class="ability-row"><h4>${s.name}</h4><p>${s.description}</p></div>`).join('');
+    html += draftable.map(s => abilityRow(s, false)).join('');
     html += `<div class="codex-sub">Habilidad definitiva (se desbloquea sola al aprender las 3 normales)</div>`;
-    html += `<div class="ability-row fixed"><h4>${ult.name}</h4><p>${ult.description}</p></div>`;
+    html += abilityRow(ult, true);
     detail.innerHTML = html;
+}
+
+function tagChips(tags) {
+    return (tags || []).map(tag => `<span class="tag" title="${TAGS[tag] || ''}">${tag}</span>`).join('');
+}
+
+function abilityRow(a, fixed) {
+    return `<div class="ability-row${fixed ? ' fixed' : ''}"><h4>${a.name}</h4><p>${a.description}</p><div class="tags">${tagChips(a.tags)}</div></div>`;
 }
 
 function showView(view) {
@@ -101,7 +109,15 @@ function renderCooldownBar() {
         const remaining = Math.max(0, (player.cooldowns[s.id] || 0));
         const span = document.createElement('span');
         span.className = remaining <= 0 ? 'ready' : '';
-        span.textContent = `[${s.keybind.toUpperCase()}] ${s.name}: ${remaining <= 0 ? 'Listo' : remaining.toFixed(1) + 's'}`;
+        const key = player.keyBindings[s.id];
+        span.textContent = `[${key ? key.toUpperCase() : '—'}] ${s.name}: ${remaining <= 0 ? 'Listo' : remaining.toFixed(1) + 's'}`;
+        bar.appendChild(span);
+    });
+    // Efectos activos sobre el jugador (mejoras propias, invulnerabilidad al reaparecer...)
+    activeEffects(player).forEach(e => {
+        const span = document.createElement('span');
+        span.className = 'effect';
+        span.textContent = `✦ ${e.name} ${(e.until - gameClock).toFixed(1)}s`;
         bar.appendChild(span);
     });
 }
@@ -176,7 +192,7 @@ function render() {
         projectiles.forEach(p => { ctx.beginPath(); ctx.arc(p.x * TILE + TILE / 2, p.y * TILE + TILE / 2, 3, 0, Math.PI * 2); ctx.fill(); });
     }
     if (player && player.isAlive() && (gameState === 'WAVE' || gameState === 'PREP')) {
-        const invulnerable = gameState === 'WAVE' && player.invulnerableUntil > gameClock;
+        const invulnerable = gameState === 'WAVE' && hasFlag(player, 'invulnerable');
         drawUnit({ x: player.x, y: player.y, hp: player.hp, maxHp: player.maxHp }, invulnerable ? '#ffffff' : '#00f5d4', player.symbol);
     }
 }

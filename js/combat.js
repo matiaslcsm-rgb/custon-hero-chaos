@@ -1,4 +1,6 @@
 // Sistema de combate: creación de creeps, daño, críticos, robo de vida, proyectiles, escalado y bajas.
+// Todas las funciones reciben explícitamente quién ataca (attacker/source/caster) para que el mismo
+// código sirva para el jugador y, en el futuro, para héroes rivales.
 
 // --- CREEPS ---
 function makeCreep(t, x, y, statMult, isBossUnit, bossAuraBonus) {
@@ -16,77 +18,81 @@ function makeCreep(t, x, y, statMult, isBossUnit, bossAuraBonus) {
         gold: isBossUnit ? 40 : t.gold, oneHit,
         x, y, moveTimer: 0, attackTimer: 0, isBoss: !!isBossUnit, spawnTime: gameClock,
         auraRadius: isBossUnit ? 4 : 0, auraAtkBonus: isBossUnit ? bossAuraBonus : 0,
-        stunnedUntil: 0, slowUntil: 0, dot: null,
+        effects: [],
         isAlive() { return this.hp > 0; }
     };
 }
 
+// --- OBJETIVOS ---
+// Enemigos de una unidad. Por ahora un héroe solo enfrenta creeps; con PvP se suman los héroes rivales.
+function enemiesOf(unit) { return creeps; }
+
+function nearestEnemy(unit, maxRange) {
+    let best = null, bestDist = Infinity;
+    enemiesOf(unit).forEach(c => {
+        if (!c.isAlive()) return;
+        const d = Math.hypot(c.x - unit.x, c.y - unit.y);
+        if (d < bestDist && (maxRange === undefined || d <= maxRange)) { bestDist = d; best = c; }
+    });
+    return best;
+}
+
+// Teletransporta una unidad junto a un objetivo (Parpadeo, Salto Sangriento), a 1 casilla de distancia.
+function blinkNextTo(unit, target) {
+    const dx = target.x - unit.x, dy = target.y - unit.y;
+    unit.x = Math.max(0, Math.min(COLS - 1, target.x - Math.sign(dx || 1)));
+    unit.y = Math.max(0, Math.min(ROWS - 1, dy === 0 ? target.y : target.y - Math.sign(dy)));
+}
+
+// --- DAÑO ---
 // Aplica daño a un creep respetando la regla de "un solo golpe" (oneHit) y dispara la muerte si corresponde.
-// opts.isMagical aplica la amplificación de hechizo (spellAmp) del jugador al daño. Devuelve el daño
+// opts.isMagical aplica la amplificación de hechizo (spellAmp) de quien ataca. Devuelve el daño
 // realmente aplicado (para robo de vida y otros efectos que dependen del daño causado).
-function damageCreep(c, dmg, opts) {
+function damageCreep(source, c, dmg, opts) {
     if (!c.isAlive()) return 0;
     let final = dmg;
-    if (opts && opts.isMagical) final = Math.round(final * (1 + (player.spellAmp || 0) / 100));
+    if (opts && opts.isMagical) final = Math.round(final * (1 + (source.spellAmp || 0) / 100));
     final = c.oneHit ? c.hp : Math.min(c.hp, final);
     c.hp = Math.max(0, c.hp - final);
-    if (c.hp <= 0) killCreep(c);
+    if (c.hp <= 0) killCreep(c, source);
     return final;
 }
 
-// Robo de vida: cura al jugador según su stat de robo de vida (se duplica vs objetivos con <30% HP
-// gracias a la pasiva Hambre del Vampiro, y aumenta durante Sangre Oscura y Forma Inmortal).
-function applyLifesteal(dmgDealt, target) {
-    let ls = player.lifesteal || 0;
-    if (gameClock < player.immortalUntil) ls += 25; // Forma Inmortal: +25% robo de vida
+// Robo de vida: cura según el robo de vida efectivo (base + efectos). El innato Hambre y Sangre Oscura
+// modifican el multiplicador a través del evento beforeLifesteal.
+function applyLifesteal(unit, dmgDealt, target) {
+    const ls = effLifesteal(unit);
     if (ls <= 0 || dmgDealt <= 0) return;
-    let mult = 1;
-    if (player.hasArchetypePassive('BLOODLUST') && target && target.maxHp && target.hp / target.maxHp < 0.3) mult = 2;
-    if (gameClock < player.darkBloodUntil) mult += 0.5;
-    const heal = Math.round(dmgDealt * (ls / 100) * mult);
-    if (heal > 0) player.hp = Math.min(player.maxHp, player.hp + heal);
+    const ctx = { target, mult: 1 };
+    emit(unit, 'beforeLifesteal', ctx);
+    const heal = Math.round(dmgDealt * (ls / 100) * ctx.mult);
+    if (heal > 0) unit.hp = Math.min(unit.maxHp, unit.hp + heal);
 }
 
-// Tira el crítico y aplica todos los multiplicadores de daño activos (Puntería Perfecta, Furia,
-// Sangre Oscura, combo de Velocidad Letal, Masacre) para un golpe de ataque básico.
-function rollAttackDamage(target) {
-    let dmg = player.atk;
-    if (player.hasArchetypePassive('PERFECT_AIM') && target && player.attackRange > 0) {
-        const dist = Math.hypot(player.x - target.x, player.y - target.y);
-        const distPct = dist / player.attackRange;
-        if (distPct > 0.8) dmg *= 1.35; else if (distPct > 0.45) dmg *= 1.15;
-    }
-    if (gameClock < player.furiaUntil) dmg = dmg * 1.4 + (player.furiaBonusAtk || 0);
-    if (gameClock < player.darkBloodUntil) dmg *= 1.3;
-    if (gameClock < player.visionUntil) dmg *= 1.25;
-    if (gameClock < player.immortalUntil) dmg *= 1.3;
-    if (gameClock < player.lethalSpeedComboUntil && target && player.comboTarget === target) {
-        dmg *= (1 + Math.min(0.4, player.comboStacks * 0.05));
-    }
-    dmg = Math.round(dmg);
-    let critChance = player.critChance || 0;
-    if (gameClock < player.masacreUntil) critChance += 50;
+// Calcula el daño de un ataque básico: daño efectivo (base + efectos), luego los modificadores de
+// beforeAttack (Puntería Perfecta, combo de Velocidad Letal...) y por último la tirada de crítico.
+function rollAttackDamage(attacker, target) {
+    const ctx = { target, dmg: effAttack(attacker) };
+    emit(attacker, 'beforeAttack', ctx);
+    let dmg = Math.round(ctx.dmg);
     let isCrit = false;
-    if (Math.random() < critChance / 100) { dmg = Math.round(dmg * 2); isCrit = true; }
-    if (gameClock < player.lethalSpeedComboUntil && target) {
-        if (player.comboTarget !== target) { player.comboTarget = target; player.comboStacks = 0; }
-        player.comboStacks++;
-    }
+    if (Math.random() < effCritChance(attacker) / 100) { dmg = Math.round(dmg * 2); isCrit = true; }
     return { dmg, isCrit };
 }
 
 // Resuelve el impacto de un ataque básico ya calculado (instantáneo o al llegar un proyectil).
-function resolveBasicHit(target, dmg, isCrit) {
+function resolveBasicHit(attacker, target, dmg, isCrit) {
     if (!target.isAlive()) return; // el objetivo murió mientras el proyectil viajaba
     if (isCrit) log(`💥 ¡Golpe crítico a ${target.label}!`);
-    const dealt = damageCreep(target, dmg);
-    applyLifesteal(dealt, target);
+    const dealt = damageCreep(attacker, target, dmg);
+    applyLifesteal(attacker, dealt, target);
+    emit(attacker, 'onHit', { target, dealt, isCrit });
 }
 
 // --- PROYECTILES (ataques básicos a distancia con velocidad de proyectil) ---
 let projectiles = [];
-function fireProjectile(x, y, target, dmg, isCrit) {
-    projectiles.push({ x, y, target, dmg, isCrit, speed: player.projectileSpeed || 10 });
+function fireProjectile(attacker, target, dmg, isCrit) {
+    projectiles.push({ attacker, x: attacker.x, y: attacker.y, target, dmg, isCrit, speed: attacker.projectileSpeed || 10 });
 }
 function updateProjectiles(dt) {
     for (let i = projectiles.length - 1; i >= 0; i--) {
@@ -96,7 +102,7 @@ function updateProjectiles(dt) {
         const dist = Math.hypot(dx, dy);
         const step = p.speed * dt;
         if (dist < 0.35 || step >= dist) {
-            resolveBasicHit(p.target, p.dmg, p.isCrit);
+            resolveBasicHit(p.attacker, p.target, p.dmg, p.isCrit);
             projectiles.splice(i, 1);
             continue;
         }
@@ -105,60 +111,42 @@ function updateProjectiles(dt) {
     }
 }
 
-// --- OBJETIVOS Y MOVIMIENTO DE HABILIDADES ---
-function nearestAliveCreep(fromX, fromY, maxRange) {
-    let best = null, bestDist = Infinity;
-    creeps.forEach(c => {
-        if (!c.isAlive()) return;
-        const d = Math.hypot(c.x - fromX, c.y - fromY);
-        if (d < bestDist && (maxRange === undefined || d <= maxRange)) { bestDist = d; best = c; }
-    });
-    return best;
-}
-
-// Teletransporta al jugador junto a un objetivo (para Parpadeo y Salto Sangriento), dejándolo a 1 casilla de distancia.
-function blinkNextTo(target) {
-    const dx = target.x - player.x, dy = target.y - player.y;
-    player.x = Math.max(0, Math.min(COLS - 1, target.x - Math.sign(dx || 1)));
-    player.y = Math.max(0, Math.min(ROWS - 1, dy === 0 ? target.y : target.y - Math.sign(dy)));
-}
-
 // --- ESCALADO Y BAJAS ---
-// Aplica el bonus de escalado del héroe activo (armadura, daño, etc. según su arquetipo) y recalcula stats.
-function applyScalingBonus(amount) {
-    if (!player.scaling) return;
-    if (player.scaling.stat === 'armor') player.bonusArmor = (player.bonusArmor || 0) + amount;
-    else if (player.scaling.stat === 'atk') player.bonusAtk = (player.bonusAtk || 0) + amount;
-    else if (player.scaling.stat === 'critChance') player.bonusCritChance = (player.bonusCritChance || 0) + amount;
-    else if (player.scaling.stat === 'lifesteal') player.bonusLifesteal = (player.bonusLifesteal || 0) + amount;
-    player.recalculateStats();
+// Aplica el bonus de escalado del héroe (armadura, daño, etc. según su plantilla) y recalcula stats.
+function applyScalingBonus(hero, amount) {
+    if (!hero.scaling) return;
+    if (hero.scaling.stat === 'armor') hero.bonusArmor = (hero.bonusArmor || 0) + amount;
+    else if (hero.scaling.stat === 'atk') hero.bonusAtk = (hero.bonusAtk || 0) + amount;
+    else if (hero.scaling.stat === 'critChance') hero.bonusCritChance = (hero.bonusCritChance || 0) + amount;
+    else if (hero.scaling.stat === 'lifesteal') hero.bonusLifesteal = (hero.bonusLifesteal || 0) + amount;
+    hero.recalculateStats();
 }
 
-function applyScalingOnCreepKill() {
-    if (!player.scaling) return;
-    player.creepKillCount++;
-    if (player.creepKillCount % player.scaling.perKills === 0) {
-        applyScalingBonus(player.scaling.perKillsAmount);
-        log(`📈 ¡Escalado! +${player.scaling.perKillsAmount} ${scalingStatLabel(player.scaling.stat)} (${player.creepKillCount} bajas totales)`);
+function applyScalingOnCreepKill(hero) {
+    if (!hero.scaling) return;
+    hero.creepKillCount++;
+    if (hero.creepKillCount % hero.scaling.perKills === 0) {
+        applyScalingBonus(hero, hero.scaling.perKillsAmount);
+        log(`📈 ¡Escalado! +${hero.scaling.perKillsAmount} ${scalingStatLabel(hero.scaling.stat)} (${hero.creepKillCount} bajas totales)`);
     }
 }
 
-// Lista para cuando existan duelos PvP en el loop completo: otorga el bonus de escalado por ganar un duelo.
-function awardHeroKillScaling() {
-    if (!player.scaling) return;
-    player.heroKillCount++;
-    applyScalingBonus(player.scaling.perHeroKill);
-    log(`🏅 ¡Escalado por duelo! +${player.scaling.perHeroKill} ${scalingStatLabel(player.scaling.stat)}`);
+// Lista para cuando existan duelos PvP: otorga el bonus de escalado por ganar un duelo.
+function awardHeroKillScaling(hero) {
+    if (!hero.scaling) return;
+    hero.heroKillCount++;
+    applyScalingBonus(hero, hero.scaling.perHeroKill);
+    log(`🏅 ¡Escalado por duelo! +${hero.scaling.perHeroKill} ${scalingStatLabel(hero.scaling.stat)}`);
 }
 
-function killCreep(c) {
+function killCreep(c, killer) {
     c.hp = 0;
     const timeAlive = gameClock - (c.spawnTime || gameClock);
     const speedMult = speedGoldMultiplier(timeAlive);
     const gold = Math.max(1, Math.round(c.gold * speedMult));
-    player.gold += gold;
-    applyScalingOnCreepKill();
-    if (gameClock < player.masacreUntil) player.masacreUntil += 1.5; // Masacre: cada baja extiende la duración
+    killer.gold += gold;
+    applyScalingOnCreepKill(killer);
+    emit(killer, 'onKill', { victim: c });
     const bonusTag = speedMult > 1.05 ? ` ⚡x${speedMult.toFixed(1)}` : '';
     log(`${c.isBoss ? '👹 ¡Eliminaste al Jefe!' : '⚔️ Eliminaste un ' + c.label} (+${gold}g${bonusTag})`);
 }

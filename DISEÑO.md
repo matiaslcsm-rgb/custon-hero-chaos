@@ -176,7 +176,7 @@ Cada fase deja el juego jugable.
 
 | Fase | Qué | Por qué en este orden |
 |---|---|---|
-| **A. Cimientos** | Quién lanza como parámetro, sistema genérico de mejoras, eventos, etiquetas, teclas por espacio | Sin esto, cada habilidad, ítem y creep nuevo hay que programarlo a mano contra todos los demás |
+| **A. Cimientos** ✅ | Quién lanza como parámetro, sistema genérico de mejoras, eventos, etiquetas, teclas por espacio | Sin esto, cada habilidad, ítem y creep nuevo hay que programarlo a mano contra todos los demás |
 | **B. Draft mezclado** | Nuevas reglas de draft, definitiva drafteable, escalado en la definitiva | Es lo que define al modo; con A hecha es chico |
 | **C. Roster** | Aplicar los criterios, pasar los 4 héroes actuales, sumar héroes de INT (daño mágico) | Da variedad para que el draft mezclado tenga gracia |
 | **D. Ítems** | Contras por etiqueta, niveles/recetas, inventario limitado | Necesita las etiquetas y habilidades variadas para tener qué contrarrestar |

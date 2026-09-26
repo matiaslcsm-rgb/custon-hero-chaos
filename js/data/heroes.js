@@ -1,8 +1,11 @@
-// Datos de los héroes: stats base, pasiva fija de arquetipo y mecánica de escalado.
-
-// Cada arquetipo define su propia mecánica de escalado: qué stat sube, cuánto por cada N creeps
-// eliminados (acumulado durante toda la partida) y cuánto por ganar un duelo 1v1 contra otro héroe
-// (perHeroKill queda listo para cuando se implementen los duelos PvP del loop completo).
+// Datos de los héroes: stats base, innato y mecánica de escalado.
+//
+// innate: la habilidad innata, permanente y no drafteable. Define la identidad del héroe y reacciona a
+// eventos de combate mediante `hooks` (ver effects.js). Tiene que funcionar con cualquier kit drafteado.
+//
+// scaling: escalado chico propio del héroe: qué stat sube, cuánto por cada N creeps eliminados
+// (acumulado durante toda la partida) y cuánto por ganar un duelo 1v1 contra otro héroe
+// (perHeroKill queda listo para cuando se implementen los duelos PvP).
 const HERO_TEMPLATES = {
     AXE: {
         key: 'AXE', name: 'Axe', symbol: '@', primaryAttr: 'STR', role: 'Tanque de contraataque',
@@ -12,9 +15,20 @@ const HERO_TEMPLATES = {
         baseCritChance: 5, baseEvasion: 4, baseSpellAmp: 0, baseLifesteal: 0,
         description: 'Fuerza: tanque de primera línea. Provoca enemigos y castiga a quien lo golpea. Escala armadura.',
         scaling: { stat: 'armor', perKills: 10, perKillsAmount: 0.5, perHeroKill: 1.5 },
-        archetypePassive: {
+        innate: {
             id: 'COUNTERATTACK', name: 'Contraataque', chance: 20, tauntBonusChance: 20,
-            description: 'Pasiva fija de Fuerza: 20% de probabilidad de responder automáticamente con un golpe físico (100% de tu daño) contra quien te golpeó. La probabilidad sube mientras Llamado Provocador está activo.'
+            tags: ['FÍSICO', 'AL_RECIBIR_DAÑO'],
+            description: 'Innato: 20% de probabilidad de responder automáticamente con un golpe físico (100% de tu daño) contra quien te golpeó. +20% de probabilidad mientras estás provocando enemigos.',
+            hooks: {
+                onDamaged(owner, { source, dealt }, innate) {
+                    if (dealt <= 0 || !source || !source.isAlive()) return;
+                    let chance = innate.chance / 100;
+                    if (hasFlag(owner, 'taunt')) chance += innate.tauntBonusChance / 100;
+                    if (Math.random() >= chance) return;
+                    damageCreep(owner, source, owner.atk);
+                    log(`🪓 ¡Contraataque! Golpeaste de vuelta a ${source.label}.`);
+                }
+            }
         }
     },
     SNIPER: {
@@ -25,9 +39,17 @@ const HERO_TEMPLATES = {
         baseCritChance: 12, baseEvasion: 8, baseSpellAmp: 8, baseLifesteal: 0,
         description: 'Agilidad: DPS físico de largo alcance. Cuanto más lejos dispara, más daño hace. Frágil de cerca.',
         scaling: { stat: 'atk', perKills: 8, perKillsAmount: 3, perHeroKill: 8 },
-        archetypePassive: {
+        innate: {
             id: 'PERFECT_AIM', name: 'Puntería Perfecta',
-            description: 'Pasiva fija de Agilidad: el daño de tus ataques básicos crece con la distancia al objetivo (hasta +35% a distancia máxima).'
+            tags: ['FÍSICO', 'AL_GOLPEAR'],
+            description: 'Innato: el daño de tus ataques básicos crece con la distancia al objetivo (+15% a media distancia, +35% a distancia máxima).',
+            hooks: {
+                beforeAttack(owner, ctx) {
+                    if (!ctx.target || owner.attackRange <= 0) return;
+                    const distPct = Math.hypot(owner.x - ctx.target.x, owner.y - ctx.target.y) / owner.attackRange;
+                    if (distPct > 0.8) ctx.dmg *= 1.35; else if (distPct > 0.45) ctx.dmg *= 1.15;
+                }
+            }
         }
     },
     ASSASSIN: {
@@ -38,9 +60,11 @@ const HERO_TEMPLATES = {
         baseCritChance: 20, baseEvasion: 10, baseSpellAmp: 0, baseLifesteal: 0,
         description: 'Agilidad: asesino explosivo de altísimo daño crítico. Entra, elimina un objetivo y sale antes de que lo rodeen.',
         scaling: { stat: 'critChance', perKills: 8, perKillsAmount: 2, perHeroKill: 5 },
-        archetypePassive: {
+        // Golpe Mortal no necesita hooks: su efecto es la probabilidad de crítico base alta (baseCritChance: 20).
+        innate: {
             id: 'DEADLY_STRIKE', name: 'Golpe Mortal',
-            description: 'Pasiva fija de Agilidad: alta probabilidad base de golpe crítico (x2 daño) en cada ataque básico.'
+            tags: ['CRÍTICO'],
+            description: 'Innato: alta probabilidad base de golpe crítico (x2 daño) en cada ataque básico.'
         }
     },
     VAMPIRE: {
@@ -51,9 +75,15 @@ const HERO_TEMPLATES = {
         baseCritChance: 6, baseEvasion: 5, baseSpellAmp: 0, baseLifesteal: 15,
         description: 'Fuerza: guerrero resistente que se cura con el daño que hace. Dominante en peleas largas.',
         scaling: { stat: 'lifesteal', perKills: 9, perKillsAmount: 1, perHeroKill: 3 },
-        archetypePassive: {
+        innate: {
             id: 'BLOODLUST', name: 'Hambre',
-            description: 'Pasiva fija de Fuerza: convierte una parte de tu daño físico en vida (Robo de Vida). Se duplica contra enemigos con menos de 30% HP.'
+            tags: ['ROBO_VIDA'],
+            description: 'Innato: convierte una parte de tu daño físico en vida (Robo de Vida base 15%). La curación se duplica contra enemigos con menos de 30% HP.',
+            hooks: {
+                beforeLifesteal(owner, ctx) {
+                    if (ctx.target && ctx.target.maxHp && ctx.target.hp / ctx.target.maxHp < 0.3) ctx.mult *= 2;
+                }
+            }
         }
     }
 };
