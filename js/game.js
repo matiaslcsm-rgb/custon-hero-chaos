@@ -264,7 +264,7 @@ function updateCreep(c, dt) {
     c.attackTimer += dt;
     if (c.attackTimer < (1 / c.atkSpeed)) return;
     c.attackTimer = 0;
-    const result = player.takeDamage(effAtk, 'physical', c);
-    if (result.evaded) { log(`💨 Esquivaste el ataque de ${c.label}.`); return; }
-    if (!player.isAlive()) handlePlayerDeath(c);
+    // dealDamage resuelve la muerte del héroe (Voluntad de Titán o eliminación) a través de onHeroDeath
+    const result = dealDamage(c, player, effAtk, 'physical', { isAttack: true });
+    if (result.evaded) log(`💨 Esquivaste el ataque de ${c.label}.`);
 }

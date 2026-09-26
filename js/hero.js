@@ -1,12 +1,24 @@
 // Entidad de un héroe (el jugador y, en el futuro, los rivales): stats derivados de atributos, regeneración y daño recibido.
 
+// Qué da cada punto de atributo (estilo Dota 2). Documentado en DISEÑO.md §2.
+const ATTRIBUTE_RULES = {
+    str: { hp: 5, hpRegen: 0.05 },
+    agi: { atkSpeedPct: 0.01, moveSpeedPct: 0.01, moveSpeedCap: 40, critChance: 0.1, armor: 0.08 },
+    int: { mana: 4, manaRegen: 0.05, spellAmp: 0.1, magicResist: 0.1 },
+    primaryAtk: 0.8 // daño de ataque por punto del atributo principal
+};
+
 // Teclas de habilidades activas, asignadas por orden de aprendizaje.
 const SKILL_KEYS = ['e', 'r', 't', 'f'];
 
 class Hero {
     constructor(template) {
+        this.isHero = true;
         this.key = template.key; this.name = template.name; this.symbol = template.symbol; this.primaryAttr = template.primaryAttr;
-        this.str = 20; this.agi = 15; this.int = 15;
+        // Atributos con decimales (crecen por nivel); en pantalla se muestran redondeados hacia abajo.
+        const attrs = template.attributes;
+        this.str = attrs.str[0]; this.agi = attrs.agi[0]; this.int = attrs.int[0];
+        this.attrGain = { str: attrs.str[1], agi: attrs.agi[1], int: attrs.int[1] };
         this.baseHp = template.baseHp; this.baseAtk = template.baseAtk; this.baseAtkSpeed = template.baseAtkSpeed;
         this.baseAttackRange = template.baseAttackRange; this.baseArmor = template.baseArmor || 0;
         this.baseMagicResist = template.baseMagicResist || 0; this.baseHpRegen = template.baseHpRegen || 0;
@@ -29,25 +41,30 @@ class Hero {
     }
     hasSkill(id) { return this.skills.some(s => s.id === id); }
     recalculateStats() {
+        const R = ATTRIBUTE_RULES;
         const primaryVal = this.primaryAttr === 'STR' ? this.str : this.primaryAttr === 'AGI' ? this.agi : this.int;
-        this.maxHp = Math.round(this.baseHp + (this.str * 5) + this.bonus.maxHp);
-        this.maxMana = Math.round(this.baseMaxMana + (this.int * 4));
-        this.atk = Math.round(this.baseAtk + (primaryVal * 0.8)) + Math.round(this.bonus.atk);
-        this.atkSpeed = this.baseAtkSpeed * (1 + (this.agi * 0.01));
-        this.moveSpeed = this.baseMoveSpeed * (1 + Math.min(this.agi, 40) * 0.01);
+        this.maxHp = Math.round(this.baseHp + this.str * R.str.hp + this.bonus.maxHp);
+        this.maxMana = Math.round(this.baseMaxMana + this.int * R.int.mana);
+        this.atk = Math.round(this.baseAtk + primaryVal * R.primaryAtk + this.bonus.atk);
+        this.atkSpeed = this.baseAtkSpeed * (1 + this.agi * R.agi.atkSpeedPct);
+        this.moveSpeed = this.baseMoveSpeed * (1 + Math.min(this.agi, R.agi.moveSpeedCap) * R.agi.moveSpeedPct);
         this.moveInterval = Math.max(0.05, 1 / this.moveSpeed);
         this.attackRange = this.baseAttackRange;
-        this.armor = (this.baseArmor || 0) + this.bonus.armor;
-        this.magicResist = this.baseMagicResist;
-        this.hpRegen = this.baseHpRegen + this.str * 0.05;
-        this.manaRegen = this.baseManaRegen + this.int * 0.05;
+        this.armor = this.baseArmor + this.agi * R.agi.armor + this.bonus.armor;
+        this.magicResist = this.baseMagicResist + this.int * R.int.magicResist;
+        this.hpRegen = this.baseHpRegen + this.str * R.str.hpRegen;
+        this.manaRegen = this.baseManaRegen + this.int * R.int.manaRegen;
         this.projectileSpeed = this.baseProjectileSpeed;
-        this.critChance = this.baseCritChance + this.agi * 0.1 + this.bonus.critChance;
+        this.critChance = this.baseCritChance + this.agi * R.agi.critChance + this.bonus.critChance;
         this.evasion = this.baseEvasion;
-        this.spellAmp = this.baseSpellAmp + this.int * 0.1;
-        this.lifesteal = (this.baseLifesteal || 0) + this.bonus.lifesteal;
+        this.spellAmp = this.baseSpellAmp + this.int * R.int.spellAmp;
+        this.lifesteal = this.baseLifesteal + this.bonus.lifesteal;
     }
-    // Las activas toman la primera tecla libre de SKILL_KEYS (por orden de aprendizaje); las pasivas no usan tecla.
+    // Al subir de nivel: suma la ganancia de atributos del héroe (más en el principal).
+    gainLevelAttributes() {
+        this.str += this.attrGain.str; this.agi += this.attrGain.agi; this.int += this.attrGain.int;
+        this.recalculateStats();
+    }
     // Una habilidad drafteada llega en nivel 0: hay que invertir un punto para poder usarla.
     addSkill(skill) {
         this.skills.push(skill);
@@ -73,22 +90,6 @@ class Hero {
     regenTick(dt) {
         this.hp = Math.min(this.maxHp, this.hp + this.hpRegen * dt);
         this.mana = Math.min(this.maxMana, this.mana + this.manaRegen * dt);
-    }
-    // type: 'physical' | 'magical' | 'pure' (el daño puro ignora armadura y resistencia mágica).
-    // source: quién hizo el daño (para Contraataque y otros efectos que responden al atacante).
-    // Devuelve { dealt, evaded } para que el llamador sepa si hubo esquive.
-    takeDamage(amt, type, source) {
-        if (hasFlag(this, 'invulnerable')) return { dealt: 0, evaded: false };
-        if (Math.random() < (this.evasion || 0) / 100) return { dealt: 0, evaded: true };
-        let final = amt * (1 - effDmgReduction(this));
-        if (type === 'magical') final *= Math.max(0.25, 1 - (this.magicResist || 0) / 100);
-        else if (type === 'physical') final *= Math.max(0.2, 1 - (this.armor || 0) * 0.04);
-        // type === 'pure': sin mitigación.
-        final = Math.round(final);
-        const floor = hasFlag(this, 'preventDeath') ? 1 : 0;
-        this.hp = Math.max(floor, this.hp - final);
-        emit(this, 'onDamaged', { source, dealt: final, type });
-        return { dealt: final, evaded: false };
     }
     isAlive() { return this.hp > 0; }
 }

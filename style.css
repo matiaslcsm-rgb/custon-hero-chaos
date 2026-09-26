@@ -77,3 +77,8 @@ b.cur { color: #ffb703; }
 #destiny-panel .destiny-row { display: flex; align-items: center; gap: 6px; background: #1c1f26; border: 1px solid #9d4edd; padding: 6px; }
 #destiny-panel .destiny-row span { flex: 1; }
 #destiny-panel button { background: #9d4edd; color: #fff; border: none; font-family: inherit; padding: 3px 8px; cursor: pointer; }
+#test-report { position: fixed; top: 10px; right: 10px; width: 440px; max-height: 92vh; overflow-y: auto; background: #0d0e11; border: 2px solid #00b4d8; padding: 10px; z-index: 9999; font-size: 0.75rem; display: flex; flex-direction: column; gap: 3px; }
+#test-report h3 { margin-bottom: 6px; }
+#test-report .fail { color: #ff477e; }
+#test-report .ok { color: #72efdd; }
+#test-report small { color: #ffb703; }

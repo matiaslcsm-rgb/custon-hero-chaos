@@ -28,11 +28,11 @@ const HERO_SKILLS = {
                 const target = nearestEnemy(caster, caster.attackRange + 0.5);
                 if (!target) { log('Golpe de Hacha: sin objetivo en rango.'); return false; }
                 const dmg = Math.round(caster.atk * val(this, caster, 'dmgMult'));
-                damageCreep(caster, target, dmg);
+                const { dealt } = dealDamage(caster, target, dmg, 'physical');
                 if (target.isAlive() && Math.random() < val(this, caster, 'stunChance')) {
                     addEffect(target, { id: 'STUN', name: 'Aturdido', duration: val(this, caster, 'stunDuration'), flags: ['stun'] });
                 }
-                log(`🪓 ¡Golpe de Hacha a ${target.label}! (-${dmg} HP)`);
+                log(`🪓 ¡Golpe de Hacha a ${target.label}! (-${dealt} HP)`);
                 return true;
             }
         },
@@ -62,7 +62,7 @@ const HERO_SKILLS = {
                 const radius = val(this, caster, 'radius');
                 let hits = 0;
                 enemiesOf(caster).forEach(c => {
-                    if (c.isAlive() && Math.hypot(c.x - caster.x, c.y - caster.y) <= radius) { damageCreep(caster, c, dmg); hits++; }
+                    if (c.isAlive() && Math.hypot(c.x - caster.x, c.y - caster.y) <= radius) { dealDamage(caster, c, dmg, 'physical'); hits++; }
                 });
                 log(`🌀 ¡Giro de Combate! Golpeaste a ${hits} enemigo(s) por ${dmg} c/u.`);
                 return true;
@@ -100,8 +100,8 @@ const HERO_SKILLS = {
                 const target = nearestEnemy(caster, caster.attackRange + 2);
                 if (!target) { log('Disparo Potente: sin objetivo en rango.'); return false; }
                 const dmg = Math.round(caster.atk * val(this, caster, 'dmgMult'));
-                damageCreep(caster, target, dmg);
-                log(`🎯 ¡Disparo Potente a ${target.label}! (-${dmg} HP)`);
+                const { dealt } = dealDamage(caster, target, dmg, 'physical');
+                log(`🎯 ¡Disparo Potente a ${target.label}! (-${dealt} HP)`);
                 return true;
             }
         },
@@ -114,7 +114,7 @@ const HERO_SKILLS = {
                 const target = nearestEnemy(caster, caster.attackRange + 2);
                 if (!target) { log('Disparo Congelante: sin objetivo en rango.'); return false; }
                 const dmg = Math.round(caster.atk * val(this, caster, 'dmgMult'));
-                damageCreep(caster, target, dmg);
+                dealDamage(caster, target, dmg, 'physical');
                 const farAway = Math.hypot(caster.x - target.x, caster.y - target.y) > caster.attackRange * 0.8;
                 const slow = Math.min(0.9, val(this, caster, 'slow') + (farAway ? val(this, caster, 'farSlowBonus') : 0));
                 if (target.isAlive()) addEffect(target, { id: 'SLOW_' + this.id, name: 'Congelado', duration: val(this, caster, 'duration'), mods: { moveSpeedPct: -slow } });
@@ -149,8 +149,8 @@ const HERO_SKILLS = {
                 let dmg = Math.round(caster.atk * val(this, caster, 'dmgMult') * farMult);
                 const isCrit = Math.random() < val(this, caster, 'critChance');
                 if (isCrit) dmg = Math.round(dmg * 2);
-                damageCreep(caster, target, dmg);
-                log(`💀 ¡DISPARO MORTAL a ${target.label}!${isCrit ? ' ¡CRÍTICO!' : ''} (-${dmg} HP)`);
+                const { dealt } = dealDamage(caster, target, dmg, 'physical');
+                log(`💀 ¡DISPARO MORTAL a ${target.label}!${isCrit ? ' ¡CRÍTICO!' : ''} (-${dealt} HP)`);
                 if (!target.isAlive()) grantPermanent(caster, 'atk', val(this, caster, 'atkPerKill'), this.name);
                 return true;
             }
@@ -184,8 +184,8 @@ const HERO_SKILLS = {
                 let dmg = Math.round(caster.atk * val(this, caster, 'dmgMult'));
                 const isCrit = Math.random() < (effCritChance(caster) + val(this, caster, 'extraCrit')) / 100;
                 if (isCrit) dmg = Math.round(dmg * 2);
-                damageCreep(caster, target, dmg);
-                log(`⚔️ ¡Golpe Crítico a ${target.label}!${isCrit ? ' ¡CRÍTICO!' : ''} (-${dmg} HP)`);
+                const { dealt } = dealDamage(caster, target, dmg, 'physical');
+                log(`⚔️ ¡Golpe Crítico a ${target.label}!${isCrit ? ' ¡CRÍTICO!' : ''} (-${dealt} HP)`);
                 return true;
             }
         },
@@ -262,9 +262,9 @@ const HERO_SKILLS = {
                 if (!target) { log('Garra Vampírica: sin objetivo en rango.'); return false; }
                 const dmg = Math.round(caster.atk * val(this, caster, 'dmgMult'));
                 const lowHp = target.maxHp && target.hp / target.maxHp < 0.3;
-                const dealt = damageCreep(caster, target, dmg);
+                const { dealt } = dealDamage(caster, target, dmg, 'physical');
                 const heal = healUnit(caster, Math.round(dealt * val(this, caster, 'healPct') * (lowHp ? 2 : 1)));
-                log(`🐾 ¡Garra Vampírica a ${target.label}! (-${dmg} HP, +${heal} HP propia)`);
+                log(`🐾 ¡Garra Vampírica a ${target.label}! (-${dealt} HP, +${heal} HP propia)`);
                 return true;
             }
         },
@@ -278,9 +278,9 @@ const HERO_SKILLS = {
                 if (!target) { log('Salto Sangriento: sin objetivo en rango.'); return false; }
                 blinkNextTo(caster, target);
                 const dmg = Math.round(caster.atk * val(this, caster, 'dmgMult'));
-                damageCreep(caster, target, dmg);
+                const { dealt } = dealDamage(caster, target, dmg, 'physical');
                 if (target.isAlive()) addEffect(target, { id: 'SLOW_' + this.id, name: 'Desgarrado', duration: val(this, caster, 'slowDuration'), mods: { moveSpeedPct: -val(this, caster, 'slow') } });
-                log(`🦇 ¡Salto Sangriento sobre ${target.label}! (-${dmg} HP)`);
+                log(`🦇 ¡Salto Sangriento sobre ${target.label}! (-${dealt} HP)`);
                 return true;
             }
         },

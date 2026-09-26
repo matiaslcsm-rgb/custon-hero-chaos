@@ -3,13 +3,17 @@
 // innate: la habilidad innata, permanente y no drafteable. Define la identidad del héroe y reacciona a
 // eventos de combate mediante `hooks` (ver effects.js). Tiene que funcionar con cualquier kit drafteado.
 //
+// attributes: [base, ganancia por nivel] de Fuerza, Agilidad e Inteligencia (estilo Dota 2).
+// El atributo principal crece más rápido. Qué da cada punto: ver ATTRIBUTE_RULES en hero.js.
+//
 // scaling: escalado chico propio del héroe: qué stat sube, cuánto por cada N creeps eliminados
 // (acumulado durante toda la partida) y cuánto por ganar un duelo 1v1 contra otro héroe
 // (perHeroKill queda listo para cuando se implementen los duelos PvP).
 const HERO_TEMPLATES = {
     AXE: {
         key: 'AXE', name: 'Axe', symbol: '@', primaryAttr: 'STR', role: 'Tanque de contraataque',
-        baseHp: 120, baseAtk: 16, baseAtkSpeed: 0.9, baseAttackRange: 1.5,
+        attributes: { str: [24, 2.8], agi: [12, 1.6], int: [14, 1.6] },
+        baseHp: 100, baseAtk: 13, baseAtkSpeed: 0.9, baseAttackRange: 1.5,
         baseArmor: 2, baseMagicResist: 15, baseHpRegen: 1.5,
         baseMaxMana: 100, baseManaRegen: 1.2, baseMoveSpeed: 2.8, baseProjectileSpeed: 0,
         baseCritChance: 5, baseEvasion: 4, baseSpellAmp: 0, baseLifesteal: 0,
@@ -25,7 +29,7 @@ const HERO_TEMPLATES = {
                     let chance = innate.chance / 100;
                     if (hasFlag(owner, 'taunt')) chance += innate.tauntBonusChance / 100;
                     if (Math.random() >= chance) return;
-                    damageCreep(owner, source, owner.atk);
+                    dealDamage(owner, source, owner.atk, 'physical');
                     log(`🪓 ¡Contraataque! Golpeaste de vuelta a ${source.label}.`);
                 }
             }
@@ -33,7 +37,8 @@ const HERO_TEMPLATES = {
     },
     SNIPER: {
         key: 'SNIPER', name: 'Sniper', symbol: 'S', primaryAttr: 'AGI', role: 'Francotirador de largo alcance',
-        baseHp: 85, baseAtk: 14, baseAtkSpeed: 1.2, baseAttackRange: 5,
+        attributes: { str: [16, 1.8], agi: [22, 3.0], int: [15, 1.4] },
+        baseHp: 105, baseAtk: 8, baseAtkSpeed: 1.2, baseAttackRange: 5,
         baseArmor: 0, baseMagicResist: 10, baseHpRegen: 0.5,
         baseMaxMana: 150, baseManaRegen: 1.5, baseMoveSpeed: 2.6, baseProjectileSpeed: 11,
         baseCritChance: 12, baseEvasion: 8, baseSpellAmp: 8, baseLifesteal: 0,
@@ -54,7 +59,8 @@ const HERO_TEMPLATES = {
     },
     ASSASSIN: {
         key: 'ASSASSIN', name: 'Asesino', symbol: 'K', primaryAttr: 'AGI', role: 'Asesino de críticos',
-        baseHp: 90, baseAtk: 15, baseAtkSpeed: 1.1, baseAttackRange: 1.3,
+        attributes: { str: [18, 2.0], agi: [22, 3.2], int: [14, 1.4] },
+        baseHp: 100, baseAtk: 9, baseAtkSpeed: 1.1, baseAttackRange: 1.3,
         baseArmor: 1, baseMagicResist: 8, baseHpRegen: 0.8,
         baseMaxMana: 90, baseManaRegen: 1.3, baseMoveSpeed: 3.4, baseProjectileSpeed: 0,
         baseCritChance: 20, baseEvasion: 10, baseSpellAmp: 0, baseLifesteal: 0,
@@ -69,7 +75,8 @@ const HERO_TEMPLATES = {
     },
     VAMPIRE: {
         key: 'VAMPIRE', name: 'Guerrero Vampiro', symbol: 'V', primaryAttr: 'STR', role: 'Guerrero vampiro cuerpo a cuerpo',
-        baseHp: 140, baseAtk: 15, baseAtkSpeed: 0.85, baseAttackRange: 1.4,
+        attributes: { str: [24, 3.0], agi: [14, 1.8], int: [14, 1.4] },
+        baseHp: 120, baseAtk: 12, baseAtkSpeed: 0.85, baseAttackRange: 1.4,
         baseArmor: 3, baseMagicResist: 12, baseHpRegen: 1.0,
         baseMaxMana: 100, baseManaRegen: 1.0, baseMoveSpeed: 2.9, baseProjectileSpeed: 0,
         baseCritChance: 6, baseEvasion: 5, baseSpellAmp: 0, baseLifesteal: 15,

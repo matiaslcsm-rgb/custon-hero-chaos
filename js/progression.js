@@ -57,7 +57,8 @@ function gainXp(hero, amount) {
         hero.xp -= xpToNext(hero.level);
         hero.level++;
         hero.skillPoints++;
-        log(`⬆️ ¡Nivel ${hero.level}! +1 punto de habilidad.`);
+        hero.gainLevelAttributes();
+        log(`⬆️ ¡Nivel ${hero.level}! +1 punto de habilidad y atributos.`);
     }
     resolveExcessPoints(hero);
 }

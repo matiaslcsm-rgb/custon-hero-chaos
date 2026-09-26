@@ -36,21 +36,24 @@ function renderHeroCodex() {
 }
 
 function renderCodexDetail(t) {
-    const ref = new Hero(t); // instancia de referencia solo para calcular stats base (str 20/agi 15/int 15, sin ítems ni skills)
+    const ref = new Hero(t); // instancia de referencia solo para calcular los stats de nivel 1 (sin ítems ni habilidades)
     const detail = document.getElementById('codex-detail');
     const natural = Object.values(HERO_SKILLS[t.key]);
     const statRows = [
         ['HP máx.', ref.maxHp], ['Maná máx.', ref.maxMana],
         ['Daño de ataque', ref.atk], ['Vel. de ataque', ref.atkSpeed.toFixed(2)],
         ['Rango de ataque', ref.attackRange], ['Vel. de proyectil', ref.projectileSpeed || 'Melé (instantáneo)'],
-        ['Armadura física', ref.armor], ['Resistencia mágica', ref.magicResist + '%'],
+        ['Armadura física', ref.armor.toFixed(1)], ['Resistencia mágica', ref.magicResist.toFixed(1) + '%'],
         ['Regen. HP', ref.hpRegen.toFixed(2) + '/s'], ['Regen. Maná', ref.manaRegen.toFixed(2) + '/s'],
         ['Vel. de movimiento', ref.moveSpeed.toFixed(2)], ['Prob. de crítico', ref.critChance.toFixed(1) + '%'],
         ['Prob. de esquivar', ref.evasion + '%'], ['Amp. de hechizo', ref.spellAmp.toFixed(1) + '%'],
         ['Robo de vida', ref.lifesteal + '%'], ['Rol', t.role]
     ];
     let html = `<h3>[${t.symbol}] ${t.name} &mdash; ${t.primaryAttr}</h3><p style="color:#bbb;">${t.description}</p>`;
-    html += `<div class="codex-sub">Stats base (STR 20 / AGI 15 / INT 15, sin ítems)</div>`;
+    const attrs = t.attributes, mark = a => t.primaryAttr === a.toUpperCase() ? ' ★' : '';
+    html += `<div class="codex-sub">Atributos (base + ganancia por nivel; ★ = principal)</div>`;
+    html += `<div class="stat-grid">${['str', 'agi', 'int'].map(a => `<div>${a.toUpperCase()}${mark(a)}: <strong>${attrs[a][0]} + ${attrs[a][1]}/nivel</strong></div>`).join('')}</div>`;
+    html += `<div class="codex-sub">Stats en nivel 1 (sin ítems)</div>`;
     html += `<div class="stat-grid">${statRows.map(r => `<div>${r[0]}: <strong>${r[1]}</strong></div>`).join('')}</div>`;
     html += `<div class="codex-sub">Escalado del héroe</div>`;
     html += `<div class="ability-row"><p>+${t.scaling.perKillsAmount} ${scalingStatLabel(t.scaling.stat)} cada ${t.scaling.perKills} bajas de creeps &middot; +${t.scaling.perHeroKill} al ganar un duelo 1v1.</p></div>`;
@@ -236,9 +239,9 @@ function updateHud() {
     document.getElementById('player-mana').textContent = `${Math.round(player.mana)}/${player.maxMana}`;
     document.getElementById('player-gold').textContent = player.gold;
     document.getElementById('round-num').textContent = Math.min(waveNumber, NORMAL_WAVES) + (isBossWave ? ' (JEFE)' : '');
-    document.getElementById('stat-str').textContent = player.str;
-    document.getElementById('stat-agi').textContent = player.agi;
-    document.getElementById('stat-int').textContent = player.int;
+    document.getElementById('stat-str').textContent = Math.floor(player.str);
+    document.getElementById('stat-agi').textContent = Math.floor(player.agi);
+    document.getElementById('stat-int').textContent = Math.floor(player.int);
     document.getElementById('stat-armor').textContent = player.armor.toFixed(1);
     document.getElementById('extra-stats').textContent =
         `RM: ${player.magicResist.toFixed(0)}% | Crít: ${player.critChance.toFixed(1)}% | Evasión: ${player.evasion.toFixed(1)}% | ` +

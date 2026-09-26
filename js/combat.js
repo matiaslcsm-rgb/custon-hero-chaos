@@ -16,6 +16,7 @@ function makeCreep(t, x, y, statMult, isBossUnit, bossAuraBonus) {
         moveInterval: t.moveInterval * (isBossUnit ? 1.15 : 1),
         range: isBossUnit ? Math.max(t.range, 1.8) : t.range,
         gold: isBossUnit ? 40 : t.gold, xp: isBossUnit ? BOSS_XP : t.xp, oneHit,
+        armor: (t.armor || 0) + (isBossUnit ? 2 : 0), magicResist: t.magicResist || 0, evasion: 0,
         x, y, moveTimer: 0, attackTimer: 0, isBoss: !!isBossUnit, spawnTime: gameClock,
         auraRadius: isBossUnit ? 4 : 0, auraAtkBonus: isBossUnit ? bossAuraBonus : 0,
         effects: [],
@@ -45,17 +46,40 @@ function blinkNextTo(unit, target) {
 }
 
 // --- DAÑO ---
-// Aplica daño a un creep respetando la regla de "un solo golpe" (oneHit) y dispara la muerte si corresponde.
-// opts.isMagical aplica la amplificación de hechizo (spellAmp) de quien ataca. Devuelve el daño
-// realmente aplicado (para robo de vida y otros efectos que dependen del daño causado).
-function damageCreep(source, c, dmg, opts) {
-    if (!c.isAlive()) return 0;
-    let final = dmg;
-    if (opts && opts.isMagical) final = Math.round(final * (1 + (source.spellAmp || 0) / 100));
-    final = c.oneHit ? c.hp : Math.min(c.hp, final);
-    c.hp = Math.max(0, c.hp - final);
-    if (c.hp <= 0) killCreep(c, source);
-    return final;
+// Mitigación según el tipo de daño:
+//   'physical' → armadura: cada punto reduce 4% (como máximo 80%)
+//   'magical'  → resistencia mágica en % (como máximo 75%)
+//   'pure'     → sin mitigación
+function mitigate(target, amount, type) {
+    if (type === 'physical') return amount * Math.max(0.2, 1 - (target.armor || 0) * 0.04);
+    if (type === 'magical') return amount * Math.max(0.25, 1 - (target.magicResist || 0) / 100);
+    return amount;
+}
+
+// Único punto de entrada para dañar a cualquier unidad (héroe o creep). En orden:
+// invulnerabilidad → esquive (solo ataques básicos, opts.isAttack) → amplificación de hechizo (mágico)
+// → reducción de daño por efectos → armadura/resistencia mágica → regla de un solo golpe (oneHit)
+// → no bajar de 1 con preventDeath → evento onDamaged → muerte.
+// Devuelve { dealt, evaded }: dealt es la vida que realmente perdió el objetivo (para robo de vida).
+function dealDamage(source, target, amount, type = 'physical', opts = {}) {
+    if (!target.isAlive() || hasFlag(target, 'invulnerable')) return { dealt: 0, evaded: false };
+    if (opts.isAttack && Math.random() < (target.evasion || 0) / 100) return { dealt: 0, evaded: true };
+    let final = amount;
+    if (type === 'magical' && source) final *= 1 + (source.spellAmp || 0) / 100;
+    final = Math.round(mitigate(target, final * (1 - effDmgReduction(target)), type));
+    if (target.oneHit) final = target.hp;
+    const floor = hasFlag(target, 'preventDeath') ? 1 : 0;
+    const hpLost = Math.max(0, Math.min(final, target.hp - floor));
+    target.hp -= hpLost;
+    // dealt en el evento es el daño completo (sin recortar por la vida restante): lo usa Forma Inmortal para acumular
+    emit(target, 'onDamaged', { source, dealt: final, type });
+    if (!target.isAlive()) onUnitDeath(target, source);
+    return { dealt: hpLost, evaded: false };
+}
+
+function onUnitDeath(unit, killer) {
+    if (unit.isHero) onHeroDeath(unit, killer);
+    else killCreep(unit, killer);
 }
 
 // Cura a una unidad (sin pasar su máximo), emite onHeal y devuelve cuánto curó realmente.
@@ -92,7 +116,7 @@ function rollAttackDamage(attacker, target) {
 function resolveBasicHit(attacker, target, dmg, isCrit) {
     if (!target.isAlive()) return; // el objetivo murió mientras el proyectil viajaba
     if (isCrit) log(`💥 ¡Golpe crítico a ${target.label}!`);
-    const dealt = damageCreep(attacker, target, dmg);
+    const { dealt } = dealDamage(attacker, target, dmg, 'physical', { isAttack: true });
     applyLifesteal(attacker, dealt, target);
     emit(attacker, 'onHit', { target, dealt, isCrit });
 }
@@ -144,6 +168,7 @@ function awardHeroKillScaling(hero) {
 
 function killCreep(c, killer) {
     c.hp = 0;
+    if (!killer || !killer.isHero) return;
     const timeAlive = gameClock - (c.spawnTime || gameClock);
     const speedMult = speedGoldMultiplier(timeAlive);
     const gold = Math.max(1, Math.round(c.gold * speedMult));

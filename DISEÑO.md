@@ -30,22 +30,39 @@ con la definitiva y contrarrestar las del rival con ítems.
 **Decisión — escalado repartido:** el héroe (vía su innato) tiene un escalado chico por bajas y duelos; la definitiva
 trae el escalado fuerte. Si drafteás la definitiva de otro héroe, sumás su escalado al tuyo.
 
-### Atributos (Fuerza, Agilidad, Inteligencia)
+### Atributos (Fuerza, Agilidad, Inteligencia) — estilo Dota 2 ✅
 
-Qué da cada punto **hoy** en el código (`Hero.recalculateStats`):
+Cada héroe tiene **atributos base** y **ganancia por nivel**; el atributo principal crece más rápido.
+Además, con el kit al máximo cada punto sobrante da +1 a los tres (ver §3).
 
 | Atributo | Por cada punto |
 |---|---|
 | **Fuerza (STR)** | +5 HP máximo · +0,05 regeneración de HP/s |
-| **Agilidad (AGI)** | +1% velocidad de ataque · +1% velocidad de movimiento (hasta 40 AGI) · +0,1% crítico |
-| **Inteligencia (INT)** | +4 maná máximo · +0,05 regeneración de maná/s · +0,1% amplificación de hechizo |
-| **Atributo principal** (el del héroe) | Además: +0,8 daño de ataque |
+| **Agilidad (AGI)** | +1% velocidad de ataque · +1% velocidad de movimiento (hasta 40 AGI) · +0,1% crítico · **+0,08 armadura** |
+| **Inteligencia (INT)** | +4 maná máximo · +0,05 regeneración de maná/s · +0,1% amplificación de hechizo · **+0,1% resistencia mágica** |
+| **Atributo principal** | Además: +0,8 daño de ataque |
 
-**Problemas detectados:**
-- **Todos los héroes empiezan con 20/15/15**, sin importar su atributo principal (el Sniper, de Agilidad, tiene más Fuerza que Agilidad).
-- **La Inteligencia casi no sirve:** la amplificación de hechizo solo afecta daño mágico, y todavía no hay daño mágico.
-- **La Agilidad no da armadura** ni la Inteligencia resistencia mágica (en Dota 2 sí).
-- Los atributos solo crecen con ítems o con el kit al máximo, así que en la práctica casi no cambian durante la partida.
+| Héroe | Fuerza | Agilidad | Inteligencia |
+|---|---|---|---|
+| Axe (STR) | **24 + 2,8** | 12 + 1,6 | 14 + 1,6 |
+| Sniper (AGI) | 16 + 1,8 | **22 + 3,0** | 15 + 1,4 |
+| Asesino (AGI) | 18 + 2,0 | **22 + 3,2** | 14 + 1,4 |
+| Vampiro (STR) | **24 + 3,0** | 14 + 1,8 | 14 + 1,4 |
+
+*La vida y el daño base de cada héroe se ajustaron para que en nivel 1 queden igual que antes del cambio.*
+Los coeficientes están en `ATTRIBUTE_RULES` (hero.js).
+
+### Daño
+Todo el daño pasa por una sola función (`dealDamage`) para héroes y creeps. Tres tipos:
+
+| Tipo | Lo reduce | Máximo de reducción |
+|---|---|---|
+| **Físico** | Armadura: 4% por punto | 80% |
+| **Mágico** | Resistencia mágica (y lo aumenta la amplificación de hechizo del atacante) | 75% |
+| **Puro** | Nada | — |
+
+- **El esquive solo evita ataques básicos**, no habilidades (como en Dota 2).
+- Los creeps también tienen armadura (Grunt 1, Bruto 3, jefe +2) y pueden tener resistencia mágica.
 
 ### Escalado propuesto para las definitivas actuales
 
@@ -247,6 +264,12 @@ Cada fase deja el juego jugable.
 
 ---
 
+### Pruebas automáticas
+Abrir **`tests.html`** (doble clic) corre todas las pruebas y muestra ✅/❌ por cada una.
+**Correrlas después de cada cambio.** Cada mecánica nueva tiene que sumar su prueba en `js/tests.js`.
+
+---
+
 ## 11. Preguntas abiertas
 
 1. **Definitiva en el pool:** ¿aparece en el draft con la misma probabilidad que una normal, o más baja?
@@ -303,6 +326,7 @@ si un nombre no te gusta, se cambia acá y después en el código.
 ### Combate
 | Nombre | Qué es | En el código |
 |---|---|---|
+| **Daño** (físico / mágico / puro) | Todo daño a cualquier unidad, con su mitigación | `dealDamage()` |
 | **Efecto** (mejora / perjuicio) | Estado temporal sobre una unidad (Furia, Aturdido…) | `addEffect()` |
 | **Evento** | Algo que pasa en combate y activa reacciones | `emit()` |
 | **Etiqueta** | Categoría de una habilidad (`FÍSICO`, `ROBO_VIDA`…) | `TAGS` |

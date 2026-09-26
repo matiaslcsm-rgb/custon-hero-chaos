@@ -28,6 +28,10 @@ function validateContent() {
         if (!a.tags || !a.tags.length) problems.push(`${where}: no declara etiquetas`);
     };
     Object.values(HERO_TEMPLATES).forEach(t => {
+        ['str', 'agi', 'int'].forEach(a => {
+            const v = t.attributes && t.attributes[a];
+            if (!Array.isArray(v) || v.length !== 2) problems.push(`${t.key}: attributes.${a} debe ser [base, ganancia por nivel]`);
+        });
         if (!t.innate) problems.push(`${t.key}: no tiene innato`);
         else checkAbility(t.innate, `${t.key} (innato)`);
         const skills = Object.values(HERO_SKILLS[t.key] || {});
