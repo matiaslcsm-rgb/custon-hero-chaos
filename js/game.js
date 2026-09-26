@@ -11,7 +11,8 @@ let currentDraft = null; // { mode, options } del draft abierto; mode 'bookChoic
 window.addEventListener('keydown', e => {
     const k = e.key.toLowerCase();
     keys[k] = true;
-    if (gameState === 'WAVE') handleSkillKeypress(k);
+    if (k === 'p') { setAutopilot(!autopilot); return; }
+    if (gameState === 'WAVE' && !autopilot) handleSkillKeypress(k);
 });
 window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
 
@@ -165,15 +166,31 @@ function handleSkillKeypress(k) {
     const skill = player.skillForKey(k);
     if (!skill || skill.kind !== 'active') return;
     if (skillLevel(player, skill) === 0) { log(`🔒 ${skill.name} está en nivel 0: invertile un punto para usarla.`); return; }
-    const cd = player.cooldowns[skill.id] || 0;
-    if (cd > 0) return;
-    const manaCost = hasFlag(player, 'freeCast') ? 0 : (val(skill, player, 'manaCost') || 0);
-    if (player.mana < manaCost) { log(`❌ Maná insuficiente para ${skill.name} (necesitás ${manaCost}).`); return; }
-    // Solo se cobra maná y cooldown si la habilidad realmente se lanzó (ej: había objetivo en rango)
-    if (!skill.cast(player)) return;
-    player.mana -= manaCost;
-    player.cooldowns[skill.id] = val(skill, player, 'cooldown') || 0;
-    emit(player, 'onCast', { skill });
+    tryCastSkill(player, skill);
+}
+
+// Camino único para lanzar una habilidad (jugador o IA). Devuelve true si se lanzó.
+// Solo se cobra maná y enfriamiento si la habilidad realmente se lanzó (ej: había objetivo en rango).
+// opts.quiet: no muestra los mensajes de un intento fallido (la IA prueba seguido y llenaría el registro).
+function tryCastSkill(hero, skill, opts = {}) {
+    if (!hero.isAlive() || skillLevel(hero, skill) === 0 || (hero.cooldowns[skill.id] || 0) > 0) return false;
+    const manaCost = hasFlag(hero, 'freeCast') ? 0 : (val(skill, hero, 'manaCost') || 0);
+    if (hero.mana < manaCost) {
+        if (!opts.quiet) log(`❌ Maná insuficiente para ${skill.name} (necesitás ${manaCost}).`);
+        return false;
+    }
+    logBuffer = [];
+    let ok;
+    try { ok = skill.cast(hero); } finally {
+        const messages = logBuffer;
+        logBuffer = null;
+        if (ok || !opts.quiet) messages.forEach(log);
+    }
+    if (!ok) return false;
+    hero.mana -= manaCost;
+    hero.cooldowns[skill.id] = val(skill, hero, 'cooldown') || 0;
+    emit(hero, 'onCast', { skill });
+    return true;
 }
 
 // --- ACTUALIZACIÓN POR FRAME DURANTE UNA OLEADA ---
@@ -193,14 +210,19 @@ function updateWave(dt) {
     }
     tickWaveTimer(dt);
 
-    // Movimiento (la velocidad la modifican los efectos: Masacre, Visión de Cazador...)
+    // Piloto automático: la IA reparte puntos y lanza habilidades varias veces por segundo
+    if (autopilot && everyInterval(player, 'AI_THINK', dt, AI.thinkInterval)) {
+        aiSpendPoints(player);
+        aiCastSkills(player);
+    }
+
+    // Movimiento: del teclado o de la IA (la velocidad la modifican los efectos: Masacre, Visión de Cazador...)
     const effMoveInterval = player.moveInterval / effMoveMult(player);
     moveTimer += dt;
     if (moveTimer > effMoveInterval) {
-        if (keys['w'] || keys['arrowup']) player.y = Math.max(0, player.y - 1);
-        if (keys['s'] || keys['arrowdown']) player.y = Math.min(ROWS - 1, player.y + 1);
-        if (keys['a'] || keys['arrowleft']) player.x = Math.max(0, player.x - 1);
-        if (keys['d'] || keys['arrowright']) player.x = Math.min(COLS - 1, player.x + 1);
+        const dir = autopilot ? aiMoveDirection(player) : keyboardDirection();
+        player.x = Math.max(0, Math.min(COLS - 1, player.x + dir.dx));
+        player.y = Math.max(0, Math.min(ROWS - 1, player.y + dir.dy));
         moveTimer = 0;
     }
 
@@ -226,6 +248,13 @@ function updateWave(dt) {
 
     // ¿Oleada limpia?
     if (gameState === 'WAVE' && creeps.every(c => !c.isAlive())) onWaveCleared();
+}
+
+function keyboardDirection() {
+    return {
+        dx: (keys['d'] || keys['arrowright'] ? 1 : 0) - (keys['a'] || keys['arrowleft'] ? 1 : 0),
+        dy: (keys['s'] || keys['arrowdown'] ? 1 : 0) - (keys['w'] || keys['arrowup'] ? 1 : 0)
+    };
 }
 
 function tickCooldowns(dt) {

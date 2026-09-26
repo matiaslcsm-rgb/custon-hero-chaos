@@ -3,7 +3,7 @@
 Juego inspirado en Custom Hero Chaos: elegís un héroe, drafteás habilidades de todos los héroes,
 subís de nivel, comprás ítems y sobrevivís oleadas de creeps.
 
-- **Jugar:** abrir `index.html` (doble clic).
+- **Jugar:** abrir `index.html` (doble clic). Tecla **P** (o el botón 🤖): la IA juega por vos.
 - **Probar:** abrir `tests.html` (doble clic). Corre todas las pruebas automáticas y muestra ✅/❌.
 - **Diseño:** reglas, decisiones, glosario y roadmap en [`DISEÑO.md`](DISEÑO.md).
 - **Nuevos héroes con otra IA:** prompt listo en [`docs/prompt-heroes.md`](docs/prompt-heroes.md).
@@ -25,6 +25,7 @@ js/
 ├── game.js      flujo de la partida y oleadas
 ├── death.js     vidas, revivir, Condenado, Injusticia de los Codiciosos
 ├── timers.js    temporizadores de fase y enfurecimiento de creeps
+├── ai.js        IA de héroes y Piloto automático (tecla P)
 ├── ui.js        paneles, kit, códice y dibujo del mapa
 ├── main.js      arranque y validador de contenido
 └── tests.js     pruebas automáticas

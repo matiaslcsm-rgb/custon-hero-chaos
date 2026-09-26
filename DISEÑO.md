@@ -193,6 +193,26 @@ las 5 oleadas): Sniper 57 · Asesino 59 · Sabio del Vacío 62 · Arcanista 79 �
 Vampiro 99 · **Bruja del Hielo 44 (a observar)**. En otra medición con kit completo desde el inicio la Bruja quedó pareja
 con el Sniper (60 vs 53), así que falta jugarla para confirmar si está fuerte.
 
+**Dificultad con la IA** (12 partidas por héroe, IA sin modo dios, drafteando y comprando sola): Sniper, Asesino y
+Alquimista 12/12 · Axe, Bruja del Hielo, Nigromante y Sabio del Vacío 11/12 · **Arcanista 5/12 · Guerrero Vampiro 1/12**
+(pierden en las oleadas 4-5). Hay que revisar por qué esos dos rinden mucho menos.
+
+### IA de héroes ✅
+Controla a un héroe en la oleada y fuera de ella (`js/ai.js`). La usa el **Piloto automático** del jugador
+(botón o tecla **P**), las pruebas, las mediciones de balance y más adelante los rivales (fase F).
+
+| Situación | Qué hace |
+|---|---|
+| A distancia (rango ≥ 2,5: tiradores y magos) | Ataca al más cercano; si un enemigo se acerca a menos del 60% de su rango, **retrocede** a la casilla más segura sin dejar de pegar; si no hay nadie a tiro, avanza |
+| Cuerpo a cuerpo | Va al enemigo más cercano |
+| Habilidades de área | Solo con 2+ enemigos cerca (o el jefe) |
+| Definitiva | Con 3+ enemigos cerca o el jefe cerca |
+| Mejoras y controles propios | Cuando hay enemigos cerca |
+| Movilidad (a distancia) | Solo para acercarse, nunca para meterse entre enemigos |
+| Puntos de habilidad | Primero la definitiva; después la de menos nivel |
+| Draft | Prefiere sus habilidades naturales; si no tiene definitiva, una definitiva |
+| Tienda | Si está Condenado compra una vida; si no, ítems de su atributo principal |
+
 ### Criterios
 
 Un héroe entra solo si cumple **todo** esto:
@@ -386,6 +406,7 @@ si un nombre no te gusta, se cambia acá y después en el código.
 | **Evento** | Algo que pasa en combate y activa reacciones | `emit()` |
 | **Etiqueta** | Categoría de una habilidad (`FÍSICO`, `ROBO_VIDA`…) | `TAGS` |
 | **Enfurecimiento** 🆕 | Los creeps ganan daño y vel. de ataque al pasarse el tiempo de la oleada | `enrageMult()` (timers.js) |
+| **Piloto automático** | La IA juega por el jugador (botón o tecla P) | `autopilot`, `js/ai.js` |
 | **Temporizador de fase** | Tiempo de cada fase; al vencer, el juego decide | `PHASE_TIMES`, `tickPhaseTimer()` |
 | **Aura del Jefe** 🆕 | +daño a los creeps cerca del jefe | `auraRadius`, `auraAtkBonus` |
 

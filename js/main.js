@@ -4,12 +4,14 @@ document.getElementById('nav-game').onclick = () => showView('game');
 document.getElementById('nav-heroes').onclick = () => showView('heroes');
 document.getElementById('start-wave-btn').onclick = startWave;
 document.getElementById('restart-btn').onclick = resetGame;
+document.getElementById('autopilot-btn').onclick = () => setAutopilot(!autopilot);
 
 let lastTime = 0;
 function loop(ts) {
     const dt = Math.max(0, Math.min(0.1, (ts - lastTime) / 1000 || 0)); lastTime = ts;
     if (gameState === 'WAVE') gameClock += dt;
     tickPhaseTimer(dt);
+    tickAutopilot(dt);
     updateHud();
     renderTimer();
     if (gameState === 'WAVE') updateWave(dt); // también con el jugador muerto: cuenta el tiempo para revivir

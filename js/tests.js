@@ -541,35 +541,81 @@ test('Pacto de la Muerte: daño puro en área y cura lo que drena', () => {
     checkEq(player.hp, Math.min(player.maxHp, 1 + 2 * expected), 'cura el total drenado');
 });
 
+// ============================================================ IA
+test('IA a distancia: avanza si no hay nadie a tiro y retrocede si se le acercan', () => {
+    newGame('SNIPER');
+    const c = dummy({ x: 15, y: 5 });
+    checkEq(aiMoveDirection(player).dx, 1, 'avanza hacia el enemigo lejano');
+    c.x = 6;
+    const dir = aiMoveDirection(player);
+    checkEq(dir.dx, -1, 'retrocede alejándose del enemigo pegado');
+    c.x = 9; // a 4 casillas, dentro del rango (5) y fuera de la zona de peligro (3)
+    checkEq(JSON.stringify(aiMoveDirection(player)), JSON.stringify({ dx: 0, dy: 0 }), 'se queda disparando');
+});
+
+test('IA a distancia acorralada en una esquina se queda quieta', () => {
+    newGame('ARCANIST');
+    player.x = 0; player.y = 0;
+    dummy({ x: 1, y: 1 });
+    const dir = aiMoveDirection(player);
+    checkEq(dir.dx === 1 && dir.dy === 1, false, 'no camina hacia el enemigo');
+});
+
+test('IA cuerpo a cuerpo: va al enemigo más cercano', () => {
+    newGame('AXE');
+    dummy({ x: 10, y: 8 });
+    const dir = aiMoveDirection(player);
+    checkEq(`${dir.dx},${dir.dy}`, '1,1', 'dirección');
+});
+
+test('IA: habilidades de área solo con 2+ enemigos cerca, sin ensuciar el registro', () => {
+    newGame('AXE');
+    const giro = learn('AXE_GIRO', 1);
+    dummy({ hp: 9999, maxHp: 9999 });
+    aiCastSkills(player);
+    checkEq(player.cooldowns[giro.id], 0, 'con 1 enemigo no la usa');
+    dummy({ y: player.y + 1, hp: 9999, maxHp: 9999 });
+    aiCastSkills(player);
+    check(player.cooldowns[giro.id] > 0, 'con 2 enemigos sí');
+    const hacha = learn('AXE_HACHAZO', 1);
+    creeps.forEach(k => { k.x = 19; });
+    const logs = document.querySelectorAll('#combat-log p').length;
+    aiCastSkills(player);
+    checkEq(document.querySelectorAll('#combat-log p').length, logs, 'un intento fallido no deja mensajes');
+    checkEq(player.cooldowns[hacha.id], 0, 'ni gasta el enfriamiento');
+});
+
+test('IA: definitiva primero al repartir puntos y prefiere habilidades naturales en el draft', () => {
+    newGame('AXE');
+    const ult = learn('AXE_FURIA', 0), giro = learn('AXE_GIRO', 0);
+    player.level = 6; player.skillPoints = 2;
+    aiSpendPoints(player);
+    checkEq(skillLevel(player, ult), 1, 'definitiva');
+    checkEq(skillLevel(player, giro), 1, 'y el resto');
+    const pick = aiPickDraft(player, [SKILL_INDEX.SNIPER_VISION, SKILL_INDEX.AXE_HACHAZO, SKILL_INDEX.VAMP_CLAW]);
+    checkEq(pick.id, 'AXE_HACHAZO', 'natural');
+});
+
 // ============================================================ PARTIDAS COMPLETAS
-// El "jugador" draftea la primera opción, reparte los puntos, camina hacia el enemigo más cercano y
-// lanza sus habilidades. Es invulnerable para que la prueba mida que el flujo completo funciona.
-function simulateGame(heroIndex) {
+// Juega la partida entera con la IA (draft, puntos, tienda y combate). Con godMode el héroe es invulnerable,
+// para probar que el flujo completo funciona; sin godMode sirve para medir qué tan difícil es el juego.
+function simulateGame(heroIndex, godMode = true) {
     resetGame();
     document.querySelectorAll('#hero-options .skill-card')[heroIndex].click();
-    const spend = () => { let again = true; while (again) { again = false; for (const s of player.skills) if (levelUpSkill(player, s)) again = true; } };
-    let guard = 0;
-    while (gameState !== 'VICTORY' && gameState !== 'GAMEOVER' && guard++ < 30) {
-        if (gameState === 'DRAFT') document.querySelector('#draft-options .skill-card').click();
-        if (gameState === 'PREP') { spend(); document.getElementById('start-wave-btn').click(); }
-        if (gameState === 'WAVE') {
-            addEffect(player, { id: 'TEST_GOD', duration: 1e9, flags: ['invulnerable'] });
-            for (let f = 0; gameState === 'WAVE' && f < 6000; f++) {
-                spend();
-                const t = nearestEnemy(player);
-                keys = {};
-                if (t && Math.hypot(t.x - player.x, t.y - player.y) > player.attackRange) {
-                    if (t.x !== player.x) keys[t.x > player.x ? 'd' : 'a'] = true;
-                    if (t.y !== player.y) keys[t.y > player.y ? 's' : 'w'] = true;
-                }
-                if (f % 20 === 0) player.skills.forEach(s => handleSkillKeypress(player.keyBindings[s.id]));
-                gameClock += 0.05; updateWave(0.05);
+    autopilot = true;
+    try {
+        let guard = 0;
+        while (gameState !== 'VICTORY' && gameState !== 'GAMEOVER' && guard++ < 40) {
+            if (gameState === 'DRAFT') learnSkill(aiPickDraft(player, currentDraft.options));
+            if (gameState === 'PREP') { aiSpendPoints(player); aiShop(player); startWave(); }
+            if (gameState === 'WAVE') {
+                if (godMode) addEffect(player, { id: 'TEST_GOD', duration: 1e9, flags: ['invulnerable', 'persistent'] });
+                for (let f = 0; gameState === 'WAVE' && f < 12000; f++) { gameClock += 0.05; updateWave(0.05); }
+                if (gameState === 'WAVE') throw new Error('una oleada no terminó');
             }
-            keys = {};
-            if (gameState === 'WAVE') throw new Error('una oleada no terminó');
         }
-    }
-    return { state: gameState, skills: player.skills.length, level: player.level };
+    } finally { autopilot = false; }
+    return { state: gameState, skills: player.skills.length, level: player.level, wave: waveNumber, lives: player.lives };
 }
 
 Object.keys(HERO_TEMPLATES).forEach((key, i) => {

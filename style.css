@@ -84,3 +84,5 @@ b.cur { color: #ffb703; }
 #test-report small { color: #ffb703; }
 #phase-timer { color: #8ecae6; font-weight: bold; margin-left: 6px; }
 #phase-timer.urgent { color: #ff477e; }
+#autopilot-btn { background: #1c1f26; color: #ccc; border: 1px solid #444; padding: 6px; cursor: pointer; font-family: inherit; font-size: 0.8rem; }
+#autopilot-btn.on { background: #9d4edd; color: #fff; border-color: #9d4edd; }

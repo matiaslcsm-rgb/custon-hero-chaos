@@ -19,7 +19,8 @@
     <div id="game-container">
         <div id="viewport">
             <canvas id="ascii-canvas"></canvas>
-            <div id="controls-hint">Mover: [W,A,S,D] / Flechas &mdash; Habilidades activas: ver barra de abajo (varían según el héroe)</div>
+            <div id="controls-hint">Mover: [W,A,S,D] / Flechas &mdash; Habilidades: ver barra de abajo &mdash; Piloto automático: [P]</div>
+            <button id="autopilot-btn">🤖 Piloto automático: OFF</button>
             <div id="cooldown-bar"></div>
         </div>
 
@@ -110,6 +111,7 @@
     <script src="js/game.js"></script>
     <script src="js/death.js"></script>
     <script src="js/timers.js"></script>
+    <script src="js/ai.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/main.js"></script>
     <!-- Pruebas automáticas: solo corren con index.html?test (abrir tests.html) -->

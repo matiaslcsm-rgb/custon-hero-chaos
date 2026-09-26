@@ -1,7 +1,11 @@
 // Utilidades generales usadas por todo el juego.
 
+// Si logBuffer es un array, los mensajes se guardan ahí en vez de mostrarse (ver tryCastSkill).
+let logBuffer = null;
+
 // Agrega una línea al registro de combate y lo scrollea al final.
 function log(msg) {
+    if (logBuffer) { logBuffer.push(msg); return; }
     const box = document.getElementById('combat-log');
     const p = document.createElement('p'); p.textContent = msg;
     box.appendChild(p); box.scrollTop = box.scrollHeight;

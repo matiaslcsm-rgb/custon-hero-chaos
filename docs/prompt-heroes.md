@@ -121,6 +121,7 @@ registerHero({
 - blinkNextTo(caster, objetivo)         → teletransporta al caster al lado del objetivo
 - rollAttackDamage(caster, objetivo) y resolveBasicHit(caster, objetivo, dmg, isCrit) → un ataque básico instantáneo
 - effCritChance(u), effArmor(u), effEvasion(u), effSpellAmp(u) → valores actuales (base + efectos)
+- tryCastSkill(heroe, habilidad) → lanza otra habilidad del kit respetando maná y enfriamiento
 - log('texto')                          → mensaje en el registro de combate (no lo uses en cada golpe o cada frame)
 - Datos del caster: caster.atk, caster.int, caster.str, caster.agi, caster.attackRange, caster.hp, caster.maxHp,
   caster.mana, caster.maxMana, caster.x, caster.y
