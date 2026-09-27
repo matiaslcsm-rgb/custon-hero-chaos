@@ -108,9 +108,10 @@ const TUTORIAL_PAGES = [
         <b>3 o menos</b>, perder estando maldito <b>elimina</b>.</p>
         <p><b>Apuestas:</b> en la previa elegís cuánto arriesgar (hasta la mitad de tu oro) y a quién, en un duelo ajeno. Si acertás, cobrás el doble.</p>` },
     { title: '👹 Jefes, neutrales y ayudas', body: `
-        <p>En las rondas <b>5, 10, 15 y 20</b>, después de los duelos, todos pelean juntos contra un <b>jefe de ronda</b>. Morir ahí no
-        cuesta vidas. Si cae, todos cobran oro (más los 3 que más daño hicieron) y eligen un <b>objeto neutral</b>: va en un espacio
-        aparte y solo podés tener uno.</p>
+        <p>En las rondas <b>5, 10, 15 y 20</b>, después de los duelos, cada héroe pelea contra un <b>jefe de ronda</b> en su arena. Hay
+        8 jefes distintos y cada uno se pone más difícil a su manera (fases, cabezas, barreras...). Es como una oleada: morir cuesta
+        vidas y, si tardás, se enfurece. Al matarlo cobrás oro y elegís un <b>objeto neutral</b> (va en un espacio aparte y solo podés
+        tener uno); los 3 más rápidos cobran extra.</p>
         <p>Los que van en la <b>mitad de abajo</b> del ranking reciben un Fragmento del Destino cada ronda, y el último, además, un Libro.</p>
         <p>¡Listo! Tocá <b>Iniciar partida</b> cuando quieras.</p>` }
 ];

@@ -142,9 +142,7 @@ function renderCreepCodex() {
             return `<div class="item-card" style="border-left-color:${CREEP_SECTION_COLORS.themes}"><div class="item-head"><span class="item-name" style="color:#fff">${th.name}</span></div>` +
                 `<ul class="item-stats creep-list">${rows}</ul><p class="item-meta">Jefe de la oleada: ${creepNameHtml(boss)}</p></div>`;
         }))).join('');
-    const bosses = grid(ROUND_BOSSES.map((b, i) => creepCard(b,
-        `<p class="item-meta">Ronda ${(i + 1) * ROUND_BOSS_EVERY} · premio: ${BOSS_FIGHT.gold[i]}g para todos + objeto neutral del escalón ${i + 1}</p>`,
-        `${b.hpPerHero} de vida por cada héroe que pelea`)));
+    const bosses = grid(ROUND_BOSSES.map(b => creepCard(b, `<p class="item-text">📈 ${b.escalation}</p>`, `${b.hp} de vida (crece con la ronda)`)));
 
     const sections = [
         ['creeps-basic', 'Básicos', CREEP_SECTION_COLORS.basic, 'Sin mecánicas especiales: aparecen en todas las oleadas.', basics],
@@ -152,7 +150,7 @@ function renderCreepCodex() {
         ['creeps-themes', 'Temas de oleada', CREEP_SECTION_COLORS.themes,
             'Cada ronda sortea uno de su nivel. Todas las oleadas traen además un jefe: 4 veces más vida, +2 de armadura y un aura que potencia a los creeps cercanos. Los creeps se hacen más fuertes en cada ronda.', themes],
         ['creeps-bosses', 'Jefes de ronda', CREEP_SECTION_COLORS.bosses,
-            `Cada ${ROUND_BOSS_EVERY} rondas, después de los duelos, todos los héroes contra uno. Morir no cuesta vidas (revivís en ${BOSS_FIGHT.respawn}s). Si cae en ${BOSS_FIGHT.time}s, todos cobran y eligen un objeto neutral; los 3 que más daño hicieron cobran extra.`, bosses]
+            `Cada ${ROUND_BOSS_EVERY} rondas, después de los duelos, cada héroe pelea contra el jefe en su arena (se sortea uno de estos, el mismo para todos). Morir cuesta vidas y, pasados ${BOSS_FIGHT.enrageAfter}s, se enfurece cada vez más. Al matarlo: oro (${BOSS_FIGHT.gold.join('/')}g según la ronda) y un objeto neutral; los 3 más rápidos cobran extra.`, bosses]
     ];
     const codex = document.getElementById('creep-codex');
     codex.innerHTML = `<h3>Creeps y Jefes</h3><p class="subtitle">El número a la derecha es el oro que dan (hasta ×3 si los matás rápido).</p>` +
@@ -415,7 +413,9 @@ function renderBetting() {
     const rival = mine ? mine.find(h => h !== player) : null;
     const limit = betLimit();
     if (betAmount > limit) betAmount = limit;
+    const backing = rival ? betsOn(player) : 0;
     document.getElementById('bet-info').innerHTML = (rival ? `Tu duelo: contra <strong>${rival.displayName}</strong>. ` : 'Esta ronda no peleás. ') +
+        (rival ? (backing ? `<span class="bet-backing">Te apostaron ${backing}g: si ganás cobrás +${Math.round(backing * BACKING_BONUS)}g de respaldo.</span> ` : 'Nadie te apostó todavía. ') : '') +
         (currentBet ? `Apostaste <strong>${currentBet.amount}g</strong> a <strong>${currentBet.on.displayName}</strong>: si gana cobrás ${currentBet.amount * BET_PAYOUT}g.`
                     : `Elegí cuánto arriesgar y a quién. Si acertás cobrás el doble; si no, lo perdés. Tope: ${limit}g (${BET_MAX_PCT * 100}% de tu oro).`);
     const box = document.getElementById('bet-amount-box');
@@ -437,7 +437,7 @@ function renderBetting() {
         const row = document.createElement('div'); row.className = 'bet-pair';
         pair.forEach((h, i) => {
             const side = document.createElement('div'); side.className = 'bet-side' + (currentBet && currentBet.on === h ? ' chosen' : '');
-            side.innerHTML = betHeroHtml(h);
+            side.innerHTML = betHeroHtml(h) + (betsOn(h) ? `<span class="bet-stats">💰 le apostaron ${betsOn(h)}g</span>` : '');
             if (!currentBet) {
                 const btn = document.createElement('button');
                 btn.textContent = `Apostar a ${h.name}`; btn.disabled = !betAmount;
@@ -604,7 +604,7 @@ function renderCombatInfo() {
         html = `<h3>🎲 Previa de duelos</h3><p class="subtitle">Apostá en la ventana antes de que arranquen los duelos.</p>`;
     } else if (gameState === 'ENDED') html = `<h3>Fin de la partida</h3><p class="subtitle">Mirá el ranking a la izquierda. Tocá "Nueva Partida" para jugar otra.</p>`;
     else if (player.eliminated) html = `<h3>Quedaste eliminado</h3><p class="subtitle">Podés seguir mirando: clic en un héroe del ranking.</p>`;
-    else if (gameState === 'BOSS') html = `<h3>👹 Jefe de ronda</h3><p class="subtitle">Todos contra ${arena && arena.boss ? arena.boss.label : 'el jefe'}. Morir acá no cuesta vidas. Los 3 que más daño hagan cobran extra.</p>`;
+    else if (gameState === 'BOSS') html = `<h3>👹 Jefe de ronda</h3><p class="subtitle">${arena && arena.boss ? `<b>${arena.boss.label}</b>: ${arena.boss.type.mechanic} ${arena.boss.type.escalation}` : 'Esperando a que terminen los demás.'}</p><p class="subtitle">Morir cuesta vidas. Pasados ${BOSS_FIGHT.enrageAfter}s se enfurece. Los 3 más rápidos cobran extra.</p>`;
     else if (gameState === 'DUEL') {
         const rival = arena && arena.kind === 'duel' ? arena.heroes.find(h => h !== hero) : null;
         html = `<h3>⚔ Duelos</h3><p class="subtitle">${rival ? `${hero === player ? 'Peleás' : hero.name + ' pelea'} contra <b>${rival.displayName}</b>. Gana quien mata al otro o, a los ${DUEL_TIME}s, quien tenga más % de vida.` : 'Esperando que terminen los demás duelos.'}</p>` +
@@ -626,7 +626,7 @@ function renderTimer() {
         if (hero.inRest || !arena || arena.done) { text = `🏕 Descansando · ${waiting} ${gameState === 'DUEL' ? 'duelo' : 'arena'}${waiting === 1 ? '' : 's'} en curso`; }
         else if (arena.kind === 'duel') { const left = DUEL_TIME - arena.elapsed; text = `⚔ Duelo ${Math.max(0, Math.ceil(left))}s`; if (left <= 5) cls = 'urgent'; }
         else if (!hero.isAlive() && hero.respawnAt) { text = `☠ Revive en ${Math.max(0, hero.respawnAt - gameClock).toFixed(1)}s`; cls = 'urgent'; }
-        else if (arena.kind === 'boss') { const left = BOSS_FIGHT.time - arena.elapsed; text = `👹 Jefe ${Math.max(0, Math.ceil(left))}s · tu daño ${hero.bossDamage}`; if (left <= 10) cls = 'urgent'; }
+        else if (arena.kind === 'boss') { const left = BOSS_FIGHT.enrageAfter - arena.elapsed; text = left > 0 ? `👹 Jefe · se enfurece en ${Math.ceil(left)}s` : `🔥 Jefe enfurecido +${Math.round((enrageMult(arena) - 1) * 100)}%`; if (left <= 10) cls = 'urgent'; }
         else if (waveTimeLeft(arena) > 0) { text = `⏱ ${Math.ceil(waveTimeLeft(arena))}s`; if (waveTimeLeft(arena) <= 5) cls = 'urgent'; }
         else { text = `🔥 Creeps enfurecidos +${Math.round((enrageMult(arena) - 1) * 100)}%`; cls = 'urgent'; }
     }

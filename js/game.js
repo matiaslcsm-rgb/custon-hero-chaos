@@ -236,7 +236,7 @@ function resetGame() {
     player = null; heroes = []; arenas = []; viewedHero = null;
     gameState = 'MENU'; waveNumber = 1; gameClock = 0; heroOffers = null;
     currentDraft = null; savedPrepTime = null; nextWave = null; logMuted = false;
-    duelPlan = null; currentBet = null;
+    duelPlan = null; currentBet = null; duelBets = []; nextRoundBoss = null; lastRoundBoss = null;
     cancelTargeting();
     setPhaseTimer(PHASE_TIMES.heroSelect);
     resetHud();

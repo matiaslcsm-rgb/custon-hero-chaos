@@ -45,7 +45,6 @@ class Hero {
         this.duelWins = 0; this.duelLosses = 0;
         this.neutral = null;      // objeto neutral equipado (key de NEUTRAL_ITEMS), ver bosses.js
         this.neutralOffer = null; // neutrales para elegir después de un jefe de ronda
-        this.bossDamage = 0;      // daño hecho al jefe de ronda en la pelea actual
         this.eliminated = false; this.diedThisRound = false;
         this.condemnPct = 0;      // % de daño recibido extra acumulado como Condenado (se guarda aunque compre una vida)
         this.greedPurchases = 0;  // compras de Injusticia de los Codiciosos (cada una cuesta el doble)

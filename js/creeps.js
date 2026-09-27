@@ -81,7 +81,7 @@ function updateCreep(c, dt) {
     if (c.type.update && c.type.update(c, dt)) return;
 
     const enrage = enrageMult(c.arena);
-    let effAtk = c.atk * enrage;
+    let effAtk = effAttack(c) * enrage; // effAttack: incluye mejoras del creep (ej: cabezas de la Hidra)
     const boss = c.arena.boss;
     if (!c.isBoss && boss && boss.isAlive()) {
         const dBoss = Math.hypot(c.x - boss.x, c.y - boss.y);

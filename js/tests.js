@@ -1193,6 +1193,22 @@ test('Apuesta: si gana tu elegido cobrás el doble; si pierde, perdés lo aposta
     checkEq(player.gold, 300, 'perdió lo apostado');
 });
 
+test('La IA apuesta (nunca a su propio duelo) y el ganador cobra el 25% de lo que le apostaron', () => {
+    toBetting(400);
+    duelBets = [];
+    const mine = duelPlan.pairs.find(p => p.includes(player));
+    const rival = mine.find(h => h !== player);
+    const other = bettablePairs()[0][0];
+    other.gold = 1000;
+    duelBets.push({ bettor: other, on: player, against: rival, amount: 200 }); // un rival te apuesta a vos
+    for (let i = 0; i < 30; i++) { const saved = duelBets; duelBets = []; aiPlaceBets(); check(duelBets.every(b => !(b.bettor === b.on || b.bettor === b.against)), 'nadie apuesta a su propio duelo'); duelBets = saved; }
+    endBetting();
+    const gold = player.gold, otherGold = other.gold;
+    dealDamage(player, rival, 99999, 'pure');
+    checkEq(player.gold - gold, Math.round(200 * BACKING_BONUS), 'respaldo: 25% de lo que te apostaron');
+    checkEq(other.gold - otherGold, 200 * BET_PAYOUT, 'el que te apostó cobra el doble');
+});
+
 test('Sin oro para apostar (o eliminado) no hay previa: los duelos arrancan directo', () => {
     toBetting(1);
     checkEq(gameState, 'DUEL', 'con 1g el tope es 0');
@@ -1224,7 +1240,7 @@ test('IA: usa el Libro en una habilidad que no es natural y vende el Fragmento s
 });
 
 // ============================================================ JEFES DE RONDA Y NEUTRALES (fase G)
-// Deja la partida en la pelea contra el jefe de la ronda 5.
+// Deja la partida en la pelea contra el jefe de la ronda 5 (cada héroe en su arena).
 function toBoss() {
     resetGame();
     selectHero(HERO_TEMPLATES.AXE);
@@ -1233,71 +1249,70 @@ function toBoss() {
     startWave();
     clearAllWaves();
     skipDuels();
-    return arenas[0];
+    return player.arena;
 }
 
-test('Jefe de ronda: en la ronda 5, después de los duelos, todos los héroes pelean juntos contra él', () => {
+test('Jefe de ronda: en la ronda 5, después de los duelos, cada héroe pelea contra el mismo jefe en su arena', () => {
     const arena = toBoss();
     checkEq(gameState, 'BOSS', 'fase del jefe');
-    checkEq(arenas.length, 1, 'una sola arena');
-    checkEq(arena.heroes.length, MAX_HEROES, 'los 8 héroes');
-    check(arena.boss.isRoundBoss && arena.boss.label === ROUND_BOSSES[0].label, 'el jefe del escalón 1');
-    check(enemiesOf(player).every(e => !e.isHero), 'los héroes no se atacan entre sí');
-    checkEq(enrageMult(arena), 1, 'sin enojo de oleada');
-    arena.elapsed = 50; checkEq(enrageMult(arena), 1, 'tampoco pasado el tiempo de oleada');
+    checkEq(arenas.length, MAX_HEROES, 'una arena por héroe');
+    check(arenas.every(a => a.heroes.length === 1 && a.boss.isRoundBoss), 'cada uno con su jefe');
+    checkEq(new Set(arenas.map(a => a.boss.type)).size, 1, 'el mismo tipo de jefe para todos');
+    checkEq(arena.boss.type, lastRoundBoss, 'el jefe sorteado');
+    checkEq(enrageMult(arena), 1, 'todavía no se enfureció');
+    arena.elapsed = BOSS_FIGHT.enrageAfter + 10;
+    check(enrageMult(arena) > 1, 'pasado el tiempo se enfurece');
 });
 
-test('Jefe de ronda: ataca al héroe vivo más cercano', () => {
-    const arena = toBoss();
-    const [a, b] = arena.heroes;
-    a.x = arena.boss.x - 1; a.y = arena.boss.y;
-    b.x = arena.boss.x - 5; b.y = arena.boss.y;
-    checkEq(creepTarget(arena.boss), a, 'el más cercano');
-    a.hp = 0;
-    checkEq(creepTarget(arena.boss), b, 'si muere, el siguiente');
-});
-
-test('Jefe de ronda: morir no cuesta vidas; se revive a los 5 s sin Voluntad de Titán', () => {
+test('Jefe de ronda: como contra los creeps, morir cuesta una vida y se revive con Voluntad de Titán', () => {
     const arena = toBoss();
     const lives = player.lives;
     dealDamage(arena.boss, player, 99999, 'pure');
-    checkEq(player.lives, lives, 'no perdió vida');
-    check(!player.eliminated && player.respawnAt > 0, 'espera para revivir');
-    gameClock += BOSS_FIGHT.respawn + 0.1;
-    check(tryRespawn(player), 'revive');
-    checkEq(player.hp, player.maxHp, 'con la vida llena');
-    check(!getEffect(player, 'TITAN_WILL'), 'sin Voluntad de Titán');
+    checkEq(player.lives, lives - 1, 'perdió una vida');
+    waitRespawn();
+    check(player.isAlive() && getEffect(player, 'TITAN_WILL'), 'revivió con Voluntad de Titán');
+    player.lives = 0; setCondemned(player, 0.1); removeEffect(player, 'TITAN_WILL');
+    dealDamage(arena.boss, player, 99999, 'pure');
+    check(player.eliminated, 'sin vidas y Condenado: eliminado por el jefe');
 });
 
-test('Jefe de ronda: si cae, todos cobran, los 3 que más daño hicieron cobran extra y hay neutrales para elegir', () => {
-    const arena = toBoss();
-    const gold = heroes.map(h => h.gold);
-    heroes.forEach((h, i) => { h.bossDamage = i * 10; }); // más daño: los últimos
+test('Jefe de ronda: al matarlo cobrás oro y elegís neutral; los 3 más rápidos cobran extra', () => {
+    toBoss();
     const realEndRound = endRound;
     window.endRound = () => {}; // para mirar el oro antes de que la IA compre en la ronda siguiente
-    try { dealDamage(heroes[7], arena.boss, 1e9, 'pure'); updateWave(0.016); } finally { window.endRound = realEndRound; }
+    const gold = heroes.map(h => h.gold);
+    try {
+        heroes.forEach((h, i) => { h.arena.elapsed = 10 + i; dealDamage(h, h.arena.boss, 1e9, 'pure'); }); // el jugador, el más rápido
+        updateWave(0.016);
+    } finally { window.endRound = realEndRound; }
     const base = BOSS_FIGHT.gold[0];
     const got = heroes.map((h, i) => h.gold - gold[i]);
-    checkEq(got[0], base, 'el jugador (menos daño): el oro de todos');
-    checkEq(got[7], base + Math.round(base * BOSS_FIGHT.topBonus[0]) + 1, '1º en daño: +50% (y 1g por el último golpe)');
-    checkEq(got[6], base + Math.round(base * BOSS_FIGHT.topBonus[1]), '2º en daño: +30%');
+    checkEq(got[0], base + Math.round(base * BOSS_FIGHT.fastBonus[0]) + 1, '1º más rápido: +50% (y 1g por el último golpe)');
+    checkEq(got[1], base + Math.round(base * BOSS_FIGHT.fastBonus[1]) + 1, '2º: +30%');
+    checkEq(got[5], base + 1, 'el 6º: el oro de todos');
     checkEq(player.neutralOffer.length, BOSS_FIGHT.neutralOptions, '3 neutrales para elegir');
     check(player.neutralOffer.every(k => NEUTRAL_ITEMS[k].tier === 1), 'del escalón 1');
     check(heroes.slice(1).every(h => h.neutral), 'la IA ya eligió');
-    endRound();
-    if (gameState === 'DRAFT') learnSkill(currentDraft.options[0]);
-    checkEq(gameState, 'PREP', 'sigue la ronda 6');
-    checkEq(waveNumber, ROUND_BOSS_EVERY + 1, 'ronda 6');
 });
 
-test('Jefe de ronda: si se acaba el tiempo se va sin premio', () => {
-    const arena = toBoss();
-    const gold = player.gold;
-    arena.elapsed = BOSS_FIGHT.time;
-    updateWave(0.016);
-    check(arena.done, 'terminó');
-    checkEq(player.gold, gold, 'sin oro');
-    checkEq(player.neutralOffer, null, 'sin neutrales');
+test('Jefes: cada uno se pone más difícil a su manera', () => {
+    toBoss();
+    const make = key => { const c = makeRoundBoss(ROUND_BOSSES.find(b => b.key === key)); c.arena = player.arena; player.arena.creeps.push(c); return c; };
+    const golem = make('GOLEM'), armor = golem.armor;
+    golem.hp = golem.maxHp * 0.5; golem.type.update(golem, 0.01);
+    checkEq(golem.armor, armor + 3, 'Gólem: fase 2 con más armadura');
+    const hydra = make('HYDRA');
+    hydra.hp = hydra.maxHp * 0.4; hydra.type.update(hydra, 0.01);
+    checkEq(hydra.heads, 2, 'Hidra: 2 cabezas nuevas con 60% de vida perdida');
+    check(effAttack(hydra) > hydra.atk, 'Hidra: pega más');
+    const lich = make('LICH');
+    lich.type.update(lich, 12); const d1 = getEffect(lich, 'LICH_BARRIER').until - gameClock;
+    lich.type.update(lich, 12); const d2 = getEffect(lich, 'LICH_BARRIER').until - gameClock;
+    checkNear(d2 - d1, 1, 'Liche: cada barrera dura 1s más');
+    const queen = make('HIVE_QUEEN');
+    const before = player.arena.creeps.length; queen.type.update(queen, 8); const first = player.arena.creeps.length - before;
+    queen.type.update(queen, 8); const second = player.arena.creeps.length - before - first;
+    checkEq(second, first + 1, 'Reina: cada invocación trae uno más');
 });
 
 test('Neutrales: uno solo, da sus stats; al cambiarlo el anterior se vende solo', () => {
