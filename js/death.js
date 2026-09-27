@@ -36,7 +36,9 @@ function isCondemned(hero) { return !!getEffect(hero, 'CONDEMNED'); }
 function enterCondemned(hero) {
     const pct = hero.condemnPct > 0 ? hero.condemnPct * 2 : CONDEMNED.initialPct;
     setCondemned(hero, pct);
-    log(`☠️ ¡Sin vidas! Quedás CONDENADO: recibís +${Math.round(pct * 100)}% de daño. Si un creep te mata, quedás eliminado.`);
+    log(hero === player
+        ? `☠️ ¡Sin vidas! Quedás CONDENADO: recibís +${Math.round(pct * 100)}% de daño. Si un creep te mata, quedás eliminado.`
+        : `☠️ ${hero.displayName} quedó CONDENADO.`);
 }
 
 // Duelo perdido estando Condenado: +10% más de daño recibido (se usa con los duelos de la fase F).
@@ -57,39 +59,54 @@ function buyGreedLife(hero) {
 }
 
 // --- MORIR Y REVIVIR ---
+// Sirve para cualquier héroe (jugador o rival). Los mensajes se ven si es la arena que estás mirando.
 // killer: la unidad que lo mató (un creep) o null si murió por otra causa (ej: el costo de Forma Inmortal).
-// Los duelos (fase F) van a resolver la muerte contra héroes con registerDuelLoss en vez de eliminar.
-function handlePlayerDeath(killer) {
-    if (gameState !== 'WAVE' || player.respawnAt) return; // evita procesar la misma muerte dos veces
-    const cause = killer ? `${killer.label} te mató` : 'Moriste';
-    if (isCondemned(player)) {
-        gameState = 'GAMEOVER';
-        setStateText('ELIMINADO');
-        log(`💀 ${cause}. Estabas Condenado: quedás ELIMINADO. Modo espectador.`);
-        showPanel('restart-btn', true);
-        return;
-    }
-    player.lives--;
-    player.hp = 0;
-    player.effects = player.effects.filter(e => e.flags.includes('persistent')); // al morir se pierden las mejoras
-    player.respawnAt = gameClock + RESPAWN_DELAY;
-    const livesText = player.lives > 0 ? `te queda${player.lives > 1 ? 'n' : ''} ${player.lives} vida${player.lives > 1 ? 's' : ''}` : 'no te quedan vidas';
-    log(`💀 ${cause} (${livesText}). Revivís en ${RESPAWN_DELAY}s; los creeps pierden tu rastro.`);
+// Los duelos (fase F2) van a resolver la muerte contra héroes con registerDuelLoss en vez de eliminar.
+function handleHeroDeath(hero, killer) {
+    if (gameState !== 'WAVE' || hero.respawnAt || hero.eliminated) return; // evita procesar la misma muerte dos veces
+    hero.diedThisRound = true;
+    const you = hero === player;
+    const cause = killer ? `${killer.label} ${you ? 'te mató' : 'mató a ' + hero.displayName}` : (you ? 'Moriste' : `${hero.displayName} murió`);
+    if (isCondemned(hero)) { eliminateHero(hero, cause); return; }
+    hero.lives--;
+    hero.hp = 0;
+    hero.effects = hero.effects.filter(e => e.flags.includes('persistent')); // al morir se pierden las mejoras
+    hero.respawnAt = gameClock + RESPAWN_DELAY;
+    const livesText = hero.lives > 0 ? `${you ? 'te queda' : 'le queda'}${hero.lives > 1 ? 'n' : ''} ${hero.lives} vida${hero.lives > 1 ? 's' : ''}` : 'sin vidas';
+    log(`💀 ${cause} (${livesText}). ${you ? 'Revivís' : 'Revive'} en ${RESPAWN_DELAY}s; los creeps pierden el rastro.`);
 }
 
-// Llamado cada frame mientras el jugador está muerto. Devuelve true si revivió.
-function tryRespawn() {
-    if (!player.respawnAt || gameClock < player.respawnAt) return false;
-    player.respawnAt = 0;
-    player.hp = player.maxHp;
-    applyTitanWill(player);
+// Condenado y muerto por un creep: queda fuera de la partida. El jugador sigue mirando (espectador).
+function eliminateHero(hero, cause) {
+    hero.eliminated = true;
+    hero.hp = 0;
+    if (hero.arena) hero.arena.done = true;
+    const wasLogMuted = logMuted;
+    logMuted = false; // las eliminaciones se anuncian siempre
+    if (hero === player) {
+        log(`💀 ${cause}. Estabas Condenado: quedás ELIMINADO. Podés seguir mirando la partida (clic en el ranking).`);
+        setStateText('ELIMINADO · ESPECTADOR');
+        showPanel('restart-btn', true);
+        viewedHero = aliveHeroes()[0] || player;
+    } else {
+        log(`☠️ ${hero.displayName} quedó ELIMINADO.`);
+        if (viewedHero === hero) viewedHero = player.eliminated ? (aliveHeroes()[0] || player) : player;
+    }
+    logMuted = wasLogMuted;
+}
+
+// Llamado cada frame mientras el héroe está muerto. Devuelve true si revivió.
+function tryRespawn(hero = player) {
+    if (!hero.respawnAt || gameClock < hero.respawnAt) return false;
+    hero.respawnAt = 0;
+    hero.hp = hero.maxHp;
+    applyTitanWill(hero);
     log(`⚡ ¡Voluntad de Titán! ${TITAN_WILL.duration}s de inmortalidad, +${TITAN_WILL.atkSpeedPct * 100}% vel. ataque y habilidades sin costo de maná.`);
-    if (player.lives <= 0 && !isCondemned(player)) enterCondemned(player);
+    if (hero.lives <= 0 && !isCondemned(hero)) enterCondemned(hero);
     return true;
 }
 
 // Punto único para la muerte de cualquier héroe (lo usan dealDamage y los efectos, ej: Forma Inmortal).
-// Con PvP, acá se resuelve también la muerte de héroes rivales.
 function onHeroDeath(hero, killer = null) {
-    if (hero === player) handlePlayerDeath(killer);
+    handleHeroDeath(hero, killer);
 }

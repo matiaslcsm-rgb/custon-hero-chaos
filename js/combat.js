@@ -26,8 +26,14 @@ function makeCreep(t, x, y, statMult, isBossUnit, bossAuraBonus) {
 }
 
 // --- OBJETIVOS ---
-// Enemigos de una unidad. Por ahora un héroe solo enfrenta creeps; con PvP se suman los héroes rivales.
-function enemiesOf(unit) { return creeps; }
+// Enemigos de una unidad según su arena: un héroe en su oleada enfrenta a los creeps; en un duelo, al otro héroe.
+// Los creeps enfrentan a los héroes de su arena.
+function enemiesOf(unit) {
+    const arena = unit.arena;
+    if (!arena) return [];
+    if (!unit.isHero) return arena.heroes;
+    return arena.kind === 'duel' ? arena.heroes.filter(h => h !== unit) : arena.creeps;
+}
 
 function nearestEnemy(unit, maxRange) {
     let best = null, bestDist = Infinity;
@@ -143,11 +149,11 @@ function resolveBasicHit(attacker, target, dmg, isCrit) {
 }
 
 // --- PROYECTILES (ataques básicos a distancia con velocidad de proyectil) ---
-let projectiles = [];
 function fireProjectile(attacker, target, dmg, isCrit) {
-    projectiles.push({ attacker, x: attacker.x, y: attacker.y, target, dmg, isCrit, speed: attacker.projectileSpeed || 10 });
+    attacker.arena.projectiles.push({ attacker, x: attacker.x, y: attacker.y, target, dmg, isCrit, speed: attacker.projectileSpeed || 10 });
 }
-function updateProjectiles(dt) {
+function updateProjectiles(arena, dt) {
+    const projectiles = arena.projectiles;
     for (let i = projectiles.length - 1; i >= 0; i--) {
         const p = projectiles[i];
         if (!p.target.isAlive()) { projectiles.splice(i, 1); continue; }

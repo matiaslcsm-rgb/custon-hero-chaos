@@ -96,7 +96,8 @@ function renderCreepCodex() {
         return `<div class="ability-row"><h4>${creepTag(t)} ${t.label}</h4><p>${t.mechanic}</p>` +
             `<p class="meta">${stats.join(' · ')}</p><p><strong>Contra:</strong> ${t.counter}${item}</p></div>`;
     }).join('');
-    const themes = WAVE_THEMES.map((tier, i) => `<p><strong>${i < NORMAL_WAVES ? 'Oleada ' + (i + 1) : 'Jefe final'}:</strong> ${tier.map(th => th.name).join(' o ')}</p>`).join('');
+    const last = WAVE_THEMES.length - 1;
+    const themes = WAVE_THEMES.map((tier, i) => `<p><strong>${i < last - 1 ? 'Ronda ' + (i + 1) : i === last - 1 ? 'Ronda ' + (i + 1) + ' en adelante' : 'Cada ' + BOSS_ROUND_EVERY + ' rondas (jefe)'}:</strong> ${tier.map(th => th.name).join(' o ')}</p>`).join('');
     document.getElementById('creep-codex').innerHTML =
         `<h3>Creeps</h3><p class="subtitle">Cada oleada normal trae además un jefe (4x vida, +2 armadura y un aura que potencia a los creeps cercanos). Los creeps se hacen más fuertes en cada oleada.</p>${rows}` +
         `<div class="codex-sub">Temas de oleada (se elige uno al azar)</div>${themes}`;
@@ -106,7 +107,7 @@ function renderCreepCodex() {
 function renderWavePreview() {
     const el = document.getElementById('wave-preview');
     if (!nextWave) { el.innerHTML = ''; return; }
-    const title = waveNumber > NORMAL_WAVES ? 'Jefe final' : `Próxima oleada ${waveNumber}/${NORMAL_WAVES}`;
+    const title = `Próxima oleada · ronda ${waveNumber}${waveNumber % BOSS_ROUND_EVERY === 0 ? ' (JEFE)' : ''}`;
     const rows = waveSummary(nextWave).map(({ type, count }) => {
         const counter = type.counterItem ? ` → <span class="counter-item">${ITEMS[type.counterItem].name}</span>` : '';
         return `<div class="preview-row">${creepTag(type)} <strong>${type.label} x${count}</strong>: ${type.mechanic}${type.counter !== '—' ? ` <em>Contra: ${type.counter}${counter}</em>` : ''}</div>`;
@@ -347,7 +348,8 @@ function updateHud() {
     document.getElementById('player-hp').textContent = `${Math.round(player.hp)}/${player.maxHp}`;
     document.getElementById('player-mana').textContent = `${Math.round(player.mana)}/${player.maxMana}`;
     document.getElementById('player-gold').textContent = player.gold;
-    document.getElementById('round-num').textContent = Math.min(waveNumber, NORMAL_WAVES) + (isBossWave ? ' (JEFE)' : '');
+    document.getElementById('round-num').textContent = `${waveNumber}/${MAX_ROUNDS}${isBossWave ? ' (JEFE)' : ''}`;
+    renderScoreboard();
     document.getElementById('stat-str').textContent = Math.floor(player.attr('str'));
     document.getElementById('stat-agi').textContent = Math.floor(player.attr('agi'));
     document.getElementById('stat-int').textContent = Math.floor(player.attr('int'));
@@ -377,12 +379,42 @@ function renderTimer() {
         text = `⏱ ${Math.max(0, Math.ceil(phaseTimeLeft))}s`;
         if (phaseTimeLeft <= 5) cls = 'urgent';
     } else if (gameState === 'WAVE' && player) {
-        if (!player.isAlive() && player.respawnAt) { text = `☠ Revivís en ${Math.max(0, player.respawnAt - gameClock).toFixed(1)}s`; cls = 'urgent'; }
-        else if (waveTimeLeft() > 0) { text = `⏱ ${Math.ceil(waveTimeLeft())}s`; if (waveTimeLeft() <= 5) cls = 'urgent'; }
-        else { text = `🔥 Creeps enfurecidos +${Math.round((enrageMult() - 1) * 100)}%`; cls = 'urgent'; }
+        const hero = viewedHero || player, arena = hero.arena;
+        const waiting = arenas.filter(a => !a.done).length;
+        if (hero.inRest || !arena || arena.done) { text = `🏕 Descansando · ${waiting} arena${waiting === 1 ? '' : 's'} en combate`; }
+        else if (!hero.isAlive() && hero.respawnAt) { text = `☠ Revive en ${Math.max(0, hero.respawnAt - gameClock).toFixed(1)}s`; cls = 'urgent'; }
+        else if (waveTimeLeft(arena) > 0) { text = `⏱ ${Math.ceil(waveTimeLeft(arena))}s`; if (waveTimeLeft(arena) <= 5) cls = 'urgent'; }
+        else { text = `🔥 Creeps enfurecidos +${Math.round((enrageMult(arena) - 1) * 100)}%`; cls = 'urgent'; }
     }
     el.textContent = text;
     el.className = cls;
+}
+
+// --- RANKING ---
+// Tabla con los 8 héroes: puesto, vidas, puntos, oro y dónde está. Un clic en un héroe muestra su arena.
+let lastScoreboardSignature = '';
+function heroStatusIcon(h) {
+    if (h.eliminated) return '💀';
+    if (h.inRest) return '🏕';
+    if (!h.isAlive()) return '☠';
+    return gameState === 'WAVE' ? '⚔' : '🏕';
+}
+function renderScoreboard() {
+    const ranked = rankedHeroes();
+    const signature = ranked.map(h => [h.displayName, h.points, h.gold, h.lives, heroStatusIcon(h), isCondemned(h)].join(':')).join('|') + (viewedHero ? viewedHero.displayName : '');
+    if (signature === lastScoreboardSignature) return;
+    lastScoreboardSignature = signature;
+    const board = document.getElementById('scoreboard'); board.innerHTML = '';
+    ranked.forEach((h, i) => {
+        const row = document.createElement('div');
+        row.className = 'score-row' + (h === player ? ' you' : '') + (h === (viewedHero || player) ? ' viewed' : '') + (h.eliminated ? ' out' : '');
+        const lives = h.eliminated ? '' : isCondemned(h) ? '☠' : '♥'.repeat(Math.max(0, h.lives));
+        row.innerHTML = `<span class="pos">${i + 1}º</span><span class="sym">${h.symbol}</span><span class="name">${h.displayName}</span>` +
+            `<span class="lives">${lives}</span><span class="pts">${h.points} pts</span><span class="gold">${h.gold}g</span><span class="st">${heroStatusIcon(h)}</span>`;
+        row.title = h === player ? 'Vos' : 'Clic para mirar su arena';
+        row.onclick = () => { viewedHero = h; lastScoreboardSignature = ''; };
+        board.appendChild(row);
+    });
 }
 
 // Deja la interfaz como al abrir el juego (usado por "Nueva Partida").
@@ -392,6 +424,7 @@ function resetHud() {
     setStateText('SELECCIÓN DE HÉROE');
     document.getElementById('player-name').textContent = 'Ninguno';
     document.getElementById('round-num').textContent = '1';
+    document.getElementById('scoreboard').innerHTML = ''; lastScoreboardSignature = '';
     ['cooldown-bar', 'combat-log'].forEach(id => document.getElementById(id).innerHTML = '');
     ['scaling-info', 'extra-stats'].forEach(id => document.getElementById(id).textContent = '');
     document.getElementById('kit-panel').style.display = 'none';
@@ -411,6 +444,8 @@ function drawUnit(u, color, symbol) {
 }
 
 // Área de Descanso: un claro tranquilo con una fuente y fogatas donde los héroes esperan entre combates.
+function heroColor(h) { return h === player ? '#00f5d4' : '#ffb703'; }
+
 function renderRestArea() {
     ctx.fillStyle = '#07140d'; ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.strokeStyle = '#0f2418';
@@ -419,44 +454,46 @@ function renderRestArea() {
     ctx.font = '14px monospace'; ctx.fillStyle = '#2d6a4f';
     [[2, 2], [17, 2], [2, 10], [17, 10], [5, 5], [15, 8]].forEach(([x, y]) => ctx.fillText('♣', x * TILE + TILE / 2, y * TILE + TILE / 2));
     ctx.font = '22px monospace'; ctx.fillStyle = '#48cae4';
-    ctx.fillText('≈', REST_SPOT.x * TILE + TILE / 2, (REST_SPOT.y - 2) * TILE + TILE / 2);
+    ctx.fillText('≈', REST_SPOT.x * TILE + TILE / 2, (REST_SPOT.y - 3) * TILE + TILE / 2);
     ctx.fillStyle = '#fb8500';
-    [[REST_SPOT.x - 3, REST_SPOT.y], [REST_SPOT.x + 3, REST_SPOT.y]].forEach(([x, y]) => ctx.fillText('♨', x * TILE + TILE / 2, y * TILE + TILE / 2));
+    [[REST_SPOT.x - 5, REST_SPOT.y], [REST_SPOT.x + 5, REST_SPOT.y]].forEach(([x, y]) => ctx.fillText('♨', x * TILE + TILE / 2, y * TILE + TILE / 2));
     ctx.font = 'bold 16px monospace'; ctx.fillStyle = '#95d5b2';
     ctx.fillText('ÁREA DE DESCANSO', canvas.width / 2, TILE * 0.8);
     ctx.font = '11px monospace'; ctx.fillStyle = '#74c69d';
     ctx.fillText('Volvés al combate con vida y maná completos', canvas.width / 2, canvas.height - TILE * 0.6);
     ctx.font = '18px monospace';
-    drawUnit({ x: player.x, y: player.y, hp: player.hp, maxHp: player.maxHp }, '#00f5d4', player.symbol);
+    heroes.filter(h => h.inRest && !h.eliminated).forEach(h => drawUnit({ x: h.x, y: h.y, hp: h.hp, maxHp: h.maxHp }, heroColor(h), h.symbol));
 }
 
 function render() {
-    if (player && player.inRest && gameState !== 'WAVE') { renderRestArea(); return; }
+    const hero = viewedHero || player;
+    if (hero && (hero.inRest || !hero.arena) && gameState !== 'HERO_SELECT') { renderRestArea(); return; }
     ctx.fillStyle = '#050507'; ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.strokeStyle = '#151821';
     for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) ctx.strokeRect(c * TILE, r * TILE, TILE, TILE);
+    if (!hero || !hero.arena || gameState !== 'WAVE') return;
+    const arena = hero.arena;
 
     // Aura del jefe
-    if (gameState === 'WAVE' && boss && boss.isAlive()) {
+    if (arena.boss && arena.boss.isAlive()) {
         ctx.beginPath();
         ctx.strokeStyle = 'rgba(255,0,85,0.4)';
-        ctx.arc(boss.x * TILE + TILE / 2, boss.y * TILE + TILE / 2, boss.auraRadius * TILE, 0, Math.PI * 2);
+        ctx.arc(arena.boss.x * TILE + TILE / 2, arena.boss.y * TILE + TILE / 2, arena.boss.auraRadius * TILE, 0, Math.PI * 2);
         ctx.stroke();
     }
 
     ctx.font = '18px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-
-    if (gameState === 'WAVE') {
-        creeps.forEach(c => { if (c.isAlive()) drawUnit(c, c.color, c.symbol); });
-        ctx.fillStyle = '#fefae0';
-        projectiles.forEach(p => { ctx.beginPath(); ctx.arc(p.x * TILE + TILE / 2, p.y * TILE + TILE / 2, 3, 0, Math.PI * 2); ctx.fill(); });
-    }
-    // Jugador muerto esperando revivir: una calavera en el lugar donde va a reaparecer
-    if (player && !player.isAlive() && player.respawnAt && gameState === 'WAVE') {
-        ctx.fillStyle = '#555'; ctx.fillText('☠', player.x * TILE + TILE / 2, player.y * TILE + TILE / 2);
-    }
-    if (player && player.isAlive() && (gameState === 'WAVE' || gameState === 'PREP')) {
-        const invulnerable = gameState === 'WAVE' && hasFlag(player, 'invulnerable');
-        drawUnit({ x: player.x, y: player.y, hp: player.hp, maxHp: player.maxHp }, invulnerable ? '#ffffff' : '#00f5d4', player.symbol);
+    arena.creeps.forEach(c => { if (c.isAlive()) drawUnit(c, c.color, c.symbol); });
+    ctx.fillStyle = '#fefae0';
+    arena.projectiles.forEach(p => { ctx.beginPath(); ctx.arc(p.x * TILE + TILE / 2, p.y * TILE + TILE / 2, 3, 0, Math.PI * 2); ctx.fill(); });
+    arena.heroes.forEach(h => {
+        if (h.eliminated) return;
+        // Muerto esperando revivir: una calavera en el lugar donde va a reaparecer
+        if (!h.isAlive()) { ctx.fillStyle = '#555'; ctx.fillText('☠', h.x * TILE + TILE / 2, h.y * TILE + TILE / 2); return; }
+        drawUnit({ x: h.x, y: h.y, hp: h.hp, maxHp: h.maxHp }, hasFlag(h, 'invulnerable') ? '#ffffff' : heroColor(h), h.symbol);
+    });
+    if (hero !== player) {
+        ctx.font = '11px monospace'; ctx.fillStyle = '#ffb703';
+        ctx.fillText(`👁 Mirando a ${hero.displayName} (clic en tu fila del ranking para volver)`, canvas.width / 2, canvas.height - 8);
     }
 }

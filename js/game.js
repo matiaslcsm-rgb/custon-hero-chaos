@@ -1,12 +1,14 @@
-// Flujo de la partida: estado global, selección de héroe, draft, tienda, oleadas, muerte y
-// la actualización de cada frame durante una oleada (movimiento, ataques, IA de creeps).
+// Flujo de la partida: estado global, selección de héroe, draft, tienda, oleadas en paralelo de los 8 héroes
+// (ver world.js) y la actualización de cada frame de cada arena (movimiento, ataques, IA).
 
 const COLS = 20, ROWS = 12;
 
-let player = null, creeps = [], boss = null;
+let player = null;
 let gameState = 'HERO_SELECT', waveNumber = 1, isBossWave = false, gameClock = 0, keys = {};
-let moveTimer = 0;
 let currentDraft = null; // { mode, options } del draft abierto; mode 'bookChoice' = eligiendo qué cambiar con el Libro
+
+const BOSS_ROUND_EVERY = 5;   // cada 5 rondas, la oleada es la del jefe (tema "Jefe Final")
+const WAVE_HARD_LIMIT = 120;  // segundos: si una arena no terminó, se da por perdida (evita partidas trabadas)
 
 window.addEventListener('keydown', e => {
     const k = e.key.toLowerCase();
@@ -19,13 +21,24 @@ window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
 // --- SELECCIÓN, DRAFT Y TIENDA ---
 function selectHero(template) {
     player = new Hero(template);
-    sendToRestArea(player);
+    player.displayName = `${player.name} (Vos)`;
+    heroes = [player];
+    createRivals(template);
+    heroes.forEach(sendToRestArea);
+    viewedHero = player;
     showPanel('hero-select-panel', false);
-    log(`Seleccionaste a ${player.name}.`);
-    startSkillDraft();
+    log(`Seleccionaste a ${player.name}. Tus rivales: ${heroes.slice(1).map(h => h.name).join(', ')}.`);
+    startRoundDraft();
 }
 
-// Abre un draft. mode: 'normal' (3 opciones), 'fragment' (4) o 'book' (6).
+// Comienzo de ronda: los rivales draftean al instante; el jugador, si su kit no está completo.
+function startRoundDraft() {
+    quietly(() => aliveHeroes().filter(h => h.isAI && h.skills.length < KIT_SIZE).forEach(h => h.addSkill(aiPickDraft(h, draftOptions(h, DRAFT_OPTIONS.normal)))));
+    if (!player.eliminated && player.skills.length < KIT_SIZE) startSkillDraft();
+    else startPreparation();
+}
+
+// Abre un draft para el jugador. mode: 'normal' (3 opciones), 'fragment' (4) o 'book' (6).
 // exclude: habilidades que no se pueden ofrecer (ej: la que se acaba de reemplazar).
 function startSkillDraft(mode = 'normal', exclude = []) {
     gameState = 'DRAFT';
@@ -87,22 +100,25 @@ function replaceSkill(skill, mode, sourceName) {
     startSkillDraft(mode, [skill.id]);
 }
 
+// Preparación: el jugador compra en la tienda (con el aviso de la oleada); los rivales se arman al instante.
 function startPreparation() {
     gameState = 'PREP';
     if (!nextWave) nextWave = rollWave(waveNumber); // se sortea ya, para avisarla en la tienda
+    quietly(() => aliveHeroes().filter(h => h.isAI).forEach(h => { aiSpendPoints(h); aiShop(h); }));
     setPhaseTimer(savedPrepTime ?? PHASE_TIMES.prep);
     savedPrepTime = null;
     setStateText('PREPARACIÓN');
-    showPanel('shop-container', true);
-    renderShop();
+    showPanel('shop-container', !player.eliminated);
+    if (!player.eliminated) renderShop();
 }
 
-
 // --- ÁREA DE DESCANSO ---
-// Al terminar una oleada (y en el futuro, un duelo) el héroe va al Área de Descanso hasta que se acabe el
-// tiempo de preparación, y vuelve al combate con la vida y el maná completos. Las mejoras temporales se pierden.
+// Al terminar su oleada (y en la fase F2, su duelo) cada héroe va al Área de Descanso hasta que terminen todos,
+// y vuelve al combate con la vida y el maná completos. Las mejoras temporales se pierden.
 const REST_SPOT = { x: 10, y: 7 };
 const WAVE_START = { x: 3, y: 6 };
+// Lugares alrededor de la fuente para los 8 héroes
+const REST_SPOTS = [[10, 7], [8, 6], [12, 6], [7, 8], [13, 8], [9, 9], [11, 9], [10, 5]];
 
 function restoreHero(hero) {
     hero.hp = hero.maxHp; hero.mana = hero.maxMana;
@@ -111,7 +127,8 @@ function restoreHero(hero) {
 
 function sendToRestArea(hero) {
     hero.inRest = true;
-    hero.x = REST_SPOT.x; hero.y = REST_SPOT.y;
+    const [x, y] = REST_SPOTS[Math.max(0, heroes.indexOf(hero)) % REST_SPOTS.length];
+    hero.x = x; hero.y = y;
     restoreHero(hero);
 }
 
@@ -122,42 +139,69 @@ function returnFromRestArea(hero) {
 }
 
 // --- OLEADAS ---
+// Cada héroe en juego pelea la misma oleada en su propia arena, todos al mismo tiempo.
 function startWave() {
     showPanel('shop-container', false);
-    isBossWave = waveNumber > NORMAL_WAVES;
+    isBossWave = waveNumber % BOSS_ROUND_EVERY === 0;
     gameState = 'WAVE';
     const wave = nextWave || rollWave(waveNumber);
     nextWave = null;
-    returnFromRestArea(player);
-    setStateText(isBossWave ? `JEFE FINAL: ${wave.name.toUpperCase()}` : `OLEADA ${waveNumber}/${NORMAL_WAVES}: ${wave.name.toUpperCase()}`);
-    spawnWave(wave);
-    resetWaveTimer();
-    log(`🌊 ¡Comienza la oleada ${waveNumber}: ${wave.name}! ${creeps.length - 1} creeps + 1 jefe.`);
+    arenas = aliveHeroes().map(hero => {
+        returnFromRestArea(hero);
+        hero.diedThisRound = false;
+        const arena = makeArena('wave', [hero]);
+        spawnWave(arena, wave);
+        return arena;
+    });
+    if (player.eliminated && (!viewedHero || viewedHero.eliminated)) viewedHero = rankedHeroes()[0];
+    setStateText(`${isBossWave ? 'JEFE' : 'OLEADA'} · RONDA ${waveNumber}: ${wave.name.toUpperCase()}`);
+    log(`🌊 ¡Ronda ${waveNumber}: ${wave.name}! Cada héroe pelea en su arena (${creeps.length ? creeps.length - 1 : '?'} creeps + 1 jefe).`);
 }
 
-function onWaveCleared() {
-    if (isBossWave) {
-        gameState = 'VICTORY';
-        setStateText('¡VICTORIA!');
-        log('🏆 ¡Derrotaste al jefe final! Fin del prototipo de héroe único.');
-        showPanel('restart-btn', true);
-        return;
+// Un héroe limpió su arena: suma el punto (si no murió), experiencia e interés, y va a descansar.
+function onArenaCleared(arena) {
+    arena.done = true;
+    const hero = arena.heroes[0];
+    if (hero.eliminated) return;
+    if (!hero.diedThisRound) hero.points += POINTS.waveClean;
+    gainXp(hero, 40 + 20 * waveNumber);
+    const interest = Math.min(5, Math.floor(hero.gold / 10));
+    hero.gold += interest;
+    sendToRestArea(hero);
+    if (hero === player) {
+        const waiting = arenas.filter(a => !a.done).length;
+        log(`🏆 Oleada superada${hero.diedThisRound ? '' : ' sin morir (+1 punto)'}. 🏕️ Vas al Área de Descanso${waiting ? ` (esperando a ${waiting} héroe${waiting > 1 ? 's' : ''})` : ''}.${interest ? ` Interés: +${interest}g.` : ''}`);
     }
-    log(`🏆 Oleada ${waveNumber} superada. 🏕️ Vas al Área de Descanso: volvés con vida y maná completos.`);
-    sendToRestArea(player);
-    gainXp(player, 40 + 20 * waveNumber);
-    const interest = Math.min(5, Math.floor(player.gold / 10));
-    if (interest > 0) { player.gold += interest; log(`💰 Interés por oro ahorrado: +${interest}g`); }
+}
+
+// Todas las arenas terminaron: ranking y siguiente ronda (en la fase F2 acá van los duelos).
+function onRoundWavesDone() {
+    arenas = [];
+    heroes.forEach(h => { if (!h.eliminated) h.arena = null; });
+    logMuted = false;
+    const top = rankedHeroes().slice(0, 3).map((h, i) => `${i + 1}º ${h.displayName} (${h.points})`).join(' · ');
+    log(`📊 Fin de la ronda ${waveNumber}. Ranking: ${top}. Vas ${heroRank(player)}º.`);
+    if (aliveHeroes().length <= 1 || waveNumber >= MAX_ROUNDS) { endGame(); return; }
     waveNumber++;
-    if (player.skills.length < KIT_SIZE) startSkillDraft();
-    else startPreparation();
+    startRoundDraft();
+}
+
+function endGame() {
+    gameState = 'ENDED';
+    const winner = rankedHeroes()[0];
+    const place = heroRank(player);
+    setStateText(winner === player ? '¡GANASTE LA PARTIDA!' : `FIN · QUEDASTE ${place}º DE ${heroes.length}`);
+    log(`🏁 Fin de la partida. Ganador: ${winner.displayName} con ${winner.points} puntos. Quedaste ${place}º.`);
+    showPanel('restart-btn', true);
+    showPanel('shop-container', false);
+    showPanel('draft-container', false);
 }
 
 // Vuelve todo al estado inicial (selección de héroe) sin recargar la página.
 function resetGame() {
-    player = null; creeps = []; boss = null; projectiles = [];
+    player = null; heroes = []; arenas = []; viewedHero = null;
     gameState = 'HERO_SELECT'; waveNumber = 1; isBossWave = false; gameClock = 0;
-    currentDraft = null; savedPrepTime = null; nextWave = null;
+    currentDraft = null; savedPrepTime = null; nextWave = null; logMuted = false;
     setPhaseTimer(PHASE_TIMES.heroSelect);
     resetHud();
     log('🔄 Nueva partida. Elegí un héroe.');
@@ -165,7 +209,7 @@ function resetGame() {
 
 // --- HABILIDADES ACTIVAS ---
 function handleSkillKeypress(k) {
-    if (!player || !player.isAlive()) return;
+    if (!player || !player.isAlive() || player.inRest || !player.arena) return;
     const skill = player.skillForKey(k);
     if (!skill || skill.kind !== 'active') return;
     if (skillLevel(player, skill) === 0) { log(`🔒 ${skill.name} está en nivel 0: invertile un punto para usarla.`); return; }
@@ -183,11 +227,12 @@ function tryCastSkill(hero, skill, opts = {}) {
         if (!opts.quiet) log(`❌ Maná insuficiente para ${skill.name} (necesitás ${manaCost}).`);
         return false;
     }
+    const outerBuffer = logBuffer;
     logBuffer = [];
     let ok;
     try { ok = skill.cast(hero); } finally {
         const messages = logBuffer;
-        logBuffer = null;
+        logBuffer = outerBuffer;
         if (ok || !opts.quiet) messages.forEach(log);
     }
     if (!ok) return false;
@@ -197,63 +242,76 @@ function tryCastSkill(hero, skill, opts = {}) {
     return true;
 }
 
-// --- ACTUALIZACIÓN POR FRAME DURANTE UNA OLEADA ---
+// --- ACTUALIZACIÓN POR FRAME ---
+// Actualiza todas las arenas activas. Los mensajes solo se muestran si son de la arena que estás mirando.
 function updateWave(dt) {
-    // Efectos temporales: avanzan, emiten onTick y los vencidos disparan su onExpire (puede matar al jugador).
-    tickEffects(player, dt);
-    creeps.forEach(c => { if (c.isAlive()) tickEffects(c, dt); });
     if (gameState !== 'WAVE') return;
+    const shown = viewArena();
+    arenas.forEach(arena => {
+        if (arena.done) return;
+        logMuted = arena !== shown;
+        updateArena(arena, dt);
+    });
+    logMuted = false;
+    if (gameState === 'WAVE' && arenas.every(a => a.done)) onRoundWavesDone();
+}
 
-    // Muerto esperando revivir: los creeps vuelven a su lugar y el temporizador de la oleada se pausa
-    if (!player.isAlive()) {
-        if (!tryRespawn()) {
-            creeps.forEach(c => updateCreep(c, dt));
-            tickCooldowns(dt);
-            return;
-        }
+function updateArena(arena, dt) {
+    // Efectos temporales: avanzan, emiten onTick y los vencidos disparan su onExpire (puede matar al héroe)
+    arena.heroes.forEach(h => tickEffects(h, dt));
+    arena.creeps.forEach(c => { if (c.isAlive()) tickEffects(c, dt); });
+    if (gameState !== 'WAVE' || arena.done) return;
+
+    arena.heroes.forEach(hero => updateHero(hero, arena, dt));
+    if (arena.done) return; // el héroe quedó eliminado
+    updateProjectiles(arena, dt);
+    arena.creeps.forEach(c => updateCreep(c, dt));
+
+    const fighting = arena.heroes.some(h => h.isAlive());
+    if (fighting) tickWaveTimer(arena, dt);
+    if (arena.creeps.every(c => !c.isAlive())) onArenaCleared(arena);
+    else if (arena.elapsed > WAVE_HARD_LIMIT) { arena.done = true; arena.heroes.forEach(sendToRestArea); } // no la terminó a tiempo
+}
+
+// Un héroe en su arena: revivir, pensar (IA), moverse, atacar, regenerar y enfriamientos.
+function updateHero(hero, arena, dt) {
+    if (hero.eliminated) return;
+    // Muerto esperando revivir: los creeps vuelven a su lugar y su temporizador de oleada se pausa
+    if (!hero.isAlive()) {
+        if (!tryRespawn(hero)) { tickCooldowns(hero, dt); return; }
     }
-    tickWaveTimer(dt);
-
-    // Piloto automático: la IA reparte puntos y lanza habilidades varias veces por segundo
-    if (autopilot && everyInterval(player, 'AI_THINK', dt, AI.thinkInterval)) {
-        aiSpendPoints(player);
-        aiCastSkills(player);
+    const aiControlled = hero !== player || autopilot;
+    if (aiControlled && everyInterval(hero, 'AI_THINK', dt, AI.thinkInterval)) {
+        aiSpendPoints(hero);
+        aiCastSkills(hero);
     }
 
-    const stunned = hasFlag(player, 'stun');
+    const stunned = hasFlag(hero, 'stun');
 
     // Movimiento: del teclado o de la IA (la velocidad la modifican los efectos: Masacre, Visión de Cazador...)
-    const effMoveInterval = player.moveInterval / effMoveMult(player);
-    moveTimer += dt;
-    if (!stunned && moveTimer > effMoveInterval) {
-        const dir = autopilot ? aiMoveDirection(player) : keyboardDirection();
-        player.x = Math.max(0, Math.min(COLS - 1, player.x + dir.dx));
-        player.y = Math.max(0, Math.min(ROWS - 1, player.y + dir.dy));
-        moveTimer = 0;
+    hero.moveTimer = (hero.moveTimer || 0) + dt;
+    if (!stunned && hero.moveTimer > hero.moveInterval / effMoveMult(hero)) {
+        const dir = aiControlled ? aiMoveDirection(hero) : keyboardDirection();
+        hero.x = Math.max(0, Math.min(COLS - 1, hero.x + dir.dx));
+        hero.y = Math.max(0, Math.min(ROWS - 1, hero.y + dir.dy));
+        hero.moveTimer = 0;
     }
 
     // Ataque automático: al enemigo en rango de mayor prioridad (ej: Sanadores) o, si no, al más cercano
-    const target = stunned ? null : pickAttackTarget(player, effRange(player));
+    const target = stunned ? null : pickAttackTarget(hero, effRange(hero));
     if (target) {
-        player.attackTimer += dt;
-        if (player.attackTimer >= (1 / effAtkSpeed(player))) {
-            player.attackTimer = 0;
-            const { dmg, isCrit } = rollAttackDamage(player, target);
-            if (player.projectileSpeed > 0) fireProjectile(player, target, dmg, isCrit);
-            else resolveBasicHit(player, target, dmg, isCrit);
+        hero.attackTimer += dt;
+        if (hero.attackTimer >= (1 / effAtkSpeed(hero))) {
+            hero.attackTimer = 0;
+            const { dmg, isCrit } = rollAttackDamage(hero, target);
+            if (hero.projectileSpeed > 0) fireProjectile(hero, target, dmg, isCrit);
+            else resolveBasicHit(hero, target, dmg, isCrit);
         }
     } else {
-        player.attackTimer = 0;
+        hero.attackTimer = 0;
     }
-    updateProjectiles(dt);
-    player.regenTick(dt);
-
-    creeps.forEach(c => updateCreep(c, dt));
-
-    tickCooldowns(dt);
-
-    // ¿Oleada limpia?
-    if (gameState === 'WAVE' && creeps.every(c => !c.isAlive())) onWaveCleared();
+    hero.regenTick(dt);
+    tickCooldowns(hero, dt);
 }
 
 function keyboardDirection() {
@@ -263,6 +321,6 @@ function keyboardDirection() {
     };
 }
 
-function tickCooldowns(dt) {
-    for (let id in player.cooldowns) if (player.cooldowns[id] > 0) player.cooldowns[id] = Math.max(0, player.cooldowns[id] - dt);
+function tickCooldowns(hero, dt) {
+    for (let id in hero.cooldowns) if (hero.cooldowns[id] > 0) hero.cooldowns[id] = Math.max(0, hero.cooldowns[id] - dt);
 }

@@ -32,7 +32,9 @@ function newGame(heroKey) {
     selectHero(HERO_TEMPLATES[heroKey]);
     showPanel('draft-container', false);
     gameState = 'WAVE';
-    spawnWave(TEST_WAVE);
+    player.inRest = false;
+    arenas = [makeArena('wave', [player])];
+    spawnWave(player.arena, TEST_WAVE);
     resetWaveTimer();
     creeps.forEach(c => { c.x = 19; c.spawnX = 19; });
     player.x = 5; player.y = 5;
@@ -112,6 +114,7 @@ test('Invulnerable no recibe daño; los creeps de un golpe mueren con cualquier 
     dealDamage(creeps[0], player, 500, 'pure');
     checkEq(player.hp, hp, 'vida del invulnerable');
     const chusma = makeCreep(CREEP_TYPES.CHUSMA, 6, 5, 1, false, 0);
+    chusma.arena = player.arena;
     creeps.push(chusma);
     dealDamage(player, chusma, 1, 'physical');
     check(!chusma.isAlive(), 'la Chusma muere de un golpe');
@@ -378,7 +381,7 @@ test('Condenado: si lo mata un creep queda eliminado (una sola vez aunque peguen
     player.lives = 0; setCondemned(player, 0.1); player.hp = 1;
     const attackers = [[4, 5], [6, 5], [5, 4], [5, 6]].map(([x, y]) => dummy({ x, y, attackTimer: 99, atk: 999 }));
     attackers.forEach(c => updateCreep(c, 0.016));
-    checkEq(gameState, 'GAMEOVER', 'estado');
+    check(player.eliminated, 'quedó eliminado');
     checkEq([...document.querySelectorAll('#combat-log p')].filter(p => p.textContent.includes('ELIMINADO')).length, 1, 'mensajes de eliminación');
 });
 
@@ -555,6 +558,7 @@ test('Pacto de la Muerte: daño puro en área y cura lo que drena', () => {
 // Agrega un creep de un tipo al lado del jugador (o donde se indique).
 function spawnType(key, props = {}) {
     const c = makeCreep(CREEP_TYPES[key], player.x + 1, player.y, 1, false, 0);
+    c.arena = player.arena;
     Object.assign(c, props);
     creeps.push(c);
     return c;
@@ -564,7 +568,7 @@ test('Oleadas: tema sorteado, cantidades correctas y el aviso coincide con lo qu
     newGame('AXE');
     waveNumber = 1; isBossWave = false;
     const wave = { name: 'Enjambre', groups: [{ type: 'SWARM', count: 2 }, { type: 'GRUNT', count: 2 }], boss: 'SCOUT' };
-    spawnWave(wave);
+    spawnWave(player.arena, wave);
     checkEq(creeps.filter(c => c.key === 'SWARM').length, 8, 'el Enjambre viene de a 4');
     checkEq(creeps.length, 8 + 2 + 1, 'total con el jefe');
     check(boss.isBoss && boss.key === 'SCOUT', 'jefe del tipo del tema');
@@ -781,7 +785,7 @@ test('Área de Descanso: al terminar la oleada vas ahí y volvés con vida, man�
     creeps.forEach(c => { c.hp = 0; });
     player.hp = 5; player.mana = 0;
     addEffect(player, { id: 'TEMP', duration: 99, mods: { atkPct: 1 } });
-    onWaveCleared();
+    updateWave(0.016); // su arena quedó limpia: termina la ronda
     check(player.inRest, 'está en el Área de Descanso');
     checkEq(player.hp, player.maxHp, 'vida llena');
     check(!getEffect(player, 'TEMP'), 'sin mejoras temporales');
@@ -884,32 +888,131 @@ test('IA: definitiva primero al repartir puntos y prefiere habilidades naturales
     checkEq(pick.id, 'AXE_HACHAZO', 'natural');
 });
 
+// ============================================================ MUNDO DE 8 HÉROES (fase F1)
+test('Partida de 8: el jugador + 7 rivales con otros héroes, cada uno en su arena', () => {
+    resetGame();
+    selectHero(HERO_TEMPLATES.AXE);
+    checkEq(heroes.length, MAX_HEROES, 'héroes');
+    check(heroes.slice(1).every(h => h.isAI && h.key !== 'AXE'), 'rivales con otros héroes');
+    check(heroes.slice(1).every(h => h.skills.length === 1), 'los rivales ya draftearon');
+    learnSkill(currentDraft.options[0]);
+    startWave();
+    checkEq(arenas.length, MAX_HEROES, 'una arena por héroe');
+    checkEq(new Set(arenas.map(a => a.creeps)).size, MAX_HEROES, 'cada arena con sus propios creeps');
+    check(arenas.every(a => a.creeps.length === arenas[0].creeps.length), 'todos pelean la misma oleada');
+    check(heroes.every(h => enemiesOf(h) === h.arena.creeps), 'cada héroe pelea contra los creeps de su arena');
+});
+
+test('Las arenas se juegan en paralelo; al terminar todas, la ronda suma puntos y sigue', () => {
+    resetGame();
+    selectHero(HERO_TEMPLATES.SNIPER);
+    learnSkill(currentDraft.options[0]);
+    startWave();
+    heroes.forEach(h => addEffect(h, { id: 'TEST_GOD', duration: 1e9, flags: ['invulnerable', 'persistent'] }));
+    autopilot = true;
+    try { for (let f = 0; gameState === 'WAVE' && f < 12000; f++) { gameClock += 0.05; updateWave(0.05); } }
+    finally { autopilot = false; }
+    check(gameState !== 'WAVE', 'terminó la ronda');
+    checkEq(waveNumber, 2, 'pasó a la ronda 2');
+    check(heroes.every(h => h.points === POINTS.waveClean), 'todos superaron la oleada sin morir (+1)');
+    check(heroes.every(h => h.inRest && !h.arena), 'todos en el Área de Descanso');
+});
+
+test('Solo se ven los mensajes de la arena que estás mirando', () => {
+    newGame('AXE');
+    const rival = heroes[1];
+    rival.inRest = false;
+    arenas.push(makeArena('wave', [rival]));
+    spawnWave(rival.arena, TEST_WAVE);
+    rival.hp = 1;
+    const c = rival.arena.creeps[0];
+    Object.assign(c, { x: rival.x + 1, y: rival.y, atk: 999, attackTimer: 99 });
+    const before = document.querySelectorAll('#combat-log p').length;
+    updateWave(0.016);
+    check(!rival.isAlive(), 'el rival murió en su arena');
+    checkEq(document.querySelectorAll('#combat-log p').length, before, 'sin mensajes de su arena');
+});
+
+test('Rival Condenado que muere contra creeps queda eliminado y no juega la ronda siguiente', () => {
+    resetGame();
+    selectHero(HERO_TEMPLATES.AXE);
+    learnSkill(currentDraft.options[0]);
+    startWave();
+    const rival = heroes[3];
+    rival.lives = 0; setCondemned(rival, 0.1);
+    dealDamage(rival.arena.creeps[0], rival, 99999, 'pure');
+    check(rival.eliminated, 'eliminado');
+    check(rival.arena.done, 'su arena terminó');
+    checkEq(heroRank(rival), MAX_HEROES, 'último en el ranking');
+    heroes.forEach(h => { if (h.arena) h.arena.creeps.forEach(c => { c.hp = 0; }); });
+    updateWave(0.016);
+    if (gameState === 'DRAFT') learnSkill(currentDraft.options[0]);
+    startWave();
+    check(!arenas.some(a => a.heroes.includes(rival)), 'no tiene arena en la ronda 2');
+    checkEq(arenas.length, MAX_HEROES - 1, 'juegan los otros 7');
+});
+
+test('Espectador: si el jugador queda eliminado, la partida sigue y mira a otro héroe', () => {
+    resetGame();
+    selectHero(HERO_TEMPLATES.AXE);
+    learnSkill(currentDraft.options[0]);
+    startWave();
+    player.lives = 0; setCondemned(player, 0.1);
+    dealDamage(player.arena.creeps[0], player, 99999, 'pure');
+    check(player.eliminated, 'eliminado');
+    check(viewedHero !== player && !viewedHero.eliminated, 'pasa a mirar a un héroe en juego');
+    heroes.forEach(h => { if (h.arena) h.arena.creeps.forEach(c => { c.hp = 0; }); });
+    updateWave(0.016);
+    checkEq(gameState, 'PREP', 'la partida sigue (sin draft para el eliminado)');
+    startWave();
+    checkEq(arenas.length, MAX_HEROES - 1, 'juegan los otros 7');
+});
+
+test('Fin de partida al llegar al máximo de rondas: gana el primero del ranking', () => {
+    const saved = MAX_ROUNDS;
+    try {
+        MAX_ROUNDS = 1;
+        resetGame();
+        selectHero(HERO_TEMPLATES.AXE);
+        learnSkill(currentDraft.options[0]);
+        startWave();
+        heroes[2].points = 10;
+        heroes.forEach(h => { if (h.arena) h.arena.creeps.forEach(c => { c.hp = 0; }); });
+        updateWave(0.016);
+        checkEq(gameState, 'ENDED', 'terminó');
+        checkEq(rankedHeroes()[0], heroes[2], 'gana el de más puntos');
+    } finally { MAX_ROUNDS = saved; }
+});
+
 // ============================================================ PARTIDAS COMPLETAS
-// Juega la partida entera con la IA (draft, puntos, tienda y combate). Con godMode el héroe es invulnerable,
-// para probar que el flujo completo funciona; sin godMode sirve para medir qué tan difícil es el juego.
-function simulateGame(heroIndex, godMode = true) {
+// Juega varias rondas con la IA (draft, puntos, tienda y combate de los 8 héroes). Con godMode el jugador es
+// invulnerable, para probar que el flujo completo funciona; sin godMode sirve para medir la dificultad.
+function simulateGame(heroIndex, godMode = true, rounds = 4) {
+    const savedMax = MAX_ROUNDS;
+    MAX_ROUNDS = rounds;
     resetGame();
     document.querySelectorAll('#hero-options .skill-card')[heroIndex].click();
     autopilot = true;
     try {
         let guard = 0;
-        while (gameState !== 'VICTORY' && gameState !== 'GAMEOVER' && guard++ < 40) {
+        while (gameState !== 'ENDED' && guard++ < rounds * 4 + 10) {
             if (gameState === 'DRAFT') learnSkill(aiPickDraft(player, currentDraft.options));
-            if (gameState === 'PREP') { aiSpendPoints(player); aiShop(player); startWave(); }
+            if (gameState === 'PREP') { if (!player.eliminated) { aiSpendPoints(player); aiShop(player); } startWave(); }
             if (gameState === 'WAVE') {
                 if (godMode) addEffect(player, { id: 'TEST_GOD', duration: 1e9, flags: ['invulnerable', 'persistent'] });
                 for (let f = 0; gameState === 'WAVE' && f < 12000; f++) { gameClock += 0.05; updateWave(0.05); }
-                if (gameState === 'WAVE') throw new Error('una oleada no terminó');
+                if (gameState === 'WAVE') throw new Error('una ronda no terminó');
             }
         }
-    } finally { autopilot = false; }
-    return { state: gameState, skills: player.skills.length, level: player.level, wave: waveNumber, lives: player.lives };
+    } finally { autopilot = false; MAX_ROUNDS = savedMax; }
+    return { state: gameState, eliminated: player.eliminated, skills: player.skills.length, level: player.level, rank: heroRank(player), round: waveNumber };
 }
 
 Object.keys(HERO_TEMPLATES).forEach((key, i) => {
-    test(`Partida completa con ${HERO_TEMPLATES[key].name}`, () => {
+    test(`Partida completa (4 rondas) con ${HERO_TEMPLATES[key].name}`, () => {
         const r = simulateGame(i);
-        checkEq(r.state, 'VICTORY', 'resultado');
+        checkEq(r.state, 'ENDED', 'la partida terminó');
+        check(!r.eliminated, 'el jugador sigue en juego');
         checkEq(r.skills, KIT_SIZE, 'kit completo');
         check(r.level > 1, 'subió de nivel');
     }, { random: true });

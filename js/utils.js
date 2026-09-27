@@ -2,10 +2,13 @@
 
 // Si logBuffer es un array, los mensajes se guardan ahí en vez de mostrarse (ver tryCastSkill).
 let logBuffer = null;
+// Con logMuted los mensajes no se muestran (ej: lo que pasa en las arenas de los rivales que no estás mirando).
+let logMuted = false;
 
 // Agrega una línea al registro de combate y lo scrollea al final.
 function log(msg) {
     if (logBuffer) { logBuffer.push(msg); return; }
+    if (logMuted) return;
     const box = document.getElementById('combat-log');
     const p = document.createElement('p'); p.textContent = msg;
     box.appendChild(p); box.scrollTop = box.scrollHeight;

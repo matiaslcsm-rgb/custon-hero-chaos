@@ -11,8 +11,6 @@ const WAVE_TIME = { limit: 30, enragePerSecond: 0.05 };
 
 let phaseTimeLeft = PHASE_TIMES.heroSelect; // segundos que le quedan a la fase actual
 let savedPrepTime = null; // al usar un objeto del destino, la preparación retoma el tiempo que le quedaba
-let waveElapsed = 0;      // segundos de oleada (solo cuentan con el héroe vivo)
-let enrageAnnounced = false;
 
 function setPhaseTimer(seconds) { phaseTimeLeft = seconds; }
 
@@ -38,20 +36,22 @@ function onPhaseTimeout() {
 }
 
 // --- OLEADA ---
-function resetWaveTimer() { waveElapsed = 0; enrageAnnounced = false; }
+// Cada arena lleva su propio tiempo (solo corre con su héroe vivo).
+function resetWaveTimer(arena = player && player.arena) { if (arena) { arena.elapsed = 0; arena.enrageAnnounced = false; } }
 
-function tickWaveTimer(dt) {
-    waveElapsed += dt;
-    if (!enrageAnnounced && waveElapsed > WAVE_TIME.limit) {
-        enrageAnnounced = true;
+function tickWaveTimer(arena = player && player.arena, dt = 0) {
+    if (typeof arena === 'number') { dt = arena; arena = player && player.arena; } // compatibilidad: tickWaveTimer(segundos)
+    arena.elapsed += dt;
+    if (!arena.enrageAnnounced && arena.elapsed > WAVE_TIME.limit) {
+        arena.enrageAnnounced = true;
         log(`🔥 ¡Se acabó el tiempo! Los creeps se enfurecen: +${WAVE_TIME.enragePerSecond * 100}% de daño y velocidad de ataque por segundo.`);
     }
 }
 
-function waveTimeLeft() { return WAVE_TIME.limit - waveElapsed; }
+function waveTimeLeft(arena = player && player.arena) { return arena ? WAVE_TIME.limit - arena.elapsed : WAVE_TIME.limit; }
 
-// Multiplicador de daño y velocidad de ataque de los creeps (1 = normal).
-function enrageMult() {
-    const over = waveElapsed - WAVE_TIME.limit;
+// Multiplicador de daño y velocidad de ataque de los creeps de una arena (1 = normal).
+function enrageMult(arena = player && player.arena) {
+    const over = arena ? arena.elapsed - WAVE_TIME.limit : 0;
     return over > 0 ? 1 + over * WAVE_TIME.enragePerSecond : 1;
 }

@@ -422,10 +422,21 @@ ordenado por **puntos y oro**:
 
 La idea es que quien va perdiendo tenga herramientas para rehacer su kit y volver a la partida.
 
+### Implementado en F1 ✅
+- **Arenas** (`js/world.js`): cada héroe pelea la misma oleada en su propia arena, con sus creeps, jefe y proyectiles; las 8 se
+  actualizan en paralelo en cada frame. La ronda sigue cuando terminan todas; los que terminan antes esperan en el Área de Descanso.
+- **Rivales:** 7 héroes distintos al del jugador. Draftean y compran al instante (misma IA que el Piloto automático).
+- **Ranking** siempre visible: puesto, vidas, puntos, oro y estado (⚔ pelea, 🏕 descansa, ☠ muerto, 💀 eliminado).
+  **Clic en un héroe para mirar su arena** (el registro muestra solo lo que pasa en la arena que mirás).
+- **Rondas:** hasta 20; las rondas 1-4 usan los temas de su nivel y después se repiten los del nivel 4, cada vez más fuertes;
+  cada 5 rondas toca la oleada del jefe. Si una arena pasa de 120 s, se da por perdida.
+- **Espectador:** si el jugador queda eliminado, la partida sigue y puede mirar a los demás.
+- Rendimiento: un frame con las 8 arenas tarda ~0,1 ms (peor caso ~9 ms).
+
 ### Construcción de la fase F
 | Etapa | Qué |
 |---|---|
-| **F1** | Mundo de 8 héroes: rivales con IA jugando sus oleadas en paralelo, cada uno en su arena; ranking con puntos; mirar cualquier arena |
+| **F1** ✅ | Mundo de 8 héroes: rivales con IA jugando sus oleadas en paralelo, cada uno en su arena; ranking con puntos; mirar cualquier arena |
 | **F2** | Duelos: parejas al azar, arena de duelo, perder cuesta vida, Condenado suma castigo, espera en el Área de Descanso |
 | **F3** | Apuestas a un duelo ajeno; Fragmentos para los 4 últimos y Libro para el último |
 

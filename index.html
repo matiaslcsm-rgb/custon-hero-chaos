@@ -31,10 +31,13 @@
                 <p><strong>Héroe:</strong> <span id="player-name">Ninguno</span> (<span id="player-hp">100/100</span> HP, <span id="player-mana">0/0</span> Maná)</p>
                 <p><strong>Stats:</strong> STR: <span id="stat-str">0</span> | AGI: <span id="stat-agi">0</span> | INT: <span id="stat-int">0</span> | ARM: <span id="stat-armor">0</span></p>
                 <p style="font-size: 0.72rem; color: #8ecae6;" id="extra-stats"></p>
-                <p><strong>Oro:</strong> <span id="player-gold">100</span> g | <strong>Oleada:</strong> <span id="round-num">1</span>/4 | <strong>Vidas:</strong> <span id="lives-text">♥♥</span></p>
+                <p><strong>Oro:</strong> <span id="player-gold">100</span> g | <strong>Ronda:</strong> <span id="round-num">1</span> | <strong>Vidas:</strong> <span id="lives-text">♥♥</span></p>
                 <p><strong>Estado:</strong> <span id="game-state-text">SELECCIÓN DE HÉROE</span> <span id="phase-timer"></span></p>
                 <p id="scaling-info" style="font-size: 0.75rem; color: #ffb703;"></p>
             </div>
+
+            <!-- Ranking de los 8 héroes (clic para mirar su arena) -->
+            <div id="scoreboard"></div>
 
             <!-- Kit: nivel, experiencia, puntos y habilidades (se sube de nivel con [+]) -->
             <div id="kit-panel" style="display: none;">
@@ -124,6 +127,7 @@
     <script src="js/combat.js"></script>
     <script src="js/items.js"></script>
     <script src="js/game.js"></script>
+    <script src="js/world.js"></script>
     <script src="js/death.js"></script>
     <script src="js/timers.js"></script>
     <script src="js/creeps.js"></script>

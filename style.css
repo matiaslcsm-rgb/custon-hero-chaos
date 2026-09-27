@@ -102,3 +102,17 @@ b.cur { color: #ffb703; }
 .item-level { color: #8ecae6; font-size: 0.72rem; }
 #inventory-panel { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; font-size: 0.78rem; }
 #inventory-line { font-size: 0.7rem; color: #72efdd; }
+#scoreboard { display: flex; flex-direction: column; gap: 1px; font-size: 0.68rem; }
+#scoreboard:empty { display: none; }
+.score-row { display: flex; gap: 5px; align-items: center; padding: 1px 4px; background: #1c1f26; cursor: pointer; border: 1px solid transparent; }
+.score-row:hover { border-color: #444; }
+.score-row.you { color: #00f5d4; }
+.score-row.viewed { border-color: #ffb703; }
+.score-row.out { opacity: 0.45; }
+.score-row .pos { width: 22px; color: #888; }
+.score-row .sym { width: 12px; font-weight: bold; }
+.score-row .name { flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.score-row .lives { color: #ff477e; width: 22px; }
+.score-row .pts { color: #ffb703; width: 44px; text-align: right; }
+.score-row .gold { color: #e9c46a; width: 40px; text-align: right; }
+.score-row .st { width: 16px; text-align: center; }

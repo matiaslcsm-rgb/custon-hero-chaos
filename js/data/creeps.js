@@ -14,7 +14,6 @@
 //   onDeath(c, killer)            al morir a manos de un héroe
 
 const BOSS_XP = 120;
-const NORMAL_WAVES = 4; // oleadas normales antes de la oleada del jefe final
 
 // Cacería Veloz: cuanto antes muere un creep tras aparecer, más oro paga (hasta x3).
 function speedGoldMultiplier(timeAliveSeconds) {
@@ -59,7 +58,7 @@ const CREEP_TYPES = {
         counter: 'Anticuración o matarlo primero', counterItem: 'SPEAR',
         update(c, dt) {
             if (!everyInterval(c, 'heal', dt, this.healEvery)) return false;
-            const ally = creeps.filter(o => o !== c && o.isAlive() && !o.oneHit && o.hp < o.maxHp && Math.hypot(o.x - c.x, o.y - c.y) <= this.healRadius)
+            const ally = c.arena.creeps.filter(o => o !== c && o.isAlive() && !o.oneHit && o.hp < o.maxHp && Math.hypot(o.x - c.x, o.y - c.y) <= this.healRadius)
                 .sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
             if (ally) healUnit(ally, this.healAmount * c.statMult);
             return false;
@@ -81,9 +80,10 @@ const CREEP_TYPES = {
         key: 'KAMIKAZE', label: 'Kamikaze', symbol: 'k', color: '#fb8500', hp: 16, atk: 40, atkSpeed: 1, moveInterval: 150, range: 1.5, gold: 6, xp: 14,
         mechanic: 'Corre hacia vos y EXPLOTA al llegar (mucho daño físico).', counter: 'Matarlo a distancia antes de que llegue',
         update(c) {
-            if (Math.hypot(c.x - player.x, c.y - player.y) > this.range) return false;
+            const target = creepTarget(c);
+            if (Math.hypot(c.x - target.x, c.y - target.y) > this.range) return false;
             c.hp = 0; // se destruye al explotar: no da oro ni experiencia
-            dealDamage(c, player, Math.round(c.atk * enrageMult()), 'physical');
+            dealDamage(c, target, Math.round(c.atk * enrageMult(c.arena)), 'physical');
             log(`💥 ¡Un Kamikaze explotó a tu lado!`);
             return true;
         }
@@ -106,9 +106,10 @@ const CREEP_TYPES = {
         counter: 'Inmunidad mágica, resistencia mágica o al control', counterItem: 'AEGIS',
         update(c, dt) {
             if (!everyInterval(c, 'bolt', dt, this.boltEvery)) return false;
-            if (Math.hypot(c.x - player.x, c.y - player.y) > this.boltRange) return false;
-            const { dealt } = dealDamage(c, player, Math.round(this.boltDamage * c.statMult * enrageMult()), 'magical');
-            const stunned = addEffect(player, { id: 'STUN', name: 'Aturdido', duration: this.boltStun, flags: ['stun'] });
+            const target = creepTarget(c);
+            if (Math.hypot(c.x - target.x, c.y - target.y) > this.boltRange) return false;
+            const { dealt } = dealDamage(c, target, Math.round(this.boltDamage * c.statMult * enrageMult(c.arena)), 'magical');
+            const stunned = target.isAlive() && addEffect(target, { id: 'STUN', name: 'Aturdido', duration: this.boltStun, flags: ['stun'] });
             if (dealt > 0 || stunned) log(`⚡ Un Brujo te lanzó un rayo${stunned ? ' y te aturdió' : ''}.`);
             return false;
         }
@@ -131,7 +132,7 @@ const CREEP_TYPES = {
         mechanic: 'Los creeps cerca de él (radio 4) atacan 40% más rápido. Objetivo prioritario.', counter: 'Matarlo primero',
         update(c, dt) {
             if (!everyInterval(c, 'drum', dt, 0.5)) return false;
-            creeps.forEach(o => {
+            c.arena.creeps.forEach(o => {
                 if (o !== c && o.isAlive() && Math.hypot(o.x - c.x, o.y - c.y) <= this.auraRadius) {
                     addEffect(o, { id: 'DRUM_AURA', name: 'Tambores de guerra', duration: 0.6, mods: { atkSpeedPct: this.auraAtkSpeed } });
                 }
@@ -145,7 +146,7 @@ const CREEP_TYPES = {
         mechanic: 'Te roba 20 de oro por golpe y huye. Si lo matás, recuperás el oro +50%.', counter: 'Ralentizar, aturdir o rango',
         update(c, dt) {
             if (gameClock >= (c.fleeUntil || 0)) return false;
-            stepCreepAway(c, player, dt);
+            stepCreepAway(c, creepTarget(c), dt);
             return true;
         },
         onAttack(c, target, result) {

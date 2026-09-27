@@ -39,6 +39,10 @@ class Hero {
         this.x = 3; this.y = 6; this.gold = 100; this.lives = 2;
         this.respawnAt = 0;       // > 0 mientras está muerto esperando revivir (ver death.js)
         this.inRest = false;      // en el Área de Descanso entre combates (ver game.js)
+        this.arena = null;        // arena donde pelea ahora (ver world.js)
+        this.isAI = false; this.displayName = template.name;
+        this.points = 0;          // puntos del ranking (ver world.js)
+        this.eliminated = false; this.diedThisRound = false;
         this.condemnPct = 0;      // % de daño recibido extra acumulado como Condenado (se guarda aunque compre una vida)
         this.greedPurchases = 0;  // compras de Injusticia de los Codiciosos (cada una cuesta el doble)
         this.skills = []; this.cooldowns = {}; this.keyBindings = {}; this.attackTimer = 0;
