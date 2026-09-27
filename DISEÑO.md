@@ -410,7 +410,8 @@ partidas con cada héroe** y murió entre las oleadas 1 y 3. No juega bien, pero
   - Es para que la partida no se estanque cuando todos tienen builds que los creeps no pueden derrotar.
 - Maldito **con vidas**: si un creep lo mata, pierde una vida como siempre; queda eliminado solo sin vidas.
 - Al terminar su duelo, cada héroe espera en el Área de Descanso.
-- **Apuestas:** antes de los duelos el jugador puede apostar oro a quién gana **un duelo ajeno**; si acierta, cobra **el doble**.
+- **Apuestas:** antes de los duelos hay una **previa de 10 s** con las parejas; el jugador puede apostar oro a quién gana
+  **un duelo ajeno** (uno por ronda, **tope: 25% de su oro**); si acierta, cobra **el doble**. La IA no apuesta.
 - **Puntos del ranking:** ganar un duelo **+3**; superar la oleada sin morir **+1**. El oro desempata.
 - **Largo de la partida (propuesta):** hasta que quede un solo héroe, con un máximo de **20 rondas**; si se llega, gana el
   primero del ranking. Como la idea es que las builds escalen, una build tiene que rendir contra creeps **y** en duelos.
@@ -422,9 +423,11 @@ ordenado por **puntos y oro**:
 
 | Puesto | Recompensa |
 |---|---|
-| 1.º a 4.º | Nada extra |
-| 5.º a 8.º | 1 **Fragmento del Destino** cada uno (para probar suerte o venderlo) |
-| 8.º (último) | Además, 1 **Libro del Destino** |
+| Mitad de arriba | Nada extra |
+| **Mitad de abajo de los que siguen en juego** (con 8: los 4 últimos; con 5: los 2 últimos) | 1 **Fragmento del Destino** cada uno (para probar suerte o venderlo) |
+| Último en juego | Además, 1 **Libro del Destino** |
+
+Se reparte **en cada ronda**. Los eliminados no cuentan.
 
 La idea es que quien va perdiendo tenga herramientas para rehacer su kit y volver a la partida.
 
@@ -468,12 +471,25 @@ las victorias se reparten (Bruja 5, Axe 4-5, Arcanista 2-3, Sniper, Vampiro y Al
 (Axe ~55%, Asesino ~33%, Vampiro ~20% de duelos). **Aplicado** (escalado del Sniper +1,5 daño cada 8 bajas y +4 por
 duelo; `MOVE_RESETS_ATTACK` en game.js). Queda por mirar: el Alquimista sigue ganando ~83% de sus duelos.
 
+### Implementado en F3 ✅
+- **Previa de duelos** (`js/bets.js`): al terminar las oleadas se sortean las parejas y se muestran con puesto, puntos, nivel,
+  vidas y récord de duelos. 10 s para apostar (o "Listo, a los duelos"). Sin oro, sin duelos ajenos o eliminado → se saltea.
+- **Por qué el tope:** medido en 207 duelos, **el que va arriba en puntos gana el 73%**. Pagando ×2 sin tope, apostar al
+  favorito deja **+46%** promedio por apuesta (y en una ronda se ganan ~90g): rendía más que farmear.
+- **Premios** (`js/rewards.js`) al final de cada ronda (no en la última): Fragmento a la mitad de abajo en juego, Libro al último.
+- **IA con objetos del destino** (decisión mía, reversible): usa el Libro en una habilidad que no es natural de su héroe (si
+  no tiene, lo guarda); usa el Fragmento si al menos la mitad de su kit no es natural y, si no, lo vende. El Piloto automático
+  hace lo mismo y no apuesta.
+- **Medido (20 partidas de 12 rondas por variante):** con la IA, los premios **no cambian de forma medible** la remontada: el
+  líder de la ronda 4 gana 70-75% de las partidas con y sin premios, y el último de la ronda 4 termina ~4.º-5.º en todos los
+  casos (también probando que la IA use siempre los Fragmentos). La diferencia la haría un jugador que elige bien qué cambiar.
+
 ### Construcción de la fase F
 | Etapa | Qué |
 |---|---|
 | **F1** ✅ | Mundo de 8 héroes: rivales con IA jugando sus oleadas en paralelo, cada uno en su arena; ranking con puntos; mirar cualquier arena |
 | **F2** ✅ | Duelos: parejas al azar, arena de duelo, perder cuesta vida, Condenado suma castigo, espera en el Área de Descanso |
-| **F3** | Apuestas a un duelo ajeno; Fragmentos para los 4 últimos y Libro para el último |
+| **F3** ✅ | Previa de duelos con apuestas (×2, tope 25% del oro); Fragmento a la mitad de abajo en juego y Libro al último |
 
 ---
 

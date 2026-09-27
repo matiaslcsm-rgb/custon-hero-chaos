@@ -6,6 +6,7 @@ document.getElementById('nav-creeps').onclick = () => showView('creeps');
 document.getElementById('nav-items').onclick = () => showView('items');
 document.getElementById('start-wave-btn').onclick = startWave;
 document.getElementById('restart-btn').onclick = resetGame;
+document.getElementById('bet-done-btn').onclick = endBetting;
 document.getElementById('autopilot-btn').onclick = () => setAutopilot(!autopilot);
 
 let lastTime = 0;

@@ -107,7 +107,7 @@ function replaceSkill(skill, mode, sourceName) {
 function startPreparation() {
     gameState = 'PREP';
     if (!nextWave) nextWave = rollWave(waveNumber); // se sortea ya, para avisarla en la tienda
-    quietly(() => aliveHeroes().filter(h => h.isAI).forEach(h => { aiSpendPoints(h); aiShop(h); }));
+    quietly(() => aliveHeroes().filter(h => h.isAI).forEach(h => { aiUseDestiny(h); aiSpendPoints(h); aiShop(h); }));
     setPhaseTimer(savedPrepTime ?? PHASE_TIMES.prep);
     savedPrepTime = null;
     setStateText('PREPARACIÓN');
@@ -183,7 +183,7 @@ function onRoundWavesDone() {
     heroes.forEach(h => { if (!h.eliminated) h.arena = null; });
     logMuted = false;
     if (aliveHeroes().length <= 1) { endRound(); return; }
-    startDuels();
+    startBetting();
 }
 
 // Fin de la ronda (después de los duelos): ranking, fin de partida o siguiente ronda.
@@ -192,6 +192,7 @@ function endRound() {
     const top = rankedHeroes().slice(0, 3).map((h, i) => `${i + 1}º ${h.displayName} (${h.points})`).join(' · ');
     log(`📊 Fin de la ronda ${waveNumber}. Ranking: ${top}. Vas ${heroRank(player)}º.`);
     if (aliveHeroes().length <= 1 || waveNumber >= MAX_ROUNDS) { endGame(); return; }
+    giveRankingRewards();
     waveNumber++;
     startRoundDraft();
 }
@@ -212,6 +213,7 @@ function resetGame() {
     player = null; heroes = []; arenas = []; viewedHero = null;
     gameState = 'HERO_SELECT'; waveNumber = 1; isBossWave = false; gameClock = 0;
     currentDraft = null; savedPrepTime = null; nextWave = null; logMuted = false;
+    duelPlan = null; currentBet = null;
     setPhaseTimer(PHASE_TIMES.heroSelect);
     resetHud();
     log('🔄 Nueva partida. Elegí un héroe.');

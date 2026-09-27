@@ -269,6 +269,42 @@ function renderDestinyPanel() {
     }
 }
 
+// --- PREVIA DE DUELOS (apuestas, ver bets.js) ---
+function betHeroHtml(h) {
+    const lives = '♥'.repeat(Math.max(0, h.lives)) + (isCondemned(h) ? '☠' : '');
+    return `<span class="bet-name">${h.symbol} ${h.displayName}</span>` +
+        `<span class="bet-stats">${heroRank(h)}º · ${h.points} pts · niv ${h.level} · ${lives} · duelos ${h.duelWins}-${h.duelLosses}</span>`;
+}
+
+function renderBetting() {
+    const mine = duelPlan.pairs.find(p => p.includes(player));
+    const rival = mine ? mine.find(h => h !== player) : null;
+    document.getElementById('bet-info').innerHTML = (rival ? `Tu duelo: contra <strong>${rival.displayName}</strong>. ` : 'Esta ronda no peleás. ') +
+        (currentBet ? `Apostaste <strong>${currentBet.amount}g</strong> a ${currentBet.on.displayName}.`
+                    : `Apostá a un duelo ajeno: si acertás, cobrás el doble. Tope: <strong>${betLimit()}g</strong> (${BET_MAX_PCT * 100}% de tu oro).`);
+    const list = document.getElementById('bet-pairs'); list.innerHTML = '';
+    if (!currentBet) {
+        const row = document.createElement('div'); row.className = 'bet-amount';
+        row.innerHTML = `<label>Monto: <input id="bet-amount" type="number" min="1" max="${betLimit()}" value="${betLimit()}"> g</label>`;
+        list.appendChild(row);
+    }
+    bettablePairs().forEach(pair => {
+        const box = document.createElement('div'); box.className = 'bet-pair';
+        pair.forEach((h, i) => {
+            const side = document.createElement('div'); side.className = 'bet-side' + (currentBet && currentBet.on === h ? ' chosen' : '');
+            side.innerHTML = betHeroHtml(h);
+            if (!currentBet) {
+                const btn = document.createElement('button'); btn.textContent = 'Apostar';
+                btn.onclick = () => placeBet(h, Number(document.getElementById('bet-amount').value));
+                side.appendChild(btn);
+            }
+            box.appendChild(side);
+            if (i === 0) { const vs = document.createElement('div'); vs.className = 'bet-vs'; vs.textContent = 'vs'; box.appendChild(vs); }
+        });
+        list.appendChild(box);
+    });
+}
+
 // --- KIT (nivel, experiencia, puntos y habilidades) ---
 let lastKitSignature = '';
 
@@ -375,7 +411,7 @@ function updateHud() {
 function renderTimer() {
     const el = document.getElementById('phase-timer');
     let text = '', cls = '';
-    if (['HERO_SELECT', 'DRAFT', 'PREP'].includes(gameState)) {
+    if (['HERO_SELECT', 'DRAFT', 'PREP', 'BETTING'].includes(gameState)) {
         text = `⏱ ${Math.max(0, Math.ceil(phaseTimeLeft))}s`;
         if (phaseTimeLeft <= 5) cls = 'urgent';
     } else if (inCombat() && player) {
@@ -420,7 +456,7 @@ function renderScoreboard() {
 
 // Deja la interfaz como al abrir el juego (usado por "Nueva Partida").
 function resetHud() {
-    ['draft-container', 'shop-container', 'restart-btn'].forEach(id => showPanel(id, false));
+    ['draft-container', 'shop-container', 'bet-container', 'restart-btn'].forEach(id => showPanel(id, false));
     showPanel('hero-select-panel', true);
     setStateText('SELECCIÓN DE HÉROE');
     document.getElementById('player-name').textContent = 'Ninguno';

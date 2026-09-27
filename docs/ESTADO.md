@@ -17,8 +17,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 | Área de Descanso, Voluntad de Titán, Condenado, temporizadores, IA + Piloto automático (P) | ✅ |
 | F1. Partida de 8 héroes (jugador + 7 IA), arenas en paralelo, ranking clickeable | ✅ |
 | F2. Duelos 1v1, maldición con la mitad o menos, duelos a muerte con 3 o menos | ✅ |
-| **F3. Apuestas a un duelo ajeno; Fragmentos para los 4 últimos y Libro para el último** | ⏳ siguiente |
-| G. Jefes de ronda y objetos neutrales (ver DISEÑO.md §9 bis) | ⏳ futuro |
+| F3. Previa de duelos con apuestas (×2, tope 25% del oro); Fragmentos a la mitad de abajo y Libro al último | ✅ |
+| **G. Jefes de ronda y objetos neutrales (ver DISEÑO.md §9 bis)** | ⏳ siguiente |
 
 ## Pendientes y temas abiertos
 - **Alquimista:** gana ~83% de sus duelos (medido); falta investigarlo como se hizo con el Sniper.
@@ -31,7 +31,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **Idioma:** español rioplatense (voseo), en el código, los comentarios, los textos del juego y los commits.
 - **Decisiones de diseño:** se consultan con opciones y una recomendada, idealmente con números medidos. Lo que se decide
   se anota en DISEÑO.md (secciones de la fase y "Decisiones tomadas").
-- **Cada cambio:** pruebas automáticas (`tests.html`, hoy **99**) → commit en git → push a GitHub solo cuando el usuario lo pide.
+- **Cada cambio:** pruebas automáticas (`tests.html`, hoy **105**) → commit en git → push a GitHub solo cuando el usuario lo pide.
 - **Commits:** mensaje en español que explica el porqué; terminan con `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 - **Héroes nuevos con otra IA:** prompt en [`prompt-heroes.md`](prompt-heroes.md); lo que devuelva se revisa contra el motor
   (pasivas, efectos por segundo con `everyInterval`, descripciones que coincidan con el código) antes de integrarlo.

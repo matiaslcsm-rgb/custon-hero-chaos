@@ -42,6 +42,7 @@ class Hero {
         this.arena = null;        // arena donde pelea ahora (ver world.js)
         this.isAI = false; this.displayName = template.name;
         this.points = 0;          // puntos del ranking (ver world.js)
+        this.duelWins = 0; this.duelLosses = 0;
         this.eliminated = false; this.diedThisRound = false;
         this.condemnPct = 0;      // % de daño recibido extra acumulado como Condenado (se guarda aunque compre una vida)
         this.greedPurchases = 0;  // compras de Injusticia de los Codiciosos (cada una cuesta el doble)

@@ -6,7 +6,7 @@
 // Los tiempos de oleada salen de medir partidas simuladas: limpiar una oleada tarda 13-19s
 // (mediana según el héroe), el 90% de las veces menos de 24s y el peor caso fue 27s.
 
-const PHASE_TIMES = { heroSelect: 30, draft: 20, prep: 30 };
+const PHASE_TIMES = { heroSelect: 30, draft: 20, prep: 30, betting: 10 };
 const WAVE_TIME = { limit: 30, enragePerSecond: 0.05 };
 
 let phaseTimeLeft = PHASE_TIMES.heroSelect; // segundos que le quedan a la fase actual
@@ -15,7 +15,7 @@ let savedPrepTime = null; // al usar un objeto del destino, la preparación reto
 function setPhaseTimer(seconds) { phaseTimeLeft = seconds; }
 
 function tickPhaseTimer(dt) {
-    if (!['HERO_SELECT', 'DRAFT', 'PREP'].includes(gameState)) return;
+    if (!['HERO_SELECT', 'DRAFT', 'PREP', 'BETTING'].includes(gameState)) return;
     phaseTimeLeft -= dt;
     if (phaseTimeLeft <= 0) onPhaseTimeout();
 }
@@ -32,6 +32,8 @@ function onPhaseTimeout() {
     } else if (gameState === 'PREP') {
         log('⏱️ Se acabó el tiempo de preparación.');
         startWave();
+    } else if (gameState === 'BETTING') {
+        endBetting();
     }
 }
 

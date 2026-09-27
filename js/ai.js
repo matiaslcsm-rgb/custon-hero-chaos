@@ -101,6 +101,27 @@ function aiPickDraft(hero, options) {
         || options[0];
 }
 
+// Objetos del destino (decisión provisoria, reversible): el Libro cambia una habilidad que no es natural del héroe (si
+// tiene; si no, lo guarda) por la mejor de 6. El Fragmento lo usa si al menos la mitad de su kit no es natural (la que
+// pierde es al azar); si no, lo vende.
+function aiUseDestiny(hero) {
+    const foreign = () => hero.skills.filter(s => s.heroKey !== hero.key);
+    while (hero.destiny.books > 0 && foreign().length) {
+        hero.destiny.books--;
+        aiReplaceSkill(hero, foreign().find(s => !s.isUltimate) || foreign()[0], 'book');
+    }
+    while (hero.destiny.fragments > 0) {
+        hero.destiny.fragments--;
+        if (hero.skills.length && foreign().length * 2 >= hero.skills.length) aiReplaceSkill(hero, pickRandom(hero.skills), 'fragment');
+        else hero.gold += FRAGMENT_SELL_PRICE;
+    }
+}
+
+function aiReplaceSkill(hero, skill, mode) {
+    hero.removeSkill(skill);
+    hero.addSkill(aiPickDraft(hero, draftOptions(hero, DRAFT_OPTIONS[mode], [skill.id])));
+}
+
 // Tienda: si está Condenado compra una vida; después arma ítems en orden de prioridad: los contras de la
 // próxima oleada (mirando el aviso), su atributo principal y los compuestos de su tipo. Si no le alcanza para
 // un compuesto entero, compra un componente que falte (lo va armando de a poco, como en Dota 2).
@@ -156,14 +177,17 @@ function setAutopilot(on) {
 
 // Fuera de la oleada: decide el draft y la tienda con una pausa corta entre cada paso.
 function tickAutopilot(dt) {
-    if (!autopilot || !player || (gameState !== 'DRAFT' && gameState !== 'PREP')) return;
+    if (!autopilot || !player || !['DRAFT', 'PREP', 'BETTING'].includes(gameState)) return;
     autopilotWait += dt;
     if (autopilotWait < 1.2) return;
     autopilotWait = 0;
     if (gameState === 'DRAFT') {
         if (currentDraft.mode === 'bookChoice') useBookOn(player.skills[0]);
         else learnSkill(aiPickDraft(player, currentDraft.options));
+    } else if (gameState === 'BETTING') {
+        endBetting(); // el piloto automático no apuesta
     } else {
+        aiUseDestiny(player);
         aiSpendPoints(player);
         aiShop(player);
         startWave();

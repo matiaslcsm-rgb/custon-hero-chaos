@@ -41,9 +41,10 @@ function makeDuelPairs(list) {
     return { pairs: best.pairs, bye: best.bye };
 }
 
-function startDuels() {
+// plan: parejas ya sorteadas en la previa de apuestas (ver bets.js).
+function startDuels(plan = makeDuelPairs(aliveHeroes())) {
     gameState = 'DUEL';
-    const { pairs, bye } = makeDuelPairs(aliveHeroes());
+    const { pairs, bye } = plan;
     arenas = pairs.map(([a, b]) => {
         const arena = makeArena('duel', [a, b]);
         [a, b].forEach((h, i) => {
@@ -77,7 +78,9 @@ function resolveDuel(arena, winner, loser, reason) {
     const you = loser === player ? 'Perdiste tu duelo' : winner === player ? 'Ganaste tu duelo' : null;
     log(`⚔️ ${winner.displayName} venció a ${loser.displayName}${reason ? ` (${reason})` : ''}.${you ? ` ${you}${winner === player ? ' (+3 puntos)' : ''}.` : ''}`);
     logMuted = !involvesPlayer; // los detalles, solo si es tu duelo
+    settleBet(winner, loser);
     winner.points += POINTS.duelWin;
+    winner.duelWins++; loser.duelLosses++;
     awardHeroKillScaling(winner);
     emit(winner, 'onKill', { victim: loser });
     [winner, loser].forEach(h => { h.respawnAt = 0; sendToRestArea(h); h.arena = null; });

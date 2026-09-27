@@ -61,10 +61,11 @@ function skipDuels() {
     arenas.forEach(a => { a.elapsed = DUEL_TIME; });
     updateWave(0.016);
 }
-// Mata a todos los creeps de todas las arenas y termina la fase de oleadas.
-function clearAllWaves() {
+// Mata a todos los creeps de todas las arenas y termina la fase de oleadas (salteando la previa de apuestas).
+function clearAllWaves(skipBetting = true) {
     heroes.forEach(h => { if (h.arena) h.arena.creeps.forEach(c => { c.hp = 0; }); });
     updateWave(0.016);
+    if (skipBetting) endBetting();
 }
 function lastLog() { const p = document.querySelector('#combat-log p:last-child'); return p ? p.textContent : ''; }
 
@@ -922,9 +923,13 @@ test('Las arenas se juegan en paralelo; al terminar todas, la ronda suma puntos 
     startWave();
     heroes.forEach(h => addEffect(h, { id: 'TEST_GOD', duration: 1e9, flags: ['invulnerable', 'persistent'] }));
     autopilot = true;
-    try { for (let f = 0; inCombat() && f < 20000; f++) { gameClock += 0.05; updateWave(0.05); } }
-    finally { autopilot = false; }
-    check(!inCombat(), 'terminó la ronda (oleadas y duelos)');
+    try {
+        for (let f = 0; (inCombat() || gameState === 'BETTING') && f < 20000; f++) {
+            if (gameState === 'BETTING') endBetting();
+            gameClock += 0.05; updateWave(0.05);
+        }
+    } finally { autopilot = false; }
+    check(!inCombat(), 'terminó la ronda (oleadas, previa y duelos)');
     checkEq(waveNumber, 2, 'pasó a la ronda 2');
     const total = heroes.reduce((s, h) => s + h.points, 0);
     checkEq(total, MAX_HEROES * POINTS.waveClean + (MAX_HEROES / 2) * POINTS.duelWin, 'puntos: 8 oleadas limpias + 4 duelos');
@@ -1129,6 +1134,87 @@ test('Coraza de Espinas también devuelve daño a héroes cuerpo a cuerpo en los
     checkEq(hp - a.hp, Math.round(Math.round(dealt * ITEMS.THORNS.reflect) * (1 - DUEL_DAMAGE_REDUCTION)), 'reflejo al atacante (con la reducción de duelo)');
 });
 
+// ============================================================ APUESTAS Y PREMIOS (fase F3)
+// Deja la partida en la previa de duelos, con oro para apostar.
+function toBetting(gold = 400) {
+    resetGame();
+    selectHero(HERO_TEMPLATES.AXE);
+    learnSkill(currentDraft.options[0]);
+    startWave();
+    player.gold = gold;
+    clearAllWaves(false);
+    player.gold = gold; // sin el interés de la oleada
+}
+
+test('Previa de duelos: al terminar las oleadas se sortean las parejas y se espera; después pelean esas parejas', () => {
+    toBetting();
+    checkEq(gameState, 'BETTING', 'previa');
+    checkEq(bettablePairs().length, MAX_HEROES / 2 - 1, 'se puede apostar a los 3 duelos ajenos');
+    const plan = duelPlan.pairs.map(p => p.slice());
+    tickPhaseTimer(PHASE_TIMES.betting + 0.1);
+    checkEq(gameState, 'DUEL', 'al vencer el tiempo arrancan los duelos');
+    checkEq(arenas.map(a => a.heroes.join()).join('|'), plan.map(p => p.join()).join('|'), 'las mismas parejas de la previa');
+});
+
+test('Apuesta: tope del 25% del oro, una por ronda y nunca a tu propio duelo', () => {
+    toBetting(400);
+    const mine = duelPlan.pairs.find(p => p.includes(player));
+    const rival = mine.find(h => h !== player);
+    check(!placeBet(rival, 50), 'no se apuesta al propio duelo');
+    const [a] = bettablePairs()[0];
+    check(!placeBet(a, 101), 'más del tope (100g)');
+    check(placeBet(a, 100), 'apuesta válida');
+    checkEq(player.gold, 300, 'se descuenta al apostar');
+    check(!placeBet(bettablePairs()[1][0], 1), 'una sola apuesta por ronda');
+});
+
+test('Apuesta: si gana tu elegido cobrás el doble; si pierde, perdés lo apostado', () => {
+    toBetting(400);
+    const [a, b] = bettablePairs()[0];
+    placeBet(a, 100);
+    endBetting();
+    const arena = arenas.find(x => x.heroes.includes(a));
+    dealDamage(a, b, 99999, 'pure');
+    check(arena.done, 'terminó el duelo');
+    checkEq(player.gold, 300 + 200, 'cobró el doble');
+    toBetting(400);
+    const [c, d] = bettablePairs()[0];
+    placeBet(c, 100);
+    endBetting();
+    dealDamage(d, c, 99999, 'pure');
+    checkEq(player.gold, 300, 'perdió lo apostado');
+});
+
+test('Sin oro para apostar (o eliminado) no hay previa: los duelos arrancan directo', () => {
+    toBetting(3);
+    checkEq(gameState, 'DUEL', 'con menos de 4g el tope es 0');
+});
+
+test('Premios: la mitad de abajo de los que siguen en juego recibe un Fragmento; el último, además un Libro', () => {
+    toDuels();
+    heroes.forEach((h, i) => { h.points = 1000 - i * 10; });  // ranking = orden de heroes
+    heroes[7].eliminated = true;                          // quedan 7: premio para los 3 últimos en juego
+    skipDuels();
+    const frags = heroes.map(h => h.destiny.fragments), books = heroes.map(h => h.destiny.books);
+    checkEq(frags.join(), '0,0,0,0,1,1,1,0', 'Fragmentos');
+    checkEq(books.join(), '0,0,0,0,0,0,1,0', 'Libro para el último en juego');
+});
+
+test('IA: usa el Libro en una habilidad que no es natural y vende el Fragmento si su kit es casi todo natural', () => {
+    const h = new Hero(HERO_TEMPLATES.AXE);
+    const natural = Object.values(HERO_SKILLS.AXE).filter(s => !s.isUltimate);
+    const foreign = Object.values(HERO_SKILLS.SNIPER).find(s => !s.isUltimate);
+    natural.forEach(s => h.addSkill(s));
+    h.addSkill(foreign);
+    h.destiny.books = 1; h.destiny.fragments = 1;
+    const gold = h.gold;
+    aiUseDestiny(h);
+    check(!h.skills.includes(foreign), 'cambió la habilidad ajena');
+    checkEq(h.skills.length, KIT_SIZE, 'kit completo');
+    checkEq(h.destiny.books + h.destiny.fragments, 0, 'usó todo');
+    checkEq(h.gold, gold + FRAGMENT_SELL_PRICE, 'vendió el Fragmento');
+});
+
 test('Moverse reinicia el ataque (no se puede disparar gratis mientras te alejás)', () => {
     newGame('SNIPER');
     dummy({ x: player.x + 3 });
@@ -1161,10 +1247,13 @@ function simulateGame(heroIndex, godMode = true, rounds = 4) {
         let guard = 0;
         while (gameState !== 'ENDED' && guard++ < rounds * 4 + 10) {
             if (gameState === 'DRAFT') learnSkill(aiPickDraft(player, currentDraft.options));
-            if (gameState === 'PREP') { if (!player.eliminated) { aiSpendPoints(player); aiShop(player); } startWave(); }
+            if (gameState === 'PREP') { if (!player.eliminated) { aiUseDestiny(player); aiSpendPoints(player); aiShop(player); } startWave(); }
             if (gameState === 'WAVE') {
                 if (godMode) addEffect(player, { id: 'TEST_GOD', duration: 1e9, flags: ['invulnerable', 'persistent'] });
-                for (let f = 0; inCombat() && f < 20000; f++) { gameClock += 0.05; updateWave(0.05); }
+                for (let f = 0; (inCombat() || gameState === 'BETTING') && f < 20000; f++) {
+                    if (gameState === 'BETTING') endBetting();
+                    gameClock += 0.05; updateWave(0.05);
+                }
                 if (inCombat()) throw new Error('una ronda no terminó');
             }
         }

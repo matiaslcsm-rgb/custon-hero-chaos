@@ -116,3 +116,13 @@ b.cur { color: #ffb703; }
 .score-row .pts { color: #ffb703; width: 44px; text-align: right; }
 .score-row .gold { color: #e9c46a; width: 40px; text-align: right; }
 .score-row .st { width: 16px; text-align: center; }
+
+/* Previa de duelos (apuestas) */
+#bet-pairs .bet-amount { margin: 6px 0; }
+#bet-pairs .bet-amount input { width: 70px; background: #11141a; color: #fff; border: 1px solid #444; font-family: inherit; }
+#bet-pairs .bet-pair { display: flex; align-items: stretch; gap: 6px; margin: 6px 0; }
+#bet-pairs .bet-side { flex: 1; display: flex; flex-direction: column; gap: 3px; background: #1c1f26; border: 1px solid #333; padding: 6px; }
+#bet-pairs .bet-side.chosen { border-color: #ffb703; }
+#bet-pairs .bet-name { font-weight: bold; }
+#bet-pairs .bet-stats { font-size: 0.72rem; color: #8ecae6; }
+#bet-pairs .bet-vs { align-self: center; color: #888; }
