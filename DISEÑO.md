@@ -398,10 +398,17 @@ partidas con cada héroe** y murió entre las oleadas 1 y 3. No juega bien, pero
 
 ## 9. PvP: duelos, apuestas y ranking
 
-- Varios héroes rivales (controlados por IA al principio) hacen el mismo recorrido: draft, tienda, oleadas.
-- Entre oleadas hay **duelos 1v1**. Ganar da el bonus de escalado por duelo.
-- Los jugadores **apuestan oro** sobre los duelos (incluidos los ajenos).
-- Se pierde con vidas en 0; gana el último en pie o el que termina primero en el ranking.
+- Partidas de **8 héroes**: el jugador + 7 rivales controlados por la IA, que hacen el mismo recorrido con las mismas reglas.
+- **Ronda:** Draft → Preparación (Área de Descanso) → Oleada (cada héroe en su propia arena, en paralelo) → Duelos → Ranking.
+- **Duelos 1v1** después de cada oleada. **Parejas al azar**, evitando repetir el rival de la ronda anterior. Si quedan impares,
+  uno descansa esa ronda. Ganar da el bonus de escalado por duelo.
+- **Perder un duelo cuesta una vida** (como morir contra creeps). Estando **Condenado**, perder un duelo **no elimina**: suma
+  **+10% de daño recibido**. Al terminar su duelo, cada héroe espera en el Área de Descanso.
+- **Apuestas:** antes de los duelos el jugador puede apostar oro a quién gana **un duelo ajeno**; si acierta, cobra **el doble**.
+- **Puntos del ranking:** ganar un duelo **+3**; superar la oleada sin morir **+1**. El oro desempata.
+- **Largo de la partida (propuesta):** hasta que quede un solo héroe, con un máximo de **20 rondas**; si se llega, gana el
+  primero del ranking. Como la idea es que las builds escalen, una build tiene que rendir contra creeps **y** en duelos.
+- Si el jugador queda eliminado, puede seguir mirando la partida (espectador).
 
 ### Ranking y ayuda a los que van atrás
 Partidas de **8 jugadores**. Cuando **todos ya tuvieron su duelo** de la ronda, se arma el **top 8**
@@ -414,6 +421,24 @@ ordenado por **puntos y oro**:
 | 8.º (último) | Además, 1 **Libro del Destino** |
 
 La idea es que quien va perdiendo tenga herramientas para rehacer su kit y volver a la partida.
+
+### Construcción de la fase F
+| Etapa | Qué |
+|---|---|
+| **F1** | Mundo de 8 héroes: rivales con IA jugando sus oleadas en paralelo, cada uno en su arena; ranking con puntos; mirar cualquier arena |
+| **F2** | Duelos: parejas al azar, arena de duelo, perder cuesta vida, Condenado suma castigo, espera en el Área de Descanso |
+| **F3** | Apuestas a un duelo ajeno; Fragmentos para los 4 últimos y Libro para el último |
+
+---
+
+## 9 bis. Jefes de ronda y objetos neutrales (fase G, a futuro)
+
+- Cada cierta cantidad de rondas, **al terminar los duelos se pausan** y **todos pelean contra un jefe**: un creep mucho más
+  fuerte y resistente.
+- Derrotarlo da **oro** y un **objeto neutral**.
+- **Objetos neutrales:** van en un **espacio aparte** del inventario y dan una mejora. **Solo se puede tener uno a la vez.**
+  Cada jefe siguiente ofrece objetos **mejores**: podés quedarte con el que tenés o cambiarlo por el nuevo.
+  También se pueden **vender** por oro (perdés el objeto).
 
 ---
 
@@ -429,6 +454,7 @@ Cada fase deja el juego jugable.
 | **D. Ítems** ✅ | Contras por etiqueta, niveles/recetas, inventario limitado | Necesita las etiquetas y habilidades variadas para tener qué contrarrestar |
 | **E. Creeps** ✅ | Tipos con mecánica, aviso de oleada, oleadas compuestas | Es el campo de prueba de los ítems situacionales |
 | **F. PvP** | Rivales con IA, duelos, apuestas, ranking top 8, Fragmentos/Libro para los últimos | Usa todo lo anterior: la IA draftea, compra y pelea con las mismas reglas |
+| **G. Jefes de ronda** | Jefe común cada N rondas, objetos neutrales (uno a la vez, mejoran con cada jefe) | Da objetivos compartidos y escalado extra en partidas largas |
 
 ---
 
