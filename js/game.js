@@ -19,6 +19,7 @@ window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
 // --- SELECCIÓN, DRAFT Y TIENDA ---
 function selectHero(template) {
     player = new Hero(template);
+    sendToRestArea(player);
     showPanel('hero-select-panel', false);
     log(`Seleccionaste a ${player.name}.`);
     startSkillDraft();
@@ -97,6 +98,29 @@ function startPreparation() {
 }
 
 
+// --- ÁREA DE DESCANSO ---
+// Al terminar una oleada (y en el futuro, un duelo) el héroe va al Área de Descanso hasta que se acabe el
+// tiempo de preparación, y vuelve al combate con la vida y el maná completos. Las mejoras temporales se pierden.
+const REST_SPOT = { x: 10, y: 7 };
+const WAVE_START = { x: 3, y: 6 };
+
+function restoreHero(hero) {
+    hero.hp = hero.maxHp; hero.mana = hero.maxMana;
+    hero.effects = hero.effects.filter(e => e.flags.includes('persistent'));
+}
+
+function sendToRestArea(hero) {
+    hero.inRest = true;
+    hero.x = REST_SPOT.x; hero.y = REST_SPOT.y;
+    restoreHero(hero);
+}
+
+function returnFromRestArea(hero) {
+    hero.inRest = false;
+    hero.x = WAVE_START.x; hero.y = WAVE_START.y;
+    restoreHero(hero);
+}
+
 // --- OLEADAS ---
 function startWave() {
     showPanel('shop-container', false);
@@ -104,6 +128,7 @@ function startWave() {
     gameState = 'WAVE';
     const wave = nextWave || rollWave(waveNumber);
     nextWave = null;
+    returnFromRestArea(player);
     setStateText(isBossWave ? `JEFE FINAL: ${wave.name.toUpperCase()}` : `OLEADA ${waveNumber}/${NORMAL_WAVES}: ${wave.name.toUpperCase()}`);
     spawnWave(wave);
     resetWaveTimer();
@@ -118,7 +143,8 @@ function onWaveCleared() {
         showPanel('restart-btn', true);
         return;
     }
-    log(`🏆 Oleada ${waveNumber} superada.`);
+    log(`🏆 Oleada ${waveNumber} superada. 🏕️ Vas al Área de Descanso: volvés con vida y maná completos.`);
+    sendToRestArea(player);
     gainXp(player, 40 + 20 * waveNumber);
     const interest = Math.min(5, Math.floor(player.gold / 10));
     if (interest > 0) { player.gold += interest; log(`💰 Interés por oro ahorrado: +${interest}g`); }

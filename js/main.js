@@ -3,6 +3,7 @@
 document.getElementById('nav-game').onclick = () => showView('game');
 document.getElementById('nav-heroes').onclick = () => showView('heroes');
 document.getElementById('nav-creeps').onclick = () => showView('creeps');
+document.getElementById('nav-items').onclick = () => showView('items');
 document.getElementById('start-wave-btn').onclick = startWave;
 document.getElementById('restart-btn').onclick = resetGame;
 document.getElementById('autopilot-btn').onclick = () => setAutopilot(!autopilot);
@@ -66,16 +67,16 @@ function validateContent() {
     });
     Object.entries(ITEMS).forEach(([key, item]) => {
         if (item.key !== key) problems.push(`Ítem ${key}: su key no coincide`);
-        if (item.kind === 'equip') {
-            if (!Array.isArray(item.costs) || item.costs.length !== ITEM_MAX_LEVEL) problems.push(`Ítem ${key}: costs debe tener ${ITEM_MAX_LEVEL} precios`);
-            if (typeof item.effect !== 'function') problems.push(`Ítem ${key}: le falta effect(level)`);
-            Object.entries(item.values || {}).forEach(([k, v]) => {
-                if (Array.isArray(v) && v.length !== ITEM_MAX_LEVEL) problems.push(`Ítem ${key}: values.${k} tiene ${v.length} niveles (deben ser ${ITEM_MAX_LEVEL})`);
-            });
-            [...item.description.matchAll(/\{(\w+)%?\}/g)].forEach(([, k]) => {
-                if (!item.values || item.values[k] === undefined) problems.push(`Ítem ${key}: la descripción usa {${k}} pero no existe en values`);
-            });
-        } else if (item.kind !== 'instant') problems.push(`Ítem ${key}: kind debe ser 'equip' o 'instant'`);
+        if (item.tier === 'basic') {
+            if (typeof item.cost !== 'number') problems.push(`Ítem ${key}: un básico necesita cost`);
+        } else if (item.tier === 'composite') {
+            if (!Array.isArray(item.components) || !item.components.length) problems.push(`Ítem ${key}: un compuesto necesita components`);
+            (item.components || []).forEach(k => { if (!ITEMS[k] || ITEMS[k].tier !== 'basic') problems.push(`Ítem ${key}: el componente "${k}" no es un básico`); });
+            if (typeof item.recipe !== 'number') problems.push(`Ítem ${key}: un compuesto necesita recipe`);
+            if (!ITEM_GROUPS.includes(item.group)) problems.push(`Ítem ${key}: grupo "${item.group}" desconocido`);
+            if (item.components && item.components.length > INVENTORY_SLOTS) problems.push(`Ítem ${key}: tiene más componentes que espacios`);
+        } else if (item.kind !== 'instant') problems.push(`Ítem ${key}: tiene que ser básico, compuesto o inmediato`);
+        Object.keys(item.mods || {}).forEach(m => { if (!MOD_LABELS[m]) problems.push(`Ítem ${key}: mod "${m}" sin texto en MOD_LABELS`); });
     });
     Object.values(CREEP_TYPES).forEach(t => {
         if (t.counterItem && !ITEMS[t.counterItem]) problems.push(`Creep ${t.key}: el ítem de contra "${t.counterItem}" no existe`);
@@ -95,4 +96,5 @@ validateContent();
 initHeroSelect();
 renderHeroCodex();
 renderCreepCodex();
+renderItemCodex();
 requestAnimationFrame(loop);

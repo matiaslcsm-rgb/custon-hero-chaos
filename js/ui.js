@@ -79,8 +79,8 @@ function stripHtml(html) { return html.replace(/<[^>]+>/g, ''); }
 
 function showView(view) {
     document.getElementById('view-game').style.display = view === 'game' ? 'flex' : 'none';
-    ['heroes', 'creeps'].forEach(v => { document.getElementById('view-' + v).style.display = view === v ? 'block' : 'none'; });
-    ['game', 'heroes', 'creeps'].forEach(v => document.getElementById('nav-' + v).classList.toggle('active', view === v));
+    ['heroes', 'creeps', 'items'].forEach(v => { document.getElementById('view-' + v).style.display = view === v ? 'block' : 'none'; });
+    ['game', 'heroes', 'creeps', 'items'].forEach(v => document.getElementById('nav-' + v).classList.toggle('active', view === v));
 }
 
 // --- CÓDICE DE CREEPS ---
@@ -157,42 +157,60 @@ function renderBookChoice() {
     });
 }
 
-const SHOP_CATEGORIES = ['Atributos', 'Contras', 'Otros'];
+// --- TIENDA ---
+const SHOP_TABS = { basic: 'Básicos', composite: 'Compuestos', other: 'Otros' };
+let shopTab = 'composite';
+
+// Receta de un compuesto: cada componente con ✓ si ya lo tenés, más el precio de la receta.
+function recipeHtml(item, hero) {
+    const { used } = hero ? recipeStatus(hero, item) : { used: [] };
+    const pool = used.slice();
+    const parts = item.components.map(k => {
+        const has = pool.includes(k); if (has) pool.splice(pool.indexOf(k), 1);
+        return `<span class="${has ? 'has' : ''}">${has ? '✓ ' : ''}${ITEMS[k].name}</span>`;
+    });
+    return `<p class="meta recipe">${parts.join(' + ')} + receta ${item.recipe}g</p>`;
+}
+
+function shopCard(item) {
+    const blocker = itemBlocker(item, player);
+    const cost = itemCost(item, player);
+    const card = document.createElement('div');
+    card.className = 'skill-card' + (blocker || player.gold < cost ? ' disabled' : '');
+    const owned = isEquip(item) ? countItem(player, item.key) : 0;
+    const total = item.tier === 'composite' && cost !== itemTotalCost(item) ? ` <span class="item-level">(total ${itemTotalCost(item)}g)</span>` : '';
+    card.innerHTML = `<h4>${item.name} (${cost}g)${total}${owned ? ` <span class="item-level">tenés ${owned}</span>` : ''}</h4>` +
+        `<p>${describeItem(item)}</p>` +
+        (item.tier === 'composite' ? recipeHtml(item, player) : '') +
+        (item.counters ? `<p class="meta">Contra: ${item.counters}</p>` : '') +
+        (blocker ? `<p class="meta">${blocker}</p>` : '');
+    card.onclick = () => buyItem(item);
+    return card;
+}
 
 function renderShop() {
     renderWavePreview();
-    const c = document.getElementById('shop-options'); c.innerHTML = '';
-    SHOP_CATEGORIES.forEach(category => {
-        const items = Object.values(ITEMS).filter(i => i.category === category && (i.kind === 'equip' || itemAvailable(i, player)));
-        if (!items.length) return;
-        const title = document.createElement('div'); title.className = 'shop-category'; title.textContent = category;
-        c.appendChild(title);
-        items.forEach(i => {
-            const level = i.kind === 'equip' ? itemLevel(player, i.key) : 0;
-            const blocker = itemBlocker(i, player);
-            const cost = itemCost(i, player);
-            const card = document.createElement('div');
-            card.className = 'skill-card' + (blocker || player.gold < cost ? ' disabled' : '');
-            let head, body;
-            if (i.kind === 'equip') {
-                const next = Math.min(level + 1, ITEM_MAX_LEVEL);
-                const levelText = level === 0 ? 'Nivel 1' : level >= ITEM_MAX_LEVEL ? 'Nivel máximo' : `Nivel ${level} → ${next}`;
-                head = `${i.name} <span class="item-level">${levelText}</span>${blocker === 'Nivel máximo' ? '' : ` (${cost}g)`}`;
-                body = `<p>${describeSkill(i, next)}</p>${i.counters ? `<p class="meta">Contra: ${i.counters}</p>` : ''}${blocker && blocker !== 'Nivel máximo' ? `<p class="meta">${blocker}</p>` : ''}`;
-            } else {
-                head = `${i.name} (${cost}g)`;
-                body = `<p>${i.desc}</p>`;
-            }
-            card.innerHTML = `<h4>${head}</h4>${body}`;
-            card.onclick = () => buyItem(i);
-            c.appendChild(card);
-        });
+    const tabs = document.getElementById('shop-tabs'); tabs.innerHTML = '';
+    Object.entries(SHOP_TABS).forEach(([key, label]) => {
+        const btn = document.createElement('button');
+        btn.textContent = label; btn.className = shopTab === key ? 'active' : '';
+        btn.onclick = () => { shopTab = key; renderShop(); };
+        tabs.appendChild(btn);
     });
+    const c = document.getElementById('shop-options'); c.innerHTML = '';
+    const heading = text => { const d = document.createElement('div'); d.className = 'shop-category'; d.textContent = text; c.appendChild(d); };
+    const all = Object.values(ITEMS);
+    if (shopTab === 'basic') all.filter(i => i.tier === 'basic').forEach(i => c.appendChild(shopCard(i)));
+    if (shopTab === 'composite') ITEM_GROUPS.forEach(group => {
+        heading(group);
+        all.filter(i => i.tier === 'composite' && i.group === group).forEach(i => c.appendChild(shopCard(i)));
+    });
+    if (shopTab === 'other') all.filter(i => !isEquip(i) && itemAvailable(i, player)).forEach(i => c.appendChild(shopCard(i)));
     renderInventoryPanel();
     renderDestinyPanel();
 }
 
-// Inventario en la tienda: cada ítem con su nivel y un botón para venderlo.
+// Inventario en la tienda: cada ítem con un botón para venderlo.
 function renderInventoryPanel() {
     const panel = document.getElementById('inventory-panel'); panel.innerHTML = '';
     const title = document.createElement('div');
@@ -200,14 +218,33 @@ function renderInventoryPanel() {
     title.textContent = `🎒 Inventario (${player.inventory.length}/${INVENTORY_SLOTS})`;
     panel.appendChild(title);
     player.inventory.forEach(inv => {
+        const item = ITEMS[inv.key];
         const row = document.createElement('div'); row.className = 'destiny-row';
-        row.innerHTML = `<span>${ITEMS[inv.key].name} <span class="item-level">nv ${inv.level}</span></span>`;
+        row.innerHTML = `<span>${item.name}${item.tier === 'basic' ? ' <span class="item-level">básico</span>' : ''}</span>`;
         const sell = document.createElement('button');
-        sell.textContent = `Vender (${Math.floor(inv.spent * SELL_REFUND)}g)`;
+        sell.textContent = `Vender (${Math.floor(itemTotalCost(item) * SELL_REFUND)}g)`;
         sell.onclick = () => sellItem(inv.key);
         row.appendChild(sell);
         panel.appendChild(row);
     });
+}
+
+// --- CÓDICE DE ÍTEMS (árbol de recetas) ---
+function renderItemCodex() {
+    const all = Object.values(ITEMS);
+    const basics = all.filter(i => i.tier === 'basic').map(i => {
+        const usedIn = all.filter(c => c.tier === 'composite' && c.components.includes(i.key)).map(c => c.name);
+        return `<div class="ability-row"><h4>${i.name} <span class="item-level">${i.cost}g</span></h4><p>${describeItem(i)}</p>` +
+            (usedIn.length ? `<p class="meta">Se usa en: ${usedIn.join(', ')}</p>` : '') + `</div>`;
+    }).join('');
+    const composites = ITEM_GROUPS.map(group => `<div class="codex-sub">${group}</div>` + all.filter(i => i.tier === 'composite' && i.group === group).map(i =>
+        `<div class="ability-row fixed"><h4>${i.name} <span class="item-level">${itemTotalCost(i)}g</span></h4><p>${describeItem(i)}</p>${recipeHtml(i, null)}` +
+        (i.counters ? `<p class="meta">Contra: ${i.counters}</p>` : '') + `</div>`).join('')).join('');
+    document.getElementById('item-codex').innerHTML =
+        `<h3>Ítems</h3><p class="subtitle">Los básicos mejoran un solo stat y se pueden repetir. Los compuestos se arman con básicos + una receta, ` +
+        `suman sus efectos y agregan algo especial. Al comprar un compuesto se usan los básicos que ya tenés y pagás solo lo que falta. ` +
+        `Inventario: ${INVENTORY_SLOTS} espacios. Vender devuelve el ${SELL_REFUND * 100}%.</p>` +
+        `<div class="codex-sub">Básicos</div>${basics}${composites}`;
 }
 
 // Inventario de objetos del destino (solo se usan fuera de las oleadas).
@@ -315,7 +352,7 @@ function updateHud() {
     document.getElementById('stat-agi').textContent = Math.floor(player.attr('agi'));
     document.getElementById('stat-int').textContent = Math.floor(player.attr('int'));
     document.getElementById('inventory-line').textContent = player.inventory.length
-        ? '🎒 ' + player.inventory.map(inv => `${ITEMS[inv.key].name} ${inv.level}`).join(' · ') : '';
+        ? '🎒 ' + player.inventory.map(inv => ITEMS[inv.key].name).join(' · ') : '';
     document.getElementById('stat-armor').textContent = player.armor.toFixed(1);
     document.getElementById('extra-stats').textContent =
         `RM: ${player.magicResist.toFixed(0)}% | Crít: ${player.critChance.toFixed(1)}% | Evasión: ${player.evasion.toFixed(1)}% | ` +
@@ -373,7 +410,28 @@ function drawUnit(u, color, symbol) {
     }
 }
 
+// Área de Descanso: un claro tranquilo con una fuente y fogatas donde los héroes esperan entre combates.
+function renderRestArea() {
+    ctx.fillStyle = '#07140d'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = '#0f2418';
+    for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) ctx.strokeRect(c * TILE, r * TILE, TILE, TILE);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = '14px monospace'; ctx.fillStyle = '#2d6a4f';
+    [[2, 2], [17, 2], [2, 10], [17, 10], [5, 5], [15, 8]].forEach(([x, y]) => ctx.fillText('♣', x * TILE + TILE / 2, y * TILE + TILE / 2));
+    ctx.font = '22px monospace'; ctx.fillStyle = '#48cae4';
+    ctx.fillText('≈', REST_SPOT.x * TILE + TILE / 2, (REST_SPOT.y - 2) * TILE + TILE / 2);
+    ctx.fillStyle = '#fb8500';
+    [[REST_SPOT.x - 3, REST_SPOT.y], [REST_SPOT.x + 3, REST_SPOT.y]].forEach(([x, y]) => ctx.fillText('♨', x * TILE + TILE / 2, y * TILE + TILE / 2));
+    ctx.font = 'bold 16px monospace'; ctx.fillStyle = '#95d5b2';
+    ctx.fillText('ÁREA DE DESCANSO', canvas.width / 2, TILE * 0.8);
+    ctx.font = '11px monospace'; ctx.fillStyle = '#74c69d';
+    ctx.fillText('Volvés al combate con vida y maná completos', canvas.width / 2, canvas.height - TILE * 0.6);
+    ctx.font = '18px monospace';
+    drawUnit({ x: player.x, y: player.y, hp: player.hp, maxHp: player.maxHp }, '#00f5d4', player.symbol);
+}
+
 function render() {
+    if (player && player.inRest && gameState !== 'WAVE') { renderRestArea(); return; }
     ctx.fillStyle = '#050507'; ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.strokeStyle = '#151821';
     for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) ctx.strokeRect(c * TILE, r * TILE, TILE, TILE);

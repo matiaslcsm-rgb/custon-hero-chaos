@@ -12,7 +12,7 @@
         <button id="nav-game" class="active">🎮 Jugar</button>
         <button id="nav-heroes">🦸 Héroes</button>
         <button id="nav-creeps">👹 Creeps y Jefes</button>
-        <button class="disabled" title="Próximamente">🎒 Ítems</button>
+        <button id="nav-items">🎒 Ítems</button>
     </div>
 
     <div id="view-game" style="display:flex;">
@@ -65,7 +65,8 @@
             <div id="shop-container" style="display: none;">
                 <div id="wave-preview"></div>
                 <h3>Tienda de Artículos</h3>
-                <p class="subtitle">Armate según lo que viene:</p>
+                <p class="subtitle">Armate según lo que viene. Los compuestos usan los básicos que ya tenés.</p>
+                <div id="shop-tabs"></div>
                 <div id="shop-options" class="options-grid"></div>
                 <div id="inventory-panel"></div>
                 <div id="destiny-panel"></div>
@@ -89,6 +90,11 @@
             <div id="codex-hero-list"></div>
             <div id="codex-detail"><p id="codex-empty">Elegí un héroe de la lista para ver sus stats y habilidades.</p></div>
         </div>
+    </div>
+
+    <!-- Códice de Ítems -->
+    <div id="view-items">
+        <div class="codex-layout"><div id="item-codex"></div></div>
     </div>
 
     <!-- Códice de Creeps -->

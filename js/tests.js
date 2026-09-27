@@ -600,7 +600,7 @@ test('Sanador: cura al más herido cada 3s; la Lanza Cortacuras lo reduce a la m
     giveItem(player, 'SPEAR');
     hurt.hp = 5; dealDamage(player, hurt, 1, 'pure');
     for (let i = 0; i < 3 * 60 + 1; i++) updateCreep(healer, 1 / 60);
-    checkEq(hurt.hp, 4 + Math.round(heal * (1 - valueAt(ITEMS.SPEAR, 'antiHeal', 1))), 'con Cortacuras cura menos');
+    checkEq(hurt.hp, 4 + Math.round(heal * (1 - ITEMS.SPEAR.antiHeal)), 'con Cortacuras cura menos');
 });
 
 test('Espectro: esquiva ataques básicos; la Hoja Certera no falla', () => {
@@ -618,7 +618,7 @@ test('Acorazado: armadura alta; el Martillo Rompecorazas se la baja golpe a golp
     checkEq(dealDamage(player, a, 100, 'physical').dealt, Math.round(100 * (1 - armor * 0.04)), 'reducción por armadura');
     giveItem(player, 'HAMMER');
     for (let i = 0; i < 5; i++) resolveBasicHit(player, a, 1, false);
-    const maxBreak = valueAt(ITEMS.HAMMER, 'armorPerHit', 1) * valueAt(ITEMS.HAMMER, 'maxStacks', 1);
+    const maxBreak = ITEMS.HAMMER.armorPerHit * ITEMS.HAMMER.maxStacks;
     checkNear(effArmor(a), armor - maxBreak, 'baja hasta el máximo de acumulaciones');
 });
 
@@ -650,7 +650,7 @@ test('Aturdidor: aturde cada N golpes; aturdido no te movés ni lanzás; las Bot
     player.stunImmuneUntil = 0;
     giveItem(player, 'BOOTS');
     for (let i = 0; i < stunEvery; i++) { t.attackTimer = 99; updateCreep(t, 0.016); }
-    checkNear(getEffect(player, 'STUN').until - gameClock, stunDuration * (1 - valueAt(ITEMS.BOOTS, 'statusResist', 1)), 'dura menos');
+    checkNear(getEffect(player, 'STUN').until - gameClock, stunDuration * (1 - ITEMS.BOOTS.mods.statusResist), 'dura menos');
 });
 
 test('Inmunidad tras aturdimiento: un héroe no puede quedar aturdido para siempre', () => {
@@ -679,54 +679,145 @@ test('Ladrón: roba oro y huye; si lo matás recuperás el oro +50%', () => {
     check(player.gold >= 100 - steal + Math.round(steal * 1.5), 'recupera lo robado +50% (más el oro por matarlo)');
 });
 
-test('Inventario: 6 espacios, subir de nivel no ocupa espacio, máximo nivel 3', () => {
+test('Recetas: un compuesto usa los básicos que ya tenés y cobra solo lo que falta', () => {
+    newGame('AXE');
+    gameState = 'PREP'; player.gold = 1000;
+    const hoja = ITEMS.TRUESTRIKE;
+    checkEq(itemCost(hoja, player), itemTotalCost(hoja), 'sin componentes cuesta el total');
+    checkEq(itemTotalCost(hoja), ITEMS.BLADE.cost + ITEMS.QUICK_GLOVES.cost + hoja.recipe, 'total = componentes + receta');
+    buyItem(ITEMS.BLADE);
+    checkEq(itemCost(hoja, player), ITEMS.QUICK_GLOVES.cost + hoja.recipe, 'con la Espada, paga los Guantes y la receta');
+    const atk0 = effAttack(player);
+    buyItem(hoja);
+    checkEq(player.inventory.map(i => i.key).join(','), 'TRUESTRIKE', 'la Espada se usó para armarla');
+    checkEq(effAttack(player) - atk0, hoja.mods.flatAtk - ITEMS.BLADE.mods.flatAtk, 'daño del compuesto (en vez del de la Espada)');
+    check(hasFlag(player, 'trueStrike'), 'y su efecto especial');
+    check(!buyItem(hoja), 'un compuesto no se puede tener dos veces');
+});
+
+test('Recetas con componentes repetidos (Martillo = 2 Espadas) y básicos que se acumulan', () => {
+    newGame('AXE');
+    gameState = 'PREP'; player.gold = 1000;
+    const atk0 = effAttack(player);
+    buyItem(ITEMS.BLADE); buyItem(ITEMS.BLADE);
+    checkEq(effAttack(player) - atk0, 2 * ITEMS.BLADE.mods.flatAtk, 'dos Espadas suman');
+    checkEq(itemCost(ITEMS.HAMMER, player), ITEMS.HAMMER.recipe, 'con las dos Espadas solo paga la receta');
+    buyItem(ITEMS.HAMMER);
+    checkEq(countItem(player, 'BLADE'), 0, 'usó las dos');
+    checkEq(countItem(player, 'HAMMER'), 1, 'y armó el Martillo');
+});
+
+test('Inventario: 6 espacios; un compuesto entra si libera los espacios de sus componentes', () => {
     newGame('AXE');
     gameState = 'PREP'; player.gold = 5000;
-    ['BELT', 'GLOVES', 'TOME', 'CLOAK', 'TRUESTRIKE', 'SPEAR'].forEach(k => buyItem(ITEMS[k]));
+    ['BLADE', 'QUICK_GLOVES', 'CHAINMAIL', 'RUNE_CAPE', 'VITALITY', 'VITALITY'].forEach(k => buyItem(ITEMS[k]));
     checkEq(player.inventory.length, INVENTORY_SLOTS, 'inventario lleno');
-    check(!buyItem(ITEMS.HAMMER), 'un séptimo ítem no entra');
-    checkEq(itemCost(ITEMS.BELT, player), ITEMS.BELT.costs[1], 'el nivel 2 cuesta más');
-    check(buyItem(ITEMS.BELT) && buyItem(ITEMS.BELT), 'subir de nivel con el inventario lleno');
-    checkEq(itemLevel(player, 'BELT'), 3, 'nivel 3');
-    check(!buyItem(ITEMS.BELT), 'no pasa del nivel 3');
-    const gold = player.gold; buyItem(ITEMS.POTION);
-    checkEq(player.gold, gold - ITEMS.POTION.cost, 'la poción se compra aunque el inventario esté lleno');
+    checkEq(itemBlocker(ITEMS.FANG, player), 'Inventario lleno', 'un séptimo básico no entra');
+    check(buyItem(ITEMS.TRUESTRIKE), 'la Hoja Certera entra: usa 2 espacios y ocupa 1');
+    checkEq(player.inventory.length, INVENTORY_SLOTS - 1, 'quedó un espacio libre');
+    check(buyItem(ITEMS.HEART), 'el Corazón usa las 2 Piedras que ya tenía');
 });
 
 test('Ítem de atributo: suma al atributo y a sus stats; venderlo devuelve la mitad y lo quita', () => {
     newGame('AXE');
     gameState = 'PREP'; player.gold = 1000;
     const str0 = player.attr('str'), hp0 = player.maxHp;
-    buyItem(ITEMS.BELT); buyItem(ITEMS.BELT);
-    checkEq(player.attr('str') - str0, valueAt(ITEMS.BELT, 'str', 2), 'Fuerza del nivel 2');
-    checkEq(player.maxHp - hp0, valueAt(ITEMS.BELT, 'str', 2) * ATTRIBUTE_RULES.str.hp, 'vida extra');
+    buyItem(ITEMS.BELT);
+    checkEq(player.attr('str') - str0, ITEMS.BELT.mods.str, 'Fuerza');
+    checkEq(player.maxHp - hp0, ITEMS.BELT.mods.str * ATTRIBUTE_RULES.str.hp, 'vida extra');
     const gold = player.gold;
     sellItem('BELT');
-    checkEq(player.gold - gold, Math.floor((ITEMS.BELT.costs[0] + ITEMS.BELT.costs[1]) * SELL_REFUND), 'devuelve la mitad de lo gastado');
+    checkEq(player.gold - gold, Math.floor(itemTotalCost(ITEMS.BELT) * SELL_REFUND), 'devuelve la mitad del precio total');
     checkEq(player.attr('str'), str0, 'pierde la Fuerza del ítem');
     checkEq(player.maxHp, hp0, 'y la vida');
+});
+
+test('Égida Inquebrantable: por debajo del 40% da inmunidad mágica (sin daño mágico ni aturdimientos)', () => {
+    newGame('AXE');
+    giveItem(player, 'AEGIS');
+    const c = dummy();
+    player.hp = player.maxHp;
+    dealDamage(c, player, player.maxHp * 0.7, 'pure');
+    check(hasFlag(player, 'magicImmune'), 'se activó');
+    const hp = player.hp;
+    dealDamage(c, player, 100, 'magical');
+    checkEq(player.hp, hp, 'sin daño mágico');
+    check(!addEffect(player, { id: 'STUN', duration: 1, flags: ['stun'] }), 'sin aturdimientos');
+    dealDamage(c, player, 10, 'physical');
+    check(player.hp < hp, 'el daño físico sí entra');
+});
+
+test('Coraza de Espinas devuelve daño cuerpo a cuerpo; Corazón del Titán regenera por segundo', () => {
+    newGame('AXE');
+    giveItem(player, 'THORNS');
+    const c = dummy({ hp: 9999, maxHp: 9999 });
+    const { dealt } = dealDamage(c, player, 100, 'physical');
+    checkEq(9999 - c.hp, Math.round(dealt * ITEMS.THORNS.reflect), 'reflejo');
+    giveItem(player, 'HEART');
+    player.hp = 10;
+    for (let i = 0; i < 61; i++) tickEffects(player, 1 / 60);
+    checkEq(player.hp, 10 + Math.round(player.maxHp * ITEMS.HEART.regenPct), 'curación por segundo');
+});
+
+test('Brujo: rayo cada 5s con daño mágico y aturdimiento; Escarchador ralentiza; Tamborilero acelera', () => {
+    newGame('AXE');
+    const w = spawnType('WARLOCK', { x: player.x + 3 });
+    const hp = player.hp;
+    for (let i = 0; i < CREEP_TYPES.WARLOCK.boltEvery * 60 + 1; i++) updateCreep(w, 1 / 60);
+    check(player.hp < hp, 'el rayo hizo daño');
+    check(hasFlag(player, 'stun'), 'y aturdió');
+    newGame('AXE');
+    const f = spawnType('FROSTCASTER', { attackTimer: 99 });
+    updateCreep(f, 0.016);
+    checkNear(effMoveMult(player), 1 - CREEP_TYPES.FROSTCASTER.slow, 'ralentizado');
+    const d = spawnType('DRUMMER', { x: 15, y: 5 }), ally = spawnType('GRUNT', { x: 16, y: 5 });
+    for (let i = 0; i < 31; i++) updateCreep(d, 1 / 60);
+    checkNear(effAtkSpeed(ally) / ally.atkSpeed, 1 + CREEP_TYPES.DRUMMER.auraAtkSpeed, 'aliado acelerado');
+});
+
+test('Área de Descanso: al terminar la oleada vas ahí y volvés con vida, maná completos y sin mejoras temporales', () => {
+    newGame('AXE');
+    waveNumber = 1; isBossWave = false;
+    creeps.forEach(c => { c.hp = 0; });
+    player.hp = 5; player.mana = 0;
+    addEffect(player, { id: 'TEMP', duration: 99, mods: { atkPct: 1 } });
+    onWaveCleared();
+    check(player.inRest, 'está en el Área de Descanso');
+    checkEq(player.hp, player.maxHp, 'vida llena');
+    check(!getEffect(player, 'TEMP'), 'sin mejoras temporales');
+    if (gameState === 'DRAFT') learnSkill(currentDraft.options[0]);
+    player.hp = 5; player.x = 0;
+    startWave();
+    check(!player.inRest, 'volvió al combate');
+    checkEq(player.hp, player.maxHp, 'con la vida llena');
+    checkEq(player.mana, player.maxMana, 'y el maná lleno');
+    checkEq(`${player.x},${player.y}`, `${WAVE_START.x},${WAVE_START.y}`, 'en el punto de inicio');
 });
 
 test('IA: con el inventario lleno vende un contra que no sirve para comprar el que necesita', () => {
     newGame('AXE');
     gameState = 'PREP'; player.gold = 500;
-    ['BELT', 'GLOVES', 'TOME', 'TRUESTRIKE', 'SPEAR', 'BOOTS'].forEach(k => giveItem(player, k));
+    ['BELT', 'TRUESTRIKE', 'SPEAR', 'BOOTS', 'CLOAK', 'THORNS'].forEach(k => giveItem(player, k));
     nextWave = { name: 'Muralla', groups: [{ type: 'ARMORED', count: 3 }], boss: 'ARMORED' };
     aiShop(player);
-    checkEq(itemLevel(player, 'HAMMER'), 1, 'compró el Martillo');
-    checkEq(player.inventory.length, INVENTORY_SLOTS, 'sigue en 6');
-    check(itemLevel(player, 'BELT') > 0, 'no vendió su ítem de atributo');
+    checkEq(countItem(player, 'HAMMER'), 1, 'compró el Martillo');
+    check(player.inventory.length <= INVENTORY_SLOTS, 'no pasó de 6');
+    checkEq(countItem(player, 'BELT'), 1, 'no vendió su ítem de atributo');
 });
 
-test('IA: compra los contras de la próxima oleada', () => {
+test('IA: arma los contras de la próxima oleada (de a componentes si no le alcanza)', () => {
     newGame('AXE');
     gameState = 'PREP'; player.gold = 1000;
     nextWave = { name: 'Muralla', groups: [{ type: 'ARMORED', count: 2 }, { type: 'SHAMAN', count: 3 }, { type: 'SPECTER', count: 1 }], boss: 'ARMORED' };
     aiShop(player);
-    check(!!getEffect(player, 'ITEM_HAMMER'), 'Martillo contra Acorazados');
-    check(!!getEffect(player, 'ITEM_CLOAK'), 'Capa contra Chamanes');
-    check(!getEffect(player, 'ITEM_TRUESTRIKE'), 'no compra contra un solo Espectro');
-    checkEq(itemLevel(player, 'HAMMER'), 1, 'compra el contra una sola vez (nivel 1)');
+    checkEq(countItem(player, 'HAMMER'), 1, 'Martillo contra Acorazados');
+    checkEq(countItem(player, 'CLOAK'), 1, 'Capa contra Chamanes');
+    checkEq(countItem(player, 'TRUESTRIKE'), 0, 'no compra contra un solo Espectro');
+    newGame('AXE');
+    gameState = 'PREP'; player.gold = 120;
+    nextWave = { name: 'Muralla', groups: [{ type: 'ARMORED', count: 3 }], boss: 'ARMORED' };
+    aiShop(player);
+    checkEq(countItem(player, 'BLADE'), 1, 'sin oro para el Martillo entero, compra una Espada para ir armándolo');
 });
 
 test('Prioridad: el ataque automático va primero por el Sanador si está a tiro', () => {

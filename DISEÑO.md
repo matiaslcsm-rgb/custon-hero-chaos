@@ -204,6 +204,10 @@ Sniper, Asesino, Axe, Vampiro, Nigromante y Alquimista 16/16 · Bruja del Hielo 
 - **Arcanista** ganaba 69% (Axe 88%). Moría sobre todo contra Arqueros, que tenían más alcance (4,5 contra 4).
   **Rango 4 → 5 y +30 de vida** → 81%.
 
+**Con recetas y Área de Descanso** (12 partidas por héroe): con contras **92%** de victorias (1,19 muertes/partida), sin
+contras **84%**. Los cuerpo a cuerpo se recuperaron (Axe 11/12, Asesino 10/12, Vampiro 9/12; antes 1-6/12): los ayuda volver
+con la vida llena a cada oleada y los compuestos de tanque. El juego quedó más fácil; se puede subir la dificultad de las oleadas.
+
 **Ojo:** con una IA decente casi todos los héroes ganan casi siempre, así que el PvE hoy es fácil. La dificultad debería
 subir con los creeps con mecánicas (fase E) y los duelos (fase F).
 
@@ -241,34 +245,57 @@ Un héroe entra solo si cumple **todo** esto:
 
 ---
 
-## 7. Ítems: inventario, niveles y contras ✅
+## 7. Ítems: recetas estilo Dota 2 ✅
 
-- **Inventario de 6 espacios.** Los ítems equipables (atributos y contras) ocupan un espacio.
-- **Niveles:** comprar un ítem que ya tenés lo sube de nivel (hasta **3**); cada nivel es más fuerte y más caro.
-- **Vender:** devuelve el **50%** de todo lo gastado en ese ítem y quita sus bonus. Sirve para cambiar de contra según la oleada.
-- **Los atributos de los ítems son bonus** (se pierden al venderlos), separados de los atributos propios del héroe.
-- **De uso inmediato** (no ocupan espacio): Poción de Vida, Fragmento del Destino, Injusticia de los Codiciosos.
+- **Básicos:** mejoran **un solo stat** (o empeoran uno del enemigo). Se pueden tener repetidos y se acumulan.
+- **Compuestos:** se arman con básicos + el precio de la **receta**, suman sus efectos y suelen agregar algo especial.
+  Al comprar un compuesto se usan los básicos que ya tenés y **pagás solo lo que falta**. Uno de cada compuesto como máximo.
+- **Inventario de 6 espacios** (básicos y compuestos). Un compuesto entra aunque esté lleno si libera los espacios de sus componentes.
+- **Vender** devuelve el **50%** del precio total del ítem.
+- **Inmediatos** (no ocupan espacio): Fragmento del Destino, Injusticia de los Codiciosos.
+- *Las recetas reemplazaron a los niveles de ítem de la fase D* (en Dota los ítems crecen armando compuestos).
+- Todo se ve en la tienda (pestañas Básicos / Compuestos / Otros, con ✓ en los componentes que ya tenés) y en la pestaña **🎒 Ítems**.
 
-| Ítem | Categoría | Precio nv 1 / 2 / 3 | Efecto por nivel |
+### Básicos
+| Ítem | Precio | Efecto |
+|---|---|---|
+| Rama de Fuerza / Agilidad / Inteligencia | 50 | +4 al atributo |
+| Espada Corta | 100 | +10 daño |
+| Guantes de Rapidez | 90 | +12% vel. de ataque |
+| Colmillo | 90 | +8% crítico |
+| Cota de Malla | 80 | +3 armadura |
+| Capa Rúnica | 75 | +15% resistencia mágica |
+| Piedra de Vitalidad | 90 | +80 vida |
+| Anillo de Regeneración | 70 | +3 vida/s |
+| Máscara Vampírica | 90 | +10% robo de vida |
+| Cristal de Maná | 70 | +75 maná, +1 maná/s |
+| Botas de Viaje | 60 | +10% vel. de movimiento |
+| Daga Serrada | 80 | Tu daño reduce 30% la curación del objetivo |
+| Orbe Helado | 90 | Tus ataques ralentizan 15% |
+
+### Compuestos
+| Grupo | Ítem | Receta | Efecto |
 |---|---|---|---|
-| Cinturón de Fuerza | Atributos | 75 / 110 / 150 | +6 / 12 / 20 Fuerza |
-| Guantes de Celeridad | Atributos | 90 / 130 / 170 | +8 / 16 / 26 Agilidad |
-| Túnica del Mago | Atributos | 90 / 130 / 170 | +8 / 16 / 26 Inteligencia |
-| Capa Antimagia | Contra (Chamanes) | 60 / 90 / 120 | +25 / 35 / 45% resistencia mágica |
-| Hoja Certera | Contra (Espectros) | 75 / 110 / 150 | Ataques que no fallan; +0 / 8 / 16 daño |
-| Lanza Cortacuras | Contra (Sanadores, robo de vida) | 65 / 100 / 140 | −40 / 60 / 80% curación del objetivo por 3 s |
-| Martillo Rompecorazas | Contra (Acorazados) | 70 / 105 / 140 | −1,5 / 2 / 3 armadura por golpe (hasta 4 veces) |
-| Botas Firmes | Contra (Aturdidores) | 50 / 80 / 110 | −35 / 50 / 65% duración de control; +0 / 5 / 10% velocidad |
+| Atributos | Cinturón de Fuerza | 2 Ramas de Fuerza + 40 | +14 Fuerza |
+| | Guantes de Celeridad | 2 Ramas de Agilidad + 40 | +14 Agilidad |
+| | Túnica del Mago | 2 Ramas de Inteligencia + 40 | +14 Inteligencia |
+| | Diadema del Equilibrio | 3 Ramas (una de cada) + 60 | +8 a los tres |
+| Ataque | Hoja Certera | Espada + Guantes de Rapidez + 30 | +15 daño, +12% vel. ataque, ataques que no fallan |
+| | Martillo Rompecorazas | 2 Espadas + 20 | +22 daño, cada golpe quita 2 armadura (x4) |
+| | Hoja Veloz | Colmillo + Guantes de Rapidez + 60 | +15% crítico, +22% vel. ataque |
+| Robo de vida y anticuración | Sed Carmesí | Máscara Vampírica + Espada + 50 | +12 daño, +18% robo de vida (x2 bajo 30% de vida) |
+| | Lanza Cortacuras | Daga Serrada + Espada + 30 | +12 daño, −60% curación del objetivo |
+| | Ojo de Invierno | Orbe Helado + 3 Ramas + 80 | +7 a los tres; ataques ralentizan 30% y −40% curación |
+| Defensa y tanque | Capa Antimagia | Capa Rúnica + Anillo + 20 | +25% resistencia mágica, +3 vida/s |
+| | Botas Firmes | Botas de Viaje + Cota de Malla + 30 | +10% movimiento, +3 armadura, −40% duración de control |
+| | Coraza de Espinas | Cota de Malla + Piedra de Vitalidad + 50 | +5 armadura, +100 vida, devuelve 30% del daño cuerpo a cuerpo |
+| | Corazón del Titán | 2 Piedras de Vitalidad + Anillo + 120 | +250 vida, regenera 1,5% de la vida máx./s |
+| | Égida Inquebrantable | Capa Rúnica + Piedra + Rama de Fuerza + 90 | +15% RM, +80 vida, +4 Fuerza; bajo 40% de vida: **inmunidad mágica** 4 s (cada 35 s) |
+| Magia | Báculo Arcano | Rama de Inteligencia + Cristal de Maná + 60 | +6 INT, +150 maná, +2 maná/s, +15% amplificación |
 
-**Pendiente:** recetas (ítems avanzados combinando básicos) y contras contra héroes para los duelos (silencio, inmunidad mágica, disipar).
+**Inmunidad mágica** (`magicImmune`): no recibe daño mágico ni aturdimientos ni ralentizaciones. El daño físico y puro sí entran.
 
-### Balance medido (IA sin modo dios, 12 partidas por héroe)
-- **Los contras ahora importan:** con contras la IA gana **58%** (2,15 muertes/partida), sin contras **44%** (2,37). En la fase E,
-  sin límite de inventario, acumular atributos rendía más que cualquier contra.
-- **Desbalance cuerpo a cuerpo vs. distancia:** Sniper 12/12, Bruja del Hielo 11/12, Arcanista y Sabio 9/12, Alquimista y
-  Nigromante 8/12, pero **Asesino ~4/12 y Axe y Vampiro entre 1 y 6/12** (hay mucho ruido con 12 partidas). Los cuerpo a cuerpo
-  dependían de acumular Fuerza sin límite, y las oleadas castigan a quien tiene que acercarse (Arqueros, Chamanes, Kamikazes).
-  Probado: +30% de vida a los cuerpo a cuerpo → 39% a 42%; −40% de daño recibido de creeps a distancia/mágicos → 47%. **A decidir.**
+**Pendiente:** contras específicos para los duelos (silencio, disipar mejoras) y habilidades activas de ítems.
 
 ---
 
@@ -292,6 +319,10 @@ Cada tipo de creep tiene una **mecánica** y un **contra**. Todo está en `js/da
 | **Kamikaze** `k` | Explota al llegar a vos | Matarlo a distancia |
 | **Aturdidor** `t` | Cada 2 golpes aturde 1,5 s | Resistencia al control (**Botas Firmes**) |
 | **Ladrón** `$` | Roba 20 de oro por golpe y huye; si lo matás, recuperás +50% | Ralentizar, aturdir, rango |
+| **Brujo** `w` | Magia a distancia; cada 5 s un rayo que hace daño mágico y **aturde** 1,2 s; objetivo prioritario | Inmunidad mágica (**Égida**), resistencia mágica o al control |
+| **Escarchador** `f` | Ataques mágicos a distancia que **ralentizan** 30% | Resistencia al control (**Botas Firmes**) |
+| **Ballestero** `z` | Rango 6, golpes lentos y fuertes | Vida y armadura (**Corazón del Titán**) o alcanzarlo |
+| **Tamborilero** `d` | Aura: los creeps cercanos atacan 40% más rápido; objetivo prioritario | Matarlo primero |
 
 ### Oleadas con tema
 Cada oleada sortea un tema de su nivel (en la tienda se ve **el aviso de la próxima oleada**: qué viene y cómo contrarrestarlo):
@@ -299,9 +330,9 @@ Cada oleada sortea un tema de su nivel (en la tienda se ve **el aviso de la pró
 | Oleada | Temas posibles |
 |---|---|
 | 1 | Avanzada · Enjambre |
-| 2 | Hechiceros · Espectros |
-| 3 | Muralla · Kamikazes |
-| 4 | Emboscada · Asedio |
+| 2 | Hechiceros · Espectros · Brujería |
+| 3 | Muralla · Kamikazes · Tiradores |
+| 4 | Emboscada · Asedio · Tormenta Arcana |
 | 5 (jefe final) | Jefe Final |
 
 Cada oleada trae además un **jefe** (4x vida, +2 armadura y aura que potencia a los creeps cercanos) del tipo que indica el tema.
@@ -325,6 +356,11 @@ Martillo Rompecorazas (70g), Botas Firmes (50g).
   queda para la economía de ítems (fase D).
 - Problemas encontrados y corregidos al medir: el Sanador curaba un % de la vida del objetivo (un jefe con 2 Sanadores era
   imposible de matar) y el bloqueo por aturdimiento.
+
+### Área de Descanso ✅
+Al terminar una oleada (y, con la fase F, al terminar un duelo) los héroes van a un **área común de descanso** hasta que se
+acabe el tiempo de preparación. Desde ahí compran y draftean, y **vuelven al combate con la vida y el maná completos**
+(las mejoras temporales se pierden). Por eso se quitó la Poción de Vida.
 
 ### Muerte, vidas y Condenado ✅
 
@@ -466,8 +502,11 @@ si un nombre no te gusta, se cambia acá y después en el código.
 | **Efecto** (mejora / perjuicio) | Estado temporal sobre una unidad (Furia, Aturdido…) | `addEffect()` |
 | **Evento** | Algo que pasa en combate y activa reacciones | `emit()` |
 | **Etiqueta** | Categoría de una habilidad (`FÍSICO`, `ROBO_VIDA`…) | `TAGS` |
-| **Inventario** | 6 espacios para ítems equipables | `hero.inventory`, `INVENTORY_SLOTS` (items.js) |
-| **Nivel de ítem** | Comprar de nuevo un ítem lo mejora (hasta 3) | `itemLevel()`, `ITEM_MAX_LEVEL` |
+| **Inventario** | 6 espacios para ítems básicos y compuestos | `hero.inventory`, `INVENTORY_SLOTS` (items.js) |
+| **Ítem básico / compuesto** | Básico: un stat. Compuesto: básicos + receta | `tier`, `components`, `recipe` |
+| **Receta** | Precio extra para armar un compuesto | `recipe`, `recipeStatus()` |
+| **Inmunidad mágica** | Sin daño mágico ni control (Égida) | flag `magicImmune` |
+| **Área de Descanso** | Donde esperan los héroes entre combates; se vuelve con vida y maná completos | `sendToRestArea()`, `returnFromRestArea()` |
 | **Tema de oleada** | Composición de una oleada (Muralla, Hechiceros…) | `WAVE_THEMES`, `rollWave()` |
 | **Aviso de oleada** | Qué viene en la próxima oleada, visible en la tienda | `nextWave`, `renderWavePreview()` |
 | **Objetivo prioritario** | Creep al que el ataque automático va primero (Sanador) | `priority`, `pickAttackTarget()` |

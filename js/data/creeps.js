@@ -98,6 +98,47 @@ const CREEP_TYPES = {
             if (c.hitCount % this.stunEvery === 0 && target.isAlive()) addEffect(target, { id: 'STUN', name: 'Aturdido', duration: this.stunDuration, flags: ['stun'] });
         }
     },
+    WARLOCK: {
+        key: 'WARLOCK', label: 'Brujo', symbol: 'w', color: '#e0aaff', hp: 30, atk: 8, atkSpeed: 0.7, moveInterval: 320, range: 4, gold: 10, xp: 24,
+        attackType: 'magical', bossable: true, priority: 1,
+        boltEvery: 5, boltRange: 5, boltDamage: 20, boltStun: 1.2,
+        mechanic: 'Ataca con magia a distancia y cada 5s lanza un rayo que hace daño mágico y te aturde 1,2s.',
+        counter: 'Inmunidad mágica, resistencia mágica o al control', counterItem: 'AEGIS',
+        update(c, dt) {
+            if (!everyInterval(c, 'bolt', dt, this.boltEvery)) return false;
+            if (Math.hypot(c.x - player.x, c.y - player.y) > this.boltRange) return false;
+            const { dealt } = dealDamage(c, player, Math.round(this.boltDamage * c.statMult * enrageMult()), 'magical');
+            const stunned = addEffect(player, { id: 'STUN', name: 'Aturdido', duration: this.boltStun, flags: ['stun'] });
+            if (dealt > 0 || stunned) log(`⚡ Un Brujo te lanzó un rayo${stunned ? ' y te aturdió' : ''}.`);
+            return false;
+        }
+    },
+    FROSTCASTER: {
+        key: 'FROSTCASTER', label: 'Escarchador', symbol: 'f', color: '#90e0ef', hp: 28, atk: 7, atkSpeed: 0.9, moveInterval: 300, range: 4, gold: 9, xp: 20,
+        attackType: 'magical', slow: 0.3, slowDuration: 2,
+        mechanic: 'Ataques mágicos a distancia que te ralentizan 30% por 2s.', counter: 'Resistencia al control o mágica', counterItem: 'BOOTS',
+        onAttack(c, target, result) {
+            if (!result.evaded && target.isAlive()) addEffect(target, { id: 'FROSTCASTER_SLOW', name: 'Escarcha', duration: this.slowDuration, mods: { moveSpeedPct: -this.slow } });
+        }
+    },
+    CROSSBOW: {
+        key: 'CROSSBOW', label: 'Ballestero', symbol: 'z', color: '#d4a373', hp: 30, atk: 18, atkSpeed: 0.5, moveInterval: 320, range: 6, gold: 10, xp: 22, bossable: true,
+        mechanic: 'Dispara desde muy lejos (rango 6) golpes lentos pero fuertes.', counter: 'Vida y armadura, o alcanzarlo rápido', counterItem: 'HEART'
+    },
+    DRUMMER: {
+        key: 'DRUMMER', label: 'Tamborilero', symbol: 'd', color: '#f4a261', hp: 45, atk: 4, atkSpeed: 0.8, moveInterval: 300, range: 3, gold: 10, xp: 22, priority: 1,
+        auraRadius: 4, auraAtkSpeed: 0.4,
+        mechanic: 'Los creeps cerca de él (radio 4) atacan 40% más rápido. Objetivo prioritario.', counter: 'Matarlo primero',
+        update(c, dt) {
+            if (!everyInterval(c, 'drum', dt, 0.5)) return false;
+            creeps.forEach(o => {
+                if (o !== c && o.isAlive() && Math.hypot(o.x - c.x, o.y - c.y) <= this.auraRadius) {
+                    addEffect(o, { id: 'DRUM_AURA', name: 'Tambores de guerra', duration: 0.6, mods: { atkSpeedPct: this.auraAtkSpeed } });
+                }
+            });
+            return false;
+        }
+    },
     THIEF: {
         key: 'THIEF', label: 'Ladrón', symbol: '$', color: '#ffe066', hp: 24, atk: 5, atkSpeed: 1.0, moveInterval: 150, range: 1.2, gold: 8, xp: 16,
         steal: 20, fleeFor: 3,
@@ -134,17 +175,20 @@ const WAVE_THEMES = [
     ],
     [ // oleada 2
         { name: 'Hechiceros', groups: [{ type: 'SHAMAN', count: 3 }, { type: 'GRUNT', count: 3 }, { type: 'HEALER', count: 1 }, { type: 'CHUSMA', count: 2 }], boss: 'SHAMAN' },
-        { name: 'Espectros', groups: [{ type: 'SPECTER', count: 4 }, { type: 'GRUNT', count: 2 }, { type: 'ARCHER', count: 2 }], boss: 'GRUNT' }
+        { name: 'Espectros', groups: [{ type: 'SPECTER', count: 4 }, { type: 'GRUNT', count: 2 }, { type: 'ARCHER', count: 2 }], boss: 'GRUNT' },
+        { name: 'Brujería', groups: [{ type: 'WARLOCK', count: 2 }, { type: 'FROSTCASTER', count: 2 }, { type: 'GRUNT', count: 3 }, { type: 'CHUSMA', count: 2 }], boss: 'WARLOCK' }
     ],
     [ // oleada 3
         { name: 'Muralla', groups: [{ type: 'ARMORED', count: 3 }, { type: 'HEALER', count: 2 }, { type: 'ARCHER', count: 3 }], boss: 'ARMORED' },
-        { name: 'Kamikazes', groups: [{ type: 'KAMIKAZE', count: 4 }, { type: 'SCOUT', count: 2 }, { type: 'BRUTE', count: 2 }], boss: 'BRUTE' }
+        { name: 'Kamikazes', groups: [{ type: 'KAMIKAZE', count: 4 }, { type: 'SCOUT', count: 2 }, { type: 'BRUTE', count: 2 }], boss: 'BRUTE' },
+        { name: 'Tiradores', groups: [{ type: 'CROSSBOW', count: 3 }, { type: 'DRUMMER', count: 1 }, { type: 'GRUNT', count: 3 }, { type: 'SCOUT', count: 2 }], boss: 'CROSSBOW' }
     ],
     [ // oleada 4
         { name: 'Emboscada', groups: [{ type: 'THIEF', count: 2 }, { type: 'STUNNER', count: 3 }, { type: 'SPECTER', count: 2 }, { type: 'SHAMAN', count: 2 }], boss: 'STUNNER' },
-        { name: 'Asedio', groups: [{ type: 'ARMORED', count: 2 }, { type: 'SHAMAN', count: 3 }, { type: 'HEALER', count: 2 }, { type: 'STUNNER', count: 2 }], boss: 'ARMORED' }
+        { name: 'Asedio', groups: [{ type: 'ARMORED', count: 2 }, { type: 'SHAMAN', count: 3 }, { type: 'HEALER', count: 2 }, { type: 'STUNNER', count: 2 }], boss: 'ARMORED' },
+        { name: 'Tormenta Arcana', groups: [{ type: 'WARLOCK', count: 2 }, { type: 'FROSTCASTER', count: 2 }, { type: 'SHAMAN', count: 2 }, { type: 'HEALER', count: 1 }, { type: 'DRUMMER', count: 1 }], boss: 'WARLOCK' }
     ],
     [ // oleada 5: jefe final
-        { name: 'Jefe Final', groups: [{ type: 'BRUTE', count: 2 }, { type: 'SHAMAN', count: 2 }, { type: 'HEALER', count: 1 }, { type: 'STUNNER', count: 2 }, { type: 'ARMORED', count: 1 }, { type: 'KAMIKAZE', count: 2 }], boss: 'BRUTE' }
+        { name: 'Jefe Final', groups: [{ type: 'BRUTE', count: 2 }, { type: 'SHAMAN', count: 2 }, { type: 'HEALER', count: 1 }, { type: 'STUNNER', count: 2 }, { type: 'ARMORED', count: 1 }, { type: 'KAMIKAZE', count: 2 }, { type: 'WARLOCK', count: 1 }, { type: 'DRUMMER', count: 1 }], boss: 'BRUTE' }
     ]
 ];

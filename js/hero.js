@@ -38,6 +38,7 @@ class Hero {
         this.inventory = []; // ítems equipados: { key, level, spent } (ver items.js)
         this.x = 3; this.y = 6; this.gold = 100; this.lives = 2;
         this.respawnAt = 0;       // > 0 mientras está muerto esperando revivir (ver death.js)
+        this.inRest = false;      // en el Área de Descanso entre combates (ver game.js)
         this.condemnPct = 0;      // % de daño recibido extra acumulado como Condenado (se guarda aunque compre una vida)
         this.greedPurchases = 0;  // compras de Injusticia de los Codiciosos (cada una cuesta el doble)
         this.skills = []; this.cooldowns = {}; this.keyBindings = {}; this.attackTimer = 0;
@@ -51,8 +52,8 @@ class Hero {
         const R = ATTRIBUTE_RULES;
         const str = this.attr('str'), agi = this.attr('agi'), int = this.attr('int');
         const primaryVal = this.primaryAttr === 'STR' ? str : this.primaryAttr === 'AGI' ? agi : int;
-        this.maxHp = Math.round(this.baseHp + str * R.str.hp + this.bonus.maxHp);
-        this.maxMana = Math.round(this.baseMaxMana + int * R.int.mana);
+        this.maxHp = Math.round(this.baseHp + str * R.str.hp + this.bonus.maxHp + sumMod(this, 'maxHp'));
+        this.maxMana = Math.round(this.baseMaxMana + int * R.int.mana + sumMod(this, 'maxMana'));
         this.atk = Math.round(this.baseAtk + primaryVal * R.primaryAtk + this.bonus.atk);
         this.atkSpeed = this.baseAtkSpeed * (1 + agi * R.agi.atkSpeedPct);
         this.moveSpeed = this.baseMoveSpeed * (1 + Math.min(agi, R.agi.moveSpeedCap) * R.agi.moveSpeedPct);
@@ -60,8 +61,8 @@ class Hero {
         this.attackRange = this.baseAttackRange;
         this.armor = this.baseArmor + agi * R.agi.armor + this.bonus.armor;
         this.magicResist = this.baseMagicResist + int * R.int.magicResist;
-        this.hpRegen = this.baseHpRegen + str * R.str.hpRegen;
-        this.manaRegen = this.baseManaRegen + int * R.int.manaRegen;
+        this.hpRegen = this.baseHpRegen + str * R.str.hpRegen + sumMod(this, 'hpRegen');
+        this.manaRegen = this.baseManaRegen + int * R.int.manaRegen + sumMod(this, 'manaRegen');
         this.projectileSpeed = this.baseProjectileSpeed;
         this.critChance = this.baseCritChance + agi * R.agi.critChance + this.bonus.critChance;
         this.evasion = this.baseEvasion;

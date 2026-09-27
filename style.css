@@ -32,8 +32,12 @@ button.primary-btn:hover { background: #48cae4; }
 #top-nav button { flex: 1; background: #1c1f26; color: #ccc; border: 1px solid #444; padding: 8px; cursor: pointer; font-family: inherit; font-size: 0.85rem; }
 #top-nav button.active { background: #ffb703; color: #000; font-weight: bold; border-color: #ffb703; }
 #top-nav button.disabled { opacity: 0.4; cursor: default; }
-#view-heroes, #view-creeps { display: none; width: 940px; }
-#creep-codex { flex: 1; }
+#view-heroes, #view-creeps, #view-items { display: none; width: 940px; }
+#creep-codex, #item-codex { flex: 1; }
+#shop-tabs { display: flex; gap: 4px; margin-bottom: 6px; }
+#shop-tabs button { flex: 1; background: #1c1f26; color: #ccc; border: 1px solid #444; padding: 4px; cursor: pointer; font-family: inherit; font-size: 0.75rem; }
+#shop-tabs button.active { background: #ffb703; color: #000; border-color: #ffb703; font-weight: bold; }
+.recipe span.has { color: #72efdd; }
 .creep-symbol { font-weight: bold; font-size: 1.1rem; }
 .counter-item { color: #ffb703; }
 #wave-preview { background: #0d0e11; border: 1px solid #c77dff; padding: 8px; margin-bottom: 10px; font-size: 0.74rem; display: flex; flex-direction: column; gap: 4px; }

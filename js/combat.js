@@ -78,6 +78,7 @@ function mitigate(target, amount, type) {
 // Devuelve { dealt, evaded }: dealt es la vida que realmente perdió el objetivo (para robo de vida).
 function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     if (!target.isAlive() || hasFlag(target, 'invulnerable')) return { dealt: 0, evaded: false };
+    if (type === 'magical' && hasFlag(target, 'magicImmune')) return { dealt: 0, evaded: false };
     const canEvade = opts.isAttack && !(source && hasFlag(source, 'trueStrike'));
     if (canEvade && Math.random() < effEvasion(target) / 100) return { dealt: 0, evaded: true };
     let final = amount;
