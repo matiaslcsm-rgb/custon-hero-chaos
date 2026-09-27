@@ -472,7 +472,21 @@ héroes (Axe: +0,5 armadura cada 10). El Alquimista también domina los duelos (
 **Propuesta medida:** escalado del Sniper a la mitad + **moverse reinicia el ataque** (como la animación de ataque de Dota):
 las victorias se reparten (Bruja 5, Axe 4-5, Arcanista 2-3, Sniper, Vampiro y Alquimista 1) y los cuerpo a cuerpo suben
 (Axe ~55%, Asesino ~33%, Vampiro ~20% de duelos). **Aplicado** (escalado del Sniper +1,5 daño cada 8 bajas y +4 por
-duelo; `MOVE_RESETS_ATTACK` en game.js). Queda por mirar: el Alquimista sigue ganando ~83% de sus duelos.
+duelo; `MOVE_ATTACK_RULE` en game.js). Queda por mirar: el Alquimista sigue ganando ~83% de sus duelos.
+
+**Revisado con el movimiento −20%, duelos desde la ronda 5 y habilidades automáticas** (18 partidas de 15 rondas por variante,
+sin modo dios): se probó que moverse **pause** el ataque (no avanza mientras caminás, pero no se pierde) y que se pueda
+**atacar caminando**, contra el **reinicio** actual.
+
+| Regla al moverse | Duelos ganados por cuerpo a cuerpo | Duración mediana | Ganadores de partida |
+|---|---|---|---|
+| **Reinicia (actual)** | **46%** | 10,7 s | Axe 7, Sniper 6, Bruja 3, Alquimista 1, Asesino 1 |
+| Pausa | 36% (Asesino cae a 8%) | 19,0 s | Bruja 7, Axe 6, Alquimista 2, Arcanista 2, Sniper 1 |
+| Libre | 38% | 10,2 s | **Alquimista 13 de 18** |
+
+**Decisión: se mantiene el reinicio** (es lo más parejo para los cuerpo a cuerpo). La pausa alarga los duelos y perjudica a
+los cuerpo a cuerpo; atacar caminando le da la partida al Alquimista. En las tres variantes **el Alquimista gana 86-95% de sus
+duelos**: es el próximo a investigar.
 
 ### Implementado en F3 ✅
 - **Previa de duelos** (`js/bets.js`): al terminar las oleadas se sortean las parejas y se muestran con puesto, puntos, nivel,

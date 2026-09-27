@@ -10,7 +10,9 @@ let currentDraft = null; // { mode, options } del draft abierto; mode 'bookChoic
 const WAVE_HARD_LIMIT = 120;
 // Moverse reinicia el ataque (como la animación de ataque de Dota): sin esto los héroes a distancia se alejaban y disparaban
 // a la vez sin costo, y los cuerpo a cuerpo casi no ganaban duelos.
-const MOVE_RESETS_ATTACK = true;
+// Qué pasa con el ataque al moverse: 'reset' (arranca de cero), 'pause' (no avanza mientras caminás, pero no se pierde)
+// o 'free' (se puede atacar caminando). Es let para poder medir las variantes.
+let MOVE_ATTACK_RULE = 'reset';
 // Velocidad de movimiento de todos (héroes y creeps): 0,8 = 20% más lentos, a pedido (el juego se veía muy frenético).
 // Solo el movimiento: ataques y proyectiles quedan igual.
 const MOVE_SPEED_MULT = 0.8;  // segundos: si una arena no terminó, se da por perdida (evita partidas trabadas)
@@ -344,12 +346,19 @@ function updateHero(hero, arena, dt) {
         hero.x = Math.max(0, Math.min(COLS - 1, hero.x + dir.dx));
         hero.y = Math.max(0, Math.min(ROWS - 1, hero.y + dir.dy));
         hero.moveTimer = 0;
-        if (MOVE_RESETS_ATTACK && (hero.x !== x || hero.y !== y)) hero.attackTimer = 0;
+        if (hero.x !== x || hero.y !== y) {
+            if (MOVE_ATTACK_RULE === 'reset') hero.attackTimer = 0;
+            // "está caminando" hasta que le tocaría dar el próximo paso
+            hero.movingUntil = gameClock + hero.moveInterval / (effMoveMult(hero) * MOVE_SPEED_MULT) + dt;
+        }
     }
 
     // Ataque automático: al enemigo en rango de mayor prioridad (ej: Sanadores) o, si no, al más cercano
     const target = stunned ? null : pickAttackTarget(hero, effRange(hero));
-    if (target) {
+    const walking = MOVE_ATTACK_RULE === 'pause' && gameClock < (hero.movingUntil || 0);
+    if (target && walking) {
+        // pausa: mientras camina el ataque no avanza, pero conserva lo que tenía cargado
+    } else if (target) {
         hero.attackTimer += dt;
         if (hero.attackTimer >= (1 / effAtkSpeed(hero))) {
             hero.attackTimer = 0;
