@@ -75,9 +75,14 @@ function renderCodexDetail(t) {
     html += `<div class="codex-sub">Escalado del héroe</div>`;
     html += `<div class="ability-row"><p>+${t.scaling.perKillsAmount} ${scalingStatLabel(t.scaling.stat)} cada ${t.scaling.perKills} bajas de creeps &middot; +${t.scaling.perHeroKill} al ganar un duelo 1v1.</p></div>`;
     html += `<div class="codex-sub">Innato (siempre activo, no se draftea)</div>`;
-    html += abilityRow(t.innate, true);
+    html += abilityRow(t.innate, true, 'innate');
     html += `<div class="codex-sub">Habilidades naturales (4 niveles las normales, 3 la definitiva: niveles 6/12/18 del héroe)</div>`;
-    html += natural.map(s => abilityRow(s, s.isUltimate)).join('');
+    html += natural.map(s => abilityRow(s, s.isUltimate, s.isUltimate ? 'ult' : '')).join('');
+    const g = guideOf(t.key);
+    if (g) {
+        html += `<div class="codex-sub">Ítems sugeridos</div><p class="guide-why">${g.why}</p>`;
+        html += GUIDE_STAGES.map(([stage, label]) => `<p class="guide-row"><b>${label}:</b> ${g[stage].map(k => itemNameHtml(ITEMS[k])).join(' · ')}</p>`).join('');
+    }
     detail.innerHTML = html;
 }
 
@@ -86,10 +91,16 @@ function tagChips(tags) {
 }
 
 // Fila del códice. Los innatos no tienen `values`: se muestran con su descripción tal cual.
-function abilityRow(a, fixed) {
+// kind: 'innate' agrega la etiqueta Innato al lado del nombre; 'ult' subraya el nombre y marca Definitiva.
+function abilityLabel(name, kind) {
+    if (kind === 'innate') return `${name} <span class="badge-innate">Innato</span>`;
+    if (kind === 'ult') return `<span class="ult-name">${name}</span> <span class="badge-ult">Definitiva</span>`;
+    return name;
+}
+function abilityRow(a, fixed, kind = '') {
     const desc = a.values ? describeSkill(a, 0) : a.description;
     const meta = a.values ? `<p class="meta">${skillCostLine(a, 0)}</p>` : '';
-    return `<div class="ability-row${fixed ? ' fixed' : ''}"><h4>${a.name}</h4><p>${desc}</p>${meta}<div class="tags">${tagChips(a.tags)}</div></div>`;
+    return `<div class="ability-row${fixed ? ' fixed' : ''}"><h4>${abilityLabel(a.name, kind)}</h4><p>${desc}</p>${meta}<div class="tags">${tagChips(a.tags)}</div></div>`;
 }
 
 function stripHtml(html) { return html.replace(/<[^>]+>/g, ''); }
@@ -182,7 +193,7 @@ const DRAFT_TITLES = {
 function skillCardHtml(s) {
     const natural = s.heroKey === player.key;
     const type = s.isUltimate ? 'Definitiva' : s.kind === 'passive' ? 'Pasiva' : 'Activa';
-    return `<h4>${s.name}</h4>` +
+    return `<h4>${abilityLabel(s.name, s.isUltimate ? 'ult' : '')}</h4>` +
         `<p class="meta"><span class="${natural ? 'natural' : ''}">${natural ? '★ Natural' : 'De ' + naturalHeroName(s)}</span> &middot; ${type} &middot; ${skillCostLine(s, 0)}</p>` +
         `<p>${describeSkill(s, 0)}</p><div class="tags">${tagChips(s.tags)}</div>`;
 }
@@ -216,8 +227,8 @@ function renderBookChoice() {
 }
 
 // --- TIENDA ---
-const SHOP_TABS = { basic: 'Básicos', composite: 'Compuestos', other: 'Otros' };
-let shopTab = 'composite';
+const SHOP_TABS = { guide: '⭐ Guía', basic: 'Básicos', composite: 'Compuestos', other: 'Otros' };
+let shopTab = 'guide';
 
 // Receta de un compuesto: cada componente con ✓ si ya lo tenés, más el precio de la receta.
 function recipeHtml(item, hero) {
@@ -237,7 +248,7 @@ function shopCard(item) {
     card.className = 'skill-card' + (blocker || player.gold < cost ? ' disabled' : '');
     const owned = isEquip(item) ? countItem(player, item.key) : 0;
     const total = item.tier === 'composite' && cost !== itemTotalCost(item) ? ` <span class="item-level">(total ${itemTotalCost(item)}g)</span>` : '';
-    card.innerHTML = `<h4>${itemNameHtml(item)} (${cost}g)${total}${owned ? ` <span class="item-level">tenés ${owned}</span>` : ''}</h4>` +
+    card.innerHTML = `<h4>${isSuggested(player, item.key) ? '<span class="suggested" title="Sugerido para tu héroe">⭐</span> ' : ''}${itemNameHtml(item)} (${cost}g)${total}${owned ? ` <span class="item-level">tenés ${owned}</span>` : ''}</h4>` +
         `<p>${describeItem(item)}</p>` +
         (item.tier === 'composite' ? recipeHtml(item, player) : '') +
         (item.counters ? `<p class="meta">Contra: ${item.counters}</p>` : '') +
@@ -259,6 +270,16 @@ function renderShop() {
     const c = document.getElementById('shop-options'); c.innerHTML = '';
     const heading = text => { const d = document.createElement('div'); d.className = 'shop-category'; d.textContent = text; c.appendChild(d); };
     const all = Object.values(ITEMS);
+    if (shopTab === 'guide') {
+        const g = guideOf(player);
+        if (g) {
+            const why = document.createElement('p'); why.className = 'guide-why'; why.textContent = `${player.name}: ${g.why}`;
+            c.appendChild(why);
+            GUIDE_STAGES.forEach(([stage, label]) => { heading(label); g[stage].forEach(k => c.appendChild(shopCard(ITEMS[k]))); });
+            const note = document.createElement('p'); note.className = 'guide-why'; note.textContent = 'Son sugerencias: mirá también los contras de la próxima oleada.';
+            c.appendChild(note);
+        }
+    }
     if (shopTab === 'basic') all.filter(i => i.tier === 'basic').forEach(i => c.appendChild(shopCard(i)));
     if (shopTab === 'composite') ITEM_GROUPS.forEach(group => {
         heading(group);
@@ -554,7 +575,7 @@ function renderHeroBar() {
         const chip = document.createElement('span');
         const lvl = innate ? null : skillLevel(p, a);
         chip.className = 'passive-chip' + (innate ? ' innate' : '') + (lvl === 0 ? ' locked' : '');
-        chip.textContent = `${innate ? '◆ ' : '◇ '}${a.name}${innate ? '' : ` ${lvl}/${maxSkillLevel(a)}`}`;
+        chip.innerHTML = innate ? `◆ ${a.name} <span class="badge-innate">Innato</span>` : `◇ ${a.name} ${lvl}/${maxSkillLevel(a)}`;
         chip.title = `${innate ? 'Innato' : 'Pasiva'}: ${a.name}\n${stripHtml(innate ? a.description : describeSkill(a, lvl))}`;
         if (!innate) { const btn = levelButton(a); if (btn) chip.appendChild(btn); }
         passives.appendChild(chip);
@@ -576,8 +597,31 @@ function renderHeroBar() {
     slots.appendChild(neutral);
 }
 
+// Estadísticas del jugador debajo del ranking (se actualiza solo si cambió algo).
+function renderHeroStats() {
+    const panel = document.getElementById('hero-stats-panel');
+    panel.style.display = 'block';
+    const p = player;
+    const rows = [
+        ['Fuerza', Math.floor(p.attr('str')), 'st-str', p.primaryAttr === 'STR'], ['Agilidad', Math.floor(p.attr('agi')), 'st-agi', p.primaryAttr === 'AGI'],
+        ['Inteligencia', Math.floor(p.attr('int')), 'st-int', p.primaryAttr === 'INT'],
+        ['Daño', Math.round(effAttack(p))], ['Vel. ataque', `${effAtkSpeed(p).toFixed(2)}/s`], ['Rango', effRange(p).toFixed(1)],
+        ['Armadura', effArmor(p).toFixed(1)], ['Res. mágica', `${Math.round(effMagicResist(p))}%`], ['Evasión', `${Math.round(effEvasion(p))}%`],
+        ['Crítico', `${effCritChance(p).toFixed(0)}%`], ['Robo de vida', `${effLifesteal(p).toFixed(0)}%`], ['Amp. hechizo', `${Math.round(effSpellAmp(p))}%`],
+        ['Regen. vida', `${p.hpRegen.toFixed(1)}/s`], ['Regen. maná', `${p.manaRegen.toFixed(1)}/s`], ['Vel. mov.', p.moveSpeed.toFixed(1)]
+    ];
+    let html = rows.map(([label, value, cls, main]) => `<div class="hs-row${main ? ' main' : ''}"><span>${label}${main ? ' ★' : ''}</span><b class="${cls || ''}">${value}</b></div>`).join('');
+    if (p.scaling) {
+        const toNext = p.scaling.perKills - (p.creepKillCount % p.scaling.perKills);
+        html += `<div class="hs-scaling">📈 Escalado: +${(p.bonus[p.scaling.stat] || 0).toFixed(1)} ${scalingStatLabel(p.scaling.stat)} · próximo en ${toNext} bajas</div>`;
+    }
+    const box = document.getElementById('hero-stats');
+    if (box.dataset.html !== html) { box.dataset.html = html; box.innerHTML = html; }
+}
+
 function updateHud() {
     if (!player) return;
+    renderHeroStats();
     document.getElementById('player-gold').textContent = player.gold;
     document.getElementById('round-num').textContent = `${waveNumber}/${MAX_ROUNDS}${isRoundBossRound() ? ' 👹' : ''}`;
     document.getElementById('lives-text').innerHTML = `<span class="hearts">${'♥'.repeat(Math.max(0, player.lives))}${'♡'.repeat(Math.max(0, 2 - player.lives))}</span>` +
@@ -673,6 +717,7 @@ function resetHud() {
     document.getElementById('round-num').textContent = '1';
     ['lives-text', 'points-text', 'player-gold'].forEach(id => { document.getElementById(id).textContent = ''; });
     document.getElementById('hero-bar').style.display = 'none';
+    document.getElementById('hero-stats-panel').style.display = 'none';
     document.getElementById('combat-info').style.display = 'none';
     document.getElementById('scoreboard').innerHTML = ''; lastScoreboardSignature = '';
     document.getElementById('combat-log').innerHTML = '';

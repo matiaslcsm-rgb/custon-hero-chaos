@@ -107,6 +107,11 @@ function validateContent() {
         const units = th.groups.reduce((n, g) => n + (CREEP_TYPES[g.type] ? groupUnits(g) : 0), 0);
         if (units > 6 * ROWS) problems.push(`Tema ${th.name}: ${units} creeps no entran en la zona de aparición`);
     });
+    Object.entries(BUILD_GUIDES).forEach(([hero, g]) => {
+        if (!HERO_TEMPLATES[hero]) problems.push(`Guía: el héroe "${hero}" no existe`);
+        GUIDE_STAGES.forEach(([stage]) => (g[stage] || []).forEach(k => { if (!ITEMS[k]) problems.push(`Guía de ${hero}: el ítem "${k}" no existe`); }));
+    });
+    Object.keys(HERO_TEMPLATES).forEach(k => { if (!BUILD_GUIDES[k]) problems.push(`${k}: no tiene guía de ítems (data/guides.js)`); });
     if (problems.length) console.warn('⚠️ Problemas en el contenido del juego:\n- ' + problems.join('\n- '));
     return problems;
 }

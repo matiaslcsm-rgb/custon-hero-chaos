@@ -415,6 +415,8 @@ partidas con cada héroe** y murió entre las oleadas 1 y 3. No juega bien, pero
 - **Apuestas:** antes de los duelos se abre una **ventana con cuenta regresiva de 15 s** con las parejas. El jugador **elige el
   monto** (control deslizante + botones ¼, ½, Máx; arranca en 0) y a quién, en **un duelo ajeno** (uno por ronda, **tope: 50% de
   su oro**, antes 25%); si acierta, cobra **el doble**. La ventana muestra cuánto gana o pierde. La IA no apuesta.
+- **La IA también apuesta** (60% de las veces, casi siempre al favorito, 10-35% de su oro), nunca a su propio duelo.
+  **Respaldo:** el que gana un duelo cobra el **25% de todo lo que le apostaron** (si te apostaron a vos y ganás, lo cobrás).
 - **Puntos del ranking:** ganar un duelo **+3**; superar la oleada sin morir **+1**. El oro desempata.
 - **Largo de la partida (propuesta):** hasta que quede un solo héroe, con un máximo de **20 rondas**; si se llega, gana el
   primero del ranking. Como la idea es que las builds escalen, una build tiene que rendir contra creeps **y** en duelos.
@@ -527,6 +529,17 @@ duelos**: es el próximo a investigar.
 - **Sin riesgo de vidas:** morir contra el jefe no cuesta vidas; se revive a los **5 s** en el fondo de la arena, sin Voluntad de Titán.
 - **Neutrales: elegís 1 de 3** del escalón del jefe (en la preparación siguiente), o te quedás con el tuyo.
 
+### Cambio: jefes individuales con escalada propia (reemplaza lo de abajo)
+- **Cada héroe pelea contra el jefe en su propia arena.** Se sortea uno de **8 jefes** (el mismo para todos, sin repetir el
+  anterior): Gólem Ancestral (fases), Reina de la Colmena (invocaciones cada vez más grandes), Dragón de Escarcha (aliento cada
+  vez más seguido), Señor del Abismo (llamarada que quema más y furia), Hidra (le crecen cabezas), Liche (barreras cada vez más
+  largas), Titán de Sangre (robo de vida creciente) y Espectro Errante (evasión creciente con cada teletransporte).
+- **Como una oleada:** morir cuesta vidas (Voluntad de Titán al revivir) y, pasados **60 s**, se enfurece (+5% de daño y
+  velocidad de ataque por segundo) hasta que lo matás o te elimina.
+- Al matarlo: oro según la ronda (100/150/200/250), experiencia y **1 de 3 neutrales**; los **3 más rápidos** cobran +50/30/15%.
+- Balance en ajuste. Medido (9 partidas): con vida base ~1.700-2.000 la ronda 5 se resuelve en ~21 s y lo mata el 73%;
+  los eliminados eran casi todos héroes que ya estaban Condenados. El Gólem era el más duro y se le bajó vida y daño.
+
 ### Implementado en G ✅
 - **Jefes** (`js/data/bosses.js`): Gólem Ancestral (ronda 5: Golpe Sísmico en área que aturde), Reina de la Colmena
   (10: invoca Enjambres), Dragón de Escarcha (15: Aliento Helado a los 3 más cercanos, ralentiza) y Señor del Abismo
@@ -597,6 +610,13 @@ Todo en `js/fx.js`, **solo visual** (no cambia reglas) y solo para la arena que 
 - **Mapa agrandable** con el botón ⤢ o la tecla **M** (×1,45; oculta el ranking para hacer lugar). El mapa se dibuja según la
   densidad de la pantalla, así se ve nítido.
 
+
+### Guía de ítems y estadísticas
+- **Guía de ítems sugeridos por héroe** (`js/data/guides.js`): Inicio, Núcleo y Final, con el porqué de la build. En la tienda es
+  la primera pestaña (⭐ Guía) y los ítems sugeridos llevan ⭐ en todas las pestañas; también está en el códice de Héroes.
+  Son sugerencias (los contras de la oleada siguen importando). La IA todavía compra con sus reglas propias (`AI_BUILDS`).
+- **Estadísticas del jugador** debajo del ranking (atributos con el principal marcado, daño, velocidad, defensas, escalado).
+- El **innato** lleva la etiqueta "Innato" al lado del nombre y las **definitivas** van subrayadas (barra del héroe, draft y códice).
 ---
 
 ## 10. Orden de construcción

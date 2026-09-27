@@ -296,3 +296,18 @@ body.big-map #left-col { display: none; }
 #autocast-btn { background: #1c1f26; color: #ccc; border: 1px solid #444; padding: 4px 10px; cursor: pointer; font-family: inherit; font-size: 0.8rem; }
 #autocast-btn.on { background: #00b4d8; color: #000; border-color: #00b4d8; font-weight: bold; }
 .bet-backing { color: #ffd166; }
+
+/* Guía de ítems, estadísticas, innato y definitivas */
+.guide-why { color: #ddd; font-size: 0.78rem; grid-column: 1 / -1; margin: 4px 0; }
+.guide-row { font-size: 0.8rem; margin: 3px 0; }
+.suggested { color: #ffd166; }
+#hero-stats-panel { margin-top: 12px; border-top: 1px solid #333; padding-top: 8px; }
+.hs-row { display: flex; justify-content: space-between; font-size: 0.74rem; padding: 1px 2px; color: #bbb; }
+.hs-row b { color: #fff; font-weight: bold; }
+.hs-row.main span { color: #ffd166; }
+.hs-row .st-str { color: #ff6b6b; } .hs-row .st-agi { color: #69db7c; } .hs-row .st-int { color: #74c0fc; }
+.hs-scaling { font-size: 0.68rem; color: #ffb703; margin-top: 6px; }
+.badge-innate { font-size: 0.6rem; color: #1c1226; background: #e0aaff; padding: 0 4px; margin-left: 4px; font-weight: bold; vertical-align: middle; }
+.badge-ult { font-size: 0.6rem; color: #2a1600; background: #ff9f1c; padding: 0 4px; margin-left: 4px; font-weight: bold; vertical-align: middle; }
+.ult-name { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.skill-slot.ult .nm { text-decoration: underline; text-underline-offset: 2px; }

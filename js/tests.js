@@ -1450,6 +1450,23 @@ test('Clic derecho: el héroe camina hasta el destino; el teclado lo cancela', (
     checkEq(player.moveTarget, null, 'sin destino');
 });
 
+test('Guía de ítems: cada héroe tiene la suya y la tienda la muestra primero', () => {
+    newGame('AXE');
+    startPreparation();
+    shopTab = 'guide'; renderShop();
+    const cards = [...document.querySelectorAll('#shop-options .skill-card h4')].map(h => h.textContent);
+    const g = guideOf(player);
+    GUIDE_STAGES.forEach(([stage]) => g[stage].forEach(k => check(cards.some(t => t.includes(ITEMS[k].name)), 'muestra ' + ITEMS[k].name)));
+    check(isSuggested(player, 'THORNS') && !isSuggested(player, 'ARCANE_STAFF'), 'marca solo los sugeridos');
+});
+
+test('Estadísticas debajo del ranking', () => {
+    newGame('SNIPER');
+    updateHud();
+    checkEq(document.getElementById('hero-stats-panel').style.display, 'block', 'visible');
+    check(document.getElementById('hero-stats').textContent.includes('Agilidad ★'), 'marca el atributo principal');
+});
+
 test('Moverse reinicia el ataque (no se puede disparar gratis mientras te alejás)', () => {
     newGame('SNIPER');
     dummy({ x: player.x + 3 });
