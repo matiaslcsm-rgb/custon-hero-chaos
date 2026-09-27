@@ -24,6 +24,7 @@ window.addEventListener('keydown', e => {
     if (k === 'b') { toggleShop(); return; }
     if (k === 'm') { toggleBigMap(); return; }
     if (k === 'h') { setAutoCast(!autoCast); return; }
+    if (k === 'g') { setSprites(!spritesOn); return; }
     if (k === 'escape') { cancelTargeting(); closeShop(); closeTutorial(); return; }
     if (inCombat() && !autopilot) handleSkillKeypress(k);
 });

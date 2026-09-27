@@ -67,6 +67,7 @@ function fxDeath(unit) {
 function fxLunge(attacker, target) {
     if (!fxArena(attacker)) return;
     const d = Math.hypot(target.x - attacker.x, target.y - attacker.y) || 1;
+    if (target.x !== attacker.x) attacker.facing = Math.sign(target.x - attacker.x); // mira a quien ataca
     attacker.fxLunge = { dx: (target.x - attacker.x) / d, dy: (target.y - attacker.y) / d, at: fxClock };
 }
 
@@ -148,6 +149,8 @@ function drawArenaFx(arena) {
 // Posición dibujada de una unidad: se desliza hacia su casilla (movimiento suave) + el salto del golpe.
 function drawPos(u, dt) {
     if (u.rx === undefined || Math.abs(u.rx - u.x) > 3 || Math.abs(u.ry - u.y) > 3) { u.rx = u.x; u.ry = u.y; } // teletransportes: sin deslizar
+    const moveX = u.x - u.rx;
+    if (Math.abs(moveX) > 0.05) u.facing = Math.sign(moveX); // mira hacia donde camina
     const k = Math.min(1, dt * 14);
     u.rx += (u.x - u.rx) * k; u.ry += (u.y - u.ry) * k;
     let x = u.rx, y = u.ry;

@@ -1497,6 +1497,16 @@ test('Elección de héroe agrupada por atributo', () => {
     checkEq(document.querySelectorAll('#hero-options .skill-card').length, HERO_PICK_OPTIONS + 1, '3 héroes + al azar');
 });
 
+test('Sprites: plantillas de 12×12 y un sprite para cada héroe, creep y jefe', () => {
+    Object.entries(SPRITE_TEMPLATES).forEach(([name, rows]) => {
+        checkEq(rows.length, 12, name + ': 12 filas');
+        rows.forEach((r, i) => checkEq(r.length, 12, `${name} fila ${i}: 12 columnas`));
+    });
+    Object.keys(HERO_TEMPLATES).forEach(k => check(spriteFor({ isHero: true, key: k }), 'héroe ' + k));
+    Object.values(CREEP_TYPES).forEach(t => check(spriteFor({ type: t }), 'creep ' + t.key));
+    ROUND_BOSSES.forEach(b => check(spriteFor({ isRoundBoss: true, type: b, color: b.color }), 'jefe ' + b.key));
+});
+
 test('Moverse reinicia el ataque (no se puede disparar gratis mientras te alejás)', () => {
     newGame('SNIPER');
     dummy({ x: player.x + 3 });

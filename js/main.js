@@ -21,6 +21,8 @@ document.getElementById('tutorial').onclick = e => { if (e.target.id === 'tutori
 document.getElementById('autopilot-btn').onclick = () => setAutopilot(!autopilot);
 document.getElementById('autocast-btn').onclick = () => setAutoCast(!autoCast);
 document.getElementById('sound-btn').onclick = () => setSound(!soundOn);
+document.getElementById('sprites-btn').onclick = () => setSprites(!spritesOn);
+setSprites(spritesOn);
 setSound(soundOn);
 // Sonido de clic en botones y cartas
 document.addEventListener('click', e => { if (e.target.closest('button, .skill-card, .score-row')) sfx('click'); });

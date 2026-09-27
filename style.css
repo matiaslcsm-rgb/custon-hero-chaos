@@ -328,3 +328,10 @@ body.big-map #left-col { display: none; }
 
 #sound-btn { background: #1c1f26; color: #ccc; border: 1px solid #444; padding: 4px 8px; cursor: pointer; font-size: 0.85rem; }
 .attr-head { margin-top: 4px; }
+
+#sprites-btn { background: #1c1f26; color: #ccc; border: 1px solid #444; padding: 4px 8px; cursor: pointer; font-family: inherit; font-size: 0.8rem; }
+.pixel-img { width: 44px; height: 44px; image-rendering: pixelated; }
+.pixel-img.tiny { width: 16px; height: 16px; vertical-align: middle; }
+#top-bar { gap: 10px; }
+#top-bar .tb-item, #top-bar button, #top-bar .brand { white-space: nowrap; }
+#top-bar button { font-size: 0.74rem; padding: 3px 7px; }

@@ -567,7 +567,9 @@ function renderHeroBar() {
     const portrait = document.getElementById('hb-portrait');
     portrait.title = heroTooltip();
     const sym = document.getElementById('hb-symbol');
-    sym.textContent = p.symbol; sym.style.color = heroColor(p);
+    const url = heroSpriteUrl(p);
+    if (url) sym.innerHTML = `<img src="${url}" alt="${p.symbol}" class="pixel-img">`;
+    else { sym.textContent = p.symbol; sym.style.color = heroColor(p); }
     document.getElementById('hb-level').innerHTML = `Nv ${p.level}` + (p.skillPoints > 0 ? ` <span class="pts" title="Puntos de habilidad para repartir con [+]">+${p.skillPoints}</span>` : '');
     document.getElementById('hb-name').textContent = p.name;
     const stats = document.getElementById('hb-stats');
@@ -718,7 +720,7 @@ function heroStatusIcon(h) {
 }
 function renderScoreboard() {
     const ranked = rankedHeroes();
-    const signature = ranked.map(h => [h.displayName, h.points, h.gold, h.lives, heroStatusIcon(h), isCondemned(h)].join(':')).join('|') + (viewedHero ? viewedHero.displayName : '');
+    const signature = ranked.map(h => [h.displayName, h.points, h.gold, h.lives, heroStatusIcon(h), isCondemned(h)].join(':')).join('|') + (viewedHero ? viewedHero.displayName : '') + spritesOn;
     if (signature === lastScoreboardSignature) return;
     lastScoreboardSignature = signature;
     const board = document.getElementById('scoreboard'); board.innerHTML = '';
@@ -726,7 +728,8 @@ function renderScoreboard() {
         const row = document.createElement('div');
         row.className = 'score-row' + (h === player ? ' you' : '') + (h === (viewedHero || player) ? ' viewed' : '') + (h.eliminated ? ' out' : '');
         const lives = h.eliminated ? '' : '♥'.repeat(Math.max(0, h.lives)) + (isCondemned(h) ? '☠' : '');
-        row.innerHTML = `<span class="pos">${i + 1}</span><span class="sym" style="color:${heroColor(h)}">${h.symbol}</span><span class="name">${h === player ? 'Vos' : h.name}</span>` +
+        const url = heroSpriteUrl(h);
+        row.innerHTML = `<span class="pos">${i + 1}</span><span class="sym" style="color:${heroColor(h)}">${url ? `<img src="${url}" alt="${h.symbol}" class="pixel-img tiny">` : h.symbol}</span><span class="name">${h === player ? 'Vos' : h.name}</span>` +
             `<span class="lives">${lives}</span><span class="pts">${h.points}</span><span class="st">${heroStatusIcon(h)}</span>`;
         row.title = `${h.displayName} · ${h.points} pts · ${h.gold}g · nivel ${h.level} · duelos ${h.duelWins}-${h.duelLosses}`;
         row.onclick = () => { viewedHero = h; lastScoreboardSignature = ''; };
@@ -752,15 +755,39 @@ function resetHud() {
 // --- RENDER DEL CANVAS ---
 // Dibuja una unidad: símbolo (con brillo si es héroe o jefe), destello blanco al recibir daño, barra de vida
 // (y de maná en los héroes) y marcas de estado (aturdido, ralentizado). pos: posición dibujada (ver drawPos en fx.js).
+// Tamaño del sprite según la unidad (los jefes más grandes).
+function spriteSize(u, opts) {
+    if (opts.big) return 48;
+    if (u.isBoss) return 34;
+    if (u.isHero) return 30;
+    return u.type && u.type.key === 'BRUTE' ? 30 : u.type && u.type.key === 'SWARM' ? 20 : 26;
+}
+
 function drawUnit(u, color, symbol, pos = u, opts = {}) {
     const cx = pos.x * TILE + TILE / 2, cy = pos.y * TILE + TILE / 2;
     const hit = u.fxHitAt !== undefined && fxClock - u.fxHitAt < 0.12;
-    if (opts.glow) { ctx.shadowColor = color; ctx.shadowBlur = 10; }
-    ctx.font = opts.big ? 'bold 26px monospace' : opts.glow ? 'bold 19px monospace' : '18px monospace';
-    ctx.fillStyle = hit ? '#ffffff' : color; ctx.fillText(symbol, cx, cy + 1);
-    ctx.shadowBlur = 0;
+    const sprite = spritesOn ? spriteFor(u) : null;
+    let halfHeight = TILE / 2;
+    if (sprite) {
+        const size = spriteSize(u, opts);
+        halfHeight = Math.max(TILE / 2, size / 2);
+        // Sombra en el piso; en los héroes, un aro del color del bando (celeste vos, naranja los rivales)
+        ctx.fillStyle = 'rgba(0,0,0,0.45)';
+        ctx.beginPath(); ctx.ellipse(cx, cy + size * 0.42, size * 0.34, size * 0.12, 0, 0, Math.PI * 2); ctx.fill();
+        if (u.isHero) { ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(cx, cy + size * 0.42, size * 0.4, size * 0.15, 0, 0, Math.PI * 2); ctx.stroke(); }
+        if (u.bobSeed === undefined) u.bobSeed = Math.random() * 6;
+        const bob = Math.sin(fxClock * 5 + u.bobSeed) * 1.2;
+        if (opts.glow) { ctx.shadowColor = color; ctx.shadowBlur = 8; }
+        drawSprite(sprite, cx, cy + bob, size, u.facing || (u.isHero ? 1 : -1), hit);
+        ctx.shadowBlur = 0;
+    } else {
+        if (opts.glow) { ctx.shadowColor = color; ctx.shadowBlur = 10; }
+        ctx.font = opts.big ? 'bold 26px monospace' : opts.glow ? 'bold 19px monospace' : '18px monospace';
+        ctx.fillStyle = hit ? '#ffffff' : color; ctx.fillText(symbol, cx, cy + 1);
+        ctx.shadowBlur = 0;
+    }
     if (u.maxHp) {
-        const pct = Math.max(0, u.hp / u.maxHp), w = TILE - 4, top = cy - TILE / 2 - 1;
+        const pct = Math.max(0, u.hp / u.maxHp), w = Math.max(TILE - 4, opts.big ? 40 : 0), top = cy - halfHeight - 3;
         ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(cx - w / 2 - 1, top - 1, w + 2, 5);
         ctx.fillStyle = pct > 0.5 ? '#2dc653' : pct > 0.25 ? '#ffb703' : '#ff0055';
         ctx.fillRect(cx - w / 2, top, w * pct, 3);
@@ -768,7 +795,7 @@ function drawUnit(u, color, symbol, pos = u, opts = {}) {
     }
     if (u.effects && u.effects.length) {
         ctx.font = '10px monospace';
-        if (hasFlag(u, 'stun')) { ctx.fillStyle = '#ffd166'; ctx.fillText('✦✦', cx, cy - TILE / 2 - 7 + Math.sin(fxClock * 10) * 1.5); }
+        if (hasFlag(u, 'stun')) { ctx.fillStyle = '#ffd166'; ctx.fillText('✦✦', cx, cy - halfHeight - 9 + Math.sin(fxClock * 10) * 1.5); }
         else if (sumMod(u, 'moveSpeedPct') < 0) { ctx.fillStyle = '#90e0ef'; ctx.fillText('❄', cx + TILE / 2 - 3, cy - TILE / 2 + 6); }
     }
 }
@@ -816,7 +843,9 @@ function renderTitle() {
     const order = { STR: 0, AGI: 1, INT: 2 }; // agrupados por atributo, en su color
     Object.values(HERO_TEMPLATES).sort((a, b) => order[a.primaryAttr] - order[b.primaryAttr]).forEach((t, i, all) => {
         ctx.fillStyle = ATTR_INFO[t.primaryAttr].color;
-        ctx.fillText(t.symbol, MAP_W / 2 + (i - (all.length - 1) / 2) * TILE * 1.4, MAP_H / 2 + 55);
+        const x = MAP_W / 2 + (i - (all.length - 1) / 2) * TILE * 1.4, y = MAP_H / 2 + 55;
+        const s = spritesOn ? spriteFor({ isHero: true, key: t.key }) : null;
+        if (s) drawSprite(s, x, y + Math.sin(fxClock * 4 + i) * 2, 30, 1, false); else ctx.fillText(t.symbol, x, y);
     });
 }
 

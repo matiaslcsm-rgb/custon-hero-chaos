@@ -616,6 +616,12 @@ Todo en `js/fx.js`, **solo visual** (no cambia reglas) y solo para la arena que 
   la primera pestaña (⭐ Guía) y los ítems sugeridos llevan ⭐ en todas las pestañas; también está en el códice de Héroes.
   Son sugerencias (los contras de la oleada siguen importando). La IA todavía compra con sus reglas propias (`AI_BUILDS`).
 - **Estadísticas del jugador** debajo del ranking (atributos con el principal marcado, daño, velocidad, defensas, escalado).
+- **Pixel art dibujado en código** (`js/sprites.js`, opción 1 elegida entre pixel art propio, paquete gratuito o arte con IA):
+  sprites de 12×12 hechos con plantillas (guerrero, mago con túnica, fantasma, bomba, insecto, gólem, dragón, hidra, demonio)
+  y paletas. Cada héroe tiene los suyos; los creeps usan el color de su tipo; los jefes, su forma propia (y corona los que
+  corresponde). Miran hacia donde caminan o atacan, se balancean un poco, destellan en blanco al recibir daño y tienen
+  sombra; los héroes, un aro del color de su bando (celeste vos, naranja los rivales). También en el retrato, el ranking y
+  la portada. Con **G** o el botón 🎨 se vuelve a las letras ASCII (queda guardado).
 - **Sonidos** (`js/audio.js`): sintetizados con Web Audio, sin archivos (golpes, críticos, tajos, disparos, muertes, hechizos,
   definitivas, curación, oro, subir de nivel, explosiones, clics, y avisos de oleada, duelo, jefe, victoria y derrota).
   Solo suenan los de la arena que mirás; botón 🔊 para silenciar (queda guardado).
