@@ -40,50 +40,65 @@ function renderHeroPick() {
 }
 
 // --- CÓDICE DE HÉROES (referencia navegable, no afecta una partida en curso) ---
-function renderHeroCodex() {
-    const list = document.getElementById('codex-hero-list');
-    list.innerHTML = '';
-    Object.values(HERO_TEMPLATES).forEach(t => {
-        const card = document.createElement('div');
-        card.className = 'skill-card';
-        card.innerHTML = `<h4>[${t.symbol}] ${t.name}</h4><p>${t.primaryAttr} &middot; ${t.description}</p>`;
-        card.onclick = () => renderCodexDetail(t);
-        list.appendChild(card);
-    });
+// Mismo formato que los códices de ítems y creeps: nombre en el color de su atributo, texto en blanco, secciones por
+// atributo principal con botones para saltar. Cada carta: stats de nivel 1, escalado, innato, habilidades y guía de ítems.
+const ATTR_INFO = {
+    STR: { label: 'Fuerza', color: '#ff6b6b', note: 'Más vida y regeneración. Aguantan al frente y pegan cuerpo a cuerpo.' },
+    AGI: { label: 'Agilidad', color: '#69db7c', note: 'Más velocidad de ataque y armadura. Daño con ataques básicos y críticos.' },
+    INT: { label: 'Inteligencia', color: '#74c0fc', note: 'Más maná y amplificación de hechizos (+100% para magos). El daño fuerte viene de las habilidades.' }
+};
+
+function heroAbilityHtml(a, kind) {
+    const desc = a.values ? describeSkill(a, 0) : a.description;
+    const type = kind === 'innate' ? '' : `${a.kind === 'passive' ? 'Pasiva' : 'Activa'} · ${skillCostLine(a, 0)}`;
+    return `<div class="hc-ability${kind === 'ult' ? ' ult' : kind === 'innate' ? ' innate' : ''}">` +
+        `<div class="hc-ability-name">${abilityLabel(a.name, kind)}</div>` +
+        (type ? `<div class="item-meta">${type}</div>` : '') +
+        `<p class="item-text">${desc}</p><div class="tags">${tagChips(a.tags)}</div></div>`;
 }
 
-function renderCodexDetail(t) {
-    const ref = new Hero(t); // instancia de referencia solo para calcular los stats de nivel 1 (sin ítems ni habilidades)
-    const detail = document.getElementById('codex-detail');
-    const natural = Object.values(HERO_SKILLS[t.key]);
-    const statRows = [
-        ['HP máx.', ref.maxHp], ['Maná máx.', ref.maxMana],
-        ['Daño de ataque', ref.atk], ['Vel. de ataque', ref.atkSpeed.toFixed(2)],
-        ['Rango de ataque', ref.attackRange], ['Vel. de proyectil', ref.projectileSpeed || 'Melé (instantáneo)'],
-        ['Armadura física', ref.armor.toFixed(1)], ['Resistencia mágica', ref.magicResist.toFixed(1) + '%'],
-        ['Regen. HP', ref.hpRegen.toFixed(2) + '/s'], ['Regen. Maná', ref.manaRegen.toFixed(2) + '/s'],
-        ['Vel. de movimiento', ref.moveSpeed.toFixed(2)], ['Prob. de crítico', ref.critChance.toFixed(1) + '%'],
-        ['Prob. de esquivar', ref.evasion + '%'], ['Amp. de hechizo', ref.spellAmp.toFixed(1) + '%'],
-        ['Robo de vida', ref.lifesteal + '%'], ['Rol', t.role]
-    ];
-    let html = `<h3>[${t.symbol}] ${t.name} &mdash; ${t.primaryAttr}</h3><p style="color:#bbb;">${t.description}</p>`;
-    const attrs = t.attributes, mark = a => t.primaryAttr === a.toUpperCase() ? ' ★' : '';
-    html += `<div class="codex-sub">Atributos (base + ganancia por nivel; ★ = principal)</div>`;
-    html += `<div class="stat-grid">${['str', 'agi', 'int'].map(a => `<div>${a.toUpperCase()}${mark(a)}: <strong>${attrs[a][0]} + ${attrs[a][1]}/nivel</strong></div>`).join('')}</div>`;
-    html += `<div class="codex-sub">Stats en nivel 1 (sin ítems)</div>`;
-    html += `<div class="stat-grid">${statRows.map(r => `<div>${r[0]}: <strong>${r[1]}</strong></div>`).join('')}</div>`;
-    html += `<div class="codex-sub">Escalado del héroe</div>`;
-    html += `<div class="ability-row"><p>+${t.scaling.perKillsAmount} ${scalingStatLabel(t.scaling.stat)} cada ${t.scaling.perKills} bajas de creeps &middot; +${t.scaling.perHeroKill} al ganar un duelo 1v1.</p></div>`;
-    html += `<div class="codex-sub">Innato (siempre activo, no se draftea)</div>`;
-    html += abilityRow(t.innate, true, 'innate');
-    html += `<div class="codex-sub">Habilidades naturales (4 niveles las normales, 3 la definitiva: niveles 6/12/18 del héroe)</div>`;
-    html += natural.map(s => abilityRow(s, s.isUltimate, s.isUltimate ? 'ult' : '')).join('');
+function heroCard(t) {
+    const ref = new Hero(t); // instancia de referencia: stats de nivel 1 sin ítems ni habilidades
+    const color = ATTR_INFO[t.primaryAttr].color;
+    const attrs = ['str', 'agi', 'int'].map(a => {
+        const main = t.primaryAttr === a.toUpperCase();
+        return `<li class="${main ? 'main' : ''}">${ATTR_INFO[a.toUpperCase()].label}${main ? ' ★' : ''}: ${t.attributes[a][0]} <span class="item-meta">+${t.attributes[a][1]}/nivel</span></li>`;
+    }).join('');
+    const ranged = ref.projectileSpeed > 0;
+    const stats = [
+        `${ref.maxHp} de vida · ${ref.maxMana} de maná`,
+        `${ref.atk} de daño · ${ref.atkSpeed.toFixed(2)} ataques/s`,
+        `${ranged ? 'A distancia' : 'Cuerpo a cuerpo'} · rango ${ref.attackRange}`,
+        `Armadura ${ref.armor.toFixed(1)} · res. mágica ${ref.magicResist.toFixed(0)}%`,
+        `Vel. de movimiento ${ref.moveSpeed.toFixed(1)}`
+    ].map(l => `<li>${l}</li>`).join('');
+    const natural = Object.values(HERO_SKILLS[t.key]).sort((a, b) => (a.isUltimate ? 1 : 0) - (b.isUltimate ? 1 : 0));
     const g = guideOf(t.key);
-    if (g) {
-        html += `<div class="codex-sub">Ítems sugeridos</div><p class="guide-why">${g.why}</p>`;
-        html += GUIDE_STAGES.map(([stage, label]) => `<p class="guide-row"><b>${label}:</b> ${g[stage].map(k => itemNameHtml(ITEMS[k])).join(' · ')}</p>`).join('');
-    }
-    detail.innerHTML = html;
+    return `<div class="item-card hero-card" style="border-left-color:${color}">` +
+        `<div class="item-head"><span><span class="hc-symbol" style="color:${color}">${t.symbol}</span> <span class="item-name" style="color:${color}; font-size:1.05rem">${t.name}</span></span>` +
+        `<span class="item-price">${t.role}</span></div>` +
+        `<p class="item-text">${t.description}</p>` +
+        `<div class="hc-cols"><ul class="item-stats">${attrs}</ul><ul class="item-stats">${stats}</ul></div>` +
+        `<p class="item-meta">📈 Escalado: +${t.scaling.perKillsAmount} ${scalingStatLabel(t.scaling.stat)} cada ${t.scaling.perKills} bajas · +${t.scaling.perHeroKill} al ganar un duelo</p>` +
+        `<div class="hc-sub">Innato</div>` + heroAbilityHtml(t.innate, 'innate') +
+        `<div class="hc-sub">Habilidades naturales</div>` + natural.map(s => heroAbilityHtml(s, s.isUltimate ? 'ult' : '')).join('') +
+        (g ? `<div class="hc-sub">Ítems sugeridos</div><p class="item-text">${g.why}</p>` +
+            GUIDE_STAGES.map(([stage, label]) => `<p class="item-meta"><b>${label}:</b> ${g[stage].map(k => itemNameHtml(ITEMS[k])).join(' · ')}</p>`).join('') : '') +
+        `</div>`;
+}
+
+function renderHeroCodex() {
+    const templates = Object.values(HERO_TEMPLATES);
+    const sections = Object.entries(ATTR_INFO).map(([attr, info]) => [
+        `heroes-${attr.toLowerCase()}`, info.label, info.color, info.note,
+        `<div class="item-grid hero-grid">${templates.filter(t => t.primaryAttr === attr).map(heroCard).join('')}</div>`
+    ]);
+    const codex = document.getElementById('hero-codex');
+    codex.innerHTML = `<h3>Héroes</h3><p class="subtitle">Cada héroe tiene un innato (siempre activo) y 4 habilidades naturales (3 normales de hasta 4 niveles y una ` +
+        `definitiva de 3, que se sube en los niveles 6, 12 y 18). En el draft te puede tocar cualquier habilidad de cualquier héroe.</p>` +
+        `<div class="item-jump">${sections.map(([id, title, color]) => `<button data-target="${id}" style="color:${color}; border-color:${color}">${title}</button>`).join('')}</div>` +
+        sections.map(sec => itemSection(...sec)).join('');
+    codex.querySelectorAll('.item-jump button').forEach(btn => { btn.onclick = () => document.getElementById(btn.dataset.target).scrollIntoView({ behavior: 'smooth' }); });
 }
 
 function tagChips(tags) {

@@ -154,7 +154,7 @@ button.secondary-btn:hover { background: #2a2e3a; }
 #tutorial-step { color: #888; font-size: 0.8rem; }
 
 /* Códice de ítems */
-#item-codex, #creep-codex { font-size: 0.8rem; }
+#item-codex, #creep-codex, #hero-codex { font-size: 0.8rem; }
 .creep-list li::before { content: ''; }
 .item-jump { display: flex; gap: 6px; margin: 8px 0 14px; position: sticky; top: 0; background: #16181d; padding: 6px 0; z-index: 1; }
 .item-jump button { flex: 1; background: #1c1f26; border: 1px solid; padding: 6px; font-family: inherit; font-weight: bold; cursor: pointer; }
@@ -311,3 +311,17 @@ body.big-map #left-col { display: none; }
 .badge-ult { font-size: 0.6rem; color: #2a1600; background: #ff9f1c; padding: 0 4px; margin-left: 4px; font-weight: bold; vertical-align: middle; }
 .ult-name { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
 .skill-slot.ult .nm { text-decoration: underline; text-underline-offset: 2px; }
+
+/* Códice de héroes */
+#hero-codex { flex: 1; }
+.hero-grid { grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); }
+.hc-symbol { font-size: 1.4rem; font-weight: bold; }
+.hc-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.hc-cols li.main { color: #ffd166; }
+.hc-sub { color: #8ecae6; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; margin-top: 6px; border-bottom: 1px solid #333; padding-bottom: 2px; }
+.hc-ability { background: #16181d; border: 1px solid #2a2d36; padding: 5px 7px; }
+.hc-ability.ult { border-color: #ff9f1c; }
+.hc-ability.innate { border-color: #9d4edd; }
+.hc-ability-name { color: #00f5d4; font-weight: bold; font-size: 0.85rem; }
+.hc-ability.ult .hc-ability-name { color: #ff9f1c; }
+.hc-ability.innate .hc-ability-name { color: #e0aaff; }

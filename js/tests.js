@@ -1467,6 +1467,13 @@ test('Estadísticas debajo del ranking', () => {
     check(document.getElementById('hero-stats').textContent.includes('Agilidad ★'), 'marca el atributo principal');
 });
 
+test('Códice de héroes: una carta por héroe, separadas por atributo, con innato y definitiva marcados', () => {
+    renderHeroCodex();
+    checkEq(document.querySelectorAll('#hero-codex .hero-card').length, Object.keys(HERO_TEMPLATES).length, 'todos los héroes');
+    checkEq(document.querySelectorAll('#hero-codex .badge-innate').length, Object.keys(HERO_TEMPLATES).length, 'un innato por héroe');
+    checkEq(document.querySelectorAll('#hero-codex .ult-name').length, Object.keys(HERO_TEMPLATES).length, 'una definitiva subrayada por héroe');
+});
+
 test('Moverse reinicia el ataque (no se puede disparar gratis mientras te alejás)', () => {
     newGame('SNIPER');
     dummy({ x: player.x + 3 });

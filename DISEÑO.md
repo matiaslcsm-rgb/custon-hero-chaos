@@ -616,6 +616,9 @@ Todo en `js/fx.js`, **solo visual** (no cambia reglas) y solo para la arena que 
   la primera pestaña (⭐ Guía) y los ítems sugeridos llevan ⭐ en todas las pestañas; también está en el códice de Héroes.
   Son sugerencias (los contras de la oleada siguen importando). La IA todavía compra con sus reglas propias (`AI_BUILDS`).
 - **Estadísticas del jugador** debajo del ranking (atributos con el principal marcado, daño, velocidad, defensas, escalado).
+- **Códice de Héroes** con el mismo formato que los de ítems y creeps: secciones por atributo principal (Fuerza, Agilidad,
+  Inteligencia) con botones para saltar; cada carta con nombre en el color del atributo, stats de nivel 1, escalado, innato,
+  habilidades naturales y guía de ítems.
 - El **innato** lleva la etiqueta "Innato" al lado del nombre y las **definitivas** van subrayadas (barra del héroe, draft y códice).
 ---
 
