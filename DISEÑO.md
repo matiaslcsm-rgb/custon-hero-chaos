@@ -541,6 +541,22 @@ duelo; `MOVE_RESETS_ATTACK` en game.js). Queda por mirar: el Alquimista sigue ga
 - **Códice de Creeps y Jefes:** mismo formato. Nombre en el color del creep, stats y mecánica en blanco, contra con su ítem en
   color. Secciones: Básicos, Con mecánica, Temas de oleada (con sus creeps y el jefe de cada oleada) y Jefes de ronda.
 
+## 9 quater. Gráficos: efectos de combate (paso 1 de la mejora visual)
+
+Se eligió mejorar el estilo ASCII actual antes que pasar a pixel art (se decide después, con el juego "vivo" para comparar).
+Todo en `js/fx.js`, **solo visual** (no cambia reglas) y solo para la arena que estás mirando:
+- **Números de daño** flotantes: naranja físico, violeta mágico, blanco puro, rojo el que recibe un héroe; los críticos más
+  grandes con "!" y chispas. Curación en verde, "esquiva", oro ganado ("+6g") y "¡NIVEL N!".
+- **Partículas** al morir (del color del creep), **anillos** al lanzar habilidades (color según el tipo de daño; la definitiva
+  más grande) y en las mecánicas de los jefes, **explosión** del Kamikaze.
+- **Temblor de pantalla** en críticos, muertes de héroes, definitivas y golpes de jefe.
+- **Golpe (lunge):** los cuerpo a cuerpo saltan hacia el objetivo; el golpeado **destella** en blanco.
+- **Movimiento suave** entre casillas, **brillo** en héroes y jefes, **estela** en los proyectiles, barra de vida con borde y
+  **barra de maná** en los héroes, marcas de **aturdido** (✦✦) y **ralentizado** (❄).
+- **Fondo por arena** (sin grilla): pasto oscuro en las oleadas, piedra en los duelos, rojo volcánico en el jefe de ronda.
+
+**Siguiente paso:** rediseño del panel lateral y los menús (íconos, barras, cartas).
+
 ---
 
 ## 10. Orden de construcción

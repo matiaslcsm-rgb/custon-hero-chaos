@@ -17,6 +17,7 @@ const ROUND_BOSSES = [
                 dealDamage(c, h, Math.round(c.atk * 1.5), 'magical');
                 if (h.isAlive()) addEffect(h, { id: 'STUN', name: 'Aturdido', duration: this.slamStun, flags: ['stun'] });
             });
+            fxRing(c, '#adb5bd', this.slamRadius, 0.6); fxShake(5);
             if (hit.length) log(`🪨 ¡Golpe Sísmico del ${c.label}! (${hit.length} héroe${hit.length > 1 ? 's' : ''})`);
             return false;
         }
@@ -37,7 +38,7 @@ const ROUND_BOSSES = [
                 s.arena = c.arena; s.gold = 1;
                 c.arena.creeps.push(s);
             }
-            if (count > 0) log(`🐝 La ${c.label} invoca ${count} Enjambres.`);
+            if (count > 0) { fxRing(c, '#b5e48c', 2, 0.6); log(`🐝 La ${c.label} invoca ${count} Enjambres.`); }
             return false;
         }
     },
@@ -53,6 +54,7 @@ const ROUND_BOSSES = [
                 dealDamage(c, h, Math.round(c.atk * 2), 'magical');
                 if (h.isAlive()) addEffect(h, { id: 'FROST_BREATH', name: 'Aliento Helado', duration: this.breathSlowFor, mods: { moveSpeedPct: -this.breathSlow } });
             });
+            hit.forEach(h => fxBurst(h, '#90e0ef', 10, 3));
             if (hit.length) log(`❄️ ¡Aliento Helado del ${c.label}!`);
             return false;
         }
@@ -70,6 +72,7 @@ const ROUND_BOSSES = [
             }
             if (!everyInterval(c, 'flame', dt, this.flameEvery)) return false;
             bossTargets(c).forEach(h => dealDamage(c, h, Math.round(h.maxHp * this.flamePct), 'pure'));
+            fxRing(c, '#ff5400', 12, 0.8); fxShake(4);
             log(`🔥 ¡Llamarada del ${c.label}!`);
             return false;
         }

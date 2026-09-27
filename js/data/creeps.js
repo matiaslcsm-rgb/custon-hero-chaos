@@ -84,6 +84,7 @@ const CREEP_TYPES = {
             const target = creepTarget(c);
             if (Math.hypot(c.x - target.x, c.y - target.y) > this.range) return false;
             c.hp = 0; // se destruye al explotar: no da oro ni experiencia
+            fxBurst(c, '#fb8500', 16, 5); fxShake(4);
             dealDamage(c, target, Math.round(c.atk * enrageMult(c.arena)), 'physical');
             log(`💥 ¡Un Kamikaze explotó a tu lado!`);
             return true;

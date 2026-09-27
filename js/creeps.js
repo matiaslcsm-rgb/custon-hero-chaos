@@ -95,6 +95,7 @@ function updateCreep(c, dt) {
     if (c.attackTimer < 1 / (effAtkSpeed(c) * enrage)) return;
     c.attackTimer = 0;
     // dealDamage resuelve la muerte del héroe (revivir, Condenado o eliminación) a través de onHeroDeath
+    if (c.range <= 2) fxLunge(c, target);
     const result = dealDamage(c, target, Math.round(effAtk), c.attackType, { isAttack: true });
     if (result.evaded) log(`💨 Esquivaste el ataque de ${c.label}.`);
     if (c.type.onAttack) c.type.onAttack(c, target, result);

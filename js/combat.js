@@ -87,7 +87,7 @@ function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     if (!target.isAlive() || hasFlag(target, 'invulnerable')) return { dealt: 0, evaded: false };
     if (type === 'magical' && hasFlag(target, 'magicImmune')) return { dealt: 0, evaded: false };
     const canEvade = opts.isAttack && !(source && hasFlag(source, 'trueStrike'));
-    if (canEvade && Math.random() < effEvasion(target) / 100) return { dealt: 0, evaded: true };
+    if (canEvade && Math.random() < effEvasion(target) / 100) { fxText(target, 'esquiva', '#8ecae6', 10); return { dealt: 0, evaded: true }; }
     let final = amount;
     if (type === 'magical' && source) final *= 1 + effSpellAmp(source) / 100;
     if (source && source.isHero && target.isHero && target.arena && target.arena.kind === 'duel') final *= 1 - DUEL_DAMAGE_REDUCTION;
@@ -100,6 +100,7 @@ function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     const floor = hasFlag(target, 'preventDeath') ? 1 : 0;
     const hpLost = Math.max(0, Math.min(final, target.hp - floor));
     target.hp -= hpLost;
+    fxDamage(target, hpLost, type, opts.isCrit);
     if (target.isRoundBoss && source && source.isHero) source.bossDamage += hpLost; // para el bonus del jefe de ronda
     // dealt en el evento es el daño completo (sin recortar por la vida restante): lo usa Forma Inmortal para acumular
     emit(target, 'onDamaged', { source, dealt: final, type });
@@ -120,6 +121,7 @@ function healUnit(unit, amount) {
     const healed = Math.max(0, Math.min(unit.maxHp - unit.hp, Math.round(amount)));
     if (healed <= 0) return 0;
     unit.hp += healed;
+    fxHeal(unit, healed);
     emit(unit, 'onHeal', { amount: healed });
     return healed;
 }
@@ -149,7 +151,7 @@ function rollAttackDamage(attacker, target) {
 function resolveBasicHit(attacker, target, dmg, isCrit) {
     if (!target.isAlive()) return; // el objetivo murió mientras el proyectil viajaba
     if (isCrit) log(`💥 ¡Golpe crítico a ${target.label}!`);
-    const { dealt } = dealDamage(attacker, target, dmg, 'physical', { isAttack: true });
+    const { dealt } = dealDamage(attacker, target, dmg, 'physical', { isAttack: true, isCrit });
     applyLifesteal(attacker, dealt, target);
     emit(attacker, 'onHit', { target, dealt, isCrit });
 }
@@ -201,12 +203,14 @@ function awardHeroKillScaling(hero) {
 
 function killCreep(c, killer) {
     c.hp = 0;
+    fxDeath(c);
     if (!killer || !killer.isHero) return;
     if (c.type && c.type.onDeath) c.type.onDeath(c, killer);
     const timeAlive = gameClock - (c.spawnTime || gameClock);
     const speedMult = speedGoldMultiplier(timeAlive);
     const gold = Math.max(1, Math.round(c.gold * speedMult));
     killer.gold += gold;
+    fxText(c, `+${gold}g`, '#ffd166', 10, 1);
     applyScalingOnCreepKill(killer);
     gainXp(killer, c.xp || 0);
     emit(killer, 'onKill', { victim: c });

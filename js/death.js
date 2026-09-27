@@ -136,5 +136,6 @@ function tryRespawn(hero = player) {
 
 // Punto único para la muerte de cualquier héroe (lo usan dealDamage y los efectos, ej: Forma Inmortal).
 function onHeroDeath(hero, killer = null) {
+    fxDeath(hero);
     handleHeroDeath(hero, killer);
 }

@@ -20,6 +20,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 | F3. Previa de duelos con apuestas (×2, tope 25% del oro); Fragmentos a la mitad de abajo y Libro al último | ✅ |
 | G. Jefes de ronda cada 5 rondas (todos contra uno) y objetos neutrales (elegís 1 de 3) | ✅ |
 | Menú de inicio, tutorial, elección de héroe (3 opciones + al azar, sin repetir) y códice de ítems con colores | ✅ |
+| Gráficos paso 1: efectos de combate (números, partículas, temblor, fondos) | ✅ |
+| **Gráficos paso 2: rediseño del panel lateral y los menús** | ⏳ siguiente |
 
 ## Pendientes y temas abiertos
 - **Alquimista:** gana ~83% de sus duelos (medido); falta investigarlo como se hizo con el Sniper.

@@ -584,14 +584,26 @@ function resetHud() {
 }
 
 // --- RENDER DEL CANVAS ---
-function drawUnit(u, color, symbol) {
-    const cx = u.x * TILE + TILE / 2, cy = u.y * TILE + TILE / 2;
-    ctx.fillStyle = color; ctx.fillText(symbol, cx, cy);
+// Dibuja una unidad: símbolo (con brillo si es héroe o jefe), destello blanco al recibir daño, barra de vida
+// (y de maná en los héroes) y marcas de estado (aturdido, ralentizado). pos: posición dibujada (ver drawPos en fx.js).
+function drawUnit(u, color, symbol, pos = u, opts = {}) {
+    const cx = pos.x * TILE + TILE / 2, cy = pos.y * TILE + TILE / 2;
+    const hit = u.fxHitAt !== undefined && fxClock - u.fxHitAt < 0.12;
+    if (opts.glow) { ctx.shadowColor = color; ctx.shadowBlur = 10; }
+    ctx.font = opts.big ? 'bold 26px monospace' : opts.glow ? 'bold 19px monospace' : '18px monospace';
+    ctx.fillStyle = hit ? '#ffffff' : color; ctx.fillText(symbol, cx, cy + 1);
+    ctx.shadowBlur = 0;
     if (u.maxHp) {
-        const pct = Math.max(0, u.hp / u.maxHp);
-        ctx.fillStyle = '#333'; ctx.fillRect(cx - TILE / 2 + 2, cy - TILE / 2 + 2, TILE - 4, 3);
-        ctx.fillStyle = pct > 0.5 ? '#00f5d4' : pct > 0.25 ? '#ffb703' : '#ff0055';
-        ctx.fillRect(cx - TILE / 2 + 2, cy - TILE / 2 + 2, (TILE - 4) * pct, 3);
+        const pct = Math.max(0, u.hp / u.maxHp), w = TILE - 4, top = cy - TILE / 2 - 1;
+        ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(cx - w / 2 - 1, top - 1, w + 2, 5);
+        ctx.fillStyle = pct > 0.5 ? '#2dc653' : pct > 0.25 ? '#ffb703' : '#ff0055';
+        ctx.fillRect(cx - w / 2, top, w * pct, 3);
+        if (u.isHero && u.maxMana) { ctx.fillStyle = '#4895ef'; ctx.fillRect(cx - w / 2, top + 4, w * Math.max(0, u.mana / u.maxMana), 2); }
+    }
+    if (u.effects && u.effects.length) {
+        ctx.font = '10px monospace';
+        if (hasFlag(u, 'stun')) { ctx.fillStyle = '#ffd166'; ctx.fillText('✦✦', cx, cy - TILE / 2 - 7 + Math.sin(fxClock * 10) * 1.5); }
+        else if (sumMod(u, 'moveSpeedPct') < 0) { ctx.fillStyle = '#90e0ef'; ctx.fillText('❄', cx + TILE / 2 - 3, cy - TILE / 2 + 6); }
     }
 }
 
@@ -632,14 +644,21 @@ function renderTitle() {
 }
 
 function render() {
+    const dt = tickFx();
     const hero = viewedHero || player;
     if (hero && (hero.inRest || !hero.arena) && gameState !== 'HERO_SELECT' && gameState !== 'MENU') { renderRestArea(); return; }
     ctx.fillStyle = '#050507'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = '#151821';
-    for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) ctx.strokeRect(c * TILE, r * TILE, TILE, TILE);
-    if (gameState === 'MENU' || gameState === 'HERO_SELECT') { renderTitle(); return; }
-    if (!hero || !hero.arena || !inCombat()) return;
+    if (gameState === 'MENU' || gameState === 'HERO_SELECT' || !hero || !hero.arena || !inCombat()) {
+        ctx.strokeStyle = '#151821';
+        for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) ctx.strokeRect(c * TILE, r * TILE, TILE, TILE);
+        if (gameState === 'MENU' || gameState === 'HERO_SELECT') renderTitle();
+        return;
+    }
     const arena = hero.arena;
+    updateArenaFx(arena, dt);
+    ctx.save();
+    if (shakeAmount) ctx.translate((Math.random() - 0.5) * shakeAmount * 2, (Math.random() - 0.5) * shakeAmount * 2);
+    ctx.drawImage(arenaBackground(arena.kind), 0, 0);
     if (arena.kind === 'duel') {
         ctx.font = 'bold 13px monospace'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffb703';
         ctx.fillText(`⚔ DUELO: ${arena.heroes[0].displayName}  vs  ${arena.heroes[1].displayName}`, canvas.width / 2, TILE * 0.7);
@@ -660,16 +679,28 @@ function render() {
         ctx.stroke();
     }
 
-    ctx.font = '18px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    arena.creeps.forEach(c => { if (c.isAlive()) drawUnit(c, c.color, c.symbol); });
-    ctx.fillStyle = '#fefae0';
-    arena.projectiles.forEach(p => { ctx.beginPath(); ctx.arc(p.x * TILE + TILE / 2, p.y * TILE + TILE / 2, 3, 0, Math.PI * 2); ctx.fill(); });
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    arena.creeps.forEach(c => { if (c.isAlive()) drawUnit(c, c.color, c.symbol, drawPos(c, dt), { glow: c.isBoss || c.isRoundBoss, big: c.isRoundBoss }); });
+    // Proyectiles con estela, del color de quien los disparó
+    arena.projectiles.forEach(p => {
+        const color = p.attacker.isHero ? heroColor(p.attacker) : p.attacker.color || '#fefae0';
+        p.trail = p.trail || [];
+        p.trail.push([p.x, p.y]); if (p.trail.length > 6) p.trail.shift();
+        p.trail.forEach(([x, y], i) => {
+            ctx.globalAlpha = (i + 1) / p.trail.length * 0.5; ctx.fillStyle = color;
+            ctx.beginPath(); ctx.arc(x * TILE + TILE / 2, y * TILE + TILE / 2, 1.5 + i * 0.3, 0, Math.PI * 2); ctx.fill();
+        });
+        ctx.globalAlpha = 1; ctx.fillStyle = p.isCrit ? '#ffd166' : '#fefae0';
+        ctx.beginPath(); ctx.arc(p.x * TILE + TILE / 2, p.y * TILE + TILE / 2, p.isCrit ? 4 : 3, 0, Math.PI * 2); ctx.fill();
+    });
     arena.heroes.forEach(h => {
         if (h.eliminated) return;
         // Muerto esperando revivir: una calavera en el lugar donde va a reaparecer
-        if (!h.isAlive()) { ctx.fillStyle = '#555'; ctx.fillText('☠', h.x * TILE + TILE / 2, h.y * TILE + TILE / 2); return; }
-        drawUnit({ x: h.x, y: h.y, hp: h.hp, maxHp: h.maxHp }, hasFlag(h, 'invulnerable') ? '#ffffff' : heroColor(h), h.symbol);
+        if (!h.isAlive()) { ctx.font = '18px monospace'; ctx.fillStyle = '#555'; ctx.fillText('☠', h.x * TILE + TILE / 2, h.y * TILE + TILE / 2); return; }
+        drawUnit(h, hasFlag(h, 'invulnerable') ? '#ffffff' : heroColor(h), h.symbol, drawPos(h, dt), { glow: true });
     });
+    drawArenaFx(arena);
+    ctx.restore();
     if (hero !== player) {
         ctx.font = '11px monospace'; ctx.fillStyle = '#ffb703';
         ctx.fillText(`👁 Mirando a ${hero.displayName} (clic en tu fila del ranking para volver)`, canvas.width / 2, canvas.height - 8);

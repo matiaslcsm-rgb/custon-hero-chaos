@@ -250,6 +250,7 @@ function tryCastSkill(hero, skill, opts = {}) {
     if (!ok) return false;
     hero.mana -= manaCost;
     hero.cooldowns[skill.id] = val(skill, hero, 'cooldown') || 0;
+    fxCast(hero, skill);
     emit(hero, 'onCast', { skill });
     return true;
 }
@@ -324,7 +325,7 @@ function updateHero(hero, arena, dt) {
             hero.attackTimer = 0;
             const { dmg, isCrit } = rollAttackDamage(hero, target);
             if (hero.projectileSpeed > 0) fireProjectile(hero, target, dmg, isCrit);
-            else resolveBasicHit(hero, target, dmg, isCrit);
+            else { fxLunge(hero, target); resolveBasicHit(hero, target, dmg, isCrit); }
         }
     } else {
         hero.attackTimer = 0;
