@@ -55,6 +55,17 @@ function dummy(props = {}) {
 }
 // Avanza el reloj de la oleada hasta que el jugador reviva.
 function waitRespawn() { gameClock = player.respawnAt; updateWave(0.016); }
+// Termina todos los duelos en curso por tiempo (gana el de más % de vida; empate al azar).
+function skipDuels() {
+    if (gameState !== 'DUEL') return;
+    arenas.forEach(a => { a.elapsed = DUEL_TIME; });
+    updateWave(0.016);
+}
+// Mata a todos los creeps de todas las arenas y termina la fase de oleadas.
+function clearAllWaves() {
+    heroes.forEach(h => { if (h.arena) h.arena.creeps.forEach(c => { c.hp = 0; }); });
+    updateWave(0.016);
+}
 function lastLog() { const p = document.querySelector('#combat-log p:last-child'); return p ? p.textContent : ''; }
 
 // ============================================================ CONTENIDO
@@ -785,7 +796,8 @@ test('Área de Descanso: al terminar la oleada vas ahí y volvés con vida, man�
     creeps.forEach(c => { c.hp = 0; });
     player.hp = 5; player.mana = 0;
     addEffect(player, { id: 'TEMP', duration: 99, mods: { atkPct: 1 } });
-    updateWave(0.016); // su arena quedó limpia: termina la ronda
+    updateWave(0.016); // su arena quedó limpia: terminan las oleadas
+    skipDuels();
     check(player.inRest, 'está en el Área de Descanso');
     checkEq(player.hp, player.maxHp, 'vida llena');
     check(!getEffect(player, 'TEMP'), 'sin mejoras temporales');
@@ -910,11 +922,12 @@ test('Las arenas se juegan en paralelo; al terminar todas, la ronda suma puntos 
     startWave();
     heroes.forEach(h => addEffect(h, { id: 'TEST_GOD', duration: 1e9, flags: ['invulnerable', 'persistent'] }));
     autopilot = true;
-    try { for (let f = 0; gameState === 'WAVE' && f < 12000; f++) { gameClock += 0.05; updateWave(0.05); } }
+    try { for (let f = 0; inCombat() && f < 20000; f++) { gameClock += 0.05; updateWave(0.05); } }
     finally { autopilot = false; }
-    check(gameState !== 'WAVE', 'terminó la ronda');
+    check(!inCombat(), 'terminó la ronda (oleadas y duelos)');
     checkEq(waveNumber, 2, 'pasó a la ronda 2');
-    check(heroes.every(h => h.points === POINTS.waveClean), 'todos superaron la oleada sin morir (+1)');
+    const total = heroes.reduce((s, h) => s + h.points, 0);
+    checkEq(total, MAX_HEROES * POINTS.waveClean + (MAX_HEROES / 2) * POINTS.duelWin, 'puntos: 8 oleadas limpias + 4 duelos');
     check(heroes.every(h => h.inRest && !h.arena), 'todos en el Área de Descanso');
 });
 
@@ -944,8 +957,9 @@ test('Rival Condenado que muere contra creeps queda eliminado y no juega la rond
     check(rival.eliminated, 'eliminado');
     check(rival.arena.done, 'su arena terminó');
     checkEq(heroRank(rival), MAX_HEROES, 'último en el ranking');
-    heroes.forEach(h => { if (h.arena) h.arena.creeps.forEach(c => { c.hp = 0; }); });
-    updateWave(0.016);
+    clearAllWaves();
+    check(!arenas.some(a => a.heroes.includes(rival)), 'no duela');
+    skipDuels();
     if (gameState === 'DRAFT') learnSkill(currentDraft.options[0]);
     startWave();
     check(!arenas.some(a => a.heroes.includes(rival)), 'no tiene arena en la ronda 2');
@@ -961,8 +975,8 @@ test('Espectador: si el jugador queda eliminado, la partida sigue y mira a otro 
     dealDamage(player.arena.creeps[0], player, 99999, 'pure');
     check(player.eliminated, 'eliminado');
     check(viewedHero !== player && !viewedHero.eliminated, 'pasa a mirar a un héroe en juego');
-    heroes.forEach(h => { if (h.arena) h.arena.creeps.forEach(c => { c.hp = 0; }); });
-    updateWave(0.016);
+    clearAllWaves();
+    skipDuels();
     checkEq(gameState, 'PREP', 'la partida sigue (sin draft para el eliminado)');
     startWave();
     checkEq(arenas.length, MAX_HEROES - 1, 'juegan los otros 7');
@@ -977,11 +991,102 @@ test('Fin de partida al llegar al máximo de rondas: gana el primero del ranking
         learnSkill(currentDraft.options[0]);
         startWave();
         heroes[2].points = 10;
-        heroes.forEach(h => { if (h.arena) h.arena.creeps.forEach(c => { c.hp = 0; }); });
-        updateWave(0.016);
+        clearAllWaves();
+        skipDuels();
         checkEq(gameState, 'ENDED', 'terminó');
         checkEq(rankedHeroes()[0], heroes[2], 'gana el de más puntos');
     } finally { MAX_ROUNDS = saved; }
+});
+
+// ============================================================ DUELOS (fase F2)
+// Deja la partida lista en la fase de duelos (todas las oleadas limpias).
+function toDuels(heroKey = 'AXE') {
+    resetGame();
+    selectHero(HERO_TEMPLATES[heroKey]);
+    learnSkill(currentDraft.options[0]);
+    startWave();
+    clearAllWaves();
+    return arenas;
+}
+
+test('Duelos: parejas al azar sin repetir el rival anterior; con impares, uno descansa', () => {
+    toDuels();
+    checkEq(gameState, 'DUEL', 'fase de duelos');
+    checkEq(arenas.length, MAX_HEROES / 2, '4 duelos');
+    const inDuels = arenas.flatMap(a => a.heroes);
+    checkEq(new Set(inDuels).size, MAX_HEROES, 'cada héroe en un solo duelo');
+    check(arenas.every(a => a.kind === 'duel' && enemiesOf(a.heroes[0])[0] === a.heroes[1]), 'cada uno enfrenta a su rival');
+    for (let i = 0; i < 30; i++) {
+        const list = heroes.slice(0, 4);
+        list[0].lastOpponent = list[1]; list[1].lastOpponent = list[0];
+        const { pairs } = makeDuelPairs(list);
+        check(!pairs.some(([a, b]) => (a === list[0] && b === list[1]) || (a === list[1] && b === list[0])), 'no repite el rival anterior');
+    }
+    const { pairs, bye } = makeDuelPairs(heroes.slice(0, 5));
+    checkEq(pairs.length, 2, 'con 5 héroes, 2 duelos');
+    check(!!bye, 'y uno descansa');
+}, { random: true });
+
+test('Duelo: gana quien mata al otro (+3 puntos); el perdedor pierde una vida; los dos van a descansar', () => {
+    toDuels();
+    const arena = arenas.find(a => a.heroes.includes(player));
+    const rival = arena.heroes.find(h => h !== player);
+    const points = player.points, lives = rival.lives;
+    dealDamage(player, rival, 99999, 'pure');
+    check(arena.done, 'el duelo terminó');
+    checkEq(player.points - points, POINTS.duelWin, 'puntos del ganador');
+    checkEq(rival.lives, lives - 1, 'el perdedor pierde una vida');
+    check(player.inRest && rival.inRest, 'los dos descansan');
+    checkEq(rival.hp, rival.maxHp, 'el perdedor se recupera en el descanso');
+});
+
+test('Duelo: perder sin vidas deja Condenado; perder estando Condenado suma +10% y no elimina', () => {
+    toDuels();
+    const arena = arenas.find(a => a.heroes.includes(player));
+    const rival = arena.heroes.find(h => h !== player);
+    rival.lives = 1;
+    dealDamage(player, rival, 99999, 'pure');
+    check(isCondemned(rival) && !rival.eliminated, 'queda Condenado, no eliminado');
+    const other = arenas.find(a => !a.done);
+    const [a, b] = other.heroes;
+    setCondemned(b, 0.1); b.lives = 0;
+    dealDamage(a, b, 99999, 'pure');
+    checkNear(b.condemnPct, 0.2, '+10% por el duelo perdido');
+    check(!b.eliminated, 'sigue en la partida');
+});
+
+test('Duelo: si se acaba el tiempo gana el que tiene más % de vida; los enfriamientos arrancan en 0', () => {
+    toDuels();
+    check(arenas.every(a => a.heroes.every(h => Object.values(h.cooldowns).every(cd => cd === 0))), 'enfriamientos reiniciados');
+    const arena = arenas[0];
+    const [a, b] = arena.heroes;
+    a.hp = a.maxHp * 0.3; b.hp = b.maxHp * 0.6;
+    arena.elapsed = DUEL_TIME;
+    updateWave(0.016);
+    check(arena.done, 'terminó por tiempo');
+    check(b.points > a.points, 'gana el de más % de vida');
+});
+
+test('Duelo: la IA usa su definitiva y habilidades de área contra un solo rival', () => {
+    toDuels();
+    const arena = arenas[0];
+    const [a, b] = arena.heroes;
+    a.skills.slice().forEach(s => a.removeSkill(s));
+    const ult = SKILL_INDEX.AXE_GIRO; // de área
+    a.addSkill(ult); a.skillLevels[ult.id] = 1; a.mana = a.maxMana;
+    b.x = a.x + 1; b.y = a.y;
+    aiCastSkills(a);
+    check(a.cooldowns[ult.id] > 0, 'la lanzó contra un solo enemigo');
+});
+
+test('Coraza de Espinas también devuelve daño a héroes cuerpo a cuerpo en los duelos', () => {
+    toDuels();
+    const [a, b] = arenas[0].heroes;
+    giveItem(b, 'THORNS');
+    a.baseAttackRange = 1.5; a.recalculateStats();
+    const hp = a.hp;
+    const { dealt } = dealDamage(a, b, 100, 'physical');
+    checkEq(hp - a.hp, Math.round(Math.round(dealt * ITEMS.THORNS.reflect)), 'reflejo al atacante');
 });
 
 // ============================================================ PARTIDAS COMPLETAS
@@ -1000,8 +1105,8 @@ function simulateGame(heroIndex, godMode = true, rounds = 4) {
             if (gameState === 'PREP') { if (!player.eliminated) { aiSpendPoints(player); aiShop(player); } startWave(); }
             if (gameState === 'WAVE') {
                 if (godMode) addEffect(player, { id: 'TEST_GOD', duration: 1e9, flags: ['invulnerable', 'persistent'] });
-                for (let f = 0; gameState === 'WAVE' && f < 12000; f++) { gameClock += 0.05; updateWave(0.05); }
-                if (gameState === 'WAVE') throw new Error('una ronda no terminó');
+                for (let f = 0; inCombat() && f < 20000; f++) { gameClock += 0.05; updateWave(0.05); }
+                if (inCombat()) throw new Error('una ronda no terminó');
             }
         }
     } finally { autopilot = false; MAX_ROUNDS = savedMax; }

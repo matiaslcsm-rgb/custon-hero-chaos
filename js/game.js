@@ -14,7 +14,7 @@ window.addEventListener('keydown', e => {
     const k = e.key.toLowerCase();
     keys[k] = true;
     if (k === 'p') { setAutopilot(!autopilot); return; }
-    if (gameState === 'WAVE' && !autopilot) handleSkillKeypress(k);
+    if (inCombat() && !autopilot) handleSkillKeypress(k);
 });
 window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
 
@@ -174,10 +174,17 @@ function onArenaCleared(arena) {
     }
 }
 
-// Todas las arenas terminaron: ranking y siguiente ronda (en la fase F2 acá van los duelos).
+// Todas las oleadas terminaron: empiezan los duelos (ver duels.js).
 function onRoundWavesDone() {
     arenas = [];
     heroes.forEach(h => { if (!h.eliminated) h.arena = null; });
+    logMuted = false;
+    if (aliveHeroes().length <= 1) { endRound(); return; }
+    startDuels();
+}
+
+// Fin de la ronda (después de los duelos): ranking, fin de partida o siguiente ronda.
+function endRound() {
     logMuted = false;
     const top = rankedHeroes().slice(0, 3).map((h, i) => `${i + 1}º ${h.displayName} (${h.points})`).join(' · ');
     log(`📊 Fin de la ronda ${waveNumber}. Ranking: ${top}. Vas ${heroRank(player)}º.`);
@@ -243,9 +250,9 @@ function tryCastSkill(hero, skill, opts = {}) {
 }
 
 // --- ACTUALIZACIÓN POR FRAME ---
-// Actualiza todas las arenas activas. Los mensajes solo se muestran si son de la arena que estás mirando.
+// Actualiza todas las arenas activas (oleadas o duelos). Los mensajes solo se muestran si son de la arena que mirás.
 function updateWave(dt) {
-    if (gameState !== 'WAVE') return;
+    if (!inCombat()) return;
     const shown = viewArena();
     arenas.forEach(arena => {
         if (arena.done) return;
@@ -253,18 +260,21 @@ function updateWave(dt) {
         updateArena(arena, dt);
     });
     logMuted = false;
-    if (gameState === 'WAVE' && arenas.every(a => a.done)) onRoundWavesDone();
+    if (!arenas.every(a => a.done)) return;
+    if (gameState === 'WAVE') onRoundWavesDone();
+    else if (gameState === 'DUEL') onDuelsDone();
 }
 
 function updateArena(arena, dt) {
     // Efectos temporales: avanzan, emiten onTick y los vencidos disparan su onExpire (puede matar al héroe)
     arena.heroes.forEach(h => tickEffects(h, dt));
     arena.creeps.forEach(c => { if (c.isAlive()) tickEffects(c, dt); });
-    if (gameState !== 'WAVE' || arena.done) return;
+    if (!inCombat() || arena.done) return;
 
-    arena.heroes.forEach(hero => updateHero(hero, arena, dt));
-    if (arena.done) return; // el héroe quedó eliminado
+    arena.heroes.forEach(hero => { if (!arena.done) updateHero(hero, arena, dt); });
+    if (arena.done) return; // el héroe quedó eliminado o el duelo se resolvió
     updateProjectiles(arena, dt);
+    if (arena.kind === 'duel') { updateDuelArena(arena, dt); return; }
     arena.creeps.forEach(c => updateCreep(c, dt));
 
     const fighting = arena.heroes.some(h => h.isAlive());

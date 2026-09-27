@@ -368,7 +368,7 @@ function updateHud() {
         const toNext = player.scaling.perKills - (player.creepKillCount % player.scaling.perKills);
         document.getElementById('scaling-info').textContent = `Escalado: +${bonusSoFar.toFixed(1)} ${scalingStatLabel(player.scaling.stat)} acumulado (${player.creepKillCount} bajas, próximo bonus en ${toNext})`;
     }
-    if (gameState === 'WAVE') renderCooldownBar();
+    if (inCombat()) renderCooldownBar();
 }
 
 // Temporizador de la fase actual (o de la oleada / reaparición) al lado del estado.
@@ -378,10 +378,11 @@ function renderTimer() {
     if (['HERO_SELECT', 'DRAFT', 'PREP'].includes(gameState)) {
         text = `⏱ ${Math.max(0, Math.ceil(phaseTimeLeft))}s`;
         if (phaseTimeLeft <= 5) cls = 'urgent';
-    } else if (gameState === 'WAVE' && player) {
+    } else if (inCombat() && player) {
         const hero = viewedHero || player, arena = hero.arena;
         const waiting = arenas.filter(a => !a.done).length;
-        if (hero.inRest || !arena || arena.done) { text = `🏕 Descansando · ${waiting} arena${waiting === 1 ? '' : 's'} en combate`; }
+        if (hero.inRest || !arena || arena.done) { text = `🏕 Descansando · ${waiting} ${gameState === 'DUEL' ? 'duelo' : 'arena'}${waiting === 1 ? '' : 's'} en curso`; }
+        else if (arena.kind === 'duel') { const left = DUEL_TIME - arena.elapsed; text = `⚔ Duelo ${Math.max(0, Math.ceil(left))}s`; if (left <= 5) cls = 'urgent'; }
         else if (!hero.isAlive() && hero.respawnAt) { text = `☠ Revive en ${Math.max(0, hero.respawnAt - gameClock).toFixed(1)}s`; cls = 'urgent'; }
         else if (waveTimeLeft(arena) > 0) { text = `⏱ ${Math.ceil(waveTimeLeft(arena))}s`; if (waveTimeLeft(arena) <= 5) cls = 'urgent'; }
         else { text = `🔥 Creeps enfurecidos +${Math.round((enrageMult(arena) - 1) * 100)}%`; cls = 'urgent'; }
@@ -397,7 +398,7 @@ function heroStatusIcon(h) {
     if (h.eliminated) return '💀';
     if (h.inRest) return '🏕';
     if (!h.isAlive()) return '☠';
-    return gameState === 'WAVE' ? '⚔' : '🏕';
+    return inCombat() ? '⚔' : '🏕';
 }
 function renderScoreboard() {
     const ranked = rankedHeroes();
@@ -471,8 +472,12 @@ function render() {
     ctx.fillStyle = '#050507'; ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.strokeStyle = '#151821';
     for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) ctx.strokeRect(c * TILE, r * TILE, TILE, TILE);
-    if (!hero || !hero.arena || gameState !== 'WAVE') return;
+    if (!hero || !hero.arena || !inCombat()) return;
     const arena = hero.arena;
+    if (arena.kind === 'duel') {
+        ctx.font = 'bold 13px monospace'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffb703';
+        ctx.fillText(`⚔ DUELO: ${arena.heroes[0].displayName}  vs  ${arena.heroes[1].displayName}`, canvas.width / 2, TILE * 0.7);
+    }
 
     // Aura del jefe
     if (arena.boss && arena.boss.isAlive()) {

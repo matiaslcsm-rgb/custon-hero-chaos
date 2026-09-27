@@ -45,7 +45,8 @@ function enterCondemned(hero) {
 function registerDuelLoss(hero) {
     if (!isCondemned(hero)) return;
     setCondemned(hero, hero.condemnPct + CONDEMNED.perDuelLostPct);
-    log(`⚔️ Duelo perdido: ahora recibís +${Math.round(hero.condemnPct * 100)}% de daño.`);
+    log(hero === player ? `⚔️ Duelo perdido estando Condenado: ahora recibís +${Math.round(hero.condemnPct * 100)}% de daño.`
+        : `⚔️ ${hero.displayName} (Condenado) ahora recibe +${Math.round(hero.condemnPct * 100)}% de daño.`);
 }
 
 // --- INJUSTICIA DE LOS CODICIOSOS ---
@@ -61,9 +62,14 @@ function buyGreedLife(hero) {
 // --- MORIR Y REVIVIR ---
 // Sirve para cualquier héroe (jugador o rival). Los mensajes se ven si es la arena que estás mirando.
 // killer: la unidad que lo mató (un creep) o null si murió por otra causa (ej: el costo de Forma Inmortal).
-// Los duelos (fase F2) van a resolver la muerte contra héroes con registerDuelLoss en vez de eliminar.
+// En un duelo, morir no cuesta la vida acá: lo resuelve resolveDuel (duels.js).
 function handleHeroDeath(hero, killer) {
-    if (gameState !== 'WAVE' || hero.respawnAt || hero.eliminated) return; // evita procesar la misma muerte dos veces
+    if (!inCombat() || hero.respawnAt || hero.eliminated) return; // evita procesar la misma muerte dos veces
+    if (hero.arena && hero.arena.kind === 'duel') {
+        const winner = hero.arena.heroes.find(h => h !== hero);
+        resolveDuel(hero.arena, winner, hero);
+        return;
+    }
     hero.diedThisRound = true;
     const you = hero === player;
     const cause = killer ? `${killer.label} ${you ? 'te mató' : 'mató a ' + hero.displayName}` : (you ? 'Moriste' : `${hero.displayName} murió`);

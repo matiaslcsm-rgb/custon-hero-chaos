@@ -58,6 +58,11 @@ function retreatStep(hero, enemies) {
 
 // --- HABILIDADES ---
 function aiWantsToCast(hero, skill, nearCount, bossNear) {
+    // En un duelo hay un solo enemigo: definitiva y habilidades de área apenas lo tiene cerca
+    if (hero.arena && hero.arena.kind === 'duel') {
+        if (skill.tags.includes('MOVILIDAD') && isRanged(hero)) return nearCount === 0;
+        return nearCount >= 1 || !(skill.isUltimate || skill.tags.includes('ÁREA'));
+    }
     const dealsDamage = skill.tags.some(t => t === 'FÍSICO' || t === 'MÁGICO' || t === 'PURO');
     if (skill.isUltimate) return nearCount >= 3 || bossNear;
     if (skill.tags.includes('ÁREA')) return nearCount >= 2 || bossNear;

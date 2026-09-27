@@ -93,7 +93,7 @@ const ITEMS = {
         key: 'THORNS', name: 'Coraza de Espinas', tier: 'composite', group: 'Defensa y tanque', components: ['CHAINMAIL', 'VITALITY'], recipe: 50,
         reflect: 0.3, mods: { armor: 5, maxHp: 100 }, special: 'Devuelve como daño puro el 30% del daño físico que te hacen cuerpo a cuerpo.', counters: 'Muchos enemigos cuerpo a cuerpo',
         hooks: item => ({ onDamaged(owner, { source, dealt, type }) {
-            if (source && source.isAlive() && type === 'physical' && source.range <= 2 && dealt > 0) dealDamage(owner, source, dealt * item.reflect, 'pure');
+            if (source && source.isAlive() && type === 'physical' && (source.isHero ? source.attackRange : source.range) <= 2 && dealt > 0) dealDamage(owner, source, dealt * item.reflect, 'pure');
         } })
     },
     HEART: {

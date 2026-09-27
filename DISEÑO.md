@@ -433,11 +433,23 @@ La idea es que quien va perdiendo tenga herramientas para rehacer su kit y volve
 - **Espectador:** si el jugador queda eliminado, la partida sigue y puede mirar a los demás.
 - Rendimiento: un frame con las 8 arenas tarda ~0,1 ms (peor caso ~9 ms).
 
+### Implementado en F2 ✅
+- Después de las oleadas: parejas al azar (sin repetir el rival anterior; con impares uno descansa), una arena de duelo por
+  pareja, todas en paralelo. Al empezar: vida y maná llenos, sin mejoras temporales y **enfriamientos reiniciados**.
+- Gana quien mata al otro; a los **45 s**, quien tenga más % de vida. Ganador **+3 puntos** y escalado por duelo; perdedor
+  **−1 vida** (sin vidas → Condenado; ya Condenado → +10% de daño recibido, sin eliminar).
+- La IA en duelo usa definitivas y habilidades de área contra un solo rival. La Coraza de Espinas refleja también a héroes.
+
+**Medido en una partida completa de 20 rondas (IA sin modo dios):** los 30 duelos se definieron por muerte, con una
+duración mediana de **3,2 s** (muy cortos); en la ronda 2 ya había **5 de 8 Condenados**; en la ronda 5 quedaban 3 héroes y
+siguieron así **15 rondas** hasta el límite (estancamiento). **A decidir:** duración de los duelos, costo en vidas de perder
+un duelo, y cómo se define una partida cuando quedan pocos.
+
 ### Construcción de la fase F
 | Etapa | Qué |
 |---|---|
 | **F1** ✅ | Mundo de 8 héroes: rivales con IA jugando sus oleadas en paralelo, cada uno en su arena; ranking con puntos; mirar cualquier arena |
-| **F2** | Duelos: parejas al azar, arena de duelo, perder cuesta vida, Condenado suma castigo, espera en el Área de Descanso |
+| **F2** ✅ | Duelos: parejas al azar, arena de duelo, perder cuesta vida, Condenado suma castigo, espera en el Área de Descanso |
 | **F3** | Apuestas a un duelo ajeno; Fragmentos para los 4 últimos y Libro para el último |
 
 ---

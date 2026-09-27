@@ -59,7 +59,7 @@ function stepCreepAway(c, from, dt) {
 function updateCreep(c, dt) {
     if (!c.isAlive()) return;
     // Si el héroe murió (o quedó eliminado) en este mismo frame, el resto de los creeps no sigue pegando
-    if (gameState !== 'WAVE' || c.arena.done) return;
+    if (!inCombat() || c.arena.done) return;
     if (hasFlag(c, 'stun')) return;
     const target = creepTarget(c);
     if (!target.isAlive()) { stepCreepToward(c, c.spawnX, c.spawnY, dt); return; } // perdió el agro

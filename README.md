@@ -25,6 +25,7 @@ js/
 ├── items.js     inventario (6), recetas (básicos + compuestos), comprar y vender
 ├── game.js      flujo de la ronda y actualización de las arenas
 ├── world.js     los 8 héroes, arenas y ranking
+├── duels.js     duelos 1v1 después de las oleadas
 ├── death.js     vidas, revivir, Condenado, Injusticia de los Codiciosos
 ├── timers.js    temporizadores de fase y enfurecimiento de creeps
 ├── ai.js        IA de héroes y Piloto automático (tecla P)
