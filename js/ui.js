@@ -8,11 +8,11 @@ canvas.width = COLS * TILE; canvas.height = ROWS * TILE;
 function setStateText(text) { document.getElementById('game-state-text').textContent = text; }
 function showPanel(id, visible) { document.getElementById(id).style.display = visible ? 'block' : 'none'; }
 
-// --- SELECCIÓN DE HÉROE ---
-function initHeroSelect() {
+// --- ELECCIÓN DE HÉROE (tus opciones + uno al azar, ver menu.js) ---
+function renderHeroPick() {
     const container = document.getElementById('hero-options');
     container.innerHTML = '';
-    Object.values(HERO_TEMPLATES).forEach(t => {
+    heroOffers[0].forEach(t => {
         const card = document.createElement('div');
         card.className = 'skill-card';
         const scalingText = `Escalado: +${t.scaling.perKillsAmount} ${scalingStatLabel(t.scaling.stat)} cada ${t.scaling.perKills} bajas &middot; +${t.scaling.perHeroKill} al ganar un duelo.`;
@@ -20,6 +20,11 @@ function initHeroSelect() {
         card.onclick = () => selectHero(t);
         container.appendChild(card);
     });
+    const random = document.createElement('div');
+    random.className = 'skill-card random-pick';
+    random.innerHTML = `<h4>🎲 Héroe al azar</h4><p>Te toca uno que no está entre tus opciones. ¡Sorpresa!</p>`;
+    random.onclick = () => selectHero(randomHeroPick());
+    container.appendChild(random);
 }
 
 // --- CÓDICE DE HÉROES (referencia navegable, no afecta una partida en curso) ---
@@ -173,7 +178,7 @@ function recipeHtml(item, hero) {
     const pool = used.slice();
     const parts = item.components.map(k => {
         const has = pool.includes(k); if (has) pool.splice(pool.indexOf(k), 1);
-        return `<span class="${has ? 'has' : ''}">${has ? '✓ ' : ''}${ITEMS[k].name}</span>`;
+        return has ? `<span class="has">✓ ${ITEMS[k].name}</span>` : itemNameHtml(ITEMS[k]);
     });
     return `<p class="meta recipe">${parts.join(' + ')} + receta ${item.recipe}g</p>`;
 }
@@ -185,7 +190,7 @@ function shopCard(item) {
     card.className = 'skill-card' + (blocker || player.gold < cost ? ' disabled' : '');
     const owned = isEquip(item) ? countItem(player, item.key) : 0;
     const total = item.tier === 'composite' && cost !== itemTotalCost(item) ? ` <span class="item-level">(total ${itemTotalCost(item)}g)</span>` : '';
-    card.innerHTML = `<h4>${item.name} (${cost}g)${total}${owned ? ` <span class="item-level">tenés ${owned}</span>` : ''}</h4>` +
+    card.innerHTML = `<h4>${itemNameHtml(item)} (${cost}g)${total}${owned ? ` <span class="item-level">tenés ${owned}</span>` : ''}</h4>` +
         `<p>${describeItem(item)}</p>` +
         (item.tier === 'composite' ? recipeHtml(item, player) : '') +
         (item.counters ? `<p class="meta">Contra: ${item.counters}</p>` : '') +
@@ -265,25 +270,59 @@ function renderInventoryPanel() {
     });
 }
 
-// --- CÓDICE DE ÍTEMS (árbol de recetas) ---
+// --- CÓDICE DE ÍTEMS ---
+// El nombre de cada ítem va en el color de su categoría; la descripción, en blanco. Secciones: básicos, mejoras
+// (compuestos, por grupo), neutrales (por escalón) y especiales.
+const ITEM_COLORS = {
+    basic: '#9ecbff', composite: '#ffb703', special: '#e0aaff',
+    neutral: ['#95d5b2', '#48cae4', '#c77dff', '#ff7b00'] // escalones 1 a 4
+};
+function isNeutral(item) { return NEUTRAL_ITEMS[item.key] === item; }
+function itemColor(item) {
+    if (isNeutral(item)) return ITEM_COLORS.neutral[item.tier - 1];
+    return ITEM_COLORS[item.tier] || ITEM_COLORS.special;
+}
+function itemNameHtml(item) { return `<span class="item-name" style="color:${itemColor(item)}">${item.name}</span>`; }
+
+function itemCard(item, price, extra = '') {
+    const stats = Object.entries(item.mods || {}).map(([k, v]) => `<li>${MOD_LABELS[k] ? MOD_LABELS[k](v) : `${k} ${v}`}</li>`).join('');
+    return `<div class="item-card" style="border-left-color:${itemColor(item)}">` +
+        `<div class="item-head">${itemNameHtml(item)}<span class="item-price">${price}</span></div>` +
+        (stats ? `<ul class="item-stats">${stats}</ul>` : '') +
+        (item.special ? `<p class="item-text">★ ${item.special}</p>` : '') +
+        (item.desc ? `<p class="item-text">${item.desc}</p>` : '') + extra + `</div>`;
+}
+function itemSection(id, title, color, note, body) {
+    return `<section id="${id}" class="item-section"><h3 style="color:${color}">${title}</h3><p class="subtitle">${note}</p>${body}</section>`;
+}
+
 function renderItemCodex() {
     const all = Object.values(ITEMS);
-    const basics = all.filter(i => i.tier === 'basic').map(i => {
-        const usedIn = all.filter(c => c.tier === 'composite' && c.components.includes(i.key)).map(c => c.name);
-        return `<div class="ability-row"><h4>${i.name} <span class="item-level">${i.cost}g</span></h4><p>${describeItem(i)}</p>` +
-            (usedIn.length ? `<p class="meta">Se usa en: ${usedIn.join(', ')}</p>` : '') + `</div>`;
-    }).join('');
-    const composites = ITEM_GROUPS.map(group => `<div class="codex-sub">${group}</div>` + all.filter(i => i.tier === 'composite' && i.group === group).map(i =>
-        `<div class="ability-row fixed"><h4>${i.name} <span class="item-level">${itemTotalCost(i)}g</span></h4><p>${describeItem(i)}</p>${recipeHtml(i, null)}` +
-        (i.counters ? `<p class="meta">Contra: ${i.counters}</p>` : '') + `</div>`).join('')).join('');
-    document.getElementById('item-codex').innerHTML =
-        `<h3>Ítems</h3><p class="subtitle">Los básicos mejoran un solo stat y se pueden repetir. Los compuestos se arman con básicos + una receta, ` +
-        `suman sus efectos y agregan algo especial. Al comprar un compuesto se usan los básicos que ya tenés y pagás solo lo que falta. ` +
-        `Inventario: ${INVENTORY_SLOTS} espacios. Vender devuelve el ${SELL_REFUND * 100}%.</p>` +
-        `<div class="codex-sub">Básicos</div>${basics}${composites}` +
-        `<div class="codex-sub">Objetos neutrales (premio de los jefes de ronda; solo uno a la vez)</div>` +
-        [1, 2, 3, 4].map(tier => `<p><strong>Escalón ${tier} (ronda ${tier * ROUND_BOSS_EVERY}):</strong></p>` + Object.values(NEUTRAL_ITEMS).filter(n => n.tier === tier).map(n =>
-            `<div class="ability-row"><h4>${n.name} <span class="item-level">se vende por ${neutralSellPrice(n.key)}g</span></h4><p>${describeNeutral(n)}</p></div>`).join('')).join('');
+    const grid = cards => `<div class="item-grid">${cards.join('')}</div>`;
+    const basics = grid(all.filter(i => i.tier === 'basic').map(i => {
+        const usedIn = all.filter(c => c.tier === 'composite' && c.components.includes(i.key));
+        return itemCard(i, `${i.cost}g`, usedIn.length ? `<p class="item-meta">Se usa en: ${usedIn.map(itemNameHtml).join(', ')}</p>` : '');
+    }));
+    const composites = ITEM_GROUPS.map(group => `<h4 class="item-group">${group}</h4>` + grid(all.filter(i => i.tier === 'composite' && i.group === group).map(i =>
+        itemCard(i, `${itemTotalCost(i)}g`,
+            `<p class="item-meta">Receta: ${i.components.map(k => itemNameHtml(ITEMS[k])).join(' + ')} + ${i.recipe}g</p>` +
+            (i.counters ? `<p class="item-meta">Contra: <span class="item-counter">${i.counters}</span></p>` : ''))))).join('');
+    const neutrals = [1, 2, 3, 4].map(tier => `<h4 class="item-group" style="color:${ITEM_COLORS.neutral[tier - 1]}">Escalón ${tier} · jefe de la ronda ${tier * ROUND_BOSS_EVERY}</h4>` +
+        grid(Object.values(NEUTRAL_ITEMS).filter(n => n.tier === tier).map(n =>
+            itemCard(n, `vende ${neutralSellPrice(n.key)}g`, `<p class="item-meta">Le sirve a: ${n.fits.join(', ')}</p>`)))).join('');
+    const specials = grid(all.filter(i => !isEquip(i)).map(i => itemCard(i, typeof i.cost === 'function' ? `desde ${GREED.baseCost}g` : `${i.cost}g`)));
+
+    const sections = [
+        ['items-basic', 'Básicos', ITEM_COLORS.basic, 'Mejoran un solo stat y se pueden repetir. Son los componentes de las mejoras.', basics],
+        ['items-composite', 'Mejoras (compuestos)', ITEM_COLORS.composite, 'Se arman con básicos + una receta. Si ya tenés los básicos, pagás solo lo que falta. No se repiten.', composites],
+        ['items-neutral', 'Objetos neutrales', ITEM_COLORS.neutral[2], `Premio de los jefes de ronda: elegís 1 de 3. Van en un espacio aparte y solo podés tener uno.`, neutrals],
+        ['items-special', 'Especiales', ITEM_COLORS.special, 'No ocupan espacio: se usan al comprarlos.', specials]
+    ];
+    const codex = document.getElementById('item-codex');
+    codex.innerHTML = `<h3>Ítems</h3><p class="subtitle">Inventario: ${INVENTORY_SLOTS} espacios (+1 para el neutral). Vender devuelve el ${SELL_REFUND * 100}%.</p>` +
+        `<div class="item-jump">${sections.map(([id, title, color]) => `<button data-target="${id}" style="color:${color}; border-color:${color}">${title}</button>`).join('')}</div>` +
+        sections.map(sec => itemSection(...sec)).join('');
+    codex.querySelectorAll('.item-jump button').forEach(btn => { btn.onclick = () => document.getElementById(btn.dataset.target).scrollIntoView({ behavior: 'smooth' }); });
 }
 
 // Inventario de objetos del destino (solo se usan fuera de las oleadas).
@@ -495,9 +534,9 @@ function renderScoreboard() {
 
 // Deja la interfaz como al abrir el juego (usado por "Nueva Partida").
 function resetHud() {
-    ['draft-container', 'shop-container', 'bet-container', 'restart-btn'].forEach(id => showPanel(id, false));
-    showPanel('hero-select-panel', true);
-    setStateText('SELECCIÓN DE HÉROE');
+    ['draft-container', 'shop-container', 'bet-container', 'restart-btn', 'hero-select-panel'].forEach(id => showPanel(id, false));
+    showPanel('menu-panel', true);
+    setStateText('MENÚ');
     document.getElementById('player-name').textContent = 'Ninguno';
     document.getElementById('round-num').textContent = '1';
     document.getElementById('scoreboard').innerHTML = ''; lastScoreboardSignature = '';
@@ -541,12 +580,27 @@ function renderRestArea() {
     heroes.filter(h => h.inRest && !h.eliminated).forEach(h => drawUnit({ x: h.x, y: h.y, hp: h.hp, maxHp: h.maxHp }, heroColor(h), h.symbol));
 }
 
+// Portada en el mapa mientras estás en el menú o eligiendo héroe.
+function renderTitle() {
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = 'bold 30px monospace'; ctx.fillStyle = '#ffb703';
+    ctx.fillText('CUSTOM HERO CHAOS', canvas.width / 2, canvas.height / 2 - 30);
+    ctx.font = '13px monospace'; ctx.fillStyle = '#8ecae6';
+    ctx.fillText(gameState === 'MENU' ? 'Iniciá una partida o mirá el tutorial →' : 'Elegí tu héroe →', canvas.width / 2, canvas.height / 2 + 10);
+    ctx.font = '20px monospace';
+    Object.values(HERO_TEMPLATES).forEach((t, i, all) => {
+        ctx.fillStyle = i % 2 ? '#ffb703' : '#00f5d4';
+        ctx.fillText(t.symbol, canvas.width / 2 + (i - (all.length - 1) / 2) * TILE * 1.4, canvas.height / 2 + 55);
+    });
+}
+
 function render() {
     const hero = viewedHero || player;
-    if (hero && (hero.inRest || !hero.arena) && gameState !== 'HERO_SELECT') { renderRestArea(); return; }
+    if (hero && (hero.inRest || !hero.arena) && gameState !== 'HERO_SELECT' && gameState !== 'MENU') { renderRestArea(); return; }
     ctx.fillStyle = '#050507'; ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.strokeStyle = '#151821';
     for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) ctx.strokeRect(c * TILE, r * TILE, TILE, TILE);
+    if (gameState === 'MENU' || gameState === 'HERO_SELECT') { renderTitle(); return; }
     if (!hero || !hero.arena || !inCombat()) return;
     const arena = hero.arena;
     if (arena.kind === 'duel') {

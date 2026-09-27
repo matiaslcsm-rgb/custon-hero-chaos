@@ -526,6 +526,21 @@ duelo; `MOVE_RESETS_ATTACK` en game.js). Queda por mirar: el Alquimista sigue ga
 
 ---
 
+## 9 ter. Menú, tutorial y elección de héroe
+
+- **Menú de inicio:** "Iniciar partida" o "Tutorial". El tutorial (8 páginas: objetivo, ronda, controles, habilidades, tienda,
+  vidas, duelos y apuestas, jefes y ayudas) también se abre en cualquier momento desde la pestaña **📖 Tutorial**.
+- **Elección de héroe:** a cada jugador se le reparten **3 héroes al azar** + la opción **🎲 Héroe al azar** (uno que no está
+  entre tus 3). Tiempo: 30 s (si se acaba, te toca uno de tus 3). **Los héroes elegidos nunca se repiten.**
+- **Opciones únicas:** tus 3 opciones son solo tuyas (ningún rival las recibe). Para que las de **todos** sean distintas
+  hacen falta 8 × 3 = **24 héroes**; hoy hay 9, así que entre los rivales las opciones se pisan (el código ya reparte
+  opciones únicas a todos cuando haya héroes suficientes). Los rivales eligen de las suyas; si ya se las tomaron, de lo que quede.
+- **Códice de ítems:** nombres en el color de su categoría (básicos celeste, mejoras dorado, neutrales verde/azul/violeta/naranja
+  por escalón, especiales lila) y descripción en blanco. Secciones con botones para saltar: Básicos, Mejoras (por grupo),
+  Neutrales (por escalón) y Especiales. En la tienda, los nombres usan los mismos colores.
+
+---
+
 ## 10. Orden de construcción
 
 Cada fase deja el juego jugable.

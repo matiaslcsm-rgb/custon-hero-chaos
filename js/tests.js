@@ -436,6 +436,7 @@ test('Oleada: pasado el límite los creeps se enfurecen', () => {
 
 test('Temporizadores: al vencer, el juego elige por vos', () => {
     resetGame();
+    startHeroPick();
     tickPhaseTimer(PHASE_TIMES.heroSelect + 1);
     checkEq(gameState, 'DRAFT', 'elige un héroe al azar y pasa al draft');
     tickPhaseTimer(PHASE_TIMES.draft + 1);
@@ -1131,7 +1132,7 @@ test('Coraza de Espinas también devuelve daño a héroes cuerpo a cuerpo en los
     a.baseAttackRange = 1.5; a.recalculateStats();
     const hp = a.hp;
     const { dealt } = dealDamage(a, b, 100, 'physical');
-    checkEq(hp - a.hp, Math.round(Math.round(dealt * ITEMS.THORNS.reflect) * (1 - DUEL_DAMAGE_REDUCTION)), 'reflejo al atacante (con la reducción de duelo)');
+    checkEq(hp - a.hp, Math.round(dealt * ITEMS.THORNS.reflect * (1 - DUEL_DAMAGE_REDUCTION)), 'reflejo al atacante (con la reducción de duelo)');
 });
 
 // ============================================================ APUESTAS Y PREMIOS (fase F3)
@@ -1312,6 +1313,47 @@ test('Las oleadas ya no traen el tema "Jefe Final" (lo reemplaza el jefe de rond
     for (let r = 1; r <= 20; r++) check(rollWave(r).name !== 'Jefe Final', 'ronda ' + r);
 });
 
+// ============================================================ MENÚ Y ELECCIÓN DE HÉROE
+test('Elección de héroe: 3 opciones propias + "al azar" (uno que no está entre ellas)', () => {
+    resetGame();
+    startHeroPick();
+    checkEq(gameState, 'HERO_SELECT', 'fase de elección');
+    checkEq(heroOffers[0].length, HERO_PICK_OPTIONS, '3 opciones');
+    checkEq(document.querySelectorAll('#hero-options .skill-card').length, HERO_PICK_OPTIONS + 1, '3 cartas + al azar');
+    for (let i = 0; i < 20; i++) check(!heroOffers[0].includes(randomHeroPick()), 'al azar: fuera de tus opciones');
+    for (let i = 1; i < MAX_HEROES; i++) check(heroOffers[i].every(t => !heroOffers[0].includes(t)), 'tus opciones son solo tuyas');
+});
+
+test('Elección de héroe: los rivales eligen de sus opciones y ningún héroe se repite', () => {
+    for (let n = 0; n < 10; n++) {
+        resetGame();
+        startHeroPick();
+        const offers = heroOffers;
+        document.querySelectorAll('#hero-options .skill-card')[0].click();
+        checkEq(new Set(heroes.map(h => h.key)).size, MAX_HEROES, 'sin repetidos');
+        heroes.slice(1).forEach((h, i) => {
+            const own = offers[i + 1].filter(t => t !== offers[0][0]);
+            // elige de las suyas salvo que ya se las hayan tomado todas
+            check(own.some(t => t.key === h.key) || own.every(t => heroes.some(o => o !== h && o.key === t.key)), 'eligió de sus opciones');
+        });
+    }
+});
+
+test('Con héroes de sobra, cada jugador tiene opciones que no se repiten', () => {
+    const fake = Array.from({ length: MAX_HEROES * HERO_PICK_OPTIONS }, (_, i) => ({ key: 'H' + i }));
+    const all = dealHeroOffers(fake).flat();
+    checkEq(new Set(all).size, all.length, 'las 24 opciones son distintas');
+});
+
+test('Tutorial: se abre, avanza y se cierra', () => {
+    openTutorial();
+    checkEq(document.getElementById('tutorial').style.display, 'flex', 'abierto');
+    for (let i = 0; i < TUTORIAL_PAGES.length - 1; i++) tutorialStep(1);
+    checkEq(tutorialPage, TUTORIAL_PAGES.length - 1, 'última página');
+    tutorialStep(1);
+    checkEq(document.getElementById('tutorial').style.display, 'none', 'cerrado');
+});
+
 test('Moverse reinicia el ataque (no se puede disparar gratis mientras te alejás)', () => {
     newGame('SNIPER');
     dummy({ x: player.x + 3 });
@@ -1338,7 +1380,7 @@ function simulateGame(heroIndex, godMode = true, rounds = 4) {
     const savedMax = MAX_ROUNDS;
     MAX_ROUNDS = rounds;
     resetGame();
-    document.querySelectorAll('#hero-options .skill-card')[heroIndex].click();
+    selectHero(Object.values(HERO_TEMPLATES)[heroIndex]);
     autopilot = true;
     try {
         let guard = 0;
@@ -1375,8 +1417,8 @@ test('Nueva Partida deja todo como al empezar', () => {
     newGame('AXE');
     resetGame();
     checkEq(player, null, 'jugador');
-    checkEq(gameState, 'HERO_SELECT', 'estado');
-    checkEq(document.getElementById('hero-select-panel').style.display, 'block', 'panel de selección visible');
+    checkEq(gameState, 'MENU', 'estado');
+    checkEq(document.getElementById('menu-panel').style.display, 'block', 'menú visible');
 });
 
 // ============================================================ EJECUCIÓN

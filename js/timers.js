@@ -22,7 +22,7 @@ function tickPhaseTimer(dt) {
 
 function onPhaseTimeout() {
     if (gameState === 'HERO_SELECT') {
-        const t = pickRandom(Object.values(HERO_TEMPLATES));
+        const t = pickRandom(heroOffers ? heroOffers[0] : Object.values(HERO_TEMPLATES));
         log(`⏱️ Se acabó el tiempo: te toca ${t.name}.`);
         selectHero(t);
     } else if (gameState === 'DRAFT') {

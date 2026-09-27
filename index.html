@@ -13,6 +13,7 @@
         <button id="nav-heroes">🦸 Héroes</button>
         <button id="nav-creeps">👹 Creeps y Jefes</button>
         <button id="nav-items">🎒 Ítems</button>
+        <button id="nav-tutorial">📖 Tutorial</button>
     </div>
 
     <div id="view-game" style="display:flex;">
@@ -50,10 +51,17 @@
 
             <hr>
 
-            <!-- Selección de Héroe -->
-            <div id="hero-select-panel">
-                <h3>Selección de Héroe</h3>
-                <p class="subtitle">Cada arquetipo tiene su propio kit y su propia mecánica de escalado.</p>
+            <!-- Menú de inicio -->
+            <div id="menu-panel">
+                <p class="subtitle">8 héroes, oleadas de creeps, duelos, apuestas y jefes. Armá tu kit mezclando habilidades de cualquier héroe.</p>
+                <button id="start-game-btn" class="primary-btn">▶ Iniciar partida</button>
+                <button id="menu-tutorial-btn" class="secondary-btn">📖 Tutorial (cómo se juega)</button>
+            </div>
+
+            <!-- Elección de Héroe -->
+            <div id="hero-select-panel" style="display: none;">
+                <h3>Elegí tu héroe</h3>
+                <p class="subtitle">Estas opciones son solo tuyas. Ningún héroe se repite en la partida.</p>
                 <div id="hero-options" class="options-grid"></div>
             </div>
 
@@ -93,6 +101,19 @@
             </div>
         </div>
     </div>
+    </div>
+
+    <!-- Tutorial -->
+    <div id="tutorial" style="display: none;">
+        <div id="tutorial-box">
+            <div id="tutorial-head"><h3 id="tutorial-title"></h3><button id="tutorial-close" title="Cerrar">✕</button></div>
+            <div id="tutorial-body"></div>
+            <div id="tutorial-foot">
+                <button id="tutorial-prev">◀ Anterior</button>
+                <span id="tutorial-step"></span>
+                <button id="tutorial-next">Siguiente ▶</button>
+            </div>
+        </div>
     </div>
 
     <!-- Códice de Héroes -->
@@ -138,6 +159,7 @@
     <script src="js/items.js"></script>
     <script src="js/game.js"></script>
     <script src="js/world.js"></script>
+    <script src="js/menu.js"></script>
     <script src="js/duels.js"></script>
     <script src="js/bets.js"></script>
     <script src="js/rewards.js"></script>

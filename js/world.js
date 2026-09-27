@@ -28,15 +28,14 @@ Object.defineProperty(window, 'projectiles', { get: () => (player && player.aren
 function aliveHeroes() { return heroes.filter(h => !h.eliminated); }
 function viewArena() { const h = viewedHero || player; return h ? h.arena : null; }
 
-// Crea los rivales con héroes distintos al del jugador (si hay menos plantillas que rivales, se repiten).
+// Crea los rivales: cada uno elige entre sus opciones de la fase de elección (ver menu.js), sin repetir héroes.
 function createRivals(playerTemplate) {
-    const pool = shuffle(Object.values(HERO_TEMPLATES).filter(t => t !== playerTemplate));
-    for (let i = 0; i < MAX_HEROES - 1; i++) {
-        const rival = new Hero(pool[i % pool.length]);
+    pickRivalTemplates(playerTemplate).forEach((template, i) => {
+        const rival = new Hero(template);
         rival.isAI = true;
         rival.displayName = `${rival.name} (IA ${i + 1})`;
         heroes.push(rival);
-    }
+    });
 }
 
 // Corre fn sin mostrar sus mensajes en el registro (ej: las compras y el draft de los rivales).

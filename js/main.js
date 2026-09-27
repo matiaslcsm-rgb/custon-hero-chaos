@@ -7,6 +7,13 @@ document.getElementById('nav-items').onclick = () => showView('items');
 document.getElementById('start-wave-btn').onclick = startWave;
 document.getElementById('restart-btn').onclick = resetGame;
 document.getElementById('bet-done-btn').onclick = endBetting;
+document.getElementById('start-game-btn').onclick = startHeroPick;
+document.getElementById('menu-tutorial-btn').onclick = () => openTutorial();
+document.getElementById('nav-tutorial').onclick = () => openTutorial();
+document.getElementById('tutorial-close').onclick = closeTutorial;
+document.getElementById('tutorial-prev').onclick = () => tutorialStep(-1);
+document.getElementById('tutorial-next').onclick = () => tutorialStep(1);
+document.getElementById('tutorial').onclick = e => { if (e.target.id === 'tutorial') closeTutorial(); };
 document.getElementById('autopilot-btn').onclick = () => setAutopilot(!autopilot);
 
 let lastTime = 0;
@@ -94,7 +101,7 @@ function validateContent() {
 }
 
 validateContent();
-initHeroSelect();
+showMenu();
 renderHeroCodex();
 renderCreepCodex();
 renderItemCodex();

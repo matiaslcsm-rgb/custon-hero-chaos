@@ -4,7 +4,7 @@
 const COLS = 20, ROWS = 12;
 
 let player = null;
-let gameState = 'HERO_SELECT', waveNumber = 1, gameClock = 0, keys = {};
+let gameState = 'MENU', waveNumber = 1, gameClock = 0, keys = {};
 let currentDraft = null; // { mode, options } del draft abierto; mode 'bookChoice' = eligiendo qué cambiar con el Libro
 
 const WAVE_HARD_LIMIT = 120;
@@ -28,6 +28,8 @@ function selectHero(template) {
     createRivals(template);
     heroes.forEach(sendToRestArea);
     viewedHero = player;
+    heroOffers = null;
+    showPanel('menu-panel', false);
     showPanel('hero-select-panel', false);
     log(`Seleccionaste a ${player.name}. Tus rivales: ${heroes.slice(1).map(h => h.name).join(', ')}.`);
     startRoundDraft();
@@ -206,15 +208,15 @@ function endGame() {
     showPanel('draft-container', false);
 }
 
-// Vuelve todo al estado inicial (selección de héroe) sin recargar la página.
+// Vuelve todo al estado inicial (menú) sin recargar la página.
 function resetGame() {
     player = null; heroes = []; arenas = []; viewedHero = null;
-    gameState = 'HERO_SELECT'; waveNumber = 1; gameClock = 0;
+    gameState = 'MENU'; waveNumber = 1; gameClock = 0; heroOffers = null;
     currentDraft = null; savedPrepTime = null; nextWave = null; logMuted = false;
     duelPlan = null; currentBet = null;
     setPhaseTimer(PHASE_TIMES.heroSelect);
     resetHud();
-    log('🔄 Nueva partida. Elegí un héroe.');
+    log('🔄 Nueva partida. Tocá "Iniciar partida" cuando quieras.');
 }
 
 // --- HABILIDADES ACTIVAS ---
