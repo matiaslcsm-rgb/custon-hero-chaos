@@ -2,11 +2,11 @@
 //
 //   Al terminar las oleadas se sortean las parejas y hay una previa de PHASE_TIMES.betting segundos: se muestran los duelos
 //   y el jugador puede apostar oro a quién gana UN duelo en el que no pelea. Si acierta, cobra el doble (BET_PAYOUT).
-//   Tope: BET_MAX_PCT de su oro. Medido en 207 duelos: el que va arriba en puntos gana el 73%, así que sin tope apostar
+//   El monto lo elige el jugador (arranca en 0). Tope: BET_MAX_PCT de su oro. Medido en 207 duelos: el que va arriba en puntos gana el 73%, así que sin tope apostar
 //   todo al favorito dejaba +46% de ganancia por apuesta y rendía más que farmear.
 //   Los rivales de la IA no apuestan.
 
-const BET_MAX_PCT = 0.25;
+const BET_MAX_PCT = 0.5;  // subido de 25% a 50% a pedido: cada uno elige cuánto arriesgar (el monto arranca en 0)
 const BET_PAYOUT = 2;
 
 let duelPlan = null;   // { pairs, bye } sorteados en la previa (los usa startDuels)
@@ -20,6 +20,7 @@ function bettablePairs() { return duelPlan ? duelPlan.pairs.filter(p => !p.inclu
 function startBetting() {
     duelPlan = makeDuelPairs(aliveHeroes());
     currentBet = null;
+    betAmount = 0;
     // Sin nada para apostar (eliminado, sin oro o sin duelos ajenos) se va directo a los duelos
     if (player.eliminated || !bettablePairs().length || betLimit() < 1) { startDuels(duelPlan); return; }
     gameState = 'BETTING';

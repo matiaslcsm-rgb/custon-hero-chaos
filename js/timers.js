@@ -6,7 +6,7 @@
 // Los tiempos de oleada salen de medir partidas simuladas: limpiar una oleada tarda 13-19s
 // (mediana según el héroe), el 90% de las veces menos de 24s y el peor caso fue 27s.
 
-const PHASE_TIMES = { heroSelect: 30, draft: 20, prep: 30, betting: 10 };
+const PHASE_TIMES = { heroSelect: 30, draft: 20, prep: 30, betting: 15 }; // previa: 15s para elegir monto y a quién
 const WAVE_TIME = { limit: 30, enragePerSecond: 0.05 };
 
 let phaseTimeLeft = PHASE_TIMES.heroSelect; // segundos que le quedan a la fase actual

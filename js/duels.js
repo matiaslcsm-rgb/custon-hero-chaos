@@ -13,6 +13,7 @@
 //   Es para que la partida no se estanque cuando todos tienen builds que los creeps no pueden derrotar.
 
 const DUEL_TIME = 45;
+const DUEL_START_ROUND = 5; // rondas 1-4: solo draft y creeps (armás el kit); los duelos y las apuestas arrancan acá
 const DUEL_DAMAGE_REDUCTION = 0.6; // en duelo, los héroes se hacen 60% menos daño entre sí (sin esto duraban ~3 s)
 const DUEL_CURSE_ALIVE = MAX_HEROES / 2; // con esta cantidad de héroes en juego o menos, perder un duelo maldice
 const DUEL_DEATH_ALIVE = 3;              // con esta cantidad o menos, perder un duelo estando maldito elimina

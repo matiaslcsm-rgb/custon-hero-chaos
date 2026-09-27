@@ -168,8 +168,10 @@ function arenaBackground(kind) {
     if (arenaBgCache[kind]) return arenaBgCache[kind];
     const theme = ARENA_THEMES[kind] || ARENA_THEMES.wave;
     const bg = document.createElement('canvas');
-    bg.width = canvas.width; bg.height = canvas.height;
+    const k = 2; // se dibuja al doble para que se vea nítido también con el mapa agrandado
+    bg.width = MAP_W * k; bg.height = MAP_H * k;
     const g = bg.getContext('2d');
+    g.scale(k, k);
     const rnd = seededRandom(kind.length * 7919 + 17);
     for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) {
         g.fillStyle = theme.base[Math.floor(rnd() * theme.base.length)];
@@ -181,10 +183,10 @@ function arenaBackground(kind) {
         }
     }
     // Viñeta: oscurece los bordes
-    const grad = g.createRadialGradient(bg.width / 2, bg.height / 2, bg.height * 0.3, bg.width / 2, bg.height / 2, bg.width * 0.65);
+    const grad = g.createRadialGradient(MAP_W / 2, MAP_H / 2, MAP_H * 0.3, MAP_W / 2, MAP_H / 2, MAP_W * 0.65);
     grad.addColorStop(0, 'rgba(0,0,0,0)'); grad.addColorStop(1, 'rgba(0,0,0,0.55)');
-    g.fillStyle = grad; g.fillRect(0, 0, bg.width, bg.height);
-    g.strokeStyle = theme.border; g.lineWidth = 2; g.strokeRect(1, 1, bg.width - 2, bg.height - 2);
+    g.fillStyle = grad; g.fillRect(0, 0, MAP_W, MAP_H);
+    g.strokeStyle = theme.border; g.lineWidth = 2; g.strokeRect(1, 1, MAP_W - 2, MAP_H - 2);
     arenaBgCache[kind] = bg;
     return bg;
 }

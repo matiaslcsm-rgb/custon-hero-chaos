@@ -16,6 +16,9 @@ window.addEventListener('keydown', e => {
     const k = e.key.toLowerCase();
     keys[k] = true;
     if (k === 'p') { setAutopilot(!autopilot); return; }
+    if (k === 'b') { toggleShop(); return; }
+    if (k === 'm') { toggleBigMap(); return; }
+    if (k === 'escape') { closeShop(); closeTutorial(); return; }
     if (inCombat() && !autopilot) handleSkillKeypress(k);
 });
 window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
@@ -112,8 +115,21 @@ function startPreparation() {
     setPhaseTimer(savedPrepTime ?? PHASE_TIMES.prep);
     savedPrepTime = null;
     setStateText('PREPARACIÓN');
-    showPanel('shop-container', !player.eliminated);
+    showPanel('shop-container', !player.eliminated && !autopilot); // con el piloto automático no se abre la ventana
     if (!player.eliminated) renderShop();
+}
+
+// --- VENTANA DE LA TIENDA ---
+// Se abre sola al empezar la preparación; se cierra con ✕ o Esc y se vuelve a abrir con B.
+function openShop() {
+    if (gameState !== 'PREP' || player.eliminated) return;
+    showPanel('shop-container', true);
+    renderShop();
+}
+function closeShop() { showPanel('shop-container', false); }
+function toggleShop() {
+    const open = document.getElementById('shop-container').style.display === 'block';
+    if (open) closeShop(); else openShop();
 }
 
 // --- ÁREA DE DESCANSO ---
@@ -183,6 +199,7 @@ function onRoundWavesDone() {
     heroes.forEach(h => { if (!h.eliminated) h.arena = null; });
     logMuted = false;
     if (aliveHeroes().length <= 1) { endRound(); return; }
+    if (waveNumber < DUEL_START_ROUND) { onDuelsDone(); return; } // todavía no hay duelos: jefe (si toca) o siguiente ronda
     startBetting();
 }
 

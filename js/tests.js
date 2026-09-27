@@ -921,6 +921,7 @@ test('Las arenas se juegan en paralelo; al terminar todas, la ronda suma puntos 
     resetGame();
     selectHero(HERO_TEMPLATES.SNIPER);
     learnSkill(currentDraft.options[0]);
+    waveNumber = DUEL_START_ROUND + 1;
     startWave();
     heroes.forEach(h => addEffect(h, { id: 'TEST_GOD', duration: 1e9, flags: ['invulnerable', 'persistent'] }));
     autopilot = true;
@@ -931,7 +932,7 @@ test('Las arenas se juegan en paralelo; al terminar todas, la ronda suma puntos 
         }
     } finally { autopilot = false; }
     check(!inCombat(), 'terminó la ronda (oleadas, previa y duelos)');
-    checkEq(waveNumber, 2, 'pasó a la ronda 2');
+    checkEq(waveNumber, DUEL_START_ROUND + 2, 'pasó a la ronda siguiente');
     const total = heroes.reduce((s, h) => s + h.points, 0);
     checkEq(total, MAX_HEROES * POINTS.waveClean + (MAX_HEROES / 2) * POINTS.duelWin, 'puntos: 8 oleadas limpias + 4 duelos');
     check(heroes.every(h => h.inRest && !h.arena), 'todos en el Área de Descanso');
@@ -1010,6 +1011,7 @@ function toDuels(heroKey = 'AXE') {
     resetGame();
     selectHero(HERO_TEMPLATES[heroKey]);
     learnSkill(currentDraft.options[0]);
+    waveNumber = DUEL_START_ROUND + 1; // los duelos arrancan en la ronda 5 (y la 5 tiene jefe)
     startWave();
     clearAllWaves();
     return arenas;
@@ -1141,6 +1143,7 @@ function toBetting(gold = 400) {
     resetGame();
     selectHero(HERO_TEMPLATES.AXE);
     learnSkill(currentDraft.options[0]);
+    waveNumber = DUEL_START_ROUND + 1;
     startWave();
     player.gold = gold;
     clearAllWaves(false);
@@ -1163,7 +1166,7 @@ test('Apuesta: tope del 25% del oro, una por ronda y nunca a tu propio duelo', (
     const rival = mine.find(h => h !== player);
     check(!placeBet(rival, 50), 'no se apuesta al propio duelo');
     const [a] = bettablePairs()[0];
-    check(!placeBet(a, 101), 'más del tope (100g)');
+    check(!placeBet(a, 201), 'más del tope (200g)');
     check(placeBet(a, 100), 'apuesta válida');
     checkEq(player.gold, 300, 'se descuenta al apostar');
     check(!placeBet(bettablePairs()[1][0], 1), 'una sola apuesta por ronda');
@@ -1187,8 +1190,8 @@ test('Apuesta: si gana tu elegido cobrás el doble; si pierde, perdés lo aposta
 });
 
 test('Sin oro para apostar (o eliminado) no hay previa: los duelos arrancan directo', () => {
-    toBetting(3);
-    checkEq(gameState, 'DUEL', 'con menos de 4g el tope es 0');
+    toBetting(1);
+    checkEq(gameState, 'DUEL', 'con 1g el tope es 0');
 });
 
 test('Premios: la mitad de abajo de los que siguen en juego recibe un Fragmento; el último, además un Libro', () => {
@@ -1352,6 +1355,38 @@ test('Tutorial: se abre, avanza y se cierra', () => {
     checkEq(tutorialPage, TUTORIAL_PAGES.length - 1, 'última página');
     tutorialStep(1);
     checkEq(document.getElementById('tutorial').style.display, 'none', 'cerrado');
+});
+
+test('Rondas 1 a 4 sin duelos: al terminar las oleadas se pasa directo a la ronda siguiente', () => {
+    resetGame();
+    selectHero(HERO_TEMPLATES.AXE);
+    learnSkill(currentDraft.options[0]);
+    startWave();
+    clearAllWaves(false);
+    check(gameState !== 'BETTING' && gameState !== 'DUEL', 'sin previa ni duelos en la ronda 1');
+    checkEq(waveNumber, 2, 'ronda 2');
+});
+
+test('Tienda en ventana: se abre sola en la preparación, se cierra y se vuelve a abrir con B', () => {
+    resetGame();
+    selectHero(HERO_TEMPLATES.AXE);
+    learnSkill(currentDraft.options[0]);
+    checkEq(gameState, 'PREP', 'preparación');
+    checkEq(document.getElementById('shop-container').style.display, 'block', 'abierta');
+    closeShop();
+    checkEq(document.getElementById('shop-container').style.display, 'none', 'cerrada');
+    toggleShop();
+    checkEq(document.getElementById('shop-container').style.display, 'block', 'reabierta');
+    startWave();
+    checkEq(document.getElementById('shop-container').style.display, 'none', 'se cierra al empezar la oleada');
+});
+
+test('Mapa agrandable: M cambia el tamaño del mapa y vuelve', () => {
+    const w = canvas.style.width;
+    toggleBigMap();
+    check(canvas.style.width !== w, 'más grande');
+    toggleBigMap();
+    checkEq(canvas.style.width, w, 'vuelve al tamaño normal');
 });
 
 test('Moverse reinicia el ataque (no se puede disparar gratis mientras te alejás)', () => {

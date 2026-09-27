@@ -411,8 +411,10 @@ partidas con cada héroe** y murió entre las oleadas 1 y 3. No juega bien, pero
   - Es para que la partida no se estanque cuando todos tienen builds que los creeps no pueden derrotar.
 - Maldito **con vidas**: si un creep lo mata, pierde una vida como siempre; queda eliminado solo sin vidas.
 - Al terminar su duelo, cada héroe espera en el Área de Descanso.
-- **Apuestas:** antes de los duelos hay una **previa de 10 s** con las parejas; el jugador puede apostar oro a quién gana
-  **un duelo ajeno** (uno por ronda, **tope: 25% de su oro**); si acierta, cobra **el doble**. La IA no apuesta.
+- **Duelos desde la ronda 5:** las rondas 1 a 4 son de draft y creeps (armás el kit); desde la 5 hay previa, apuestas y duelos.
+- **Apuestas:** antes de los duelos se abre una **ventana con cuenta regresiva de 15 s** con las parejas. El jugador **elige el
+  monto** (control deslizante + botones ¼, ½, Máx; arranca en 0) y a quién, en **un duelo ajeno** (uno por ronda, **tope: 50% de
+  su oro**, antes 25%); si acierta, cobra **el doble**. La ventana muestra cuánto gana o pierde. La IA no apuesta.
 - **Puntos del ranking:** ganar un duelo **+3**; superar la oleada sin morir **+1**. El oro desempata.
 - **Largo de la partida (propuesta):** hasta que quede un solo héroe, con un máximo de **20 rondas**; si se llega, gana el
   primero del ranking. Como la idea es que las builds escalen, una build tiene que rendir contra creeps **y** en duelos.
@@ -565,6 +567,11 @@ Todo en `js/fx.js`, **solo visual** (no cambia reglas) y solo para la arena que 
   inventario de 6 + neutral y efectos activos. Los stats completos y el escalado, en el tooltip del retrato.
 - **Derecha:** solo lo de la fase actual (menú, elección, draft, tienda con "Comenzar oleada" arriba, apuestas, o qué
   pasa en el combate) y el **registro** abajo, plegable.
+- **Ventanas:** la **tienda** se abre sola al empezar la preparación (no con el piloto automático), en una ventana grande con el
+  aviso de oleada, inventario y objetos del destino; se cierra con ✕ o Esc y se reabre con **B**. Las **apuestas** también van en
+  su ventana, con la cuenta regresiva grande.
+- **Mapa agrandable** con el botón ⤢ o la tecla **M** (×1,45; oculta el ranking para hacer lugar). El mapa se dibuja según la
+  densidad de la pantalla, así se ve nítido.
 
 ---
 

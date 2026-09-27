@@ -22,6 +22,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 | Menú de inicio, tutorial, elección de héroe (3 opciones + al azar, sin repetir) y códice de ítems con colores | ✅ |
 | Gráficos paso 1: efectos de combate (números, partículas, temblor, fondos) | ✅ |
 | Gráficos paso 2: HUD estilo MOBA (barra superior, ranking, mapa grande, barra del héroe, panel de fase) | ✅ |
+| Calidad de vida: duelos desde la ronda 5, apuestas con monto elegido (tope 50%) en ventana, tienda en ventana (B), mapa grande (M) | ✅ |
 
 ## Pendientes y temas abiertos
 - **Alquimista:** gana ~83% de sus duelos (medido); falta investigarlo como se hizo con el Sniper.
@@ -34,7 +35,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **Idioma:** español rioplatense (voseo), en el código, los comentarios, los textos del juego y los commits.
 - **Decisiones de diseño:** se consultan con opciones y una recomendada, idealmente con números medidos. Lo que se decide
   se anota en DISEÑO.md (secciones de la fase y "Decisiones tomadas").
-- **Cada cambio:** pruebas automáticas (`tests.html`, hoy **116**) → commit en git → push a GitHub solo cuando el usuario lo pide.
+- **Cada cambio:** pruebas automáticas (`tests.html`, hoy **119**) → commit en git → push a GitHub solo cuando el usuario lo pide.
 - **Commits:** mensaje en español que explica el porqué; terminan con `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 - **Héroes nuevos con otra IA:** prompt en [`prompt-heroes.md`](prompt-heroes.md); lo que devuelva se revisa contra el motor
   (pasivas, efectos por segundo con `everyInterval`, descripciones que coincidan con el código) antes de integrarlo.

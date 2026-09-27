@@ -40,7 +40,10 @@
 
             <!-- Centro: mapa y barra de tu héroe -->
             <div id="center-col">
-                <canvas id="ascii-canvas"></canvas>
+                <div id="map-wrap">
+                    <canvas id="ascii-canvas"></canvas>
+                    <button id="map-toggle" title="Agrandar o achicar el mapa (tecla M)">⤢</button>
+                </div>
                 <div id="hero-bar" style="display: none;">
                     <div id="hb-portrait">
                         <div id="hb-symbol"></div>
@@ -60,7 +63,7 @@
                         <div id="hb-effects"></div>
                     </div>
                 </div>
-                <div id="controls-hint">Mover: W A S D / flechas · Habilidades: E R T F · Piloto automático: P · Pasá el mouse por todo para ver detalles</div>
+                <div id="controls-hint">Mover: W A S D / flechas · Habilidades: E R T F · Tienda: B · Mapa grande: M · Piloto: P · Pasá el mouse por todo para ver detalles</div>
             </div>
 
             <!-- Derecha: lo que toca en esta fase y el registro -->
@@ -88,25 +91,6 @@
                         <div id="draft-options" class="options-grid"></div>
                     </div>
 
-                    <!-- Preparación / Tienda -->
-                    <div id="shop-container" style="display: none;">
-                        <button id="start-wave-btn" class="primary-btn">⚔ Comenzar oleada</button>
-                        <div id="wave-preview"></div>
-                        <h3>Tienda</h3>
-                        <div id="shop-tabs"></div>
-                        <div id="shop-options" class="options-grid"></div>
-                        <div id="inventory-panel"></div>
-                        <div id="destiny-panel"></div>
-                    </div>
-
-                    <!-- Previa de duelos: apuestas -->
-                    <div id="bet-container" style="display: none;">
-                        <h3>Previa de Duelos</h3>
-                        <div id="bet-info" class="subtitle"></div>
-                        <button id="bet-done-btn" class="primary-btn">Listo, a los duelos</button>
-                        <div id="bet-pairs"></div>
-                    </div>
-
                     <!-- En combate: qué está pasando -->
                     <div id="combat-info" style="display: none;"></div>
 
@@ -121,6 +105,44 @@
             </div>
         </div>
     </div>
+    </div>
+
+    <!-- Ventana de la tienda (se abre sola en la preparación; B para abrir o cerrar) -->
+    <div id="shop-container" class="modal" style="display: none;">
+        <div class="modal-box wide">
+            <div class="modal-head">
+                <h3>🛒 Tienda · Preparación</h3>
+                <span class="modal-timer phase-countdown"></span>
+                <span class="modal-gold">💰 <span id="shop-gold"></span>g</span>
+                <button class="modal-close" id="shop-close" title="Cerrar (Esc). Se vuelve a abrir con B">✕</button>
+            </div>
+            <div class="shop-layout">
+                <div class="shop-main">
+                    <div id="shop-tabs"></div>
+                    <div id="shop-options" class="options-grid"></div>
+                </div>
+                <div class="shop-side">
+                    <button id="start-wave-btn" class="primary-btn">⚔ Comenzar oleada</button>
+                    <div id="wave-preview"></div>
+                    <div id="inventory-panel"></div>
+                    <div id="destiny-panel"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ventana de apuestas (previa de duelos) -->
+    <div id="bet-container" class="modal" style="display: none;">
+        <div class="modal-box">
+            <div class="modal-head">
+                <h3>🎲 Previa de duelos</h3>
+                <span class="modal-timer phase-countdown big"></span>
+            </div>
+            <div id="bet-info" class="subtitle"></div>
+            <div id="bet-amount-box"></div>
+            <div id="bet-pairs"></div>
+            <button id="bet-done-btn" class="primary-btn">Listo, a los duelos</button>
+        </div>
     </div>
 
     <!-- Tutorial -->

@@ -3,7 +3,19 @@
 const canvas = document.getElementById('ascii-canvas');
 const ctx = canvas.getContext('2d');
 const TILE = 30;
-canvas.width = COLS * TILE; canvas.height = ROWS * TILE;
+const MAP_W = COLS * TILE, MAP_H = ROWS * TILE; // tamaño lógico del mapa (se dibuja siempre en estas coordenadas)
+
+// Tamaño real del canvas: el mapa normal o agrandado (M), y multiplicado por la densidad de la pantalla para que se vea nítido.
+let mapScale = 1;
+const BIG_MAP_SCALE = 1.45;
+function applyMapSize() {
+    const k = mapScale * (window.devicePixelRatio || 1);
+    canvas.width = Math.round(MAP_W * k); canvas.height = Math.round(MAP_H * k);
+    canvas.style.width = `${Math.round(MAP_W * mapScale)}px`; canvas.style.height = `${Math.round(MAP_H * mapScale)}px`;
+    document.body.classList.toggle('big-map', mapScale > 1);
+}
+function toggleBigMap() { mapScale = mapScale > 1 ? 1 : BIG_MAP_SCALE; applyMapSize(); }
+applyMapSize();
 
 function setStateText(text) { document.getElementById('game-state-text').textContent = text; }
 function showPanel(id, visible) { document.getElementById(id).style.display = visible ? 'block' : 'none'; }
@@ -237,6 +249,7 @@ function shopCard(item) {
 }
 
 function renderShop() {
+    document.getElementById('shop-gold').textContent = player.gold;
     renderWavePreview();
     const tabs = document.getElementById('shop-tabs'); tabs.innerHTML = '';
     Object.entries(SHOP_TABS).forEach(([key, label]) => {
@@ -390,33 +403,53 @@ function betHeroHtml(h) {
         `<span class="bet-stats">${heroRank(h)}º · ${h.points} pts · niv ${h.level} · ${lives} · duelos ${h.duelWins}-${h.duelLosses}</span>`;
 }
 
+let betAmount = 0; // monto elegido en la ventana de apuestas (arranca en 0: el riesgo lo decidís vos)
+
+function setBetAmount(v) {
+    betAmount = Math.max(0, Math.min(betLimit(), Math.round(v)));
+    renderBetting();
+}
+
 function renderBetting() {
     const mine = duelPlan.pairs.find(p => p.includes(player));
     const rival = mine ? mine.find(h => h !== player) : null;
+    const limit = betLimit();
+    if (betAmount > limit) betAmount = limit;
     document.getElementById('bet-info').innerHTML = (rival ? `Tu duelo: contra <strong>${rival.displayName}</strong>. ` : 'Esta ronda no peleás. ') +
-        (currentBet ? `Apostaste <strong>${currentBet.amount}g</strong> a ${currentBet.on.displayName}.`
-                    : `Apostá a un duelo ajeno: si acertás, cobrás el doble. Tope: <strong>${betLimit()}g</strong> (${BET_MAX_PCT * 100}% de tu oro).`);
-    const list = document.getElementById('bet-pairs'); list.innerHTML = '';
+        (currentBet ? `Apostaste <strong>${currentBet.amount}g</strong> a <strong>${currentBet.on.displayName}</strong>: si gana cobrás ${currentBet.amount * BET_PAYOUT}g.`
+                    : `Elegí cuánto arriesgar y a quién. Si acertás cobrás el doble; si no, lo perdés. Tope: ${limit}g (${BET_MAX_PCT * 100}% de tu oro).`);
+    const box = document.getElementById('bet-amount-box');
+    box.innerHTML = '';
     if (!currentBet) {
-        const row = document.createElement('div'); row.className = 'bet-amount';
-        row.innerHTML = `<label>Monto: <input id="bet-amount" type="number" min="1" max="${betLimit()}" value="${betLimit()}"> g</label>`;
-        list.appendChild(row);
+        box.innerHTML = `<div class="bet-slider"><input id="bet-amount" type="range" min="0" max="${limit}" step="1" value="${betAmount}">` +
+            `<b class="bet-value">${betAmount}g</b></div>` +
+            `<div class="bet-quick">${[['0', 0], ['¼', 0.25], ['½', 0.5], ['Máx', 1]].map(([t, f]) => `<button data-f="${f}">${t}</button>`).join('')}</div>` +
+            `<div class="bet-odds">${betAmount ? `Si ganás: <span class="win">+${betAmount}g</span> (cobrás ${betAmount * BET_PAYOUT}g) · Si perdés: <span class="lose">−${betAmount}g</span>` : 'Mové el control para elegir cuánto apostar.'}</div>`;
+        const input = box.querySelector('#bet-amount');
+        input.oninput = () => { betAmount = Number(input.value); box.querySelector('.bet-value').textContent = `${betAmount}g`;
+            box.querySelector('.bet-odds').innerHTML = betAmount ? `Si ganás: <span class="win">+${betAmount}g</span> (cobrás ${betAmount * BET_PAYOUT}g) · Si perdés: <span class="lose">−${betAmount}g</span>` : 'Mové el control para elegir cuánto apostar.';
+            document.querySelectorAll('#bet-pairs .bet-side button').forEach(b => { b.disabled = !betAmount; }); };
+        input.onchange = () => renderBetting();
+        box.querySelectorAll('.bet-quick button').forEach(btn => { btn.onclick = () => setBetAmount(limit * Number(btn.dataset.f)); });
     }
+    const list = document.getElementById('bet-pairs'); list.innerHTML = '';
     bettablePairs().forEach(pair => {
-        const box = document.createElement('div'); box.className = 'bet-pair';
+        const row = document.createElement('div'); row.className = 'bet-pair';
         pair.forEach((h, i) => {
             const side = document.createElement('div'); side.className = 'bet-side' + (currentBet && currentBet.on === h ? ' chosen' : '');
             side.innerHTML = betHeroHtml(h);
             if (!currentBet) {
-                const btn = document.createElement('button'); btn.textContent = 'Apostar';
-                btn.onclick = () => placeBet(h, Number(document.getElementById('bet-amount').value));
+                const btn = document.createElement('button');
+                btn.textContent = `Apostar a ${h.name}`; btn.disabled = !betAmount;
+                btn.onclick = () => { if (placeBet(h, betAmount)) betAmount = 0; };
                 side.appendChild(btn);
             }
-            box.appendChild(side);
-            if (i === 0) { const vs = document.createElement('div'); vs.className = 'bet-vs'; vs.textContent = 'vs'; box.appendChild(vs); }
+            row.appendChild(side);
+            if (i === 0) { const vs = document.createElement('div'); vs.className = 'bet-vs'; vs.textContent = 'vs'; row.appendChild(vs); }
         });
-        list.appendChild(box);
+        list.appendChild(row);
     });
+    document.getElementById('bet-done-btn').textContent = currentBet ? 'Listo, a los duelos' : 'No apuesto, a los duelos';
 }
 
 // --- KIT (nivel, experiencia, puntos y habilidades) ---
@@ -558,12 +591,18 @@ function updateHud() {
 // Panel derecho durante el combate (no hay nada para elegir): qué está pasando y qué hacer.
 function renderCombatInfo() {
     const box = document.getElementById('combat-info');
-    const show = inCombat() || gameState === 'ENDED';
+    const show = inCombat() || gameState === 'ENDED' || gameState === 'PREP' || gameState === 'BETTING';
     box.style.display = show ? 'block' : 'none';
     if (!show) return;
     const hero = viewedHero || player, arena = hero.arena;
     let html;
-    if (gameState === 'ENDED') html = `<h3>Fin de la partida</h3><p class="subtitle">Mirá el ranking a la izquierda. Tocá "Nueva Partida" para jugar otra.</p>`;
+    if (gameState === 'PREP' && !player.eliminated) {
+        html = `<h3>🛒 Preparación · ronda ${waveNumber}</h3><p class="subtitle">Comprá en la tienda, subí tus habilidades con [+] y preparate para la oleada` +
+            `${nextWave ? `: <b>${nextWave.name}</b>` : ''}.${waveNumber < DUEL_START_ROUND ? ` Los duelos arrancan en la ronda ${DUEL_START_ROUND}.` : ''}</p>` +
+            `<button class="primary-btn" onclick="openShop()">🛒 Abrir tienda (B)</button><button class="secondary-btn" onclick="startWave()">⚔ Comenzar oleada</button>`;
+    } else if (gameState === 'BETTING') {
+        html = `<h3>🎲 Previa de duelos</h3><p class="subtitle">Apostá en la ventana antes de que arranquen los duelos.</p>`;
+    } else if (gameState === 'ENDED') html = `<h3>Fin de la partida</h3><p class="subtitle">Mirá el ranking a la izquierda. Tocá "Nueva Partida" para jugar otra.</p>`;
     else if (player.eliminated) html = `<h3>Quedaste eliminado</h3><p class="subtitle">Podés seguir mirando: clic en un héroe del ranking.</p>`;
     else if (gameState === 'BOSS') html = `<h3>👹 Jefe de ronda</h3><p class="subtitle">Todos contra ${arena && arena.boss ? arena.boss.label : 'el jefe'}. Morir acá no cuesta vidas. Los 3 que más daño hagan cobran extra.</p>`;
     else if (gameState === 'DUEL') {
@@ -593,6 +632,10 @@ function renderTimer() {
     }
     el.textContent = text;
     el.className = cls;
+    document.querySelectorAll('.phase-countdown').forEach(c => {
+        c.textContent = ['PREP', 'BETTING'].includes(gameState) ? `⏱ ${Math.max(0, Math.ceil(phaseTimeLeft))}s` : '';
+        c.classList.toggle('urgent', phaseTimeLeft <= 5);
+    });
 }
 
 // --- RANKING ---
@@ -664,7 +707,7 @@ function drawUnit(u, color, symbol, pos = u, opts = {}) {
 function heroColor(h) { return h === player ? '#00f5d4' : '#ffb703'; }
 
 function renderRestArea() {
-    ctx.fillStyle = '#07140d'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#07140d'; ctx.fillRect(0, 0, MAP_W, MAP_H);
     ctx.strokeStyle = '#0f2418';
     for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) ctx.strokeRect(c * TILE, r * TILE, TILE, TILE);
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -675,9 +718,9 @@ function renderRestArea() {
     ctx.fillStyle = '#fb8500';
     [[REST_SPOT.x - 5, REST_SPOT.y], [REST_SPOT.x + 5, REST_SPOT.y]].forEach(([x, y]) => ctx.fillText('♨', x * TILE + TILE / 2, y * TILE + TILE / 2));
     ctx.font = 'bold 16px monospace'; ctx.fillStyle = '#95d5b2';
-    ctx.fillText('ÁREA DE DESCANSO', canvas.width / 2, TILE * 0.8);
+    ctx.fillText('ÁREA DE DESCANSO', MAP_W / 2, TILE * 0.8);
     ctx.font = '11px monospace'; ctx.fillStyle = '#74c69d';
-    ctx.fillText('Volvés al combate con vida y maná completos', canvas.width / 2, canvas.height - TILE * 0.6);
+    ctx.fillText('Volvés al combate con vida y maná completos', MAP_W / 2, MAP_H - TILE * 0.6);
     ctx.font = '18px monospace';
     heroes.filter(h => h.inRest && !h.eliminated).forEach(h => drawUnit({ x: h.x, y: h.y, hp: h.hp, maxHp: h.maxHp }, heroColor(h), h.symbol));
 }
@@ -686,21 +729,23 @@ function renderRestArea() {
 function renderTitle() {
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.font = 'bold 30px monospace'; ctx.fillStyle = '#ffb703';
-    ctx.fillText('CUSTOM HERO CHAOS', canvas.width / 2, canvas.height / 2 - 30);
+    ctx.fillText('CUSTOM HERO CHAOS', MAP_W / 2, MAP_H / 2 - 30);
     ctx.font = '13px monospace'; ctx.fillStyle = '#8ecae6';
-    ctx.fillText(gameState === 'MENU' ? 'Iniciá una partida o mirá el tutorial →' : 'Elegí tu héroe →', canvas.width / 2, canvas.height / 2 + 10);
+    ctx.fillText(gameState === 'MENU' ? 'Iniciá una partida o mirá el tutorial →' : 'Elegí tu héroe →', MAP_W / 2, MAP_H / 2 + 10);
     ctx.font = '20px monospace';
     Object.values(HERO_TEMPLATES).forEach((t, i, all) => {
         ctx.fillStyle = i % 2 ? '#ffb703' : '#00f5d4';
-        ctx.fillText(t.symbol, canvas.width / 2 + (i - (all.length - 1) / 2) * TILE * 1.4, canvas.height / 2 + 55);
+        ctx.fillText(t.symbol, MAP_W / 2 + (i - (all.length - 1) / 2) * TILE * 1.4, MAP_H / 2 + 55);
     });
 }
 
 function render() {
     const dt = tickFx();
+    const k = mapScale * (window.devicePixelRatio || 1);
+    ctx.setTransform(k, 0, 0, k, 0, 0);
     const hero = viewedHero || player;
     if (hero && (hero.inRest || !hero.arena) && gameState !== 'HERO_SELECT' && gameState !== 'MENU') { renderRestArea(); return; }
-    ctx.fillStyle = '#050507'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#050507'; ctx.fillRect(0, 0, MAP_W, MAP_H);
     if (gameState === 'MENU' || gameState === 'HERO_SELECT' || !hero || !hero.arena || !inCombat()) {
         ctx.strokeStyle = '#151821';
         for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) ctx.strokeRect(c * TILE, r * TILE, TILE, TILE);
@@ -711,17 +756,17 @@ function render() {
     updateArenaFx(arena, dt);
     ctx.save();
     if (shakeAmount) ctx.translate((Math.random() - 0.5) * shakeAmount * 2, (Math.random() - 0.5) * shakeAmount * 2);
-    ctx.drawImage(arenaBackground(arena.kind), 0, 0);
+    ctx.drawImage(arenaBackground(arena.kind), 0, 0, MAP_W, MAP_H);
     if (arena.kind === 'duel') {
         ctx.font = 'bold 13px monospace'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffb703';
-        ctx.fillText(`⚔ DUELO: ${arena.heroes[0].displayName}  vs  ${arena.heroes[1].displayName}`, canvas.width / 2, TILE * 0.7);
+        ctx.fillText(`⚔ DUELO: ${arena.heroes[0].displayName}  vs  ${arena.heroes[1].displayName}`, MAP_W / 2, TILE * 0.7);
     }
     if (arena.kind === 'boss' && arena.boss) {
         const b = arena.boss;
         ctx.font = 'bold 13px monospace'; ctx.textAlign = 'center'; ctx.fillStyle = b.color;
-        ctx.fillText(`👹 ${b.label}: ${Math.max(0, b.hp)} / ${b.maxHp}`, canvas.width / 2, TILE * 0.5);
-        ctx.fillStyle = '#330010'; ctx.fillRect(TILE * 3, TILE * 0.8, canvas.width - TILE * 6, 5);
-        ctx.fillStyle = '#ff0055'; ctx.fillRect(TILE * 3, TILE * 0.8, (canvas.width - TILE * 6) * Math.max(0, b.hp) / b.maxHp, 5);
+        ctx.fillText(`👹 ${b.label}: ${Math.max(0, b.hp)} / ${b.maxHp}`, MAP_W / 2, TILE * 0.5);
+        ctx.fillStyle = '#330010'; ctx.fillRect(TILE * 3, TILE * 0.8, MAP_W - TILE * 6, 5);
+        ctx.fillStyle = '#ff0055'; ctx.fillRect(TILE * 3, TILE * 0.8, (MAP_W - TILE * 6) * Math.max(0, b.hp) / b.maxHp, 5);
     }
 
     // Aura del jefe
@@ -756,6 +801,6 @@ function render() {
     ctx.restore();
     if (hero !== player) {
         ctx.font = '11px monospace'; ctx.fillStyle = '#ffb703';
-        ctx.fillText(`👁 Mirando a ${hero.displayName} (clic en tu fila del ranking para volver)`, canvas.width / 2, canvas.height - 8);
+        ctx.fillText(`👁 Mirando a ${hero.displayName} (clic en tu fila del ranking para volver)`, MAP_W / 2, MAP_H - 8);
     }
 }

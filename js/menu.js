@@ -70,8 +70,8 @@ const TUTORIAL_PAGES = [
             <li><b>Draft:</b> elegís una habilidad nueva entre 3 (hasta tener 4).</li>
             <li><b>Preparación:</b> tienda, subir habilidades y usar objetos del destino. Arriba ves el <b>aviso de la próxima oleada</b>.</li>
             <li><b>Oleada:</b> cada héroe pelea contra los mismos creeps en su propia arena.</li>
-            <li><b>Previa de duelos:</b> ves las parejas y podés apostar a un duelo ajeno.</li>
-            <li><b>Duelos 1 contra 1.</b></li>
+            <li><b>Previa de duelos</b> (desde la ronda 5): ves las parejas y podés apostar a un duelo ajeno.</li>
+            <li><b>Duelos 1 contra 1</b> (desde la ronda 5; las rondas 1 a 4 son para armar tu kit).</li>
             <li><b>Jefe de ronda</b> (cada 5 rondas): todos juntos contra un jefe.</li>
             <li><b>Ranking</b> y a la ronda siguiente.</li>
         </ol>
@@ -80,7 +80,7 @@ const TUTORIAL_PAGES = [
         <p><b>W A S D</b> o flechas: moverte. <b>El ataque es automático</b> contra el enemigo a tiro más cercano (o el prioritario, como los Sanadores).</p>
         <p><b>E R T F</b>: tus habilidades activas, en el orden en que las aprendiste (mirá la barra debajo del mapa).</p>
         <p><b>Moverte reinicia tu ataque</b>: si te alejás, tu próximo golpe arranca de cero.</p>
-        <p><b>P</b>: piloto automático (la IA juega por vos). <b>Clic en el ranking</b>: mirar la arena de otro héroe.</p>` },
+        <p><b>B</b>: abrir o cerrar la tienda. <b>M</b>: agrandar el mapa. <b>P</b>: piloto automático (la IA juega por vos). <b>Esc</b>: cerrar ventanas. <b>Clic en el ranking</b>: mirar la arena de otro héroe.</p>` },
     { title: '✨ Habilidades y niveles', body: `
         <p>Tu kit tiene <b>4 habilidades</b>. En cada draft una de las 3 opciones es de tu héroe (natural); las otras pueden ser de cualquiera.</p>
         <p>Llegan en <b>nivel 0</b>: con el botón <b>[+]</b> les ponés puntos (1 por nivel del héroe). Las normales llegan a nivel 4; la
@@ -102,7 +102,7 @@ const TUTORIAL_PAGES = [
         A los 45s gana el que tenga más % de vida.</p>
         <p>Perder un duelo <b>no cuesta vidas</b>, pero con <b>4 héroes o menos</b> en juego el perdedor queda <b>maldito</b>, y con
         <b>3 o menos</b>, perder estando maldito <b>elimina</b>.</p>
-        <p><b>Apuestas:</b> en la previa podés apostar hasta el 25% de tu oro a un duelo ajeno. Si acertás, cobrás el doble.</p>` },
+        <p><b>Apuestas:</b> en la previa elegís cuánto arriesgar (hasta la mitad de tu oro) y a quién, en un duelo ajeno. Si acertás, cobrás el doble.</p>` },
     { title: '👹 Jefes, neutrales y ayudas', body: `
         <p>En las rondas <b>5, 10, 15 y 20</b>, después de los duelos, todos pelean juntos contra un <b>jefe de ronda</b>. Morir ahí no
         cuesta vidas. Si cae, todos cobran oro (más los 3 que más daño hicieron) y eligen un <b>objeto neutral</b>: va en un espacio
