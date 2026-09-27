@@ -409,7 +409,7 @@ function renderScoreboard() {
     ranked.forEach((h, i) => {
         const row = document.createElement('div');
         row.className = 'score-row' + (h === player ? ' you' : '') + (h === (viewedHero || player) ? ' viewed' : '') + (h.eliminated ? ' out' : '');
-        const lives = h.eliminated ? '' : isCondemned(h) ? '☠' : '♥'.repeat(Math.max(0, h.lives));
+        const lives = h.eliminated ? '' : '♥'.repeat(Math.max(0, h.lives)) + (isCondemned(h) ? '☠' : '');
         row.innerHTML = `<span class="pos">${i + 1}º</span><span class="sym">${h.symbol}</span><span class="name">${h.displayName}</span>` +
             `<span class="lives">${lives}</span><span class="pts">${h.points} pts</span><span class="gold">${h.gold}g</span><span class="st">${heroStatusIcon(h)}</span>`;
         row.title = h === player ? 'Vos' : 'Clic para mirar su arena';

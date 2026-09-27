@@ -1027,7 +1027,7 @@ test('Duelos: parejas al azar sin repetir el rival anterior; con impares, uno de
     check(!!bye, 'y uno descansa');
 }, { random: true });
 
-test('Duelo: gana quien mata al otro (+3 puntos); el perdedor pierde una vida; los dos van a descansar', () => {
+test('Duelo: gana quien mata al otro (+3 puntos); con 5 o más en juego perder no cuesta nada', () => {
     toDuels();
     const arena = arenas.find(a => a.heroes.includes(player));
     const rival = arena.heroes.find(h => h !== player);
@@ -1035,24 +1035,64 @@ test('Duelo: gana quien mata al otro (+3 puntos); el perdedor pierde una vida; l
     dealDamage(player, rival, 99999, 'pure');
     check(arena.done, 'el duelo terminó');
     checkEq(player.points - points, POINTS.duelWin, 'puntos del ganador');
-    checkEq(rival.lives, lives - 1, 'el perdedor pierde una vida');
+    checkEq(rival.lives, lives, 'los duelos no cuestan vidas');
+    check(!isCondemned(rival), 'con 8 en juego, sin maldición');
     check(player.inRest && rival.inRest, 'los dos descansan');
     checkEq(rival.hp, rival.maxHp, 'el perdedor se recupera en el descanso');
 });
 
-test('Duelo: perder sin vidas deja Condenado; perder estando Condenado suma +10% y no elimina', () => {
+test('Duelo con la mitad de los héroes o menos: el perdedor queda maldito (aunque tenga vidas)', () => {
     toDuels();
-    const arena = arenas.find(a => a.heroes.includes(player));
-    const rival = arena.heroes.find(h => h !== player);
-    rival.lives = 1;
-    dealDamage(player, rival, 99999, 'pure');
-    check(isCondemned(rival) && !rival.eliminated, 'queda Condenado, no eliminado');
-    const other = arenas.find(a => !a.done);
-    const [a, b] = other.heroes;
+    heroes.slice(4).forEach(h => { h.eliminated = true; });
+    const arena = arenas.find(a => a.heroes.every(h => !h.eliminated)) || arenas[0];
+    const [a, b] = arena.heroes;
+    a.eliminated = false; b.eliminated = false;
+    heroes.filter(h => !h.eliminated).slice(4).forEach(h => { h.eliminated = true; }); // quedan 4
+    checkEq(aliveHeroes().length, DUEL_CURSE_ALIVE, 'quedan 4');
+    dealDamage(a, b, 99999, 'pure');
+    check(isCondemned(b) && b.lives === 2, 'maldito y con sus 2 vidas');
+});
+
+test('La maldición amplifica el daño de creeps y héroes sin maldición, no el de otro maldito', () => {
+    newGame('AXE');
+    const cursed = heroes[1], clean = heroes[2];
+    setCondemned(player, 0.5);
+    const c = dummy();
+    const hp = player.hp;
+    dealDamage(c, player, 100, 'pure'); checkEq(hp - player.hp, 150, 'creep: +50%');
+    player.hp = hp; dealDamage(clean, player, 100, 'pure'); checkEq(hp - player.hp, 150, 'héroe sin maldición: +50%');
+    setCondemned(cursed, 0.1);
+    player.hp = hp; dealDamage(cursed, player, 100, 'pure'); checkEq(hp - player.hp, 100, 'héroe maldito: sin extra');
+});
+
+test('Maldito con vidas: un creep lo mata y pierde una vida (no queda eliminado)', () => {
+    newGame('AXE');
+    setCondemned(player, 0.1);
+    player.hp = 1;
+    updateCreep(dummy({ atk: 9999, attackTimer: 99 }), 0.016);
+    check(!player.eliminated, 'sigue en juego');
+    checkEq(player.lives, 1, 'perdió una vida');
+});
+
+test('Duelo: perder estando maldito (con más de 3 en juego) suma +10% y no elimina', () => {
+    toDuels();
+    const [a, b] = arenas[0].heroes;
+    heroes.filter(h => h !== a && h !== b).slice(0, 3).forEach(h => { h.eliminated = true; }); // quedan 5... se ajusta abajo
+    heroes.filter(h => h !== a && h !== b && !h.eliminated).slice(0, 1).forEach(h => { h.eliminated = true; }); // quedan 4
     setCondemned(b, 0.1); b.lives = 0;
     dealDamage(a, b, 99999, 'pure');
     checkNear(b.condemnPct, 0.2, '+10% por el duelo perdido');
     check(!b.eliminated, 'sigue en la partida');
+});
+
+test('Con 3 o menos en juego, perder un duelo estando maldito elimina', () => {
+    toDuels();
+    const arena = arenas[0];
+    const [a, b] = arena.heroes;
+    heroes.forEach(h => { if (h !== a && h !== b) h.eliminated = true; });
+    setCondemned(b, 0.2);
+    dealDamage(a, b, 99999, 'pure');
+    check(b.eliminated, 'eliminado en el duelo a muerte');
 });
 
 test('Duelo: si se acaba el tiempo gana el que tiene más % de vida; los enfriamientos arrancan en 0', () => {

@@ -4,10 +4,16 @@
 //   uno descansa. Cada pareja pelea en su propia arena ('duel'), todas en paralelo.
 //   Al empezar: vida y maná llenos, sin mejoras temporales y con los enfriamientos reiniciados.
 //   Gana quien mata al otro; si se acaba el tiempo, quien tenga más % de vida.
-//   Ganador: +3 puntos y el escalado por duelo de su héroe. Perdedor: pierde una vida (si ya estaba Condenado,
-//   no queda eliminado: suma +10% de daño recibido). Los dos van al Área de Descanso.
+//   Ganador: +3 puntos y el escalado por duelo de su héroe. Los dos van al Área de Descanso.
+//   Perdedor (las vidas NO se pierden en duelos, solo contra creeps):
+//     - quedan más de la mitad de los héroes → sin castigo (solo se queda sin los puntos);
+//     - quedan la mitad o menos (DUEL_CURSE_ALIVE) → queda Condenado (maldito); si ya lo estaba, +10% de castigo;
+//     - quedan DUEL_DEATH_ALIVE o menos → duelo a muerte: si ya estaba Condenado, queda eliminado.
+//   Es para que la partida no se estanque cuando todos tienen builds que los creeps no pueden derrotar.
 
 const DUEL_TIME = 45;
+const DUEL_CURSE_ALIVE = MAX_HEROES / 2; // con esta cantidad de héroes en juego o menos, perder un duelo maldice
+const DUEL_DEATH_ALIVE = 3;              // con esta cantidad o menos, perder un duelo estando maldito elimina
 const DUEL_STARTS = [{ x: 3, y: 6 }, { x: 16, y: 6 }];
 
 function inCombat() { return gameState === 'WAVE' || gameState === 'DUEL'; }
@@ -72,13 +78,21 @@ function resolveDuel(arena, winner, loser, reason) {
     winner.points += POINTS.duelWin;
     awardHeroKillScaling(winner);
     emit(winner, 'onKill', { victim: loser });
-    if (isCondemned(loser)) registerDuelLoss(loser);
-    else {
-        loser.lives--;
-        if (loser.lives <= 0) enterCondemned(loser);
-    }
     [winner, loser].forEach(h => { h.respawnAt = 0; sendToRestArea(h); h.arena = null; });
+    penalizeDuelLoser(loser);
     logMuted = wasMuted;
+}
+
+// Castigo al perdedor según cuántos héroes siguen en juego (ver arriba).
+function penalizeDuelLoser(loser) {
+    const alive = aliveHeroes().length;
+    if (alive > DUEL_CURSE_ALIVE) return;
+    if (alive <= DUEL_DEATH_ALIVE && isCondemned(loser)) {
+        eliminateHero(loser, loser === player ? 'Perdiste un duelo a muerte' : `${loser.displayName} perdió un duelo a muerte`);
+        return;
+    }
+    if (isCondemned(loser)) registerDuelLoss(loser);
+    else curseHero(loser);
 }
 
 // Llamado desde updateArena para las arenas de duelo: vence el tiempo o alguien murió.

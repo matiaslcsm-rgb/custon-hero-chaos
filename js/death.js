@@ -4,7 +4,9 @@
 //   Vidas > 0   → muere, pierde 1 vida, queda RESPAWN_DELAY segundos muerto (los creeps pierden el agro
 //                 y vuelven a su lugar) y revive en el lugar con Voluntad de Titán.
 //   Vidas = 0   → al revivir queda Condenado: recibe +10% de daño (+10% por cada duelo perdido).
-//   Condenado   → si lo mata un creep, queda eliminado (espectador).
+//   Maldición   → perder un duelo cuando queda la mitad de los héroes o menos también deja Condenado (ver duels.js),
+//                 aunque todavía tenga vidas. El castigo aplica al daño de creeps y de héroes SIN maldición.
+//   Condenado sin vidas → si lo mata un creep, queda eliminado (espectador). Con vidas, pierde una como siempre.
 //   Injusticia  → estando Condenado, compra 1 vida y deja de estarlo; si vuelve a quedar sin vidas,
 //                 el % de daño recibido que tenía se duplica.
 
@@ -31,6 +33,14 @@ function setCondemned(hero, pct) {
     });
 }
 function isCondemned(hero) { return !!getEffect(hero, 'CONDEMNED'); }
+
+// Maldición por perder un duelo con la mitad de los héroes o menos en juego.
+function curseHero(hero) {
+    setCondemned(hero, hero.condemnPct > 0 ? hero.condemnPct : CONDEMNED.initialPct);
+    log(hero === player
+        ? `☠️ Perdiste un duelo con la mitad de los héroes o menos en juego: quedás MALDITO (Condenado). Los creeps y los héroes sin maldición te hacen +${Math.round(hero.condemnPct * 100)}% de daño.`
+        : `☠️ ${hero.displayName} quedó maldito (Condenado).`);
+}
 
 // Primera vez: +10%. Si ya había estado Condenado (y se salvó comprando una vida), el % se duplica.
 function enterCondemned(hero) {
@@ -73,7 +83,7 @@ function handleHeroDeath(hero, killer) {
     hero.diedThisRound = true;
     const you = hero === player;
     const cause = killer ? `${killer.label} ${you ? 'te mató' : 'mató a ' + hero.displayName}` : (you ? 'Moriste' : `${hero.displayName} murió`);
-    if (isCondemned(hero)) { eliminateHero(hero, cause); return; }
+    if (isCondemned(hero) && hero.lives <= 0) { eliminateHero(hero, cause); return; }
     hero.lives--;
     hero.hp = 0;
     hero.effects = hero.effects.filter(e => e.flags.includes('persistent')); // al morir se pierden las mejoras
@@ -90,7 +100,7 @@ function eliminateHero(hero, cause) {
     const wasLogMuted = logMuted;
     logMuted = false; // las eliminaciones se anuncian siempre
     if (hero === player) {
-        log(`💀 ${cause}. Estabas Condenado: quedás ELIMINADO. Podés seguir mirando la partida (clic en el ranking).`);
+        log(`💀 ${cause}. Quedás ELIMINADO. Podés seguir mirando la partida (clic en el ranking).`);
         setStateText('ELIMINADO · ESPECTADOR');
         showPanel('restart-btn', true);
         viewedHero = aliveHeroes()[0] || player;

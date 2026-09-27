@@ -90,7 +90,10 @@ function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     let final = amount;
     if (type === 'magical' && source) final *= 1 + effSpellAmp(source) / 100;
     final = mitigate(target, final * (1 - effDmgReduction(target)), type);
-    final = Math.round(final * (1 + sumMod(target, 'dmgTakenPct'))); // ej: Condenado
+    let takenPct = sumMod(target, 'dmgTakenPct'); // ej: Condenado
+    // La maldición (Condenado) solo amplifica el daño de creeps y de héroes sin maldición
+    if (source && source.isHero && isCondemned(source)) takenPct -= (getEffect(target, 'CONDEMNED') || { mods: {} }).mods.dmgTakenPct || 0;
+    final = Math.round(final * (1 + takenPct));
     if (target.oneHit) final = target.hp;
     const floor = hasFlag(target, 'preventDeath') ? 1 : 0;
     const hpLost = Math.max(0, Math.min(final, target.hp - floor));

@@ -402,8 +402,14 @@ partidas con cada héroe** y murió entre las oleadas 1 y 3. No juega bien, pero
 - **Ronda:** Draft → Preparación (Área de Descanso) → Oleada (cada héroe en su propia arena, en paralelo) → Duelos → Ranking.
 - **Duelos 1v1** después de cada oleada. **Parejas al azar**, evitando repetir el rival de la ronda anterior. Si quedan impares,
   uno descansa esa ronda. Ganar da el bonus de escalado por duelo.
-- **Perder un duelo cuesta una vida** (como morir contra creeps). Estando **Condenado**, perder un duelo **no elimina**: suma
-  **+10% de daño recibido**. Al terminar su duelo, cada héroe espera en el Área de Descanso.
+- **Los duelos no cuestan vidas** (las vidas se pierden solo contra creeps). El castigo depende de cuántos quedan en juego:
+  - **5 o más:** perder no tiene castigo (solo te quedás sin los +3 puntos).
+  - **4 o menos (la mitad):** el perdedor queda **maldito (Condenado)**, aunque tenga vidas; si ya lo estaba, **+10%** más.
+    La maldición amplifica el daño de **creeps y héroes sin maldición** (no el de otros malditos).
+  - **3 o menos:** **duelo a muerte**: perder estando maldito **elimina**.
+  - Es para que la partida no se estanque cuando todos tienen builds que los creeps no pueden derrotar.
+- Maldito **con vidas**: si un creep lo mata, pierde una vida como siempre; queda eliminado solo sin vidas.
+- Al terminar su duelo, cada héroe espera en el Área de Descanso.
 - **Apuestas:** antes de los duelos el jugador puede apostar oro a quién gana **un duelo ajeno**; si acierta, cobra **el doble**.
 - **Puntos del ranking:** ganar un duelo **+3**; superar la oleada sin morir **+1**. El oro desempata.
 - **Largo de la partida (propuesta):** hasta que quede un solo héroe, con un máximo de **20 rondas**; si se llega, gana el
@@ -444,6 +450,11 @@ La idea es que quien va perdiendo tenga herramientas para rehacer su kit y volve
 duración mediana de **3,2 s** (muy cortos); en la ronda 2 ya había **5 de 8 Condenados**; en la ronda 5 quedaban 3 héroes y
 siguieron así **15 rondas** hasta el límite (estancamiento). **A decidir:** duración de los duelos, costo en vidas de perder
 un duelo, y cómo se define una partida cuando quedan pocos.
+
+**Con las reglas nuevas de maldición (5 partidas de 20 rondas):** después de la ronda 5 no cae nadie más (quedan 5 a 8 hasta el
+final): los creeps escalan +10% lineal por ronda y los héroes mucho más rápido, así que nunca se llega a la mitad.
+Probado: creeps **×1,12 por ronda** (exponencial) → en la ronda 20 quedan 3-5; **×1,15** → la partida termina con un ganador
+entre las rondas 8 y 18. **El Sniper ganó las 13 partidas simuladas** (domina los duelos a distancia). **A decidir.**
 
 ### Construcción de la fase F
 | Etapa | Qué |
