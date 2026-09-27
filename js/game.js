@@ -96,17 +96,6 @@ function startPreparation() {
     renderShop();
 }
 
-function itemCost(item, hero) { return typeof item.cost === 'function' ? item.cost(hero) : item.cost; }
-function itemAvailable(item, hero) { return !item.available || item.available(hero); }
-
-function buyItem(item) {
-    const cost = itemCost(item, player);
-    if (!itemAvailable(item, player)) return;
-    if (player.gold < cost) { log('❌ Oro insuficiente'); return; }
-    player.gold -= cost; item.apply(player); player.recalculateStats();
-    log(`Compraste: ${item.name}`);
-    renderShop();
-}
 
 // --- OLEADAS ---
 function startWave() {

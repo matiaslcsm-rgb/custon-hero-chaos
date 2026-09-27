@@ -157,18 +157,57 @@ function renderBookChoice() {
     });
 }
 
+const SHOP_CATEGORIES = ['Atributos', 'Contras', 'Otros'];
+
 function renderShop() {
     renderWavePreview();
     const c = document.getElementById('shop-options'); c.innerHTML = '';
-    Object.values(ITEMS).filter(i => itemAvailable(i, player)).forEach(i => {
-        const card = document.createElement('div'); card.className = 'skill-card' + (player.gold < itemCost(i, player) ? ' disabled' : '');
-        card.innerHTML = `<h4>${i.name} (${itemCost(i, player)}g)</h4><p>${i.desc}</p>${i.counters ? `<p class="meta">Contra: ${i.counters}</p>` : ''}`;
-        card.onclick = () => buyItem(i);
-        c.appendChild(card);
+    SHOP_CATEGORIES.forEach(category => {
+        const items = Object.values(ITEMS).filter(i => i.category === category && (i.kind === 'equip' || itemAvailable(i, player)));
+        if (!items.length) return;
+        const title = document.createElement('div'); title.className = 'shop-category'; title.textContent = category;
+        c.appendChild(title);
+        items.forEach(i => {
+            const level = i.kind === 'equip' ? itemLevel(player, i.key) : 0;
+            const blocker = itemBlocker(i, player);
+            const cost = itemCost(i, player);
+            const card = document.createElement('div');
+            card.className = 'skill-card' + (blocker || player.gold < cost ? ' disabled' : '');
+            let head, body;
+            if (i.kind === 'equip') {
+                const next = Math.min(level + 1, ITEM_MAX_LEVEL);
+                const levelText = level === 0 ? 'Nivel 1' : level >= ITEM_MAX_LEVEL ? 'Nivel máximo' : `Nivel ${level} → ${next}`;
+                head = `${i.name} <span class="item-level">${levelText}</span>${blocker === 'Nivel máximo' ? '' : ` (${cost}g)`}`;
+                body = `<p>${describeSkill(i, next)}</p>${i.counters ? `<p class="meta">Contra: ${i.counters}</p>` : ''}${blocker && blocker !== 'Nivel máximo' ? `<p class="meta">${blocker}</p>` : ''}`;
+            } else {
+                head = `${i.name} (${cost}g)`;
+                body = `<p>${i.desc}</p>`;
+            }
+            card.innerHTML = `<h4>${head}</h4>${body}`;
+            card.onclick = () => buyItem(i);
+            c.appendChild(card);
+        });
     });
-    const owned = activeEffects(player).filter(e => e.flags.includes('item')).map(e => e.name);
-    document.getElementById('owned-items').textContent = owned.length ? `🎒 Tus ítems: ${owned.join(', ')}` : '';
+    renderInventoryPanel();
     renderDestinyPanel();
+}
+
+// Inventario en la tienda: cada ítem con su nivel y un botón para venderlo.
+function renderInventoryPanel() {
+    const panel = document.getElementById('inventory-panel'); panel.innerHTML = '';
+    const title = document.createElement('div');
+    title.className = 'shop-category';
+    title.textContent = `🎒 Inventario (${player.inventory.length}/${INVENTORY_SLOTS})`;
+    panel.appendChild(title);
+    player.inventory.forEach(inv => {
+        const row = document.createElement('div'); row.className = 'destiny-row';
+        row.innerHTML = `<span>${ITEMS[inv.key].name} <span class="item-level">nv ${inv.level}</span></span>`;
+        const sell = document.createElement('button');
+        sell.textContent = `Vender (${Math.floor(inv.spent * SELL_REFUND)}g)`;
+        sell.onclick = () => sellItem(inv.key);
+        row.appendChild(sell);
+        panel.appendChild(row);
+    });
 }
 
 // Inventario de objetos del destino (solo se usan fuera de las oleadas).
@@ -272,9 +311,11 @@ function updateHud() {
     document.getElementById('player-mana').textContent = `${Math.round(player.mana)}/${player.maxMana}`;
     document.getElementById('player-gold').textContent = player.gold;
     document.getElementById('round-num').textContent = Math.min(waveNumber, NORMAL_WAVES) + (isBossWave ? ' (JEFE)' : '');
-    document.getElementById('stat-str').textContent = Math.floor(player.str);
-    document.getElementById('stat-agi').textContent = Math.floor(player.agi);
-    document.getElementById('stat-int').textContent = Math.floor(player.int);
+    document.getElementById('stat-str').textContent = Math.floor(player.attr('str'));
+    document.getElementById('stat-agi').textContent = Math.floor(player.attr('agi'));
+    document.getElementById('stat-int').textContent = Math.floor(player.attr('int'));
+    document.getElementById('inventory-line').textContent = player.inventory.length
+        ? '🎒 ' + player.inventory.map(inv => `${ITEMS[inv.key].name} ${inv.level}`).join(' · ') : '';
     document.getElementById('stat-armor').textContent = player.armor.toFixed(1);
     document.getElementById('extra-stats').textContent =
         `RM: ${player.magicResist.toFixed(0)}% | Crít: ${player.critChance.toFixed(1)}% | Evasión: ${player.evasion.toFixed(1)}% | ` +

@@ -96,21 +96,39 @@ function aiPickDraft(hero, options) {
         || options[0];
 }
 
-// Tienda: si está Condenado compra una vida; después, los contras de la próxima oleada (mirando el aviso);
-// con lo que sobre, ítems de su atributo principal.
+// Tienda: si está Condenado compra una vida; después, los contras de la próxima oleada (mirando el aviso),
+// vendiendo un contra que ya no sirve si el inventario está lleno; con lo que sobre, atributos y mejorar contras.
 let aiBuysCounters = true; // se puede apagar para medir cuánto importan los contras
+const PRIMARY_ITEM = { STR: 'BELT', AGI: 'GLOVES', INT: 'TOME' };
+
+function aiNeededCounters(wave) {
+    // Solo contras que valen la pena: tipos que vienen de a 2 o más, o el tipo del jefe
+    return waveSummary(wave).filter(({ type, count }) => type.counterItem && (count >= 2 || type.key === wave.boss)).map(({ type }) => type.counterItem);
+}
+
 function aiShop(hero) {
-    if (itemAvailable(ITEMS.GREED, hero) && hero.gold >= itemCost(ITEMS.GREED, hero)) buyItem(ITEMS.GREED);
+    if (itemAvailable(ITEMS.GREED, hero) && hero.gold >= itemCost(ITEMS.GREED, hero)) buyItem(ITEMS.GREED, hero);
     if (aiBuysCounters && nextWave) {
-        // Solo contras que valen la pena: tipos que vienen de a 2 o más, o el tipo del jefe
-        waveSummary(nextWave).filter(({ type, count }) => count >= 2 || type.key === nextWave.boss).forEach(({ type }) => {
-            const item = type.counterItem && ITEMS[type.counterItem];
-            if (item && itemAvailable(item, hero) && hero.gold >= itemCost(item, hero)) buyItem(item);
+        const needed = aiNeededCounters(nextWave);
+        needed.forEach(key => {
+            const item = ITEMS[key];
+            if (itemLevel(hero, key) > 0 || hero.gold < itemCost(item, hero)) return;
+            if (hero.inventory.length >= INVENTORY_SLOTS) {
+                const spare = hero.inventory.find(inv => ITEMS[inv.key].category === 'Contras' && !needed.includes(inv.key));
+                if (!spare) return;
+                sellItem(spare.key, hero);
+            }
+            buyItem(item, hero);
         });
     }
-    const byAttr = { STR: ITEMS.BELT, AGI: ITEMS.GLOVES, INT: ITEMS.TOME };
-    const item = byAttr[hero.primaryAttr];
-    while (item && hero.gold >= itemCost(item, hero)) buyItem(item);
+    // Con lo que sobra, en orden: su atributo principal, los otros atributos y subir los contras que ya tiene
+    const primaryKey = PRIMARY_ITEM[hero.primaryAttr];
+    const others = Object.values(PRIMARY_ITEM).filter(k => k !== primaryKey);
+    const owned = hero.inventory.filter(inv => ITEMS[inv.key].category === 'Contras').map(inv => inv.key);
+    [primaryKey, ...others, ...owned].forEach(key => {
+        const item = ITEMS[key];
+        while (itemAvailable(item, hero) && hero.gold >= itemCost(item, hero)) buyItem(item, hero);
+    });
 }
 
 // --- PILOTO AUTOMÁTICO DEL JUGADOR ---

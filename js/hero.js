@@ -35,6 +35,7 @@ class Hero {
         this.level = 1; this.xp = 0; this.skillPoints = 1;
         this.skillLevels = {}; // id de habilidad -> nivel (0 = drafteada pero sin aprender)
         this.destiny = { fragments: 0, books: 0 }; // Fragmentos y Libros del Destino sin usar
+        this.inventory = []; // ítems equipados: { key, level, spent } (ver items.js)
         this.x = 3; this.y = 6; this.gold = 100; this.lives = 2;
         this.respawnAt = 0;       // > 0 mientras está muerto esperando revivir (ver death.js)
         this.condemnPct = 0;      // % de daño recibido extra acumulado como Condenado (se guarda aunque compre una vida)
@@ -44,25 +45,29 @@ class Hero {
         this.recalculateStats(); this.hp = this.maxHp; this.mana = this.maxMana;
     }
     hasSkill(id) { return this.skills.some(s => s.id === id); }
+    // Atributo total: el propio (base, niveles, Ascensos) + el de los ítems (efectos con mods str/agi/int).
+    attr(name) { return this[name] + sumMod(this, name); }
     recalculateStats() {
         const R = ATTRIBUTE_RULES;
-        const primaryVal = this.primaryAttr === 'STR' ? this.str : this.primaryAttr === 'AGI' ? this.agi : this.int;
-        this.maxHp = Math.round(this.baseHp + this.str * R.str.hp + this.bonus.maxHp);
-        this.maxMana = Math.round(this.baseMaxMana + this.int * R.int.mana);
+        const str = this.attr('str'), agi = this.attr('agi'), int = this.attr('int');
+        const primaryVal = this.primaryAttr === 'STR' ? str : this.primaryAttr === 'AGI' ? agi : int;
+        this.maxHp = Math.round(this.baseHp + str * R.str.hp + this.bonus.maxHp);
+        this.maxMana = Math.round(this.baseMaxMana + int * R.int.mana);
         this.atk = Math.round(this.baseAtk + primaryVal * R.primaryAtk + this.bonus.atk);
-        this.atkSpeed = this.baseAtkSpeed * (1 + this.agi * R.agi.atkSpeedPct);
-        this.moveSpeed = this.baseMoveSpeed * (1 + Math.min(this.agi, R.agi.moveSpeedCap) * R.agi.moveSpeedPct);
+        this.atkSpeed = this.baseAtkSpeed * (1 + agi * R.agi.atkSpeedPct);
+        this.moveSpeed = this.baseMoveSpeed * (1 + Math.min(agi, R.agi.moveSpeedCap) * R.agi.moveSpeedPct);
         this.moveInterval = Math.max(0.05, 1 / this.moveSpeed);
         this.attackRange = this.baseAttackRange;
-        this.armor = this.baseArmor + this.agi * R.agi.armor + this.bonus.armor;
-        this.magicResist = this.baseMagicResist + this.int * R.int.magicResist;
-        this.hpRegen = this.baseHpRegen + this.str * R.str.hpRegen;
-        this.manaRegen = this.baseManaRegen + this.int * R.int.manaRegen;
+        this.armor = this.baseArmor + agi * R.agi.armor + this.bonus.armor;
+        this.magicResist = this.baseMagicResist + int * R.int.magicResist;
+        this.hpRegen = this.baseHpRegen + str * R.str.hpRegen;
+        this.manaRegen = this.baseManaRegen + int * R.int.manaRegen;
         this.projectileSpeed = this.baseProjectileSpeed;
-        this.critChance = this.baseCritChance + this.agi * R.agi.critChance + this.bonus.critChance;
+        this.critChance = this.baseCritChance + agi * R.agi.critChance + this.bonus.critChance;
         this.evasion = this.baseEvasion;
-        this.spellAmp = this.baseSpellAmp + this.int * R.int.spellAmp + (this.primaryAttr === 'INT' ? R.mageSpellAmp : 0);
+        this.spellAmp = this.baseSpellAmp + int * R.int.spellAmp + (this.primaryAttr === 'INT' ? R.mageSpellAmp : 0);
         this.lifesteal = this.baseLifesteal + this.bonus.lifesteal;
+        this.hp = Math.min(this.hp, this.maxHp); this.mana = Math.min(this.mana, this.maxMana); // si bajó el máximo (ej: vender un ítem)
     }
     // Al subir de nivel: suma la ganancia de atributos del héroe (más en el principal).
     gainLevelAttributes() {

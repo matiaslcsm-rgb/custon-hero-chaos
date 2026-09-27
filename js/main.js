@@ -64,6 +64,19 @@ function validateContent() {
             });
         });
     });
+    Object.entries(ITEMS).forEach(([key, item]) => {
+        if (item.key !== key) problems.push(`Ítem ${key}: su key no coincide`);
+        if (item.kind === 'equip') {
+            if (!Array.isArray(item.costs) || item.costs.length !== ITEM_MAX_LEVEL) problems.push(`Ítem ${key}: costs debe tener ${ITEM_MAX_LEVEL} precios`);
+            if (typeof item.effect !== 'function') problems.push(`Ítem ${key}: le falta effect(level)`);
+            Object.entries(item.values || {}).forEach(([k, v]) => {
+                if (Array.isArray(v) && v.length !== ITEM_MAX_LEVEL) problems.push(`Ítem ${key}: values.${k} tiene ${v.length} niveles (deben ser ${ITEM_MAX_LEVEL})`);
+            });
+            [...item.description.matchAll(/\{(\w+)%?\}/g)].forEach(([, k]) => {
+                if (!item.values || item.values[k] === undefined) problems.push(`Ítem ${key}: la descripción usa {${k}} pero no existe en values`);
+            });
+        } else if (item.kind !== 'instant') problems.push(`Ítem ${key}: kind debe ser 'equip' o 'instant'`);
+    });
     Object.values(CREEP_TYPES).forEach(t => {
         if (t.counterItem && !ITEMS[t.counterItem]) problems.push(`Creep ${t.key}: el ítem de contra "${t.counterItem}" no existe`);
         if (Object.values(HERO_TEMPLATES).some(h => h.symbol === t.symbol)) problems.push(`Creep ${t.key}: su símbolo "${t.symbol}" lo usa un héroe`);

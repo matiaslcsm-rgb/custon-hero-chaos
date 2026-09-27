@@ -241,20 +241,34 @@ Un héroe entra solo si cumple **todo** esto:
 
 ---
 
-## 7. Ítems: mejorar y contrarrestar
+## 7. Ítems: inventario, niveles y contras ✅
 
-Tres familias:
+- **Inventario de 6 espacios.** Los ítems equipables (atributos y contras) ocupan un espacio.
+- **Niveles:** comprar un ítem que ya tenés lo sube de nivel (hasta **3**); cada nivel es más fuerte y más caro.
+- **Vender:** devuelve el **50%** de todo lo gastado en ese ítem y quita sus bonus. Sirve para cambiar de contra según la oleada.
+- **Los atributos de los ítems son bonus** (se pierden al venderlos), separados de los atributos propios del héroe.
+- **De uso inmediato** (no ocupan espacio): Poción de Vida, Fragmento del Destino, Injusticia de los Codiciosos.
 
-| Familia | Para qué | Ejemplos |
-|---|---|---|
-| **Stats** | Base del armado | Cinturón (STR), Guantes (AGI), Túnica (INT), armadura, RM |
-| **Potenciadores** | Refuerzan etiquetas propias | +% daño crítico, +duración de mejoras, +% robo de vida |
-| **Destino** | Rehacer el kit | Fragmento del Destino (comprable/vendible), Libro del Destino (solo por ranking). Ver §4 |
-| **Contras pedidos por los magos** | Pendientes de crear | Silencio (impide lanzar habilidades), inmunidad mágica, anticuración (vs Nigromante y Alquimista), disipar mejoras (vs Furia Química) |
-| **Contras** | Anulan etiquetas rivales | Anticuración (vs `ROBO_VIDA`), capa antimagia (vs `MÁGICO`), disipador (quita `MEJORA`), botas firmes (resistencia a `CONTROL`), hoja certera (ignora evasión), coraza de espinas (castiga `AL_GOLPEAR`) |
+| Ítem | Categoría | Precio nv 1 / 2 / 3 | Efecto por nivel |
+|---|---|---|---|
+| Cinturón de Fuerza | Atributos | 75 / 110 / 150 | +6 / 12 / 20 Fuerza |
+| Guantes de Celeridad | Atributos | 90 / 130 / 170 | +8 / 16 / 26 Agilidad |
+| Túnica del Mago | Atributos | 90 / 130 / 170 | +8 / 16 / 26 Inteligencia |
+| Capa Antimagia | Contra (Chamanes) | 60 / 90 / 120 | +25 / 35 / 45% resistencia mágica |
+| Hoja Certera | Contra (Espectros) | 75 / 110 / 150 | Ataques que no fallan; +0 / 8 / 16 daño |
+| Lanza Cortacuras | Contra (Sanadores, robo de vida) | 65 / 100 / 140 | −40 / 60 / 80% curación del objetivo por 3 s |
+| Martillo Rompecorazas | Contra (Acorazados) | 70 / 105 / 140 | −1,5 / 2 / 3 armadura por golpe (hasta 4 veces) |
+| Botas Firmes | Contra (Aturdidores) | 50 / 80 / 110 | −35 / 50 / 65% duración de control; +0 / 5 / 10% velocidad |
 
-- **Mejoras por niveles:** los ítems se pueden subir de nivel o combinar (recetas) para escalar a lo largo de la partida.
-- **Espacios limitados** de inventario, para que armarse sea una elección y no acumular todo.
+**Pendiente:** recetas (ítems avanzados combinando básicos) y contras contra héroes para los duelos (silencio, inmunidad mágica, disipar).
+
+### Balance medido (IA sin modo dios, 12 partidas por héroe)
+- **Los contras ahora importan:** con contras la IA gana **58%** (2,15 muertes/partida), sin contras **44%** (2,37). En la fase E,
+  sin límite de inventario, acumular atributos rendía más que cualquier contra.
+- **Desbalance cuerpo a cuerpo vs. distancia:** Sniper 12/12, Bruja del Hielo 11/12, Arcanista y Sabio 9/12, Alquimista y
+  Nigromante 8/12, pero **Asesino ~4/12 y Axe y Vampiro entre 1 y 6/12** (hay mucho ruido con 12 partidas). Los cuerpo a cuerpo
+  dependían de acumular Fuerza sin límite, y las oleadas castigan a quien tiene que acercarse (Arqueros, Chamanes, Kamikazes).
+  Probado: +30% de vida a los cuerpo a cuerpo → 39% a 42%; −40% de daño recibido de creeps a distancia/mágicos → 47%. **A decidir.**
 
 ---
 
@@ -376,7 +390,7 @@ Cada fase deja el juego jugable.
 | **A. Cimientos** ✅ | Quién lanza como parámetro, sistema genérico de mejoras, eventos, etiquetas, teclas por espacio | Sin esto, cada habilidad, ítem y creep nuevo hay que programarlo a mano contra todos los demás |
 | **B. Draft y niveles** ✅ | Draft mezclado, definitiva drafteable, experiencia y niveles de habilidad, escalado en la definitiva, pasivas sin espacio, Fragmento del Destino en la tienda | Es lo que define al modo; los niveles cambian cómo se draftea, así que van juntos |
 | **C. Roster** | Aplicar los criterios, pasar los 4 héroes actuales, sumar héroes de INT (daño mágico) | Da variedad para que el draft mezclado tenga gracia |
-| **D. Ítems** | Contras por etiqueta, niveles/recetas, inventario limitado | Necesita las etiquetas y habilidades variadas para tener qué contrarrestar |
+| **D. Ítems** ✅ | Contras por etiqueta, niveles/recetas, inventario limitado | Necesita las etiquetas y habilidades variadas para tener qué contrarrestar |
 | **E. Creeps** ✅ | Tipos con mecánica, aviso de oleada, oleadas compuestas | Es el campo de prueba de los ítems situacionales |
 | **F. PvP** | Rivales con IA, duelos, apuestas, ranking top 8, Fragmentos/Libro para los últimos | Usa todo lo anterior: la IA draftea, compra y pelea con las mismas reglas |
 
@@ -452,6 +466,8 @@ si un nombre no te gusta, se cambia acá y después en el código.
 | **Efecto** (mejora / perjuicio) | Estado temporal sobre una unidad (Furia, Aturdido…) | `addEffect()` |
 | **Evento** | Algo que pasa en combate y activa reacciones | `emit()` |
 | **Etiqueta** | Categoría de una habilidad (`FÍSICO`, `ROBO_VIDA`…) | `TAGS` |
+| **Inventario** | 6 espacios para ítems equipables | `hero.inventory`, `INVENTORY_SLOTS` (items.js) |
+| **Nivel de ítem** | Comprar de nuevo un ítem lo mejora (hasta 3) | `itemLevel()`, `ITEM_MAX_LEVEL` |
 | **Tema de oleada** | Composición de una oleada (Muralla, Hechiceros…) | `WAVE_THEMES`, `rollWave()` |
 | **Aviso de oleada** | Qué viene en la próxima oleada, visible en la tienda | `nextWave`, `renderWavePreview()` |
 | **Objetivo prioritario** | Creep al que el ataque automático va primero (Sanador) | `priority`, `pickAttackTarget()` |

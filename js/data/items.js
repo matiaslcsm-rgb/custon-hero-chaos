@@ -1,43 +1,87 @@
-// Ítems de la tienda. apply() modifica al héroe; después se llama a recalculateStats().
-// cost: número o función (héroe) => número. available (opcional): función (héroe) => si aparece en la tienda.
-// counters (opcional): texto de qué contrarresta, para la tienda.
-
-// Ítem de contra: se compra una sola vez y queda como efecto permanente del héroe (no se pierde al morir).
-function counterItem(key, name, cost, desc, counters, effect) {
-    return {
-        name, cost, desc, counters, unique: true,
-        available: h => !getEffect(h, 'ITEM_' + key),
-        apply: h => addEffect(h, { id: 'ITEM_' + key, name, duration: Infinity, flags: ['persistent', 'item', ...(effect.flags || [])], mods: effect.mods, hooks: effect.hooks })
-    };
-}
+// Ítems de la tienda. Reglas: DISEÑO.md §7.
+//
+// Dos clases:
+//   kind 'equip'   ocupa un espacio del inventario (6). Comprarlo de nuevo lo sube de nivel (hasta 3).
+//                  costs: precio de cada nivel; values: números por nivel (como las habilidades);
+//                  description: con marcadores {clave} / {clave%}; effect(level): { mods, flags, hooks }
+//                  que el héroe tiene mientras lo lleva (ver applyInventory en items.js).
+//                  counters (opcional): texto de qué contrarresta.
+//   kind 'instant' se usa al comprarlo y no ocupa espacio: cost (número o función), desc, apply(héroe),
+//                  available (opcional): función (héroe) => si aparece en la tienda.
 
 const ITEMS = {
-    BELT: { name: 'Cinturón de Fuerza', cost: 75, desc: '+6 STR (más HP y daño)', apply: h => { h.str += 6; } },
-    GLOVES: { name: 'Guantes de Celeridad', cost: 100, desc: '+10 AGI (más vel. ataque, movimiento y armadura)', apply: h => { h.agi += 10; } },
-    TOME: { name: 'Túnica del Mago', cost: 100, desc: '+10 INT (más maná, amplificación de hechizo y resistencia mágica)', apply: h => { h.int += 10; } },
-    POTION: { name: 'Poción de Vida', cost: 40, desc: 'Cura 50 HP al instante', apply: h => { h.hp = Math.min(h.maxHp, h.hp + 50); } },
-    // Precio provisorio (pregunta abierta en DISEÑO.md §11). Se guarda en el inventario del destino para usar o vender.
-    FRAGMENT: { name: 'Fragmento del Destino', cost: 150, desc: 'Quita una de tus habilidades al azar (devuelve sus puntos) y te ofrece 4 nuevas para elegir. Se puede vender por 75g.', apply: h => { h.destiny.fragments++; } },
-    // --- Contras de creeps (DISEÑO.md §8) ---
-    // Precios medidos: a 100-150g rendían menos que gastar en atributos; gratis subían las victorias de 69% a 89%.
-    CLOAK: counterItem('CLOAK', 'Capa Antimagia', 60, '+25% de resistencia mágica.', 'Chamanes y daño mágico', { mods: { magicResist: 25 } }),
-    TRUESTRIKE: counterItem('TRUESTRIKE', 'Hoja Certera', 75, 'Tus ataques básicos no se pueden esquivar.', 'Espectros y evasión', { flags: ['trueStrike'] }),
-    SPEAR: counterItem('SPEAR', 'Lanza Cortacuras', 65, 'Todo tu daño reduce 50% la curación del objetivo por 3s.', 'Sanadores y robo de vida', {
-        hooks: { onDealDamage(owner, { target }) { if (target.isAlive()) addEffect(target, { id: 'ANTIHEAL', name: 'Cortacuras', duration: 3, tags: ['PERJUICIO'], mods: { healingTakenPct: -0.5 } }); } }
-    }),
-    HAMMER: counterItem('HAMMER', 'Martillo Rompecorazas', 70, 'Cada ataque básico quita 2 de armadura al objetivo por 4s (acumula hasta -8).', 'Acorazados y armadura alta', {
-        hooks: {
-            onHit(owner, { target }) {
-                if (!target.isAlive()) return;
-                const stacks = Math.min(4, ((getEffect(target, 'ARMOR_BREAK') || { data: { stacks: 0 } }).data.stacks) + 1);
-                addEffect(target, { id: 'ARMOR_BREAK', name: 'Coraza rota', duration: 4, tags: ['PERJUICIO'], mods: { armor: -2 * stacks }, data: { stacks } });
-            }
+    // --- ATRIBUTOS ---
+    BELT: {
+        key: 'BELT', name: 'Cinturón de Fuerza', kind: 'equip', category: 'Atributos', costs: [75, 110, 150],
+        values: { str: [6, 12, 20] },
+        description: '+{str} de Fuerza (más vida; más daño si sos de Fuerza).',
+        effect(level) { return { mods: { str: valueAt(this, 'str', level) } }; }
+    },
+    GLOVES: {
+        key: 'GLOVES', name: 'Guantes de Celeridad', kind: 'equip', category: 'Atributos', costs: [90, 130, 170],
+        values: { agi: [8, 16, 26] },
+        description: '+{agi} de Agilidad (vel. de ataque, movimiento y armadura; más daño si sos de Agilidad).',
+        effect(level) { return { mods: { agi: valueAt(this, 'agi', level) } }; }
+    },
+    TOME: {
+        key: 'TOME', name: 'Túnica del Mago', kind: 'equip', category: 'Atributos', costs: [90, 130, 170],
+        values: { int: [8, 16, 26] },
+        description: '+{int} de Inteligencia (maná, amplificación y resistencia mágica; más daño si sos de Inteligencia).',
+        effect(level) { return { mods: { int: valueAt(this, 'int', level) } }; }
+    },
+
+    // --- CONTRAS DE CREEPS (DISEÑO.md §8) ---
+    CLOAK: {
+        key: 'CLOAK', name: 'Capa Antimagia', kind: 'equip', category: 'Contras', costs: [60, 90, 120], counters: 'Chamanes y daño mágico',
+        values: { magicResist: [25, 35, 45] },
+        description: '+{magicResist}% de resistencia mágica.',
+        effect(level) { return { mods: { magicResist: valueAt(this, 'magicResist', level) } }; }
+    },
+    TRUESTRIKE: {
+        key: 'TRUESTRIKE', name: 'Hoja Certera', kind: 'equip', category: 'Contras', costs: [75, 110, 150], counters: 'Espectros y evasión',
+        values: { flatAtk: [0, 8, 16] },
+        description: 'Tus ataques básicos no se pueden esquivar. +{flatAtk} de daño de ataque.',
+        effect(level) { return { flags: ['trueStrike'], mods: { flatAtk: valueAt(this, 'flatAtk', level) } }; }
+    },
+    SPEAR: {
+        key: 'SPEAR', name: 'Lanza Cortacuras', kind: 'equip', category: 'Contras', costs: [65, 100, 140], counters: 'Sanadores y robo de vida',
+        values: { antiHeal: [0.4, 0.6, 0.8], duration: 3 },
+        description: 'Todo tu daño reduce {antiHeal%} la curación del objetivo por {duration}s.',
+        effect(level) {
+            const antiHeal = valueAt(this, 'antiHeal', level), duration = valueAt(this, 'duration', level);
+            return { hooks: { onDealDamage(owner, { target }) {
+                if (target.isAlive()) addEffect(target, { id: 'ANTIHEAL', name: 'Cortacuras', duration, tags: ['PERJUICIO'], mods: { healingTakenPct: -antiHeal } });
+            } } };
         }
-    }),
-    BOOTS: counterItem('BOOTS', 'Botas Firmes', 50, 'Los aturdimientos y ralentizaciones te duran 50% menos.', 'Aturdidores y control', { mods: { statusResist: 0.5 } }),
+    },
+    HAMMER: {
+        key: 'HAMMER', name: 'Martillo Rompecorazas', kind: 'equip', category: 'Contras', costs: [70, 105, 140], counters: 'Acorazados y armadura alta',
+        values: { armorPerHit: [1.5, 2, 3], maxStacks: 4, duration: 4 },
+        description: 'Cada ataque básico quita {armorPerHit} de armadura al objetivo por {duration}s (acumula hasta {maxStacks} veces).',
+        effect(level) {
+            const perHit = valueAt(this, 'armorPerHit', level), maxStacks = valueAt(this, 'maxStacks', level), duration = valueAt(this, 'duration', level);
+            return { hooks: { onHit(owner, { target }) {
+                if (!target.isAlive()) return;
+                const current = getEffect(target, 'ARMOR_BREAK');
+                const stacks = Math.min(maxStacks, (current ? current.data.stacks : 0) + 1);
+                addEffect(target, { id: 'ARMOR_BREAK', name: 'Coraza rota', duration, tags: ['PERJUICIO'], mods: { armor: -perHit * stacks }, data: { stacks } });
+            } } };
+        }
+    },
+    BOOTS: {
+        key: 'BOOTS', name: 'Botas Firmes', kind: 'equip', category: 'Contras', costs: [50, 80, 110], counters: 'Aturdidores y control',
+        values: { statusResist: [0.35, 0.5, 0.65], moveSpeedPct: [0, 0.05, 0.1] },
+        description: 'Los aturdimientos y ralentizaciones te duran {statusResist%} menos. +{moveSpeedPct%} de velocidad de movimiento.',
+        effect(level) { return { mods: { statusResist: valueAt(this, 'statusResist', level), moveSpeedPct: valueAt(this, 'moveSpeedPct', level) } }; }
+    },
+
+    // --- DE USO INMEDIATO (no ocupan espacio) ---
+    POTION: { key: 'POTION', name: 'Poción de Vida', kind: 'instant', category: 'Otros', cost: 40, desc: 'Cura 50 HP al instante.', apply: h => { healUnit(h, 50); } },
+    // Precio provisorio (pregunta abierta en DISEÑO.md §11). Va al inventario del destino para usar o vender.
+    FRAGMENT: { key: 'FRAGMENT', name: 'Fragmento del Destino', kind: 'instant', category: 'Otros', cost: 150, desc: 'Quita una de tus habilidades al azar (devuelve sus puntos) y te ofrece 4 nuevas para elegir. Se puede vender por 75g.', apply: h => { h.destiny.fragments++; } },
     // Solo aparece estando Condenado (ver death.js).
     GREED: {
-        name: 'Injusticia de los Codiciosos', cost: h => greedCost(h), available: h => isCondemned(h),
+        key: 'GREED', name: 'Injusticia de los Codiciosos', kind: 'instant', category: 'Otros', cost: h => greedCost(h), available: h => isCondemned(h),
         desc: 'Comprás 1 vida y dejás de estar Condenado. Si volvés a quedar sin vidas, tu castigo de daño recibido se duplica. Cada compra cuesta el doble.',
         apply: h => buyGreedLife(h)
     }

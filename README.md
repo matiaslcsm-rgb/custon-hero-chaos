@@ -22,6 +22,7 @@ js/
 ├── progression.js  experiencia, niveles, puntos de habilidad, draft
 ├── hero.js      entidad del héroe y atributos
 ├── combat.js    daño, críticos, robo de vida, proyectiles, bajas
+├── items.js     inventario (6), niveles de ítems, comprar y vender
 ├── game.js      flujo de la partida y oleadas
 ├── death.js     vidas, revivir, Condenado, Injusticia de los Codiciosos
 ├── timers.js    temporizadores de fase y enfurecimiento de creeps

@@ -21,6 +21,7 @@
 //               evasion      probabilidad de esquivar ataques básicos en % (se suman)
 //               spellAmp     amplificación de hechizo en % (se suman)
 //               healingTakenPct  +% de curación recibida (negativo = anticuración; se suman)
+//               str, agi, int  atributos extra (los usan los ítems; el héroe recalcula sus stats al cambiarlos)
 //               statusResist reduce la duración de aturdimientos y ralentizaciones que recibe (0.4 = 40% menos)
 //   flags     estados sin número: 'stun', 'invulnerable', 'preventDeath' (la vida no baja de 1), 'taunt',
 //             'freeCast' (las habilidades no gastan maná), 'persistent' (no se pierde al morir),

@@ -94,3 +94,7 @@ b.cur { color: #ffb703; }
 #phase-timer.urgent { color: #ff477e; }
 #autopilot-btn { background: #1c1f26; color: #ccc; border: 1px solid #444; padding: 6px; cursor: pointer; font-family: inherit; font-size: 0.8rem; }
 #autopilot-btn.on { background: #9d4edd; color: #fff; border-color: #9d4edd; }
+.shop-category { color: #ffb703; font-size: 0.8rem; margin-top: 6px; border-bottom: 1px solid #333; }
+.item-level { color: #8ecae6; font-size: 0.72rem; }
+#inventory-panel { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; font-size: 0.78rem; }
+#inventory-line { font-size: 0.7rem; color: #72efdd; }
