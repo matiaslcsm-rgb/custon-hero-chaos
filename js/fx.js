@@ -33,6 +33,7 @@ function fxDamage(target, amount, type, isCrit) {
     const arena = fxArena(target);
     if (!arena || amount <= 0) return;
     target.fxHitAt = fxClock;
+    sfx(isCrit ? 'crit' : target.isHero ? 'heroHit' : 'hit');
     const color = target.isHero ? '#ff477e' : DMG_COLORS[type] || '#fff';
     pushFx(arena, { kind: 'text', x: target.x + (Math.random() - 0.5) * 0.6, y: target.y - 0.4, text: isCrit ? `${amount}!` : `${amount}`, color, size: isCrit ? 18 : 12, life: isCrit ? 1.1 : 0.8 });
     if (isCrit) { fxBurst(target, '#ffd166', 6, 3); fxShake(2.5); }
@@ -57,6 +58,7 @@ function fxRing(unit, color, radius = 1.6, life = 0.45) {
 }
 
 function fxDeath(unit) {
+    if (fxArena(unit)) sfx(unit.isHero ? 'death' : 'pop');
     fxBurst(unit, unit.color || '#ff477e', unit.isHero ? 22 : 12, unit.isHero ? 5 : 3.5);
     if (unit.isHero) fxShake(5);
 }
@@ -72,17 +74,22 @@ function fxLunge(attacker, target) {
 function fxSlash(attacker, target, color, isCrit) {
     const arena = fxArena(attacker);
     if (!arena) return;
+    sfx('swing');
     const angle = Math.atan2(target.y - attacker.y, target.x - attacker.x);
     const flip = (attacker.fxSlashFlip = !attacker.fxSlashFlip); // alterna el sentido del tajo en cada golpe
     pushFx(arena, { kind: 'slash', x: target.x, y: target.y, angle, flip, color: isCrit ? '#ffd166' : color, width: isCrit ? 5 : 3.5, life: 0.22 });
     if (isCrit) fxBurst(target, '#ffd166', 5, 3);
 }
 
-function fxShake(amount) { shakeAmount = Math.max(shakeAmount, amount); }
+function fxShake(amount) {
+    shakeAmount = Math.max(shakeAmount, amount);
+    if (amount >= 4) sfx('boom');
+}
 
 function fxCast(hero, skill) {
     const tag = (skill.tags || []).find(t => SKILL_FX_COLORS[t]);
     const color = tag ? SKILL_FX_COLORS[tag] : '#00f5d4';
+    if (fxArena(hero)) sfx(skill.isUltimate ? 'ult' : 'cast');
     fxRing(hero, color, skill.isUltimate ? 3.2 : 1.8, skill.isUltimate ? 0.7 : 0.45);
     if (skill.isUltimate) { fxBurst(hero, color, 18, 5); fxShake(3); }
 }

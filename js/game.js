@@ -158,6 +158,32 @@ function sendToRestArea(hero) {
     restoreHero(hero);
 }
 
+// En la sala de espera se puede caminar: vos con el teclado o clic derecho; la IA pasea de a ratos.
+// No se puede pisar la fuente ni las fogatas.
+function restBlocked(x, y) { return (x === REST_SPOT.x && y === REST_SPOT.y - 3) || (y === REST_SPOT.y && (x === REST_SPOT.x - 5 || x === REST_SPOT.x + 5)); }
+
+function updateRestArea(dt) {
+    heroes.forEach(h => {
+        if (!h.inRest || h.eliminated) return;
+        h.restMoveTimer = (h.restMoveTimer || 0) + dt;
+        if (h.restMoveTimer < h.moveInterval / MOVE_SPEED_MULT) return;
+        h.restMoveTimer = 0;
+        let dir = { dx: 0, dy: 0 };
+        if (h === player && !autopilot) {
+            dir = keyboardDirection();
+            if (dir.dx || dir.dy) h.moveTarget = null; else dir = moveTargetDirection(h) || dir;
+        } else {
+            if (!h.wander && Math.random() < 0.08) h.wander = { x: 2 + Math.floor(Math.random() * (COLS - 4)), y: 2 + Math.floor(Math.random() * (ROWS - 4)) };
+            if (h.wander) {
+                dir = { dx: Math.sign(h.wander.x - h.x), dy: Math.sign(h.wander.y - h.y) };
+                if (!dir.dx && !dir.dy) h.wander = null;
+            }
+        }
+        const x = Math.max(0, Math.min(COLS - 1, h.x + dir.dx)), y = Math.max(0, Math.min(ROWS - 1, h.y + dir.dy));
+        if (!restBlocked(x, y)) { h.x = x; h.y = y; } else h.wander = null;
+    });
+}
+
 function returnFromRestArea(hero) {
     hero.inRest = false;
     hero.x = WAVE_START.x; hero.y = WAVE_START.y;
@@ -180,6 +206,7 @@ function startWave() {
     });
     if (player.eliminated && (!viewedHero || viewedHero.eliminated)) viewedHero = rankedHeroes()[0];
     setStateText(`OLEADA · RONDA ${waveNumber}: ${wave.name.toUpperCase()}`);
+    sfx('wave');
     log(`🌊 ¡Ronda ${waveNumber}: ${wave.name}! Cada héroe pelea en su arena (${creeps.length ? creeps.length - 1 : '?'} creeps + 1 jefe).`);
 }
 
@@ -275,7 +302,7 @@ function tryCastSkill(hero, skill, opts = {}) {
     }
     if (!ok) return false;
     hero.mana -= manaCost;
-    hero.cooldowns[skill.id] = val(skill, hero, 'cooldown') || 0;
+    hero.cooldowns[skill.id] = skillCooldown(skill, hero);
     fxCast(hero, skill);
     emit(hero, 'onCast', { skill });
     return true;

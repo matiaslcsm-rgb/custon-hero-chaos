@@ -147,7 +147,7 @@ test('Habilidad en nivel 0 no se lanza; en nivel 1 cobra maná y enfriamiento', 
     cancelTargeting();
     castAt(player, s, d.x, d.y); // ...y el clic la lanza
     checkEq(mana - player.mana, valueAt(s, 'manaCost', 1), 'maná gastado');
-    checkEq(player.cooldowns[s.id], valueAt(s, 'cooldown', 1), 'enfriamiento');
+    checkNear(player.cooldowns[s.id], valueAt(s, 'cooldown', 1) * COOLDOWN_MULT, 'enfriamiento (25% más corto)');
 });
 
 test('Sin objetivo en rango no se cobra maná ni enfriamiento', () => {
@@ -1472,6 +1472,29 @@ test('Códice de héroes: una carta por héroe, separadas por atributo, con inna
     checkEq(document.querySelectorAll('#hero-codex .hero-card').length, Object.keys(HERO_TEMPLATES).length, 'todos los héroes');
     checkEq(document.querySelectorAll('#hero-codex .badge-innate').length, Object.keys(HERO_TEMPLATES).length, 'un innato por héroe');
     checkEq(document.querySelectorAll('#hero-codex .ult-name').length, Object.keys(HERO_TEMPLATES).length, 'una definitiva subrayada por héroe');
+});
+
+test('Sala de espera: el jugador camina con el teclado y no pisa la fuente', () => {
+    resetGame();
+    selectHero(HERO_TEMPLATES.AXE);
+    check(player.inRest, 'en la sala de espera');
+    player.x = REST_SPOT.x; player.y = REST_SPOT.y - 2; // justo debajo de la fuente
+    keys['w'] = true;
+    try { for (let i = 0; i < 10; i++) updateRestArea(1); } finally { keys['w'] = false; }
+    check(!restBlocked(player.x, player.y), 'no está sobre la fuente');
+    checkEq(player.y, REST_SPOT.y - 2, 'la fuente lo frena');
+    keys['a'] = true;
+    try { updateRestArea(1); } finally { keys['a'] = false; }
+    checkEq(player.x, REST_SPOT.x - 1, 'caminó a la izquierda');
+});
+
+test('Elección de héroe agrupada por atributo', () => {
+    resetGame();
+    startHeroPick();
+    const heads = [...document.querySelectorAll('#hero-options .attr-head')].map(h => h.textContent);
+    const attrs = [...new Set(heroOffers[0].map(t => ATTR_INFO[t.primaryAttr].label))];
+    checkEq(heads.length, attrs.length, 'un título por atributo presente');
+    checkEq(document.querySelectorAll('#hero-options .skill-card').length, HERO_PICK_OPTIONS + 1, '3 héroes + al azar');
 });
 
 test('Moverse reinicia el ataque (no se puede disparar gratis mientras te alejás)', () => {

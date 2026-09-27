@@ -28,10 +28,10 @@ function valueAt(skill, key, level) {
 function val(skill, hero, key) { return valueAt(skill, key, skillLevel(hero, skill)); }
 
 // Texto de un valor: "100/120/140/160%" con el nivel actual resaltado (level 0 = ninguno).
-function formatKey(skill, key, level, pct) {
+function formatKey(skill, key, level, pct, mult = 1) {
     const v = skill.values && skill.values[key];
     if (v === undefined) return null;
-    const fmt = x => String(+(pct ? x * 100 : x).toFixed(2));
+    const fmt = x => String(+((pct ? x * 100 : x) * mult).toFixed(2));
     const suffix = pct ? '%' : '';
     if (!Array.isArray(v)) return fmt(v) + suffix;
     return v.map((x, i) => (i + 1 === level ? `<b class="cur">${fmt(x)}</b>` : fmt(x))).join('/') + suffix;
@@ -42,9 +42,14 @@ function describeSkill(skill, level) {
     return skill.description.replace(/\{(\w+)(%?)\}/g, (m, key, pct) => formatKey(skill, key, level, !!pct) ?? m);
 }
 
+// Enfriamientos: todos un 25% más cortos (a pedido: las habilidades salían poco). Los valores de cada habilidad quedan
+// como están; el multiplicador se aplica al lanzarla y en los textos.
+const COOLDOWN_MULT = 0.75;
+function skillCooldown(skill, hero) { return (val(skill, hero, 'cooldown') || 0) * COOLDOWN_MULT; }
+
 function skillCostLine(skill, level) {
     if (skill.kind === 'passive') return 'Pasiva';
-    return `Maná ${formatKey(skill, 'manaCost', level)} · Enfriamiento ${formatKey(skill, 'cooldown', level)}s`;
+    return `Maná ${formatKey(skill, 'manaCost', level)} · Enfriamiento ${formatKey(skill, 'cooldown', level, false, COOLDOWN_MULT)}s`;
 }
 
 // --- EXPERIENCIA Y NIVELES ---
@@ -59,6 +64,7 @@ function gainXp(hero, amount) {
         hero.skillPoints++;
         hero.gainLevelAttributes();
         log(`⬆️ ¡Nivel ${hero.level}! +1 punto de habilidad y atributos.`);
+        if (hero === player) sfx('levelup');
         fxText(hero, `¡NIVEL ${hero.level}!`, '#ffd166', 15, 1.4); fxRing(hero, '#ffd166', 1.5, 0.6);
     }
     resolveExcessPoints(hero);

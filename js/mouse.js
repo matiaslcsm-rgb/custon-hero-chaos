@@ -63,6 +63,10 @@ canvas.addEventListener('mousedown', e => {
     Object.assign(mouse, p);
     if (e.button === 2) { // clic derecho: cancela el apuntado o camina
         if (targeting) { cancelTargeting(); return; }
+        if (player && player.inRest && !player.eliminated && !autopilot) { // caminar por la sala de espera
+            player.moveTarget = { x: Math.max(0, Math.min(COLS - 1, Math.round(p.x))), y: Math.max(0, Math.min(ROWS - 1, Math.round(p.y))), arena: null, at: fxClock };
+            return;
+        }
         if (!canControlPlayer()) return;
         player.moveTarget = { x: Math.max(0, Math.min(COLS - 1, Math.round(p.x))), y: Math.max(0, Math.min(ROWS - 1, Math.round(p.y))), arena: player.arena, at: fxClock };
         return;

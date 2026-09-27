@@ -24,13 +24,23 @@ function showPanel(id, visible) { document.getElementById(id).style.display = vi
 function renderHeroPick() {
     const container = document.getElementById('hero-options');
     container.innerHTML = '';
-    heroOffers[0].forEach(t => {
-        const card = document.createElement('div');
-        card.className = 'skill-card';
-        const scalingText = `Escalado: +${t.scaling.perKillsAmount} ${scalingStatLabel(t.scaling.stat)} cada ${t.scaling.perKills} bajas &middot; +${t.scaling.perHeroKill} al ganar un duelo.`;
-        card.innerHTML = `<h4>[${t.symbol}] ${t.name} (${t.primaryAttr})</h4><p>${t.description}</p><p style="color:#ffb703; margin-top:4px;">${scalingText}</p>`;
-        card.onclick = () => selectHero(t);
-        container.appendChild(card);
+    // Agrupadas por atributo principal (Fuerza, Agilidad, Inteligencia), con el color de cada uno
+    Object.entries(ATTR_INFO).forEach(([attr, info]) => {
+        const group = heroOffers[0].filter(t => t.primaryAttr === attr);
+        if (!group.length) return;
+        const head = document.createElement('div');
+        head.className = 'shop-category attr-head'; head.style.color = info.color; head.style.borderColor = info.color;
+        head.textContent = info.label;
+        container.appendChild(head);
+        group.forEach(t => {
+            const card = document.createElement('div');
+            card.className = 'skill-card';
+            card.style.borderLeft = `4px solid ${info.color}`;
+            const scalingText = `Escalado: +${t.scaling.perKillsAmount} ${scalingStatLabel(t.scaling.stat)} cada ${t.scaling.perKills} bajas &middot; +${t.scaling.perHeroKill} al ganar un duelo.`;
+            card.innerHTML = `<h4><span style="color:${info.color}">[${t.symbol}] ${t.name}</span> <span class="item-meta">${t.role}</span></h4><p>${t.description}</p><p style="color:#ffb703; margin-top:4px;">${scalingText}</p>`;
+            card.onclick = () => selectHero(t);
+            container.appendChild(card);
+        });
     });
     const random = document.createElement('div');
     random.className = 'skill-card random-pick';
@@ -534,7 +544,7 @@ function renderHeroBar() {
     document.querySelectorAll('#hb-skills .skill-slot[data-id]').forEach(slot => {
         const s = p.skills.find(x => x.id === slot.dataset.id);
         if (!s) return;
-        const total = val(s, p, 'cooldown') || 1, left = Math.max(0, p.cooldowns[s.id] || 0);
+        const total = skillCooldown(s, p) || 1, left = Math.max(0, p.cooldowns[s.id] || 0);
         const cd = slot.querySelector('.cd');
         cd.style.height = `${Math.min(100, left / total * 100)}%`;
         cd.textContent = left > 0 ? left.toFixed(left < 10 ? 1 : 0) : '';
@@ -766,7 +776,7 @@ function drawUnit(u, color, symbol, pos = u, opts = {}) {
 // Área de Descanso: un claro tranquilo con una fuente y fogatas donde los héroes esperan entre combates.
 function heroColor(h) { return h === player ? '#00f5d4' : '#ffb703'; }
 
-function renderRestArea() {
+function renderRestArea(dt = 0) {
     ctx.fillStyle = '#07140d'; ctx.fillRect(0, 0, MAP_W, MAP_H);
     ctx.strokeStyle = '#0f2418';
     for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) ctx.strokeRect(c * TILE, r * TILE, TILE, TILE);
@@ -782,7 +792,17 @@ function renderRestArea() {
     ctx.font = '11px monospace'; ctx.fillStyle = '#74c69d';
     ctx.fillText('Volvés al combate con vida y maná completos', MAP_W / 2, MAP_H - TILE * 0.6);
     ctx.font = '18px monospace';
-    heroes.filter(h => h.inRest && !h.eliminated).forEach(h => drawUnit({ x: h.x, y: h.y, hp: h.hp, maxHp: h.maxHp }, heroColor(h), h.symbol));
+    heroes.filter(h => h.inRest && !h.eliminated).forEach(h => {
+        drawUnit(h, heroColor(h), h.symbol, drawPos(h, dt), { glow: h === player });
+        if (h === player) { ctx.font = '10px monospace'; ctx.fillStyle = '#00f5d4'; ctx.fillText('vos', (h.rx ?? h.x) * TILE + TILE / 2, (h.ry ?? h.y) * TILE + TILE + 4); }
+    });
+    if (player && player.moveTarget && player.inRest) {
+        const t = player.moveTarget, px = t.x * TILE + TILE / 2, py = t.y * TILE + TILE / 2;
+        ctx.strokeStyle = '#2dc653'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(px - 5, py - 5); ctx.lineTo(px + 5, py + 5); ctx.moveTo(px + 5, py - 5); ctx.lineTo(px - 5, py + 5); ctx.stroke();
+    }
+    ctx.font = '11px monospace'; ctx.fillStyle = '#74c69d';
+    ctx.fillText('Podés caminar con W A S D o clic derecho', MAP_W / 2, TILE * 1.5);
 }
 
 // Portada en el mapa mientras estás en el menú o eligiendo héroe.
@@ -793,8 +813,9 @@ function renderTitle() {
     ctx.font = '13px monospace'; ctx.fillStyle = '#8ecae6';
     ctx.fillText(gameState === 'MENU' ? 'Iniciá una partida o mirá el tutorial →' : 'Elegí tu héroe →', MAP_W / 2, MAP_H / 2 + 10);
     ctx.font = '20px monospace';
-    Object.values(HERO_TEMPLATES).forEach((t, i, all) => {
-        ctx.fillStyle = i % 2 ? '#ffb703' : '#00f5d4';
+    const order = { STR: 0, AGI: 1, INT: 2 }; // agrupados por atributo, en su color
+    Object.values(HERO_TEMPLATES).sort((a, b) => order[a.primaryAttr] - order[b.primaryAttr]).forEach((t, i, all) => {
+        ctx.fillStyle = ATTR_INFO[t.primaryAttr].color;
         ctx.fillText(t.symbol, MAP_W / 2 + (i - (all.length - 1) / 2) * TILE * 1.4, MAP_H / 2 + 55);
     });
 }
@@ -804,7 +825,7 @@ function render() {
     const k = mapScale * (window.devicePixelRatio || 1);
     ctx.setTransform(k, 0, 0, k, 0, 0);
     const hero = viewedHero || player;
-    if (hero && (hero.inRest || !hero.arena) && gameState !== 'HERO_SELECT' && gameState !== 'MENU') { renderRestArea(); return; }
+    if (hero && (hero.inRest || !hero.arena) && gameState !== 'HERO_SELECT' && gameState !== 'MENU') { renderRestArea(dt); return; }
     ctx.fillStyle = '#050507'; ctx.fillRect(0, 0, MAP_W, MAP_H);
     if (gameState === 'MENU' || gameState === 'HERO_SELECT' || !hero || !hero.arena || !inCombat()) {
         ctx.strokeStyle = '#151821';

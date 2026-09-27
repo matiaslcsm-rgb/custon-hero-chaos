@@ -616,6 +616,13 @@ Todo en `js/fx.js`, **solo visual** (no cambia reglas) y solo para la arena que 
   la primera pestaña (⭐ Guía) y los ítems sugeridos llevan ⭐ en todas las pestañas; también está en el códice de Héroes.
   Son sugerencias (los contras de la oleada siguen importando). La IA todavía compra con sus reglas propias (`AI_BUILDS`).
 - **Estadísticas del jugador** debajo del ranking (atributos con el principal marcado, daño, velocidad, defensas, escalado).
+- **Sonidos** (`js/audio.js`): sintetizados con Web Audio, sin archivos (golpes, críticos, tajos, disparos, muertes, hechizos,
+  definitivas, curación, oro, subir de nivel, explosiones, clics, y avisos de oleada, duelo, jefe, victoria y derrota).
+  Solo suenan los de la arena que mirás; botón 🔊 para silenciar (queda guardado).
+- **Sala de espera caminable:** con WASD o clic derecho; la IA pasea de a ratos. No se pisan la fuente ni las fogatas.
+- **Elección de héroe agrupada por atributo** (Fuerza, Agilidad, Inteligencia) con su color; la portada también.
+- **Enfriamientos 25% más cortos** para todos (`COOLDOWN_MULT` en progression.js; los textos ya muestran el valor real).
+  Medido (9 partidas de 12 rondas): duelos y oleadas con mediana de ~13 s; solo el 3% de las oleadas pasa del límite.
 - **Códice de Héroes** con el mismo formato que los de ítems y creeps: secciones por atributo principal (Fuerza, Agilidad,
   Inteligencia) con botones para saltar; cada carta con nombre en el color del atributo, stats de nivel 1, escalado, innato,
   habilidades naturales y guía de ítems.

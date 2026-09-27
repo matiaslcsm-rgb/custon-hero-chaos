@@ -27,6 +27,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 | Mouse estilo MOBA (apuntar con tecla + clic, clic derecho para caminar) y movimiento −20% | ✅ |
 | Jefes individuales (8, cada uno con escalada propia; cuestan vidas) y apuestas de la IA con respaldo del 25% | ✅ (balance de jefes en ajuste) |
 | Guía de ítems por héroe, estadísticas bajo el ranking, etiqueta Innato y definitivas subrayadas | ✅ |
+| Sonidos sintetizados, sala de espera caminable, héroes agrupados por atributo, enfriamientos −25% | ✅ |
 
 ## Pendientes y temas abiertos
 - **Alquimista:** gana ~83% de sus duelos (medido); falta investigarlo como se hizo con el Sniper.
@@ -39,7 +40,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **Idioma:** español rioplatense (voseo), en el código, los comentarios, los textos del juego y los commits.
 - **Decisiones de diseño:** se consultan con opciones y una recomendada, idealmente con números medidos. Lo que se decide
   se anota en DISEÑO.md (secciones de la fase y "Decisiones tomadas").
-- **Cada cambio:** pruebas automáticas (`tests.html`, hoy **125**) → commit en git → push a GitHub solo cuando el usuario lo pide.
+- **Cada cambio:** pruebas automáticas (`tests.html`, hoy **127**) → commit en git → push a GitHub solo cuando el usuario lo pide.
 - **Commits:** mensaje en español que explica el porqué; terminan con `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 - **Héroes nuevos con otra IA:** prompt en [`prompt-heroes.md`](prompt-heroes.md); lo que devuelva se revisa contra el motor
   (pasivas, efectos por segundo con `everyInterval`, descripciones que coincidan con el código) antes de integrarlo.

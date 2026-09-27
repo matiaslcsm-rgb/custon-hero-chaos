@@ -325,3 +325,6 @@ body.big-map #left-col { display: none; }
 .hc-ability-name { color: #00f5d4; font-weight: bold; font-size: 0.85rem; }
 .hc-ability.ult .hc-ability-name { color: #ff9f1c; }
 .hc-ability.innate .hc-ability-name { color: #e0aaff; }
+
+#sound-btn { background: #1c1f26; color: #ccc; border: 1px solid #444; padding: 4px 8px; cursor: pointer; font-size: 0.85rem; }
+.attr-head { margin-top: 4px; }

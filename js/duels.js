@@ -63,6 +63,7 @@ function startDuels(plan = makeDuelPairs(aliveHeroes())) {
     if (mine) viewedHero = player;
     else if (!viewedHero || !viewedHero.arena) viewedHero = arenas.length ? arenas[0].heroes[0] : player;
     setStateText(`DUELOS · RONDA ${waveNumber}`);
+    sfx('duel');
     const rival = mine ? mine.heroes.find(h => h !== player) : null;
     log(`⚔️ ¡Duelos! ${rival ? `Te toca contra ${rival.displayName}.` : player.eliminated ? 'Mirás los duelos.' : 'Esta ronda descansás.'} ` +
         pairs.map(([a, b]) => `${a.name} vs ${b.name}`).join(' · ') + (bye ? ` · descansa ${bye.name}` : ''));
@@ -79,6 +80,7 @@ function resolveDuel(arena, winner, loser, reason) {
     const you = loser === player ? 'Perdiste tu duelo' : winner === player ? 'Ganaste tu duelo' : null;
     log(`⚔️ ${winner.displayName} venció a ${loser.displayName}${reason ? ` (${reason})` : ''}.${you ? ` ${you}${winner === player ? ' (+3 puntos)' : ''}.` : ''}`);
     logMuted = !involvesPlayer; // los detalles, solo si es tu duelo
+    if (winner === player) sfx('win'); else if (loser === player) sfx('lose');
     settleBet(winner, loser);
     winner.points += POINTS.duelWin;
     winner.duelWins++; loser.duelLosses++;

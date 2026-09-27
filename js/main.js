@@ -20,6 +20,10 @@ document.getElementById('tutorial-next').onclick = () => tutorialStep(1);
 document.getElementById('tutorial').onclick = e => { if (e.target.id === 'tutorial') closeTutorial(); };
 document.getElementById('autopilot-btn').onclick = () => setAutopilot(!autopilot);
 document.getElementById('autocast-btn').onclick = () => setAutoCast(!autoCast);
+document.getElementById('sound-btn').onclick = () => setSound(!soundOn);
+setSound(soundOn);
+// Sonido de clic en botones y cartas
+document.addEventListener('click', e => { if (e.target.closest('button, .skill-card, .score-row')) sfx('click'); });
 { const btn = document.getElementById('autocast-btn'); btn.textContent = `✨ Habilidades: ${autoCast ? 'AUTO' : 'MANUAL'}`; btn.classList.toggle('on', autoCast); }
 document.getElementById('log-toggle').onclick = () => {
     const panel = document.getElementById('log-panel');
@@ -36,6 +40,7 @@ function loop(ts) {
     updateHud();
     renderTimer();
     if (inCombat()) updateWave(dt); // oleadas o duelos (también con el jugador muerto: cuenta el tiempo para revivir)
+    if (player && gameState !== 'MENU' && gameState !== 'HERO_SELECT') updateRestArea(dt); // en la sala de espera se puede caminar
     render();
     requestAnimationFrame(loop);
 }

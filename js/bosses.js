@@ -53,6 +53,7 @@ function startBossFight() {
     lastRoundBoss = t; nextRoundBoss = null;
     if (player.eliminated && (!viewedHero || viewedHero.eliminated)) viewedHero = rankedHeroes()[0];
     setStateText(`JEFE DE RONDA · ${t.label.toUpperCase()}`);
+    sfx('boss');
     log(`👹 ¡Jefe de ronda: ${t.label}! Cada héroe contra el suyo. ${t.mechanic} ${t.escalation} ` +
         `Morir cuesta vidas y, pasados ${BOSS_FIGHT.enrageAfter}s, se enfurece. Los 3 más rápidos en matarlo cobran extra.`);
 }

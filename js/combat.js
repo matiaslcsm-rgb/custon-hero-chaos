@@ -162,6 +162,7 @@ function resolveBasicHit(attacker, target, dmg, isCrit) {
 
 // --- PROYECTILES (ataques básicos a distancia con velocidad de proyectil) ---
 function fireProjectile(attacker, target, dmg, isCrit) {
+    if (attacker.isHero && fxArena(attacker)) sfx('shoot');
     attacker.arena.projectiles.push({ attacker, x: attacker.x, y: attacker.y, target, dmg, isCrit, speed: attacker.projectileSpeed || 10 });
 }
 function updateProjectiles(arena, dt) {
@@ -215,6 +216,7 @@ function killCreep(c, killer) {
     const gold = Math.max(1, Math.round(c.gold * speedMult));
     killer.gold += gold;
     fxText(c, `+${gold}g`, '#ffd166', 10, 1);
+    if (fxArena(c) && killer === player) sfx('coin');
     applyScalingOnCreepKill(killer);
     gainXp(killer, c.xp || 0);
     emit(killer, 'onKill', { victim: c });
