@@ -180,7 +180,7 @@ let autopilotWait = 0; // pausa en draft/preparación para que se vea lo que hac
 function setAutopilot(on) {
     autopilot = on;
     const btn = document.getElementById('autopilot-btn');
-    if (btn) { btn.textContent = `🤖 Piloto automático: ${on ? 'ON' : 'OFF'}`; btn.classList.toggle('on', on); }
+    if (btn) { btn.textContent = `🤖 Piloto: ${on ? 'ON' : 'OFF'}`; btn.classList.toggle('on', on); }
     log(on ? '🤖 Piloto automático activado.' : '🤖 Piloto automático desactivado.');
 }
 

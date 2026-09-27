@@ -556,7 +556,15 @@ Todo en `js/fx.js`, **solo visual** (no cambia reglas) y solo para la arena que 
   **barra de maná** en los héroes, marcas de **aturdido** (✦✦) y **ralentizado** (❄).
 - **Fondo por arena** (sin grilla): pasto oscuro en las oleadas, piedra en los duelos, rojo volcánico en el jefe de ronda.
 
-**Siguiente paso:** rediseño del panel lateral y los menús (íconos, barras, cartas).
+### Paso 2: HUD estilo MOBA ✅
+- **Barra superior:** ronda, fase y tiempo; a la derecha vidas, oro, puntos y puesto, y el piloto automático.
+- **Izquierda:** ranking compacto (tooltip con puntos, oro, nivel y duelos; clic para mirar su arena).
+- **Centro:** mapa más grande (casillas de 30 px en vez de 26) y abajo la **barra del héroe**: retrato con nivel,
+  experiencia y puntos para repartir; vida y maná con números; las 4 habilidades como casillas (tecla, niveles,
+  enfriamiento que baja como una cortina, borde azul si no alcanza el maná, [+] para subir); innato y pasivas como chips;
+  inventario de 6 + neutral y efectos activos. Los stats completos y el escalado, en el tooltip del retrato.
+- **Derecha:** solo lo de la fase actual (menú, elección, draft, tienda con "Comenzar oleada" arriba, apuestas, o qué
+  pasa en el combate) y el **registro** abajo, plegable.
 
 ---
 

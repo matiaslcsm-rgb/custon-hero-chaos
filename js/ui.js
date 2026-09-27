@@ -2,7 +2,7 @@
 
 const canvas = document.getElementById('ascii-canvas');
 const ctx = canvas.getContext('2d');
-const TILE = 26;
+const TILE = 30;
 canvas.width = COLS * TILE; canvas.height = ROWS * TILE;
 
 function setStateText(text) { document.getElementById('game-state-text').textContent = text; }
@@ -422,103 +422,156 @@ function renderBetting() {
 // --- KIT (nivel, experiencia, puntos y habilidades) ---
 let lastKitSignature = '';
 
-// Se redibuja solo cuando cambia algo (nivel, puntos, habilidades), para no romper los clics en cada frame.
-function renderKit() {
-    document.getElementById('kit-panel').style.display = 'flex';
-    document.getElementById('xp-fill').style.width = `${Math.min(100, player.xp / xpToNext(player.level) * 100)}%`;
-    const signature = [player.level, player.skillPoints, ...player.skills.map(s => s.id + ':' + skillLevel(player, s) + ':' + player.keyBindings[s.id])].join('|');
+// --- BARRA DEL HÉROE (abajo del mapa) ---
+// Retrato con nivel y experiencia, vida y maná, las 4 habilidades como casillas (tecla, niveles, enfriamiento y [+]),
+// innato y pasivas como chips, inventario de 6 + el neutral y los efectos activos. Todo con tooltip (title) al pasar el mouse.
+// La estructura se rehace solo cuando cambia algo (para no romper los clics); vida, maná y enfriamientos se actualizan en cada cuadro.
+function shortName(name, max = 14) { return name.length > max ? name.slice(0, max - 1) + '…' : name; }
+
+function heroTooltip() {
+    const p = player;
+    let text = `${p.name} (${p.primaryAttr}) · Nivel ${p.level}\n` +
+        `Fuerza ${Math.floor(p.attr('str'))} · Agilidad ${Math.floor(p.attr('agi'))} · Inteligencia ${Math.floor(p.attr('int'))}\n` +
+        `Daño ${Math.round(effAttack(p))} · Vel. ataque ${effAtkSpeed(p).toFixed(2)}/s · Rango ${effRange(p).toFixed(1)}\n` +
+        `Armadura ${p.armor.toFixed(1)} · Res. mágica ${p.magicResist.toFixed(0)}% · Evasión ${p.evasion.toFixed(1)}%\n` +
+        `Crítico ${p.critChance.toFixed(1)}% · Robo de vida ${p.lifesteal.toFixed(1)}% · Amp. hechizo ${p.spellAmp.toFixed(1)}%\n` +
+        `Regeneración ${p.hpRegen.toFixed(1)} vida/s · ${p.manaRegen.toFixed(1)} maná/s · Vel. mov. ${p.moveSpeed.toFixed(1)}`;
+    if (p.scaling) {
+        const toNext = p.scaling.perKills - (p.creepKillCount % p.scaling.perKills);
+        text += `\nEscalado: +${(p.bonus[p.scaling.stat] || 0).toFixed(1)} ${scalingStatLabel(p.scaling.stat)} (${p.creepKillCount} bajas, próximo en ${toNext})`;
+    }
+    return text;
+}
+
+function levelButton(ability) {
+    const blocker = levelUpBlocker(player, ability);
+    if (blocker) return null;
+    const btn = document.createElement('button');
+    btn.className = 'lvl-btn'; btn.textContent = '+'; btn.title = 'Subir de nivel';
+    btn.onclick = e => { e.stopPropagation(); levelUpSkill(player, ability); lastKitSignature = ''; renderHeroBar(); };
+    return btn;
+}
+
+function renderHeroBar() {
+    const bar = document.getElementById('hero-bar');
+    bar.style.display = 'grid';
+    const p = player;
+    // Partes que cambian en cada cuadro
+    document.getElementById('hb-hp-fill').style.width = `${Math.max(0, p.hp / p.maxHp * 100)}%`;
+    document.getElementById('hb-hp-text').textContent = `${Math.max(0, Math.round(p.hp))} / ${p.maxHp}`;
+    document.getElementById('hb-mana-fill').style.width = `${p.maxMana ? Math.max(0, p.mana / p.maxMana * 100) : 0}%`;
+    document.getElementById('hb-mana-text').textContent = `${Math.round(p.mana)} / ${p.maxMana}`;
+    document.getElementById('hb-xp-fill').style.width = `${Math.min(100, p.xp / xpToNext(p.level) * 100)}%`;
+    document.querySelectorAll('#hb-skills .skill-slot[data-id]').forEach(slot => {
+        const s = p.skills.find(x => x.id === slot.dataset.id);
+        if (!s) return;
+        const total = val(s, p, 'cooldown') || 1, left = Math.max(0, p.cooldowns[s.id] || 0);
+        const cd = slot.querySelector('.cd');
+        cd.style.height = `${Math.min(100, left / total * 100)}%`;
+        cd.textContent = left > 0 ? left.toFixed(left < 10 ? 1 : 0) : '';
+        slot.classList.toggle('no-mana', skillLevel(p, s) > 0 && p.mana < (val(s, p, 'manaCost') || 0));
+    });
+    const effects = activeEffects(p).filter(e => !e.flags.includes('item'));
+    const effSig = effects.map(e => e.id + (isFinite(e.until) ? Math.ceil(e.until - gameClock) : '')).join('|');
+    const effBox = document.getElementById('hb-effects');
+    if (effBox.dataset.sig !== effSig) {
+        effBox.dataset.sig = effSig;
+        effBox.innerHTML = effects.map(e => `<span class="fx-chip" title="${e.name}">${shortName(e.name, 16)}${isFinite(e.until) ? ` ${Math.ceil(e.until - gameClock)}s` : ''}</span>`).join('');
+    }
+
+    // Estructura (solo si cambió algo)
+    const signature = [p.level, p.skillPoints, p.neutral, p.inventory.map(i => i.key).join(','), Math.floor(p.attr('str')), Math.floor(p.attr('agi')),
+        Math.floor(p.attr('int')), p.armor.toFixed(1), ...p.skills.map(s => s.id + ':' + skillLevel(p, s) + ':' + p.keyBindings[s.id] + ':' + !!levelUpBlocker(p, s))].join('|');
     if (signature === lastKitSignature) return;
     lastKitSignature = signature;
 
-    document.getElementById('level-line').innerHTML = `<strong>Nivel ${player.level}</strong>` +
-        (player.skillPoints > 0 ? ` &middot; <span class="points">${player.skillPoints} punto${player.skillPoints > 1 ? 's' : ''} de habilidad</span>` : '');
+    const portrait = document.getElementById('hb-portrait');
+    portrait.title = heroTooltip();
+    const sym = document.getElementById('hb-symbol');
+    sym.textContent = p.symbol; sym.style.color = heroColor(p);
+    document.getElementById('hb-level').innerHTML = `Nv ${p.level}` + (p.skillPoints > 0 ? ` <span class="pts" title="Puntos de habilidad para repartir con [+]">+${p.skillPoints}</span>` : '');
+    document.getElementById('hb-name').textContent = p.name;
+    const stats = document.getElementById('hb-stats');
+    stats.innerHTML = `<span class="st-str">FUE ${Math.floor(p.attr('str'))}</span> <span class="st-agi">AGI ${Math.floor(p.attr('agi'))}</span> ` +
+        `<span class="st-int">INT ${Math.floor(p.attr('int'))}</span> <span>ARM ${p.armor.toFixed(1)}</span> <span class="st-more">ⓘ</span>`;
+    stats.title = heroTooltip();
 
-    const active = document.getElementById('kit-active'); active.innerHTML = '';
-    player.skills.filter(s => s.kind === 'active').forEach(s => {
-        const lvl = skillLevel(player, s), max = maxSkillLevel(s), blocker = levelUpBlocker(player, s);
-        const row = document.createElement('div');
-        row.className = 'kit-row' + (lvl === 0 ? ' locked' : '') + (s.isUltimate ? ' ult' : '');
-        row.title = `${s.name}\n${stripHtml(skillCostLine(s, lvl))}\n${stripHtml(describeSkill(s, lvl))}`;
-        const pips = Array.from({ length: max }, (_, i) => i < lvl ? '■' : '<span class="off">□</span>').join('');
-        row.innerHTML = `<span class="key">[${(player.keyBindings[s.id] || '—').toUpperCase()}]</span><span class="name">${s.name}</span><span class="pips">${pips}</span>`;
-        const btn = document.createElement('button');
-        btn.textContent = '+'; btn.disabled = !!blocker; btn.title = blocker || 'Subir de nivel';
-        btn.onclick = e => { e.stopPropagation(); levelUpSkill(player, s); renderKit(); };
-        row.appendChild(btn);
-        active.appendChild(row);
-    });
-    for (let i = player.skills.length; i < KIT_SIZE; i++) {
-        const row = document.createElement('div'); row.className = 'kit-row empty';
-        row.textContent = '— espacio libre (se llena en el draft) —';
-        active.appendChild(row);
+    // Habilidades activas: 4 casillas (las vacías se llenan en el draft)
+    const skills = document.getElementById('hb-skills'); skills.innerHTML = '';
+    const actives = p.skills.filter(s => s.kind === 'active');
+    for (let i = 0; i < KIT_SIZE; i++) {
+        const s = actives[i];
+        const slot = document.createElement('div');
+        if (!s) { slot.className = 'skill-slot empty'; slot.textContent = 'libre'; slot.title = 'Espacio libre: se llena en el draft'; skills.appendChild(slot); continue; }
+        const lvl = skillLevel(p, s), max = maxSkillLevel(s);
+        slot.className = 'skill-slot' + (lvl === 0 ? ' locked' : '') + (s.isUltimate ? ' ult' : '');
+        slot.dataset.id = s.id;
+        slot.title = `${s.name}${s.isUltimate ? ' (definitiva)' : ''}\n${stripHtml(skillCostLine(s, lvl))}\n${stripHtml(describeSkill(s, lvl))}` +
+            (p.skillPoints > 0 && levelUpBlocker(p, s) ? `\n🔒 ${levelUpBlocker(p, s)}` : '');
+        slot.innerHTML = `<span class="key">${(p.keyBindings[s.id] || '—').toUpperCase()}</span><span class="nm">${s.name}</span>` +
+            `<span class="pips">${Array.from({ length: max }, (_, j) => `<i class="${j < lvl ? 'on' : ''}"></i>`).join('')}</span><div class="cd"></div>`;
+        const btn = levelButton(s); if (btn) slot.appendChild(btn);
+        skills.appendChild(slot);
     }
 
-    // Innato y pasivas: recuadros chicos siempre visibles. Las pasivas drafteadas también se suben con [+].
-    const passive = document.getElementById('kit-passive'); passive.innerHTML = '';
-    const boxes = [{ a: player.innate, innate: true }, ...player.skills.filter(s => s.kind === 'passive').map(a => ({ a }))];
-    boxes.forEach(({ a, innate }) => {
+    // Innato y pasivas: chips (las pasivas drafteadas también se suben con [+])
+    const passives = document.getElementById('hb-passives'); passives.innerHTML = '';
+    [{ a: p.innate, innate: true }, ...p.skills.filter(s => s.kind === 'passive').map(a => ({ a }))].forEach(({ a, innate }) => {
         if (!a) return;
-        const box = document.createElement('div'); box.className = 'passive-box';
-        const lvl = innate ? null : skillLevel(player, a);
-        box.innerHTML = `<h5>${innate ? 'Innato: ' : ''}${a.name}${innate ? '' : ` (nv ${lvl}/${maxSkillLevel(a)})`}</h5><div>${innate ? a.description : describeSkill(a, lvl)}</div>`;
-        if (!innate) {
-            const btn = document.createElement('button');
-            btn.textContent = '+'; btn.disabled = !!levelUpBlocker(player, a);
-            btn.onclick = () => { levelUpSkill(player, a); renderKit(); };
-            box.appendChild(btn);
-        }
-        passive.appendChild(box);
+        const chip = document.createElement('span');
+        const lvl = innate ? null : skillLevel(p, a);
+        chip.className = 'passive-chip' + (innate ? ' innate' : '') + (lvl === 0 ? ' locked' : '');
+        chip.textContent = `${innate ? '◆ ' : '◇ '}${a.name}${innate ? '' : ` ${lvl}/${maxSkillLevel(a)}`}`;
+        chip.title = `${innate ? 'Innato' : 'Pasiva'}: ${a.name}\n${stripHtml(innate ? a.description : describeSkill(a, lvl))}`;
+        if (!innate) { const btn = levelButton(a); if (btn) chip.appendChild(btn); }
+        passives.appendChild(chip);
     });
-}
 
-// --- HUD ---
-function renderCooldownBar() {
-    const bar = document.getElementById('cooldown-bar'); bar.innerHTML = '';
-    player.skills.filter(s => s.kind === 'active').forEach(s => {
-        const remaining = Math.max(0, (player.cooldowns[s.id] || 0));
-        const locked = skillLevel(player, s) === 0;
-        const span = document.createElement('span');
-        span.className = !locked && remaining <= 0 ? 'ready' : '';
-        const key = player.keyBindings[s.id];
-        span.textContent = `[${key ? key.toUpperCase() : '—'}] ${s.name}: ${locked ? 'Nivel 0' : remaining <= 0 ? 'Listo' : remaining.toFixed(1) + 's'}`;
-        bar.appendChild(span);
-    });
-    // Efectos activos sobre el jugador (mejoras propias, invulnerabilidad al reaparecer...)
-    activeEffects(player).filter(e => !e.flags.includes('item')).forEach(e => {
-        const span = document.createElement('span');
-        span.className = 'effect';
-        span.textContent = `✦ ${e.name}${isFinite(e.until) ? ' ' + (e.until - gameClock).toFixed(1) + 's' : ''}`;
-        bar.appendChild(span);
-    });
+    // Inventario: 6 casillas + el neutral
+    const slots = document.getElementById('hb-slots'); slots.innerHTML = '';
+    for (let i = 0; i < INVENTORY_SLOTS; i++) {
+        const inv = p.inventory[i], el = document.createElement('div');
+        el.className = 'item-slot' + (inv ? '' : ' empty');
+        if (inv) { const item = ITEMS[inv.key]; el.textContent = shortName(item.name, 11); el.style.color = itemColor(item); el.style.borderColor = itemColor(item); el.title = `${item.name}\n${describeItem(item)}`; }
+        slots.appendChild(el);
+    }
+    const n = p.neutral ? NEUTRAL_ITEMS[p.neutral] : null, neutral = document.createElement('div');
+    neutral.className = 'item-slot neutral' + (n ? '' : ' empty');
+    neutral.textContent = n ? shortName(n.name, 11) : 'neutral';
+    if (n) { neutral.style.color = itemColor(n); neutral.style.borderColor = itemColor(n); neutral.title = `${n.name} (neutral)\n${describeNeutral(n)}`; }
+    else neutral.title = 'Objeto neutral: se gana contra los jefes de ronda';
+    slots.appendChild(neutral);
 }
 
 function updateHud() {
     if (!player) return;
-    document.getElementById('player-name').textContent = player.name;
-    document.getElementById('player-hp').textContent = `${Math.round(player.hp)}/${player.maxHp}`;
-    document.getElementById('player-mana').textContent = `${Math.round(player.mana)}/${player.maxMana}`;
     document.getElementById('player-gold').textContent = player.gold;
-    document.getElementById('round-num').textContent = `${waveNumber}/${MAX_ROUNDS}${isRoundBossRound() ? ' (JEFE)' : ''}`;
+    document.getElementById('round-num').textContent = `${waveNumber}/${MAX_ROUNDS}${isRoundBossRound() ? ' 👹' : ''}`;
+    document.getElementById('lives-text').innerHTML = `<span class="hearts">${'♥'.repeat(Math.max(0, player.lives))}${'♡'.repeat(Math.max(0, 2 - player.lives))}</span>` +
+        (isCondemned(player) ? ` <span class="cursed" title="Condenado: recibís más daño">☠ +${Math.round(player.condemnPct * 100)}%</span>` : '');
+    document.getElementById('points-text').textContent = `🏆 ${player.points} pts · ${heroRank(player)}º`;
     renderScoreboard();
-    document.getElementById('stat-str').textContent = Math.floor(player.attr('str'));
-    document.getElementById('stat-agi').textContent = Math.floor(player.attr('agi'));
-    document.getElementById('stat-int').textContent = Math.floor(player.attr('int'));
-    document.getElementById('inventory-line').textContent = player.inventory.length
-        ? '🎒 ' + player.inventory.map(inv => ITEMS[inv.key].name).join(' · ') : '';
-    document.getElementById('stat-armor').textContent = player.armor.toFixed(1);
-    document.getElementById('extra-stats').textContent =
-        `RM: ${player.magicResist.toFixed(0)}% | Crít: ${player.critChance.toFixed(1)}% | Evasión: ${player.evasion.toFixed(1)}% | ` +
-        `Amp.Hechizo: ${player.spellAmp.toFixed(1)}% | Robo Vida: ${player.lifesteal.toFixed(1)}% | Regen: ${player.hpRegen.toFixed(1)} HP/s, ${player.manaRegen.toFixed(1)} Maná/s | ` +
-        `Vel.Mov: ${player.moveSpeed.toFixed(1)}${player.projectileSpeed > 0 ? ` | Vel.Proyectil: ${player.projectileSpeed.toFixed(1)}` : ''}`;
-    document.getElementById('lives-text').textContent = '♥'.repeat(Math.max(0, player.lives)) + '♡'.repeat(Math.max(0, 2 - player.lives)) +
-        (isCondemned(player) ? ` ☠ Condenado +${Math.round(player.condemnPct * 100)}%` : '');
-    renderKit();
-    if (player.scaling) {
-        const bonusSoFar = player.bonus[player.scaling.stat] || 0;
-        const toNext = player.scaling.perKills - (player.creepKillCount % player.scaling.perKills);
-        document.getElementById('scaling-info').textContent = `Escalado: +${bonusSoFar.toFixed(1)} ${scalingStatLabel(player.scaling.stat)} acumulado (${player.creepKillCount} bajas, próximo bonus en ${toNext})`;
-    }
-    if (inCombat()) renderCooldownBar();
+    renderHeroBar();
+    renderCombatInfo();
+}
+
+// Panel derecho durante el combate (no hay nada para elegir): qué está pasando y qué hacer.
+function renderCombatInfo() {
+    const box = document.getElementById('combat-info');
+    const show = inCombat() || gameState === 'ENDED';
+    box.style.display = show ? 'block' : 'none';
+    if (!show) return;
+    const hero = viewedHero || player, arena = hero.arena;
+    let html;
+    if (gameState === 'ENDED') html = `<h3>Fin de la partida</h3><p class="subtitle">Mirá el ranking a la izquierda. Tocá "Nueva Partida" para jugar otra.</p>`;
+    else if (player.eliminated) html = `<h3>Quedaste eliminado</h3><p class="subtitle">Podés seguir mirando: clic en un héroe del ranking.</p>`;
+    else if (gameState === 'BOSS') html = `<h3>👹 Jefe de ronda</h3><p class="subtitle">Todos contra ${arena && arena.boss ? arena.boss.label : 'el jefe'}. Morir acá no cuesta vidas. Los 3 que más daño hagan cobran extra.</p>`;
+    else if (gameState === 'DUEL') {
+        const rival = arena && arena.kind === 'duel' ? arena.heroes.find(h => h !== hero) : null;
+        html = `<h3>⚔ Duelos</h3><p class="subtitle">${rival ? `${hero === player ? 'Peleás' : hero.name + ' pelea'} contra <b>${rival.displayName}</b>. Gana quien mata al otro o, a los ${DUEL_TIME}s, quien tenga más % de vida.` : 'Esperando que terminen los demás duelos.'}</p>` +
+            (currentBet ? `<p class="subtitle">🎲 Apostaste ${currentBet.amount}g a ${currentBet.on.displayName}.</p>` : '');
+    } else html = `<h3>🌊 Oleada ${waveNumber}</h3><p class="subtitle">${hero.inRest ? 'Terminaste: esperás en el Área de Descanso a que terminen los demás.' : 'Matá a todos los creeps antes de que se acabe el tiempo (después se enfurecen). El ataque es automático: movete y usá tus habilidades.'}</p>`;
+    if (box.dataset.html !== html) { box.dataset.html = html; box.innerHTML = html; }
 }
 
 // Temporizador de la fase actual (o de la oleada / reaparición) al lado del estado.
@@ -561,9 +614,9 @@ function renderScoreboard() {
         const row = document.createElement('div');
         row.className = 'score-row' + (h === player ? ' you' : '') + (h === (viewedHero || player) ? ' viewed' : '') + (h.eliminated ? ' out' : '');
         const lives = h.eliminated ? '' : '♥'.repeat(Math.max(0, h.lives)) + (isCondemned(h) ? '☠' : '');
-        row.innerHTML = `<span class="pos">${i + 1}º</span><span class="sym">${h.symbol}</span><span class="name">${h.displayName}</span>` +
-            `<span class="lives">${lives}</span><span class="pts">${h.points} pts</span><span class="gold">${h.gold}g</span><span class="st">${heroStatusIcon(h)}</span>`;
-        row.title = h === player ? 'Vos' : 'Clic para mirar su arena';
+        row.innerHTML = `<span class="pos">${i + 1}</span><span class="sym" style="color:${heroColor(h)}">${h.symbol}</span><span class="name">${h === player ? 'Vos' : h.name}</span>` +
+            `<span class="lives">${lives}</span><span class="pts">${h.points}</span><span class="st">${heroStatusIcon(h)}</span>`;
+        row.title = `${h.displayName} · ${h.points} pts · ${h.gold}g · nivel ${h.level} · duelos ${h.duelWins}-${h.duelLosses}`;
         row.onclick = () => { viewedHero = h; lastScoreboardSignature = ''; };
         board.appendChild(row);
     });
@@ -574,12 +627,12 @@ function resetHud() {
     ['draft-container', 'shop-container', 'bet-container', 'restart-btn', 'hero-select-panel'].forEach(id => showPanel(id, false));
     showPanel('menu-panel', true);
     setStateText('MENÚ');
-    document.getElementById('player-name').textContent = 'Ninguno';
     document.getElementById('round-num').textContent = '1';
+    ['lives-text', 'points-text', 'player-gold'].forEach(id => { document.getElementById(id).textContent = ''; });
+    document.getElementById('hero-bar').style.display = 'none';
+    document.getElementById('combat-info').style.display = 'none';
     document.getElementById('scoreboard').innerHTML = ''; lastScoreboardSignature = '';
-    ['cooldown-bar', 'combat-log'].forEach(id => document.getElementById(id).innerHTML = '');
-    ['scaling-info', 'extra-stats'].forEach(id => document.getElementById(id).textContent = '');
-    document.getElementById('kit-panel').style.display = 'none';
+    document.getElementById('combat-log').innerHTML = '';
     lastKitSignature = '';
 }
 

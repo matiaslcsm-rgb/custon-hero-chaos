@@ -18,86 +18,106 @@
 
     <div id="view-game" style="display:flex;">
     <div id="game-container">
-        <div id="viewport">
-            <canvas id="ascii-canvas"></canvas>
-            <div id="controls-hint">Mover: [W,A,S,D] / Flechas &mdash; Habilidades: ver barra de abajo &mdash; Piloto automático: [P]</div>
-            <button id="autopilot-btn">🤖 Piloto automático: OFF</button>
-            <div id="cooldown-bar"></div>
+        <!-- Barra superior: ronda, fase, tiempo y lo tuyo (vidas, oro, puntos) -->
+        <div id="top-bar">
+            <span class="brand">CUSTOM HERO CHAOS</span>
+            <span class="tb-item">Ronda <b id="round-num">1</b></span>
+            <span class="tb-item"><span id="game-state-text">MENÚ</span> <span id="phase-timer"></span></span>
+            <span class="tb-spacer"></span>
+            <span class="tb-item" id="lives-text" title="Vidas"></span>
+            <span class="tb-item tb-gold" title="Oro">💰 <span id="player-gold">0</span>g</span>
+            <span class="tb-item" id="points-text" title="Puntos y puesto en el ranking"></span>
+            <button id="autopilot-btn" title="La IA juega por vos (tecla P)">🤖 Piloto: OFF</button>
         </div>
 
-        <div id="ui-panel">
-            <h2>CUSTOM HERO CHAOS</h2>
-
-            <div id="status-panel">
-                <p><strong>Héroe:</strong> <span id="player-name">Ninguno</span> (<span id="player-hp">100/100</span> HP, <span id="player-mana">0/0</span> Maná)</p>
-                <p><strong>Stats:</strong> STR: <span id="stat-str">0</span> | AGI: <span id="stat-agi">0</span> | INT: <span id="stat-int">0</span> | ARM: <span id="stat-armor">0</span></p>
-                <p style="font-size: 0.72rem; color: #8ecae6;" id="extra-stats"></p>
-                <p><strong>Oro:</strong> <span id="player-gold">100</span> g | <strong>Ronda:</strong> <span id="round-num">1</span> | <strong>Vidas:</strong> <span id="lives-text">♥♥</span></p>
-                <p><strong>Estado:</strong> <span id="game-state-text">SELECCIÓN DE HÉROE</span> <span id="phase-timer"></span></p>
-                <p id="scaling-info" style="font-size: 0.75rem; color: #ffb703;"></p>
+        <div id="hud-main">
+            <!-- Izquierda: ranking (clic para mirar la arena de otro héroe) -->
+            <div id="left-col">
+                <div class="col-title">Ranking</div>
+                <div id="scoreboard"></div>
+                <div class="col-hint">Clic en un héroe para mirar su arena</div>
             </div>
 
-            <!-- Ranking de los 8 héroes (clic para mirar su arena) -->
-            <div id="scoreboard"></div>
-
-            <!-- Kit: nivel, experiencia, puntos y habilidades (se sube de nivel con [+]) -->
-            <div id="kit-panel" style="display: none;">
-                <div id="level-line"></div>
-                <div id="xp-bar"><div id="xp-fill"></div></div>
-                <div id="kit-active"></div>
-                <div id="kit-passive"></div>
-                <div id="inventory-line"></div>
+            <!-- Centro: mapa y barra de tu héroe -->
+            <div id="center-col">
+                <canvas id="ascii-canvas"></canvas>
+                <div id="hero-bar" style="display: none;">
+                    <div id="hb-portrait">
+                        <div id="hb-symbol"></div>
+                        <div id="hb-level"></div>
+                        <div id="hb-xp"><div id="hb-xp-fill"></div></div>
+                    </div>
+                    <div id="hb-main">
+                        <div id="hb-name-line"><span id="hb-name"></span><span id="hb-stats"></span></div>
+                        <div class="hb-bar hp"><div id="hb-hp-fill"></div><span id="hb-hp-text"></span></div>
+                        <div class="hb-bar mana"><div id="hb-mana-fill"></div><span id="hb-mana-text"></span></div>
+                        <div id="hb-skills"></div>
+                        <div id="hb-passives"></div>
+                    </div>
+                    <div id="hb-side">
+                        <div class="hb-title">Inventario</div>
+                        <div id="hb-slots"></div>
+                        <div id="hb-effects"></div>
+                    </div>
+                </div>
+                <div id="controls-hint">Mover: W A S D / flechas · Habilidades: E R T F · Piloto automático: P · Pasá el mouse por todo para ver detalles</div>
             </div>
 
-            <hr>
+            <!-- Derecha: lo que toca en esta fase y el registro -->
+            <div id="right-col">
+                <div id="phase-area">
+                    <!-- Menú de inicio -->
+                    <div id="menu-panel">
+                        <h3>Bienvenido</h3>
+                        <p class="subtitle">8 héroes, oleadas de creeps, duelos, apuestas y jefes. Armá tu kit mezclando habilidades de cualquier héroe.</p>
+                        <button id="start-game-btn" class="primary-btn">▶ Iniciar partida</button>
+                        <button id="menu-tutorial-btn" class="secondary-btn">📖 Tutorial (cómo se juega)</button>
+                    </div>
 
-            <!-- Menú de inicio -->
-            <div id="menu-panel">
-                <p class="subtitle">8 héroes, oleadas de creeps, duelos, apuestas y jefes. Armá tu kit mezclando habilidades de cualquier héroe.</p>
-                <button id="start-game-btn" class="primary-btn">▶ Iniciar partida</button>
-                <button id="menu-tutorial-btn" class="secondary-btn">📖 Tutorial (cómo se juega)</button>
-            </div>
+                    <!-- Elección de Héroe -->
+                    <div id="hero-select-panel" style="display: none;">
+                        <h3>Elegí tu héroe</h3>
+                        <p class="subtitle">Estas opciones son solo tuyas. Ningún héroe se repite en la partida.</p>
+                        <div id="hero-options" class="options-grid"></div>
+                    </div>
 
-            <!-- Elección de Héroe -->
-            <div id="hero-select-panel" style="display: none;">
-                <h3>Elegí tu héroe</h3>
-                <p class="subtitle">Estas opciones son solo tuyas. Ningún héroe se repite en la partida.</p>
-                <div id="hero-options" class="options-grid"></div>
-            </div>
+                    <!-- Draft de habilidades -->
+                    <div id="draft-container" style="display: none;">
+                        <h3 id="draft-title">Draft de Habilidades</h3>
+                        <p class="subtitle" id="draft-subtitle">Elegí una habilidad nueva:</p>
+                        <div id="draft-options" class="options-grid"></div>
+                    </div>
 
-            <!-- Draft de habilidades -->
-            <div id="draft-container" style="display: none;">
-                <h3 id="draft-title">Draft de Habilidades</h3>
-                <p class="subtitle" id="draft-subtitle">Elegí una habilidad nueva:</p>
-                <div id="draft-options" class="options-grid"></div>
-            </div>
+                    <!-- Preparación / Tienda -->
+                    <div id="shop-container" style="display: none;">
+                        <button id="start-wave-btn" class="primary-btn">⚔ Comenzar oleada</button>
+                        <div id="wave-preview"></div>
+                        <h3>Tienda</h3>
+                        <div id="shop-tabs"></div>
+                        <div id="shop-options" class="options-grid"></div>
+                        <div id="inventory-panel"></div>
+                        <div id="destiny-panel"></div>
+                    </div>
 
-            <!-- Preparación / Tienda -->
-            <div id="shop-container" style="display: none;">
-                <div id="wave-preview"></div>
-                <h3>Tienda de Artículos</h3>
-                <p class="subtitle">Armate según lo que viene. Los compuestos usan los básicos que ya tenés.</p>
-                <div id="shop-tabs"></div>
-                <div id="shop-options" class="options-grid"></div>
-                <div id="inventory-panel"></div>
-                <div id="destiny-panel"></div>
-                <button id="start-wave-btn" class="primary-btn">Comenzar Oleada</button>
-            </div>
+                    <!-- Previa de duelos: apuestas -->
+                    <div id="bet-container" style="display: none;">
+                        <h3>Previa de Duelos</h3>
+                        <div id="bet-info" class="subtitle"></div>
+                        <button id="bet-done-btn" class="primary-btn">Listo, a los duelos</button>
+                        <div id="bet-pairs"></div>
+                    </div>
 
-            <!-- Previa de duelos: apuestas -->
-            <div id="bet-container" style="display: none;">
-                <h3>Previa de Duelos</h3>
-                <div id="bet-info" class="subtitle"></div>
-                <div id="bet-pairs"></div>
-                <button id="bet-done-btn" class="primary-btn">Listo, a los duelos</button>
-            </div>
+                    <!-- En combate: qué está pasando -->
+                    <div id="combat-info" style="display: none;"></div>
 
-            <button id="restart-btn" class="primary-btn" style="display: none;">Nueva Partida</button>
+                    <button id="restart-btn" class="primary-btn" style="display: none;">Nueva Partida</button>
+                </div>
 
-            <!-- Registro de Combate -->
-            <div id="log-panel">
-                <h4>Registro de Combate</h4>
-                <div id="combat-log"></div>
+                <!-- Registro de Combate -->
+                <div id="log-panel">
+                    <div class="col-title">Registro <button id="log-toggle" title="Achicar o agrandar el registro">▾</button></div>
+                    <div id="combat-log"></div>
+                </div>
             </div>
         </div>
     </div>

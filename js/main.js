@@ -15,6 +15,11 @@ document.getElementById('tutorial-prev').onclick = () => tutorialStep(-1);
 document.getElementById('tutorial-next').onclick = () => tutorialStep(1);
 document.getElementById('tutorial').onclick = e => { if (e.target.id === 'tutorial') closeTutorial(); };
 document.getElementById('autopilot-btn').onclick = () => setAutopilot(!autopilot);
+document.getElementById('log-toggle').onclick = () => {
+    const panel = document.getElementById('log-panel');
+    panel.classList.toggle('small');
+    document.getElementById('log-toggle').textContent = panel.classList.contains('small') ? '▴' : '▾';
+};
 
 let lastTime = 0;
 function loop(ts) {
