@@ -154,7 +154,8 @@ button.secondary-btn:hover { background: #2a2e3a; }
 #tutorial-step { color: #888; font-size: 0.8rem; }
 
 /* Códice de ítems */
-#item-codex { font-size: 0.8rem; }
+#item-codex, #creep-codex { font-size: 0.8rem; }
+.creep-list li::before { content: ''; }
 .item-jump { display: flex; gap: 6px; margin: 8px 0 14px; position: sticky; top: 0; background: #16181d; padding: 6px 0; z-index: 1; }
 .item-jump button { flex: 1; background: #1c1f26; border: 1px solid; padding: 6px; font-family: inherit; font-weight: bold; cursor: pointer; }
 .item-section { margin-bottom: 22px; }

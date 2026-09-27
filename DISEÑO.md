@@ -538,6 +538,8 @@ duelo; `MOVE_RESETS_ATTACK` en game.js). Queda por mirar: el Alquimista sigue ga
 - **Códice de ítems:** nombres en el color de su categoría (básicos celeste, mejoras dorado, neutrales verde/azul/violeta/naranja
   por escalón, especiales lila) y descripción en blanco. Secciones con botones para saltar: Básicos, Mejoras (por grupo),
   Neutrales (por escalón) y Especiales. En la tienda, los nombres usan los mismos colores.
+- **Códice de Creeps y Jefes:** mismo formato. Nombre en el color del creep, stats y mecánica en blanco, contra con su ítem en
+  color. Secciones: Básicos, Con mecánica, Temas de oleada (con sus creeps y el jefe de cada oleada) y Jefes de ronda.
 
 ---
 

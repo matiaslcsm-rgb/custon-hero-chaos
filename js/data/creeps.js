@@ -7,6 +7,7 @@
 //   oneHit       muere de un solo golpe;  groupSize: aparece en grupos de N (por cada unidad pedida)
 //   mechanic     qué hace (se muestra en el aviso de oleada y en el códice)
 //   counter      cómo contrarrestarlo;  counterItem: clave del ítem de ITEMS que lo contrarresta (lo usa la IA)
+//   basic        creep básico (sin mecánica especial; el códice los muestra aparte)
 //   bossable     puede ser la base del jefe de una oleada
 //   priority     prioridad como objetivo: el ataque automático y la IA van primero por los de prioridad más alta
 //   update(c, dt)                 comportamiento propio; devuelve true si ya decidió qué hacer este frame
@@ -25,23 +26,23 @@ function speedGoldMultiplier(timeAliveSeconds) {
 const CREEP_TYPES = {
     // --- BÁSICOS ---
     CHUSMA: {
-        key: 'CHUSMA', label: 'Chusma', symbol: 'x', color: '#6c757d', hp: 1, atk: 4, atkSpeed: 1.0, moveInterval: 220, range: 1.0, gold: 4, xp: 6, oneHit: true,
+        key: 'CHUSMA', basic: true, label: 'Chusma', symbol: 'x', color: '#6c757d', hp: 1, atk: 4, atkSpeed: 1.0, moveInterval: 220, range: 1.0, gold: 4, xp: 6, oneHit: true,
         mechanic: 'Muere de un golpe, pero viene en cantidad.', counter: 'Daño en área'
     },
     GRUNT: {
-        key: 'GRUNT', label: 'Grunt', symbol: 'g', color: '#ffb703', hp: 35, atk: 8, atkSpeed: 0.8, moveInterval: 260, range: 1.3, gold: 6, xp: 18, armor: 1, bossable: true,
+        key: 'GRUNT', basic: true, label: 'Grunt', symbol: 'g', color: '#ffb703', hp: 35, atk: 8, atkSpeed: 0.8, moveInterval: 260, range: 1.3, gold: 6, xp: 18, armor: 1, bossable: true,
         mechanic: 'Soldado básico cuerpo a cuerpo.', counter: '—'
     },
     ARCHER: {
-        key: 'ARCHER', label: 'Arquero', symbol: 'r', color: '#8ecae6', hp: 22, atk: 10, atkSpeed: 0.9, moveInterval: 300, range: 4.5, gold: 7, xp: 18, bossable: true,
+        key: 'ARCHER', basic: true, label: 'Arquero', symbol: 'r', color: '#8ecae6', hp: 22, atk: 10, atkSpeed: 0.9, moveInterval: 300, range: 4.5, gold: 7, xp: 18, bossable: true,
         mechanic: 'Ataca desde lejos (rango 4,5).', counter: 'Más rango, movilidad o ir a buscarlo'
     },
     SCOUT: {
-        key: 'SCOUT', label: 'Explorador', symbol: 's', color: '#ff477e', hp: 18, atk: 6, atkSpeed: 1.4, moveInterval: 150, range: 1.2, gold: 5, xp: 14, bossable: true,
+        key: 'SCOUT', basic: true, label: 'Explorador', symbol: 's', color: '#ff477e', hp: 18, atk: 6, atkSpeed: 1.4, moveInterval: 150, range: 1.2, gold: 5, xp: 14, bossable: true,
         mechanic: 'Muy rápido y ataca seguido.', counter: 'Ralentizar o aturdir'
     },
     BRUTE: {
-        key: 'BRUTE', label: 'Bruto', symbol: 'b', color: '#e63946', hp: 60, atk: 14, atkSpeed: 0.6, moveInterval: 340, range: 1.4, gold: 10, xp: 28, armor: 3, bossable: true,
+        key: 'BRUTE', basic: true, label: 'Bruto', symbol: 'b', color: '#e63946', hp: 60, atk: 14, atkSpeed: 0.6, moveInterval: 340, range: 1.4, gold: 10, xp: 28, armor: 3, bossable: true,
         mechanic: 'Lento, resistente y pega fuerte.', counter: 'Mantener distancia'
     },
 

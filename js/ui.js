@@ -91,25 +91,62 @@ function showView(view) {
 // --- CÓDICE DE CREEPS ---
 function creepTag(t) { return `<span class="creep-symbol" style="color:${t.color}">${t.symbol}</span>`; }
 
+// Mismo formato que el códice de ítems: nombre en el color del creep, descripción en blanco, secciones con botones
+// para saltar: básicos, con mecánica, temas de oleada y jefes de ronda.
+const CREEP_SECTION_COLORS = { basic: '#adb5bd', mechanic: '#c77dff', themes: '#8ecae6', bosses: '#ff0055' };
+
+function creepNameHtml(t) { return `<span class="item-name" style="color:${t.color}">${t.label}</span>`; }
+
+function creepStatLines(t, hpText) {
+    const lines = [hpText || `${t.hp === 1 && t.oneHit ? 'Muere de un golpe' : `${t.hp} de vida`}${t.groupSize ? ` · aparecen de a ${t.groupSize}` : ''}`,
+        `${t.atk} de daño ${t.attackType === 'magical' ? 'mágico' : 'físico'} · rango ${String(t.range).replace('.', ',')}`];
+    const def = [t.armor ? `armadura ${t.armor}` : '', t.magicResist ? `${t.magicResist}% res. mágica` : '', t.evasion ? `${t.evasion}% evasión` : ''].filter(Boolean);
+    if (def.length) lines.push(def.join(' · '));
+    return `<ul class="item-stats">${lines.map(l => `<li>${l}</li>`).join('')}</ul>`;
+}
+
+function creepCard(t, extra = '', hpText) {
+    return `<div class="item-card" style="border-left-color:${t.color}">` +
+        `<div class="item-head"><span>${creepTag(t)} ${creepNameHtml(t)}</span>${t.gold ? `<span class="item-price">${t.gold}g</span>` : ''}</div>` +
+        creepStatLines(t, hpText) + `<p class="item-text">${t.mechanic}</p>` + extra + `</div>`;
+}
+
+function counterHtml(t) {
+    if (!t.counter || t.counter === '—') return '';
+    return `<p class="item-meta">Contra: <span class="item-counter">${t.counter}</span>${t.counterItem ? ` → ${itemNameHtml(ITEMS[t.counterItem])}` : ''}</p>`;
+}
+
 function renderCreepCodex() {
-    const rows = Object.values(CREEP_TYPES).map(t => {
-        const stats = [`${t.hp} HP${t.groupSize ? ` (x${t.groupSize})` : ''}`, `${t.atk} daño${t.attackType === 'magical' ? ' mágico' : ''}`, `rango ${t.range}`];
-        if (t.armor) stats.push(`armadura ${t.armor}`);
-        if (t.evasion) stats.push(`evasión ${t.evasion}%`);
-        if (t.bossable) stats.push('puede ser jefe');
-        const item = t.counterItem ? ` <span class="counter-item">(${ITEMS[t.counterItem].name})</span>` : '';
-        return `<div class="ability-row"><h4>${creepTag(t)} ${t.label}</h4><p>${t.mechanic}</p>` +
-            `<p class="meta">${stats.join(' · ')}</p><p><strong>Contra:</strong> ${t.counter}${item}</p></div>`;
-    }).join('');
+    const grid = cards => `<div class="item-grid">${cards.join('')}</div>`;
+    const types = Object.values(CREEP_TYPES);
+    const withExtra = t => creepCard(t, counterHtml(t) + (t.bossable ? '<p class="item-meta">Puede ser el jefe de una oleada.</p>' : ''));
+    const basics = grid(types.filter(t => t.basic).map(withExtra));
+    const mechanics = grid(types.filter(t => !t.basic).map(withExtra));
     const last = WAVE_THEMES.length - 1;
-    const themes = WAVE_THEMES.map((tier, i) => `<p><strong>Ronda ${i + 1}${i === last ? ' en adelante' : ''}:</strong> ${tier.map(th => th.name).join(' o ')}</p>`).join('');
-    const bosses = ROUND_BOSSES.map((b, i) => `<div class="ability-row fixed"><h4>${creepTag(b)} ${b.label} <span class="item-level">ronda ${(i + 1) * ROUND_BOSS_EVERY}</span></h4>` +
-        `<p>${b.mechanic}</p><p class="meta">${b.hpPerHero} HP por héroe · ${b.atk} daño${b.attackType === 'magical' ? ' mágico' : ''} · rango ${b.range} · armadura ${b.armor}</p></div>`).join('');
-    document.getElementById('creep-codex').innerHTML =
-        `<h3>Creeps</h3><p class="subtitle">Cada oleada normal trae además un jefe (4x vida, +2 armadura y un aura que potencia a los creeps cercanos). Los creeps se hacen más fuertes en cada oleada.</p>${rows}` +
-        `<div class="codex-sub">Temas de oleada (se elige uno al azar)</div>${themes}` +
-        `<div class="codex-sub">Jefes de ronda (cada ${ROUND_BOSS_EVERY} rondas, después de los duelos, todos contra uno)</div>` +
-        `<p class="subtitle">Morir no cuesta vidas (revivís en ${BOSS_FIGHT.respawn}s). Si cae en ${BOSS_FIGHT.time}s, todos cobran oro y eligen un objeto neutral; los 3 que más daño hicieron cobran extra.</p>${bosses}`;
+    const themes = WAVE_THEMES.map((tier, i) => `<h4 class="item-group" style="color:${CREEP_SECTION_COLORS.themes}">Ronda ${i + 1}${i === last ? ' en adelante' : ''}</h4>` +
+        grid(tier.map(th => {
+            const boss = CREEP_TYPES[th.boss];
+            const rows = waveSummary(th).map(({ type, count }) => `<li>${creepTag(type)} ${creepNameHtml(type)} ×${count}</li>`).join('');
+            return `<div class="item-card" style="border-left-color:${CREEP_SECTION_COLORS.themes}"><div class="item-head"><span class="item-name" style="color:#fff">${th.name}</span></div>` +
+                `<ul class="item-stats creep-list">${rows}</ul><p class="item-meta">Jefe de la oleada: ${creepNameHtml(boss)}</p></div>`;
+        }))).join('');
+    const bosses = grid(ROUND_BOSSES.map((b, i) => creepCard(b,
+        `<p class="item-meta">Ronda ${(i + 1) * ROUND_BOSS_EVERY} · premio: ${BOSS_FIGHT.gold[i]}g para todos + objeto neutral del escalón ${i + 1}</p>`,
+        `${b.hpPerHero} de vida por cada héroe que pelea`)));
+
+    const sections = [
+        ['creeps-basic', 'Básicos', CREEP_SECTION_COLORS.basic, 'Sin mecánicas especiales: aparecen en todas las oleadas.', basics],
+        ['creeps-mechanic', 'Con mecánica', CREEP_SECTION_COLORS.mechanic, 'Cada uno tiene algo especial y una forma de contrarrestarlo (mirá el aviso de oleada en la tienda).', mechanics],
+        ['creeps-themes', 'Temas de oleada', CREEP_SECTION_COLORS.themes,
+            'Cada ronda sortea uno de su nivel. Todas las oleadas traen además un jefe: 4 veces más vida, +2 de armadura y un aura que potencia a los creeps cercanos. Los creeps se hacen más fuertes en cada ronda.', themes],
+        ['creeps-bosses', 'Jefes de ronda', CREEP_SECTION_COLORS.bosses,
+            `Cada ${ROUND_BOSS_EVERY} rondas, después de los duelos, todos los héroes contra uno. Morir no cuesta vidas (revivís en ${BOSS_FIGHT.respawn}s). Si cae en ${BOSS_FIGHT.time}s, todos cobran y eligen un objeto neutral; los 3 que más daño hicieron cobran extra.`, bosses]
+    ];
+    const codex = document.getElementById('creep-codex');
+    codex.innerHTML = `<h3>Creeps y Jefes</h3><p class="subtitle">El número a la derecha es el oro que dan (hasta ×3 si los matás rápido).</p>` +
+        `<div class="item-jump">${sections.map(([id, title, color]) => `<button data-target="${id}" style="color:${color}; border-color:${color}">${title}</button>`).join('')}</div>` +
+        sections.map(sec => itemSection(...sec)).join('');
+    codex.querySelectorAll('.item-jump button').forEach(btn => { btn.onclick = () => document.getElementById(btn.dataset.target).scrollIntoView({ behavior: 'smooth' }); });
 }
 
 // Aviso de la próxima oleada en la tienda: qué creeps vienen, qué hacen y cómo contrarrestarlos.
