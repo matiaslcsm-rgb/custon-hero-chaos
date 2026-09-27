@@ -550,7 +550,8 @@ Todo en `js/fx.js`, **solo visual** (no cambia reglas) y solo para la arena que 
 - **Partículas** al morir (del color del creep), **anillos** al lanzar habilidades (color según el tipo de daño; la definitiva
   más grande) y en las mecánicas de los jefes, **explosión** del Kamikaze.
 - **Temblor de pantalla** en críticos, muertes de héroes, definitivas y golpes de jefe.
-- **Golpe (lunge):** los cuerpo a cuerpo saltan hacia el objetivo; el golpeado **destella** en blanco.
+- **Golpe cuerpo a cuerpo:** el héroe salta hacia el objetivo y deja un **tajo** (arco del color del héroe, dorado si es
+  crítico, alternando el sentido en cada golpe); el golpeado **destella** en blanco.
 - **Movimiento suave** entre casillas, **brillo** en héroes y jefes, **estela** en los proyectiles, barra de vida con borde y
   **barra de maná** en los héroes, marcas de **aturdido** (✦✦) y **ralentizado** (❄).
 - **Fondo por arena** (sin grilla): pasto oscuro en las oleadas, piedra en los duelos, rojo volcánico en el jefe de ronda.

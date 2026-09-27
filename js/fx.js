@@ -68,6 +68,16 @@ function fxLunge(attacker, target) {
     attacker.fxLunge = { dx: (target.x - attacker.x) / d, dy: (target.y - attacker.y) / d, at: fxClock };
 }
 
+// Tajo de un ataque cuerpo a cuerpo: un arco que barre sobre el objetivo, del color de quien pega (dorado si es crítico).
+function fxSlash(attacker, target, color, isCrit) {
+    const arena = fxArena(attacker);
+    if (!arena) return;
+    const angle = Math.atan2(target.y - attacker.y, target.x - attacker.x);
+    const flip = (attacker.fxSlashFlip = !attacker.fxSlashFlip); // alterna el sentido del tajo en cada golpe
+    pushFx(arena, { kind: 'slash', x: target.x, y: target.y, angle, flip, color: isCrit ? '#ffd166' : color, width: isCrit ? 5 : 3.5, life: 0.22 });
+    if (isCrit) fxBurst(target, '#ffd166', 5, 3);
+}
+
 function fxShake(amount) { shakeAmount = Math.max(shakeAmount, amount); }
 
 function fxCast(hero, skill) {
@@ -109,6 +119,17 @@ function drawArenaFx(arena) {
             ctx.fillStyle = f.color; ctx.fillText(f.text, px, py);
         } else if (f.kind === 'particle') {
             ctx.fillStyle = f.color; ctx.fillRect(px - f.size / 2, py - f.size / 2, f.size, f.size);
+        } else if (f.kind === 'slash') {
+            // El arco barre 140° alrededor del objetivo, perpendicular a la dirección del golpe
+            const sweep = Math.PI * 0.78, start = f.angle + Math.PI - sweep / 2, dir = f.flip ? 1 : -1;
+            const from = f.flip ? start : start + sweep, head = Math.min(1, t * 2.2), tail = Math.max(0, t * 2.2 - 0.6);
+            ctx.strokeStyle = f.color; ctx.lineWidth = f.width * (1 - t * 0.6); ctx.lineCap = 'round';
+            ctx.shadowColor = f.color; ctx.shadowBlur = 8;
+            ctx.beginPath();
+            const a0 = from + dir * sweep * tail, a1 = from + dir * sweep * head;
+            ctx.arc(px, py, TILE * 0.62, Math.min(a0, a1), Math.max(a0, a1));
+            ctx.stroke();
+            ctx.shadowBlur = 0; ctx.lineCap = 'butt';
         } else if (f.kind === 'ring') {
             ctx.strokeStyle = f.color; ctx.lineWidth = 3 * (1 - t) + 1;
             ctx.beginPath(); ctx.arc(px, py, f.radius * TILE * (0.3 + 0.7 * t), 0, Math.PI * 2); ctx.stroke();
@@ -126,7 +147,7 @@ function drawPos(u, dt) {
     if (u.fxLunge) {
         const t = (fxClock - u.fxLunge.at) / 0.18;
         if (t >= 1) u.fxLunge = null;
-        else { const push = Math.sin(t * Math.PI) * 0.3; x += u.fxLunge.dx * push; y += u.fxLunge.dy * push; }
+        else { const push = Math.sin(t * Math.PI) * 0.42; x += u.fxLunge.dx * push; y += u.fxLunge.dy * push; }
     }
     return { x, y };
 }

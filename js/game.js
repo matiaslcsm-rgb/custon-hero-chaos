@@ -325,7 +325,7 @@ function updateHero(hero, arena, dt) {
             hero.attackTimer = 0;
             const { dmg, isCrit } = rollAttackDamage(hero, target);
             if (hero.projectileSpeed > 0) fireProjectile(hero, target, dmg, isCrit);
-            else { fxLunge(hero, target); resolveBasicHit(hero, target, dmg, isCrit); }
+            else { fxLunge(hero, target); fxSlash(hero, target, heroColor(hero), isCrit); resolveBasicHit(hero, target, dmg, isCrit); }
         }
     } else {
         hero.attackTimer = 0;
