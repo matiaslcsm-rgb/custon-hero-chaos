@@ -454,7 +454,18 @@ un duelo, y cómo se define una partida cuando quedan pocos.
 **Con las reglas nuevas de maldición (5 partidas de 20 rondas):** después de la ronda 5 no cae nadie más (quedan 5 a 8 hasta el
 final): los creeps escalan +10% lineal por ronda y los héroes mucho más rápido, así que nunca se llega a la mitad.
 Probado: creeps **×1,12 por ronda** (exponencial) → en la ronda 20 quedan 3-5; **×1,15** → la partida termina con un ganador
-entre las rondas 8 y 18. **El Sniper ganó las 13 partidas simuladas** (domina los duelos a distancia). **A decidir.**
+entre las rondas 8 y 18. **El Sniper ganó las 13 partidas simuladas** (domina los duelos a distancia).
+
+**Aplicado:** creeps **×1,13 por ronda** y **−60% de daño entre héroes en duelo**. Medido (12 partidas): partidas de **15 a 20
+rondas**; duelos de **~10 s** de mediana (10% más cortos: 3 s; 10% más largos: 27 s), casi ninguno por tiempo.
+
+**Sniper** (ganó 12/12 partidas, 93% de duelos). Probado cambiando una cosa por vez: rango 4 o sin Puntería Perfecta no
+cambian nada; **sin su escalado baja a 73%**: +3 de daño cada 8 bajas (~+75 en una partida) es muy superior al de otros
+héroes (Axe: +0,5 armadura cada 10). El Alquimista también domina los duelos (~85%) y los cuerpo a cuerpo casi no ganan
+(Vampiro 0-9%, Asesino 8-26%) porque los de distancia **pueden moverse y atacar a la vez** ("kiteo gratis").
+**Propuesta medida:** escalado del Sniper a la mitad + **moverse reinicia el ataque** (como la animación de ataque de Dota):
+las victorias se reparten (Bruja 5, Axe 4-5, Arcanista 2-3, Sniper, Vampiro y Alquimista 1) y los cuerpo a cuerpo suben
+(Axe ~55%, Asesino ~33%, Vampiro ~20% de duelos). **A decidir.**
 
 ### Construcción de la fase F
 | Etapa | Qué |

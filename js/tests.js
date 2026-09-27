@@ -1126,7 +1126,16 @@ test('Coraza de Espinas también devuelve daño a héroes cuerpo a cuerpo en los
     a.baseAttackRange = 1.5; a.recalculateStats();
     const hp = a.hp;
     const { dealt } = dealDamage(a, b, 100, 'physical');
-    checkEq(hp - a.hp, Math.round(Math.round(dealt * ITEMS.THORNS.reflect)), 'reflejo al atacante');
+    checkEq(hp - a.hp, Math.round(Math.round(dealt * ITEMS.THORNS.reflect) * (1 - DUEL_DAMAGE_REDUCTION)), 'reflejo al atacante (con la reducción de duelo)');
+});
+
+test('En duelo los héroes se hacen menos daño entre sí; contra creeps no cambia', () => {
+    toDuels();
+    const [a, b] = arenas[0].heroes;
+    const hp = b.hp;
+    dealDamage(a, b, 100, 'pure');
+    checkEq(hp - b.hp, Math.round(100 * (1 - DUEL_DAMAGE_REDUCTION)), 'daño reducido en duelo');
+    checkNear(creepStatMult(3, false), CREEP_GROWTH * CREEP_GROWTH, 'los creeps crecen x' + CREEP_GROWTH + ' por ronda');
 });
 
 // ============================================================ PARTIDAS COMPLETAS

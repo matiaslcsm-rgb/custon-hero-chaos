@@ -79,6 +79,7 @@ function mitigate(target, amount, type) {
 
 // Único punto de entrada para dañar a cualquier unidad (héroe o creep). En orden:
 // invulnerabilidad → esquive (solo ataques básicos, opts.isAttack) → amplificación de hechizo (mágico)
+// → reducción de daño entre héroes en duelo
 // → reducción de daño por efectos → armadura/resistencia mágica → daño recibido extra (Condenado) → regla de un solo golpe (oneHit)
 // → no bajar de 1 con preventDeath → evento onDamaged → muerte.
 // Devuelve { dealt, evaded }: dealt es la vida que realmente perdió el objetivo (para robo de vida).
@@ -89,6 +90,7 @@ function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     if (canEvade && Math.random() < effEvasion(target) / 100) return { dealt: 0, evaded: true };
     let final = amount;
     if (type === 'magical' && source) final *= 1 + effSpellAmp(source) / 100;
+    if (source && source.isHero && target.isHero && target.arena && target.arena.kind === 'duel') final *= 1 - DUEL_DAMAGE_REDUCTION;
     final = mitigate(target, final * (1 - effDmgReduction(target)), type);
     let takenPct = sumMod(target, 'dmgTakenPct'); // ej: Condenado
     // La maldición (Condenado) solo amplifica el daño de creeps y de héroes sin maldición

@@ -14,10 +14,15 @@ function rollWave(number) {
 // Cantidad real de unidades de cada grupo (los grupos de Enjambre traen 4 por unidad pedida).
 function groupUnits(g) { return g.count * (CREEP_TYPES[g.type].groupSize || 1); }
 
-// Llena una arena con los creeps de la oleada. Se hacen más fuertes en cada ronda (y más en las de jefe).
+// Los creeps se hacen CREEP_GROWTH veces más fuertes por ronda, acumulado (exponencial): tienen que alcanzar a los héroes,
+// que escalan con niveles, ítems y Ascensos, para que el PvE vaya eliminando héroes (medido en DISEÑO.md §9).
+const CREEP_GROWTH = 1.13;
+function creepStatMult(round, bossWave) { return Math.pow(CREEP_GROWTH, round - 1) * (bossWave ? 1.3 : 1); }
+
+// Llena una arena con los creeps de la oleada.
 function spawnWave(arena, wave) {
     arena.creeps = []; arena.boss = null; arena.projectiles = [];
-    const statMult = (1 + (waveNumber - 1) * 0.10) * (isBossWave ? 1.3 : 1);
+    const statMult = creepStatMult(waveNumber, isBossWave);
     const add = c => { c.arena = arena; arena.creeps.push(c); return c; };
     // Aparecen en casillas distintas de las columnas 13 a 18; el jefe, en la última columna
     const cells = shuffle(Array.from({ length: 6 * ROWS }, (_, i) => [13 + Math.floor(i / ROWS), i % ROWS]));

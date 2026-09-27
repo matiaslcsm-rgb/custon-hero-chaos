@@ -3,6 +3,7 @@
 //   Parejas al azar entre los héroes en juego, evitando repetir el rival de la ronda anterior; si son impares,
 //   uno descansa. Cada pareja pelea en su propia arena ('duel'), todas en paralelo.
 //   Al empezar: vida y maná llenos, sin mejoras temporales y con los enfriamientos reiniciados.
+//   En duelo los héroes se hacen DUEL_DAMAGE_REDUCTION menos daño entre sí (peleas más largas y tácticas).
 //   Gana quien mata al otro; si se acaba el tiempo, quien tenga más % de vida.
 //   Ganador: +3 puntos y el escalado por duelo de su héroe. Los dos van al Área de Descanso.
 //   Perdedor (las vidas NO se pierden en duelos, solo contra creeps):
@@ -12,6 +13,7 @@
 //   Es para que la partida no se estanque cuando todos tienen builds que los creeps no pueden derrotar.
 
 const DUEL_TIME = 45;
+const DUEL_DAMAGE_REDUCTION = 0.6; // en duelo, los héroes se hacen 60% menos daño entre sí (sin esto duraban ~3 s)
 const DUEL_CURSE_ALIVE = MAX_HEROES / 2; // con esta cantidad de héroes en juego o menos, perder un duelo maldice
 const DUEL_DEATH_ALIVE = 3;              // con esta cantidad o menos, perder un duelo estando maldito elimina
 const DUEL_STARTS = [{ x: 3, y: 6 }, { x: 16, y: 6 }];
