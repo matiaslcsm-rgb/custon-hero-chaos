@@ -35,12 +35,17 @@ function enemiesOf(unit) {
     return arena.kind === 'duel' ? arena.heroes.filter(h => h !== unit) : arena.creeps;
 }
 
+// Si la unidad está apuntando con el mouse (aimPoint, ver mouse.js), elige entre los enemigos a su alcance el más cercano
+// a ese punto en vez del más cercano a ella.
 function nearestEnemy(unit, maxRange) {
-    let best = null, bestDist = Infinity;
+    let best = null, bestScore = Infinity;
+    const aim = unit.aimPoint;
     enemiesOf(unit).forEach(c => {
         if (!c.isAlive()) return;
         const d = Math.hypot(c.x - unit.x, c.y - unit.y);
-        if (d < bestDist && (maxRange === undefined || d <= maxRange)) { bestDist = d; best = c; }
+        if (maxRange !== undefined && d > maxRange) return;
+        const score = aim ? Math.hypot(c.x - aim.x, c.y - aim.y) : d;
+        if (score < bestScore) { bestScore = score; best = c; }
     });
     return best;
 }

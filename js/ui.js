@@ -804,6 +804,8 @@ function render() {
         drawUnit(h, hasFlag(h, 'invulnerable') ? '#ffffff' : heroColor(h), h.symbol, pos, { glow: true });
     });
     drawArenaFx(arena);
+    if (targeting && !canControlPlayer()) cancelTargeting();
+    drawMouseOverlay(arena);
     ctx.restore();
     if (hero !== player) {
         ctx.font = '11px monospace'; ctx.fillStyle = '#ffb703';

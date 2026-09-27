@@ -136,12 +136,16 @@ test('Invulnerable no recibe daño; los creeps de un golpe mueren con cualquier 
 test('Habilidad en nivel 0 no se lanza; en nivel 1 cobra maná y enfriamiento', () => {
     newGame('AXE');
     const s = learn('AXE_HACHAZO', 0);
-    dummy({ hp: 9999, maxHp: 9999 });
+    const d = dummy({ hp: 9999, maxHp: 9999 });
     const mana = player.mana;
     handleSkillKeypress('e');
     checkEq(player.mana, mana, 'maná en nivel 0');
+    checkEq(targeting, null, 'en nivel 0 ni siquiera se apunta');
     player.skillLevels[s.id] = 1;
-    handleSkillKeypress('e');
+    handleSkillKeypress('e'); // se apunta con el mouse...
+    check(targeting && targeting.skill === s, 'modo apuntar');
+    cancelTargeting();
+    castAt(player, s, d.x, d.y); // ...y el clic la lanza
     checkEq(mana - player.mana, valueAt(s, 'manaCost', 1), 'maná gastado');
     checkEq(player.cooldowns[s.id], valueAt(s, 'cooldown', 1), 'enfriamiento');
 });
@@ -1403,6 +1407,32 @@ test('Habilidades automáticas: con H prendido el jugador lanza sus habilidades 
             checkEq((player.cooldowns[skill.id] || 0) > 0, on, on ? 'la lanzó sola' : 'no la lanzó');
         }
     } finally { autoCast = saved; }
+});
+
+test('Apuntar con el mouse: la habilidad va al enemigo más cercano al cursor (dentro de su alcance)', () => {
+    newGame('SNIPER');
+    const skill = learn('SNIPER_POTENTE', 1);
+    check(isAimedSkill(skill), 'se apunta');
+    check(!isAimedSkill(SKILL_INDEX.AXE_GIRO), 'el Giro (área alrededor) no se apunta');
+    const near = dummy(), far = dummy();
+    creeps.forEach(c => { if (c !== near && c !== far) c.hp = 0; });
+    [near, far].forEach(c => { c.hp = c.maxHp = 5000; });
+    near.x = player.x + 1; near.y = player.y;
+    far.x = player.x + 3; far.y = player.y + 2;
+    player.mana = player.maxMana;
+    check(castAt(player, skill, far.x, far.y), 'se lanzó');
+    check(far.hp < 5000 && near.hp === 5000, 'le pegó al del cursor, no al más cercano');
+});
+
+test('Clic derecho: el héroe camina hasta el destino; el teclado lo cancela', () => {
+    newGame('AXE');
+    creeps.forEach(c => { c.hp = 0; });
+    creeps[0].hp = 1; creeps[0].x = 19; creeps[0].y = 0; // que la oleada no termine
+    player.x = 2; player.y = 2;
+    player.moveTarget = { x: 6, y: 2, arena: player.arena };
+    for (let i = 0; i < 200 && player.moveTarget; i++) { gameClock += 0.05; updateHero(player, player.arena, 0.05); }
+    checkEq(player.x + ',' + player.y, '6,2', 'llegó');
+    checkEq(player.moveTarget, null, 'sin destino');
 });
 
 test('Moverse reinicia el ataque (no se puede disparar gratis mientras te alejás)', () => {

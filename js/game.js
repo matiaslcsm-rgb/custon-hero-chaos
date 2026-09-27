@@ -10,7 +10,10 @@ let currentDraft = null; // { mode, options } del draft abierto; mode 'bookChoic
 const WAVE_HARD_LIMIT = 120;
 // Moverse reinicia el ataque (como la animación de ataque de Dota): sin esto los héroes a distancia se alejaban y disparaban
 // a la vez sin costo, y los cuerpo a cuerpo casi no ganaban duelos.
-const MOVE_RESETS_ATTACK = true;  // segundos: si una arena no terminó, se da por perdida (evita partidas trabadas)
+const MOVE_RESETS_ATTACK = true;
+// Velocidad de movimiento de todos (héroes y creeps): 0,8 = 20% más lentos, a pedido (el juego se veía muy frenético).
+// Solo el movimiento: ataques y proyectiles quedan igual.
+const MOVE_SPEED_MULT = 0.8;  // segundos: si una arena no terminó, se da por perdida (evita partidas trabadas)
 
 window.addEventListener('keydown', e => {
     const k = e.key.toLowerCase();
@@ -19,7 +22,7 @@ window.addEventListener('keydown', e => {
     if (k === 'b') { toggleShop(); return; }
     if (k === 'm') { toggleBigMap(); return; }
     if (k === 'h') { setAutoCast(!autoCast); return; }
-    if (k === 'escape') { closeShop(); closeTutorial(); return; }
+    if (k === 'escape') { cancelTargeting(); closeShop(); closeTutorial(); return; }
     if (inCombat() && !autopilot) handleSkillKeypress(k);
 });
 window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
@@ -232,6 +235,7 @@ function resetGame() {
     gameState = 'MENU'; waveNumber = 1; gameClock = 0; heroOffers = null;
     currentDraft = null; savedPrepTime = null; nextWave = null; logMuted = false;
     duelPlan = null; currentBet = null;
+    cancelTargeting();
     setPhaseTimer(PHASE_TIMES.heroSelect);
     resetHud();
     log('🔄 Nueva partida. Tocá "Iniciar partida" cuando quieras.');
@@ -243,6 +247,8 @@ function handleSkillKeypress(k) {
     const skill = player.skillForKey(k);
     if (!skill || skill.kind !== 'active') return;
     if (skillLevel(player, skill) === 0) { log(`🔒 ${skill.name} está en nivel 0: invertile un punto para usarla.`); return; }
+    // Las que eligen un enemigo se apuntan con el mouse (ver mouse.js); el resto se lanza al toque
+    if (isAimedSkill(skill)) { if (targeting && targeting.skill === skill) cancelTargeting(); else startTargeting(skill); return; }
     tryCastSkill(player, skill);
 }
 
@@ -328,8 +334,12 @@ function updateHero(hero, arena, dt) {
 
     // Movimiento: del teclado o de la IA (la velocidad la modifican los efectos: Masacre, Visión de Cazador...)
     hero.moveTimer = (hero.moveTimer || 0) + dt;
-    if (!stunned && hero.moveTimer > hero.moveInterval / effMoveMult(hero)) {
-        const dir = aiControlled ? aiMoveDirection(hero) : keyboardDirection();
+    if (!stunned && hero.moveTimer > hero.moveInterval / (effMoveMult(hero) * MOVE_SPEED_MULT)) {
+        let dir = aiControlled ? aiMoveDirection(hero) : keyboardDirection();
+        if (!aiControlled) {
+            if (dir.dx || dir.dy) hero.moveTarget = null; // el teclado manda sobre el clic derecho
+            else dir = moveTargetDirection(hero) || dir;
+        }
         const x = hero.x, y = hero.y;
         hero.x = Math.max(0, Math.min(COLS - 1, hero.x + dir.dx));
         hero.y = Math.max(0, Math.min(ROWS - 1, hero.y + dir.dy));

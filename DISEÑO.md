@@ -573,6 +573,12 @@ Todo en `js/fx.js`, **solo visual** (no cambia reglas) y solo para la arena que 
 - **Habilidades automáticas** (estilo Vampire Survivors, a pedido): vos solo te movés; el ataque básico ya era automático y
   ahora también las habilidades se lanzan solas, con la misma lógica de la IA. Se apaga con **H** o el botón de la barra
   superior (queda guardado) y se lanzan a mano con E R T F. Los puntos de habilidad los seguís repartiendo vos.
+- **Mouse estilo MOBA** (`js/mouse.js`): las habilidades que eligen un enemigo se **apuntan**: tecla → se ve el alcance y
+  se marca el enemigo más cercano al cursor → **clic izquierdo** la lanza (clic derecho o Esc cancela). Las de área alrededor
+  tuyo y las mejoras se lanzan al apretar la tecla. **Clic derecho** en el mapa: caminás hasta ahí (WASD manda si lo tocás).
+  Sin tocar cada habilidad: al lanzar con el mouse, `nearestEnemy()` elige el enemigo a alcance más cercano al punto apuntado.
+- **Movimiento 20% más lento** para todos (héroes y creeps; `MOVE_SPEED_MULT`), a pedido. Ataques y proyectiles igual.
+  Medido (6 partidas de 8 rondas): las oleadas se limpian en 12,8 s de mediana (90%: 22 s) y solo el 2% pasa del límite.
 - **Rango de ataque visible:** círculo punteado alrededor de cada héroe con su rango (el tuyo más marcado).
 - **Mapa agrandable** con el botón ⤢ o la tecla **M** (×1,45; oculta el ranking para hacer lugar). El mapa se dibuja según la
   densidad de la pantalla, así se ve nítido.

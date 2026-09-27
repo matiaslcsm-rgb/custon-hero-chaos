@@ -77,9 +77,11 @@ const TUTORIAL_PAGES = [
         </ol>
         <p>Cada fase tiene un tiempo: si se acaba, el juego decide por vos.</p>` },
     { title: '🎮 Controles', body: `
-        <p><b>W A S D</b> o flechas: moverte. <b>El ataque es automático</b> contra el enemigo a tiro más cercano (o el prioritario, como los Sanadores).</p>
+        <p><b>W A S D</b>, flechas o <b>clic derecho</b> en el mapa: moverte. <b>El ataque es automático</b> contra el enemigo a tiro más cercano (o el prioritario, como los Sanadores).</p>
         <p><b>Habilidades automáticas</b> (como Vampire Survivors): vos solo te movés y tus habilidades se lanzan solas. Con <b>H</b>
-        las pasás a mano y las lanzás con <b>E R T F</b>, en el orden en que las aprendiste (mirá la barra debajo del mapa).</p>
+        las pasás a mano y las lanzás con <b>E R T F</b>, en el orden en que las aprendiste (mirá la barra debajo del mapa).
+        Las que eligen un enemigo se <b>apuntan con el mouse</b>: apretás la tecla, ves el alcance, y con <b>clic izquierdo</b> la lanzás
+        sobre el enemigo marcado (clic derecho o Esc cancela).</p>
         <p>El <b>círculo punteado</b> alrededor de tu héroe es tu <b>rango de ataque</b>: lo que entra ahí recibe tu ataque automático.</p>
         <p><b>Moverte reinicia tu ataque</b>: si te alejás, tu próximo golpe arranca de cero.</p>
         <p><b>B</b>: abrir o cerrar la tienda. <b>M</b>: agrandar el mapa. <b>P</b>: piloto automático (la IA juega por vos). <b>Esc</b>: cerrar ventanas. <b>Clic en el ranking</b>: mirar la arena de otro héroe.</p>` },

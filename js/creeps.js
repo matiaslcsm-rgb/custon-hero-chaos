@@ -54,7 +54,7 @@ function creepTarget(c) {
 function stepCreepToward(c, tx, ty, dt) {
     if (c.x === tx && c.y === ty) return;
     c.moveTimer += dt * 1000;
-    if (c.moveTimer < c.moveInterval / effMoveMult(c)) return;
+    if (c.moveTimer < c.moveInterval / (effMoveMult(c) * MOVE_SPEED_MULT)) return;
     c.moveTimer = 0;
     const dx = tx - c.x, dy = ty - c.y;
     if (Math.abs(dx) >= Math.abs(dy)) c.x += Math.sign(dx); else c.y += Math.sign(dy);
