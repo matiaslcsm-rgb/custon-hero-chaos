@@ -175,6 +175,18 @@ function aiShop(hero) {
 
 // --- PILOTO AUTOMÁTICO DEL JUGADOR ---
 let autopilot = false;
+// Habilidades automáticas (estilo Vampire Survivors): vos solo te movés y tus habilidades se lanzan solas con la lógica
+// de la IA. Se apaga con H para lanzarlas a mano (E R T F también funcionan con esto prendido). Se recuerda entre partidas.
+let autoCast = true;
+try { autoCast = localStorage.getItem('chc-autocast') !== 'off'; } catch (e) { /* sin almacenamiento: queda prendido */ }
+
+function setAutoCast(on) {
+    autoCast = on;
+    try { localStorage.setItem('chc-autocast', on ? 'on' : 'off'); } catch (e) { /* no se guarda */ }
+    const btn = document.getElementById('autocast-btn');
+    if (btn) { btn.textContent = `✨ Habilidades: ${on ? 'AUTO' : 'MANUAL'}`; btn.classList.toggle('on', on); }
+    log(on ? '✨ Habilidades automáticas: se lanzan solas (H para lanzarlas a mano).' : '✨ Habilidades a mano: lanzalas con E R T F (H para volver a automáticas).');
+}
 let autopilotWait = 0; // pausa en draft/preparación para que se vea lo que hace
 
 function setAutopilot(on) {

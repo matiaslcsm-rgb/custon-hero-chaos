@@ -19,6 +19,8 @@ document.getElementById('tutorial-prev').onclick = () => tutorialStep(-1);
 document.getElementById('tutorial-next').onclick = () => tutorialStep(1);
 document.getElementById('tutorial').onclick = e => { if (e.target.id === 'tutorial') closeTutorial(); };
 document.getElementById('autopilot-btn').onclick = () => setAutopilot(!autopilot);
+document.getElementById('autocast-btn').onclick = () => setAutoCast(!autoCast);
+{ const btn = document.getElementById('autocast-btn'); btn.textContent = `✨ Habilidades: ${autoCast ? 'AUTO' : 'MANUAL'}`; btn.classList.toggle('on', autoCast); }
 document.getElementById('log-toggle').onclick = () => {
     const panel = document.getElementById('log-panel');
     panel.classList.toggle('small');

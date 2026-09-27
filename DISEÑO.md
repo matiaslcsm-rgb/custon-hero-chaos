@@ -570,6 +570,10 @@ Todo en `js/fx.js`, **solo visual** (no cambia reglas) y solo para la arena que 
 - **Ventanas:** la **tienda** se abre sola al empezar la preparación (no con el piloto automático), en una ventana grande con el
   aviso de oleada, inventario y objetos del destino; se cierra con ✕ o Esc y se reabre con **B**. Las **apuestas** también van en
   su ventana, con la cuenta regresiva grande.
+- **Habilidades automáticas** (estilo Vampire Survivors, a pedido): vos solo te movés; el ataque básico ya era automático y
+  ahora también las habilidades se lanzan solas, con la misma lógica de la IA. Se apaga con **H** o el botón de la barra
+  superior (queda guardado) y se lanzan a mano con E R T F. Los puntos de habilidad los seguís repartiendo vos.
+- **Rango de ataque visible:** círculo punteado alrededor de cada héroe con su rango (el tuyo más marcado).
 - **Mapa agrandable** con el botón ⤢ o la tecla **M** (×1,45; oculta el ranking para hacer lugar). El mapa se dibuja según la
   densidad de la pantalla, así se ve nítido.
 

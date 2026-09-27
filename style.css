@@ -293,3 +293,5 @@ body.big-map #hud-main { grid-template-columns: 870px 370px; }
 body.big-map #left-col { display: none; }
 .shop-main #shop-options .shop-category { grid-column: 1 / -1; margin-top: 8px; }
 .recipe .item-name, .item-meta .item-name { font-size: inherit; font-weight: normal; }
+#autocast-btn { background: #1c1f26; color: #ccc; border: 1px solid #444; padding: 4px 10px; cursor: pointer; font-family: inherit; font-size: 0.8rem; }
+#autocast-btn.on { background: #00b4d8; color: #000; border-color: #00b4d8; font-weight: bold; }

@@ -18,6 +18,7 @@ window.addEventListener('keydown', e => {
     if (k === 'p') { setAutopilot(!autopilot); return; }
     if (k === 'b') { toggleShop(); return; }
     if (k === 'm') { toggleBigMap(); return; }
+    if (k === 'h') { setAutoCast(!autoCast); return; }
     if (k === 'escape') { closeShop(); closeTutorial(); return; }
     if (inCombat() && !autopilot) handleSkillKeypress(k);
 });
@@ -319,6 +320,8 @@ function updateHero(hero, arena, dt) {
     if (aiControlled && everyInterval(hero, 'AI_THINK', dt, AI.thinkInterval)) {
         aiSpendPoints(hero);
         aiCastSkills(hero);
+    } else if (hero === player && autoCast && everyInterval(hero, 'AI_THINK', dt, AI.thinkInterval)) {
+        aiCastSkills(hero); // habilidades automáticas: el jugador solo se mueve (los puntos los reparte él)
     }
 
     const stunned = hasFlag(hero, 'stun');

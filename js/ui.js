@@ -795,7 +795,13 @@ function render() {
         if (h.eliminated) return;
         // Muerto esperando revivir: una calavera en el lugar donde va a reaparecer
         if (!h.isAlive()) { ctx.font = '18px monospace'; ctx.fillStyle = '#555'; ctx.fillText('☠', h.x * TILE + TILE / 2, h.y * TILE + TILE / 2); return; }
-        drawUnit(h, hasFlag(h, 'invulnerable') ? '#ffffff' : heroColor(h), h.symbol, drawPos(h, dt), { glow: true });
+        const pos = drawPos(h, dt);
+        // Rango de ataque: círculo punteado (el tuyo más visible). Lo que entra en el círculo recibe tu ataque automático.
+        ctx.save();
+        ctx.strokeStyle = heroColor(h); ctx.globalAlpha = h === player ? 0.45 : 0.18; ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]);
+        ctx.beginPath(); ctx.arc(pos.x * TILE + TILE / 2, pos.y * TILE + TILE / 2, effRange(h) * TILE, 0, Math.PI * 2); ctx.stroke();
+        ctx.restore();
+        drawUnit(h, hasFlag(h, 'invulnerable') ? '#ffffff' : heroColor(h), h.symbol, pos, { glow: true });
     });
     drawArenaFx(arena);
     ctx.restore();

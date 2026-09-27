@@ -1389,6 +1389,22 @@ test('Mapa agrandable: M cambia el tamaño del mapa y vuelve', () => {
     checkEq(canvas.style.width, w, 'vuelve al tamaño normal');
 });
 
+test('Habilidades automáticas: con H prendido el jugador lanza sus habilidades solo; apagado, no', () => {
+    const saved = autoCast;
+    try {
+        for (const on of [true, false]) {
+            autoCast = on;
+            newGame('AXE');
+            const skill = learn(Object.values(HERO_SKILLS.AXE).find(s => s.kind === 'active' && !s.isUltimate).id, 1);
+            player.mana = player.maxMana;
+            const c = creeps[0]; c.x = player.x + 1; c.y = player.y; c.hp = c.maxHp = 1e6;
+            creeps.slice(1).forEach(o => { o.hp = 0; });
+            for (let i = 0; i < 30; i++) { gameClock += 0.05; updateHero(player, player.arena, 0.05); }
+            checkEq((player.cooldowns[skill.id] || 0) > 0, on, on ? 'la lanzó sola' : 'no la lanzó');
+        }
+    } finally { autoCast = saved; }
+});
+
 test('Moverse reinicia el ataque (no se puede disparar gratis mientras te alejás)', () => {
     newGame('SNIPER');
     dummy({ x: player.x + 3 });
@@ -1458,6 +1474,7 @@ test('Nueva Partida deja todo como al empezar', () => {
 
 // ============================================================ EJECUCIÓN
 function runTests() {
+    autoCast = false; // las pruebas controlan a mano cuándo se lanza cada habilidad (la de habilidades automáticas lo prende)
     const results = TESTS.map(t => {
         try {
             if (t.opts.random) t.fn(); else withRandom(0.99, t.fn);
