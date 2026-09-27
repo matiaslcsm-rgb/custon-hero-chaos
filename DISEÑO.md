@@ -465,7 +465,8 @@ héroes (Axe: +0,5 armadura cada 10). El Alquimista también domina los duelos (
 (Vampiro 0-9%, Asesino 8-26%) porque los de distancia **pueden moverse y atacar a la vez** ("kiteo gratis").
 **Propuesta medida:** escalado del Sniper a la mitad + **moverse reinicia el ataque** (como la animación de ataque de Dota):
 las victorias se reparten (Bruja 5, Axe 4-5, Arcanista 2-3, Sniper, Vampiro y Alquimista 1) y los cuerpo a cuerpo suben
-(Axe ~55%, Asesino ~33%, Vampiro ~20% de duelos). **A decidir.**
+(Axe ~55%, Asesino ~33%, Vampiro ~20% de duelos). **Aplicado** (escalado del Sniper +1,5 daño cada 8 bajas y +4 por
+duelo; `MOVE_RESETS_ATTACK` en game.js). Queda por mirar: el Alquimista sigue ganando ~83% de sus duelos.
 
 ### Construcción de la fase F
 | Etapa | Qué |

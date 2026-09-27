@@ -8,7 +8,10 @@ let gameState = 'HERO_SELECT', waveNumber = 1, isBossWave = false, gameClock = 0
 let currentDraft = null; // { mode, options } del draft abierto; mode 'bookChoice' = eligiendo qué cambiar con el Libro
 
 const BOSS_ROUND_EVERY = 5;   // cada 5 rondas, la oleada es la del jefe (tema "Jefe Final")
-const WAVE_HARD_LIMIT = 120;  // segundos: si una arena no terminó, se da por perdida (evita partidas trabadas)
+const WAVE_HARD_LIMIT = 120;
+// Moverse reinicia el ataque (como la animación de ataque de Dota): sin esto los héroes a distancia se alejaban y disparaban
+// a la vez sin costo, y los cuerpo a cuerpo casi no ganaban duelos.
+const MOVE_RESETS_ATTACK = true;  // segundos: si una arena no terminó, se da por perdida (evita partidas trabadas)
 
 window.addEventListener('keydown', e => {
     const k = e.key.toLowerCase();
@@ -302,9 +305,11 @@ function updateHero(hero, arena, dt) {
     hero.moveTimer = (hero.moveTimer || 0) + dt;
     if (!stunned && hero.moveTimer > hero.moveInterval / effMoveMult(hero)) {
         const dir = aiControlled ? aiMoveDirection(hero) : keyboardDirection();
+        const x = hero.x, y = hero.y;
         hero.x = Math.max(0, Math.min(COLS - 1, hero.x + dir.dx));
         hero.y = Math.max(0, Math.min(ROWS - 1, hero.y + dir.dy));
         hero.moveTimer = 0;
+        if (MOVE_RESETS_ATTACK && (hero.x !== x || hero.y !== y)) hero.attackTimer = 0;
     }
 
     // Ataque automático: al enemigo en rango de mayor prioridad (ej: Sanadores) o, si no, al más cercano

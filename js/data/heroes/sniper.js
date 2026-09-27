@@ -7,7 +7,8 @@ registerHero({
     baseMaxMana: 150, baseManaRegen: 1.5, baseMoveSpeed: 2.6, baseProjectileSpeed: 11,
     baseCritChance: 12, baseEvasion: 8, baseSpellAmp: 8, baseLifesteal: 0,
     description: 'Agilidad: DPS físico de largo alcance. Cuanto más lejos dispara, más daño hace. Frágil de cerca.',
-    scaling: { stat: 'atk', perKills: 8, perKillsAmount: 3, perHeroKill: 8 },
+    // Escalado a la mitad tras medir: con +3/+8 ganaba el 93% de sus duelos y todas las partidas.
+    scaling: { stat: 'atk', perKills: 8, perKillsAmount: 1.5, perHeroKill: 4 },
     innate: {
         id: 'PERFECT_AIM', name: 'Puntería Perfecta',
         tags: ['FÍSICO', 'AL_GOLPEAR'],

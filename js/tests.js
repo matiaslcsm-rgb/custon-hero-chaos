@@ -1129,6 +1129,16 @@ test('Coraza de Espinas también devuelve daño a héroes cuerpo a cuerpo en los
     checkEq(hp - a.hp, Math.round(Math.round(dealt * ITEMS.THORNS.reflect) * (1 - DUEL_DAMAGE_REDUCTION)), 'reflejo al atacante (con la reducción de duelo)');
 });
 
+test('Moverse reinicia el ataque (no se puede disparar gratis mientras te alejás)', () => {
+    newGame('SNIPER');
+    dummy({ x: player.x + 3 });
+    player.attackTimer = 0.5; player.moveTimer = 99;
+    keys = { a: true };
+    updateWave(0.001);
+    keys = {};
+    check(player.attackTimer < 0.01, 'al moverse, el ataque vuelve a arrancar (tenía 0.5s cargados)');
+});
+
 test('En duelo los héroes se hacen menos daño entre sí; contra creeps no cambia', () => {
     toDuels();
     const [a, b] = arenas[0].heroes;
