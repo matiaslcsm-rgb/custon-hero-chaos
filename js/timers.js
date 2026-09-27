@@ -54,6 +54,6 @@ function waveTimeLeft(arena = player && player.arena) { return arena ? WAVE_TIME
 
 // Multiplicador de daño y velocidad de ataque de los creeps de una arena (1 = normal).
 function enrageMult(arena = player && player.arena) {
-    const over = arena ? arena.elapsed - WAVE_TIME.limit : 0;
+    const over = arena && arena.kind === 'wave' ? arena.elapsed - WAVE_TIME.limit : 0;
     return over > 0 ? 1 + over * WAVE_TIME.enragePerSecond : 1;
 }

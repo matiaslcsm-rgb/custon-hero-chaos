@@ -80,9 +80,17 @@ function handleHeroDeath(hero, killer) {
         resolveDuel(hero.arena, winner, hero);
         return;
     }
-    hero.diedThisRound = true;
     const you = hero === player;
     const cause = killer ? `${killer.label} ${you ? 'te mató' : 'mató a ' + hero.displayName}` : (you ? 'Moriste' : `${hero.displayName} murió`);
+    // Contra el jefe de ronda no se pierden vidas: revive a los pocos segundos (ver bosses.js)
+    if (hero.arena && hero.arena.kind === 'boss') {
+        hero.hp = 0;
+        hero.effects = hero.effects.filter(e => e.flags.includes('persistent'));
+        hero.respawnAt = gameClock + BOSS_FIGHT.respawn;
+        log(`💀 ${cause}. ${you ? 'Revivís' : 'Revive'} en ${BOSS_FIGHT.respawn}s (contra el jefe de ronda no se pierden vidas).`);
+        return;
+    }
+    hero.diedThisRound = true;
     if (isCondemned(hero) && hero.lives <= 0) { eliminateHero(hero, cause); return; }
     hero.lives--;
     hero.hp = 0;
@@ -116,6 +124,10 @@ function tryRespawn(hero = player) {
     if (!hero.respawnAt || gameClock < hero.respawnAt) return false;
     hero.respawnAt = 0;
     hero.hp = hero.maxHp;
+    if (hero.arena && hero.arena.kind === 'boss') { // sin Voluntad de Titán; vuelve al fondo de la arena
+        Object.assign(hero, bossStartSpot(hero.arena.heroes.indexOf(hero)));
+        return true;
+    }
     applyTitanWill(hero);
     log(`⚡ ¡Voluntad de Titán! ${TITAN_WILL.duration}s de inmortalidad, +${TITAN_WILL.atkSpeedPct * 100}% vel. ataque y habilidades sin costo de maná.`);
     if (hero.lives <= 0 && !isCondemned(hero)) enterCondemned(hero);

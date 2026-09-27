@@ -18,7 +18,7 @@ const DUEL_CURSE_ALIVE = MAX_HEROES / 2; // con esta cantidad de héroes en jueg
 const DUEL_DEATH_ALIVE = 3;              // con esta cantidad o menos, perder un duelo estando maldito elimina
 const DUEL_STARTS = [{ x: 3, y: 6 }, { x: 16, y: 6 }];
 
-function inCombat() { return gameState === 'WAVE' || gameState === 'DUEL'; }
+function inCombat() { return gameState === 'WAVE' || gameState === 'DUEL' || gameState === 'BOSS'; }
 
 // Parejas al azar evitando repetir el rival de la ronda anterior. Arma parejas de a una sobre un orden al azar;
 // como eso puede dejar al final justo a dos que ya pelearon, prueba varios órdenes y se queda con el que menos repite.
@@ -111,9 +111,10 @@ function updateDuelArena(arena, dt) {
     resolveDuel(arena, aWins ? a : b, aWins ? b : a, 'se acabó el tiempo');
 }
 
-// Todos los duelos terminaron: ranking y siguiente ronda.
+// Todos los duelos terminaron: jefe de ronda (cada 5 rondas) o ranking y siguiente ronda.
 function onDuelsDone() {
     arenas = [];
     heroes.forEach(h => { if (!h.eliminated) { h.arena = null; if (!h.inRest) sendToRestArea(h); } });
-    endRound();
+    if (isRoundBossRound() && aliveHeroes().length > 1) startBossFight();
+    else endRound();
 }

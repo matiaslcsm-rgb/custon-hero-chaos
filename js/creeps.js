@@ -4,9 +4,9 @@
 let nextWave = null; // oleada ya sorteada para mostrar el aviso en la tienda
 
 // Sortea el tema de la oleada de una ronda: las rondas 1-4 usan los temas de su nivel; después se repiten los del
-// nivel 4 (cada vez más fuertes); cada BOSS_ROUND_EVERY rondas toca la oleada del jefe.
+// nivel 4 (cada vez más fuertes). Cada 5 rondas, además, hay jefe de ronda después de los duelos (ver bosses.js).
 function rollWave(number) {
-    const tier = number % BOSS_ROUND_EVERY === 0 ? WAVE_THEMES.length - 1 : Math.min(number, WAVE_THEMES.length - 1) - 1;
+    const tier = Math.min(number, WAVE_THEMES.length) - 1;
     const theme = pickRandom(WAVE_THEMES[tier]);
     return { name: theme.name, groups: theme.groups, boss: theme.boss };
 }
@@ -17,12 +17,12 @@ function groupUnits(g) { return g.count * (CREEP_TYPES[g.type].groupSize || 1); 
 // Los creeps se hacen CREEP_GROWTH veces más fuertes por ronda, acumulado (exponencial): tienen que alcanzar a los héroes,
 // que escalan con niveles, ítems y Ascensos, para que el PvE vaya eliminando héroes (medido en DISEÑO.md §9).
 const CREEP_GROWTH = 1.13;
-function creepStatMult(round, bossWave) { return Math.pow(CREEP_GROWTH, round - 1) * (bossWave ? 1.3 : 1); }
+function creepStatMult(round) { return Math.pow(CREEP_GROWTH, round - 1); }
 
 // Llena una arena con los creeps de la oleada.
 function spawnWave(arena, wave) {
     arena.creeps = []; arena.boss = null; arena.projectiles = [];
-    const statMult = creepStatMult(waveNumber, isBossWave);
+    const statMult = creepStatMult(waveNumber);
     const add = c => { c.arena = arena; arena.creeps.push(c); return c; };
     // Aparecen en casillas distintas de las columnas 13 a 18; el jefe, en la última columna
     const cells = shuffle(Array.from({ length: 6 * ROWS }, (_, i) => [13 + Math.floor(i / ROWS), i % ROWS]));
@@ -33,11 +33,21 @@ function spawnWave(arena, wave) {
             add(makeCreep(CREEP_TYPES[g.type], x, y, statMult, false, 0));
         }
     });
-    arena.boss = add(makeCreep(CREEP_TYPES[wave.boss], COLS - 1, Math.floor(Math.random() * ROWS), statMult, true, isBossWave ? 0.5 : 0.35));
+    arena.boss = add(makeCreep(CREEP_TYPES[wave.boss], COLS - 1, Math.floor(Math.random() * ROWS), statMult, true, 0.35));
 }
 
-// El héroe al que ataca un creep (el de su arena).
-function creepTarget(c) { return c.arena.heroes[0]; }
+// El héroe al que ataca un creep: el de su arena o, si hay varios (jefe de ronda), el vivo más cercano.
+function creepTarget(c) {
+    const list = c.arena.heroes;
+    if (list.length === 1) return list[0];
+    let best = null, bestDist = Infinity;
+    list.forEach(h => {
+        if (h.eliminated || !h.isAlive()) return;
+        const d = Math.hypot(h.x - c.x, h.y - c.y);
+        if (d < bestDist) { bestDist = d; best = h; }
+    });
+    return best || list[0];
+}
 
 // --- MOVIMIENTO ---
 // Mueve un creep una casilla hacia (tx, ty) respetando su velocidad (y ralentizaciones).

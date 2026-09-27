@@ -52,6 +52,10 @@ function applyInventory(hero) {
             flags: ['persistent', 'item', ...(item.flags || [])], mods: item.mods, hooks: item.hooks ? item.hooks(item) : {}
         });
     });
+    if (hero.neutral) {
+        const n = NEUTRAL_ITEMS[hero.neutral];
+        addEffect(hero, { id: 'NEUTRAL', name: n.name, duration: Infinity, flags: ['persistent', 'item'], mods: n.mods || {}, hooks: n.hooks ? n.hooks(n) : {} });
+    }
     hero.recalculateStats();
 }
 

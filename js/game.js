@@ -4,10 +4,9 @@
 const COLS = 20, ROWS = 12;
 
 let player = null;
-let gameState = 'HERO_SELECT', waveNumber = 1, isBossWave = false, gameClock = 0, keys = {};
+let gameState = 'HERO_SELECT', waveNumber = 1, gameClock = 0, keys = {};
 let currentDraft = null; // { mode, options } del draft abierto; mode 'bookChoice' = eligiendo qué cambiar con el Libro
 
-const BOSS_ROUND_EVERY = 5;   // cada 5 rondas, la oleada es la del jefe (tema "Jefe Final")
 const WAVE_HARD_LIMIT = 120;
 // Moverse reinicia el ataque (como la animación de ataque de Dota): sin esto los héroes a distancia se alejaban y disparaban
 // a la vez sin costo, y los cuerpo a cuerpo casi no ganaban duelos.
@@ -145,7 +144,6 @@ function returnFromRestArea(hero) {
 // Cada héroe en juego pelea la misma oleada en su propia arena, todos al mismo tiempo.
 function startWave() {
     showPanel('shop-container', false);
-    isBossWave = waveNumber % BOSS_ROUND_EVERY === 0;
     gameState = 'WAVE';
     const wave = nextWave || rollWave(waveNumber);
     nextWave = null;
@@ -157,7 +155,7 @@ function startWave() {
         return arena;
     });
     if (player.eliminated && (!viewedHero || viewedHero.eliminated)) viewedHero = rankedHeroes()[0];
-    setStateText(`${isBossWave ? 'JEFE' : 'OLEADA'} · RONDA ${waveNumber}: ${wave.name.toUpperCase()}`);
+    setStateText(`OLEADA · RONDA ${waveNumber}: ${wave.name.toUpperCase()}`);
     log(`🌊 ¡Ronda ${waveNumber}: ${wave.name}! Cada héroe pelea en su arena (${creeps.length ? creeps.length - 1 : '?'} creeps + 1 jefe).`);
 }
 
@@ -211,7 +209,7 @@ function endGame() {
 // Vuelve todo al estado inicial (selección de héroe) sin recargar la página.
 function resetGame() {
     player = null; heroes = []; arenas = []; viewedHero = null;
-    gameState = 'HERO_SELECT'; waveNumber = 1; isBossWave = false; gameClock = 0;
+    gameState = 'HERO_SELECT'; waveNumber = 1; gameClock = 0;
     currentDraft = null; savedPrepTime = null; nextWave = null; logMuted = false;
     duelPlan = null; currentBet = null;
     setPhaseTimer(PHASE_TIMES.heroSelect);
@@ -268,6 +266,7 @@ function updateWave(dt) {
     if (!arenas.every(a => a.done)) return;
     if (gameState === 'WAVE') onRoundWavesDone();
     else if (gameState === 'DUEL') onDuelsDone();
+    else if (gameState === 'BOSS') onBossFightDone();
 }
 
 function updateArena(arena, dt) {
@@ -280,6 +279,7 @@ function updateArena(arena, dt) {
     if (arena.done) return; // el héroe quedó eliminado o el duelo se resolvió
     updateProjectiles(arena, dt);
     if (arena.kind === 'duel') { updateDuelArena(arena, dt); return; }
+    if (arena.kind === 'boss') { updateBossArena(arena, dt); return; }
     arena.creeps.forEach(c => updateCreep(c, dt));
 
     const fighting = arena.heroes.some(h => h.isAlive());

@@ -97,22 +97,27 @@ function renderCreepCodex() {
             `<p class="meta">${stats.join(' · ')}</p><p><strong>Contra:</strong> ${t.counter}${item}</p></div>`;
     }).join('');
     const last = WAVE_THEMES.length - 1;
-    const themes = WAVE_THEMES.map((tier, i) => `<p><strong>${i < last - 1 ? 'Ronda ' + (i + 1) : i === last - 1 ? 'Ronda ' + (i + 1) + ' en adelante' : 'Cada ' + BOSS_ROUND_EVERY + ' rondas (jefe)'}:</strong> ${tier.map(th => th.name).join(' o ')}</p>`).join('');
+    const themes = WAVE_THEMES.map((tier, i) => `<p><strong>Ronda ${i + 1}${i === last ? ' en adelante' : ''}:</strong> ${tier.map(th => th.name).join(' o ')}</p>`).join('');
+    const bosses = ROUND_BOSSES.map((b, i) => `<div class="ability-row fixed"><h4>${creepTag(b)} ${b.label} <span class="item-level">ronda ${(i + 1) * ROUND_BOSS_EVERY}</span></h4>` +
+        `<p>${b.mechanic}</p><p class="meta">${b.hpPerHero} HP por héroe · ${b.atk} daño${b.attackType === 'magical' ? ' mágico' : ''} · rango ${b.range} · armadura ${b.armor}</p></div>`).join('');
     document.getElementById('creep-codex').innerHTML =
         `<h3>Creeps</h3><p class="subtitle">Cada oleada normal trae además un jefe (4x vida, +2 armadura y un aura que potencia a los creeps cercanos). Los creeps se hacen más fuertes en cada oleada.</p>${rows}` +
-        `<div class="codex-sub">Temas de oleada (se elige uno al azar)</div>${themes}`;
+        `<div class="codex-sub">Temas de oleada (se elige uno al azar)</div>${themes}` +
+        `<div class="codex-sub">Jefes de ronda (cada ${ROUND_BOSS_EVERY} rondas, después de los duelos, todos contra uno)</div>` +
+        `<p class="subtitle">Morir no cuesta vidas (revivís en ${BOSS_FIGHT.respawn}s). Si cae en ${BOSS_FIGHT.time}s, todos cobran oro y eligen un objeto neutral; los 3 que más daño hicieron cobran extra.</p>${bosses}`;
 }
 
 // Aviso de la próxima oleada en la tienda: qué creeps vienen, qué hacen y cómo contrarrestarlos.
 function renderWavePreview() {
     const el = document.getElementById('wave-preview');
     if (!nextWave) { el.innerHTML = ''; return; }
-    const title = `Próxima oleada · ronda ${waveNumber}${waveNumber % BOSS_ROUND_EVERY === 0 ? ' (JEFE)' : ''}`;
+    const title = `Próxima oleada · ronda ${waveNumber}`;
     const rows = waveSummary(nextWave).map(({ type, count }) => {
         const counter = type.counterItem ? ` → <span class="counter-item">${ITEMS[type.counterItem].name}</span>` : '';
         return `<div class="preview-row">${creepTag(type)} <strong>${type.label} x${count}</strong>: ${type.mechanic}${type.counter !== '—' ? ` <em>Contra: ${type.counter}${counter}</em>` : ''}</div>`;
     }).join('');
-    el.innerHTML = `<h3>🔭 ${title}: ${nextWave.name}</h3>${rows}<div class="preview-row">${creepTag(CREEP_TYPES[nextWave.boss])} <strong>Jefe: ${CREEP_TYPES[nextWave.boss].label}</strong></div>`;
+    el.innerHTML = `<h3>🔭 ${title}: ${nextWave.name}</h3>${rows}<div class="preview-row">${creepTag(CREEP_TYPES[nextWave.boss])} <strong>Jefe: ${CREEP_TYPES[nextWave.boss].label}</strong></div>` +
+        (isRoundBossRound() ? `<div class="preview-row">${creepTag(roundBossOf())} <strong>Después de los duelos, jefe de ronda: ${roundBossOf().label}</strong>. ${roundBossOf().mechanic}</div>` : '');
 }
 
 // --- DRAFT Y TIENDA ---
@@ -208,7 +213,37 @@ function renderShop() {
     });
     if (shopTab === 'other') all.filter(i => !isEquip(i) && itemAvailable(i, player)).forEach(i => c.appendChild(shopCard(i)));
     renderInventoryPanel();
+    renderNeutralPanel();
     renderDestinyPanel();
+}
+
+// Objeto neutral: el equipado (con botón para venderlo) y, después de un jefe de ronda, los 3 para elegir.
+function renderNeutralPanel() {
+    const panel = document.getElementById('inventory-panel');
+    const title = document.createElement('div'); title.className = 'shop-category'; title.textContent = '🎁 Objeto neutral (solo uno)';
+    panel.appendChild(title);
+    const row = document.createElement('div'); row.className = 'destiny-row';
+    if (player.neutral) {
+        const n = NEUTRAL_ITEMS[player.neutral];
+        row.innerHTML = `<span>${n.name} <span class="item-level">escalón ${n.tier}</span><br><small>${describeNeutral(n)}</small></span>`;
+        const sell = document.createElement('button'); sell.textContent = `Vender (${neutralSellPrice(n.key)}g)`; sell.onclick = () => sellNeutral(player);
+        row.appendChild(sell);
+    } else row.innerHTML = `<span>Ninguno. Se ganan derrotando al jefe de ronda (cada ${ROUND_BOSS_EVERY} rondas).</span>`;
+    panel.appendChild(row);
+    if (!player.neutralOffer) return;
+    const offer = document.createElement('div'); offer.className = 'neutral-offer';
+    offer.innerHTML = `<p class="subtitle">Premio del jefe: elegí uno${player.neutral ? ' (el tuyo se vende solo)' : ''}.</p>`;
+    player.neutralOffer.forEach(key => {
+        const n = NEUTRAL_ITEMS[key];
+        const card = document.createElement('div'); card.className = 'skill-card';
+        card.innerHTML = `<h4>${n.name}</h4><p>${describeNeutral(n)}</p><p class="meta">Le sirve a: ${n.fits.join(', ')}</p>`;
+        card.onclick = () => equipNeutral(player, key);
+        offer.appendChild(card);
+    });
+    const keep = document.createElement('button'); keep.textContent = player.neutral ? 'Me quedo con el mío' : 'No quiero ninguno';
+    keep.onclick = () => declineNeutral(player);
+    offer.appendChild(keep);
+    panel.appendChild(offer);
 }
 
 // Inventario en la tienda: cada ítem con un botón para venderlo.
@@ -245,7 +280,10 @@ function renderItemCodex() {
         `<h3>Ítems</h3><p class="subtitle">Los básicos mejoran un solo stat y se pueden repetir. Los compuestos se arman con básicos + una receta, ` +
         `suman sus efectos y agregan algo especial. Al comprar un compuesto se usan los básicos que ya tenés y pagás solo lo que falta. ` +
         `Inventario: ${INVENTORY_SLOTS} espacios. Vender devuelve el ${SELL_REFUND * 100}%.</p>` +
-        `<div class="codex-sub">Básicos</div>${basics}${composites}`;
+        `<div class="codex-sub">Básicos</div>${basics}${composites}` +
+        `<div class="codex-sub">Objetos neutrales (premio de los jefes de ronda; solo uno a la vez)</div>` +
+        [1, 2, 3, 4].map(tier => `<p><strong>Escalón ${tier} (ronda ${tier * ROUND_BOSS_EVERY}):</strong></p>` + Object.values(NEUTRAL_ITEMS).filter(n => n.tier === tier).map(n =>
+            `<div class="ability-row"><h4>${n.name} <span class="item-level">se vende por ${neutralSellPrice(n.key)}g</span></h4><p>${describeNeutral(n)}</p></div>`).join('')).join('');
 }
 
 // Inventario de objetos del destino (solo se usan fuera de las oleadas).
@@ -384,7 +422,7 @@ function updateHud() {
     document.getElementById('player-hp').textContent = `${Math.round(player.hp)}/${player.maxHp}`;
     document.getElementById('player-mana').textContent = `${Math.round(player.mana)}/${player.maxMana}`;
     document.getElementById('player-gold').textContent = player.gold;
-    document.getElementById('round-num').textContent = `${waveNumber}/${MAX_ROUNDS}${isBossWave ? ' (JEFE)' : ''}`;
+    document.getElementById('round-num').textContent = `${waveNumber}/${MAX_ROUNDS}${isRoundBossRound() ? ' (JEFE)' : ''}`;
     renderScoreboard();
     document.getElementById('stat-str').textContent = Math.floor(player.attr('str'));
     document.getElementById('stat-agi').textContent = Math.floor(player.attr('agi'));
@@ -420,6 +458,7 @@ function renderTimer() {
         if (hero.inRest || !arena || arena.done) { text = `🏕 Descansando · ${waiting} ${gameState === 'DUEL' ? 'duelo' : 'arena'}${waiting === 1 ? '' : 's'} en curso`; }
         else if (arena.kind === 'duel') { const left = DUEL_TIME - arena.elapsed; text = `⚔ Duelo ${Math.max(0, Math.ceil(left))}s`; if (left <= 5) cls = 'urgent'; }
         else if (!hero.isAlive() && hero.respawnAt) { text = `☠ Revive en ${Math.max(0, hero.respawnAt - gameClock).toFixed(1)}s`; cls = 'urgent'; }
+        else if (arena.kind === 'boss') { const left = BOSS_FIGHT.time - arena.elapsed; text = `👹 Jefe ${Math.max(0, Math.ceil(left))}s · tu daño ${hero.bossDamage}`; if (left <= 10) cls = 'urgent'; }
         else if (waveTimeLeft(arena) > 0) { text = `⏱ ${Math.ceil(waveTimeLeft(arena))}s`; if (waveTimeLeft(arena) <= 5) cls = 'urgent'; }
         else { text = `🔥 Creeps enfurecidos +${Math.round((enrageMult(arena) - 1) * 100)}%`; cls = 'urgent'; }
     }
@@ -513,6 +552,13 @@ function render() {
     if (arena.kind === 'duel') {
         ctx.font = 'bold 13px monospace'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffb703';
         ctx.fillText(`⚔ DUELO: ${arena.heroes[0].displayName}  vs  ${arena.heroes[1].displayName}`, canvas.width / 2, TILE * 0.7);
+    }
+    if (arena.kind === 'boss' && arena.boss) {
+        const b = arena.boss;
+        ctx.font = 'bold 13px monospace'; ctx.textAlign = 'center'; ctx.fillStyle = b.color;
+        ctx.fillText(`👹 ${b.label}: ${Math.max(0, b.hp)} / ${b.maxHp}`, canvas.width / 2, TILE * 0.5);
+        ctx.fillStyle = '#330010'; ctx.fillRect(TILE * 3, TILE * 0.8, canvas.width - TILE * 6, 5);
+        ctx.fillStyle = '#ff0055'; ctx.fillRect(TILE * 3, TILE * 0.8, (canvas.width - TILE * 6) * Math.max(0, b.hp) / b.maxHp, 5);
     }
 
     // Aura del jefe

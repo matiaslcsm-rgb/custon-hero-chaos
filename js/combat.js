@@ -100,6 +100,7 @@ function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     const floor = hasFlag(target, 'preventDeath') ? 1 : 0;
     const hpLost = Math.max(0, Math.min(final, target.hp - floor));
     target.hp -= hpLost;
+    if (target.isRoundBoss && source && source.isHero) source.bossDamage += hpLost; // para el bonus del jefe de ronda
     // dealt en el evento es el daño completo (sin recortar por la vida restante): lo usa Forma Inmortal para acumular
     emit(target, 'onDamaged', { source, dealt: final, type });
     if (source && hpLost > 0) emit(source, 'onDealDamage', { target, dealt: hpLost, type });

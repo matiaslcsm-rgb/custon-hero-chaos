@@ -167,7 +167,7 @@ const CREEP_TYPES = {
     }
 };
 
-// Temas de oleada: para cada oleada se elige uno al azar de su nivel (la última es la del jefe final).
+// Temas de oleada: para cada oleada se elige uno al azar de su nivel (de la ronda 4 en adelante se repite el último nivel).
 // groups: tipos y cantidades; boss: tipo base del jefe de la oleada.
 const WAVE_THEMES = [
     [ // oleada 1
@@ -188,8 +188,5 @@ const WAVE_THEMES = [
         { name: 'Emboscada', groups: [{ type: 'THIEF', count: 2 }, { type: 'STUNNER', count: 3 }, { type: 'SPECTER', count: 2 }, { type: 'SHAMAN', count: 2 }], boss: 'STUNNER' },
         { name: 'Asedio', groups: [{ type: 'ARMORED', count: 2 }, { type: 'SHAMAN', count: 3 }, { type: 'HEALER', count: 2 }, { type: 'STUNNER', count: 2 }], boss: 'ARMORED' },
         { name: 'Tormenta Arcana', groups: [{ type: 'WARLOCK', count: 2 }, { type: 'FROSTCASTER', count: 2 }, { type: 'SHAMAN', count: 2 }, { type: 'HEALER', count: 1 }, { type: 'DRUMMER', count: 1 }], boss: 'WARLOCK' }
-    ],
-    [ // oleada 5: jefe final
-        { name: 'Jefe Final', groups: [{ type: 'BRUTE', count: 2 }, { type: 'SHAMAN', count: 2 }, { type: 'HEALER', count: 1 }, { type: 'STUNNER', count: 2 }, { type: 'ARMORED', count: 1 }, { type: 'KAMIKAZE', count: 2 }, { type: 'WARLOCK', count: 1 }, { type: 'DRUMMER', count: 1 }], boss: 'BRUTE' }
     ]
 ];

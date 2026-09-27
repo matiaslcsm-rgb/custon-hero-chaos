@@ -332,8 +332,9 @@ Cada oleada sortea un tema de su nivel (en la tienda se ve **el aviso de la pró
 | 1 | Avanzada · Enjambre |
 | 2 | Hechiceros · Espectros · Brujería |
 | 3 | Muralla · Kamikazes · Tiradores |
-| 4 | Emboscada · Asedio · Tormenta Arcana |
-| 5 (jefe final) | Jefe Final |
+| 4 en adelante | Emboscada · Asedio · Tormenta Arcana |
+
+*(La oleada "Jefe Final" de cada 5 rondas se reemplazó por el jefe de ronda, ver §9 bis.)*
 
 Cada oleada trae además un **jefe** (4x vida, +2 armadura y aura que potencia a los creeps cercanos) del tipo que indica el tema.
 
@@ -438,7 +439,7 @@ La idea es que quien va perdiendo tenga herramientas para rehacer su kit y volve
 - **Ranking** siempre visible: puesto, vidas, puntos, oro y estado (⚔ pelea, 🏕 descansa, ☠ muerto, 💀 eliminado).
   **Clic en un héroe para mirar su arena** (el registro muestra solo lo que pasa en la arena que mirás).
 - **Rondas:** hasta 20; las rondas 1-4 usan los temas de su nivel y después se repiten los del nivel 4, cada vez más fuertes;
-  cada 5 rondas toca la oleada del jefe. Si una arena pasa de 120 s, se da por perdida.
+  cada 5 rondas hay jefe de ronda después de los duelos (§9 bis). Si una arena pasa de 120 s, se da por perdida.
 - **Espectador:** si el jugador queda eliminado, la partida sigue y puede mirar a los demás.
 - Rendimiento: un frame con las 8 arenas tarda ~0,1 ms (peor caso ~9 ms).
 
@@ -493,7 +494,7 @@ duelo; `MOVE_RESETS_ATTACK` en game.js). Queda por mirar: el Alquimista sigue ga
 
 ---
 
-## 9 bis. Jefes de ronda y objetos neutrales (fase G, a futuro)
+## 9 bis. Jefes de ronda y objetos neutrales (fase G)
 
 - Cada cierta cantidad de rondas, **al terminar los duelos se pausan** y **todos pelean contra un jefe**: un creep mucho más
   fuerte y resistente.
@@ -501,6 +502,27 @@ duelo; `MOVE_RESETS_ATTACK` en game.js). Queda por mirar: el Alquimista sigue ga
 - **Objetos neutrales:** van en un **espacio aparte** del inventario y dan una mejora. **Solo se puede tener uno a la vez.**
   Cada jefe siguiente ofrece objetos **mejores**: podés quedarte con el que tenés o cambiarlo por el nuevo.
   También se pueden **vender** por oro (perdés el objeto).
+
+### Decisiones
+- **Reemplaza a la oleada del jefe:** rondas **5, 10, 15 y 20**: oleada normal → duelos → **jefe de ronda** para todos los
+  que siguen en juego, en una sola arena. Un jefe distinto por escalón, cada uno más fuerte.
+- **Premio:** si el jefe cae en **60 s**, todos cobran oro (100/150/200/250 según el escalón) y experiencia; los **3 que más
+  daño le hicieron** cobran **+50% / +30% / +15%**. Si se acaba el tiempo, se va y no hay premio.
+- **Sin riesgo de vidas:** morir contra el jefe no cuesta vidas; se revive a los **5 s** en el fondo de la arena, sin Voluntad de Titán.
+- **Neutrales: elegís 1 de 3** del escalón del jefe (en la preparación siguiente), o te quedás con el tuyo.
+
+### Implementado en G ✅
+- **Jefes** (`js/data/bosses.js`): Gólem Ancestral (ronda 5: Golpe Sísmico en área que aturde), Reina de la Colmena
+  (10: invoca Enjambres), Dragón de Escarcha (15: Aliento Helado a los 3 más cercanos, ralentiza) y Señor del Abismo
+  (20: Llamarada de daño puro a todos, Furia con menos de la mitad de vida). Vida = por héroe × héroes que pelean × el
+  crecimiento de los creeps de la ronda. El jefe ataca al héroe vivo más cercano.
+- **Neutrales** (`js/data/neutrals.js`): 20 objetos, 5 por escalón. Se venden por **60g × escalón**. Aparecen en la tienda
+  (sección "Objeto neutral") y en el códice de Ítems. Los jefes, en el códice de Creeps y en el aviso de la oleada.
+- **Decisión mía (reversible):** al cambiar de neutral, **el anterior se vende solo** (para no perderlo por olvidarse).
+  La IA elige el de mayor escalón que le sirva a su atributo principal.
+- **Medido** (9 partidas de 15 rondas, sin modo dios; primera versión: caía en ~10 s y nadie moría; se triplicó la vida y
+  se subió el daño): con ~5 héroes, el jefe cae en **~33 s** (ronda 5), **~40 s** (ronda 10) y **~55 s** (ronda 15),
+  con 0,5 a 5 muertes por pelea y alguna vez se escapa. El Señor del Abismo (ronda 20) casi no se llega a ver en las simulaciones.
 
 ---
 
@@ -516,7 +538,7 @@ Cada fase deja el juego jugable.
 | **D. Ítems** ✅ | Contras por etiqueta, niveles/recetas, inventario limitado | Necesita las etiquetas y habilidades variadas para tener qué contrarrestar |
 | **E. Creeps** ✅ | Tipos con mecánica, aviso de oleada, oleadas compuestas | Es el campo de prueba de los ítems situacionales |
 | **F. PvP** | Rivales con IA, duelos, apuestas, ranking top 8, Fragmentos/Libro para los últimos | Usa todo lo anterior: la IA draftea, compra y pelea con las mismas reglas |
-| **G. Jefes de ronda** | Jefe común cada N rondas, objetos neutrales (uno a la vez, mejoran con cada jefe) | Da objetivos compartidos y escalado extra en partidas largas |
+| **G. Jefes de ronda** ✅ | Jefe común cada N rondas, objetos neutrales (uno a la vez, mejoran con cada jefe) | Da objetivos compartidos y escalado extra en partidas largas |
 
 ---
 
@@ -560,7 +582,8 @@ si un nombre no te gusta, se cambia acá y después en el código.
 | **Draft** | Elegir 1 habilidad entre varias opciones | `'DRAFT'`, `startSkillDraft()` |
 | **Preparación** | Tienda, subir habilidades, usar objetos del destino | `'PREP'`, `startPreparation()` |
 | **Oleada** | Combate PvE contra creeps | `'WAVE'`, `updateWave()` |
-| **Oleada del Jefe** 🆕 | La oleada final, más difícil | `isBossWave` |
+| **Jefe de Ronda** | Cada 5 rondas, después de los duelos: todos los héroes contra un jefe | `'BOSS'`, `startBossFight()` (bosses.js) |
+| **Objeto Neutral** | Premio del jefe de ronda; espacio aparte, uno a la vez | `hero.neutral`, `NEUTRAL_ITEMS` |
 | **Duelo** | Combate 1v1 contra otro héroe *(fase F)* | — |
 | **Ranking (Top 8)** | Orden por puntos y oro tras los duelos *(fase F)* | — |
 

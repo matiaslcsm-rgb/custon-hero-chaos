@@ -58,8 +58,8 @@ function retreatStep(hero, enemies) {
 
 // --- HABILIDADES ---
 function aiWantsToCast(hero, skill, nearCount, bossNear) {
-    // En un duelo hay un solo enemigo: definitiva y habilidades de área apenas lo tiene cerca
-    if (hero.arena && hero.arena.kind === 'duel') {
+    // En un duelo (o contra el jefe de ronda) hay un enemigo principal: definitiva y área apenas lo tiene cerca
+    if (hero.arena && hero.arena.kind !== 'wave') {
         if (skill.tags.includes('MOVILIDAD') && isRanged(hero)) return nearCount === 0;
         return nearCount >= 1 || !(skill.isUltimate || skill.tags.includes('ÁREA'));
     }
@@ -115,6 +115,15 @@ function aiUseDestiny(hero) {
         if (hero.skills.length && foreign().length * 2 >= hero.skills.length) aiReplaceSkill(hero, pickRandom(hero.skills), 'fragment');
         else hero.gold += FRAGMENT_SELL_PRICE;
     }
+}
+
+// Neutrales: se queda con el que mejor le sirve (escalón + si le sirve a su atributo principal), si es mejor que el suyo.
+function aiPickNeutral(hero, options) {
+    const score = key => NEUTRAL_ITEMS[key].tier * 2 + (NEUTRAL_ITEMS[key].fits.includes(hero.primaryAttr) ? 1 : 0);
+    const best = options.slice().sort((a, b) => score(b) - score(a))[0];
+    hero.neutralOffer = options;
+    if (!hero.neutral || score(best) > score(hero.neutral)) equipNeutral(hero, best);
+    else declineNeutral(hero);
 }
 
 function aiReplaceSkill(hero, skill, mode) {
@@ -188,6 +197,7 @@ function tickAutopilot(dt) {
         endBetting(); // el piloto automático no apuesta
     } else {
         aiUseDestiny(player);
+        if (player.neutralOffer) aiPickNeutral(player, player.neutralOffer);
         aiSpendPoints(player);
         aiShop(player);
         startWave();

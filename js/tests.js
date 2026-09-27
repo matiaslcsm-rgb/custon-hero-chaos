@@ -578,7 +578,7 @@ function spawnType(key, props = {}) {
 
 test('Oleadas: tema sorteado, cantidades correctas y el aviso coincide con lo que aparece', () => {
     newGame('AXE');
-    waveNumber = 1; isBossWave = false;
+    waveNumber = 1;
     const wave = { name: 'Enjambre', groups: [{ type: 'SWARM', count: 2 }, { type: 'GRUNT', count: 2 }], boss: 'SCOUT' };
     spawnWave(player.arena, wave);
     checkEq(creeps.filter(c => c.key === 'SWARM').length, 8, 'el Enjambre viene de a 4');
@@ -793,7 +793,7 @@ test('Brujo: rayo cada 5s con daño mágico y aturdimiento; Escarchador ralentiz
 
 test('Área de Descanso: al terminar la oleada vas ahí y volvés con vida, maná completos y sin mejoras temporales', () => {
     newGame('AXE');
-    waveNumber = 1; isBossWave = false;
+    waveNumber = 1;
     creeps.forEach(c => { c.hp = 0; });
     player.hp = 5; player.mana = 0;
     addEffect(player, { id: 'TEMP', duration: 99, mods: { atkPct: 1 } });
@@ -1215,6 +1215,103 @@ test('IA: usa el Libro en una habilidad que no es natural y vende el Fragmento s
     checkEq(h.gold, gold + FRAGMENT_SELL_PRICE, 'vendió el Fragmento');
 });
 
+// ============================================================ JEFES DE RONDA Y NEUTRALES (fase G)
+// Deja la partida en la pelea contra el jefe de la ronda 5.
+function toBoss() {
+    resetGame();
+    selectHero(HERO_TEMPLATES.AXE);
+    learnSkill(currentDraft.options[0]);
+    waveNumber = ROUND_BOSS_EVERY;
+    startWave();
+    clearAllWaves();
+    skipDuels();
+    return arenas[0];
+}
+
+test('Jefe de ronda: en la ronda 5, después de los duelos, todos los héroes pelean juntos contra él', () => {
+    const arena = toBoss();
+    checkEq(gameState, 'BOSS', 'fase del jefe');
+    checkEq(arenas.length, 1, 'una sola arena');
+    checkEq(arena.heroes.length, MAX_HEROES, 'los 8 héroes');
+    check(arena.boss.isRoundBoss && arena.boss.label === ROUND_BOSSES[0].label, 'el jefe del escalón 1');
+    check(enemiesOf(player).every(e => !e.isHero), 'los héroes no se atacan entre sí');
+    checkEq(enrageMult(arena), 1, 'sin enojo de oleada');
+    arena.elapsed = 50; checkEq(enrageMult(arena), 1, 'tampoco pasado el tiempo de oleada');
+});
+
+test('Jefe de ronda: ataca al héroe vivo más cercano', () => {
+    const arena = toBoss();
+    const [a, b] = arena.heroes;
+    a.x = arena.boss.x - 1; a.y = arena.boss.y;
+    b.x = arena.boss.x - 5; b.y = arena.boss.y;
+    checkEq(creepTarget(arena.boss), a, 'el más cercano');
+    a.hp = 0;
+    checkEq(creepTarget(arena.boss), b, 'si muere, el siguiente');
+});
+
+test('Jefe de ronda: morir no cuesta vidas; se revive a los 5 s sin Voluntad de Titán', () => {
+    const arena = toBoss();
+    const lives = player.lives;
+    dealDamage(arena.boss, player, 99999, 'pure');
+    checkEq(player.lives, lives, 'no perdió vida');
+    check(!player.eliminated && player.respawnAt > 0, 'espera para revivir');
+    gameClock += BOSS_FIGHT.respawn + 0.1;
+    check(tryRespawn(player), 'revive');
+    checkEq(player.hp, player.maxHp, 'con la vida llena');
+    check(!getEffect(player, 'TITAN_WILL'), 'sin Voluntad de Titán');
+});
+
+test('Jefe de ronda: si cae, todos cobran, los 3 que más daño hicieron cobran extra y hay neutrales para elegir', () => {
+    const arena = toBoss();
+    const gold = heroes.map(h => h.gold);
+    heroes.forEach((h, i) => { h.bossDamage = i * 10; }); // más daño: los últimos
+    const realEndRound = endRound;
+    window.endRound = () => {}; // para mirar el oro antes de que la IA compre en la ronda siguiente
+    try { dealDamage(heroes[7], arena.boss, 1e9, 'pure'); updateWave(0.016); } finally { window.endRound = realEndRound; }
+    const base = BOSS_FIGHT.gold[0];
+    const got = heroes.map((h, i) => h.gold - gold[i]);
+    checkEq(got[0], base, 'el jugador (menos daño): el oro de todos');
+    checkEq(got[7], base + Math.round(base * BOSS_FIGHT.topBonus[0]) + 1, '1º en daño: +50% (y 1g por el último golpe)');
+    checkEq(got[6], base + Math.round(base * BOSS_FIGHT.topBonus[1]), '2º en daño: +30%');
+    checkEq(player.neutralOffer.length, BOSS_FIGHT.neutralOptions, '3 neutrales para elegir');
+    check(player.neutralOffer.every(k => NEUTRAL_ITEMS[k].tier === 1), 'del escalón 1');
+    check(heroes.slice(1).every(h => h.neutral), 'la IA ya eligió');
+    endRound();
+    if (gameState === 'DRAFT') learnSkill(currentDraft.options[0]);
+    checkEq(gameState, 'PREP', 'sigue la ronda 6');
+    checkEq(waveNumber, ROUND_BOSS_EVERY + 1, 'ronda 6');
+});
+
+test('Jefe de ronda: si se acaba el tiempo se va sin premio', () => {
+    const arena = toBoss();
+    const gold = player.gold;
+    arena.elapsed = BOSS_FIGHT.time;
+    updateWave(0.016);
+    check(arena.done, 'terminó');
+    checkEq(player.gold, gold, 'sin oro');
+    checkEq(player.neutralOffer, null, 'sin neutrales');
+});
+
+test('Neutrales: uno solo, da sus stats; al cambiarlo el anterior se vende solo', () => {
+    newGame('AXE');
+    const armor = effArmor(player);
+    player.neutralOffer = ['BRUTE_AMULET', 'WOLF_FANG', 'STALKER_DAGGER'];
+    check(equipNeutral(player, 'BRUTE_AMULET'), 'equipado');
+    check(effArmor(player) > armor, 'más armadura');
+    const gold = player.gold;
+    player.neutralOffer = ['OAK_SHIELD'];
+    equipNeutral(player, 'OAK_SHIELD');
+    checkEq(player.neutral, 'OAK_SHIELD', 'cambiado');
+    checkEq(player.gold - gold, neutralSellPrice('BRUTE_AMULET'), 'el anterior se vendió');
+    checkEq(player.effects.filter(e => e.id === 'NEUTRAL').length, 1, 'un solo efecto de neutral');
+    checkEq(sellNeutral(player), 2 * NEUTRAL_SELL_PER_TIER, 'se vende por escalón × 60');
+    checkEq(player.neutral, null, 'sin neutral');
+});
+
+test('Las oleadas ya no traen el tema "Jefe Final" (lo reemplaza el jefe de ronda)', () => {
+    for (let r = 1; r <= 20; r++) check(rollWave(r).name !== 'Jefe Final', 'ronda ' + r);
+});
+
 test('Moverse reinicia el ataque (no se puede disparar gratis mientras te alejás)', () => {
     newGame('SNIPER');
     dummy({ x: player.x + 3 });
@@ -1247,7 +1344,10 @@ function simulateGame(heroIndex, godMode = true, rounds = 4) {
         let guard = 0;
         while (gameState !== 'ENDED' && guard++ < rounds * 4 + 10) {
             if (gameState === 'DRAFT') learnSkill(aiPickDraft(player, currentDraft.options));
-            if (gameState === 'PREP') { if (!player.eliminated) { aiUseDestiny(player); aiSpendPoints(player); aiShop(player); } startWave(); }
+            if (gameState === 'PREP') {
+                if (!player.eliminated) { aiUseDestiny(player); if (player.neutralOffer) aiPickNeutral(player, player.neutralOffer); aiSpendPoints(player); aiShop(player); }
+                startWave();
+            }
             if (gameState === 'WAVE') {
                 if (godMode) addEffect(player, { id: 'TEST_GOD', duration: 1e9, flags: ['invulnerable', 'persistent'] });
                 for (let f = 0; (inCombat() || gameState === 'BETTING') && f < 20000; f++) {

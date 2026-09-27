@@ -126,3 +126,8 @@ b.cur { color: #ffb703; }
 #bet-pairs .bet-name { font-weight: bold; }
 #bet-pairs .bet-stats { font-size: 0.72rem; color: #8ecae6; }
 #bet-pairs .bet-vs { align-self: center; color: #888; }
+
+/* Oferta de objetos neutrales */
+.neutral-offer { border: 1px solid #ffb703; padding: 6px; margin: 6px 0; }
+.neutral-offer .skill-card { margin: 4px 0; }
+.neutral-offer button { margin-top: 4px; }
