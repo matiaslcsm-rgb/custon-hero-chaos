@@ -55,7 +55,7 @@ function renderHeroPick() {
 const ATTR_INFO = {
     STR: { label: 'Fuerza', color: '#ff6b6b', note: 'Más vida y regeneración. Aguantan al frente y pegan cuerpo a cuerpo.' },
     AGI: { label: 'Agilidad', color: '#69db7c', note: 'Más velocidad de ataque y armadura. Daño con ataques básicos y críticos.' },
-    INT: { label: 'Inteligencia', color: '#74c0fc', note: 'Más maná y amplificación de hechizos (+100% para magos). El daño fuerte viene de las habilidades.' }
+    INT: { label: 'Inteligencia', color: '#74c0fc', note: 'Más maná y amplificación de hechizos (+25% para magos, el resto lo dan los ítems). El daño fuerte viene de las habilidades.' }
 };
 
 function heroAbilityHtml(a, kind) {
@@ -764,6 +764,7 @@ function renderScoreboard() {
 // Deja la interfaz como al abrir el juego (usado por "Nueva Partida").
 function resetHud() {
     ['draft-container', 'shop-container', 'bet-container', 'restart-btn', 'hero-select-panel'].forEach(id => showPanel(id, false));
+    closeHeroDrawer();
     showPanel('menu-panel', true);
     setStateText('MENÚ');
     document.getElementById('round-num').textContent = '1';

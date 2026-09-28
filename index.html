@@ -83,6 +83,7 @@
                         <h3>Elegí tu héroe</h3>
                         <p class="subtitle">Estas opciones son solo tuyas. Ningún héroe se repite en la partida.</p>
                         <div id="hero-options" class="options-grid"></div>
+                        <button id="hero-any-btn" class="secondary-btn">🔓 Elegir cualquier héroe (arrancás sin oro)</button>
                     </div>
 
                     <!-- En combate: qué está pasando -->
@@ -174,6 +175,17 @@
     <div style="display: none;">
         <button id="sprites-btn"></button><button id="sound-btn"></button>
         <button id="autocast-btn"></button><button id="autopilot-btn"></button>
+    </div>
+
+    <!-- Elegir cualquier héroe (panel que se despliega desde la izquierda, solo en la elección de héroe) -->
+    <div id="hero-any-backdrop" style="display: none;"></div>
+    <div id="hero-any-drawer">
+        <div class="drawer-head">
+            <h3>🔓 Elegir cualquier héroe</h3>
+            <button id="hero-any-close" class="modal-close" title="Cerrar">✕</button>
+        </div>
+        <p class="subtitle">Elegís entre los 11, sin depender de tus 3 opciones al azar. A cambio, <b>arrancás sin oro</b> (en vez de 100g).</p>
+        <div id="hero-any-options" class="options-grid"></div>
     </div>
 
     <!-- Tutorial -->

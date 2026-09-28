@@ -42,6 +42,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 | Cuerpos físicos: pasar por la casilla de otro frena según su tamaño (+25/75/150%); `phasing` atraviesa | ✅ |
 | Regla: al menos 1 pasiva entre las 3 nativas (Axe, Sniper, Asesino y Vampiro convirtieron una activa) | ✅ |
 | Héroe 11: Zeus `Z` (fiel a Dota 2, pedido del usuario) + `mageSpellAmp` bajado de 100% a 25% (se saca del escalado, pasa a ítems) | ✅ (sin medir duelos) |
+| Elegir cualquier héroe: panel desplegable desde la izquierda en la elección de héroe, los 11 sin depender de las 3 opciones al azar; arrancás con 0g en vez de 100g | ✅ |
 
 ## Pendientes y temas abiertos
 - **En curso:** 3 héroes de Agilidad del usuario, de a uno y midiendo cada uno: Danzante ✅ → **Chakravin `Y`** (proyectiles
@@ -74,12 +75,13 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 ## Cómo probar y medir
 - **Pruebas:** abrir `tests.html` (o `index.html?test`). Cada mecánica nueva suma su prueba en `js/tests.js`.
 - **Probar desde el navegador integrado de Claude:** servir la carpeta con un servidor **sin caché** (el navegador guardaba
-  versiones viejas de los `.js`). En esta máquina no hay Python ni Node, así que se armó `serve-nocache.ps1` (raíz del
-  repo): servidor mínimo en PowerShell (`System.Net.HttpListener`) con cabecera `Cache-Control: no-store`, puerto 8766.
-  Correrlo con `powershell -ExecutionPolicy Bypass -File serve-nocache.ps1` (en segundo plano) y abrir
-  `http://localhost:8766/index.html` (o `?test` para las pruebas). Si la máquina tiene Python, `python -m http.server`
-  con la misma cabecera también sirve. El panel del navegador puede estar oculto y frenar `requestAnimationFrame`: para
-  probar en "tiempo real" se reproduce el cuerpo de `loop()` a mano a 60 cuadros por segundo.
+  versiones viejas de los `.js`). En esta máquina se instalaron **Node.js LTS** y **GitHub CLI (`gh`)** por `winget`
+  (2026-09-28, con permiso del usuario); en una sesión de terminal nueva deberían estar en el PATH solos. Igual queda
+  `serve-nocache.ps1` (raíz del repo, servidor mínimo en PowerShell con `Cache-Control: no-store`, puerto 8766) para
+  cuando no haya Node a mano: `powershell -ExecutionPolicy Bypass -File serve-nocache.ps1` (en segundo plano) y abrir
+  `http://localhost:8766/index.html` (o `?test`). Con Node instalado, `npx http-server -c-1` hace lo mismo. El panel del
+  navegador puede estar oculto y frenar `requestAnimationFrame`: para probar en "tiempo real" se reproduce el cuerpo de
+  `loop()` a mano a 60 cuadros por segundo.
 - **Medir balance:** `simulateGame(índiceDeHéroe, godMode, rondas)` (en tests.js) juega partidas completas con la IA.
   Para diagnosticar, se registran muertes/duelos envolviendo funciones (`resolveDuel`, `handlePlayerDeath`, `endRound`) y se
   prueba **cambiando una cosa por vez** (ablación). Con 8-16 partidas por variante hay bastante ruido: repetir antes de concluir.

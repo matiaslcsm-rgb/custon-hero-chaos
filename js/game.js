@@ -32,8 +32,13 @@ window.addEventListener('keydown', e => {
 window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
 
 // --- SELECCIÓN, DRAFT Y TIENDA ---
-function selectHero(template) {
+// Oro con el que arranca quien elige libremente (panel "Elegir cualquier héroe"), en vez de los 100g normales.
+// Es la penalización por saltarse las 3 opciones al azar y llevarse cualquiera de los HERO_TEMPLATES.
+const GOLD_PENALTY_FREE_PICK = 0;
+
+function selectHero(template, freePick = false) {
     player = new Hero(template);
+    if (freePick) player.gold = GOLD_PENALTY_FREE_PICK;
     player.displayName = `${player.name} (Vos)`;
     heroes = [player];
     createRivals(template);
@@ -42,7 +47,9 @@ function selectHero(template) {
     heroOffers = null;
     showPanel('menu-panel', false);
     showPanel('hero-select-panel', false);
-    log(`Seleccionaste a ${player.name}. Tus rivales: ${heroes.slice(1).map(h => h.name).join(', ')}.`);
+    log(freePick
+        ? `Elegiste a ${player.name} de entre todos los héroes. Arrancás con ${GOLD_PENALTY_FREE_PICK}g en vez de 100g. Tus rivales: ${heroes.slice(1).map(h => h.name).join(', ')}.`
+        : `Seleccionaste a ${player.name}. Tus rivales: ${heroes.slice(1).map(h => h.name).join(', ')}.`);
     startRoundDraft();
 }
 

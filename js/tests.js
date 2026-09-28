@@ -1545,6 +1545,28 @@ test('Elección de héroe: 3 opciones propias + "al azar" (uno que no está entr
     for (let i = 1; i < MAX_HEROES; i++) check(heroOffers[i].every(t => !heroOffers[0].includes(t)), 'tus opciones son solo tuyas');
 });
 
+test('Elegir cualquier héroe: el panel muestra los 11 (no solo tus 3 opciones) y penaliza el oro inicial', () => {
+    resetGame();
+    startHeroPick();
+    const totalHeroes = Object.keys(HERO_TEMPLATES).length;
+    openHeroDrawer();
+    check(document.getElementById('hero-any-drawer').classList.contains('open'), 'el panel se abre');
+    checkEq(document.querySelectorAll('#hero-any-options .skill-card').length, totalHeroes, 'una carta por cada héroe del roster');
+    // Elegir uno que no está entre las 3 opciones que te tocaron (si hay alguno disponible), haciendo clic
+    // en su carta real (no llamando a selectHero directo) para probar el cierre del panel también.
+    const notOffered = Object.values(HERO_TEMPLATES).find(t => !heroOffers[0].includes(t)) || Object.values(HERO_TEMPLATES)[0];
+    const card = [...document.querySelectorAll('#hero-any-options .skill-card')].find(c => c.textContent.includes(notOffered.name));
+    card.click();
+    checkEq(player.key, notOffered.key, 'te deja elegir uno que no estaba en tus opciones');
+    checkEq(player.gold, GOLD_PENALTY_FREE_PICK, 'arranca con la penalización de oro');
+    check(!document.getElementById('hero-any-drawer').classList.contains('open'), 'el panel se cierra al elegir');
+
+    resetGame();
+    startHeroPick();
+    document.querySelectorAll('#hero-options .skill-card')[0].click();
+    checkEq(player.gold, 100, 'elegir de las 3 opciones normales no penaliza');
+});
+
 test('Elección de héroe: los rivales eligen de sus opciones y ningún héroe se repite', () => {
     for (let n = 0; n < 10; n++) {
         resetGame();
