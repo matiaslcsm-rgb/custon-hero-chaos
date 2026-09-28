@@ -11,7 +11,7 @@ const WAVE_HARD_LIMIT = 120;
 // Moverse reinicia el ataque (como la animación de ataque de Dota): sin esto los héroes a distancia se alejaban y disparaban
 // a la vez sin costo, y los cuerpo a cuerpo casi no ganaban duelos.
 // Qué pasa con el ataque al moverse: 'reset' (arranca de cero), 'pause' (no avanza mientras caminás, pero no se pierde)
-// o 'free' (se puede atacar caminando). Es let para poder medir las variantes.
+// 'reset-ranged' (solo los de distancia reinician) o 'free' (se puede atacar caminando). Es let para poder medir las variantes.
 let MOVE_ATTACK_RULE = 'reset';
 // Velocidad de movimiento de todos (héroes y creeps): 0,65 = 35% más lentos que al principio, a pedido (se veía muy frenético).
 // Solo el movimiento: ataques y proyectiles quedan igual.
@@ -375,7 +375,7 @@ function updateHero(hero, arena, dt) {
         hero.y = Math.max(0, Math.min(ROWS - 1, hero.y + dir.dy));
         hero.moveTimer = 0;
         if (hero.x !== x || hero.y !== y) {
-            if (MOVE_ATTACK_RULE === 'reset') hero.attackTimer = 0;
+            if (MOVE_ATTACK_RULE === 'reset' || (MOVE_ATTACK_RULE === 'reset-ranged' && isRanged(hero))) hero.attackTimer = 0;
             // "está caminando" hasta que le tocaría dar el próximo paso
             hero.movingUntil = gameClock + hero.moveInterval / (effMoveMult(hero) * MOVE_SPEED_MULT) + dt;
         }
