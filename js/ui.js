@@ -727,26 +727,33 @@ function renderTimer() {
 // --- RANKING ---
 // Tabla con los 8 héroes: puesto, vidas, puntos, oro y dónde está. Un clic en un héroe muestra su arena.
 let lastScoreboardSignature = '';
+// 🔥 = peleando ahora (duelo, oleada o jefe); 🏕 = en la sala de espera.
+function isFighting(h) { return !h.eliminated && !h.inRest && h.isAlive() && inCombat() && !!h.arena && !h.arena.done; }
 function heroStatusIcon(h) {
     if (h.eliminated) return '💀';
-    if (h.inRest) return '🏕';
-    if (!h.isAlive()) return '☠';
-    return inCombat() ? '⚔' : '🏕';
+    if (isFighting(h)) return '🔥';
+    if (h.inRest || h.isAlive()) return '🏕';
+    return '☠';
+}
+function fightingText(h) {
+    if (!isFighting(h)) return '';
+    return h.arena.kind === 'duel' ? ' · 🔥 en duelo' : h.arena.boss && h.arena.boss.isRoundBoss ? ' · 🔥 contra el jefe' : ' · 🔥 contra creeps';
 }
 function renderScoreboard() {
     const ranked = rankedHeroes();
-    const signature = ranked.map(h => [h.displayName, h.points, h.gold, h.lives, heroStatusIcon(h), isCondemned(h)].join(':')).join('|') + (viewedHero ? viewedHero.displayName : '') + spritesOn;
+    const signature = ranked.map(h => [h.displayName, h.points, h.gold, h.lives, heroStatusIcon(h), isCondemned(h), h.arena && h.arena.kind].join(':')).join('|') + (viewedHero ? viewedHero.displayName : '') + spritesOn;
     if (signature === lastScoreboardSignature) return;
     lastScoreboardSignature = signature;
     const board = document.getElementById('scoreboard'); board.innerHTML = '';
     ranked.forEach((h, i) => {
         const row = document.createElement('div');
-        row.className = 'score-row' + (h === player ? ' you' : '') + (h === (viewedHero || player) ? ' viewed' : '') + (h.eliminated ? ' out' : '');
+        row.className = 'score-row' + (h === player ? ' you' : '') + (h === (viewedHero || player) ? ' viewed' : '') + (h.eliminated ? ' out' : '') +
+            (isFighting(h) ? ' fighting' + (h.arena.kind === 'duel' ? ' dueling' : '') : '');
         const lives = h.eliminated ? '' : '♥'.repeat(Math.max(0, h.lives)) + (isCondemned(h) ? '☠' : '');
         const url = heroSpriteUrl(h);
         row.innerHTML = `<span class="pos">${i + 1}</span><span class="sym" style="color:${heroColor(h)}">${url ? `<img src="${url}" alt="${h.symbol}" class="pixel-img tiny">` : h.symbol}</span><span class="name">${h === player ? 'Vos' : h.name}</span>` +
             `<span class="lives">${lives}</span><span class="pts">${h.points}</span><span class="st">${heroStatusIcon(h)}</span>`;
-        row.title = `${h.displayName} · ${h.points} pts · ${h.gold}g · nivel ${h.level} · duelos ${h.duelWins}-${h.duelLosses}`;
+        row.title = `${h.displayName} · ${h.points} pts · ${h.gold}g · nivel ${h.level} · duelos ${h.duelWins}-${h.duelLosses}${fightingText(h)}`;
         row.onclick = () => { viewedHero = h; lastScoreboardSignature = ''; };
         board.appendChild(row);
     });

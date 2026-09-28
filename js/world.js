@@ -26,6 +26,11 @@ Object.defineProperty(window, 'boss', { get: () => (player && player.arena ? pla
 Object.defineProperty(window, 'projectiles', { get: () => (player && player.arena ? player.arena.projectiles : []), configurable: true });
 
 function aliveHeroes() { return heroes.filter(h => !h.eliminated); }
+// Al empezar cada fase la cámara vuelve a tu héroe (si miraste a otro con el ranking). Eliminado: al primero del ranking.
+function followPlayer() {
+    if (!player.eliminated) viewedHero = player;
+    else if (!viewedHero || viewedHero.eliminated) viewedHero = rankedHeroes()[0];
+}
 function viewArena() { const h = viewedHero || player; return h ? h.arena : null; }
 
 // Crea los rivales: cada uno elige entre sus opciones de la fase de elección (ver menu.js), sin repetir héroes.

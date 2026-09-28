@@ -1036,7 +1036,8 @@ test('Un duelo por ronda: pelean los que menos pelearon, sin repetir la pareja a
         check(!(pair.includes(heroes[2]) && pair.includes(heroes[3])), 'no repite la pareja anterior');
     }
     toDuels('AXE', false);
-    check(!arenas[0].heroes.includes(player) && viewedHero && arenas[0].heroes.includes(viewedHero), 'si no peleás, la cámara va al duelo');
+    check(!arenas[0].heroes.includes(player) && viewedHero === player, 'si no peleás, la cámara sigue en tu héroe');
+    check(arenas[0].heroes.every(h => heroStatusIcon(h) === '🔥') && heroStatusIcon(player) === '🏕', 'el 🔥 marca a los duelistas');
 }, { random: true });
 
 test('Duelo: gana quien mata al otro (+3 puntos); con 5 o más en juego perder no cuesta nada', () => {

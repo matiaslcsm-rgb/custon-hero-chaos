@@ -75,8 +75,8 @@ function startDuels(plan = duelPlanOfRound()) {
     });
     if (bye) bye.arena = null;
     if (pairs.length) lastDuelPair = pairs[0].slice();
-    // Todos miran el duelo: si no peleás, la cámara va al duelo (con clic en el ranking podés volver a vos)
-    viewedHero = arenas.length ? (arenas[0].heroes.includes(player) ? player : arenas[0].heroes[0]) : player;
+    // La cámara sigue a tu héroe aunque no pelees (el 🔥 del ranking marca a los duelistas; con un clic mirás el duelo)
+    followPlayer();
     setStateText(`DUELO · RONDA ${waveNumber}`);
     sfx('duel');
     const mine = arenas.find(a => a.heroes.includes(player));

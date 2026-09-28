@@ -206,7 +206,7 @@ function startWave() {
         spawnWave(arena, wave);
         return arena;
     });
-    if (player.eliminated && (!viewedHero || viewedHero.eliminated)) viewedHero = rankedHeroes()[0];
+    followPlayer();
     setStateText(`OLEADA · RONDA ${waveNumber}: ${wave.name.toUpperCase()}`);
     sfx('wave');
     log(`🌊 ¡Ronda ${waveNumber}: ${wave.name}! Cada héroe pelea en su arena (${creeps.length ? creeps.length - 1 : '?'} creeps + 1 jefe).`);

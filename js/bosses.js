@@ -52,7 +52,7 @@ function startBossFight() {
         return arena;
     });
     lastRoundBoss = t; nextRoundBoss = null;
-    if (player.eliminated && (!viewedHero || viewedHero.eliminated)) viewedHero = rankedHeroes()[0];
+    followPlayer();
     setStateText(`JEFE DE RONDA · ${t.label.toUpperCase()}`);
     sfx('boss');
     log(`👹 ¡Jefe de ronda: ${t.label}! Cada héroe contra el suyo. ${t.mechanic} ${t.escalation} ` +
