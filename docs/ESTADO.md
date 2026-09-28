@@ -36,6 +36,9 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 | Un duelo por ronda con pozo compartido, maldición solo por duelos, sin límite de 20 rondas | ✅ (Sniper gana 8/14 partidas largas: revisar) |
 
 ## Pendientes y temas abiertos
+- **Próximo:** balancear la supervivencia contra creeps en el formato de un duelo por ronda (gana el último en pie: el Sniper
+  ganó 8 de 14 partidas simuladas y el Nigromante 4). Medir con `simulateGame(i, false, 60)` (~31 rondas por partida).
+- Pasivas: solo los magos tienen pasivas drafteables; se ofreció diseñar una para Axe, Sniper, Asesino y Vampiro.
 - **Balance de duelos:** Vampiro (17%) y Nigromante (24%) siguen abajo; Alquimista, Axe y Bruja ~70% (ver DISEÑO.md §9).
 - **Modo debug** (propuesto): panel para probar situaciones (ronda, oro, nivel, ítems, creeps, duelos, velocidad, modo dios).
 - Preguntas abiertas de diseño: DISEÑO.md §11 (probabilidad de definitivas en el draft, precio del Fragmento…).
