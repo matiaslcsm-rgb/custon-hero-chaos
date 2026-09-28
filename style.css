@@ -286,6 +286,15 @@ button.secondary-btn:hover { background: #2a2e3a; }
 #hero-any-drawer.open { transform: translateX(0); }
 #hero-any-drawer .drawer-head { display: flex; align-items: center; gap: 12px; }
 #hero-any-drawer .drawer-head h3 { flex: 1; margin: 0; color: #ffb703; }
+/* Grilla de retratos por atributo (al estilo de "todos los héroes" de Dota 2): íconos chicos en fila,
+   nombre y rol en el title (tooltip nativo) en vez de tarjetas grandes con texto. */
+#hero-any-drawer .hero-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
+#hero-any-drawer .hero-grid-card {
+    width: 64px; padding: 6px 4px 5px; display: flex; flex-direction: column; align-items: center; gap: 4px;
+    text-align: center; background: #1c1f27;
+}
+#hero-any-drawer .hero-grid-card:hover { background: #2a2e3a; filter: brightness(1.2); }
+#hero-any-drawer .hero-grid-card span { font-size: 0.62rem; line-height: 1.15; }
 .shop-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 14px; align-items: start; }
 .shop-main #shop-options { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px; }
 .shop-side { display: flex; flex-direction: column; gap: 8px; }

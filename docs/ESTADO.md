@@ -42,7 +42,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 | Cuerpos físicos: pasar por la casilla de otro frena según su tamaño (+25/75/150%); `phasing` atraviesa | ✅ |
 | Regla: al menos 1 pasiva entre las 3 nativas (Axe, Sniper, Asesino y Vampiro convirtieron una activa) | ✅ |
 | Héroe 11: Zeus `Z` (fiel a Dota 2, pedido del usuario) + `mageSpellAmp` bajado de 100% a 25% (se saca del escalado, pasa a ítems) | ✅ (sin medir duelos) |
-| Elegir cualquier héroe: panel desplegable desde la izquierda en la elección de héroe, los 11 sin depender de las 3 opciones al azar; arrancás con 0g en vez de 100g | ✅ |
+| Elegir cualquier héroe: panel desplegable desde la izquierda en la elección de héroe, los 11 sin depender de las 3 opciones al azar; arrancás con 0g en vez de 100g. Grilla de retratos por atributo (Fuerza/Agilidad/Inteligencia), al estilo de la ventana de "todos los héroes" de Dota 2 (pedido del usuario 2026-09-28); nombre, rol y descripción quedan en el tooltip | ✅ |
 | Proyectiles de habilidad (`pointTarget`): viajan de verdad al punto donde clickeaste, con velocidad y radio propios, y pueden fallar si apuntás mal (ver DISEÑO.md §9 quater). Convertidos: Rayo Relámpago (Zeus), Proyectil Arcano (Arcanista), Explosión Helada (Bruja del Hielo), Drenaje de Esencia (Nigromante), Mezcla Inestable (Alquimista) | ✅ (falta el resto del roster, ver abajo) |
 
 ## Pendientes y temas abiertos

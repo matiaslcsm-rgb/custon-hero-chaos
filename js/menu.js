@@ -58,6 +58,9 @@ function closeHeroDrawer() {
     document.getElementById('hero-any-drawer').classList.remove('open');
     document.getElementById('hero-any-backdrop').style.display = 'none';
 }
+// Grilla de retratos por atributo, al estilo de la ventana de "todos los héroes" de Dota 2: un ícono chico
+// por héroe agrupado en columnas por atributo, en vez de tarjetas grandes con texto. El nombre, rol y
+// descripción quedan en el title (tooltip nativo al pasar el mouse) para no perder esa info.
 function renderHeroDrawer() {
     const container = document.getElementById('hero-any-options');
     container.innerHTML = '';
@@ -68,14 +71,18 @@ function renderHeroDrawer() {
         head.className = 'shop-category attr-head'; head.style.color = info.color; head.style.borderColor = info.color;
         head.textContent = info.label;
         container.appendChild(head);
+        const grid = document.createElement('div');
+        grid.className = 'hero-grid';
         group.forEach(t => {
             const card = document.createElement('div');
-            card.className = 'skill-card';
-            card.style.borderLeft = `4px solid ${info.color}`;
-            card.innerHTML = `<h4 class="pick-title">${heroIconHtml(t, 'md')}<span style="color:${info.color}">${t.name}</span> <span class="item-meta">${t.role}</span></h4><p>${t.description}</p>`;
+            card.className = 'skill-card hero-grid-card';
+            card.style.border = `2px solid ${info.color}`;
+            card.title = `${t.name} — ${t.role}\n${t.description}`;
+            card.innerHTML = `${heroIconHtml(t, 'lg')}<span style="color:${info.color}">${t.name}</span>`;
             card.onclick = () => { closeHeroDrawer(); selectHero(t, true); };
-            container.appendChild(card);
+            grid.appendChild(card);
         });
+        container.appendChild(grid);
     });
 }
 
