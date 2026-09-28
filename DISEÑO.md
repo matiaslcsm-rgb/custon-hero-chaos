@@ -604,6 +604,11 @@ Todo en `js/fx.js`, **solo visual** (no cambia reglas) y solo para la arena que 
   se marca el enemigo más cercano al cursor → **clic izquierdo** la lanza (clic derecho o Esc cancela). Las de área alrededor
   tuyo y las mejoras se lanzan al apretar la tecla. **Clic derecho** en el mapa: caminás hasta ahí (WASD manda si lo tocás).
   Sin tocar cada habilidad: al lanzar con el mouse, `nearestEnemy()` elige el enemigo a alcance más cercano al punto apuntado.
+- **Objetivo marcado con clic izquierdo:** el ataque automático sigue yendo al más cercano, pero si hacés clic en un enemigo
+  queda marcado (anillo rojo): el ataque y las habilidades lo priorizan y, si está fuera de alcance, caminás hasta tenerlo a
+  tiro. Clic en el piso lo desmarca; si muere, se desmarca solo.
+- **Movimiento 35% más lento** que al principio (`MOVE_SPEED_MULT` 0,65; antes 0,8). Medido (9 partidas de 12 rondas):
+  oleadas con mediana de 13,4 s (90%: 23 s; 3% pasa del límite) y duelos de ~14 s.
 - **Movimiento 20% más lento** para todos (héroes y creeps; `MOVE_SPEED_MULT`), a pedido. Ataques y proyectiles igual.
   Medido (6 partidas de 8 rondas): las oleadas se limpian en 12,8 s de mediana (90%: 22 s) y solo el 2% pasa del límite.
 - **Rango de ataque visible:** círculo punteado alrededor de cada héroe con su rango (el tuyo más marcado).

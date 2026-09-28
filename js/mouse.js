@@ -75,8 +75,35 @@ canvas.addEventListener('mousedown', e => {
         const skill = targeting.skill;
         cancelTargeting();
         if (canControlPlayer()) castAt(player, skill, p.x, p.y);
+        return;
+    }
+    if (e.button === 0 && canControlPlayer()) { // clic izquierdo: marcar un enemigo como objetivo (o desmarcar)
+        const enemy = enemyUnderCursor(p.x, p.y);
+        player.focus = enemy;
+        player.focusChase = !!enemy;
+        player.moveTarget = null;
+        if (enemy) fxRing(enemy, '#ff477e', 0.9, 0.3);
     }
 });
+
+// Enemigo bajo el cursor (a menos de 0,8 casillas; si hay varios, el más cercano al cursor).
+function enemyUnderCursor(x, y) {
+    let best = null, bestDist = 0.8;
+    enemiesOf(player).forEach(c => {
+        if (!c.isAlive()) return;
+        const d = Math.hypot(c.x - x, c.y - y);
+        if (d < bestDist) { bestDist = d; best = c; }
+    });
+    return best;
+}
+
+// Con un objetivo marcado fuera de alcance, el héroe camina hasta tenerlo a tiro (y ahí se queda atacando).
+function focusChaseDirection(hero) {
+    const f = hero.focusChase && validFocus(hero);
+    if (!f) return null;
+    if (Math.hypot(f.x - hero.x, f.y - hero.y) <= effRange(hero)) return null;
+    return { dx: Math.sign(f.x - hero.x), dy: Math.sign(f.y - hero.y) };
+}
 
 // Dirección del próximo paso hacia el destino del clic derecho (o null si no hay destino).
 function moveTargetDirection(hero) {
@@ -96,6 +123,13 @@ function drawMouseOverlay(arena) {
         const s = 5;
         ctx.beginPath(); ctx.moveTo(px(t.x) - s, px(t.y) - s); ctx.lineTo(px(t.x) + s, px(t.y) + s); ctx.moveTo(px(t.x) + s, px(t.y) - s); ctx.lineTo(px(t.x) - s, px(t.y) + s); ctx.stroke();
         ctx.globalAlpha = 1;
+    }
+    const focus = validFocus(player);
+    if (focus) { // objetivo marcado: anillo rojo punteado que gira
+        ctx.save();
+        ctx.strokeStyle = '#ff477e'; ctx.lineWidth = 2; ctx.setLineDash([5, 4]); ctx.lineDashOffset = -fxClock * 20;
+        ctx.beginPath(); ctx.arc(px(focus.rx ?? focus.x), px(focus.ry ?? focus.y), TILE * 0.62, 0, Math.PI * 2); ctx.stroke();
+        ctx.restore();
     }
     if (!targeting) return;
     const color = '#ffd166';

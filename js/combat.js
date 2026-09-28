@@ -37,7 +37,17 @@ function enemiesOf(unit) {
 
 // Si la unidad está apuntando con el mouse (aimPoint, ver mouse.js), elige entre los enemigos a su alcance el más cercano
 // a ese punto en vez del más cercano a ella.
+// Objetivo marcado con clic (ver mouse.js): vale mientras siga vivo y en la misma arena.
+function validFocus(unit) {
+    const f = unit.focus;
+    if (f && f.isAlive() && f.arena === unit.arena && unit.arena) return f;
+    if (f) unit.focus = null;
+    return null;
+}
+
 function nearestEnemy(unit, maxRange) {
+    const focus = !unit.aimPoint && validFocus(unit);
+    if (focus && (maxRange === undefined || Math.hypot(focus.x - unit.x, focus.y - unit.y) <= maxRange)) return focus; // el marcado primero
     let best = null, bestScore = Infinity;
     const aim = unit.aimPoint;
     enemiesOf(unit).forEach(c => {
@@ -53,6 +63,8 @@ function nearestEnemy(unit, maxRange) {
 // Objetivo del ataque automático: entre los enemigos en rango, el de mayor prioridad (ej: Sanadores) y, a igual
 // prioridad, el más cercano.
 function pickAttackTarget(unit, range) {
+    const focus = validFocus(unit);
+    if (focus && Math.hypot(focus.x - unit.x, focus.y - unit.y) <= range) return focus; // el marcado con clic, si está a tiro
     let best = null, bestKey = null;
     enemiesOf(unit).forEach(c => {
         if (!c.isAlive()) return;

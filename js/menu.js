@@ -77,7 +77,8 @@ const TUTORIAL_PAGES = [
         </ol>
         <p>Cada fase tiene un tiempo: si se acaba, el juego decide por vos.</p>` },
     { title: '🎮 Controles', body: `
-        <p><b>W A S D</b>, flechas o <b>clic derecho</b> en el mapa: moverte. <b>El ataque es automático</b> contra el enemigo a tiro más cercano (o el prioritario, como los Sanadores).</p>
+        <p><b>W A S D</b>, flechas o <b>clic derecho</b> en el mapa: moverte. <b>Clic izquierdo en un enemigo</b>: lo marcás como
+        objetivo (anillo rojo): tu ataque y tus habilidades lo priorizan, y si está lejos caminás hasta tenerlo a tiro. <b>El ataque es automático</b> contra el enemigo a tiro más cercano (o el prioritario, como los Sanadores).</p>
         <p><b>Habilidades automáticas</b> (como Vampire Survivors): vos solo te movés y tus habilidades se lanzan solas. Con <b>H</b>
         las pasás a mano y las lanzás con <b>E R T F</b>, en el orden en que las aprendiste (mirá la barra debajo del mapa).
         Las que eligen un enemigo se <b>apuntan con el mouse</b>: apretás la tecla, ves el alcance, y con <b>clic izquierdo</b> la lanzás

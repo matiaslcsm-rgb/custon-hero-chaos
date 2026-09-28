@@ -1507,6 +1507,22 @@ test('Sprites: plantillas de 12×12 y un sprite para cada héroe, creep y jefe',
     ROUND_BOSSES.forEach(b => check(spriteFor({ isRoundBoss: true, type: b, color: b.color }), 'jefe ' + b.key));
 });
 
+test('Objetivo marcado con clic: el ataque lo prioriza aunque haya otro más cerca, y se camina hasta tenerlo a tiro', () => {
+    newGame('SNIPER');
+    const near = dummy(), far = dummy();
+    creeps.forEach(c => { if (c !== near && c !== far) c.hp = 0; });
+    near.x = player.x + 1; near.y = player.y;
+    far.x = player.x + 3; far.y = player.y + 1;
+    checkEq(pickAttackTarget(player, effRange(player)), near, 'sin marca: el más cercano');
+    player.focus = far;
+    checkEq(pickAttackTarget(player, effRange(player)), far, 'con marca: el marcado');
+    checkEq(nearestEnemy(player, 20), far, 'las habilidades también lo priorizan');
+    far.x = player.x + 15; far.y = player.y; player.focusChase = true;
+    check(focusChaseDirection(player).dx === 1, 'lejos: camina hacia él');
+    far.hp = 0;
+    checkEq(validFocus(player), null, 'si muere se desmarca');
+});
+
 test('Moverse reinicia el ataque (no se puede disparar gratis mientras te alejás)', () => {
     newGame('SNIPER');
     dummy({ x: player.x + 3 });

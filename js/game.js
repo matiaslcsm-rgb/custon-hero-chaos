@@ -13,9 +13,9 @@ const WAVE_HARD_LIMIT = 120;
 // Qué pasa con el ataque al moverse: 'reset' (arranca de cero), 'pause' (no avanza mientras caminás, pero no se pierde)
 // o 'free' (se puede atacar caminando). Es let para poder medir las variantes.
 let MOVE_ATTACK_RULE = 'reset';
-// Velocidad de movimiento de todos (héroes y creeps): 0,8 = 20% más lentos, a pedido (el juego se veía muy frenético).
+// Velocidad de movimiento de todos (héroes y creeps): 0,65 = 35% más lentos que al principio, a pedido (se veía muy frenético).
 // Solo el movimiento: ataques y proyectiles quedan igual.
-const MOVE_SPEED_MULT = 0.8;  // segundos: si una arena no terminó, se da por perdida (evita partidas trabadas)
+const MOVE_SPEED_MULT = 0.65; // bajado otra vez a pedido (antes 0,8)
 
 window.addEventListener('keydown', e => {
     const k = e.key.toLowerCase();
@@ -367,8 +367,8 @@ function updateHero(hero, arena, dt) {
     if (!stunned && hero.moveTimer > hero.moveInterval / (effMoveMult(hero) * MOVE_SPEED_MULT)) {
         let dir = aiControlled ? aiMoveDirection(hero) : keyboardDirection();
         if (!aiControlled) {
-            if (dir.dx || dir.dy) hero.moveTarget = null; // el teclado manda sobre el clic derecho
-            else dir = moveTargetDirection(hero) || dir;
+            if (dir.dx || dir.dy) { hero.moveTarget = null; hero.focusChase = false; } // el teclado manda sobre el mouse
+            else dir = moveTargetDirection(hero) || focusChaseDirection(hero) || dir;
         }
         const x = hero.x, y = hero.y;
         hero.x = Math.max(0, Math.min(COLS - 1, hero.x + dir.dx));
