@@ -103,6 +103,7 @@ function mitigate(target, amount, type) {
 function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     if (!target.isAlive() || hasFlag(target, 'invulnerable')) return { dealt: 0, evaded: false };
     if (type === 'magical' && hasFlag(target, 'magicImmune')) return { dealt: 0, evaded: false };
+    if (type === 'physical' && hasFlag(target, 'physicalImmune')) return { dealt: 0, evaded: false };
     const canEvade = opts.isAttack && !(source && hasFlag(source, 'trueStrike'));
     if (canEvade && Math.random() < effEvasion(target) / 100) { fxText(target, 'esquiva', '#8ecae6', 10); return { dealt: 0, evaded: true }; }
     let final = amount;

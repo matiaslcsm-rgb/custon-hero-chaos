@@ -135,3 +135,5 @@ function effArmor(u) { return (u.armor || 0) + sumMod(u, 'armor'); }
 function effMagicResist(u) { return (u.magicResist || 0) + sumMod(u, 'magicResist'); }
 function effEvasion(u) { return (u.evasion || 0) + sumMod(u, 'evasion'); }
 function effSpellAmp(u) { return (u.spellAmp || 0) + sumMod(u, 'spellAmp'); }
+function effHpRegen(u) { return (u.hpRegen || 0) + sumMod(u, 'hpRegen'); }
+function effManaRegen(u) { return (u.manaRegen || 0) + sumMod(u, 'manaRegen'); }

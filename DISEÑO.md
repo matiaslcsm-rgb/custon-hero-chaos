@@ -181,7 +181,7 @@ El cálculo de daño suma lo que haya, sin conocer cada habilidad.
 | Guerrero Vampiro `V` | Fuerza | Robo de vida cuerpo a cuerpo | Hambre |
 | Arcanista `A` | Inteligencia | Ráfaga que escala lanzando hechizos | Resonancia Arcana |
 | Bruja del Hielo `F` | Inteligencia | Control de masas y ralentización | Escarcha Profunda |
-| Nigromante `N` | Inteligencia | Drenaje de vida y desgaste | Cosecha de Almas |
+| Nigromante `N` | Inteligencia | Desgaste y ejecución a distancia (rework a Necrophos, ver §9 sexies) | Sadista |
 | Sabio del Vacío `Ø` | Inteligencia | Movilidad y ráfaga en área | Paso Etéreo |
 | Alquimista `L` | Inteligencia | Ácido y reducción de armadura | Gredas Transmutadoras |
 | Danzante Cinético `D` | Agilidad | Duelista móvil: el movimiento da daño | Danza Cinética |
@@ -642,6 +642,10 @@ Las mediciones de un mismo ajuste varían ±10 puntos entre corridas de 18 parti
 **Sigue pendiente:** Vampiro (11%) y Nigromante (17%) no suben solo con stats: hay que revisar sus kits. El Alquimista y la
 Bruja bajaron de 94% a ~75%, siguen fuertes por sus aturdimientos.
 
+> Nigromante: el kit completo se reescribió el 2026-09-28 (rework a Necrophos de Dota 2, ver §9 sexies) — estos
+> porcentajes son de la versión vieja (Cosecha de Almas/Drenaje de Esencia/Aura de Podredumbre/Maldición/Pacto de la
+> Muerte) y ya no aplican. Falta medir el kit nuevo con simulateGame.
+
 ### Implementado en F3 ✅
 - **Previa de duelos** (`js/bets.js`): al terminar las oleadas se sortean las parejas y se muestran con puesto, puntos, nivel,
   vidas y récord de duelos. 10 s para apostar (o "Listo, a los duelos"). Sin oro, sin duelos ajenos o eliminado → se saltea.
@@ -764,12 +768,12 @@ en Dota 2 que a un auto-target.
   - Rayo Relámpago de Zeus (`ZEUS_BOLT`) — velocidad 14, radio 0,8, aturde.
   - Proyectil Arcano del Arcanista (`ARCANIST_BOLT`) — velocidad 12, radio 2 (con salpicadura de área).
   - Explosión Helada de la Bruja del Hielo (`FROSTWITCH_BLAST`) — velocidad 11, radio 2,5, aturde.
-  - Drenaje de Esencia del Nigromante (`NECROMANCER_DRAIN`) — velocidad 13, radio 0,6, cura según lo drenado.
   - Mezcla Inestable del Alquimista (`ALCHEMIST_BREW`) — velocidad 12, radio 0,6, aturde.
 - **A propósito sin convertir:** las de área alrededor del propio héroe (Nimbo de Tormenta, Cero Absoluto, Giro de
   Combate, etc.) no lo necesitan porque no se apuntan a otro punto; Distorsión Espacial del Sabio del Vacío
-  (`VOIDSAGE_BLINK`) es un blink, no un proyectil; Maldición de Marchitamiento del Nigromante (`NECROMANCER_CURSE`)
-  es un debuff sin daño, no un nuke.
+  (`VOIDSAGE_BLINK`) es un blink, no un proyectil.
+- El Nigromante tenía acá "Drenaje de Esencia" y "Maldición de Marchitamiento" convertidos/candidatos, pero su kit
+  se reescribió por completo el 2026-09-28 (rework a Necrophos, ver §9 sexies) y esas habilidades ya no existen.
 - **Pendiente:** el resto del roster fuera de los magos (Danzante, Asesino, Vampiro, Sniper), si algún nuke suyo
   tiene sentido como punto de efecto. También falta una animación por forma de habilidad más allá del color
   (`vfx.shape`: rayo, orbe, etc.) si se quiere ir más lejos que un punto con estela.
@@ -787,6 +791,52 @@ Ahora `returnFromRestArea` (el momento exacto de volver del Área de Descanso a 
 (`js/bosses.js`, que tenía su propio reinicio duplicado — se sacó, ahora lo hace `returnFromRestArea`). A propósito
 **no** se tocan mientras el héroe está *en* el Área de Descanso (`sendToRestArea`): solo se reinician en el momento
 de volver a entrar en combate, no por el solo hecho de estar esperando ahí.
+
+### 9 sexies. Rework del Nigromante: fiel a Necrophos de Dota 2 ✅ (pedido del usuario 2026-09-28)
+
+Kit reescrito por completo a partir de https://dota2.fandom.com/wiki/Necrophos, adaptando sus 4 habilidades (Death
+Pulse, Ghost Shroud, Heartstopper Aura, Reaper's Scythe) a nuestro motor y reescalando los números al resto del
+roster (los de Dota son para partidas de 40+ minutos). El kit viejo (Cosecha de Almas / Drenaje de Esencia / Aura de
+Podredumbre / Maldición de Marchitamiento / Pacto de la Muerte) desaparece entero.
+
+- **Sadista** (innato, `NECROMANCER_INNATE`): cada baja da una carga de regeneración de vida y maná (+3/s cada una)
+  por 7s, hasta 6 cargas que se acumulan y renuevan la duración; una baja de héroe suma 6 cargas de una (el "Sadist"
+  de Dota, ya fusionado con el aura en el juego real — acá queda separado, como innato, siguiendo la convención del
+  resto del roster de magos).
+- **Pulso de Muerte** (`NECROMANCER_PULSE`, ex Drenaje de Esencia): ya no es un proyectil — como el Death Pulse
+  original, es un pulso centrado en el propio Nigromante que daña a los enemigos alrededor y lo cura a él según lo
+  dañado (en Dota cura también a aliados; acá cada héroe pelea solo, así que cura al propio).
+- **Aura que Detiene el Corazón** (`NECROMANCER_AURA`, ex Aura de Podredumbre): quita % de la vida MÁXIMA por
+  segundo como daño puro a los enemigos cerca. Ya era casi idéntica a la Heartstopper Aura original — solo cambió el
+  nombre y el radio.
+- **Manto Fantasma** (`NECROMANCER_SHROUD`, ex Maldición de Marchitamiento): se vuelve espectral por unos segundos —
+  inmune a daño físico y no puede atacar (pero sí moverse, a diferencia de un aturdimiento), a cambio de resistencia
+  mágica y con más curación recibida mientras dura; al activarse ralentiza a los enemigos cerca. Necesitó dos flags
+  nuevas en el motor (ver abajo).
+- **Guadaña del Segador** (`NECROMANCER_REAP`, ex Pacto de la Muerte — sigue siendo la definitiva, cambia el todo el
+  mecanismo): ahora es un **objetivo único**, no un área. Aturde y, cuando el aturdimiento termina (usando
+  `hooks.onExpire` del efecto, no al instante — como en Dota), hace daño puro según cuánta vida le falta al objetivo:
+  si alcanza para matarlo, es una ejecución. Si lo mata, gana para siempre regeneración de vida y maná (el Ascenso,
+  igual que el resto de las definitivas del roster).
+
+**Motor, dos cosas nuevas para el Manto Fantasma:**
+- Flag `physicalImmune` (`js/combat.js`, `dealDamage`): igual que `magicImmune` pero para daño físico. Simétrica, un
+  chequeo más en la misma función.
+- Flag `disarm` (`js/game.js`, `updateHero`): el héroe no ataca solo (a diferencia de `stun`, sigue moviéndose). Se
+  suma al chequeo existente en la elección de objetivo del ataque automático.
+
+**Motor, un bug que encontró la Sadista:** `hpRegen` y `manaRegen` eran propiedades cacheadas que solo se
+recalculaban en puntos puntuales (subir de nivel, comprar un ítem, `grantPermanent`) — un efecto temporal con
+`mods: {hpRegen: X}` (como las cargas de la Sadista) nunca se reflejaba de verdad, porque nada volvía a calcular la
+propiedad mientras el efecto estaba activo. Se corrigió siguiendo el mismo patrón que `effArmor`/`effMagicResist`/etc.:
+ahora `hpRegen`/`manaRegen` en `recalculateStats()` son solo la parte permanente (base + atributo + bonus), y
+`effHpRegen(u)`/`effManaRegen(u)` (`js/effects.js`) suman los mods de efectos activos en el momento de leerlos;
+`regenTick()` y el panel de stats completos usan las nuevas funciones. También se sumó soporte para `grantPermanent`
+con `hpRegen`/`manaRegen` (lo pide el Ascenso de la Guadaña del Segador) agregando esas dos claves a `hero.bonus`.
+
+**Sin medir:** el balance del kit nuevo (duelos, PvE) — el viejo Nigromante estaba en el fondo de la tabla (17-24%
+de duelos) y era candidato justamente a un rework de kit, no de números; falta correr `simulateGame` para ver dónde
+queda este.
 
 ### Paso 2: HUD estilo MOBA ✅
 - **Barra superior:** ronda, fase y tiempo; a la derecha vidas, oro, puntos y puesto, y el piloto automático.

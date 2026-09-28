@@ -39,7 +39,7 @@ class Hero {
         this.innate = template.innate || null;
         this.creepKillCount = 0; this.heroKillCount = 0;
         // Bonus permanentes acumulados (escalado del héroe y de las definitivas), ver grantPermanent().
-        this.bonus = { armor: 0, atk: 0, critChance: 0, lifesteal: 0, maxHp: 0, atkSpeed: 0 };
+        this.bonus = { armor: 0, atk: 0, critChance: 0, lifesteal: 0, maxHp: 0, atkSpeed: 0, hpRegen: 0, manaRegen: 0 };
         this.level = 1; this.xp = 0; this.skillPoints = 1;
         this.skillLevels = {}; // id de habilidad -> nivel (0 = drafteada pero sin aprender)
         this.talentBooks = 0; // libros de talento comprados (suben el precio del siguiente)
@@ -77,8 +77,8 @@ class Hero {
         this.attackRange = this.baseAttackRange;
         this.armor = this.baseArmor + agi * R.agi.armor + this.bonus.armor;
         this.magicResist = this.baseMagicResist + int * R.int.magicResist;
-        this.hpRegen = this.baseHpRegen + str * R.str.hpRegen + sumMod(this, 'hpRegen');
-        this.manaRegen = this.baseManaRegen + int * R.int.manaRegen + sumMod(this, 'manaRegen');
+        this.hpRegen = this.baseHpRegen + str * R.str.hpRegen + this.bonus.hpRegen;
+        this.manaRegen = this.baseManaRegen + int * R.int.manaRegen + this.bonus.manaRegen;
         this.projectileSpeed = this.baseProjectileSpeed;
         this.critChance = this.baseCritChance + agi * R.agi.critChance + this.bonus.critChance;
         this.evasion = this.baseEvasion;
@@ -114,8 +114,8 @@ class Hero {
     }
     skillForKey(k) { return (k && this.skills.find(s => this.keyBindings[s.id] === k)) || null; }
     regenTick(dt) {
-        this.hp = Math.min(this.maxHp, this.hp + this.hpRegen * dt);
-        this.mana = Math.min(this.maxMana, this.mana + this.manaRegen * dt);
+        this.hp = Math.min(this.maxHp, this.hp + effHpRegen(this) * dt);
+        this.mana = Math.min(this.maxMana, this.mana + effManaRegen(this) * dt);
     }
     isAlive() { return this.hp > 0; }
 }

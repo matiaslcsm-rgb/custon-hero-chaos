@@ -643,7 +643,7 @@ function renderHeroStats() {
         ['Daño', Math.round(effAttack(p))], ['Vel. ataque', `${effAtkSpeed(p).toFixed(2)}/s`], ['Rango', effRange(p).toFixed(1)],
         ['Armadura', effArmor(p).toFixed(1)], ['Res. mágica', `${Math.round(effMagicResist(p))}%`], ['Evasión', `${Math.round(effEvasion(p))}%`],
         ['Crítico', `${effCritChance(p).toFixed(0)}%`], ['Robo de vida', `${effLifesteal(p).toFixed(0)}%`], ['Amp. hechizo', `${Math.round(effSpellAmp(p))}%`],
-        ['Regen. vida', `${p.hpRegen.toFixed(1)}/s`], ['Regen. maná', `${p.manaRegen.toFixed(1)}/s`], ['Vel. mov.', p.moveSpeed.toFixed(1)]
+        ['Regen. vida', `${effHpRegen(p).toFixed(1)}/s`], ['Regen. maná', `${effManaRegen(p).toFixed(1)}/s`], ['Vel. mov.', p.moveSpeed.toFixed(1)]
     ];
     let html = rows.map(([label, value, cls, main]) => `<div class="hs-row${main ? ' main' : ''}"><span>${label}${main ? ' ★' : ''}</span><b class="${cls || ''}">${value}</b></div>`).join('');
     if (p.scaling) {

@@ -29,7 +29,7 @@ const BUILD_GUIDES = {
         early: ['MANA_CRYSTAL', 'RUNE_CAPE'], core: ['ARCANE_STAFF', 'TOME', 'BOOTS'], late: ['SKADI', 'AEGIS']
     },
     NECROMANCER: {
-        why: 'Desgaste y drenaje: vida y maná para pelear largo, y resistencia mágica contra los magos.',
+        why: 'Desgaste y ejecución: vida y maná para sostener el aura y el Manto Fantasma, y amplificación para rematar con la Guadaña.',
         early: ['VITALITY', 'MANA_CRYSTAL'], core: ['ARCANE_STAFF', 'HEART', 'CLOAK'], late: ['AEGIS', 'DIADEM']
     },
     VOIDSAGE: {

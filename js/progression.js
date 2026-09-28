@@ -103,7 +103,7 @@ function resolveExcessPoints(hero) {
 // --- BONUS PERMANENTES (escalado del héroe y de las definitivas) ---
 const PERMANENT_LABELS = {
     armor: 'armadura', atk: 'daño de ataque', atkSpeed: '% vel. de ataque', critChance: '% crítico', lifesteal: '% robo de vida', maxHp: 'HP máximo',
-    str: 'Fuerza', agi: 'Agilidad', int: 'Inteligencia'
+    hpRegen: 'regen. de vida/s', manaRegen: 'regen. de maná/s', str: 'Fuerza', agi: 'Agilidad', int: 'Inteligencia'
 };
 
 // stat: armor | atk | atkSpeed (en %) | critChance | lifesteal | maxHp (bonus directo) o str | agi | int (suma al atributo).

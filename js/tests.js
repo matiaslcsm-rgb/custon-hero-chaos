@@ -575,15 +575,72 @@ test('Furia Química: el Ascenso sube la Inteligencia', () => {
     check(player.maxMana > mana0, 'y con ella el maná máximo');
 });
 
-test('Pacto de la Muerte: daño puro en área y cura lo que drena', () => {
+test('Sadista: cada baja da una carga de regeneración que se acumula y se renueva; una baja de héroe da 6 de una', () => {
     newGame('NECROMANCER');
-    const s = learn('NECROMANCER_REAP', 1);
-    const a = dummy({ hp: 9999, maxHp: 9999, armor: 50 }), b = dummy({ y: player.y + 1, hp: 9999, maxHp: 9999 });
+    const c = dummy({ hp: 1 });
+    const before = effHpRegen(player);
+    emit(player, 'onKill', { victim: c });
+    checkNear(effHpRegen(player) - before, 3, '1 carga = +3 regen. de vida/s (y otro tanto de maná)');
+    emit(player, 'onKill', { victim: c });
+    checkNear(effHpRegen(player) - before, 6, '2 cargas se acumulan');
+    const rival = dummy(); rival.isHero = true; // una baja "de héroe" da varias cargas de una
+    emit(player, 'onKill', { victim: rival });
+    checkNear(effHpRegen(player) - before, 3 * 6, 'tope de 6 cargas (la baja de héroe ya suma 6 de una)');
+});
+
+test('Pulso de Muerte: daño mágico en área a tu alrededor y te cura según lo que dañaste', () => {
+    newGame('NECROMANCER');
+    const s = learn('NECROMANCER_PULSE', 1);
+    const near = dummy({ hp: 9999, maxHp: 9999 });
+    const far = dummy({ x: player.x + 15, y: player.y, hp: 9999, maxHp: 9999 });
     player.hp = 1;
     s.cast(player);
-    const expected = Math.round(valueAt(s, 'baseDmg', 1) + player.int * valueAt(s, 'intRatio', 1));
-    checkEq(9999 - a.hp, expected, 'el daño puro ignora la armadura');
-    checkEq(player.hp, Math.min(player.maxHp, 1 + 2 * expected), 'cura el total drenado');
+    const expected = magicDmg(valueAt(s, 'baseDmg', 1) + player.int * valueAt(s, 'intRatio', 1));
+    checkEq(9999 - near.hp, expected, 'daño a un enemigo en el radio');
+    checkEq(far.hp, 9999, 'no llega a uno lejos');
+    checkEq(player.hp, Math.min(player.maxHp, 1 + Math.round(expected * valueAt(s, 'healPct', 1))), 'se cura según el daño hecho');
+});
+
+test('Manto Fantasma: inmune a físico y desarmado, pierde resistencia mágica y cura más; ralentiza al activarse', () => {
+    newGame('NECROMANCER');
+    const s = learn('NECROMANCER_SHROUD', 1);
+    const near = dummy({ hp: 9999, maxHp: 9999 });
+    const magicResist0 = effMagicResist(player);
+    player.hp = 1;
+    s.cast(player);
+    check(hasFlag(player, 'physicalImmune'), 'inmune a daño físico');
+    check(hasFlag(player, 'disarm'), 'desarmado');
+    checkNear(effMagicResist(player), magicResist0 - valueAt(s, 'magicResistPenalty', 1), 'pierde resistencia mágica');
+    const { dealt } = dealDamage(near, player, 100, 'physical');
+    checkEq(dealt, 0, 'el daño físico no le hace nada');
+    checkEq(player.hp, 1, 'vida sin cambios');
+    const healed = healUnit(player, 100);
+    checkNear(healed, Math.round(100 * (1 + valueAt(s, 'healingBonusPct', 1))), 'cura más mientras está espectral');
+    checkNear(effMoveMult(near), 1 - valueAt(s, 'slowPct', 1), 'ralentiza al activarse');
+});
+
+test('Guadaña del Segador: aturde y, al terminar, hace daño puro según la vida que falta (ejecuta si alcanza)', () => {
+    newGame('NECROMANCER');
+    const s = learn('NECROMANCER_REAP', 1);
+    const a = dummy({ hp: 500, maxHp: 1000, armor: 50 }); // le falta 500: con ratio 0.7 son 350, no alcanza a matarlo
+    s.cast(player);
+    check(hasFlag(a, 'stun'), 'aturdido de entrada');
+    checkEq(a.hp, 500, 'el daño todavía no se aplicó, se calcula al terminar el aturdimiento');
+    const hpRegen0 = player.hpRegen;
+    gameClock += valueAt(s, 'stunDuration', 1) + 0.1;
+    tickEffects(a, 0.016);
+    const expected = Math.round((1000 - 500) * valueAt(s, 'missingHpRatio', 1));
+    checkEq(500 - a.hp, expected, 'daño puro (ignora la armadura) según lo que le faltaba');
+    check(a.isAlive(), 'no le alcanzó para matarlo');
+    checkEq(player.hpRegen, hpRegen0, 'sin matarlo, no gana regeneración permanente');
+
+    a.hp = 0; // fuera de juego: si no, nearestEnemy lo sigue eligiendo a él (mismo lugar que el nuevo dummy)
+    const b = dummy({ hp: 50, maxHp: 200 }); // le falta 150: con ratio 0.7 son 105, más que sus 50 de vida
+    s.cast(player);
+    gameClock += valueAt(s, 'stunDuration', 1) + 0.1;
+    tickEffects(b, 0.016);
+    check(!b.isAlive(), 'con poca vida, lo ejecuta');
+    checkNear(player.hpRegen - hpRegen0, valueAt(s, 'hpRegenPerKill', 1), 'Ascenso: regeneración de vida permanente por la baja');
 });
 
 // Daño mágico esperado tras pasar por dealDamage: aplica la amplificación de hechizo del que lanza
@@ -703,30 +760,6 @@ test('Explosión Helada: proyectil de punto de efecto que aturde en área; si ap
     for (let i = 0; i < 30 && player.arena.projectiles.length; i++) updateProjectiles(player.arena, 0.05);
     checkEq(off.hp, 9999, 'apuntar a un punto vacío no le pega a nadie');
     check(!hasFlag(off, 'stun'), 'y sin daño no hay aturdimiento');
-});
-
-test('Drenaje de Esencia: proyectil de punto de efecto que cura al golpear; si falla, no cura', () => {
-    newGame('NECROMANCER');
-    const s = learn('NECROMANCER_DRAIN', 1);
-    check(s.pointTarget, 'está marcado como punto de efecto');
-    const c = dummy({ hp: 9999, maxHp: 9999 });
-    player.hp = 1;
-    s.cast(player);
-    checkEq(c.hp, 9999, 'no daña al instante, tiene que viajar');
-    for (let i = 0; i < 30 && player.arena.projectiles.length; i++) updateProjectiles(player.arena, 0.05);
-    const expected = magicDmg(valueAt(s, 'baseDmg', 1) + player.int * valueAt(s, 'intRatio', 1));
-    checkEq(9999 - c.hp, expected, 'daño al llegar');
-    checkEq(player.hp, Math.min(player.maxHp, 1 + Math.round(expected * valueAt(s, 'healPct', 1))), 'se cura según el daño hecho');
-
-    c.hp = 0; // fuera de juego: que no lo vuelva a agarrar el segundo disparo, que pasa por su línea
-    const off = dummy({ x: player.x, y: player.y + 5, hp: 9999, maxHp: 9999 });
-    const hpBefore = player.hp;
-    player.aimPoint = { x: player.x + 5, y: player.y };
-    s.cast(player);
-    player.aimPoint = null;
-    for (let i = 0; i < 30 && player.arena.projectiles.length; i++) updateProjectiles(player.arena, 0.05);
-    checkEq(off.hp, 9999, 'apuntar a un punto vacío no le pega a nadie');
-    checkEq(player.hp, hpBefore, 'y sin daño no hay curación');
 });
 
 test('Mezcla Inestable: proyectil de punto de efecto que aturde; si falla, no aturde a nadie', () => {

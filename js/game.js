@@ -398,7 +398,8 @@ function updateHero(hero, arena, dt) {
     }
 
     // Ataque automático: al enemigo en rango de mayor prioridad (ej: Sanadores) o, si no, al más cercano
-    const target = stunned ? null : pickAttackTarget(hero, effRange(hero));
+    // (desarmado: como el Manto Fantasma del Nigromante, no ataca pero sigue moviéndose, a diferencia de un aturdimiento)
+    const target = (stunned || hasFlag(hero, 'disarm')) ? null : pickAttackTarget(hero, effRange(hero));
     const walking = MOVE_ATTACK_RULE === 'pause' && gameClock < (hero.movingUntil || 0);
     if (target && walking) {
         // pausa: mientras camina el ataque no avanza, pero conserva lo que tenía cargado

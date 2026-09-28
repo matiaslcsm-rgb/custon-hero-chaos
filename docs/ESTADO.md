@@ -43,17 +43,18 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 | Regla: al menos 1 pasiva entre las 3 nativas (Axe, Sniper, Asesino y Vampiro convirtieron una activa) | ✅ |
 | Héroe 11: Zeus `Z` (fiel a Dota 2, pedido del usuario) + `mageSpellAmp` bajado de 100% a 25% (se saca del escalado, pasa a ítems) | ✅ (sin medir duelos) |
 | Elegir cualquier héroe: panel desplegable desde la izquierda en la elección de héroe, los 11 sin depender de las 3 opciones al azar; arrancás con 0g en vez de 100g. Grilla de retratos por atributo (Fuerza/Agilidad/Inteligencia), al estilo de la ventana de "todos los héroes" de Dota 2 (pedido del usuario 2026-09-28); nombre, rol y descripción quedan en el tooltip | ✅ |
-| Proyectiles de habilidad (`pointTarget`): viajan de verdad al punto donde clickeaste, con velocidad y radio propios, y pueden fallar si apuntás mal (ver DISEÑO.md §9 quater). Convertidos: Rayo Relámpago (Zeus), Proyectil Arcano (Arcanista), Explosión Helada (Bruja del Hielo), Drenaje de Esencia (Nigromante), Mezcla Inestable (Alquimista) | ✅ (falta el resto del roster, ver abajo) |
+| Proyectiles de habilidad (`pointTarget`): viajan de verdad al punto donde clickeaste, con velocidad y radio propios, y pueden fallar si apuntás mal (ver DISEÑO.md §9 quater). Convertidos: Rayo Relámpago (Zeus), Proyectil Arcano (Arcanista), Explosión Helada (Bruja del Hielo), Mezcla Inestable (Alquimista) | ✅ (falta el resto del roster, ver abajo) |
 | Enfriamientos reiniciados al volver a pelear (oleada nueva o jefe de ronda), no solo en duelos como antes; mientras esperás en el Área de Descanso no se tocan (ver DISEÑO.md §9 quinquies, pedido del usuario 2026-09-28) | ✅ |
+| Rework del Nigromante fiel a Necrophos de Dota 2 (Sadista, Pulso de Muerte, Aura que Detiene el Corazón, Manto Fantasma, Guadaña del Segador — ejecuta según vida faltante); sumó las flags `physicalImmune`/`disarm` y corrigió que `hpRegen`/`manaRegen` no reflejaban efectos temporales (ver DISEÑO.md §9 sexies, pedido del usuario 2026-09-28) | ✅ (sin medir balance) |
 
 ## Pendientes y temas abiertos
 - **En curso:** 3 héroes de Agilidad del usuario, de a uno y midiendo cada uno: Danzante ✅ → **Chakravin `Y`** (proyectiles
   de habilidad que vuelven + creep Guardián de Hierro) → **Trampero `P`** (zonas en el piso + creep Saltador).
-- **Proyectiles de habilidad:** ya se convirtieron todos los nukes de un solo objetivo de los 6 magos (Zeus, Arcanista,
-  Bruja del Hielo, Nigromante, Alquimista). Quedan afuera a propósito: Distorsión Espacial del Sabio del Vacío (es un
-  blink, no un proyectil) y Maldición de Marchitamiento del Nigromante (debuff sin daño, no un nuke). Falta: los del
-  resto del roster (Danzante, Asesino, Vampiro, Sniper) si tiene sentido, y variar la forma del proyectil por
-  habilidad (`vfx.shape`), no solo el color. Ver DISEÑO.md §9 quater.
+- **Proyectiles de habilidad:** convertidos los nukes de un solo objetivo de Zeus, Arcanista, Bruja del Hielo y
+  Alquimista (el Nigromante perdió el suyo en el rework a Necrophos: Pulso de Muerte pasó a ser un área centrada en
+  uno mismo, no se apunta). Quedan afuera a propósito: Distorsión Espacial del Sabio del Vacío (es un blink, no un
+  proyectil). Falta: los del resto del roster (Danzante, Asesino, Vampiro, Sniper) si tiene sentido, y variar la
+  forma del proyectil por habilidad (`vfx.shape`), no solo el color. Ver DISEÑO.md §9 quater.
 - **Ítems:** lista de candidatos sin implementar en DISEÑO.md §7 (Orquídea, Mariposa, Tarrasque, Núcleo de Octarine y más;
   varios piden mecánica nueva: `silenced`, `cooldownReduction`, robo de vida mágico, `spellBlock`, `cyclone`). El usuario
   pidió tener la lista lista y decidir después cómo se van sumando.
@@ -64,7 +65,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   en duelos 1v1, donde el nuke mágico de golpe pesa más que en una oleada larga. Medir con `simulateGame(i, false, 60)`.
 - **Después:** balancear la supervivencia contra creeps en el formato de un duelo por ronda (gana el último en pie: el Sniper
   ganó 8 de 14 partidas simuladas y el Nigromante 4). Medir con `simulateGame(i, false, 60)` (~31 rondas por partida).
-- **Balance de duelos:** Vampiro (17%) y Nigromante (24%) siguen abajo; Alquimista, Axe y Bruja ~70% (ver DISEÑO.md §9).
+- **Balance de duelos:** Vampiro (17%) sigue abajo; Alquimista, Axe y Bruja ~70% (ver DISEÑO.md §9). El Nigromante
+  tenía 17-24% con el kit viejo, pero se reescribió entero (§9 sexies) — falta medir el nuevo.
 - **Modo debug** (propuesto): panel para probar situaciones (ronda, oro, nivel, ítems, creeps, duelos, velocidad, modo dios).
 - Preguntas abiertas de diseño: DISEÑO.md §11 (probabilidad de definitivas en el draft, precio del Fragmento…).
 - Autor de los commits: el email de git (comusanmiguel24@gmail.com) está asociado a la cuenta `comusanmiguel24-bit`, no a
@@ -74,7 +76,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **Idioma:** español rioplatense (voseo), en el código, los comentarios, los textos del juego y los commits.
 - **Decisiones de diseño:** se consultan con opciones y una recomendada, idealmente con números medidos. Lo que se decide
   se anota en DISEÑO.md (secciones de la fase y "Decisiones tomadas").
-- **Cada cambio:** pruebas automáticas (`tests.html`, hoy **155**) → commit en git → push a GitHub solo cuando el usuario lo pide.
+- **Cada cambio:** pruebas automáticas (`tests.html`, hoy **157**) → commit en git → push a GitHub solo cuando el usuario lo pide.
 - **Commits:** mensaje en español que explica el porqué; terminan con `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 - **Héroes nuevos con otra IA:** prompt en [`prompt-heroes.md`](prompt-heroes.md); lo que devuelva se revisa contra el motor
   (pasivas, efectos por segundo con `everyInterval`, descripciones que coincidan con el código) antes de integrarlo.
