@@ -490,6 +490,30 @@ sin modo dios): se probó que moverse **pause** el ataque (no avanza mientras ca
 los cuerpo a cuerpo; atacar caminando le da la partida al Alquimista. En las tres variantes **el Alquimista gana 86-95% de sus
 duelos**: es el próximo a investigar.
 
+**Cambio a pedido: se ataca caminando y el equilibrio se hace con stats** (no atacar al moverse era una penalización muy
+fuerte). Mediciones con ataque libre (18 partidas de 15 rondas por variante, % de duelos ganados):
+
+| Variante | Arriba | Abajo | Ganadores de partida |
+|---|---|---|---|
+| Libre, sin cambios | Alquimista 94%, Sniper 71%, Bruja 71% | Nigromante 13%, **Vampiro 3%** | Alquimista 9 de 18 |
+| + escalado del Alquimista a la mitad | Alquimista 89%, Sniper 88% | Vampiro 7% | Sniper 9 |
+| + stats ronda 1 | Alquimista 92% | Vampiro 10% | Alquimista 11 |
+| + Elixir del Alquimista a la mitad | Alquimista 77% | Vampiro 9% | Sniper 7, Alquimista 6 |
+| stats ronda 1 + curación −60% en duelo | Alquimista 81%, Bruja 78%, Sniper 77% | Vampiro 7% | Sniper 6, Alquimista 6, Bruja 5 |
+| stats ronda 2 + curación −60% | Alquimista 77%, Bruja 75% | Nigromante 17%, Vampiro 17% | Bruja 6, Alquimista 5 |
+| **stats ronda 2 + curación −60% + control −50% (aplicado)** | Bruja 77%, Axe 75%, Alquimista 74% | Nigromante 17%, Vampiro 11% | **6 héroes distintos** (Sniper 6, Alquimista 5, Bruja 3…) |
+
+Lo aplicado:
+- **Ataque libre** (`MOVE_ATTACK_RULE = 'free'`).
+- **Stats:** los de distancia con menos velocidad de ataque, vida y movimiento (Alquimista, Sniper, Bruja, Arcanista); los
+  cuerpo a cuerpo con más vida y movimiento para alcanzarlos (Axe, Asesino, Vampiro); Vampiro y Nigromante reforzados.
+- **En duelo, la curación baja 60%** como el daño (el robo de vida no, porque ya sale del daño reducido): sin esto, regenerar
+  valía mucho más que pegar (el Elixir del Alquimista era la mitad de su ventaja).
+- **En duelo, el control entre héroes dura la mitad** (aturdir primero decidía el duelo).
+
+**Sigue pendiente:** Vampiro (11%) y Nigromante (17%) no suben solo con stats: hay que revisar sus kits. El Alquimista y la
+Bruja bajaron de 94% a ~75%, siguen fuertes por sus aturdimientos.
+
 ### Implementado en F3 ✅
 - **Previa de duelos** (`js/bets.js`): al terminar las oleadas se sortean las parejas y se muestran con puesto, puntos, nivel,
   vidas y récord de duelos. 10 s para apostar (o "Listo, a los duelos"). Sin oro, sin duelos ajenos o eliminado → se saltea.

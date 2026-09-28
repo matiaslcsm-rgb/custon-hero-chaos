@@ -50,6 +50,7 @@
 // aturdido para siempre, ej: 2 Aturdidores enfurecidos). A los creeps no se les aplica.
 const STUN_IMMUNITY_AFTER = 1.5;
 
+let DUEL_CONTROL_REDUCTION = 0.5; // aturdimientos y ralentizaciones entre héroes duran la mitad en duelo
 function addEffect(unit, def) {
     const isStun = (def.flags || []).includes('stun');
     if (isStun && unit.isHero && gameClock < (unit.stunImmuneUntil || 0)) return null;
@@ -59,6 +60,8 @@ function addEffect(unit, def) {
     // Resistencia al control: acorta aturdimientos y ralentizaciones
     const isControl = isStun || (def.mods && def.mods.moveSpeedPct < 0);
     if (isControl && isFinite(def.duration)) def = { ...def, duration: def.duration * (1 - Math.min(0.8, sumMod(unit, 'statusResist'))) };
+    // En duelo, el control entre héroes dura menos (DUEL_CONTROL_REDUCTION); si no, el que aturde primero gana casi siempre
+    if (isControl && isFinite(def.duration) && unit.isHero && unit.arena && unit.arena.kind === 'duel') def = { ...def, duration: def.duration * (1 - DUEL_CONTROL_REDUCTION) };
     if (isStun && unit.isHero) unit.stunImmuneUntil = gameClock + def.duration + STUN_IMMUNITY_AFTER;
     const effect = {
         ...def, name: def.name || def.id,

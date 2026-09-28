@@ -79,7 +79,7 @@ test('El contenido del juego es válido (validador)', () => {
 test('Atributos de nivel 1 salen de la plantilla del héroe', () => {
     const h = new Hero(HERO_TEMPLATES.AXE);
     checkEq(h.str, 24, 'Fuerza base');
-    checkEq(h.maxHp, 100 + 24 * 5, 'HP = base + 5 por Fuerza');
+    checkEq(h.maxHp, HERO_TEMPLATES.AXE.baseHp + 24 * 5, 'HP = base + 5 por Fuerza');
     checkEq(h.atk, Math.round(13 + 24 * 0.8), 'daño = base + 0.8 por atributo principal');
     checkNear(h.armor, 2 + 12 * 0.08, 'armadura = base + 0.08 por Agilidad');
     checkNear(h.magicResist, 15 + 14 * 0.1, 'resistencia mágica = base + 0.1 por Inteligencia');
@@ -1523,14 +1523,32 @@ test('Objetivo marcado con clic: el ataque lo prioriza aunque haya otro más cer
     checkEq(validFocus(player), null, 'si muere se desmarca');
 });
 
-test('Moverse reinicia el ataque (no se puede disparar gratis mientras te alejás)', () => {
-    newGame('SNIPER');
-    dummy({ x: player.x + 3 });
-    player.attackTimer = 0.5; player.moveTimer = 99;
-    keys = { a: true };
-    updateWave(0.001);
-    keys = {};
-    check(player.attackTimer < 0.01, 'al moverse, el ataque vuelve a arrancar (tenía 0.5s cargados)');
+test('Ataque al moverse: libre por defecto; con la regla "reset", moverse reinicia el ataque', () => {
+    const saved = MOVE_ATTACK_RULE;
+    try {
+        for (const rule of ['free', 'reset']) {
+            MOVE_ATTACK_RULE = rule;
+            newGame('SNIPER');
+            dummy({ x: player.x + 3 });
+            player.attackTimer = 0.5; player.moveTimer = 99;
+            keys = { a: true };
+            updateWave(0.001);
+            keys = {};
+            check(rule === 'reset' ? player.attackTimer < 0.01 : player.attackTimer >= 0.5, rule + ': ' + player.attackTimer);
+        }
+    } finally { MOVE_ATTACK_RULE = saved; }
+    checkEq(saved, 'free', 'por defecto se ataca caminando');
+});
+
+test('En duelo, la curación y el control entre héroes bajan (el robo de vida no)', () => {
+    toDuels();
+    const [a, b] = arenas[0].heroes;
+    b.hp = 1;
+    checkEq(healUnit(b, 100), Math.round(100 * (1 - DUEL_HEAL_REDUCTION)), 'curación reducida');
+    b.hp = 1;
+    checkEq(healUnit(b, 100, { fromDamage: true }), 100, 'robo de vida sin reducir');
+    addEffect(b, { id: 'STUN', name: 'Aturdido', duration: 2, flags: ['stun'] });
+    checkNear(getEffect(b, 'STUN').until - gameClock, 2 * (1 - DUEL_CONTROL_REDUCTION) * (1 - Math.min(0.8, sumMod(b, 'statusResist'))), 'aturdimiento más corto');
 });
 
 test('En duelo los héroes se hacen menos daño entre sí; contra creeps no cambia', () => {

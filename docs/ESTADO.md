@@ -30,9 +30,10 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 | Sonidos sintetizados, sala de espera caminable, héroes agrupados por atributo, enfriamientos −25% | ✅ |
 | Pixel art dibujado en código para héroes, creeps y jefes (G para volver a ASCII) | ✅ |
 | Objetivo marcado con clic izquierdo y movimiento −35% | ✅ |
+| Ataque libre al moverse + balance por stats, curación y control −50/60% en duelo | ✅ (Vampiro y Nigromante siguen abajo) |
 
 ## Pendientes y temas abiertos
-- **Alquimista:** gana ~83% de sus duelos (medido); falta investigarlo como se hizo con el Sniper.
+- **Balance de duelos:** Vampiro (11%) y Nigromante (17%) necesitan revisar sus kits; Alquimista y Bruja ~75% (ver DISEÑO.md §9).
 - **Modo debug** (propuesto): panel para probar situaciones (ronda, oro, nivel, ítems, creeps, duelos, velocidad, modo dios).
 - Preguntas abiertas de diseño: DISEÑO.md §11 (probabilidad de definitivas en el draft, precio del Fragmento…).
 - Autor de los commits: el email de git (comusanmiguel24@gmail.com) está asociado a la cuenta `comusanmiguel24-bit`, no a
@@ -42,7 +43,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **Idioma:** español rioplatense (voseo), en el código, los comentarios, los textos del juego y los commits.
 - **Decisiones de diseño:** se consultan con opciones y una recomendada, idealmente con números medidos. Lo que se decide
   se anota en DISEÑO.md (secciones de la fase y "Decisiones tomadas").
-- **Cada cambio:** pruebas automáticas (`tests.html`, hoy **129**) → commit en git → push a GitHub solo cuando el usuario lo pide.
+- **Cada cambio:** pruebas automáticas (`tests.html`, hoy **130**) → commit en git → push a GitHub solo cuando el usuario lo pide.
 - **Commits:** mensaje en español que explica el porqué; terminan con `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 - **Héroes nuevos con otra IA:** prompt en [`prompt-heroes.md`](prompt-heroes.md); lo que devuelva se revisa contra el motor
   (pasivas, efectos por segundo con `everyInterval`, descripciones que coincidan con el código) antes de integrarlo.

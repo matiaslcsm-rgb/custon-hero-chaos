@@ -2,9 +2,9 @@
 registerHero({
     key: 'VAMPIRE', name: 'Guerrero Vampiro', symbol: 'V', primaryAttr: 'STR', role: 'Guerrero vampiro cuerpo a cuerpo',
     attributes: { str: [24, 3.0], agi: [14, 1.8], int: [14, 1.4] },
-    baseHp: 120, baseAtk: 12, baseAtkSpeed: 0.85, baseAttackRange: 1.4,
-    baseArmor: 3, baseMagicResist: 12, baseHpRegen: 1.0,
-    baseMaxMana: 100, baseManaRegen: 1.0, baseMoveSpeed: 2.9, baseProjectileSpeed: 0,
+    baseHp: 170, baseAtk: 17, baseAtkSpeed: 1.0, baseAttackRange: 1.4,
+    baseArmor: 5, baseMagicResist: 12, baseHpRegen: 1.0,
+    baseMaxMana: 100, baseManaRegen: 1.0, baseMoveSpeed: 3.3, baseProjectileSpeed: 0,
     baseCritChance: 6, baseEvasion: 5, baseSpellAmp: 0, baseLifesteal: 15,
     description: 'Fuerza: guerrero resistente que se cura con el daño que hace. Dominante en peleas largas.',
     scaling: { stat: 'lifesteal', perKills: 9, perKillsAmount: 1, perHeroKill: 3 },

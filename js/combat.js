@@ -132,8 +132,12 @@ function onUnitDeath(unit, killer) {
 
 // Cura a una unidad (sin pasar su máximo), emite onHeal y devuelve cuánto curó realmente.
 // La anticuración (mod healingTakenPct negativo) reduce la curación.
-function healUnit(unit, amount) {
+// En duelo, las curaciones bajan igual que el daño entre héroes (si no, regenerar valía muchísimo más que pegar).
+// El robo de vida no, porque ya sale del daño hecho, que ya viene reducido (opts.fromDamage).
+let DUEL_HEAL_REDUCTION = 0.6; // igual que el daño entre héroes (ver DISEÑO.md)
+function healUnit(unit, amount, opts = {}) {
     amount *= Math.max(0, 1 + sumMod(unit, 'healingTakenPct'));
+    if (!opts.fromDamage && unit.arena && unit.arena.kind === 'duel') amount *= 1 - DUEL_HEAL_REDUCTION;
     const healed = Math.max(0, Math.min(unit.maxHp - unit.hp, Math.round(amount)));
     if (healed <= 0) return 0;
     unit.hp += healed;
@@ -149,7 +153,7 @@ function applyLifesteal(unit, dmgDealt, target) {
     if (ls <= 0 || dmgDealt <= 0) return;
     const ctx = { target, mult: 1 };
     emit(unit, 'beforeLifesteal', ctx);
-    healUnit(unit, dmgDealt * (ls / 100) * ctx.mult);
+    healUnit(unit, dmgDealt * (ls / 100) * ctx.mult, { fromDamage: true });
 }
 
 // Calcula el daño de un ataque básico: daño efectivo (base + efectos), luego los modificadores de

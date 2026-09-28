@@ -2,9 +2,9 @@
 registerHero({
     key: 'ASSASSIN', name: 'Asesino', symbol: 'K', primaryAttr: 'AGI', role: 'Asesino de críticos',
     attributes: { str: [18, 2.0], agi: [22, 3.2], int: [14, 1.4] },
-    baseHp: 100, baseAtk: 9, baseAtkSpeed: 1.1, baseAttackRange: 1.3,
+    baseHp: 130, baseAtk: 9, baseAtkSpeed: 1.1, baseAttackRange: 1.3,
     baseArmor: 1, baseMagicResist: 8, baseHpRegen: 0.8,
-    baseMaxMana: 90, baseManaRegen: 1.3, baseMoveSpeed: 3.4, baseProjectileSpeed: 0,
+    baseMaxMana: 90, baseManaRegen: 1.3, baseMoveSpeed: 3.6, baseProjectileSpeed: 0,
     baseCritChance: 20, baseEvasion: 10, baseSpellAmp: 0, baseLifesteal: 0,
     description: 'Agilidad: asesino explosivo de altísimo daño crítico. Entra, elimina un objetivo y sale antes de que lo rodeen.',
     scaling: { stat: 'critChance', perKills: 8, perKillsAmount: 2, perHeroKill: 5 },

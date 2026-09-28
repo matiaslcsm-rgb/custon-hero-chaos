@@ -2,7 +2,7 @@
 registerHero({
     key: 'NECROMANCER', name: 'Nigromante', symbol: 'N', primaryAttr: 'INT', role: 'Drenaje de vida y desgaste',
     attributes: { str: [18, 1.8], agi: [11, 1.1], int: [22, 3.1] },
-    baseHp: 125, baseAtk: 9, baseAtkSpeed: 0.85, baseAttackRange: 3,
+    baseHp: 160, baseAtk: 12, baseAtkSpeed: 0.95, baseAttackRange: 3,
     baseArmor: 1, baseMagicResist: 15, baseHpRegen: 0.5,
     baseMaxMana: 130, baseManaRegen: 1.8, baseMoveSpeed: 2.6, baseProjectileSpeed: 8,
     baseCritChance: 5, baseEvasion: 5, baseSpellAmp: 0, baseLifesteal: 0,

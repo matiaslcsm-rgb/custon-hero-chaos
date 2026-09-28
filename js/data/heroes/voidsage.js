@@ -2,7 +2,7 @@
 registerHero({
     key: 'VOIDSAGE', name: 'Sabio del Vacío', symbol: 'Ø', primaryAttr: 'INT', role: 'Movilidad y ráfaga en área',
     attributes: { str: [15, 1.5], agi: [15, 1.5], int: [24, 3.3] },
-    baseHp: 110, baseAtk: 8, baseAtkSpeed: 0.95, baseAttackRange: 4,
+    baseHp: 125, baseAtk: 8, baseAtkSpeed: 0.95, baseAttackRange: 4,
     baseArmor: 0, baseMagicResist: 15, baseHpRegen: 0.5,
     baseMaxMana: 150, baseManaRegen: 2.3, baseMoveSpeed: 2.8, baseProjectileSpeed: 11,
     baseCritChance: 5, baseEvasion: 5, baseSpellAmp: 0, baseLifesteal: 0,

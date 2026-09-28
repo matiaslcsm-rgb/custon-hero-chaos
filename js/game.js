@@ -12,7 +12,7 @@ const WAVE_HARD_LIMIT = 120;
 // a la vez sin costo, y los cuerpo a cuerpo casi no ganaban duelos.
 // Qué pasa con el ataque al moverse: 'reset' (arranca de cero), 'pause' (no avanza mientras caminás, pero no se pierde)
 // 'reset-ranged' (solo los de distancia reinician) o 'free' (se puede atacar caminando). Es let para poder medir las variantes.
-let MOVE_ATTACK_RULE = 'reset';
+let MOVE_ATTACK_RULE = 'free'; // a pedido: se ataca caminando; el equilibrio se hace con stats (ver DISEÑO.md)
 // Velocidad de movimiento de todos (héroes y creeps): 0,65 = 35% más lentos que al principio, a pedido (se veía muy frenético).
 // Solo el movimiento: ataques y proyectiles quedan igual.
 const MOVE_SPEED_MULT = 0.65; // bajado otra vez a pedido (antes 0,8)

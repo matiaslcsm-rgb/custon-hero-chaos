@@ -2,9 +2,9 @@
 registerHero({
     key: 'AXE', name: 'Axe', symbol: '@', primaryAttr: 'STR', role: 'Tanque de contraataque',
     attributes: { str: [24, 2.8], agi: [12, 1.6], int: [14, 1.6] },
-    baseHp: 100, baseAtk: 13, baseAtkSpeed: 0.9, baseAttackRange: 1.5,
+    baseHp: 125, baseAtk: 13, baseAtkSpeed: 0.9, baseAttackRange: 1.5,
     baseArmor: 2, baseMagicResist: 15, baseHpRegen: 1.5,
-    baseMaxMana: 100, baseManaRegen: 1.2, baseMoveSpeed: 2.8, baseProjectileSpeed: 0,
+    baseMaxMana: 100, baseManaRegen: 1.2, baseMoveSpeed: 3.1, baseProjectileSpeed: 0,
     baseCritChance: 5, baseEvasion: 4, baseSpellAmp: 0, baseLifesteal: 0,
     description: 'Fuerza: tanque de primera línea. Provoca enemigos y castiga a quien lo golpea. Escala armadura.',
     scaling: { stat: 'armor', perKills: 10, perKillsAmount: 0.5, perHeroKill: 1.5 },

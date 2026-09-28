@@ -2,9 +2,9 @@
 registerHero({
     key: 'SNIPER', name: 'Sniper', symbol: 'S', primaryAttr: 'AGI', role: 'Francotirador de largo alcance',
     attributes: { str: [16, 1.8], agi: [22, 3.0], int: [15, 1.4] },
-    baseHp: 105, baseAtk: 8, baseAtkSpeed: 1.2, baseAttackRange: 5,
+    baseHp: 85, baseAtk: 8, baseAtkSpeed: 0.85, baseAttackRange: 5,
     baseArmor: 0, baseMagicResist: 10, baseHpRegen: 0.5,
-    baseMaxMana: 150, baseManaRegen: 1.5, baseMoveSpeed: 2.6, baseProjectileSpeed: 11,
+    baseMaxMana: 150, baseManaRegen: 1.5, baseMoveSpeed: 2.3, baseProjectileSpeed: 11,
     baseCritChance: 12, baseEvasion: 8, baseSpellAmp: 8, baseLifesteal: 0,
     description: 'Agilidad: DPS físico de largo alcance. Cuanto más lejos dispara, más daño hace. Frágil de cerca.',
     // Escalado a la mitad tras medir: con +3/+8 ganaba el 93% de sus duelos y todas las partidas.
