@@ -7,6 +7,7 @@
 //   oneHit       muere de un solo golpe;  groupSize: aparece en grupos de N (por cada unidad pedida)
 //   mechanic     qué hace (se muestra en el aviso de oleada y en el códice)
 //   counter      cómo contrarrestarlo;  counterItem: clave del ítem de ITEMS que lo contrarresta (lo usa la IA)
+//   size         tamaño del cuerpo: 'small' (frena poco al atravesarlo) o, por defecto, mediano (ver bodies.js)
 //   basic        creep básico (sin mecánica especial; el códice los muestra aparte)
 //   bossable     puede ser la base del jefe de una oleada
 //   priority     prioridad como objetivo: el ataque automático y la IA van primero por los de prioridad más alta
@@ -26,7 +27,7 @@ function speedGoldMultiplier(timeAliveSeconds) {
 const CREEP_TYPES = {
     // --- BÁSICOS ---
     CHUSMA: {
-        key: 'CHUSMA', basic: true, label: 'Chusma', symbol: 'x', color: '#6c757d', hp: 1, atk: 4, atkSpeed: 1.0, moveInterval: 220, range: 1.0, gold: 4, xp: 6, oneHit: true,
+        key: 'CHUSMA', basic: true, size: 'small', label: 'Chusma', symbol: 'x', color: '#6c757d', hp: 1, atk: 4, atkSpeed: 1.0, moveInterval: 220, range: 1.0, gold: 4, xp: 6, oneHit: true,
         mechanic: 'Muere de un golpe, pero viene en cantidad.', counter: 'Daño en área'
     },
     GRUNT: {
@@ -74,7 +75,7 @@ const CREEP_TYPES = {
         mechanic: 'Armadura 12: recibe 48% menos de daño físico.', counter: 'Daño mágico o puro, o reducir armadura', counterItem: 'HAMMER'
     },
     SWARM: {
-        key: 'SWARM', label: 'Enjambre', symbol: '·', color: '#b5e48c', hp: 10, atk: 3, atkSpeed: 1.2, moveInterval: 160, range: 1.1, gold: 2, xp: 4, groupSize: 4,
+        key: 'SWARM', label: 'Enjambre', size: 'small', symbol: '·', color: '#b5e48c', hp: 10, atk: 3, atkSpeed: 1.2, moveInterval: 160, range: 1.1, gold: 2, xp: 4, groupSize: 4,
         mechanic: 'Aparecen de a 4, débiles y rápidos.', counter: 'Daño en área'
     },
     KAMIKAZE: {

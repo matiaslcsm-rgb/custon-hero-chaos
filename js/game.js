@@ -366,16 +366,18 @@ function updateHero(hero, arena, dt) {
 
     // Movimiento: del teclado o de la IA (la velocidad la modifican los efectos: Masacre, Visión de Cazador...)
     hero.moveTimer = (hero.moveTimer || 0) + dt;
-    if (!stunned && hero.moveTimer > hero.moveInterval / (effMoveMult(hero) * MOVE_SPEED_MULT)) {
+    const stepTime = hero.moveInterval / (effMoveMult(hero) * MOVE_SPEED_MULT);
+    if (!stunned && hero.moveTimer > stepTime) {
         let dir = aiControlled ? aiMoveDirection(hero) : keyboardDirection();
         if (!aiControlled) {
             if (dir.dx || dir.dy) { hero.moveTarget = null; hero.focusChase = false; } // el teclado manda sobre el mouse
             else dir = moveTargetDirection(hero) || focusChaseDirection(hero) || dir;
         }
         const x = hero.x, y = hero.y;
-        hero.x = Math.max(0, Math.min(COLS - 1, hero.x + dir.dx));
-        hero.y = Math.max(0, Math.min(ROWS - 1, hero.y + dir.dy));
-        hero.moveTimer = 0;
+        const nx = Math.max(0, Math.min(COLS - 1, hero.x + dir.dx)), ny = Math.max(0, Math.min(ROWS - 1, hero.y + dir.dy));
+        // Cuerpos físicos (bodies.js): entrar a una casilla ocupada tarda más; mientras tanto, sigue empujando
+        const pushing = (nx !== x || ny !== y) && hero.moveTimer < stepTime * (1 + bodyPenalty(hero, nx, ny));
+        if (!pushing) { hero.x = nx; hero.y = ny; hero.moveTimer = 0; }
         if (hero.x !== x || hero.y !== y) {
             emit(hero, 'onMove', { steps: 1 });
             if (MOVE_ATTACK_RULE === 'reset' || (MOVE_ATTACK_RULE === 'reset-ranged' && isRanged(hero))) hero.attackTimer = 0;

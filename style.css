@@ -423,6 +423,19 @@ kbd { background: #2a2e3a; border: 1px solid #555; border-bottom-width: 3px; pad
 
 /* Ventana de apuestas: un duelo */
 #bet-container .modal-box { max-width: 640px; }
+
+/* Ventana del draft: cartas como en la elección de héroe (ícono y color del héroe de origen) */
+.draft-box { border-color: #00b4d8; }
+.draft-box .modal-head h3 { color: #00f5d4; }
+.draft-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.draft-card { border-top: 4px solid #444; padding: 10px; display: flex; flex-direction: column; gap: 4px; }
+.draft-card:hover { transform: translateY(-3px); box-shadow: 0 4px 14px rgba(0, 180, 216, 0.25); }
+.draft-card-head { display: flex; align-items: center; gap: 8px; }
+.draft-card-head h4 { font-size: 1rem; }
+.draft-card p { font-size: 0.8rem; }
+.draft-type { font-size: 0.72rem !important; font-weight: bold; color: #8ecae6 !important; }
+.draft-type.passive { color: #95d5b2 !important; }
+.draft-type.ult { color: #ff9f1c !important; }
 #bet-info { display: flex; flex-direction: column; gap: 4px; }
 .bet-rule { color: #bbb; font-size: 0.78rem; }
 .bet-total { color: #ffd166; }

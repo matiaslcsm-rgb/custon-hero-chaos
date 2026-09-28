@@ -71,13 +71,22 @@ function creepTarget(c) {
 
 // --- MOVIMIENTO ---
 // Mueve un creep una casilla hacia (tx, ty) respetando su velocidad (y ralentizaciones).
+// Cuerpos físicos (bodies.js): si la casilla del camino está ocupada, prueba el otro eje si está libre; si no, empuja
+// (el paso tarda más según el tamaño del que está ahí).
 function stepCreepToward(c, tx, ty, dt) {
     if (c.x === tx && c.y === ty) return;
     c.moveTimer += dt * 1000;
-    if (c.moveTimer < c.moveInterval / (effMoveMult(c) * MOVE_SPEED_MULT)) return;
-    c.moveTimer = 0;
+    const stepTime = c.moveInterval / (effMoveMult(c) * MOVE_SPEED_MULT);
+    if (c.moveTimer < stepTime) return;
     const dx = tx - c.x, dy = ty - c.y;
-    if (Math.abs(dx) >= Math.abs(dy)) c.x += Math.sign(dx); else c.y += Math.sign(dy);
+    const main = Math.abs(dx) >= Math.abs(dy) ? [Math.sign(dx), 0] : [0, Math.sign(dy)];
+    const alt = main[0] ? [0, Math.sign(dy)] : [Math.sign(dx), 0];
+    let [sx, sy] = main;
+    let penalty = bodyPenalty(c, c.x + sx, c.y + sy);
+    if (penalty > 0 && (alt[0] || alt[1]) && bodyPenalty(c, c.x + alt[0], c.y + alt[1]) === 0) { [sx, sy] = alt; penalty = 0; }
+    if (c.moveTimer < stepTime * (1 + penalty)) return;
+    c.moveTimer = 0;
+    c.x += sx; c.y += sy;
 }
 
 // Se aleja de `from` (ej: el Ladrón huyendo), sin salir del mapa.

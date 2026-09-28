@@ -422,6 +422,24 @@ partidas con cada héroe** y murió entre las oleadas 1 y 3. No juega bien, pero
 
 ---
 
+## 8 bis. Cuerpos físicos ✅
+
+Pedido del usuario: que héroes, creeps y jefes no se atraviesen libremente, para dar sensación de cuerpo.
+Elegido: **cuerpo blando** (nunca te quedás trabado) y **todos chocan con todos**, también los creeps entre sí.
+
+| Tamaño | Quiénes | Entrar a su casilla tarda |
+|---|---|---|
+| Chico | Chusma, Enjambre | +25% |
+| Mediano | Héroes y creeps normales | +75% |
+| Grande | Jefes de oleada y jefes de ronda | +150% |
+
+- Los creeps, antes de empujar, prueban el otro eje si está libre: así se reparten alrededor del héroe en vez de apilarse.
+- Las habilidades que teletransportan o saltan no frenan. El estado `phasing` atraviesa todo sin frenar
+  (lo usa **Paso Fantasma** del Danzante): abre la puerta a habilidades de "atravesar enemigos".
+- Código: `js/bodies.js` (`BODY_SLOW`, `bodyPenalty`; `BODIES_ON` para medir). Tamaño de un creep: `size` en su tipo.
+- **Medido** (26 partidas con choque contra 27 sin choque): casi no cambia el balance: 32,8 contra 32,4 rondas por
+  partida, mismos ganadores (el Sniper gana ~2 de cada 3) y duelos dentro del ruido.
+
 ## 9. PvP: duelos, apuestas y ranking
 
 > **Formato vigente (reemplaza lo que se contradiga más abajo):**

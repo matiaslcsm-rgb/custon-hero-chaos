@@ -811,6 +811,40 @@ test('Brujo: rayo cada 5s con daño mágico y aturdimiento; Escarchador ralentiz
     checkNear(effAtkSpeed(ally) / ally.atkSpeed, 1 + CREEP_TYPES.DRUMMER.auraAtkSpeed, 'aliado acelerado');
 });
 
+test('Cuerpos físicos: entrar a una casilla ocupada tarda más según el tamaño; Paso Fantasma atraviesa', () => {
+    newGame('DANCER');
+    const c = dummy();
+    checkNear(bodyPenalty(player, c.x, c.y), BODY_SLOW.medium, 'creep normal: mediano');
+    checkNear(bodyPenalty(player, c.x, c.y + 1), 0, 'casilla libre');
+    const swarm = spawnType('SWARM', { x: 10, y: 2 }), boss = spawnType('GRUNT', { x: 11, y: 2, isBoss: true });
+    checkNear(bodyPenalty(player, 10, 2), BODY_SLOW.small, 'enjambre: chico');
+    checkNear(bodyPenalty(player, 11, 2), BODY_SLOW.large, 'jefe: grande');
+    // El héroe empuja: con el tiempo de un paso normal no entra; con el tiempo extra, sí
+    const step = player.moveInterval / (effMoveMult(player) * MOVE_SPEED_MULT);
+    keys['d'] = true;
+    try {
+        player.moveTimer = step * 1.2; updateHero(player, player.arena, 0);
+        checkEq(player.x, c.x - 1, 'todavía empujando');
+        player.moveTimer = step * (1 + BODY_SLOW.medium) + 0.01; updateHero(player, player.arena, 0);
+        checkEq(player.x, c.x, 'pasó');
+        player.x = c.x - 1;
+        addEffect(player, { id: 'PHASE', duration: 5, flags: ['phasing'] });
+        player.moveTimer = step * 1.2; updateHero(player, player.arena, 0);
+        checkEq(player.x, c.x, 'atravesando no frena');
+    } finally { keys['d'] = false; }
+});
+
+test('Cuerpos físicos: un creep bloqueado prueba el otro camino si está libre', () => {
+    newGame('AXE');
+    const a = spawnType('GRUNT', { x: 10, y: 5 }), b = spawnType('GRUNT', { x: 12, y: 6 });
+    // b va hacia (10, 4): su camino principal (x) está libre
+    b.moveTimer = 0; stepCreepToward(b, 9, 5, 5);
+    checkEq([b.x, b.y].join(), '11,6', 'avanza por x');
+    b.x = 11; b.y = 5; // ahora (10,5) está ocupada por a: prueba por y
+    b.moveTimer = 0; stepCreepToward(b, 8, 4, 5);
+    checkEq([b.x, b.y].join(), '11,4', 'rodea por y');
+});
+
 test('Ancla: cada golpe ralentiza y quita evasión', () => {
     newGame('AXE');
     const ev = effEvasion(player);

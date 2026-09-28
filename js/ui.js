@@ -210,12 +210,26 @@ const DRAFT_TITLES = {
     book: ['Libro del Destino', 'Elegí 1 de estas 6 habilidades para reemplazar la que cambiaste.']
 };
 
-function skillCardHtml(s) {
+// Carta de habilidad del draft, con el estilo de la elección de héroe: ícono y color del héroe de origen.
+function skillCardHtml(s, level = 0) {
     const natural = s.heroKey === player.key;
+    const origin = HERO_TEMPLATES[s.heroKey];
+    const color = origin ? ATTR_INFO[origin.primaryAttr].color : '#ccc';
     const type = s.isUltimate ? 'Definitiva' : s.kind === 'passive' ? 'Pasiva' : 'Activa';
-    return `<h4>${abilityLabel(s.name, s.isUltimate ? 'ult' : '')}</h4>` +
-        `<p class="meta"><span class="${natural ? 'natural' : ''}">${natural ? '★ Natural' : 'De ' + naturalHeroName(s)}</span> &middot; ${type} &middot; ${skillCostLine(s, 0)}</p>` +
-        `<p>${describeSkill(s, 0)}</p><div class="tags">${tagChips(s.tags)}</div>`;
+    return `<div class="draft-card-head">${origin ? heroIconHtml(origin, 'md') : ''}<div>` +
+        `<h4>${abilityLabel(s.name, s.isUltimate ? 'ult' : '')}${level ? ` <span class="item-meta">nivel ${level}</span>` : ''}</h4>` +
+        `<p class="meta"><span class="${natural ? 'natural' : ''}" style="${natural ? '' : `color:${color}`}">${natural ? '★ Natural' : 'De ' + naturalHeroName(s)}</span></p></div></div>` +
+        `<p class="draft-type ${s.isUltimate ? 'ult' : s.kind}">${type}${s.kind === 'passive' ? '' : ` &middot; ${skillCostLine(s, level)}`}</p>` +
+        `<p>${describeSkill(s, level)}</p><div class="tags">${tagChips(s.tags)}</div>`;
+}
+function draftCard(s, onPick, level = 0) {
+    const origin = HERO_TEMPLATES[s.heroKey];
+    const card = document.createElement('div');
+    card.className = 'skill-card draft-card' + (s.isUltimate ? ' ult' : '');
+    if (origin) card.style.borderTopColor = ATTR_INFO[origin.primaryAttr].color;
+    card.innerHTML = skillCardHtml(s, level);
+    card.onclick = () => { sfx('click'); onPick(s); };
+    return card;
 }
 
 function renderDraft(options, mode) {
@@ -223,13 +237,7 @@ function renderDraft(options, mode) {
     document.getElementById('draft-title').textContent = title;
     document.getElementById('draft-subtitle').textContent = subtitle;
     const c = document.getElementById('draft-options'); c.innerHTML = '';
-    options.forEach(s => {
-        const card = document.createElement('div');
-        card.className = 'skill-card' + (s.isUltimate ? ' ult' : '');
-        card.innerHTML = skillCardHtml(s);
-        card.onclick = () => learnSkill(s);
-        c.appendChild(card);
-    });
+    options.forEach(s => c.appendChild(draftCard(s, learnSkill)));
 }
 
 // Libro del Destino, paso 1: elegir qué habilidad del kit cambiar.
@@ -237,13 +245,7 @@ function renderBookChoice() {
     document.getElementById('draft-title').textContent = 'Libro del Destino';
     document.getElementById('draft-subtitle').textContent = '¿Qué habilidad querés cambiar? Recuperás sus puntos y elegís entre 6 nuevas.';
     const c = document.getElementById('draft-options'); c.innerHTML = '';
-    player.skills.forEach(s => {
-        const card = document.createElement('div');
-        card.className = 'skill-card' + (s.isUltimate ? ' ult' : '');
-        card.innerHTML = `<h4>${s.name} (nivel ${skillLevel(player, s)})</h4><p>${describeSkill(s, skillLevel(player, s))}</p>`;
-        card.onclick = () => useBookOn(s);
-        c.appendChild(card);
-    });
+    player.skills.forEach(s => c.appendChild(draftCard(s, useBookOn, skillLevel(player, s))));
 }
 
 // --- TIENDA ---

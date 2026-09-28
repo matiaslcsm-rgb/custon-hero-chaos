@@ -38,6 +38,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 | Cámara fija en tu héroe en cada fase y 🔥 en el ranking para quien está peleando | ✅ |
 | Libros de Talento (+5 a un atributo, 500g y +250g por cada uno) | ✅ |
 | Héroe 10: Danzante Cinético `D` (diseño del usuario) + creep Ancla | ✅ (45% de duelos) |
+| Draft de habilidades en ventana emergente (cartas con el ícono y color del héroe de origen) | ✅ |
+| Cuerpos físicos: pasar por la casilla de otro frena según su tamaño (+25/75/150%); `phasing` atraviesa | ✅ |
 
 ## Pendientes y temas abiertos
 - **En curso:** 3 héroes de Agilidad del usuario, de a uno y midiendo cada uno: Danzante ✅ → **Chakravin `Y`** (proyectiles

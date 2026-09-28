@@ -85,13 +85,6 @@
                         <div id="hero-options" class="options-grid"></div>
                     </div>
 
-                    <!-- Draft de habilidades -->
-                    <div id="draft-container" style="display: none;">
-                        <h3 id="draft-title">Draft de Habilidades</h3>
-                        <p class="subtitle" id="draft-subtitle">Elegí una habilidad nueva:</p>
-                        <div id="draft-options" class="options-grid"></div>
-                    </div>
-
                     <!-- En combate: qué está pasando -->
                     <div id="combat-info" style="display: none;"></div>
 
@@ -106,6 +99,18 @@
             </div>
         </div>
     </div>
+    </div>
+
+    <!-- Ventana del draft de habilidades (también Fragmento y Libro del Destino): hay que elegir una para seguir -->
+    <div id="draft-container" class="modal" style="display: none;">
+        <div class="modal-box wide draft-box">
+            <div class="modal-head">
+                <h3 id="draft-title">Draft de Habilidades</h3>
+                <span class="modal-timer phase-countdown big"></span>
+            </div>
+            <p class="subtitle" id="draft-subtitle">Elegí una habilidad nueva:</p>
+            <div id="draft-options" class="draft-grid"></div>
+        </div>
     </div>
 
     <!-- Ventana de la tienda (se abre sola en la preparación; B para abrir o cerrar) -->
@@ -240,6 +245,7 @@
     <script src="js/progression.js"></script>
     <script src="js/hero.js"></script>
     <script src="js/combat.js"></script>
+    <script src="js/bodies.js"></script>
     <script src="js/items.js"></script>
     <script src="js/game.js"></script>
     <script src="js/world.js"></script>

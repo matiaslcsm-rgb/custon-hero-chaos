@@ -62,12 +62,12 @@ registerHero({
         id: 'DANCER_GHOSTSTEP', name: 'Paso Fantasma', kind: 'active',
         tags: ['MOVILIDAD', 'MEJORA', 'AL_GOLPEAR'],
         values: { cooldown: [12, 11, 10, 9], manaCost: 35, duration: 2, evasion: [25, 35, 45, 55], strikeRange: 2, strikeBonus: [0.2, 0.3, 0.4, 0.5] },
-        description: 'Durante {duration}s ganás +{evasion}% de evasión. Al terminar, hacés un ataque básico con +{strikeBonus%} de daño al enemigo más cercano a {strikeRange} casillas o menos.',
+        description: 'Durante {duration}s ganás +{evasion}% de evasión y atravesás unidades sin frenarte. Al terminar, hacés un ataque básico con +{strikeBonus%} de daño al enemigo más cercano a {strikeRange} casillas o menos.',
         cast(caster) {
             const skill = this;
             addEffect(caster, {
                 id: this.id, name: this.name, duration: val(this, caster, 'duration'), tags: ['MEJORA'],
-                mods: { evasion: val(this, caster, 'evasion') },
+                mods: { evasion: val(this, caster, 'evasion') }, flags: ['phasing'],
                 hooks: {
                     onExpire(owner) {
                         if (!owner.isAlive()) return;
