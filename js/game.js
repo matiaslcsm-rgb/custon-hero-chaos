@@ -33,8 +33,13 @@ window.addEventListener('keydown', e => {
 window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
 
 // --- SELECCIÓN, DRAFT Y TIENDA ---
-function selectHero(template) {
+// Oro con el que arranca quien elige libremente (panel "Elegir cualquier héroe"), en vez de los 100g normales.
+// Es la penalización por saltarse las 3 opciones al azar y llevarse cualquiera de los HERO_TEMPLATES.
+const GOLD_PENALTY_FREE_PICK = 0;
+
+function selectHero(template, freePick = false) {
     player = new Hero(template);
+    if (freePick) player.gold = GOLD_PENALTY_FREE_PICK;
     player.ownerName = playerName();
     player.displayName = `${player.name} (${player.ownerName})`;
     heroes = [player];
@@ -44,7 +49,9 @@ function selectHero(template) {
     heroOffers = null;
     showPanel('menu-panel', false);
     showPanel('hero-select-panel', false);
-    log(`Seleccionaste a ${player.name}. Tus rivales: ${heroes.slice(1).map(h => h.name).join(', ')}.`);
+    log(freePick
+        ? `Elegiste a ${player.name} de entre todos los héroes. Arrancás con ${GOLD_PENALTY_FREE_PICK}g en vez de 100g. Tus rivales: ${heroes.slice(1).map(h => h.name).join(', ')}.`
+        : `Seleccionaste a ${player.name}. Tus rivales: ${heroes.slice(1).map(h => h.name).join(', ')}.`);
     startRoundDraft();
 }
 
@@ -189,10 +196,14 @@ function updateRestArea(dt) {
     });
 }
 
+// Al volver del Área de Descanso a pelear (oleada nueva o jefe de ronda) se reinician los enfriamientos,
+// igual que ya pasaba al empezar un duelo (duels.js) o un jefe (bosses.js). Mientras estás EN el descanso siguen
+// corriendo (updateRestArea); al volver a entrar en combate se reinician del todo.
 function returnFromRestArea(hero) {
     hero.inRest = false;
     hero.x = WAVE_START.x; hero.y = WAVE_START.y;
     restoreHero(hero);
+    hero.cooldowns = Object.fromEntries(Object.keys(hero.cooldowns).map(k => [k, 0]));
 }
 
 // --- OLEADAS ---
@@ -399,7 +410,8 @@ function updateHero(hero, arena, dt) {
     }
 
     // Ataque automático: al enemigo en rango de mayor prioridad (ej: Sanadores) o, si no, al más cercano
-    const target = stunned ? null : pickAttackTarget(hero, effRange(hero));
+    // (desarmado: como el Manto Fantasma del Nigromante, no ataca pero sigue moviéndose, a diferencia de un aturdimiento)
+    const target = (stunned || hasFlag(hero, 'disarm')) ? null : pickAttackTarget(hero, effRange(hero));
     const walking = MOVE_ATTACK_RULE === 'pause' && gameClock < (hero.movingUntil || 0);
     if (target && walking) {
         // pausa: mientras camina el ataque no avanza, pero conserva lo que tenía cargado

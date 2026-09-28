@@ -55,7 +55,7 @@ function renderHeroPick() {
 const ATTR_INFO = {
     STR: { label: 'Fuerza', color: '#ff6b6b', note: 'Más vida y regeneración. Aguantan al frente y pegan cuerpo a cuerpo.' },
     AGI: { label: 'Agilidad', color: '#69db7c', note: 'Más velocidad de ataque y armadura. Daño con ataques básicos y críticos.' },
-    INT: { label: 'Inteligencia', color: '#74c0fc', note: 'Más maná y amplificación de hechizos (+100% para magos). El daño fuerte viene de las habilidades.' }
+    INT: { label: 'Inteligencia', color: '#74c0fc', note: 'Más maná y amplificación de hechizos (+25% para magos, el resto lo dan los ítems). El daño fuerte viene de las habilidades.' }
 };
 
 function heroAbilityHtml(a, kind) {
@@ -643,7 +643,7 @@ function renderHeroStats() {
         ['Daño', Math.round(effAttack(p))], ['Vel. ataque', `${effAtkSpeed(p).toFixed(2)}/s`], ['Rango', effRange(p).toFixed(1)],
         ['Armadura', effArmor(p).toFixed(1)], ['Res. mágica', `${Math.round(effMagicResist(p))}%`], ['Evasión', `${Math.round(effEvasion(p))}%`],
         ['Crítico', `${effCritChance(p).toFixed(0)}%`], ['Robo de vida', `${effLifesteal(p).toFixed(0)}%`], ['Amp. hechizo', `${Math.round(effSpellAmp(p))}%`],
-        ['Regen. vida', `${p.hpRegen.toFixed(1)}/s`], ['Regen. maná', `${p.manaRegen.toFixed(1)}/s`], ['Vel. mov.', p.moveSpeed.toFixed(1)]
+        ['Regen. vida', `${effHpRegen(p).toFixed(1)}/s`], ['Regen. maná', `${effManaRegen(p).toFixed(1)}/s`], ['Vel. mov.', p.moveSpeed.toFixed(1)]
     ];
     let html = rows.map(([label, value, cls, main]) => `<div class="hs-row${main ? ' main' : ''}"><span>${label}${main ? ' ★' : ''}</span><b class="${cls || ''}">${value}</b></div>`).join('');
     if (p.scaling) {
@@ -799,6 +799,7 @@ function renderScoreboard() {
 // Deja la interfaz como al abrir el juego (usado por "Nueva Partida").
 function resetHud() {
     ['draft-container', 'shop-container', 'bet-container', 'restart-btn', 'hero-select-panel'].forEach(id => showPanel(id, false));
+    closeHeroDrawer();
     showPanel('menu-panel', true);
     setStateText('MENÚ');
     document.getElementById('round-num').textContent = '1';
@@ -944,17 +945,22 @@ function render() {
 
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     arena.creeps.forEach(c => { if (c.isAlive()) drawUnit(c, c.color, c.symbol, drawPos(c, dt), { glow: c.isBoss || c.isRoundBoss, big: c.isRoundBoss }); });
-    // Proyectiles con estela, del color de quien los disparó
+    // Proyectiles con estela, del color de quien los disparó (o el propio de la habilidad, ver vfx en su definición)
     arena.projectiles.forEach(p => {
-        const color = p.attacker.isHero ? heroColor(p.attacker) : p.attacker.color || '#fefae0';
+        const color = (p.vfx && p.vfx.color) || (p.attacker.isHero ? heroColor(p.attacker) : p.attacker.color || '#fefae0');
         p.trail = p.trail || [];
         p.trail.push([p.x, p.y]); if (p.trail.length > 6) p.trail.shift();
         p.trail.forEach(([x, y], i) => {
             ctx.globalAlpha = (i + 1) / p.trail.length * 0.5; ctx.fillStyle = color;
-            ctx.beginPath(); ctx.arc(x * TILE + TILE / 2, y * TILE + TILE / 2, 1.5 + i * 0.3, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(x * TILE + TILE / 2, y * TILE + TILE / 2, (p.radius ? 2.2 : 1.5) + i * 0.3, 0, Math.PI * 2); ctx.fill();
         });
-        ctx.globalAlpha = 1; ctx.fillStyle = p.isCrit ? '#ffd166' : '#fefae0';
-        ctx.beginPath(); ctx.arc(p.x * TILE + TILE / 2, p.y * TILE + TILE / 2, p.isCrit ? 4 : 3, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = 1; ctx.fillStyle = p.isCrit ? '#ffd166' : color;
+        ctx.beginPath(); ctx.arc(p.x * TILE + TILE / 2, p.y * TILE + TILE / 2, p.isCrit ? 4 : (p.radius ? 5 : 3), 0, Math.PI * 2); ctx.fill();
+        if (p.radius) { // proyectil de habilidad con área: aro tenue mostrando qué va tocando mientras viaja
+            ctx.globalAlpha = 0.22; ctx.strokeStyle = color; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.arc(p.x * TILE + TILE / 2, p.y * TILE + TILE / 2, p.radius * TILE, 0, Math.PI * 2); ctx.stroke();
+            ctx.globalAlpha = 1;
+        }
     });
     arena.heroes.forEach(h => {
         if (h.eliminated) return;

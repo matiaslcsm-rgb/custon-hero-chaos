@@ -41,9 +41,8 @@ function startBossFight() {
     gameState = 'BOSS';
     const t = roundBossOf();
     arenas = aliveHeroes().map(hero => {
-        returnFromRestArea(hero);
+        returnFromRestArea(hero); // ya reinicia los enfriamientos
         hero.respawnAt = 0; hero.attackTimer = 0;
-        hero.cooldowns = Object.fromEntries(Object.keys(hero.cooldowns).map(k => [k, 0]));
         const arena = makeArena('boss', [hero]);
         arena.pressure = pressureMult(hero);
         const boss = makeRoundBoss(t, arena.pressure);

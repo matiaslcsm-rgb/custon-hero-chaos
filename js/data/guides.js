@@ -29,7 +29,7 @@ const BUILD_GUIDES = {
         early: ['MANA_CRYSTAL', 'RUNE_CAPE'], core: ['ARCANE_STAFF', 'TOME', 'BOOTS'], late: ['SKADI', 'AEGIS']
     },
     NECROMANCER: {
-        why: 'Desgaste y drenaje: vida y maná para pelear largo, y resistencia mágica contra los magos.',
+        why: 'Desgaste y ejecución: vida y maná para sostener el aura y el Manto Fantasma, y amplificación para rematar con la Guadaña.',
         early: ['VITALITY', 'MANA_CRYSTAL'], core: ['ARCANE_STAFF', 'HEART', 'CLOAK'], late: ['AEGIS', 'DIADEM']
     },
     VOIDSAGE: {
@@ -43,6 +43,10 @@ const BUILD_GUIDES = {
     DANCER: {
         why: 'Pega mientras se mueve: velocidad de ataque y movimiento para cargar la Danza, y Hoja Certera contra la evasión.',
         early: ['BLADE', 'QUICK_GLOVES'], core: ['SWIFT_BLADE', 'GLOVES', 'TRAVEL_BOOTS'], late: ['HAMMER', 'TRUESTRIKE']
+    },
+    ZEUS: {
+        why: 'Todo el daño sale de los hechizos: maná e inteligencia para tirar todo el kit seguido, y amplificación de hechizo en cuanto se pueda.',
+        early: ['MANA_CRYSTAL', 'BRANCH_INT'], core: ['ARCANE_STAFF', 'TOME', 'CLOAK'], late: ['AEGIS', 'DIADEM']
     }
 };
 

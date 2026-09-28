@@ -25,20 +25,21 @@ registerHero({
     }
 }, {
     ARCANIST_BOLT: {
-        id: 'ARCANIST_BOLT', name: 'Proyectil Arcano', kind: 'active',
+        id: 'ARCANIST_BOLT', name: 'Proyectil Arcano', kind: 'active', pointTarget: true,
         tags: ['MÁGICO', 'ÁREA'],
-        values: { cooldown: [8, 7, 6, 5], manaCost: [35, 40, 45, 50], baseDmg: [55, 95, 135, 175], intRatio: 0.6, range: 6, radius: 2 },
-        description: 'Lanza una esfera arcana al enemigo más cercano (rango {range}): {baseDmg} + {intRatio%} de tu Inteligencia como daño mágico a él y a los enemigos en radio {radius}.',
+        values: { cooldown: [8, 7, 6, 5], manaCost: [35, 40, 45, 50], baseDmg: [55, 95, 135, 175], intRatio: 0.6, range: 6, radius: 2, speed: 12 },
+        description: 'Lanza una esfera arcana hacia donde apuntes (rango {range}): {baseDmg} + {intRatio%} de tu Inteligencia como daño mágico a los enemigos en radio {radius}. Proyectil real: si apuntás mal, no le pega a nadie.',
+        vfx: { color: '#9b5de5' },
         cast(caster) {
-            const target = nearestEnemy(caster, val(this, caster, 'range'));
-            if (!target) { log('Proyectil Arcano: sin enemigo en rango.'); return false; }
+            const range = val(this, caster, 'range');
+            const aim = caster.aimPoint || nearestEnemy(caster, range);
+            if (!aim || Math.hypot(aim.x - caster.x, aim.y - caster.y) > range) { log('Proyectil Arcano: sin objetivo en rango.'); return false; }
             const dmg = val(this, caster, 'baseDmg') + caster.int * val(this, caster, 'intRatio');
-            const radius = val(this, caster, 'radius');
-            let hits = 0;
-            enemiesOf(caster).forEach(c => {
-                if (c.isAlive() && Math.hypot(c.x - target.x, c.y - target.y) <= radius) { dealDamage(caster, c, dmg, 'magical'); hits++; }
+            fireSkillProjectile(caster, {
+                tx: aim.x, ty: aim.y, speed: val(this, caster, 'speed'), radius: val(this, caster, 'radius'),
+                dmg, dmgType: 'magical', vfx: this.vfx, skillName: this.name,
+                onHit: (target, dealt) => log(`✨ ¡Proyectil Arcano a ${target.label}! (-${dealt} HP)`)
             });
-            log(`✨ ¡Proyectil Arcano! ${hits} enemigo(s) alcanzados.`);
             return true;
         }
     },

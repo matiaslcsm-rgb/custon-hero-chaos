@@ -6,7 +6,15 @@ const ATTRIBUTE_RULES = {
     agi: { atkSpeedPct: 0.01, moveSpeedPct: 0.01, moveSpeedCap: 40, critChance: 0.1, armor: 0.08 },
     int: { mana: 4, manaRegen: 0.05, spellAmp: 0.1, magicResist: 0.1 },
     primaryAtk: 0.8,     // daño de ataque por punto del atributo principal
-    mageSpellAmp: 100    // los héroes de Inteligencia (magos) tienen +100% de amplificación de hechizo
+    mageSpellAmp: 25     // los héroes de Inteligencia (magos) tienen +25% de amplificación de hechizo base
+                          // (bajado de 100% el 2026-09-28: se saca del escalado automático y pasa a depender
+                          // de ítems — Báculo Arcano y los nuevos "candidatos" de DISEÑO.md §7. A/B controlado
+                          // (mismo build, mismas condiciones, n=5): 60% vs 100% dan el mismo tiempo de limpiar
+                          // 5 oleadas con jugador invulnerable (Arcanista 144 vs 145, Bruja del Hielo 158 vs
+                          // 154) — el PvE contra creeps casi no lo nota. Con 25% no se volvió a medir el PvE,
+                          // pero por la misma razón (el daño mágico no es lo único que limpia oleada) debería
+                          // seguir siendo chico. Sin medir todavía: duelos 1v1 (ahí el nuke mágico pesa más),
+                          // con simulateGame(i, false, 60) como en DISEÑO.md §6)
 };
 
 // Teclas de habilidades activas, asignadas por orden de aprendizaje.
@@ -31,7 +39,7 @@ class Hero {
         this.innate = template.innate || null;
         this.creepKillCount = 0; this.heroKillCount = 0;
         // Bonus permanentes acumulados (escalado del héroe y de las definitivas), ver grantPermanent().
-        this.bonus = { armor: 0, atk: 0, critChance: 0, lifesteal: 0, maxHp: 0, atkSpeed: 0 };
+        this.bonus = { armor: 0, atk: 0, critChance: 0, lifesteal: 0, maxHp: 0, atkSpeed: 0, hpRegen: 0, manaRegen: 0 };
         this.level = 1; this.xp = 0; this.skillPoints = 1;
         this.skillLevels = {}; // id de habilidad -> nivel (0 = drafteada pero sin aprender)
         this.talentBooks = 0; // libros de talento comprados (suben el precio del siguiente)
@@ -69,8 +77,8 @@ class Hero {
         this.attackRange = this.baseAttackRange;
         this.armor = this.baseArmor + agi * R.agi.armor + this.bonus.armor;
         this.magicResist = this.baseMagicResist + int * R.int.magicResist;
-        this.hpRegen = this.baseHpRegen + str * R.str.hpRegen + sumMod(this, 'hpRegen');
-        this.manaRegen = this.baseManaRegen + int * R.int.manaRegen + sumMod(this, 'manaRegen');
+        this.hpRegen = this.baseHpRegen + str * R.str.hpRegen + this.bonus.hpRegen;
+        this.manaRegen = this.baseManaRegen + int * R.int.manaRegen + this.bonus.manaRegen;
         this.projectileSpeed = this.baseProjectileSpeed;
         this.critChance = this.baseCritChance + agi * R.agi.critChance + this.bonus.critChance;
         this.evasion = this.baseEvasion;
@@ -106,8 +114,8 @@ class Hero {
     }
     skillForKey(k) { return (k && this.skills.find(s => this.keyBindings[s.id] === k)) || null; }
     regenTick(dt) {
-        this.hp = Math.min(this.maxHp, this.hp + this.hpRegen * dt);
-        this.mana = Math.min(this.maxMana, this.mana + this.manaRegen * dt);
+        this.hp = Math.min(this.maxHp, this.hp + effHpRegen(this) * dt);
+        this.mana = Math.min(this.maxMana, this.mana + effManaRegen(this) * dt);
     }
     isAlive() { return this.hp > 0; }
 }

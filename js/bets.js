@@ -14,7 +14,7 @@ const BET_PAYOUT = 2;
 const BACKING_BONUS = 0.25; // el ganador cobra el 25% de lo que le apostaron
 const AI_BET = { chance: 0.85, favoriteChance: 0.7, minPct: 0.1, maxPct: 0.35 };
 
-let duelPlan = null;   // { pairs, bye } sorteados en la previa (los usa startDuels)
+let duelPlan = null;   // { pairs, bye } sorteados en la previa (los usa startWave para armar el duelo)
 let currentBet = null; // { on, against, amount }: la apuesta del jugador en esta ronda
 let duelBets = [];     // todas las apuestas de la ronda: { bettor, on, against, amount } (IA y jugador)
 

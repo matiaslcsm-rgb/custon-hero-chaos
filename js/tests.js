@@ -478,7 +478,7 @@ test('Usar un Fragmento no reinicia el tiempo de preparación', () => {
     checkEq(phaseTimeLeft, 12, 'con el tiempo que le quedaba');
 });
 
-test('Magos (Inteligencia): +100% de amplificación de hechizo', () => {
+test('Magos (Inteligencia): amplificación de hechizo extra respecto a un no-mago', () => {
     const mage = new Hero({ ...HERO_TEMPLATES.AXE, primaryAttr: 'INT' });
     const warrior = new Hero(HERO_TEMPLATES.AXE);
     checkNear(mage.spellAmp - warrior.spellAmp, ATTRIBUTE_RULES.mageSpellAmp, 'amplificación extra');
@@ -578,15 +578,213 @@ test('Furia Química: el Ascenso sube la Inteligencia', () => {
     check(player.maxMana > mana0, 'y con ella el maná máximo');
 });
 
-test('Pacto de la Muerte: daño puro en área y cura lo que drena', () => {
+test('Sadista: cada baja da una carga de regeneración que se acumula y se renueva; una baja de héroe da 6 de una', () => {
     newGame('NECROMANCER');
-    const s = learn('NECROMANCER_REAP', 1);
-    const a = dummy({ hp: 9999, maxHp: 9999, armor: 50 }), b = dummy({ y: player.y + 1, hp: 9999, maxHp: 9999 });
+    const c = dummy({ hp: 1 });
+    const before = effHpRegen(player);
+    emit(player, 'onKill', { victim: c });
+    checkNear(effHpRegen(player) - before, 3, '1 carga = +3 regen. de vida/s (y otro tanto de maná)');
+    emit(player, 'onKill', { victim: c });
+    checkNear(effHpRegen(player) - before, 6, '2 cargas se acumulan');
+    const rival = dummy(); rival.isHero = true; // una baja "de héroe" da varias cargas de una
+    emit(player, 'onKill', { victim: rival });
+    checkNear(effHpRegen(player) - before, 3 * 6, 'tope de 6 cargas (la baja de héroe ya suma 6 de una)');
+});
+
+test('Pulso de Muerte: daño mágico en área a tu alrededor y te cura según lo que dañaste', () => {
+    newGame('NECROMANCER');
+    const s = learn('NECROMANCER_PULSE', 1);
+    const near = dummy({ hp: 9999, maxHp: 9999 });
+    const far = dummy({ x: player.x + 15, y: player.y, hp: 9999, maxHp: 9999 });
     player.hp = 1;
     s.cast(player);
-    const expected = Math.round(valueAt(s, 'baseDmg', 1) + player.int * valueAt(s, 'intRatio', 1));
-    checkEq(9999 - a.hp, expected, 'el daño puro ignora la armadura');
-    checkEq(player.hp, Math.min(player.maxHp, 1 + 2 * expected), 'cura el total drenado');
+    const expected = magicDmg(valueAt(s, 'baseDmg', 1) + player.int * valueAt(s, 'intRatio', 1));
+    checkEq(9999 - near.hp, expected, 'daño a un enemigo en el radio');
+    checkEq(far.hp, 9999, 'no llega a uno lejos');
+    checkEq(player.hp, Math.min(player.maxHp, 1 + Math.round(expected * valueAt(s, 'healPct', 1))), 'se cura según el daño hecho');
+});
+
+test('Manto Fantasma: inmune a físico y desarmado, pierde resistencia mágica y cura más; ralentiza al activarse', () => {
+    newGame('NECROMANCER');
+    const s = learn('NECROMANCER_SHROUD', 1);
+    const near = dummy({ hp: 9999, maxHp: 9999 });
+    const magicResist0 = effMagicResist(player);
+    player.hp = 1;
+    s.cast(player);
+    check(hasFlag(player, 'physicalImmune'), 'inmune a daño físico');
+    check(hasFlag(player, 'disarm'), 'desarmado');
+    checkNear(effMagicResist(player), magicResist0 - valueAt(s, 'magicResistPenalty', 1), 'pierde resistencia mágica');
+    const { dealt } = dealDamage(near, player, 100, 'physical');
+    checkEq(dealt, 0, 'el daño físico no le hace nada');
+    checkEq(player.hp, 1, 'vida sin cambios');
+    const healed = healUnit(player, 100);
+    checkNear(healed, Math.round(100 * (1 + valueAt(s, 'healingBonusPct', 1))), 'cura más mientras está espectral');
+    checkNear(effMoveMult(near), 1 - valueAt(s, 'slowPct', 1), 'ralentiza al activarse');
+});
+
+test('Guadaña del Segador: aturde y, al terminar, hace daño puro según la vida que falta (ejecuta si alcanza)', () => {
+    newGame('NECROMANCER');
+    const s = learn('NECROMANCER_REAP', 1);
+    const a = dummy({ hp: 500, maxHp: 1000, armor: 50 }); // le falta 500: con ratio 0.7 son 350, no alcanza a matarlo
+    s.cast(player);
+    check(hasFlag(a, 'stun'), 'aturdido de entrada');
+    checkEq(a.hp, 500, 'el daño todavía no se aplicó, se calcula al terminar el aturdimiento');
+    const hpRegen0 = player.hpRegen;
+    gameClock += valueAt(s, 'stunDuration', 1) + 0.1;
+    tickEffects(a, 0.016);
+    const expected = Math.round((1000 - 500) * valueAt(s, 'missingHpRatio', 1));
+    checkEq(500 - a.hp, expected, 'daño puro (ignora la armadura) según lo que le faltaba');
+    check(a.isAlive(), 'no le alcanzó para matarlo');
+    checkEq(player.hpRegen, hpRegen0, 'sin matarlo, no gana regeneración permanente');
+
+    a.hp = 0; // fuera de juego: si no, nearestEnemy lo sigue eligiendo a él (mismo lugar que el nuevo dummy)
+    const b = dummy({ hp: 50, maxHp: 200 }); // le falta 150: con ratio 0.7 son 105, más que sus 50 de vida
+    s.cast(player);
+    gameClock += valueAt(s, 'stunDuration', 1) + 0.1;
+    tickEffects(b, 0.016);
+    check(!b.isAlive(), 'con poca vida, lo ejecuta');
+    checkNear(player.hpRegen - hpRegen0, valueAt(s, 'hpRegenPerKill', 1), 'Ascenso: regeneración de vida permanente por la baja');
+});
+
+// Daño mágico esperado tras pasar por dealDamage: aplica la amplificación de hechizo del que lanza
+// (spellAmp) antes de redondear. Los dummy() no tienen resistencia mágica, así que no hace falta mitigar.
+function magicDmg(rawAmount) { return Math.round(rawAmount * (1 + effSpellAmp(player) / 100)); }
+
+test('Campo Estático: cada hechizo lanzado hace daño mágico a los enemigos cercanos, % de su vida actual', () => {
+    newGame('ZEUS');
+    const near = dummy({ hp: 1000, maxHp: 1000 }); // pegado al jugador, adentro del radio 4
+    const far = dummy({ x: player.x + 15, y: player.y, hp: 1000, maxHp: 1000 }); // bien lejos, afuera del radio
+    emit(player, 'onCast', { skill: null });
+    checkEq(1000 - near.hp, magicDmg(Math.max(player.innate.minDmg, 1000 * player.innate.pct)), 'daño a un enemigo cercano (% de su vida)');
+    checkEq(far.hp, 1000, 'no llega a un enemigo lejos del radio');
+});
+
+test('Rayo Arco: salta entre varios enemigos y hace el mismo daño en cada salto', () => {
+    newGame('ZEUS');
+    const s = learn('ZEUS_ARC', 1);
+    const a = dummy({ hp: 9999, maxHp: 9999 }), b = dummy({ x: a.x + 1, y: a.y, hp: 9999, maxHp: 9999 });
+    const far = dummy({ x: player.x + 15, y: player.y, hp: 9999, maxHp: 9999 }); // fuera del alcance del primer salto
+    s.cast(player);
+    const expected = magicDmg(valueAt(s, 'baseDmg', 1) + player.int * valueAt(s, 'intRatio', 1));
+    checkEq(9999 - a.hp, expected, 'daño al primero (el más cercano)');
+    checkEq(9999 - b.hp, expected, 'daño al segundo (salta hacia el más cercano al anterior)');
+    checkEq(far.hp, 9999, 'no llega a uno lejos de la cadena');
+});
+
+test('Rayo Relámpago: proyectil real que viaja y aturde; si apuntás a un punto vacío, no le pega a nadie', () => {
+    newGame('ZEUS');
+    const s = learn('ZEUS_BOLT', 1);
+    const c = dummy({ hp: 9999, maxHp: 9999 }); // adyacente: sin aimPoint, cast() cae en nearestEnemy como destino
+    s.cast(player);
+    checkEq(player.arena.projectiles.length, 1, 'dispara un proyectil (no daña al instante)');
+    checkEq(c.hp, 9999, 'no le pega apenas se lanza, tiene que viajar');
+    for (let i = 0; i < 30 && player.arena.projectiles.length; i++) updateProjectiles(player.arena, 0.05);
+    checkEq(player.arena.projectiles.length, 0, 'el proyectil llega y se consume');
+    const expected = magicDmg(valueAt(s, 'baseDmg', 1) + player.int * valueAt(s, 'intRatio', 1));
+    checkEq(9999 - c.hp, expected, 'daño al llegar');
+    check(hasFlag(c, 'stun'), 'aturdido');
+
+    // Apuntando a un punto vacío (lejos de cualquier enemigo, fuera del camino del rayo): no le pega a nadie.
+    const off = dummy({ x: player.x, y: player.y + 5, hp: 9999, maxHp: 9999 }); // lejos de la línea de tiro
+    player.aimPoint = { x: player.x + 5, y: player.y };
+    s.cast(player);
+    player.aimPoint = null;
+    for (let i = 0; i < 30 && player.arena.projectiles.length; i++) updateProjectiles(player.arena, 0.05);
+    checkEq(off.hp, 9999, 'apuntar a un punto vacío no le pega a nadie');
+});
+
+test('Nimbo de Tormenta: daño en área alrededor de Zeus', () => {
+    newGame('ZEUS');
+    const s = learn('ZEUS_NIMBUS', 1);
+    const near = dummy({ hp: 9999, maxHp: 9999 });
+    const far = dummy({ x: player.x + 15, y: player.y, hp: 9999, maxHp: 9999 });
+    s.cast(player);
+    const expected = magicDmg(valueAt(s, 'baseDmg', 1) + player.int * valueAt(s, 'intRatio', 1));
+    checkEq(9999 - near.hp, expected, 'daño a un enemigo en el radio');
+    checkEq(far.hp, 9999, 'no llega a uno lejos');
+});
+
+test('Ira del Dios del Trueno: golpea a TODOS los enemigos vivos, sin importar la distancia', () => {
+    newGame('ZEUS');
+    const s = learn('ZEUS_WRATH', 1);
+    const near = dummy({ hp: 9999, maxHp: 9999 });
+    const far = dummy({ x: player.x + 15, y: player.y, hp: 9999, maxHp: 9999 });
+    const dead = dummy({ hp: 0, maxHp: 9999 });
+    // El daño se calcula una sola vez al lanzar; medirlo antes del cast, porque golpea también a los Grunts
+    // reales de la oleada (mueren y su baja escala la Inteligencia de Zeus a mitad del propio lanzamiento).
+    const expected = magicDmg(valueAt(s, 'baseDmg', 1) + player.int * valueAt(s, 'intRatio', 1));
+    s.cast(player);
+    checkEq(9999 - near.hp, expected, 'daño al cercano');
+    checkEq(9999 - far.hp, expected, 'daño al lejano (sin límite de rango)');
+    checkEq(dead.hp, 0, 'no revive al que ya estaba muerto');
+});
+
+// El resto de los nukes de un solo objetivo del roster, convertidos a pointTarget (ver DISEÑO.md §9 quater):
+// mismo patrón que Rayo Relámpago, viajan de verdad y pueden fallar si apuntás a un punto vacío.
+test('Proyectil Arcano: proyectil de punto de efecto con área; si apuntás mal, no le pega a nadie', () => {
+    newGame('ARCANIST');
+    const s = learn('ARCANIST_BOLT', 1);
+    check(s.pointTarget, 'está marcado como punto de efecto');
+    const a = dummy({ hp: 9999, maxHp: 9999 }); // adyacente: sin aimPoint, cast() cae en nearestEnemy
+    const b = dummy({ x: a.x + 1, y: a.y, hp: 9999, maxHp: 9999 }); // dentro del radio de a
+    s.cast(player);
+    checkEq(a.hp, 9999, 'no daña al instante, tiene que viajar');
+    for (let i = 0; i < 30 && player.arena.projectiles.length; i++) updateProjectiles(player.arena, 0.05);
+    const expected = magicDmg(valueAt(s, 'baseDmg', 1) + player.int * valueAt(s, 'intRatio', 1));
+    checkEq(9999 - a.hp, expected, 'daño al del punto');
+    checkEq(9999 - b.hp, expected, 'y a quien estaba en el área alrededor');
+
+    a.hp = 0; b.hp = 0; // fuera de juego: que no lo vuelva a agarrar el segundo disparo, que pasa por su línea
+    const off = dummy({ x: player.x, y: player.y + 5, hp: 9999, maxHp: 9999 });
+    player.aimPoint = { x: player.x + 5, y: player.y };
+    s.cast(player);
+    player.aimPoint = null;
+    for (let i = 0; i < 30 && player.arena.projectiles.length; i++) updateProjectiles(player.arena, 0.05);
+    checkEq(off.hp, 9999, 'apuntar a un punto vacío no le pega a nadie');
+});
+
+test('Explosión Helada: proyectil de punto de efecto que aturde en área; si apuntás mal, no aturde a nadie', () => {
+    newGame('FROSTWITCH');
+    const s = learn('FROSTWITCH_BLAST', 1);
+    check(s.pointTarget, 'está marcado como punto de efecto');
+    const c = dummy({ hp: 9999, maxHp: 9999 });
+    s.cast(player);
+    checkEq(c.hp, 9999, 'no daña al instante, tiene que viajar');
+    for (let i = 0; i < 30 && player.arena.projectiles.length; i++) updateProjectiles(player.arena, 0.05);
+    const expected = magicDmg(valueAt(s, 'baseDmg', 1) + player.int * valueAt(s, 'intRatio', 1));
+    checkEq(9999 - c.hp, expected, 'daño al llegar');
+    check(hasFlag(c, 'stun'), 'aturdido');
+
+    c.hp = 0; // fuera de juego: que no lo vuelva a agarrar el segundo disparo, que pasa por su línea
+    const off = dummy({ x: player.x, y: player.y + 5, hp: 9999, maxHp: 9999 });
+    player.aimPoint = { x: player.x + 5, y: player.y };
+    s.cast(player);
+    player.aimPoint = null;
+    for (let i = 0; i < 30 && player.arena.projectiles.length; i++) updateProjectiles(player.arena, 0.05);
+    checkEq(off.hp, 9999, 'apuntar a un punto vacío no le pega a nadie');
+    check(!hasFlag(off, 'stun'), 'y sin daño no hay aturdimiento');
+});
+
+test('Mezcla Inestable: proyectil de punto de efecto que aturde; si falla, no aturde a nadie', () => {
+    newGame('ALCHEMIST');
+    const s = learn('ALCHEMIST_BREW', 1);
+    check(s.pointTarget, 'está marcado como punto de efecto');
+    const c = dummy({ hp: 9999, maxHp: 9999 });
+    s.cast(player);
+    checkEq(c.hp, 9999, 'no daña al instante, tiene que viajar');
+    for (let i = 0; i < 30 && player.arena.projectiles.length; i++) updateProjectiles(player.arena, 0.05);
+    const expected = magicDmg(valueAt(s, 'baseDmg', 1) + player.int * valueAt(s, 'intRatio', 1));
+    checkEq(9999 - c.hp, expected, 'daño al llegar');
+    check(hasFlag(c, 'stun'), 'aturdido');
+
+    c.hp = 0; // fuera de juego: que no lo vuelva a agarrar el segundo disparo, que pasa por su línea
+    const off = dummy({ x: player.x, y: player.y + 5, hp: 9999, maxHp: 9999 });
+    player.aimPoint = { x: player.x + 5, y: player.y };
+    s.cast(player);
+    player.aimPoint = null;
+    for (let i = 0; i < 30 && player.arena.projectiles.length; i++) updateProjectiles(player.arena, 0.05);
+    checkEq(off.hp, 9999, 'apuntar a un punto vacío no le pega a nadie');
+    check(!hasFlag(off, 'stun'), 'y sin daño no hay aturdimiento');
 });
 
 // ============================================================ CREEPS E ÍTEMS DE CONTRA
@@ -929,15 +1127,18 @@ test('Tormenta Cinética: onda cada N ataques y +vel. de ataque permanente por b
 
 test('Área de Descanso: al terminar la oleada vas ahí y volvés con vida, maná completos y sin mejoras temporales', () => {
     newGame('AXE');
+    const giro = learn('AXE_GIRO', 1);
     waveNumber = 1;
     creeps.forEach(c => { c.hp = 0; });
     player.hp = 5; player.mana = 0;
+    player.cooldowns[giro.id] = 20; // a mitad de recargar, como si lo hubiese lanzado justo antes de ganar
     addEffect(player, { id: 'TEMP', duration: 99, mods: { atkPct: 1 } });
     updateWave(0.016); // su arena quedó limpia: terminan las oleadas
     skipDuels();
     check(player.inRest, 'está en el Área de Descanso');
     checkEq(player.hp, player.maxHp, 'vida llena');
     check(!getEffect(player, 'TEMP'), 'sin mejoras temporales');
+    check(player.cooldowns[giro.id] > 19, 'en el Área de Descanso el enfriamiento no se toca'); // salvo el propio frame en que termina la oleada
     if (gameState === 'DRAFT') learnSkill(currentDraft.options[0]);
     player.hp = 5; player.x = 0;
     startWave();
@@ -945,6 +1146,7 @@ test('Área de Descanso: al terminar la oleada vas ahí y volvés con vida, man�
     checkEq(player.hp, player.maxHp, 'con la vida llena');
     checkEq(player.mana, player.maxMana, 'y el maná lleno');
     checkEq(`${player.x},${player.y}`, `${WAVE_START.x},${WAVE_START.y}`, 'en el punto de inicio');
+    checkEq(player.cooldowns[giro.id], 0, 'al arrancar la ronda siguiente, los enfriamientos se reinician');
 });
 
 test('IA: con el inventario lleno vende un contra que no sirve para comprar el que necesita', () => {
@@ -1503,6 +1705,28 @@ test('Elección de héroe: 3 opciones propias + "al azar" (uno que no está entr
     for (let i = 1; i < MAX_HEROES; i++) check(heroOffers[i].every(t => !heroOffers[0].includes(t)), 'tus opciones son solo tuyas');
 });
 
+test('Elegir cualquier héroe: el panel muestra los 11 (no solo tus 3 opciones) y penaliza el oro inicial', () => {
+    resetGame();
+    startHeroPick();
+    const totalHeroes = Object.keys(HERO_TEMPLATES).length;
+    openHeroDrawer();
+    check(document.getElementById('hero-any-drawer').classList.contains('open'), 'el panel se abre');
+    checkEq(document.querySelectorAll('#hero-any-options .skill-card').length, totalHeroes, 'una carta por cada héroe del roster');
+    // Elegir uno que no está entre las 3 opciones que te tocaron (si hay alguno disponible), haciendo clic
+    // en su carta real (no llamando a selectHero directo) para probar el cierre del panel también.
+    const notOffered = Object.values(HERO_TEMPLATES).find(t => !heroOffers[0].includes(t)) || Object.values(HERO_TEMPLATES)[0];
+    const card = [...document.querySelectorAll('#hero-any-options .skill-card')].find(c => c.textContent.includes(notOffered.name));
+    card.click();
+    checkEq(player.key, notOffered.key, 'te deja elegir uno que no estaba en tus opciones');
+    checkEq(player.gold, GOLD_PENALTY_FREE_PICK, 'arranca con la penalización de oro');
+    check(!document.getElementById('hero-any-drawer').classList.contains('open'), 'el panel se cierra al elegir');
+
+    resetGame();
+    startHeroPick();
+    document.querySelectorAll('#hero-options .skill-card')[0].click();
+    checkEq(player.gold, 100, 'elegir de las 3 opciones normales no penaliza');
+});
+
 test('Elección de héroe: los rivales eligen de sus opciones y ningún héroe se repite', () => {
     for (let n = 0; n < 10; n++) {
         resetGame();
@@ -1594,6 +1818,20 @@ test('Apuntar con el mouse: la habilidad va al enemigo más cercano al cursor (d
     player.mana = player.maxMana;
     check(castAt(player, skill, far.x, far.y), 'se lanzó');
     check(far.hp < 5000 && near.hp === 5000, 'le pegó al del cursor, no al más cercano');
+});
+
+test('pointTarget (proyectil de habilidad): a diferencia de nearestEnemy, si apuntás mal con el mouse no le pega a nadie', () => {
+    newGame('ZEUS');
+    const skill = learn('ZEUS_BOLT', 1);
+    check(isAimedSkill(skill), 'se apunta con el mouse');
+    check(skill.pointTarget, 'está marcada como punto de efecto');
+    // A más de 4 del jugador para que no lo alcance de paso el innato Campo Estático (radio 4 alrededor tuyo).
+    const c = dummy({ hp: 9999, maxHp: 9999 });
+    c.x = player.x; c.y = player.y + 5;
+    // Clic bien lejos del enemigo y fuera de su línea de tiro (con nearestEnemy pegaría igual; acá, no).
+    check(castAt(player, skill, player.x + 5, player.y), 'se lanzó igual (había rango para el punto)');
+    for (let i = 0; i < 30 && player.arena.projectiles.length; i++) updateProjectiles(player.arena, 0.05);
+    checkEq(c.hp, 9999, 'clic errado, no le pegó a nadie');
 });
 
 test('Clic derecho: el héroe camina hasta el destino; el teclado lo cancela', () => {

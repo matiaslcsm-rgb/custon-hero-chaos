@@ -41,14 +41,33 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 | Draft de habilidades en ventana emergente (cartas con el ícono y color del héroe de origen) | ✅ |
 | Cuerpos físicos: pasar por la casilla de otro frena según su tamaño (+25/75/150%); `phasing` atraviesa | ✅ |
 | Regla: al menos 1 pasiva entre las 3 nativas (Axe, Sniper, Asesino y Vampiro convirtieron una activa) | ✅ |
+| Héroe 11: Zeus `Z` (fiel a Dota 2, pedido del usuario) + `mageSpellAmp` bajado de 100% a 25% (se saca del escalado, pasa a ítems) | ✅ (sin medir duelos) |
+| Elegir cualquier héroe: panel desplegable desde la izquierda en la elección de héroe, los 11 sin depender de las 3 opciones al azar; arrancás con 0g en vez de 100g. Grilla de retratos por atributo (Fuerza/Agilidad/Inteligencia), al estilo de la ventana de "todos los héroes" de Dota 2 (pedido del usuario 2026-09-28); nombre, rol y descripción quedan en el tooltip | ✅ |
+| Proyectiles de habilidad (`pointTarget`): viajan de verdad al punto donde clickeaste, con velocidad y radio propios, y pueden fallar si apuntás mal (ver DISEÑO.md §9 quater). Convertidos: Rayo Relámpago (Zeus), Proyectil Arcano (Arcanista), Explosión Helada (Bruja del Hielo), Mezcla Inestable (Alquimista) | ✅ (falta el resto del roster, ver abajo) |
+| Enfriamientos reiniciados al volver a pelear (oleada nueva o jefe de ronda), no solo en duelos como antes; mientras esperás en el Área de Descanso no se tocan (ver DISEÑO.md §9 quinquies, pedido del usuario 2026-09-28) | ✅ |
+| Rework del Nigromante fiel a Necrophos de Dota 2 (Sadista, Pulso de Muerte, Aura que Detiene el Corazón, Manto Fantasma, Guadaña del Segador — ejecuta según vida faltante); sumó las flags `physicalImmune`/`disarm` y corrigió que `hpRegen`/`manaRegen` no reflejaban efectos temporales (ver DISEÑO.md §9 sexies, pedido del usuario 2026-09-28) | ✅ (sin medir balance) |
 | Duelo simultáneo con las oleadas de los demás; enfriamientos en el descanso; contador central con pitidos; cartel de apuestas; nombres de jugadores; sonidos propios (`sounds/`) | ✅ |
 
 ## Pendientes y temas abiertos
 - **En curso:** 3 héroes de Agilidad del usuario, de a uno y midiendo cada uno: Danzante ✅ → **Chakravin `Y`** (proyectiles
   de habilidad que vuelven + creep Guardián de Hierro) → **Trampero `P`** (zonas en el piso + creep Saltador).
+- **Proyectiles de habilidad:** convertidos los nukes de un solo objetivo de Zeus, Arcanista, Bruja del Hielo y
+  Alquimista (el Nigromante perdió el suyo en el rework a Necrophos: Pulso de Muerte pasó a ser un área centrada en
+  uno mismo, no se apunta). Quedan afuera a propósito: Distorsión Espacial del Sabio del Vacío (es un blink, no un
+  proyectil). Falta: los del resto del roster (Danzante, Asesino, Vampiro, Sniper) si tiene sentido, y variar la
+  forma del proyectil por habilidad (`vfx.shape`), no solo el color. Ver DISEÑO.md §9 quater.
+- **Ítems:** lista de candidatos sin implementar en DISEÑO.md §7 (Orquídea, Mariposa, Tarrasque, Núcleo de Octarine y más;
+  varios piden mecánica nueva: `silenced`, `cooldownReduction`, robo de vida mágico, `spellBlock`, `cyclone`). El usuario
+  pidió tener la lista lista y decidir después cómo se van sumando.
+- **Balance del recorte de `mageSpellAmp`** (100%→25%, 2026-09-28): medido en PvE con `simulateGame` (A/B controlado,
+  n=5): el tiempo para limpiar 5 oleadas con jugador invulnerable **casi no cambia** (Arcanista 144 vs 145, Bruja del
+  Hielo 158 vs 154, con 60% vs 100%). Ojo: la comparación contra la marca vieja de este documento (Arcanista 79s) estaba
+  confundida — el juego se puso más difícil en general desde esa medición, por otros cambios. **Sin medir:** el impacto
+  en duelos 1v1, donde el nuke mágico de golpe pesa más que en una oleada larga. Medir con `simulateGame(i, false, 60)`.
 - **Después:** balancear la supervivencia contra creeps en el formato de un duelo por ronda (gana el último en pie: el Sniper
   ganó 8 de 14 partidas simuladas y el Nigromante 4). Medir con `simulateGame(i, false, 60)` (~31 rondas por partida).
-- **Balance de duelos:** Vampiro (17%) y Nigromante (24%) siguen abajo; Alquimista, Axe y Bruja ~70% (ver DISEÑO.md §9).
+- **Balance de duelos:** Vampiro (17%) sigue abajo; Alquimista, Axe y Bruja ~70% (ver DISEÑO.md §9). El Nigromante
+  tenía 17-24% con el kit viejo, pero se reescribió entero (§9 sexies) — falta medir el nuevo.
 - **Modo debug** (propuesto): panel para probar situaciones (ronda, oro, nivel, ítems, creeps, duelos, velocidad, modo dios).
 - Preguntas abiertas de diseño: DISEÑO.md §11 (probabilidad de definitivas en el draft, precio del Fragmento…).
 - Autor de los commits: el email de git (comusanmiguel24@gmail.com) está asociado a la cuenta `comusanmiguel24-bit`, no a
@@ -58,7 +77,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **Idioma:** español rioplatense (voseo), en el código, los comentarios, los textos del juego y los commits.
 - **Decisiones de diseño:** se consultan con opciones y una recomendada, idealmente con números medidos. Lo que se decide
   se anota en DISEÑO.md (secciones de la fase y "Decisiones tomadas").
-- **Cada cambio:** pruebas automáticas (`tests.html`, hoy **134**) → commit en git → push a GitHub solo cuando el usuario lo pide.
+- **Cada cambio:** pruebas automáticas (`tests.html`, hoy **157**) → commit en git → push a GitHub solo cuando el usuario lo pide.
 - **Commits:** mensaje en español que explica el porqué; terminan con `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 - **Héroes nuevos con otra IA:** prompt en [`prompt-heroes.md`](prompt-heroes.md); lo que devuelva se revisa contra el motor
   (pasivas, efectos por segundo con `everyInterval`, descripciones que coincidan con el código) antes de integrarlo.
@@ -66,9 +85,13 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 ## Cómo probar y medir
 - **Pruebas:** abrir `tests.html` (o `index.html?test`). Cada mecánica nueva suma su prueba en `js/tests.js`.
 - **Probar desde el navegador integrado de Claude:** servir la carpeta con un servidor **sin caché** (el navegador guardaba
-  versiones viejas de los `.js` con `python -m http.server`). Script usado: `http.server` con cabecera
-  `Cache-Control: no-store`, puerto 8766. El panel del navegador puede estar oculto y frenar `requestAnimationFrame`: para
-  probar en "tiempo real" se reproduce el cuerpo de `loop()` a mano a 60 cuadros por segundo.
+  versiones viejas de los `.js`). En esta máquina se instalaron **Node.js LTS** y **GitHub CLI (`gh`)** por `winget`
+  (2026-09-28, con permiso del usuario); en una sesión de terminal nueva deberían estar en el PATH solos. Igual queda
+  `serve-nocache.ps1` (raíz del repo, servidor mínimo en PowerShell con `Cache-Control: no-store`, puerto 8766) para
+  cuando no haya Node a mano: `powershell -ExecutionPolicy Bypass -File serve-nocache.ps1` (en segundo plano) y abrir
+  `http://localhost:8766/index.html` (o `?test`). Con Node instalado, `npx http-server -c-1` hace lo mismo. El panel del
+  navegador puede estar oculto y frenar `requestAnimationFrame`: para probar en "tiempo real" se reproduce el cuerpo de
+  `loop()` a mano a 60 cuadros por segundo.
 - **Medir balance:** `simulateGame(índiceDeHéroe, godMode, rondas)` (en tests.js) juega partidas completas con la IA.
   Para diagnosticar, se registran muertes/duelos envolviendo funciones (`resolveDuel`, `handlePlayerDeath`, `endRound`) y se
   prueba **cambiando una cosa por vez** (ablación). Con 8-16 partidas por variante hay bastante ruido: repetir antes de concluir.

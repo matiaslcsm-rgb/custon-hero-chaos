@@ -46,6 +46,46 @@ function startHeroPick() {
     log(`🎲 Elegí tu héroe entre tus ${HERO_PICK_OPTIONS} opciones o probá suerte con uno al azar.`);
 }
 
+// --- ELEGIR CUALQUIER HÉROE (panel que se despliega desde la izquierda) ---
+// Bypasea las 3 opciones al azar: el jugador elige cualquiera de los HERO_TEMPLATES. A cambio arranca sin oro
+// (ver GOLD_PENALTY_FREE_PICK en game.js). Solo disponible en la fase de elección de héroe (gameState HERO_SELECT).
+function openHeroDrawer() {
+    renderHeroDrawer();
+    document.getElementById('hero-any-backdrop').style.display = 'block';
+    document.getElementById('hero-any-drawer').classList.add('open'); // el CSS ya lo esconde con transform, no hace falta display
+}
+function closeHeroDrawer() {
+    document.getElementById('hero-any-drawer').classList.remove('open');
+    document.getElementById('hero-any-backdrop').style.display = 'none';
+}
+// Grilla de retratos por atributo, al estilo de la ventana de "todos los héroes" de Dota 2: un ícono chico
+// por héroe agrupado en columnas por atributo, en vez de tarjetas grandes con texto. El nombre, rol y
+// descripción quedan en el title (tooltip nativo al pasar el mouse) para no perder esa info.
+function renderHeroDrawer() {
+    const container = document.getElementById('hero-any-options');
+    container.innerHTML = '';
+    Object.entries(ATTR_INFO).forEach(([attr, info]) => {
+        const group = Object.values(HERO_TEMPLATES).filter(t => t.primaryAttr === attr);
+        if (!group.length) return;
+        const head = document.createElement('div');
+        head.className = 'shop-category attr-head'; head.style.color = info.color; head.style.borderColor = info.color;
+        head.textContent = info.label;
+        container.appendChild(head);
+        const grid = document.createElement('div');
+        grid.className = 'hero-grid';
+        group.forEach(t => {
+            const card = document.createElement('div');
+            card.className = 'skill-card hero-grid-card';
+            card.style.border = `2px solid ${info.color}`;
+            card.title = `${t.name} — ${t.role}\n${t.description}`;
+            card.innerHTML = `${heroIconHtml(t, 'lg')}<span style="color:${info.color}">${t.name}</span>`;
+            card.onclick = () => { closeHeroDrawer(); selectHero(t, true); };
+            grid.appendChild(card);
+        });
+        container.appendChild(grid);
+    });
+}
+
 // Los rivales eligen de sus opciones, sin repetir ningún héroe ya elegido.
 function pickRivalTemplates(playerTemplate) {
     const offers = heroOffers || dealHeroOffers();
@@ -71,6 +111,7 @@ const TUTORIAL_PAGES = [
             ${tutCard('🏆', 'Cómo se gana', 'Quedando último en pie. Los creeps se hacen más fuertes cada ronda, así que la partida siempre termina.')}
             ${tutCard('⭐', 'Puntos', 'Ganar un duelo da <b>+3</b>; superar la oleada sin morir, <b>+1</b>. El oro desempata.')}
             ${tutCard('🧩', 'Tu kit', 'Armás 4 habilidades mezclando las de cualquier héroe. Cada partida es distinta.')}
+            ${tutCard('🔓', 'Elegir a mano', 'Si no te convencen tus 3 opciones, el botón "Elegir cualquier héroe" te deja elegir cualquiera de los 11 — pero arrancás sin oro (en vez de 100g).')}
         </div>` },
     { icon: '🔁', color: '#00b4d8', title: 'Una ronda', body: `
         <div class="tut-steps">
