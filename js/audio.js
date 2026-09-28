@@ -75,13 +75,34 @@ const SFX = {
     duel: () => { tone(260, 260, 0.2, 'sawtooth', 0.12); tone(390, 390, 0.3, 'sawtooth', 0.12, 0.15); },
     boss: () => { tone(90, 60, 0.9, 'sawtooth', 0.2); noise(0.8, 300, 0.2); },
     win: () => [659, 784, 1047].forEach((f, i) => tone(f, f, 0.2, 'triangle', 0.14, i * 0.1)),
+    tick: () => tone(880, 880, 0.07, 'square', 0.1),                       // cuenta regresiva: últimos 5 segundos
+    tickLast: () => tone(1320, 1320, 0.18, 'square', 0.12),                // último segundo
+    betWin: () => { [784, 988, 1175, 1568].forEach((f, i) => tone(f, f, 0.12, 'square', 0.08, i * 0.07)); tone(1568, 1568, 0.3, 'triangle', 0.1, 0.3); },
     lose: () => [392, 330, 262].forEach((f, i) => tone(f, f * 0.98, 0.25, 'triangle', 0.14, i * 0.12))
 };
 
+// Sonidos propios (archivos): si un nombre está en SOUND_FILES (js/data/sounds.js), suena el archivo en vez del
+// sintetizado. Si el archivo no carga, vuelve al sintetizado.
+const soundFileCache = {};
+function playSoundFile(name) {
+    const path = typeof SOUND_FILES !== 'undefined' && SOUND_FILES[name];
+    if (!path || soundFileCache[name] === false) return false;
+    if (!soundFileCache[name]) {
+        const audio = new Audio(path);
+        audio.addEventListener('error', () => { soundFileCache[name] = false; });
+        soundFileCache[name] = audio;
+    }
+    const clip = soundFileCache[name].cloneNode();
+    clip.volume = Math.min(1, AUDIO.volume * 2 * ((typeof SOUND_VOLUME !== 'undefined' && SOUND_VOLUME[name]) || 1));
+    clip.play().catch(() => { /* el navegador todavía no dejó reproducir */ });
+    return true;
+}
+
 function sfx(name) {
-    if (!audioCtx || !soundOn || !SFX[name]) return;
+    if (!audioCtx || !soundOn) return;
     const now = audioCtx.currentTime, gap = AUDIO.minGap[name] || 0.03;
     if (lastSfx[name] && now - lastSfx[name] < gap) return;
     lastSfx[name] = now;
+    if (playSoundFile(name) || !SFX[name]) return;
     try { SFX[name](); } catch (e) { /* un sonido que falla no rompe el juego */ }
 }

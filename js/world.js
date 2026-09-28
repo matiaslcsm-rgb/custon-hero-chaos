@@ -33,12 +33,29 @@ function followPlayer() {
 }
 function viewArena() { const h = viewedHero || player; return h ? h.arena : null; }
 
+// Nombres de los jugadores bot (se reparten al azar, sin repetir en la partida).
+const BOT_NAMES = ['Tano', 'Pocho', 'Colo', 'Flaco', 'Chino', 'Gringo', 'Ruso', 'Tincho', 'Pato', 'Nacho', 'Juanchi', 'Toto',
+    'Lolo', 'Fede', 'Cata', 'Luli', 'Sofi', 'Maru', 'Rocío', 'Meli'];
+
+// Tu nombre (se escribe en el menú y se recuerda entre partidas).
+function playerName() {
+    let name = '';
+    try { name = (localStorage.getItem('chc-name') || '').trim(); } catch (e) { /* sin almacenamiento */ }
+    return name || 'Vos';
+}
+function setPlayerName(name) {
+    try { localStorage.setItem('chc-name', name.trim().slice(0, 14)); } catch (e) { /* no se guarda */ }
+}
+
 // Crea los rivales: cada uno elige entre sus opciones de la fase de elección (ver menu.js), sin repetir héroes.
+// Cada bot tiene un nombre de jugador: "Axe (Tano)".
 function createRivals(playerTemplate) {
+    const names = shuffle(BOT_NAMES.filter(n => n !== playerName()));
     pickRivalTemplates(playerTemplate).forEach((template, i) => {
         const rival = new Hero(template);
         rival.isAI = true;
-        rival.displayName = `${rival.name} (IA ${i + 1})`;
+        rival.ownerName = names[i % names.length];
+        rival.displayName = `${rival.name} (${rival.ownerName})`;
         heroes.push(rival);
     });
 }

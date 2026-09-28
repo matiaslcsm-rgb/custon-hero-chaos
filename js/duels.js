@@ -1,4 +1,4 @@
-// Duelos 1v1: UNO por ronda (desde la ronda 5), después de las oleadas; los demás miran y apuestan. Reglas: DISEÑO.md §9.
+// Duelos 1v1: UNO por ronda (desde la ronda 5), al mismo tiempo que las oleadas de los demás (que antes apuestan). Reglas: DISEÑO.md §9.
 //
 //   Parejas al azar entre los héroes en juego, evitando repetir el rival de la ronda anterior; si son impares,
 //   uno descansa. Cada pareja pelea en su propia arena ('duel'), todas en paralelo.
@@ -58,10 +58,11 @@ function pickDuelPair(list = aliveHeroes()) {
 }
 function duelPlanOfRound() { const pair = pickDuelPair(); return { pairs: pair ? [pair] : [], bye: null }; }
 
-function startDuels(plan = duelPlanOfRound()) {
-    gameState = 'DUEL';
+// Arma la arena del duelo de la ronda (se pelea al mismo tiempo que las oleadas de los demás, ver startWave).
+// Al empezar: vida y maná llenos, sin mejoras temporales y con los enfriamientos reiniciados.
+function makeDuelArenas(plan) {
     const { pairs, bye } = plan;
-    arenas = pairs.map(([a, b]) => {
+    const list = pairs.map(([a, b]) => {
         const arena = makeArena('duel', [a, b]);
         [a, b].forEach((h, i) => {
             restoreHero(h);
@@ -75,15 +76,7 @@ function startDuels(plan = duelPlanOfRound()) {
     });
     if (bye) bye.arena = null;
     if (pairs.length) lastDuelPair = pairs[0].slice();
-    // La cámara sigue a tu héroe aunque no pelees (el 🔥 del ranking marca a los duelistas; con un clic mirás el duelo)
-    followPlayer();
-    setStateText(`DUELO · RONDA ${waveNumber}`);
-    sfx('duel');
-    const mine = arenas.find(a => a.heroes.includes(player));
-    const rival = mine ? mine.heroes.find(h => h !== player) : null;
-    log(`⚔️ ¡Duelo de la ronda! ${pairs.map(([a, b]) => `${a.displayName} vs ${b.displayName}`).join(' · ')}. ` +
-        (rival ? `Te toca a vos contra ${rival.displayName}.` : 'Mirás el duelo desde la sala.'));
-    if (!arenas.length) onDuelsDone();
+    return list;
 }
 
 // Resuelve un duelo. Los mensajes de resultado se anuncian siempre.

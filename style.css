@@ -424,6 +424,29 @@ kbd { background: #2a2e3a; border: 1px solid #555; border-bottom-width: 3px; pad
 /* Ventana de apuestas: un duelo */
 #bet-container .modal-box { max-width: 640px; }
 
+/* Contador grande arriba al centro (por encima de las ventanas) */
+#center-timer { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 950; pointer-events: none; text-align: center;
+    background: rgba(12, 14, 18, 0.88); border: 2px solid #00b4d8; padding: 4px 18px; min-width: 120px; }
+#center-timer .ct-label { font-size: 0.72rem; color: #8ecae6; text-transform: uppercase; letter-spacing: 1px; }
+#center-timer .ct-time { font-size: 2rem; font-weight: bold; color: #fff; line-height: 1.1; }
+#center-timer.small { border-color: #444; padding: 3px 12px; }
+#center-timer.small .ct-time { font-size: 1rem; color: #ffd166; }
+#center-timer.urgent { border-color: #ff477e; animation: ct-pulse 0.5s ease-in-out infinite alternate; }
+#center-timer.urgent .ct-time { color: #ff477e; }
+@keyframes ct-pulse { from { transform: translateX(-50%) scale(1); } to { transform: translateX(-50%) scale(1.08); } }
+
+/* Cartel de apuestas ganadas: cruza la pantalla de derecha a izquierda */
+#bet-banner { position: fixed; top: 32%; left: 0; width: 100%; height: 0; z-index: 940; pointer-events: none; overflow: visible; }
+.bet-banner-line { position: absolute; left: 0; white-space: nowrap; font-size: 1.35rem; font-weight: bold; color: #ffd166;
+    text-shadow: 0 0 6px #000, 2px 2px 0 #000; animation: bet-banner-move 9s linear forwards;
+    background: rgba(10, 12, 16, 0.75); border-top: 2px solid #ffd166; border-bottom: 2px solid #ffd166; padding: 6px 16px; }
+.bet-banner-line .bb-entry { margin-left: 28px; color: #fff; display: inline-flex; align-items: center; gap: 6px; }
+.bet-banner-line .bb-entry b { color: #06d6a0; }
+.bet-banner-line .bb-entry.you { color: #00f5d4; }
+@keyframes bet-banner-move { from { transform: translateX(100vw); } to { transform: translateX(-100%); } }
+.name-field { display: flex; align-items: center; gap: 8px; margin: 8px 0; font-size: 0.85rem; color: #8ecae6; }
+.name-field input { flex: 1; background: #11141a; color: #fff; border: 1px solid #444; padding: 4px 6px; font-family: inherit; }
+
 /* Ventana del draft: cartas como en la elección de héroe (ícono y color del héroe de origen) */
 .draft-box { border-color: #00b4d8; }
 .draft-box .modal-head h3 { color: #00f5d4; }
@@ -465,3 +488,6 @@ kbd { background: #2a2e3a; border: 1px solid #555; border-bottom-width: 3px; pad
 #inventory-panel .destiny-row > span { flex: 1; }
 #inventory-panel button { background: #2a2e3a; color: #ffd166; border: 1px solid #555; font-family: inherit; font-size: 0.72rem; padding: 2px 8px; cursor: pointer; }
 #inventory-panel button:hover { border-color: #ffd166; }
+
+/* El tiempo se muestra en el contador grande del centro (#center-timer) */
+#phase-timer { display: none; }

@@ -14,6 +14,7 @@ document.getElementById('map-toggle').onclick = toggleBigMap;
 document.getElementById('shop-container').onclick = e => { if (e.target.id === 'shop-container') closeShop(); };
 window.addEventListener('resize', applyMapSize);
 document.getElementById('start-game-btn').onclick = startHeroPick;
+{ const input = document.getElementById('player-name'); input.value = playerName() === 'Vos' ? '' : playerName(); input.oninput = () => setPlayerName(input.value); }
 document.getElementById('menu-tutorial-btn').onclick = () => openTutorial();
 document.getElementById('tutorial-close').onclick = closeTutorial;
 document.getElementById('tutorial-prev').onclick = () => tutorialStep(-1);

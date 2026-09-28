@@ -457,6 +457,21 @@ Elegido: **cuerpo blando** (nunca te quedás trabado) y **todos chocan con todos
 
 ## 9. PvP: duelos, apuestas y ranking
 
+> **Cambio (pedido del usuario): duelo simultáneo.** Desde la ronda 5 la ronda es: preparación → **previa de apuestas**
+> (15 s) → **al mismo tiempo**, los 2 duelistas pelean su duelo y los otros 6 hacen su oleada de creeps. Los duelistas se
+> saltean los creeps esa ronda (cobran por el duelo). Antes, todos hacían la oleada y después los otros 6 miraban el duelo.
+> Medido (32 partidas): partidas de 31 rondas (antes 34); duelos parecidos; el Sniper sigue ganando ~la mitad.
+> Otros cambios del mismo pedido:
+> - Los enfriamientos siguen corriendo en el Área de Descanso.
+> - Contador grande arriba al centro (visible también sobre las ventanas); en la tienda y en las apuestas suena un pitido
+>   en cada uno de los últimos 5 segundos antes de que arranque el combate.
+> - Cartel de apuestas ganadas que cruza la pantalla de derecha a izquierda, del que más ganó al que menos:
+>   «Héroe (jugador) +oro», con sonido.
+> - Nombres: cada bot tiene nombre de jugador (`BOT_NAMES`, ej: «Axe (Tano)») y vos escribís el tuyo en el menú
+>   (se recuerda). El ranking muestra el nombre del jugador.
+> - Sonidos propios: archivos en `sounds/` registrados en `js/data/sounds.js` reemplazan al sonido sintetizado.
+
+
 > **Formato vigente (reemplaza lo que se contradiga más abajo):**
 > - **Un duelo por ronda** (desde la ronda 5). Pelean los que menos duelos pelearon (al azar entre ellos), sin repetir la pareja
 >   anterior; los demás lo miran desde la sala (la cámara va al duelo).

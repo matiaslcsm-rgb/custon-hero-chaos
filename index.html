@@ -35,6 +35,10 @@
                     <button id="map-toggle" title="Agrandar o achicar el mapa (tecla M)">⤢</button>
                     <button id="pause-btn" title="Pausa, tutorial, glosario y opciones (Esc)">⏸</button>
                 </div>
+                <!-- Contador grande de la fase (arriba al centro, visible también sobre las ventanas) -->
+                <div id="center-timer" style="display: none;"><div class="ct-label"></div><div class="ct-time"></div></div>
+                <!-- Cartel de apuestas ganadas: pasa de derecha a izquierda -->
+                <div id="bet-banner"></div>
                 <div id="map-wrap">
                     <canvas id="ascii-canvas"></canvas>
                 </div>
@@ -67,6 +71,7 @@
                     <div id="menu-panel">
                         <h3>Bienvenido</h3>
                         <p class="subtitle">8 héroes, oleadas de creeps, duelos, apuestas y jefes. Armá tu kit mezclando habilidades de cualquier héroe.</p>
+                        <label class="name-field">Tu nombre <input id="player-name" maxlength="14" placeholder="Vos" autocomplete="off"></label>
                         <button id="start-game-btn" class="primary-btn">▶ Iniciar partida</button>
                         <button id="menu-tutorial-btn" class="secondary-btn">📖 Tutorial (cómo se juega)</button>
                         <div class="menu-glossary">
@@ -238,6 +243,7 @@
     <script src="js/data/bosses.js"></script>
     <script src="js/effects.js"></script>
     <script src="js/fx.js"></script>
+    <script src="js/data/sounds.js"></script>
     <script src="js/audio.js"></script>
     <script src="js/sprites.js"></script>
     <script src="js/itemicons.js"></script>

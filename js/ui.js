@@ -687,15 +687,15 @@ function renderCombatInfo() {
     if (gameState === 'PREP' && !player.eliminated) {
         html = `<h3>🛒 Preparación · ronda ${waveNumber}</h3><p class="subtitle">Comprá en la tienda, subí tus habilidades con [+] y preparate para la oleada` +
             `${nextWave ? `: <b>${nextWave.name}</b>` : ''}.${waveNumber < DUEL_START_ROUND ? ` Los duelos arrancan en la ronda ${DUEL_START_ROUND}.` : ''}</p>` +
-            `<button class="primary-btn" onclick="openShop()">🛒 Abrir tienda (B)</button><button class="secondary-btn" onclick="startWave()">⚔ Comenzar oleada</button>`;
+            `<button class="primary-btn" onclick="openShop()">🛒 Abrir tienda (B)</button><button class="secondary-btn" onclick="startWave()">⚔ Comenzar ronda</button>`;
     } else if (gameState === 'BETTING') {
         html = `<h3>🎲 Previa de duelos</h3><p class="subtitle">Apostá en la ventana antes de que arranquen los duelos.</p>`;
     } else if (gameState === 'ENDED') html = `<h3>Fin de la partida</h3><p class="subtitle">Mirá el ranking a la izquierda. Tocá "Nueva Partida" para jugar otra.</p>`;
     else if (player.eliminated) html = `<h3>Quedaste eliminado</h3><p class="subtitle">Podés seguir mirando: clic en un héroe del ranking.</p>`;
     else if (gameState === 'BOSS') html = `<h3>👹 Jefe de ronda</h3>${pressureNote(arena)}<p class="subtitle">${arena && arena.boss ? `<b>${arena.boss.label}</b>: ${arena.boss.type.mechanic} ${arena.boss.type.escalation}` : 'Esperando a que terminen los demás.'}</p><p class="subtitle">Morir cuesta vidas. Pasados ${BOSS_FIGHT.enrageAfter}s se enfurece. Los 3 más rápidos cobran extra.</p>`;
-    else if (gameState === 'DUEL') {
-        const rival = arena && arena.kind === 'duel' ? arena.heroes.find(h => h !== hero) : null;
-        html = `<h3>⚔ Duelos</h3><p class="subtitle">${rival ? `${hero === player ? 'Peleás' : hero.name + ' pelea'} contra <b>${rival.displayName}</b>. Gana quien mata al otro o, a los ${DUEL_TIME}s, quien tenga más % de vida.` : 'Esperando que terminen los demás duelos.'}</p>` +
+    else if (arena && arena.kind === 'duel') {
+        const rival = arena.heroes.find(h => h !== hero);
+        html = `<h3>⚔ Duelo</h3><p class="subtitle">${hero === player ? 'Peleás' : hero.name + ' pelea'} contra <b>${rival.displayName}</b>. Gana quien mata al otro o, a los ${DUEL_TIME}s, quien tenga más % de vida.</p>` +
             (currentBet ? `<p class="subtitle">🎲 Apostaste ${currentBet.amount}g a ${currentBet.on.displayName}.</p>` : '');
     } else html = `<h3>🌊 Oleada ${waveNumber}</h3>${pressureNote(arena)}<p class="subtitle">${hero.inRest ? 'Terminaste: esperás en el Área de Descanso a que terminen los demás.' : 'Matá a todos los creeps antes de que se acabe el tiempo (después se enfurecen). El ataque es automático: movete y usá tus habilidades.'}</p>`;
     if (box.dataset.html !== html) { box.dataset.html = html; box.innerHTML = html; }
@@ -711,7 +711,7 @@ function renderTimer() {
     } else if (inCombat() && player) {
         const hero = viewedHero || player, arena = hero.arena;
         const waiting = arenas.filter(a => !a.done).length;
-        if (hero.inRest || !arena || arena.done) { text = `🏕 Descansando · ${waiting} ${gameState === 'DUEL' ? 'duelo' : 'arena'}${waiting === 1 ? '' : 's'} en curso`; }
+        if (hero.inRest || !arena || arena.done) { text = `🏕 Descansando · ${waiting} arena${waiting === 1 ? '' : 's'} en curso`; }
         else if (arena.kind === 'duel') { const left = DUEL_TIME - arena.elapsed; text = `⚔ Duelo ${Math.max(0, Math.ceil(left))}s`; if (left <= 5) cls = 'urgent'; }
         else if (!hero.isAlive() && hero.respawnAt) { text = `☠ Revive en ${Math.max(0, hero.respawnAt - gameClock).toFixed(1)}s`; cls = 'urgent'; }
         else if (arena.kind === 'boss') { const left = BOSS_FIGHT.enrageAfter - arena.elapsed; text = left > 0 ? `👹 Jefe · se enfurece en ${Math.ceil(left)}s` : `🔥 Jefe enfurecido +${Math.round((enrageMult(arena) - 1) * 100)}%`; if (left <= 10) cls = 'urgent'; }
@@ -720,10 +720,45 @@ function renderTimer() {
     }
     el.textContent = text;
     el.className = cls;
+    renderCenterTimer(text, cls);
     document.querySelectorAll('.phase-countdown').forEach(c => {
         c.textContent = ['PREP', 'BETTING'].includes(gameState) ? `⏱ ${Math.max(0, Math.ceil(phaseTimeLeft))}s` : '';
         c.classList.toggle('urgent', phaseTimeLeft <= 5);
     });
+}
+
+// Contador grande arriba al centro. En las fases con tiempo (elegir, draft, tienda, apuestas) muestra la fase y los
+// segundos; antes de que arranque el combate (tienda y apuestas) suena un pitido en cada uno de los últimos 5 segundos.
+const PHASE_LABELS = { HERO_SELECT: 'Elegí tu héroe', DRAFT: 'Draft de habilidad', PREP: 'Preparación · la ronda empieza en', BETTING: 'Apuestas · el duelo empieza en' };
+let lastBeepSecond = null;
+function renderCenterTimer(combatText, cls) {
+    const box = document.getElementById('center-timer');
+    const timed = !!PHASE_LABELS[gameState];
+    const secs = Math.max(0, Math.ceil(phaseTimeLeft));
+    let label = '', time = '';
+    if (timed) { label = PHASE_LABELS[gameState]; time = `${secs}`; }
+    else if (inCombat() && combatText) time = combatText;
+    box.style.display = time ? 'block' : 'none';
+    box.className = (timed ? 'big' : 'small') + (cls === 'urgent' || (timed && phaseTimeLeft <= 5) ? ' urgent' : '');
+    box.querySelector('.ct-label').textContent = label;
+    box.querySelector('.ct-time').textContent = time;
+    // Pitidos de cuenta regresiva (solo antes de que arranque el combate)
+    const countdown = (gameState === 'PREP' || gameState === 'BETTING') && secs <= 5 && secs >= 1 && !paused;
+    if (countdown && lastBeepSecond !== secs) sfx(secs === 1 ? 'tickLast' : 'tick');
+    lastBeepSecond = countdown ? secs : null;
+}
+
+// Cartel de apuestas ganadas: pasa de derecha a izquierda, del que más ganó al que menos ("Axe (Tano) +120g").
+function showBetBanner(winners) {
+    const banner = document.getElementById('bet-banner');
+    if (!banner || !winners.length) return;
+    const line = document.createElement('div');
+    line.className = 'bet-banner-line';
+    line.innerHTML = '🎲 Apuestas ganadas:' + winners.map(w => `<span class="bb-entry${w.hero === player ? ' you' : ''}">` +
+        `${heroIconHtml(w.hero, 'sm')}${w.hero.name} (${w.hero.ownerName || w.hero.name}) <b>+${w.gain}g</b></span>`).join('');
+    banner.appendChild(line);
+    line.addEventListener('animationend', () => line.remove());
+    sfx('betWin');
 }
 
 // --- RANKING ---
@@ -753,7 +788,7 @@ function renderScoreboard() {
             (isFighting(h) ? ' fighting' + (h.arena.kind === 'duel' ? ' dueling' : '') : '');
         const lives = h.eliminated ? '' : '♥'.repeat(Math.max(0, h.lives)) + (isCondemned(h) ? '☠' : '');
         const url = heroSpriteUrl(h);
-        row.innerHTML = `<span class="pos">${i + 1}</span><span class="sym" style="color:${heroColor(h)}">${url ? `<img src="${url}" alt="${h.symbol}" class="pixel-img tiny">` : h.symbol}</span><span class="name">${h === player ? 'Vos' : h.name}</span>` +
+        row.innerHTML = `<span class="pos">${i + 1}</span><span class="sym" style="color:${heroColor(h)}">${url ? `<img src="${url}" alt="${h.symbol}" class="pixel-img tiny">` : h.symbol}</span><span class="name">${h.ownerName || h.name}</span>` +
             `<span class="lives">${lives}</span><span class="pts">${h.points}</span><span class="st">${heroStatusIcon(h)}</span>`;
         row.title = `${h.displayName} · ${h.points} pts · ${h.gold}g · nivel ${h.level} · duelos ${h.duelWins}-${h.duelLosses}${fightingText(h)}`;
         row.onclick = () => { viewedHero = h; lastScoreboardSignature = ''; };

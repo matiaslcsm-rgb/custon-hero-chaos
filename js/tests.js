@@ -57,16 +57,19 @@ function dummy(props = {}) {
 function waitRespawn() { gameClock = player.respawnAt; updateWave(0.016); }
 // Termina todos los duelos en curso por tiempo (gana el de más % de vida; empate al azar).
 function skipDuels() {
-    if (gameState !== 'DUEL') return;
-    arenas.forEach(a => { a.elapsed = DUEL_TIME; });
+    const duels = arenas.filter(a => a.kind === 'duel' && !a.done);
+    if (!duels.length) return;
+    duels.forEach(a => { a.elapsed = DUEL_TIME; });
     updateWave(0.016);
 }
-// Mata a todos los creeps de todas las arenas y termina la fase de oleadas (salteando la previa de apuestas).
+// Mata a todos los creeps de todas las arenas (si estaba la previa de apuestas, la saltea primero). El duelo de la ronda
+// sigue en curso: se termina con skipDuels.
 function clearAllWaves(skipBetting = true) {
+    if (skipBetting && gameState === 'BETTING') endBetting();
     heroes.forEach(h => { if (h.arena) h.arena.creeps.forEach(c => { c.hp = 0; }); });
     updateWave(0.016);
-    if (skipBetting) endBetting();
 }
+function duelArena() { return arenas.find(a => a.kind === 'duel') || null; }
 function lastLog() { const p = document.querySelector('#combat-log p:last-child'); return p ? p.textContent : ''; }
 
 // ============================================================ CONTENIDO
@@ -1066,7 +1069,7 @@ test('Las arenas se juegan en paralelo; al terminar todas, la ronda suma puntos 
     check(!inCombat(), 'terminó la ronda (oleadas, previa y duelos)');
     checkEq(waveNumber, DUEL_START_ROUND + 2, 'pasó a la ronda siguiente');
     const total = heroes.reduce((s, h) => s + h.points, 0);
-    checkEq(total, MAX_HEROES * POINTS.waveClean + POINTS.duelWin, 'puntos: 8 oleadas limpias + 1 duelo');
+    checkEq(total, (MAX_HEROES - 2) * POINTS.waveClean + POINTS.duelWin, 'puntos: 6 oleadas limpias + 1 duelo (los duelistas no hacen oleada)');
     check(heroes.every(h => h.inRest && !h.arena), 'todos en el Área de Descanso');
 });
 
@@ -1147,14 +1150,14 @@ function toDuels(heroKey = 'AXE', playerFights = true) {
     waveNumber = DUEL_START_ROUND + 1; // los duelos arrancan en la ronda 5 (y la 5 tiene jefe)
     heroes.forEach((h, i) => { h.duelWins = playerFights ? (i < 2 ? 0 : 5) : (i === 0 ? 5 : 0); });
     startWave();
-    clearAllWaves();
+    clearAllWaves(); // saltea la previa y termina las oleadas de los demás: queda el duelo en curso
     return arenas;
 }
 
 test('Un duelo por ronda: pelean los que menos pelearon, sin repetir la pareja anterior; los demás miran', () => {
     toDuels();
-    checkEq(gameState, 'DUEL', 'fase de duelo');
-    checkEq(arenas.length, 1, 'un solo duelo');
+    checkEq(gameState, 'WAVE', 'el duelo se pelea en la misma fase que las oleadas');
+    checkEq(arenas.filter(a => a.kind === 'duel').length, 1, 'un solo duelo');
     check(arenas[0].heroes.includes(player) && arenas[0].heroes.includes(heroes[1]), 'los que menos pelearon');
     check(heroes.slice(2).every(h => h.inRest), 'los demás, en la sala');
     for (let i = 0; i < 20; i++) {
@@ -1289,19 +1292,35 @@ function toBetting(gold = 400, playerFights = false) {
     learnSkill(currentDraft.options[0]);
     waveNumber = DUEL_START_ROUND + 1;
     heroes.forEach((h, i) => { h.duelWins = playerFights ? (i < 2 ? 0 : 5) : (i === 0 ? 5 : 0); });
-    startWave();
     player.gold = gold;
-    clearAllWaves(false);
-    player.gold = gold; // sin el interés de la oleada
+    startWave(); // la ronda arranca con la previa de apuestas
 }
 
-test('Previa: al terminar las oleadas se eligen los duelistas; todos los demás apuestan; después pelean esos dos', () => {
+test('Ronda con duelo: los duelistas pelean mientras los demás hacen su oleada; los enfriamientos corren en el descanso', () => {
+    toBetting(400);
+    endBetting();
+    const duel = duelArena();
+    check(duel && !duel.done, 'duelo en curso');
+    const others = aliveHeroes().filter(h => !duel.heroes.includes(h));
+    check(others.every(h => h.arena && h.arena.kind === 'wave' && h.arena.creeps.length), 'los demás, en su oleada');
+    check(duel.heroes.every(h => !arenas.some(a => a.kind === 'wave' && a.heroes.includes(h))), 'los duelistas no hacen oleada');
+    clearAllWaves();
+    check(player.inRest, 'el jugador terminó y descansa');
+    player.cooldowns.X = 5;
+    updateRestArea(2);
+    checkNear(player.cooldowns.X, 3, 'el enfriamiento sigue corriendo en el descanso');
+    skipDuels();
+    check(!inCombat(), 'terminó la ronda');
+});
+
+test('Previa: al empezar la ronda se eligen los duelistas y los demás apuestan; después pelean mientras los demás hacen su oleada', () => {
     toBetting();
     checkEq(gameState, 'BETTING', 'previa');
     checkEq(bettablePairs().length, 1, 'un solo duelo para apostar');
     const pair = duelPlan.pairs[0].slice();
     tickPhaseTimer(PHASE_TIMES.betting + 0.1);
-    checkEq(gameState, 'DUEL', 'al vencer el tiempo arranca el duelo');
+    checkEq(gameState, 'WAVE', 'al vencer el tiempo arranca la ronda');
+    check(arenas[0].kind === 'duel', 'con el duelo');
     checkEq(arenas[0].heroes.join(), pair.join(), 'los mismos de la previa');
 });
 
@@ -1336,7 +1355,7 @@ test('Pozo compartido: los que aciertan recuperan lo suyo y se reparten lo apost
 
 test('La IA apuesta (nunca a su propio duelo) y el ganador cobra el 25% de lo que le apostaron', () => {
     toBetting(400, true); // el jugador pelea: no hay ventana, pero la IA apuesta igual
-    checkEq(gameState, 'DUEL', 'directo al duelo');
+    checkEq(gameState, 'WAVE', 'directo a la ronda');
     const rival = arenas[0].heroes.find(h => h !== player);
     for (let i = 0; i < 30; i++) { const saved = duelBets; duelBets = []; aiPlaceBets(); check(duelBets.every(b => !(b.bettor === b.on || b.bettor === b.against)), 'nadie apuesta a su propio duelo'); duelBets = saved; }
     const other = heroes.find(h => h !== player && h !== rival);
@@ -1349,7 +1368,7 @@ test('La IA apuesta (nunca a su propio duelo) y el ganador cobra el 25% de lo qu
 
 test('Sin oro para apostar (o eliminado) no hay previa: los duelos arrancan directo', () => {
     toBetting(1);
-    checkEq(gameState, 'DUEL', 'con 1g el tope es 0');
+    checkEq(gameState, 'WAVE', 'con 1g el tope es 0');
 });
 
 test('Premios: la mitad de abajo de los que siguen en juego recibe un Fragmento; el último, además un Libro', () => {
@@ -1757,7 +1776,7 @@ function simulateGame(heroIndex, godMode = true, rounds = 4) {
                 if (!player.eliminated) { aiUseDestiny(player); if (player.neutralOffer) aiPickNeutral(player, player.neutralOffer); aiSpendPoints(player); aiShop(player); }
                 startWave();
             }
-            if (gameState === 'WAVE') {
+            if (inCombat() || gameState === 'BETTING') {
                 if (godMode) addEffect(player, { id: 'TEST_GOD', duration: 1e9, flags: ['invulnerable', 'persistent'] });
                 for (let f = 0; (inCombat() || gameState === 'BETTING') && f < 20000; f++) {
                     if (gameState === 'BETTING') endBetting();

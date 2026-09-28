@@ -41,6 +41,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 | Draft de habilidades en ventana emergente (cartas con el ícono y color del héroe de origen) | ✅ |
 | Cuerpos físicos: pasar por la casilla de otro frena según su tamaño (+25/75/150%); `phasing` atraviesa | ✅ |
 | Regla: al menos 1 pasiva entre las 3 nativas (Axe, Sniper, Asesino y Vampiro convirtieron una activa) | ✅ |
+| Duelo simultáneo con las oleadas de los demás; enfriamientos en el descanso; contador central con pitidos; cartel de apuestas; nombres de jugadores; sonidos propios (`sounds/`) | ✅ |
 
 ## Pendientes y temas abiertos
 - **En curso:** 3 héroes de Agilidad del usuario, de a uno y midiendo cada uno: Danzante ✅ → **Chakravin `Y`** (proyectiles

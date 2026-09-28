@@ -18,6 +18,7 @@ let MOVE_ATTACK_RULE = 'free'; // a pedido: se ataca caminando; el equilibrio se
 const MOVE_SPEED_MULT = 0.65; // bajado otra vez a pedido (antes 0,8)
 
 window.addEventListener('keydown', e => {
+    if (e.target && e.target.tagName === 'INPUT') return; // escribiendo (tu nombre, el monto de la apuesta): no son teclas del juego
     const k = e.key.toLowerCase();
     keys[k] = true;
     if (k === 'p') { setAutopilot(!autopilot); return; }
@@ -34,7 +35,8 @@ window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
 // --- SELECCIÓN, DRAFT Y TIENDA ---
 function selectHero(template) {
     player = new Hero(template);
-    player.displayName = `${player.name} (Vos)`;
+    player.ownerName = playerName();
+    player.displayName = `${player.name} (${player.ownerName})`;
     heroes = [player];
     createRivals(template);
     heroes.forEach(sendToRestArea);
@@ -167,6 +169,7 @@ function restBlocked(x, y) { return (x === REST_SPOT.x && y === REST_SPOT.y - 3)
 function updateRestArea(dt) {
     heroes.forEach(h => {
         if (!h.inRest || h.eliminated) return;
+        tickCooldowns(h, dt); // los enfriamientos siguen corriendo mientras descansás
         h.restMoveTimer = (h.restMoveTimer || 0) + dt;
         if (h.restMoveTimer < h.moveInterval / MOVE_SPEED_MULT) return;
         h.restMoveTimer = 0;
@@ -194,22 +197,34 @@ function returnFromRestArea(hero) {
 
 // --- OLEADAS ---
 // Cada héroe en juego pelea la misma oleada en su propia arena, todos al mismo tiempo.
-function startWave() {
+// Desde la ronda DUEL_START_ROUND hay un duelo por ronda: primero la previa de apuestas (bets.js) y después, AL MISMO
+// TIEMPO, los 2 duelistas pelean su duelo y los demás hacen su oleada (los duelistas se saltean los creeps esa ronda).
+//   startWave()      arranca la ronda: previa de apuestas si hay duelo, o directo a las oleadas
+//   startWave(plan)  arranca el combate con el duelo de `plan` (o sin duelo si es null)
+function isDuelRound() { return waveNumber >= DUEL_START_ROUND && aliveHeroes().length >= 2; }
+
+function startWave(plan) {
+    if (plan === undefined && isDuelRound()) { showPanel('shop-container', false); startBetting(); return; }
     showPanel('shop-container', false);
     gameState = 'WAVE';
     const wave = nextWave || rollWave(waveNumber);
     nextWave = null;
-    arenas = aliveHeroes().map(hero => {
+    const duelArenas = plan ? makeDuelArenas(plan) : [];
+    const duelists = duelArenas.flatMap(a => a.heroes);
+    arenas = [...duelArenas, ...aliveHeroes().filter(h => !duelists.includes(h)).map(hero => {
         returnFromRestArea(hero);
         hero.diedThisRound = false;
         const arena = makeArena('wave', [hero]);
         spawnWave(arena, wave);
         return arena;
-    });
+    })];
     followPlayer();
-    setStateText(`OLEADA · RONDA ${waveNumber}: ${wave.name.toUpperCase()}`);
-    sfx('wave');
-    log(`🌊 ¡Ronda ${waveNumber}: ${wave.name}! Cada héroe pelea en su arena (${creeps.length ? creeps.length - 1 : '?'} creeps + 1 jefe).`);
+    const duel = duelArenas[0];
+    setStateText(duel ? `RONDA ${waveNumber}: DUELO + ${wave.name.toUpperCase()}` : `OLEADA · RONDA ${waveNumber}: ${wave.name.toUpperCase()}`);
+    sfx(duel ? 'duel' : 'wave');
+    const rival = duel && duel.heroes.includes(player) ? duel.heroes.find(h => h !== player) : null;
+    log(`🌊 ¡Ronda ${waveNumber}: ${wave.name}!` + (duel ? ` ⚔️ Duelo: ${duel.heroes[0].displayName} vs ${duel.heroes[1].displayName}` +
+        (rival ? ` (¡te toca a vos contra ${rival.displayName}!). Los demás pelean su oleada.` : '; mientras tanto, vos peleás tu oleada.') : ' Cada héroe pelea en su arena.'));
 }
 
 // Un héroe limpió su arena: suma el punto (si no murió), experiencia e interés, y va a descansar.
@@ -228,14 +243,11 @@ function onArenaCleared(arena) {
     }
 }
 
-// Todas las oleadas terminaron: empiezan los duelos (ver duels.js).
+// Terminaron el duelo y todas las oleadas de la ronda: jefe de ronda (si toca) o ranking y siguiente ronda.
 function onRoundWavesDone() {
-    arenas = [];
-    heroes.forEach(h => { if (!h.eliminated) h.arena = null; });
     logMuted = false;
-    if (aliveHeroes().length <= 1) { endRound(); return; }
-    if (waveNumber < DUEL_START_ROUND) { onDuelsDone(); return; } // todavía no hay duelos: jefe (si toca) o siguiente ronda
-    startBetting();
+    if (aliveHeroes().length <= 1) { arenas = []; heroes.forEach(h => { if (!h.eliminated) h.arena = null; }); endRound(); return; }
+    onDuelsDone();
 }
 
 // Fin de la ronda (después de los duelos): ranking, fin de partida o siguiente ronda.

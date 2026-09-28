@@ -29,7 +29,7 @@ function startBetting() {
     betAmount = 0;
     quietly(aiPlaceBets);
     // Sin nada para apostar (eliminado, sin oro o sin duelos ajenos) se va directo a los duelos
-    if (player.eliminated || !bettablePairs().length || betLimit() < 1) { startDuels(duelPlan); return; }
+    if (player.eliminated || !bettablePairs().length || betLimit() < 1) { startWave(duelPlan); return; }
     gameState = 'BETTING';
     setStateText(`PREVIA DE DUELOS · RONDA ${waveNumber}`);
     setPhaseTimer(PHASE_TIMES.betting);
@@ -55,7 +55,7 @@ function placeBet(on, amount) {
 function endBetting() {
     if (gameState !== 'BETTING') return;
     showPanel('bet-container', false);
-    startDuels(duelPlan);
+    startWave(duelPlan);
 }
 
 // La IA apuesta: cada rival en juego, con cierta probabilidad, elige un duelo ajeno; casi siempre al favorito (más puntos,
@@ -94,14 +94,17 @@ function settleBet(winner, loser) {
     duelBets = duelBets.filter(b => !bets.includes(b));
     const onWinner = bets.filter(b => b.on === winner).reduce((s, b) => s + b.amount, 0);
     const onLoser = bets.filter(b => b.on === loser).reduce((s, b) => s + b.amount, 0);
+    const winners = [];
     bets.forEach(b => {
         const prize = b.on === winner ? Math.floor(b.amount + onLoser * b.amount / onWinner) : 0;
         b.bettor.gold += prize;
+        if (prize > b.amount) winners.push({ hero: b.bettor, gain: prize - b.amount });
         if (b.bettor !== player) return;
         currentBet = null;
         log(prize ? `🎲 ¡Acertaste! ${winner.displayName} ganó: cobrás ${prize}g (apostaste ${b.amount}g, +${prize - b.amount}g del pozo).`
             : `🎲 Perdiste la apuesta (${b.amount}g): ${winner.displayName} le ganó a ${loser.displayName}.`);
     });
+    if (winners.length && typeof showBetBanner === 'function') showBetBanner(winners.sort((a, b) => b.gain - a.gain));
     if (bets.length) { const w = logMuted; logMuted = false; log(`🎲 Pozo del duelo: ${onWinner + onLoser}g (${onWinner}g a ${winner.name}, ${onLoser}g a ${loser.name}).`); logMuted = w; }
     const backing = bets.filter(b => b.on === winner).reduce((s, b) => s + b.amount, 0);
     const bonus = Math.round(backing * BACKING_BONUS);
