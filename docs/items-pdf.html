@@ -95,7 +95,7 @@ const suggestedBy = k => Object.entries(BUILD_GUIDES).filter(([, g]) => [...g.ea
 // Compuestos que usan un básico
 const usedIn = k => composites.filter(c => c.components.includes(k));
 const chips = list => list.map(n => `<span class="hero-chip">${n}</span>`).join('');
-const priceText = i => typeof i.cost === 'function' ? 'variable' : gold(i.cost);
+const priceText = i => i.talent ? `${TALENT_BOOK.baseCost}g (+${TALENT_BOOK.costStep}g c/u)` : typeof i.cost === 'function' ? 'variable' : gold(i.cost);
 
 function cover() {
     const keys = [...all, ...neutrals].map(i => i.key).filter(k => ITEM_ICONS[k]);

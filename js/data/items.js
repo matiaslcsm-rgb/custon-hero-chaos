@@ -17,6 +17,9 @@
 //   counters texto de qué contrarresta
 //   group    grupo en la tienda y en el códice
 
+// Libros de talento (ver talentBook abajo): +5 a un atributo; 500g el primero y +250g por cada uno comprado.
+const TALENT_BOOK = { amount: 5, baseCost: 500, costStep: 250 };
+
 const ITEMS = {
     // ============================================================ BÁSICOS
     BRANCH_STR: { key: 'BRANCH_STR', name: 'Rama de Fuerza', tier: 'basic', cost: 50, mods: { str: 4 } },
@@ -128,8 +131,23 @@ const ITEMS = {
         key: 'GREED', name: 'Injusticia de los Codiciosos', kind: 'instant', cost: h => greedCost(h), available: h => isCondemned(h),
         desc: 'Comprás 1 vida y dejás de estar Condenado. Si volvés a quedar sin vidas, tu castigo de daño recibido se duplica. Cada compra cuesta el doble.',
         apply: h => buyGreedLife(h)
-    }
+    },
+    // Libros de talento: +5 permanentes a un atributo, sin ocupar espacio. Opción de late game para el oro que sobra
+    // con el inventario lleno. El precio sube con cada libro que compraste (de cualquier atributo).
+    TALENT_STR: talentBook('TALENT_STR', 'Libro de Talento: Fuerza', 'str', 'Fuerza'),
+    TALENT_AGI: talentBook('TALENT_AGI', 'Libro de Talento: Agilidad', 'agi', 'Agilidad'),
+    TALENT_INT: talentBook('TALENT_INT', 'Libro de Talento: Inteligencia', 'int', 'Inteligencia')
 };
+
+// --- Libros de talento ---
+function talentBookCost(h) { return TALENT_BOOK.baseCost + TALENT_BOOK.costStep * (h.talentBooks || 0); }
+function talentBook(key, name, stat, label) {
+    return {
+        key, name, kind: 'instant', talent: stat, cost: h => talentBookCost(h),
+        desc: `+${TALENT_BOOK.amount} ${label} permanente. No ocupa espacio. Cada libro de talento que comprás (de cualquier atributo) hace que el próximo cueste +${TALENT_BOOK.costStep}g.`,
+        apply: h => { grantPermanent(h, stat, TALENT_BOOK.amount, name); h.talentBooks = (h.talentBooks || 0) + 1; }
+    };
+}
 
 // Grupos de compuestos, en el orden en que se muestran.
 const ITEM_GROUPS = ['Atributos', 'Ataque', 'Robo de vida y anticuración', 'Defensa y tanque', 'Magia'];

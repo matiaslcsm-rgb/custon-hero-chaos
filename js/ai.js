@@ -174,9 +174,15 @@ function aiShop(hero) {
     const targets = [...counters, ...AI_BUILDS[hero.primaryAttr]];
     // Siempre intenta primero el objetivo más prioritario; cuando no puede avanzar en ninguno, termina
     for (let guard = 0; guard < 30; guard++) {
-        if (!targets.some(key => aiWorkToward(hero, key, targets))) return;
+        if (!targets.some(key => aiWorkToward(hero, key, targets))) break;
+    }
+    // Con la build armada, el oro que sobra va a libros de talento de su atributo principal (guarda una reserva)
+    if (AI_BUILDS[hero.primaryAttr].every(k => countItem(hero, k) > 0)) {
+        const book = ITEMS['TALENT_' + hero.primaryAttr];
+        while (hero.gold >= itemCost(book, hero) + AI_TALENT_RESERVE) buyItem(book, hero);
     }
 }
+const AI_TALENT_RESERVE = 200;
 
 // --- PILOTO AUTOMÁTICO DEL JUGADOR ---
 let autopilot = false;

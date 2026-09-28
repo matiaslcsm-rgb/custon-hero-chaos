@@ -252,7 +252,13 @@ Un héroe entra solo si cumple **todo** esto:
   Al comprar un compuesto se usan los básicos que ya tenés y **pagás solo lo que falta**. Uno de cada compuesto como máximo.
 - **Inventario de 6 espacios** (básicos y compuestos). Un compuesto entra aunque esté lleno si libera los espacios de sus componentes.
 - **Vender** devuelve el **50%** del precio total del ítem.
-- **Inmediatos** (no ocupan espacio): Fragmento del Destino, Injusticia de los Codiciosos.
+- **Inmediatos** (no ocupan espacio): Fragmento del Destino, Injusticia de los Codiciosos y Libros de Talento.
+- **Libros de Talento** (Fuerza, Agilidad, Inteligencia): **+5 permanentes** al atributo. Siempre en la tienda (pestaña Otros).
+  El primero cuesta **500g** y cada libro comprado (de cualquier atributo) encarece el siguiente **+250g** (500, 750, 1000…).
+  *Por qué:* medido en 18 partidas, desde la ronda 9-12 el 67-78% de los héroes ya tiene 6 compuestos y el oro se acumula
+  sin uso (~1100g en la ronda 12, ~2500g en la 18, ~4000g desde la 21). Es la salida de late game para ese oro.
+  La IA los compra (de su atributo principal) cuando terminó su build, guardando 200g de reserva: en 5 partidas largas los
+  que llegan al final compran 3-5 libros.
 - *Las recetas reemplazaron a los niveles de ítem de la fase D* (en Dota los ítems crecen armando compuestos).
 - Todo se ve en la tienda (pestañas Básicos / Compuestos / Otros, con ✓ en los componentes que ya tenés) y en la pestaña **🎒 Ítems**.
 

@@ -34,6 +34,7 @@ class Hero {
         this.bonus = { armor: 0, atk: 0, critChance: 0, lifesteal: 0, maxHp: 0 };
         this.level = 1; this.xp = 0; this.skillPoints = 1;
         this.skillLevels = {}; // id de habilidad -> nivel (0 = drafteada pero sin aprender)
+        this.talentBooks = 0; // libros de talento comprados (suben el precio del siguiente)
         this.destiny = { fragments: 0, books: 0 }; // Fragmentos y Libros del Destino sin usar
         this.inventory = []; // ítems equipados: { key, level, spent } (ver items.js)
         this.x = 3; this.y = 6; this.gold = 100; this.lives = 2;

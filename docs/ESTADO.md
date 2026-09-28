@@ -34,6 +34,9 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 | Retoques de kits (Vampiro, Nigromante), pausa con glosario y opciones, sin barras arriba, tutorial rediseñado | ✅ |
 | Presión al líder en creeps y jefes; balance por habilidades; escenarios en pixel art animados | ✅ |
 | Un duelo por ronda con pozo compartido, maldición solo por duelos, sin límite de 20 rondas | ✅ (Sniper gana 8/14 partidas largas: revisar) |
+| PDFs de héroes e ítems con requisitos para sumar nuevos (`docs/heroes-pdf.html`, `docs/items-pdf.html` → `docs/*.pdf`) | ✅ |
+| Cámara fija en tu héroe en cada fase y 🔥 en el ranking para quien está peleando | ✅ |
+| Libros de Talento (+5 a un atributo, 500g y +250g por cada uno) | ✅ |
 
 ## Pendientes y temas abiertos
 - **Próximo:** balancear la supervivencia contra creeps en el formato de un duelo por ronda (gana el último en pie: el Sniper

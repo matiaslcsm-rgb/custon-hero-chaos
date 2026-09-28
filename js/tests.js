@@ -413,6 +413,21 @@ test('Condenado: cada duelo perdido suma +10% de daño recibido', () => {
     checkNear(sumMod(player, 'dmgTakenPct'), 0.30, 'el efecto aplica el 30%');
 });
 
+test('Libro de talento: +5 permanentes al atributo, sin espacio, y cada libro encarece el siguiente', () => {
+    newGame('AXE');
+    gameState = 'PREP'; player.gold = 5000;
+    const str = player.str, hp = player.maxHp, slots = player.inventory.length;
+    checkEq(itemCost(ITEMS.TALENT_STR, player), 500, 'primer precio');
+    check(buyItem(ITEMS.TALENT_STR), 'se compra');
+    checkNear(player.str, str + 5, '+5 Fuerza');
+    checkEq(player.maxHp, hp + 5 * ATTRIBUTE_RULES.str.hp, 'la Fuerza suma vida');
+    checkEq(player.inventory.length, slots, 'no ocupa espacio');
+    checkEq(itemCost(ITEMS.TALENT_INT, player), 750, 'el siguiente (de cualquier atributo) cuesta +250');
+    buyItem(ITEMS.TALENT_INT);
+    checkEq(player.gold, 5000 - 500 - 750, 'cobró 500 + 750');
+    checkEq(itemCost(ITEMS.TALENT_AGI, player), 1000, 'y sigue subiendo');
+});
+
 test('Injusticia de los Codiciosos: solo Condenado, vida y precio doble', () => {
     newGame('AXE');
     check(!itemAvailable(ITEMS.GREED, player), 'no aparece sin estar Condenado');
