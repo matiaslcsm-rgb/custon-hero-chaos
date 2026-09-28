@@ -251,7 +251,7 @@ Un héroe entra solo si cumple **todo** esto:
 
 1. **Identidad clara:** atributo principal + rol que no esté cubierto (o una variante claramente distinta).
 2. **Innato único:** una mecánica que no repite a otro héroe y funciona con cualquier kit drafteado.
-3. **4 habilidades naturales:** 3 normales + 1 definitiva, con al menos 1 activa.
+3. **4 habilidades naturales:** 3 normales + 1 definitiva, con al menos 1 activa y **al menos 1 pasiva** entre las 3 normales. Excepción: héroes diseñados a propósito todo activos (dependen de sus habilidades) o todo pasivos (dependen del ataque básico).
 4. **Habilidades autosuficientes:** cada una tiene que servir aunque se draftee sola en otro héroe
    (no puede depender del innato de su héroe original).
 5. **Definitiva con escalado:** la más fuerte del kit, cooldown largo, y una mecánica permanente de crecimiento con condición.
@@ -262,6 +262,21 @@ Un héroe entra solo si cumple **todo** esto:
 9. **Sin duplicados:** ninguna habilidad copia la mecánica de otra ya existente con otro nombre.
 
 ---
+
+### Pasivas nativas (regla nueva, pedido del usuario)
+Cada héroe tiene al menos 1 pasiva entre sus 3 nativas. Más adelante puede haber héroes a propósito todo activos o todo
+pasivos. Los 4 que no tenían ninguna recibieron la suya convirtiendo una activa:
+
+| Héroe | Habilidad | Antes (activa) | Ahora (pasiva) |
+|---|---|---|---|
+| Axe | Golpe de Hacha | Golpe de 100-160% con 20-35% de aturdir 1 s | Cada 4 ataques básicos, el golpe suma un hachazo de 100-160% con 20-35% de aturdir 1 s |
+| Sniper | Visión de Cazador | 4-7 s: +30-60% rango y +15-45% daño, −50% movimiento | +10/15/20/25% rango y +5/8/11/14% daño fijos, sin penalización |
+| Asesino | Golpe Crítico | Golpe de 120-210% con +25% de crítico | Tus críticos hacen x2,2/2,4/2,6/2,8 en vez de x2 |
+| Vampiro | Sangre Oscura | Consumía 4% de vida: +20-50% daño y +robo de vida por 5 s | Por cada 10% de vida que falta: +2-5% daño y +3-9% de curación del robo de vida |
+
+Motor: `keepPassiveEffect` (effects.js) para pasivas con stats fijos y mod nuevo `critDamage`.
+**Medido** (32 partidas, contra 26 antes del cambio): el Sniper gana menos partidas (14/32 = 44%, antes 18/26 = 69%) y
+el Vampiro más (9/32, antes 3/26); duelos: Sniper 76%, Axe 75%, Asesino 63%, Vampiro 16% (sigue abajo).
 
 ## 7. Ítems: recetas estilo Dota 2 ✅
 

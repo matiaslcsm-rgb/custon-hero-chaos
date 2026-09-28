@@ -53,18 +53,15 @@ registerHero({
             return true;
         }
     },
+    // Era activa (+30-60% rango y +15-45% daño por 4-7s, con -50% de movimiento); pasó a pasiva con valores más bajos
+    // y sin la penalización (regla: cada héroe tiene al menos 1 pasiva entre sus 3 nativas).
     SNIPER_VISION: {
-        id: 'SNIPER_VISION', name: 'Visión de Cazador', kind: 'active',
+        id: 'SNIPER_VISION', name: 'Visión de Cazador', kind: 'passive',
         tags: ['MEJORA'],
-        values: { cooldown: 16, manaCost: 40, duration: [4, 5, 6, 7], rangePct: [0.3, 0.4, 0.5, 0.6], atkPct: [0.15, 0.25, 0.35, 0.45], moveSlow: 0.5 },
-        description: '{duration}s: +{rangePct%} de rango y +{atkPct%} de daño físico, pero -{moveSlow%} de velocidad de movimiento.',
-        cast(caster) {
-            addEffect(caster, {
-                id: this.id, name: this.name, duration: val(this, caster, 'duration'), tags: this.tags,
-                mods: { rangePct: val(this, caster, 'rangePct'), atkPct: val(this, caster, 'atkPct'), moveSpeedPct: -val(this, caster, 'moveSlow') }
-            });
-            log('👁️ ¡Visión de Cazador!');
-            return true;
+        values: { rangePct: [0.1, 0.15, 0.2, 0.25], atkPct: [0.05, 0.08, 0.11, 0.14] },
+        description: 'Pasiva: +{rangePct%} de rango de ataque y +{atkPct%} de daño físico.',
+        hooks: {
+            onTick(owner) { keepPassiveEffect(owner, this, { rangePct: val(this, owner, 'rangePct'), atkPct: val(this, owner, 'atkPct') }); }
         }
     },
     SNIPER_MORTAL: {

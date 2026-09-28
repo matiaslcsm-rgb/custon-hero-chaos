@@ -23,6 +23,7 @@
 //               healingTakenPct  +% de curación recibida (negativo = anticuración; se suman)
 //               str, agi, int  atributos extra (los usan los ítems; el héroe recalcula sus stats al cambiarlos)
 //               maxHp, hpRegen, maxMana, manaRegen  vida/maná máximos y regeneración extra (ítems)
+//               critDamage   multiplicador extra de los críticos de ataques básicos (0.4 = x2,4 en vez de x2; se suman)
 //               statusResist reduce la duración de aturdimientos y ralentizaciones que recibe (0.4 = 40% menos)
 //   flags     estados sin número: 'stun', 'invulnerable', 'preventDeath' (la vida no baja de 1), 'taunt',
 //             'freeCast' (las habilidades no gastan maná), 'persistent' (no se pierde al morir),
@@ -76,6 +77,16 @@ function addEffect(unit, def) {
 }
 
 function removeEffect(unit, id) { unit.effects = unit.effects.filter(e => e.id !== id); }
+// Pasiva con stats fijos (ej: Visión de Cazador): mantiene un efecto permanente con los mods del nivel actual. Se llama
+// desde el onTick de la pasiva; el efecto se borra solo si la habilidad deja el kit (Fragmento/Libro del Destino).
+function keepPassiveEffect(owner, skill, mods) {
+    const current = getEffect(owner, skill.id);
+    if (current) { current.mods = mods; return current; }
+    return addEffect(owner, {
+        id: skill.id, name: skill.name, duration: Infinity, flags: ['persistent', 'passive'], tags: skill.tags, mods,
+        hooks: { onTick(o) { if (!o.hasSkill(skill.id) || !skillLevel(o, skill)) removeEffect(o, skill.id); } }
+    });
+}
 function activeEffects(unit) { return (unit.effects || []).filter(e => e.until > gameClock); }
 function getEffect(unit, id) { return activeEffects(unit).find(e => e.id === id) || null; }
 function hasFlag(unit, flag) { return activeEffects(unit).some(e => e.flags.includes(flag)); }

@@ -102,8 +102,8 @@ const ATTR = { STR: 'Fuerza', AGI: 'Agilidad', INT: 'Inteligencia' };
 const ATTR_ORDER = ['STR', 'AGI', 'INT'];
 const TODAY = new Date().toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
 
-// Resultados medidos con simulaciones (53 partidas de 8 héroes con la IA, 10 en el roster). Actualizar al volver a medir.
-const DUEL_WINRATE = { SNIPER: 79, ALCHEMIST: 79, FROSTWITCH: 70, AXE: 66, ASSASSIN: 61, ARCANIST: 54, DANCER: 45, VOIDSAGE: 44, NECROMANCER: 31, VAMPIRE: 17 };
+// Resultados medidos con simulaciones (32 partidas de 8 héroes con la IA, 10 en el roster). Actualizar al volver a medir.
+const DUEL_WINRATE = { SNIPER: 76, AXE: 75, FROSTWITCH: 72, ALCHEMIST: 72, ASSASSIN: 63, ARCANIST: 57, VOIDSAGE: 42, DANCER: 42, NECROMANCER: 39, VAMPIRE: 16 };
 
 spritesOn = true;
 const heroes = Object.values(HERO_TEMPLATES).sort((a, b) => ATTR_ORDER.indexOf(a.primaryAttr) - ATTR_ORDER.indexOf(b.primaryAttr));
@@ -162,7 +162,7 @@ function summary() {
         </table>
         <h3>Pasivas del roster</h3>
         <p>Además de los innatos, estas habilidades drafteables son pasivas: ${heroes.flatMap(t => skillsOf(t).filter(s => s.kind === 'passive').map(s => `<b>${s.name}</b> (${t.name})`)).join(', ')}.
-        Axe, Sniper, Asesino y Guerrero Vampiro no tienen pasivas drafteables: todo su kit es activo.</p>
+        Regla: cada héroe tiene al menos 1 pasiva entre sus 3 nativas (Axe, Sniper, Asesino y Vampiro la recibieron convirtiendo una activa).</p>
     </section>`;
 }
 
@@ -210,12 +210,12 @@ function balance() {
         return `<tr><td>${t.name}</td><td>${attrTag(t.primaryAttr)}</td><td><span class="bar" style="width:${(w || 0) * 1.6}px"></span>${w ?? '—'}%</td></tr>`;
     }).join('');
     return `<section><h2>3. Balance medido</h2>
-        <p>Victorias en duelos 1v1 en 53 partidas simuladas de 8 héroes (la IA juega sola: draftea, compra, apuesta y pelea).
+        <p>Victorias en duelos 1v1 en 32 partidas simuladas de 8 héroes (la IA juega sola: draftea, compra, apuesta y pelea).
         Con muestras de unas 18 partidas el ruido es de ±10 puntos; desde 30 partidas los números son confiables.</p>
         <table><tr><th>Héroe</th><th>Atributo</th><th>Duelos ganados</th></tr>${rows}</table>
         <div class="note warn"><b>Temas abiertos</b><ul>
             <li>En el formato de un duelo por ronda gana el último en pie, así que decide la <b>supervivencia contra creeps</b>:
-            el Sniper ganó 23 de 53 partidas (y el 79% de sus duelos); lo siguen el Vampiro y el Nigromante con 11. Hay que balancearlo.</li>
+            el Sniper ganó 14 de 32 partidas (y el 76% de sus duelos); lo sigue el Vampiro con 9. Hay que balancearlo.</li>
             <li><b>Guerrero Vampiro</b> y <b>Nigromante</b> siguen flojos en duelo (en duelo la curación se reduce 60%, salvo el robo de vida).</li>
         </ul></div>
         <div class="note"><b>Reglas que afectan a todos los héroes</b><ul>
@@ -239,7 +239,7 @@ function requirements() {
                 Hoy hay ${attrTag('STR')} ${byAttr('STR')} · ${attrTag('AGI')} ${byAttr('AGI')} · ${attrTag('INT')} ${byAttr('INT')}.
                 <b>Faltan héroes de Fuerza y de Agilidad</b> (hay 5 magos).</li>
             <li><b>Innato único:</b> una mecánica que no repite a otro héroe y funciona con cualquier kit drafteado.</li>
-            <li><b>4 habilidades naturales:</b> 3 normales + 1 definitiva, con al menos 1 activa.</li>
+            <li><b>4 habilidades naturales:</b> 3 normales + 1 definitiva, con al menos 1 activa y <b>al menos 1 pasiva</b> entre las 3 normales. Excepción: héroes diseñados a propósito todo activos (dependen de sus habilidades) o todo pasivos (dependen del ataque básico).</li>
             <li><b>Habilidades autosuficientes:</b> cada una tiene que servir aunque se draftee sola en otro héroe
                 (no puede depender del innato de su héroe ni de otra habilidad del kit).</li>
             <li><b>Definitiva con Ascenso:</b> la más fuerte del kit, con enfriamiento largo y una mejora permanente con condición
@@ -275,7 +275,7 @@ function requirements() {
         </table>
         <h3>Objetivo de balance</h3>
         <ul>
-            <li>Duelos: entre ~35% y ~65% de victorias en 30+ partidas simuladas (hoy el rango real es 17%–79%).</li>
+            <li>Duelos: entre ~35% y ~65% de victorias en 30+ partidas simuladas (hoy el rango real es 16%–76%).</li>
             <li>Creeps: que no domine las partidas largas por supervivencia (el caso actual del Sniper).</li>
             <li>La IA tiene que poder ganar con él sola (draft, tienda y combate).</li>
         </ul>

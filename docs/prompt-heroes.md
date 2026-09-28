@@ -32,7 +32,8 @@ Si una idea necesita algo que el motor no tiene, no lo inventes en el código: e
    Nigromante (drenaje), Sabio del Vacío (movilidad y área), Alquimista (ácido y reducir armadura),
    Danzante Cinético (duelista móvil: el movimiento da daño).
 2. Innato único que funcione con cualquier kit.
-3. 3 normales + 1 definitiva, con al menos 1 activa.
+3. 3 normales + 1 definitiva, con al menos 1 activa y al menos 1 PASIVA entre las 3 normales (salvo que pida a
+   propósito un héroe todo activo o todo pasivo).
 4. Cada habilidad sirve sola en cualquier héroe.
 5. Definitiva con Ascenso y valores para 3 niveles; normales con valores para 4 niveles.
 6. Etiquetas declaradas, SOLO de esta lista: FÍSICO, MÁGICO, PURO, AL_GOLPEAR, AL_MATAR, AL_RECIBIR_DAÑO, AL_LANZAR, AL_MOVERSE,

@@ -163,7 +163,7 @@ function rollAttackDamage(attacker, target) {
     emit(attacker, 'beforeAttack', ctx);
     let dmg = Math.round(ctx.dmg);
     let isCrit = false;
-    if (Math.random() < effCritChance(attacker) / 100) { dmg = Math.round(dmg * 2); isCrit = true; }
+    if (Math.random() < effCritChance(attacker) / 100) { dmg = Math.round(dmg * (2 + sumMod(attacker, 'critDamage'))); isCrit = true; }
     return { dmg, isCrit };
 }
 

@@ -135,7 +135,7 @@ test('Invulnerable no recibe daño; los creeps de un golpe mueren con cualquier 
 // ============================================================ HABILIDADES Y NIVELES
 test('Habilidad en nivel 0 no se lanza; en nivel 1 cobra maná y enfriamiento', () => {
     newGame('AXE');
-    const s = learn('AXE_HACHAZO', 0);
+    const s = learn('VAMP_CLAW', 0);
     const d = dummy({ hp: 9999, maxHp: 9999 });
     const mana = player.mana;
     handleSkillKeypress('e');
@@ -161,8 +161,8 @@ test('Sin objetivo en rango no se cobra maná ni enfriamiento', () => {
 
 test('Teclas por orden de aprendizaje (E, R, T, F)', () => {
     newGame('AXE');
-    ['VAMP_CLAW', 'AXE_FURIA', 'SNIPER_VISION', 'AXE_GIRO'].forEach(id => learn(id, 0));
-    checkEq(['VAMP_CLAW', 'AXE_FURIA', 'SNIPER_VISION', 'AXE_GIRO'].map(id => player.keyBindings[id]).join(''), 'ertf', 'teclas');
+    ['VAMP_CLAW', 'AXE_FURIA', 'SNIPER_POTENTE', 'AXE_GIRO'].forEach(id => learn(id, 0));
+    checkEq(['VAMP_CLAW', 'AXE_FURIA', 'SNIPER_POTENTE', 'AXE_GIRO'].map(id => player.keyBindings[id]).join(''), 'ertf', 'teclas');
 });
 
 test('Definitiva: niveles 1/2/3 recién en los niveles 6/12/18 del héroe', () => {
@@ -270,9 +270,9 @@ test('Hambre + Sangre Oscura multiplican el robo de vida', () => {
     player.hp = 10; applyLifesteal(player, 100, c);
     const ls = HERO_TEMPLATES.VAMPIRE.baseLifesteal / 100;
     checkEq(player.hp - 10, Math.round(100 * ls * 2), 'Hambre duplica contra <30% HP');
-    learn('VAMP_DARKBLOOD', 1).cast(player);
+    const dark = learn('VAMP_DARKBLOOD', 1);
     player.hp = 10; applyLifesteal(player, 100, c);
-    checkEq(player.hp - 10, Math.round(100 * ls * (2 + 0.3)), 'Sangre Oscura suma al multiplicador');
+    checkEq(player.hp - 10, Math.round(100 * ls * (2 + darkBloodSteps(player) * val(dark, player, 'lifestealPerStep'))), 'Sangre Oscura suma al multiplicador según la vida que falta');
 });
 
 test('Hambre: cada baja cura 5% de la vida máxima', () => {
@@ -845,6 +845,33 @@ test('Cuerpos físicos: un creep bloqueado prueba el otro camino si está libre'
     checkEq([b.x, b.y].join(), '11,4', 'rodea por y');
 });
 
+test('Pasivas nuevas: Golpe de Hacha, Visión de Cazador, Golpe Crítico y Sangre Oscura', () => {
+    newGame('AXE');
+    const hacha = learn('AXE_HACHAZO', 1);
+    const c = dummy({ hp: 5000, maxHp: 5000 });
+    for (let i = 0; i < 3; i++) resolveBasicHit(player, c, 10, false);
+    checkEq(c.hp, 5000 - 30, 'tres golpes normales');
+    resolveBasicHit(player, c, 10, false);
+    checkEq(c.hp, 5000 - 40 - Math.round(player.atk * val(hacha, player, 'dmgMult')), 'el cuarto suma el hachazo');
+    newGame('SNIPER');
+    const vision = learn('SNIPER_VISION', 2), range = effRange(player);
+    updateArena(player.arena, 0.016);
+    checkNear(effRange(player), range * (1 + val(vision, player, 'rangePct')), '+rango fijo');
+    player.skillLevels.SNIPER_VISION = 0; player.skills = player.skills.filter(s => s !== vision);
+    updateArena(player.arena, 0.016);
+    checkNear(effRange(player), range, 'si deja el kit, se va el bonus');
+    newGame('ASSASSIN');
+    learn('ASSASSIN_CRITSTRIKE', 4);
+    updateArena(player.arena, 0.016);
+    const saved = Math.random; Math.random = () => 0;
+    try { checkEq(rollAttackDamage(player, dummy()).dmg, Math.round(Math.round(effAttack(player)) * 2.8), 'crítico x2,8'); } finally { Math.random = saved; }
+    newGame('VAMPIRE');
+    const dark = learn('VAMP_DARKBLOOD', 4);
+    player.hp = player.maxHp * 0.5;
+    updateArena(player.arena, 0.016);
+    checkNear(getEffect(player, 'VAMP_DARKBLOOD').mods.atkPct, 5 * val(dark, player, 'atkPerStep'), 'a mitad de vida: 5 tramos de daño');
+});
+
 test('Ancla: cada golpe ralentiza y quita evasión', () => {
     newGame('AXE');
     const ev = effEvasion(player);
@@ -988,7 +1015,7 @@ test('IA: habilidades de área solo con 2+ enemigos cerca, sin ensuciar el regis
     dummy({ y: player.y + 1, hp: 9999, maxHp: 9999 });
     aiCastSkills(player);
     check(player.cooldowns[giro.id] > 0, 'con 2 enemigos sí');
-    const hacha = learn('AXE_HACHAZO', 1);
+    const hacha = learn('VAMP_CLAW', 1);
     creeps.forEach(k => { k.x = 19; });
     const logs = document.querySelectorAll('#combat-log p').length;
     aiCastSkills(player);

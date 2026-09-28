@@ -22,23 +22,16 @@ registerHero({
         }
     }
 }, {
+    // Era activa (consumía vida por +daño y +robo de vida por 5s); pasó a pasiva (regla: al menos 1 pasiva entre las 3
+    // nativas): cuanta menos vida tenés, más pegás y más cura tu robo de vida.
     VAMP_DARKBLOOD: {
-        id: 'VAMP_DARKBLOOD', name: 'Sangre Oscura', kind: 'active',
+        id: 'VAMP_DARKBLOOD', name: 'Sangre Oscura', kind: 'passive',
         tags: ['MEJORA', 'ROBO_VIDA'],
-        // Costo de vida bajado de 8% a 4% tras medir (el Vampiro ganaba 11% de los duelos).
-        values: { cooldown: 12, manaCost: 25, hpCost: 0.04, duration: 5, atkPct: [0.2, 0.3, 0.4, 0.5], lifestealBonus: [0.3, 0.5, 0.7, 0.9] },
-        description: 'Consumís {hpCost%} de tu vida actual y ganás +{atkPct%} daño físico por {duration}s; tu robo de vida cura +{lifestealBonus%} mientras dura.',
-        cast(caster) {
-            const cost = Math.round(caster.hp * val(this, caster, 'hpCost'));
-            caster.hp = Math.max(1, caster.hp - cost);
-            const bonus = val(this, caster, 'lifestealBonus');
-            addEffect(caster, {
-                id: this.id, name: this.name, duration: val(this, caster, 'duration'), tags: this.tags,
-                mods: { atkPct: val(this, caster, 'atkPct') },
-                hooks: { beforeLifesteal(owner, ctx) { ctx.mult += bonus; } }
-            });
-            log(`🩸 ¡Sangre Oscura! -${cost} HP propia.`);
-            return true;
+        values: { atkPerStep: [0.02, 0.03, 0.04, 0.05], lifestealPerStep: [0.03, 0.05, 0.07, 0.09] },
+        description: 'Pasiva: por cada 10% de vida que te falta, +{atkPerStep%} de daño físico y tu robo de vida cura +{lifestealPerStep%}.',
+        hooks: {
+            onTick(owner) { keepPassiveEffect(owner, this, { atkPct: darkBloodSteps(owner) * val(this, owner, 'atkPerStep') }); },
+            beforeLifesteal(owner, ctx) { ctx.mult += darkBloodSteps(owner) * val(this, owner, 'lifestealPerStep'); }
         }
     },
     VAMP_CLAW: {
@@ -111,3 +104,6 @@ registerHero({
         }
     }
 });
+
+// Sangre Oscura: tramos de 10% de vida faltante (0 a 9).
+function darkBloodSteps(owner) { return Math.min(9, Math.floor((1 - owner.hp / owner.maxHp) * 10)); }

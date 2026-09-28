@@ -40,13 +40,13 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 | Héroe 10: Danzante Cinético `D` (diseño del usuario) + creep Ancla | ✅ (45% de duelos) |
 | Draft de habilidades en ventana emergente (cartas con el ícono y color del héroe de origen) | ✅ |
 | Cuerpos físicos: pasar por la casilla de otro frena según su tamaño (+25/75/150%); `phasing` atraviesa | ✅ |
+| Regla: al menos 1 pasiva entre las 3 nativas (Axe, Sniper, Asesino y Vampiro convirtieron una activa) | ✅ |
 
 ## Pendientes y temas abiertos
 - **En curso:** 3 héroes de Agilidad del usuario, de a uno y midiendo cada uno: Danzante ✅ → **Chakravin `Y`** (proyectiles
   de habilidad que vuelven + creep Guardián de Hierro) → **Trampero `P`** (zonas en el piso + creep Saltador).
 - **Después:** balancear la supervivencia contra creeps en el formato de un duelo por ronda (gana el último en pie: el Sniper
   ganó 8 de 14 partidas simuladas y el Nigromante 4). Medir con `simulateGame(i, false, 60)` (~31 rondas por partida).
-- Pasivas: solo los magos tienen pasivas drafteables; se ofreció diseñar una para Axe, Sniper, Asesino y Vampiro.
 - **Balance de duelos:** Vampiro (17%) y Nigromante (24%) siguen abajo; Alquimista, Axe y Bruja ~70% (ver DISEÑO.md §9).
 - **Modo debug** (propuesto): panel para probar situaciones (ronda, oro, nivel, ítems, creeps, duelos, velocidad, modo dios).
 - Preguntas abiertas de diseño: DISEÑO.md §11 (probabilidad de definitivas en el draft, precio del Fragmento…).

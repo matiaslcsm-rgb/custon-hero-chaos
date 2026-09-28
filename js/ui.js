@@ -558,7 +558,7 @@ function renderHeroBar() {
         cd.textContent = left > 0 ? left.toFixed(left < 10 ? 1 : 0) : '';
         slot.classList.toggle('no-mana', skillLevel(p, s) > 0 && p.mana < (val(s, p, 'manaCost') || 0));
     });
-    const effects = activeEffects(p).filter(e => !e.flags.includes('item'));
+    const effects = activeEffects(p).filter(e => !e.flags.includes('item') && !e.flags.includes('passive'));
     const effSig = effects.map(e => e.id + (isFinite(e.until) ? Math.ceil(e.until - gameClock) : '')).join('|');
     const effBox = document.getElementById('hb-effects');
     if (effBox.dataset.sig !== effSig) {

@@ -24,21 +24,22 @@ registerHero({
         }
     }
 }, {
+    // Era activa; pasó a pasiva (regla: cada héroe tiene al menos 1 pasiva entre sus 3 nativas).
     AXE_HACHAZO: {
-        id: 'AXE_HACHAZO', name: 'Golpe de Hacha', kind: 'active',
-        tags: ['FÍSICO', 'CONTROL'],
-        values: { cooldown: [6, 5.5, 5, 4.5], manaCost: [30, 30, 35, 35], dmgMult: [1.0, 1.2, 1.4, 1.6], stunChance: [0.2, 0.25, 0.3, 0.35], stunDuration: 1 },
-        description: 'Golpe frontal: {dmgMult%} de tu daño físico al enemigo más cercano. {stunChance%} de probabilidad de aturdirlo {stunDuration}s.',
-        cast(caster) {
-            const target = nearestEnemy(caster, caster.attackRange + 0.5);
-            if (!target) { log('Golpe de Hacha: sin objetivo en rango.'); return false; }
-            const dmg = Math.round(caster.atk * val(this, caster, 'dmgMult'));
-            const { dealt } = dealDamage(caster, target, dmg, 'physical');
-            if (target.isAlive() && Math.random() < val(this, caster, 'stunChance')) {
-                addEffect(target, { id: 'STUN', name: 'Aturdido', duration: val(this, caster, 'stunDuration'), flags: ['stun'] });
+        id: 'AXE_HACHAZO', name: 'Golpe de Hacha', kind: 'passive',
+        tags: ['FÍSICO', 'CONTROL', 'AL_GOLPEAR'],
+        values: { hitsNeeded: 4, dmgMult: [1.0, 1.2, 1.4, 1.6], stunChance: [0.2, 0.25, 0.3, 0.35], stunDuration: 1 },
+        description: 'Pasiva: cada {hitsNeeded} ataques básicos, el siguiente golpe suma un hachazo de {dmgMult%} de tu daño físico, con {stunChance%} de probabilidad de aturdir {stunDuration}s.',
+        hooks: {
+            onHit(owner, { target }) {
+                owner.axeHits = (owner.axeHits || 0) + 1;
+                if (owner.axeHits % val(this, owner, 'hitsNeeded') !== 0 || !target.isAlive()) return;
+                dealDamage(owner, target, Math.round(owner.atk * val(this, owner, 'dmgMult')), 'physical');
+                if (target.isAlive() && Math.random() < val(this, owner, 'stunChance')) {
+                    addEffect(target, { id: 'STUN', name: 'Aturdido', duration: val(this, owner, 'stunDuration'), flags: ['stun'] });
+                }
+                if (fxArena(owner)) fxText(target, '¡HACHAZO!', '#ff6b6b', 11, 0.8);
             }
-            log(`🪓 ¡Golpe de Hacha a ${target.label}! (-${dealt} HP)`);
-            return true;
         }
     },
     AXE_PROVOCACION: {

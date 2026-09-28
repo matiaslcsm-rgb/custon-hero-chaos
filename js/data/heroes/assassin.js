@@ -31,20 +31,14 @@ registerHero({
             return true;
         }
     },
+    // Era activa (golpe de 120-210% con +25% de crítico); pasó a pasiva (regla: al menos 1 pasiva entre las 3 nativas).
     ASSASSIN_CRITSTRIKE: {
-        id: 'ASSASSIN_CRITSTRIKE', name: 'Golpe Crítico', kind: 'active',
-        tags: ['FÍSICO', 'CRÍTICO'],
-        values: { cooldown: 8, manaCost: 40, dmgMult: [1.2, 1.5, 1.8, 2.1], extraCrit: 25 },
-        description: '{dmgMult%} de tu daño físico al enemigo más cercano, con +{extraCrit}% de probabilidad extra de crítico.',
-        cast(caster) {
-            const target = nearestEnemy(caster, caster.attackRange + 1);
-            if (!target) { log('Golpe Crítico: sin objetivo en rango.'); return false; }
-            let dmg = Math.round(caster.atk * val(this, caster, 'dmgMult'));
-            const isCrit = Math.random() < (effCritChance(caster) + val(this, caster, 'extraCrit')) / 100;
-            if (isCrit) dmg = Math.round(dmg * 2);
-            const { dealt } = dealDamage(caster, target, dmg, 'physical');
-            log(`⚔️ ¡Golpe Crítico a ${target.label}!${isCrit ? ' ¡CRÍTICO!' : ''} (-${dealt} HP)`);
-            return true;
+        id: 'ASSASSIN_CRITSTRIKE', name: 'Golpe Crítico', kind: 'passive',
+        tags: ['CRÍTICO', 'AL_GOLPEAR'],
+        values: { critMult: [2.2, 2.4, 2.6, 2.8] },
+        description: 'Pasiva: tus críticos con ataques básicos hacen x{critMult} de daño en vez de x2.',
+        hooks: {
+            onTick(owner) { keepPassiveEffect(owner, this, { critDamage: val(this, owner, 'critMult') - 2 }); }
         }
     },
     ASSASSIN_LETHALSPEED: {
