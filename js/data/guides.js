@@ -39,6 +39,10 @@ const BUILD_GUIDES = {
     ALCHEMIST: {
         why: 'Ácido que baja la armadura: anticuración y rompe corazas para que su daño y el de sus ataques rindan.',
         early: ['SERRATED', 'MANA_CRYSTAL'], core: ['ARCANE_STAFF', 'SPEAR', 'TOME'], late: ['HAMMER', 'HEART']
+    },
+    DANCER: {
+        why: 'Pega mientras se mueve: velocidad de ataque y movimiento para cargar la Danza, y Hoja Certera contra la evasión.',
+        early: ['BLADE', 'QUICK_GLOVES'], core: ['SWIFT_BLADE', 'GLOVES', 'TRAVEL_BOOTS'], late: ['HAMMER', 'TRUESTRIKE']
     }
 };
 

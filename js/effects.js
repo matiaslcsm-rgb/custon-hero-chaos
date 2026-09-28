@@ -45,6 +45,8 @@
 //   onHeal           { amount }                 la unidad se curó (robo de vida, habilidades...)
 //   onCast           { skill }                  la unidad lanzó una habilidad
 //   onTick           { dt }                     cada frame de la oleada (para algo "por segundo", usar everyInterval)
+//   onMove           { steps }                  la unidad avanzó casillas (caminando o con una habilidad)
+//   onDashHit        { target }                 una habilidad de avance golpeó (Corte Errante)
 
 // Después de un aturdimiento, un héroe no puede ser aturdido de nuevo durante este tiempo (evita quedar
 // aturdido para siempre, ej: 2 Aturdidores enfurecidos). A los creeps no se les aplica.

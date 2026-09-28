@@ -31,7 +31,7 @@ class Hero {
         this.innate = template.innate || null;
         this.creepKillCount = 0; this.heroKillCount = 0;
         // Bonus permanentes acumulados (escalado del héroe y de las definitivas), ver grantPermanent().
-        this.bonus = { armor: 0, atk: 0, critChance: 0, lifesteal: 0, maxHp: 0 };
+        this.bonus = { armor: 0, atk: 0, critChance: 0, lifesteal: 0, maxHp: 0, atkSpeed: 0 };
         this.level = 1; this.xp = 0; this.skillPoints = 1;
         this.skillLevels = {}; // id de habilidad -> nivel (0 = drafteada pero sin aprender)
         this.talentBooks = 0; // libros de talento comprados (suben el precio del siguiente)
@@ -63,7 +63,7 @@ class Hero {
         this.maxHp = Math.round(this.baseHp + str * R.str.hp + this.bonus.maxHp + sumMod(this, 'maxHp'));
         this.maxMana = Math.round(this.baseMaxMana + int * R.int.mana + sumMod(this, 'maxMana'));
         this.atk = Math.round(this.baseAtk + primaryVal * R.primaryAtk + this.bonus.atk);
-        this.atkSpeed = this.baseAtkSpeed * (1 + agi * R.agi.atkSpeedPct);
+        this.atkSpeed = this.baseAtkSpeed * (1 + agi * R.agi.atkSpeedPct + this.bonus.atkSpeed / 100);
         this.moveSpeed = this.baseMoveSpeed * (1 + Math.min(agi, R.agi.moveSpeedCap) * R.agi.moveSpeedPct);
         this.moveInterval = Math.max(0.05, 1 / this.moveSpeed);
         this.attackRange = this.baseAttackRange;

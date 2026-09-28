@@ -29,12 +29,13 @@ Si una idea necesita algo que el motor no tiene, no lo inventes en el código: e
 === CRITERIOS OBLIGATORIOS PARA CADA HÉROE ===
 1. Identidad clara: rol distinto a los existentes: Axe (tanque contraataque), Sniper (tirador), Asesino (críticos),
    Guerrero Vampiro (robo de vida), Arcanista (ráfaga por cargas), Bruja del Hielo (control y ralentización),
-   Nigromante (drenaje), Sabio del Vacío (movilidad y área), Alquimista (ácido y reducir armadura).
+   Nigromante (drenaje), Sabio del Vacío (movilidad y área), Alquimista (ácido y reducir armadura),
+   Danzante Cinético (duelista móvil: el movimiento da daño).
 2. Innato único que funcione con cualquier kit.
 3. 3 normales + 1 definitiva, con al menos 1 activa.
 4. Cada habilidad sirve sola en cualquier héroe.
 5. Definitiva con Ascenso y valores para 3 niveles; normales con valores para 4 niveles.
-6. Etiquetas declaradas, SOLO de esta lista: FÍSICO, MÁGICO, PURO, AL_GOLPEAR, AL_MATAR, AL_RECIBIR_DAÑO, AL_LANZAR,
+6. Etiquetas declaradas, SOLO de esta lista: FÍSICO, MÁGICO, PURO, AL_GOLPEAR, AL_MATAR, AL_RECIBIR_DAÑO, AL_LANZAR, AL_MOVERSE,
    CRÍTICO, ROBO_VIDA, CURACIÓN, CONTROL, MOVILIDAD, ÁREA, DAÑO_EN_EL_TIEMPO, MEJORA, PERJUICIO, INVOCACIÓN.
 7. Que se pueda contrarrestar: en las notas decí qué ítem o tipo de creep lo contrarresta.
 8. Números dentro de estos rangos de referencia:
@@ -45,7 +46,7 @@ Si una idea necesita algo que el motor no tiene, no lo inventes en el código: e
    - Controles: aturdir 0.5-2 s, ralentizar 20%-70% por 1.5-4 s.
    - Definitivas: enfriamiento 40-70 s, costo 80-150 de maná.
 9. No copiar la mecánica de una habilidad existente con otro nombre.
-10. Símbolo de 1 carácter que NO sea ninguno de estos (ya usados): @ S K V A F N Ø L x g r s b J
+10. Símbolo de 1 carácter que NO sea ninguno de estos (ya usados): @ S K V A F N Ø L D x g r s b c h e a k t w f z d $ q J Ω
 
 === FORMATO ===
 Un bloque por héroe:
@@ -129,7 +130,7 @@ Eventos para hooks: hook(dueño, payload)
 - beforeAttack { target, dmg }     (se puede modificar dmg)
 - onHit { target, dealt, isCrit }  (ataque básico)       onDealDamage { target, dealt, type } (cualquier daño hecho)
 - onKill { victim }  onDamaged { source, dealt, type }  beforeLifesteal { target, mult }  onHeal { amount }
-- onCast { skill }  onTick { dt } (cada frame)
+- onCast { skill }  onTick { dt } (cada frame)  onMove { steps } (avanzó casillas)
 
 === QUÉ QUIERO QUE ME DEVUELVAS, POR CADA HÉROE ===
 1. El bloque registerHero(...) completo.

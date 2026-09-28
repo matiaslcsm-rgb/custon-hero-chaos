@@ -37,9 +37,12 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 | PDFs de héroes e ítems con requisitos para sumar nuevos (`docs/heroes-pdf.html`, `docs/items-pdf.html` → `docs/*.pdf`) | ✅ |
 | Cámara fija en tu héroe en cada fase y 🔥 en el ranking para quien está peleando | ✅ |
 | Libros de Talento (+5 a un atributo, 500g y +250g por cada uno) | ✅ |
+| Héroe 10: Danzante Cinético `D` (diseño del usuario) + creep Ancla | ✅ (45% de duelos) |
 
 ## Pendientes y temas abiertos
-- **Próximo:** balancear la supervivencia contra creeps en el formato de un duelo por ronda (gana el último en pie: el Sniper
+- **En curso:** 3 héroes de Agilidad del usuario, de a uno y midiendo cada uno: Danzante ✅ → **Chakravin `Y`** (proyectiles
+  de habilidad que vuelven + creep Guardián de Hierro) → **Trampero `P`** (zonas en el piso + creep Saltador).
+- **Después:** balancear la supervivencia contra creeps en el formato de un duelo por ronda (gana el último en pie: el Sniper
   ganó 8 de 14 partidas simuladas y el Nigromante 4). Medir con `simulateGame(i, false, 60)` (~31 rondas por partida).
 - Pasivas: solo los magos tienen pasivas drafteables; se ofreció diseñar una para Axe, Sniper, Asesino y Vampiro.
 - **Balance de duelos:** Vampiro (17%) y Nigromante (24%) siguen abajo; Alquimista, Axe y Bruja ~70% (ver DISEÑO.md §9).

@@ -15,6 +15,12 @@ const SPRITE_TEMPLATES = {
         '..bbbbbbbb.w', '.sbbbaabbbsw', '.s.bbaabb.sw', '...bbbbbb..w',
         '...ll..ll...', '...ll..ll...', '...ll..ll...', '..ddd..ddd..'
     ],
+    // Duelista con un arma en cada mano, inclinado hacia adelante
+    duelist: [
+        '....hhhh....', '...hhhhhh...', '...hesseh...', '....ssss....',
+        'w.bbbbbbbb.w', 'ws.bbaabb.sw', '.w.bbaabb.w.', '...bbbbbb...',
+        '...ll..ll...', '..ll....ll..', '..ll....ll..', '.ddd....ddd.'
+    ],
     // Mago con túnica y bastón (a = orbe)
     robed: [
         '....hhhh..a.', '...hhhhhh.w.', '...hesseh.w.', '...hssssh.w.',
@@ -80,7 +86,8 @@ const HERO_SPRITES = {
     FROSTWITCH: ['robed', { h: '#caf0f8', s: '#e9ecef', e: '#0077b6', b: '#48cae4', a: '#ffffff', d: '#023e8a', w: '#90e0ef' }],
     NECROMANCER: ['robed', { h: '#1b1b1b', s: '#adb5bd', e: '#80ffdb', b: '#2d6a4f', a: '#95d5b2', d: '#111', w: '#6c757d' }],
     VOIDSAGE: ['robed', { h: '#240046', s: '#c8b6ff', e: '#e0aaff', b: '#5a189a', a: '#e0aaff', d: '#10002b', w: '#9d4edd' }],
-    ALCHEMIST: ['robed', { h: '#606c38', s: '#f1c27d', e: '#111', b: '#bc6c25', a: '#a7c957', d: '#3a2a1a', w: '#8d6e63' }]
+    ALCHEMIST: ['robed', { h: '#606c38', s: '#f1c27d', e: '#111', b: '#bc6c25', a: '#a7c957', d: '#3a2a1a', w: '#8d6e63' }],
+    DANCER: ['duelist', { h: '#1d3557', s: '#e0c097', e: '#48cae4', b: '#14213d', a: '#8d99ae', l: '#22223b', d: '#0b0c10', w: '#ced4da' }]
 };
 
 const CREEP_SPRITE_TEMPLATE = {
@@ -89,7 +96,7 @@ const CREEP_SPRITE_TEMPLATE = {
 };
 const CREEP_SPRITE_EXTRA = {
     ARCHER: { w: '#7f5539' }, CROSSBOW: { w: '#6c584c' }, ARMORED: { w: '#6c757d', a: '#dee2e6' },
-    HEALER: { a: '#ffffff', w: '#80ffdb' }, KAMIKAZE: { b: '#343a40', h: '#adb5bd', w: '#ffb703', a: '#ff5400' }, DRUMMER: { w: '#bc6c25' }
+    HEALER: { a: '#ffffff', w: '#80ffdb' }, KAMIKAZE: { b: '#343a40', h: '#adb5bd', w: '#ffb703', a: '#ff5400' }, DRUMMER: { w: '#bc6c25' }, ANCHOR: { w: '#6c757d', a: '#a8dadc' }
 };
 
 const BOSS_SPRITES = {

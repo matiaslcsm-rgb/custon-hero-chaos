@@ -34,7 +34,16 @@ function aiMoveDirection(hero) {
         if (distance(hero, nearest) < range * AI.kiteDistance) return retreatStep(hero, enemies);
         return distance(hero, focus) > range ? stepToward(hero, focus) : { dx: 0, dy: 0 };
     }
-    return distance(hero, focus) > Math.max(1, hero.attackRange) ? stepToward(hero, focus) : { dx: 0, dy: 0 };
+    if (distance(hero, focus) > Math.max(1, hero.attackRange)) return stepToward(hero, focus);
+    return movesToFight(hero) ? circleStep(hero, focus) : { dx: 0, dy: 0 };
+}
+
+// Héroes que ganan algo al moverse (innato con AL_MOVERSE, ej: Danza Cinética): en vez de quedarse quietos, giran
+// alrededor del objetivo sin salir de su alcance (se puede atacar caminando).
+function movesToFight(hero) { return !!(hero.innate && hero.innate.tags && hero.innate.tags.includes('AL_MOVERSE')); }
+function circleStep(hero, target) {
+    const next = circleNext(hero, target);
+    return next ? { dx: Math.sign(next.x - hero.x), dy: Math.sign(next.y - hero.y) } : { dx: 0, dy: 0 };
 }
 
 function stepToward(hero, target) {

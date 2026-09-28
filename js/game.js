@@ -377,6 +377,7 @@ function updateHero(hero, arena, dt) {
         hero.y = Math.max(0, Math.min(ROWS - 1, hero.y + dir.dy));
         hero.moveTimer = 0;
         if (hero.x !== x || hero.y !== y) {
+            emit(hero, 'onMove', { steps: 1 });
             if (MOVE_ATTACK_RULE === 'reset' || (MOVE_ATTACK_RULE === 'reset-ranged' && isRanged(hero))) hero.attackTimer = 0;
             // "está caminando" hasta que le tocaría dar el próximo paso
             hero.movingUntil = gameClock + hero.moveInterval / (effMoveMult(hero) * MOVE_SPEED_MULT) + dt;

@@ -172,7 +172,7 @@ El cálculo de daño suma lo que haya, sin conocer cada habilidad.
 
 ## 6. Roster y criterios para agregar un héroe
 
-### Roster actual (9 héroes)
+### Roster actual (10 héroes)
 | Héroe | Atributo | Rol | Innato |
 |---|---|---|---|
 | Axe `@` | Fuerza | Tanque de contraataque | Contraataque |
@@ -184,6 +184,24 @@ El cálculo de daño suma lo que haya, sin conocer cada habilidad.
 | Nigromante `N` | Inteligencia | Drenaje de vida y desgaste | Cosecha de Almas |
 | Sabio del Vacío `Ø` | Inteligencia | Movilidad y ráfaga en área | Paso Etéreo |
 | Alquimista `L` | Inteligencia | Ácido y reducción de armadura | Gredas Transmutadoras |
+| Danzante Cinético `D` | Agilidad | Duelista móvil: el movimiento da daño | Danza Cinética |
+
+**Danzante Cinético** (diseño del usuario, héroe 10 de 3 de Agilidad que se suman de a uno: Danzante → Chakravin → Trampero).
+Ajustes al pasarlo al motor:
+- Símbolo `D` en vez de `J`: la `J` ya la usan los jefes de oleada en el modo letras.
+- Los enfriamientos del diseño ya venían con el ×0,75 aplicado; en el archivo se guardan sin él (6 → 8 s, etc.).
+- *Paso Fantasma:* se sacaron "inmunidad al desplazamiento" y "atravesar unidades" porque en el motor no hay empujones y
+  las unidades no bloquean el paso (ya se cumplen solos).
+- *Danza:* cuenta casillas caminadas (1 por paso) en los últimos 2 s; las cargas salen de ataques básicos. El paso de
+  Corte Errante cuenta como movimiento y, si completa la Danza, da 1 carga extra (evento nuevo `onDashHit`).
+- *Tormenta Cinética:* con cada ataque se mueve sola a la casilla siguiente alrededor del objetivo (sentido horario), lo
+  que además alimenta la Danza. El Ascenso da vel. de ataque permanente (stat nuevo de Ascenso: `atkSpeed`, en %).
+- Motor: evento nuevo `onMove { steps }`, etiqueta nueva `AL_MOVERSE`. La IA de los héroes con innato `AL_MOVERSE` gira
+  alrededor del objetivo mientras le pega en vez de quedarse quieta.
+- *Ojo:* Ritmo Letal se parece al combo de Velocidad Letal (Asesino): se dejó porque es pasiva y suma vel. de ataque.
+- Contra: creep nuevo **Ancla** (ver §8).
+- **Medido** (53 partidas de 8 héroes con 10 en el roster): gana el 45% de sus duelos (objetivo 35-65%) y 6 de 53 partidas
+  (~11%, lo esperable con 8 de 10 héroes por partida). La IA llega a 5 cargas de Danza seguido (427 veces en 12 partidas).
 
 Los 5 magos se diseñaron con Gemini (con el prompt de `docs/prompt-heroes.md`) y se ajustaron al motor.
 Cada héroe vive en su propio archivo: `js/data/heroes/<héroe>.js`.
@@ -325,6 +343,7 @@ Cada tipo de creep tiene una **mecánica** y un **contra**. Todo está en `js/da
 | **Kamikaze** `k` | Explota al llegar a vos | Matarlo a distancia |
 | **Aturdidor** `t` | Cada 2 golpes aturde 1,5 s | Resistencia al control (**Botas Firmes**) |
 | **Ladrón** `$` | Roba 20 de oro por golpe y huye; si lo matás, recuperás +50% | Ralentizar, aturdir, rango |
+| **Ancla** `q` | Rango 3; cada golpe ralentiza 25% y quita 15% de evasión por 3 s (contra del Danzante Cinético). Tema de oleada **Abordaje** | Resistencia al control (**Botas Firmes**) |
 | **Brujo** `w` | Magia a distancia; cada 5 s un rayo que hace daño mágico y **aturde** 1,2 s; objetivo prioritario | Inmunidad mágica (**Égida**), resistencia mágica o al control |
 | **Escarchador** `f` | Ataques mágicos a distancia que **ralentizan** 30% | Resistencia al control (**Botas Firmes**) |
 | **Ballestero** `z` | Rango 6, golpes lentos y fuertes | Vida y armadura (**Corazón del Titán**) o alcanzarlo |

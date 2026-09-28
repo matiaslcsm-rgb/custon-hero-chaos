@@ -86,6 +86,7 @@
 <script src="../js/data/heroes/necromancer.js"></script>
 <script src="../js/data/heroes/voidsage.js"></script>
 <script src="../js/data/heroes/alchemist.js"></script>
+<script src="../js/data/heroes/dancer.js"></script>
 <script src="../js/data/items.js"></script>
 <script src="../js/data/neutrals.js"></script>
 <script src="../js/data/guides.js"></script>
@@ -101,8 +102,8 @@ const ATTR = { STR: 'Fuerza', AGI: 'Agilidad', INT: 'Inteligencia' };
 const ATTR_ORDER = ['STR', 'AGI', 'INT'];
 const TODAY = new Date().toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
 
-// Resultados medidos con simulaciones (34 partidas de 8 héroes con la IA). Actualizar al volver a medir.
-const DUEL_WINRATE = { ALCHEMIST: 74, AXE: 71, FROSTWITCH: 68, SNIPER: 63, ARCANIST: 59, ASSASSIN: 45, VOIDSAGE: 37, NECROMANCER: 24, VAMPIRE: 17 };
+// Resultados medidos con simulaciones (53 partidas de 8 héroes con la IA, 10 en el roster). Actualizar al volver a medir.
+const DUEL_WINRATE = { SNIPER: 79, ALCHEMIST: 79, FROSTWITCH: 70, AXE: 66, ASSASSIN: 61, ARCANIST: 54, DANCER: 45, VOIDSAGE: 44, NECROMANCER: 31, VAMPIRE: 17 };
 
 spritesOn = true;
 const heroes = Object.values(HERO_TEMPLATES).sort((a, b) => ATTR_ORDER.indexOf(a.primaryAttr) - ATTR_ORDER.indexOf(b.primaryAttr));
@@ -209,12 +210,12 @@ function balance() {
         return `<tr><td>${t.name}</td><td>${attrTag(t.primaryAttr)}</td><td><span class="bar" style="width:${(w || 0) * 1.6}px"></span>${w ?? '—'}%</td></tr>`;
     }).join('');
     return `<section><h2>3. Balance medido</h2>
-        <p>Victorias en duelos 1v1 en 34 partidas simuladas de 8 héroes (la IA juega sola: draftea, compra, apuesta y pelea).
+        <p>Victorias en duelos 1v1 en 53 partidas simuladas de 8 héroes (la IA juega sola: draftea, compra, apuesta y pelea).
         Con muestras de unas 18 partidas el ruido es de ±10 puntos; desde 30 partidas los números son confiables.</p>
         <table><tr><th>Héroe</th><th>Atributo</th><th>Duelos ganados</th></tr>${rows}</table>
         <div class="note warn"><b>Temas abiertos</b><ul>
             <li>En el formato de un duelo por ronda gana el último en pie, así que decide la <b>supervivencia contra creeps</b>:
-            el Sniper ganó 8 de 14 partidas largas y el Nigromante 4. Hay que balancearlo.</li>
+            el Sniper ganó 23 de 53 partidas (y el 79% de sus duelos); lo siguen el Vampiro y el Nigromante con 11. Hay que balancearlo.</li>
             <li><b>Guerrero Vampiro</b> y <b>Nigromante</b> siguen flojos en duelo (en duelo la curación se reduce 60%, salvo el robo de vida).</li>
         </ul></div>
         <div class="note"><b>Reglas que afectan a todos los héroes</b><ul>
@@ -274,7 +275,7 @@ function requirements() {
         </table>
         <h3>Objetivo de balance</h3>
         <ul>
-            <li>Duelos: entre ~35% y ~65% de victorias en 30+ partidas simuladas (hoy el rango real es 17%–74%).</li>
+            <li>Duelos: entre ~35% y ~65% de victorias en 30+ partidas simuladas (hoy el rango real es 17%–79%).</li>
             <li>Creeps: que no domine las partidas largas por supervivencia (el caso actual del Sniper).</li>
             <li>La IA tiene que poder ganar con él sola (draft, tienda y combate).</li>
         </ul>

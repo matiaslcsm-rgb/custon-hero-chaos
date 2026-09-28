@@ -811,6 +811,58 @@ test('Brujo: rayo cada 5s con daño mágico y aturdimiento; Escarchador ralentiz
     checkNear(effAtkSpeed(ally) / ally.atkSpeed, 1 + CREEP_TYPES.DRUMMER.auraAtkSpeed, 'aliado acelerado');
 });
 
+test('Ancla: cada golpe ralentiza y quita evasión', () => {
+    newGame('AXE');
+    const ev = effEvasion(player);
+    const a = spawnType('ANCHOR', { x: player.x + 3, attackTimer: 99 });
+    updateCreep(a, 0.016);
+    checkNear(effMoveMult(player), 1 - CREEP_TYPES.ANCHOR.slow, 'ralentizado');
+    checkNear(effEvasion(player), ev - CREEP_TYPES.ANCHOR.evasionLoss, 'sin evasión');
+});
+
+test('Danza Cinética: moverse 2 casillas y pegar da cargas; con 5, el próximo golpe hace un golpe extra', () => {
+    newGame('DANCER');
+    const c = dummy({ hp: 5000, maxHp: 5000 });
+    const inn = player.innate;
+    resolveBasicHit(player, c, 10, false);
+    check(!getEffect(player, 'DANCER_DANCE'), 'quieto no carga');
+    emit(player, 'onMove', { steps: 1 }); emit(player, 'onMove', { steps: 1 });
+    resolveBasicHit(player, c, 10, false);
+    checkEq(getEffect(player, 'DANCER_DANCE').data.charges, 1, 'una carga');
+    checkNear(effEvasion(player), player.evasion + inn.evasionPerCharge, '+1% evasión por carga');
+    for (let i = 0; i < 4; i++) resolveBasicHit(player, c, 10, false);
+    checkEq(getEffect(player, 'DANCER_DANCE').data.charges, 5, 'cinco cargas');
+    const hp = c.hp;
+    resolveBasicHit(player, c, 10, false);
+    checkEq(hp - c.hp, 10 + Math.round(player.atk * inn.burstMult), 'golpe normal + golpe extra');
+    check(!getEffect(player, 'DANCER_DANCE'), 'consumió las cargas');
+    gameClock += inn.moveWindow + 0.1;
+    resolveBasicHit(player, c, 10, false);
+    check(!getEffect(player, 'DANCER_DANCE'), 'el movimiento viejo ya no cuenta');
+});
+
+test('Ritmo Letal: suma daño contra el mismo objetivo y se borra al cambiar', () => {
+    newGame('DANCER');
+    const skill = learn('DANCER_RHYTHM', 1);
+    const a = dummy(), b = dummy({ y: player.y + 1 });
+    const hitDmg = t => { const ctx = { target: t, dmg: 100 }; emit(player, 'beforeAttack', ctx); return ctx.dmg; };
+    checkNear(hitDmg(a), 100, 'primer golpe sin bonus');
+    checkNear(hitDmg(a), 100 * (1 + val(skill, player, 'dmgPerStack')), 'segundo golpe con 1 carga');
+    checkNear(hitDmg(b), 100, 'cambiar de objetivo borra las cargas');
+});
+
+test('Tormenta Cinética: onda cada N ataques y +vel. de ataque permanente por baja (Ascenso)', () => {
+    newGame('DANCER');
+    const ult = learn('DANCER_STORM', 1);
+    const c = dummy({ hp: 5000, maxHp: 5000 }), other = dummy({ x: player.x, y: player.y + 1, hp: 5000, maxHp: 5000 });
+    tryCastSkill(player, ult);
+    for (let i = 0; i < val(ult, player, 'waveEvery'); i++) resolveBasicHit(player, c, 1, false);
+    check(other.hp < 5000, 'la onda golpeó al de al lado');
+    const as = player.atkSpeed;
+    emit(player, 'onKill', { victim: c });
+    checkNear(player.atkSpeed, as + player.baseAtkSpeed * val(ult, player, 'atkSpeedPerKill') / 100, 'Ascenso: vel. de ataque permanente');
+});
+
 test('Área de Descanso: al terminar la oleada vas ahí y volvés con vida, maná completos y sin mejoras temporales', () => {
     newGame('AXE');
     waveNumber = 1;

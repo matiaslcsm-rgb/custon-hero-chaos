@@ -10,6 +10,7 @@ const TAGS = {
     'AL_MATAR': 'Se activa al eliminar enemigos',
     'AL_RECIBIR_DAÑO': 'Se activa al recibir daño',
     'AL_LANZAR': 'Se activa al lanzar habilidades',
+    'AL_MOVERSE': 'Se activa o mejora al moverse',
     'CRÍTICO': 'Usa o mejora los golpes críticos',
     'ROBO_VIDA': 'Cura con el daño causado',
     'CURACIÓN': 'Recupera vida (regeneración, curaciones directas)',

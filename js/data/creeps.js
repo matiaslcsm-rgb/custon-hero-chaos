@@ -166,6 +166,17 @@ const CREEP_TYPES = {
             killer.gold += back;
             log(`💰 Recuperaste ${back} de oro del Ladrón.`);
         }
+    },
+    // Contra del Danzante Cinético: frena a los que viven de moverse y esquivar
+    ANCHOR: {
+        key: 'ANCHOR', label: 'Ancla', symbol: 'q', color: '#457b9d', hp: 50, atk: 9, atkSpeed: 0.7, moveInterval: 300, range: 3, gold: 10, xp: 22, armor: 2, bossable: true,
+        slow: 0.25, evasionLoss: 15, anchorDuration: 3,
+        mechanic: 'Lanza un ancla a distancia (rango 3): cada golpe te ralentiza 25% y te quita 15% de evasión por 3s.',
+        counter: 'Resistencia al control o no depender de la evasión', counterItem: 'BOOTS',
+        onAttack(c, target, result) {
+            if (result.evaded || !target.isAlive()) return;
+            addEffect(target, { id: 'ANCHOR_CHAIN', name: 'Anclado', duration: this.anchorDuration, mods: { moveSpeedPct: -this.slow, evasion: -this.evasionLoss } });
+        }
     }
 };
 
@@ -189,6 +200,7 @@ const WAVE_THEMES = [
     [ // oleada 4
         { name: 'Emboscada', groups: [{ type: 'THIEF', count: 2 }, { type: 'STUNNER', count: 3 }, { type: 'SPECTER', count: 2 }, { type: 'SHAMAN', count: 2 }], boss: 'STUNNER' },
         { name: 'Asedio', groups: [{ type: 'ARMORED', count: 2 }, { type: 'SHAMAN', count: 3 }, { type: 'HEALER', count: 2 }, { type: 'STUNNER', count: 2 }], boss: 'ARMORED' },
-        { name: 'Tormenta Arcana', groups: [{ type: 'WARLOCK', count: 2 }, { type: 'FROSTCASTER', count: 2 }, { type: 'SHAMAN', count: 2 }, { type: 'HEALER', count: 1 }, { type: 'DRUMMER', count: 1 }], boss: 'WARLOCK' }
+        { name: 'Tormenta Arcana', groups: [{ type: 'WARLOCK', count: 2 }, { type: 'FROSTCASTER', count: 2 }, { type: 'SHAMAN', count: 2 }, { type: 'HEALER', count: 1 }, { type: 'DRUMMER', count: 1 }], boss: 'WARLOCK' },
+        { name: 'Abordaje', groups: [{ type: 'ANCHOR', count: 3 }, { type: 'SCOUT', count: 2 }, { type: 'GRUNT', count: 3 }, { type: 'STUNNER', count: 1 }], boss: 'ANCHOR' }
     ]
 ];
