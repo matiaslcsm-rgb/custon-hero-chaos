@@ -611,14 +611,26 @@ test('Rayo Arco: salta entre varios enemigos y hace el mismo daño en cada salto
     checkEq(far.hp, 9999, 'no llega a uno lejos de la cadena');
 });
 
-test('Rayo Relámpago: daño directo y aturde', () => {
+test('Rayo Relámpago: proyectil real que viaja y aturde; si apuntás a un punto vacío, no le pega a nadie', () => {
     newGame('ZEUS');
     const s = learn('ZEUS_BOLT', 1);
-    const c = dummy({ hp: 9999, maxHp: 9999 });
+    const c = dummy({ hp: 9999, maxHp: 9999 }); // adyacente: sin aimPoint, cast() cae en nearestEnemy como destino
     s.cast(player);
+    checkEq(player.arena.projectiles.length, 1, 'dispara un proyectil (no daña al instante)');
+    checkEq(c.hp, 9999, 'no le pega apenas se lanza, tiene que viajar');
+    for (let i = 0; i < 30 && player.arena.projectiles.length; i++) updateProjectiles(player.arena, 0.05);
+    checkEq(player.arena.projectiles.length, 0, 'el proyectil llega y se consume');
     const expected = magicDmg(valueAt(s, 'baseDmg', 1) + player.int * valueAt(s, 'intRatio', 1));
-    checkEq(9999 - c.hp, expected, 'daño');
+    checkEq(9999 - c.hp, expected, 'daño al llegar');
     check(hasFlag(c, 'stun'), 'aturdido');
+
+    // Apuntando a un punto vacío (lejos de cualquier enemigo, fuera del camino del rayo): no le pega a nadie.
+    const off = dummy({ x: player.x, y: player.y + 5, hp: 9999, maxHp: 9999 }); // lejos de la línea de tiro
+    player.aimPoint = { x: player.x + 5, y: player.y };
+    s.cast(player);
+    player.aimPoint = null;
+    for (let i = 0; i < 30 && player.arena.projectiles.length; i++) updateProjectiles(player.arena, 0.05);
+    checkEq(off.hp, 9999, 'apuntar a un punto vacío no le pega a nadie');
 });
 
 test('Nimbo de Tormenta: daño en área alrededor de Zeus', () => {
@@ -1658,6 +1670,20 @@ test('Apuntar con el mouse: la habilidad va al enemigo más cercano al cursor (d
     player.mana = player.maxMana;
     check(castAt(player, skill, far.x, far.y), 'se lanzó');
     check(far.hp < 5000 && near.hp === 5000, 'le pegó al del cursor, no al más cercano');
+});
+
+test('pointTarget (proyectil de habilidad): a diferencia de nearestEnemy, si apuntás mal con el mouse no le pega a nadie', () => {
+    newGame('ZEUS');
+    const skill = learn('ZEUS_BOLT', 1);
+    check(isAimedSkill(skill), 'se apunta con el mouse');
+    check(skill.pointTarget, 'está marcada como punto de efecto');
+    // A más de 4 del jugador para que no lo alcance de paso el innato Campo Estático (radio 4 alrededor tuyo).
+    const c = dummy({ hp: 9999, maxHp: 9999 });
+    c.x = player.x; c.y = player.y + 5;
+    // Clic bien lejos del enemigo y fuera de su línea de tiro (con nearestEnemy pegaría igual; acá, no).
+    check(castAt(player, skill, player.x + 5, player.y), 'se lanzó igual (había rango para el punto)');
+    for (let i = 0; i < 30 && player.arena.projectiles.length; i++) updateProjectiles(player.arena, 0.05);
+    checkEq(c.hp, 9999, 'clic errado, no le pegó a nadie');
 });
 
 test('Clic derecho: el héroe camina hasta el destino; el teclado lo cancela', () => {

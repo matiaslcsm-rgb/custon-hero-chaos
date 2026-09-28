@@ -910,17 +910,22 @@ function render() {
 
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     arena.creeps.forEach(c => { if (c.isAlive()) drawUnit(c, c.color, c.symbol, drawPos(c, dt), { glow: c.isBoss || c.isRoundBoss, big: c.isRoundBoss }); });
-    // Proyectiles con estela, del color de quien los disparó
+    // Proyectiles con estela, del color de quien los disparó (o el propio de la habilidad, ver vfx en su definición)
     arena.projectiles.forEach(p => {
-        const color = p.attacker.isHero ? heroColor(p.attacker) : p.attacker.color || '#fefae0';
+        const color = (p.vfx && p.vfx.color) || (p.attacker.isHero ? heroColor(p.attacker) : p.attacker.color || '#fefae0');
         p.trail = p.trail || [];
         p.trail.push([p.x, p.y]); if (p.trail.length > 6) p.trail.shift();
         p.trail.forEach(([x, y], i) => {
             ctx.globalAlpha = (i + 1) / p.trail.length * 0.5; ctx.fillStyle = color;
-            ctx.beginPath(); ctx.arc(x * TILE + TILE / 2, y * TILE + TILE / 2, 1.5 + i * 0.3, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(x * TILE + TILE / 2, y * TILE + TILE / 2, (p.radius ? 2.2 : 1.5) + i * 0.3, 0, Math.PI * 2); ctx.fill();
         });
-        ctx.globalAlpha = 1; ctx.fillStyle = p.isCrit ? '#ffd166' : '#fefae0';
-        ctx.beginPath(); ctx.arc(p.x * TILE + TILE / 2, p.y * TILE + TILE / 2, p.isCrit ? 4 : 3, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = 1; ctx.fillStyle = p.isCrit ? '#ffd166' : color;
+        ctx.beginPath(); ctx.arc(p.x * TILE + TILE / 2, p.y * TILE + TILE / 2, p.isCrit ? 4 : (p.radius ? 5 : 3), 0, Math.PI * 2); ctx.fill();
+        if (p.radius) { // proyectil de habilidad con área: aro tenue mostrando qué va tocando mientras viaja
+            ctx.globalAlpha = 0.22; ctx.strokeStyle = color; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.arc(p.x * TILE + TILE / 2, p.y * TILE + TILE / 2, p.radius * TILE, 0, Math.PI * 2); ctx.stroke();
+            ctx.globalAlpha = 1;
+        }
     });
     arena.heroes.forEach(h => {
         if (h.eliminated) return;

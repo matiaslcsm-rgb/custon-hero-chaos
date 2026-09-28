@@ -11,13 +11,20 @@
 let targeting = null;               // { skill } mientras se está apuntando una habilidad
 const mouse = { x: 0, y: 0, over: false }; // posición del cursor en casillas (con decimales)
 
-// Una habilidad necesita apuntar si elige un enemigo con nearestEnemy (así funciona sola para héroes nuevos).
-function isAimedSkill(skill) { return skill.kind === 'active' && /nearestEnemy\(/.test(String(skill.cast)); }
+// Una habilidad necesita apuntar si elige un enemigo con nearestEnemy (así funciona sola para héroes nuevos)
+// o si declara pointTarget: true (proyectil de habilidad que viaja al punto exacto donde clickeaste, ver
+// fireSkillProjectile en combat.js — a diferencia de nearestEnemy, esta sí puede fallar si apuntás mal).
+function isAimedSkill(skill) { return skill.kind === 'active' && (skill.pointTarget || /nearestEnemy\(/.test(String(skill.cast))); }
 
 // Alcance que se muestra al apuntar: el valor 'range' de la habilidad o, si no tiene, el rango de ataque + 1 (aproximado).
 function aimRange(skill, hero) {
     const r = skill.values && skill.values.range !== undefined ? val(skill, hero, 'range') : undefined;
     return r !== undefined ? r : effRange(hero) + 1;
+}
+// Radio de área que se telegrafía en el cursor para las de pointTarget (ver fireSkillProjectile en combat.js).
+function skillRadius(skill, hero) {
+    const r = skill.values && skill.values.radius !== undefined ? val(skill, hero, 'radius') : undefined;
+    return r !== undefined ? r : 0.6;
 }
 
 function startTargeting(skill) {
@@ -137,10 +144,20 @@ function drawMouseOverlay(arena) {
     ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.globalAlpha = 0.8;
     ctx.beginPath(); ctx.arc(px(player.rx ?? player.x), px(player.ry ?? player.y), aimRange(targeting.skill, player) * TILE, 0, Math.PI * 2); ctx.stroke();
     ctx.globalAlpha = 1;
-    const target = aimedEnemy();
-    if (target) {
-        ctx.strokeStyle = '#ff477e'; ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.arc(px(target.rx ?? target.x), px(target.ry ?? target.y), TILE * 0.6, 0, Math.PI * 2); ctx.stroke();
+    if (targeting.skill.pointTarget) {
+        // Punto de efecto: círculo de área en el cursor (adónde va a viajar y a quién le va a pegar si llega ahí).
+        // No engancha a ningún enemigo: si lo movés lejos de todos, el hechizo falla.
+        const radius = skillRadius(targeting.skill, player);
+        ctx.fillStyle = color; ctx.globalAlpha = 0.15;
+        ctx.beginPath(); ctx.arc(px(mouse.x), px(mouse.y), radius * TILE, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = 0.9; ctx.strokeStyle = color; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(px(mouse.x), px(mouse.y), radius * TILE, 0, Math.PI * 2); ctx.stroke();
+    } else {
+        const target = aimedEnemy();
+        if (target) {
+            ctx.strokeStyle = '#ff477e'; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.arc(px(target.rx ?? target.x), px(target.ry ?? target.y), TILE * 0.6, 0, Math.PI * 2); ctx.stroke();
+        }
     }
     if (mouse.over) {
         ctx.strokeStyle = color; ctx.lineWidth = 1.5;

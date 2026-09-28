@@ -62,17 +62,28 @@ registerHero({
         }
     },
     ZEUS_BOLT: {
-        id: 'ZEUS_BOLT', name: 'Rayo Relámpago', kind: 'active',
+        id: 'ZEUS_BOLT', name: 'Rayo Relámpago', kind: 'active', pointTarget: true,
         tags: ['MÁGICO', 'CONTROL'],
-        values: { cooldown: [7, 6, 5, 4], manaCost: [85, 95, 105, 115], baseDmg: [100, 165, 230, 295], intRatio: 0.7, stun: [0.3, 0.4, 0.5, 0.6], range: 6 },
-        description: 'Golpea al enemigo más cercano (rango {range}) con un rayo directo: {baseDmg} + {intRatio%} de tu Inteligencia como daño mágico y lo aturde {stun}s.',
+        values: { cooldown: [7, 6, 5, 4], manaCost: [85, 95, 105, 115], baseDmg: [100, 165, 230, 295], intRatio: 0.7, stun: [0.3, 0.4, 0.5, 0.6], range: 6, speed: 14, radius: 0.8 },
+        description: 'Dispara un rayo hacia donde apuntes (rango {range}, radio {radius}): {baseDmg} + {intRatio%} de tu Inteligencia como daño mágico y aturde {stun}s a quien toque. Proyectil real: si apuntás mal y no hay nadie en el área, no le pega a nadie.',
+        vfx: { color: '#ffe066' },
+        // pointTarget: a diferencia de las demás (que usan nearestEnemy y siempre le "enganchan" al más cercano
+        // al cursor), esta viaja de verdad hacia el punto exacto donde clickeaste — con su propia velocidad y
+        // radio — y puede fallar. Sin mouse de por medio (teclado o la IA) apunta al enemigo más cercano.
         cast(caster) {
-            const target = nearestEnemy(caster, val(this, caster, 'range'));
-            if (!target) { log('Rayo Relámpago: sin enemigo en rango.'); return false; }
+            const range = val(this, caster, 'range');
+            const aim = caster.aimPoint || nearestEnemy(caster, range);
+            if (!aim || Math.hypot(aim.x - caster.x, aim.y - caster.y) > range) { log('Rayo Relámpago: sin objetivo en rango.'); return false; }
             const dmg = val(this, caster, 'baseDmg') + caster.int * val(this, caster, 'intRatio');
-            const { dealt } = dealDamage(caster, target, dmg, 'magical');
-            if (target.isAlive()) addEffect(target, { id: 'STUN', name: 'Aturdido', duration: val(this, caster, 'stun'), flags: ['stun'] });
-            log(`🌩️ ¡Rayo Relámpago a ${target.label}! (-${dealt} HP)`);
+            const stun = val(this, caster, 'stun');
+            fireSkillProjectile(caster, {
+                tx: aim.x, ty: aim.y, speed: val(this, caster, 'speed'), radius: val(this, caster, 'radius'),
+                dmg, dmgType: 'magical', vfx: this.vfx, skillName: this.name,
+                onHit: (target, dealt) => {
+                    if (target.isAlive()) addEffect(target, { id: 'STUN', name: 'Aturdido', duration: stun, flags: ['stun'] });
+                    log(`🌩️ ¡Rayo Relámpago a ${target.label}! (-${dealt} HP)`);
+                }
+            });
             return true;
         }
     },

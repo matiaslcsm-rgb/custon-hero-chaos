@@ -181,10 +181,46 @@ function fireProjectile(attacker, target, dmg, isCrit) {
     if (attacker.isHero && fxArena(attacker)) sfx('shoot');
     attacker.arena.projectiles.push({ attacker, x: attacker.x, y: attacker.y, target, dmg, isCrit, speed: attacker.projectileSpeed || 10 });
 }
+
+// Proyectil de habilidad: a diferencia del de arriba, no persigue a un enemigo — viaja en línea recta hacia
+// un punto fijo (donde apuntó el jugador, o la posición del enemigo más cercano si no hay mouse de por medio,
+// ver isAimedSkill/pointTarget en mouse.js) y daña en área (opts.radius) a quien encuentre en el camino. Si
+// apuntás mal y no hay nadie en el radio cuando termina de viajar, no le pega a nadie: es la idea, como un
+// hechizo de habilidad en Dota 2. Cada objetivo recibe el golpe una sola vez (opts.onHit por cada uno nuevo).
+// opts: { tx, ty, speed, radius, dmg, dmgType, vfx: {color, shape}, skillName, onHit(target), onArrive(x,y) }
+function fireSkillProjectile(attacker, opts) {
+    const dx = opts.tx - attacker.x, dy = opts.ty - attacker.y;
+    const dist = Math.hypot(dx, dy) || 0.0001;
+    if (attacker.isHero && fxArena(attacker)) sfx('shoot');
+    attacker.arena.projectiles.push({
+        attacker, kind: 'skill', x: attacker.x, y: attacker.y, tx: opts.tx, ty: opts.ty,
+        dx: dx / dist, dy: dy / dist, dist, traveled: 0, speed: opts.speed, radius: opts.radius,
+        dmg: opts.dmg, dmgType: opts.dmgType || 'magical', vfx: opts.vfx, skillName: opts.skillName,
+        onHit: opts.onHit, onArrive: opts.onArrive, hitSet: new Set()
+    });
+}
+
 function updateProjectiles(arena, dt) {
     const projectiles = arena.projectiles;
     for (let i = projectiles.length - 1; i >= 0; i--) {
         const p = projectiles[i];
+        if (p.kind === 'skill') {
+            const step = p.speed * dt;
+            p.traveled += step;
+            p.x += p.dx * step; p.y += p.dy * step;
+            enemiesOf(p.attacker).forEach(c => {
+                if (!c.isAlive() || p.hitSet.has(c) || Math.hypot(c.x - p.x, c.y - p.y) > p.radius) return;
+                p.hitSet.add(c);
+                const { dealt } = dealDamage(p.attacker, c, p.dmg, p.dmgType);
+                if (p.onHit) p.onHit(c, dealt);
+            });
+            if (p.traveled >= p.dist) {
+                if (p.onArrive) p.onArrive(p.tx, p.ty);
+                if (!p.hitSet.size && p.attacker.isHero && fxArena(p.attacker)) log(`${p.skillName}: no le pegó a nadie.`);
+                projectiles.splice(i, 1);
+            }
+            continue;
+        }
         if (!p.target.isAlive()) { projectiles.splice(i, 1); continue; }
         const dx = p.target.x - p.x, dy = p.target.y - p.y;
         const dist = Math.hypot(dx, dy);

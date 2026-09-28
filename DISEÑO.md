@@ -735,6 +735,35 @@ Todo en `js/fx.js`, **solo visual** (no cambia reglas) y solo para la arena que 
   **barra de maná** en los héroes, marcas de **aturdido** (✦✦) y **ralentizado** (❄).
 - **Fondo por arena** (sin grilla): pasto oscuro en las oleadas, piedra en los duelos, rojo volcánico en el jefe de ronda.
 
+### Proyectiles de habilidad (pointTarget) ✅ (pedido del usuario 2026-09-28)
+
+Antes, toda habilidad "apuntada" usaba `nearestEnemy()`: el mouse solo elegía *cuál* enemigo (el más cercano al
+cursor, dentro del alcance), pero el golpe era instantáneo y **nunca fallaba** si había alguien en rango. Ahora
+una habilidad puede declarar `pointTarget: true` y viajar de verdad como un proyectil propio (no uno que persigue
+una unidad, como los ataques básicos a distancia): vuela en línea recta hacia el punto exacto donde clickeaste,
+con su propia **velocidad** (`values.speed`) y **radio de daño en área** (`values.radius`), y si apuntaste mal —
+nadie quedó dentro del radio en el camino ni al llegar— **no le pega a nadie**. Más parecido a tirar un hechizo
+en Dota 2 que a un auto-target.
+
+- **Motor** (`js/combat.js`): `fireSkillProjectile(caster, {tx, ty, speed, radius, dmg, dmgType, vfx, onHit, onArrive})`
+  agrega un proyectil a `arena.projectiles` con `kind: 'skill'`; `updateProjectiles` lo mueve cada frame y aplica
+  daño a quien esté a `radius` de su posición actual (una sola vez por objetivo, `hitSet`). Al llegar a destino sin
+  tocar a nadie, loguea el fallo solo.
+- **Mouse** (`js/mouse.js`): `isAimedSkill` también entra en modo apuntar si `skill.pointTarget`. Mientras apuntás,
+  en vez del anillo enganchado al enemigo más cercano al cursor, se dibuja un **círculo de área relleno** en la
+  posición exacta del mouse (telégrafo de adónde va a llegar y a quién alcanzaría si tirás ahí).
+- **Sin mouse** (teclado o la IA): `cast()` usa `caster.aimPoint || nearestEnemy(caster, range)` como punto — cae
+  al enemigo más cercano, así que sigue funcionando solo, pero mantiene el chance real de fallo si el objetivo se
+  mueve durante el viaje del proyectil.
+- **Visual** (`js/ui.js`): los proyectiles de habilidad usan el color de `skill.vfx.color` (si no, el del héroe) y
+  muestran un aro tenue de su radio mientras viajan, para que se note que son "de área" y no un punto simple.
+- **Primer caso convertido:** Rayo Relámpago de Zeus (`ZEUS_BOLT`, `js/data/heroes/zeus.js`) — antes golpeaba
+  instantáneo al más cercano, ahora es un proyectil con velocidad 14 y radio 0,8 que puede fallar.
+- **Pendiente:** convertir el resto de las habilidades del roster que tengan sentido como punto de efecto (nukes
+  de una sola habilidad, sobre todo de los magos); las de área alrededor del propio héroe (ej. Nimbo de Tormenta,
+  Giro de Combate) no necesitan esto porque ya no se apuntan a otro punto. También falta una animación por forma
+  de habilidad más allá del color (`vfx.shape`: rayo, orbe, etc.) si se quiere ir más lejos que un punto con estela.
+
 ### Paso 2: HUD estilo MOBA ✅
 - **Barra superior:** ronda, fase y tiempo; a la derecha vidas, oro, puntos y puesto, y el piloto automático.
 - **Izquierda:** ranking compacto (tooltip con puntos, oro, nivel y duelos; clic para mirar su arena).

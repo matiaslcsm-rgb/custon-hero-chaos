@@ -43,10 +43,14 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 | Regla: al menos 1 pasiva entre las 3 nativas (Axe, Sniper, Asesino y Vampiro convirtieron una activa) | ✅ |
 | Héroe 11: Zeus `Z` (fiel a Dota 2, pedido del usuario) + `mageSpellAmp` bajado de 100% a 25% (se saca del escalado, pasa a ítems) | ✅ (sin medir duelos) |
 | Elegir cualquier héroe: panel desplegable desde la izquierda en la elección de héroe, los 11 sin depender de las 3 opciones al azar; arrancás con 0g en vez de 100g | ✅ |
+| Proyectiles de habilidad (`pointTarget`): viajan de verdad al punto donde clickeaste, con velocidad y radio propios, y pueden fallar si apuntás mal (ver DISEÑO.md §9 quater). Primer caso: Rayo Relámpago de Zeus | ✅ (falta convertir el resto del roster) |
 
 ## Pendientes y temas abiertos
 - **En curso:** 3 héroes de Agilidad del usuario, de a uno y midiendo cada uno: Danzante ✅ → **Chakravin `Y`** (proyectiles
   de habilidad que vuelven + creep Guardián de Hierro) → **Trampero `P`** (zonas en el piso + creep Saltador).
+- **Proyectiles de habilidad:** convertir el resto de los nukes de un solo objetivo del roster a `pointTarget`
+  (sobre todo de los magos) y, más adelante, variar la forma del proyectil por habilidad (`vfx.shape`), no solo el
+  color. Ver DISEÑO.md §9 quater.
 - **Ítems:** lista de candidatos sin implementar en DISEÑO.md §7 (Orquídea, Mariposa, Tarrasque, Núcleo de Octarine y más;
   varios piden mecánica nueva: `silenced`, `cooldownReduction`, robo de vida mágico, `spellBlock`, `cyclone`). El usuario
   pidió tener la lista lista y decidir después cómo se van sumando.
