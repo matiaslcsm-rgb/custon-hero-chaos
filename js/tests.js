@@ -659,6 +659,98 @@ test('Ira del Dios del Trueno: golpea a TODOS los enemigos vivos, sin importar l
     checkEq(dead.hp, 0, 'no revive al que ya estaba muerto');
 });
 
+// El resto de los nukes de un solo objetivo del roster, convertidos a pointTarget (ver DISEÑO.md §9 quater):
+// mismo patrón que Rayo Relámpago, viajan de verdad y pueden fallar si apuntás a un punto vacío.
+test('Proyectil Arcano: proyectil de punto de efecto con área; si apuntás mal, no le pega a nadie', () => {
+    newGame('ARCANIST');
+    const s = learn('ARCANIST_BOLT', 1);
+    check(s.pointTarget, 'está marcado como punto de efecto');
+    const a = dummy({ hp: 9999, maxHp: 9999 }); // adyacente: sin aimPoint, cast() cae en nearestEnemy
+    const b = dummy({ x: a.x + 1, y: a.y, hp: 9999, maxHp: 9999 }); // dentro del radio de a
+    s.cast(player);
+    checkEq(a.hp, 9999, 'no daña al instante, tiene que viajar');
+    for (let i = 0; i < 30 && player.arena.projectiles.length; i++) updateProjectiles(player.arena, 0.05);
+    const expected = magicDmg(valueAt(s, 'baseDmg', 1) + player.int * valueAt(s, 'intRatio', 1));
+    checkEq(9999 - a.hp, expected, 'daño al del punto');
+    checkEq(9999 - b.hp, expected, 'y a quien estaba en el área alrededor');
+
+    a.hp = 0; b.hp = 0; // fuera de juego: que no lo vuelva a agarrar el segundo disparo, que pasa por su línea
+    const off = dummy({ x: player.x, y: player.y + 5, hp: 9999, maxHp: 9999 });
+    player.aimPoint = { x: player.x + 5, y: player.y };
+    s.cast(player);
+    player.aimPoint = null;
+    for (let i = 0; i < 30 && player.arena.projectiles.length; i++) updateProjectiles(player.arena, 0.05);
+    checkEq(off.hp, 9999, 'apuntar a un punto vacío no le pega a nadie');
+});
+
+test('Explosión Helada: proyectil de punto de efecto que aturde en área; si apuntás mal, no aturde a nadie', () => {
+    newGame('FROSTWITCH');
+    const s = learn('FROSTWITCH_BLAST', 1);
+    check(s.pointTarget, 'está marcado como punto de efecto');
+    const c = dummy({ hp: 9999, maxHp: 9999 });
+    s.cast(player);
+    checkEq(c.hp, 9999, 'no daña al instante, tiene que viajar');
+    for (let i = 0; i < 30 && player.arena.projectiles.length; i++) updateProjectiles(player.arena, 0.05);
+    const expected = magicDmg(valueAt(s, 'baseDmg', 1) + player.int * valueAt(s, 'intRatio', 1));
+    checkEq(9999 - c.hp, expected, 'daño al llegar');
+    check(hasFlag(c, 'stun'), 'aturdido');
+
+    c.hp = 0; // fuera de juego: que no lo vuelva a agarrar el segundo disparo, que pasa por su línea
+    const off = dummy({ x: player.x, y: player.y + 5, hp: 9999, maxHp: 9999 });
+    player.aimPoint = { x: player.x + 5, y: player.y };
+    s.cast(player);
+    player.aimPoint = null;
+    for (let i = 0; i < 30 && player.arena.projectiles.length; i++) updateProjectiles(player.arena, 0.05);
+    checkEq(off.hp, 9999, 'apuntar a un punto vacío no le pega a nadie');
+    check(!hasFlag(off, 'stun'), 'y sin daño no hay aturdimiento');
+});
+
+test('Drenaje de Esencia: proyectil de punto de efecto que cura al golpear; si falla, no cura', () => {
+    newGame('NECROMANCER');
+    const s = learn('NECROMANCER_DRAIN', 1);
+    check(s.pointTarget, 'está marcado como punto de efecto');
+    const c = dummy({ hp: 9999, maxHp: 9999 });
+    player.hp = 1;
+    s.cast(player);
+    checkEq(c.hp, 9999, 'no daña al instante, tiene que viajar');
+    for (let i = 0; i < 30 && player.arena.projectiles.length; i++) updateProjectiles(player.arena, 0.05);
+    const expected = magicDmg(valueAt(s, 'baseDmg', 1) + player.int * valueAt(s, 'intRatio', 1));
+    checkEq(9999 - c.hp, expected, 'daño al llegar');
+    checkEq(player.hp, Math.min(player.maxHp, 1 + Math.round(expected * valueAt(s, 'healPct', 1))), 'se cura según el daño hecho');
+
+    c.hp = 0; // fuera de juego: que no lo vuelva a agarrar el segundo disparo, que pasa por su línea
+    const off = dummy({ x: player.x, y: player.y + 5, hp: 9999, maxHp: 9999 });
+    const hpBefore = player.hp;
+    player.aimPoint = { x: player.x + 5, y: player.y };
+    s.cast(player);
+    player.aimPoint = null;
+    for (let i = 0; i < 30 && player.arena.projectiles.length; i++) updateProjectiles(player.arena, 0.05);
+    checkEq(off.hp, 9999, 'apuntar a un punto vacío no le pega a nadie');
+    checkEq(player.hp, hpBefore, 'y sin daño no hay curación');
+});
+
+test('Mezcla Inestable: proyectil de punto de efecto que aturde; si falla, no aturde a nadie', () => {
+    newGame('ALCHEMIST');
+    const s = learn('ALCHEMIST_BREW', 1);
+    check(s.pointTarget, 'está marcado como punto de efecto');
+    const c = dummy({ hp: 9999, maxHp: 9999 });
+    s.cast(player);
+    checkEq(c.hp, 9999, 'no daña al instante, tiene que viajar');
+    for (let i = 0; i < 30 && player.arena.projectiles.length; i++) updateProjectiles(player.arena, 0.05);
+    const expected = magicDmg(valueAt(s, 'baseDmg', 1) + player.int * valueAt(s, 'intRatio', 1));
+    checkEq(9999 - c.hp, expected, 'daño al llegar');
+    check(hasFlag(c, 'stun'), 'aturdido');
+
+    c.hp = 0; // fuera de juego: que no lo vuelva a agarrar el segundo disparo, que pasa por su línea
+    const off = dummy({ x: player.x, y: player.y + 5, hp: 9999, maxHp: 9999 });
+    player.aimPoint = { x: player.x + 5, y: player.y };
+    s.cast(player);
+    player.aimPoint = null;
+    for (let i = 0; i < 30 && player.arena.projectiles.length; i++) updateProjectiles(player.arena, 0.05);
+    checkEq(off.hp, 9999, 'apuntar a un punto vacío no le pega a nadie');
+    check(!hasFlag(off, 'stun'), 'y sin daño no hay aturdimiento');
+});
+
 // ============================================================ CREEPS E ÍTEMS DE CONTRA
 // Agrega un creep de un tipo al lado del jugador (o donde se indique).
 function spawnType(key, props = {}) {

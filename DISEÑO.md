@@ -757,12 +757,20 @@ en Dota 2 que a un auto-target.
   mueve durante el viaje del proyectil.
 - **Visual** (`js/ui.js`): los proyectiles de habilidad usan el color de `skill.vfx.color` (si no, el del héroe) y
   muestran un aro tenue de su radio mientras viajan, para que se note que son "de área" y no un punto simple.
-- **Primer caso convertido:** Rayo Relámpago de Zeus (`ZEUS_BOLT`, `js/data/heroes/zeus.js`) — antes golpeaba
-  instantáneo al más cercano, ahora es un proyectil con velocidad 14 y radio 0,8 que puede fallar.
-- **Pendiente:** convertir el resto de las habilidades del roster que tengan sentido como punto de efecto (nukes
-  de una sola habilidad, sobre todo de los magos); las de área alrededor del propio héroe (ej. Nimbo de Tormenta,
-  Giro de Combate) no necesitan esto porque ya no se apuntan a otro punto. También falta una animación por forma
-  de habilidad más allá del color (`vfx.shape`: rayo, orbe, etc.) si se quiere ir más lejos que un punto con estela.
+- **Convertidos (2026-09-28):** los nukes de un solo objetivo de los 6 magos del roster, todos con el mismo patrón
+  (`caster.aimPoint || nearestEnemy(...)` + `fireSkillProjectile`):
+  - Rayo Relámpago de Zeus (`ZEUS_BOLT`) — velocidad 14, radio 0,8, aturde.
+  - Proyectil Arcano del Arcanista (`ARCANIST_BOLT`) — velocidad 12, radio 2 (con salpicadura de área).
+  - Explosión Helada de la Bruja del Hielo (`FROSTWITCH_BLAST`) — velocidad 11, radio 2,5, aturde.
+  - Drenaje de Esencia del Nigromante (`NECROMANCER_DRAIN`) — velocidad 13, radio 0,6, cura según lo drenado.
+  - Mezcla Inestable del Alquimista (`ALCHEMIST_BREW`) — velocidad 12, radio 0,6, aturde.
+- **A propósito sin convertir:** las de área alrededor del propio héroe (Nimbo de Tormenta, Cero Absoluto, Giro de
+  Combate, etc.) no lo necesitan porque no se apuntan a otro punto; Distorsión Espacial del Sabio del Vacío
+  (`VOIDSAGE_BLINK`) es un blink, no un proyectil; Maldición de Marchitamiento del Nigromante (`NECROMANCER_CURSE`)
+  es un debuff sin daño, no un nuke.
+- **Pendiente:** el resto del roster fuera de los magos (Danzante, Asesino, Vampiro, Sniper), si algún nuke suyo
+  tiene sentido como punto de efecto. También falta una animación por forma de habilidad más allá del color
+  (`vfx.shape`: rayo, orbe, etc.) si se quiere ir más lejos que un punto con estela.
 
 ### Paso 2: HUD estilo MOBA ✅
 - **Barra superior:** ronda, fase y tiempo; a la derecha vidas, oro, puntos y puesto, y el piloto automático.

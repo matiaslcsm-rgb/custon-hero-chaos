@@ -20,17 +20,25 @@ registerHero({
     }
 }, {
     NECROMANCER_DRAIN: {
-        id: 'NECROMANCER_DRAIN', name: 'Drenaje de Esencia', kind: 'active',
+        id: 'NECROMANCER_DRAIN', name: 'Drenaje de Esencia', kind: 'active', pointTarget: true,
         tags: ['MÁGICO', 'ROBO_VIDA'],
-        values: { cooldown: [10, 9, 8, 7], manaCost: [40, 45, 50, 55], range: 5, baseDmg: [50, 85, 120, 155], intRatio: 0.5, healPct: [0.6, 0.7, 0.8, 0.9] },
-        description: 'Drena al enemigo más cercano (rango {range}): {baseDmg} + {intRatio%} de tu Inteligencia como daño mágico y te curás {healPct%} del daño hecho.',
+        values: { cooldown: [10, 9, 8, 7], manaCost: [40, 45, 50, 55], range: 5, baseDmg: [50, 85, 120, 155], intRatio: 0.5, healPct: [0.6, 0.7, 0.8, 0.9], radius: 0.6, speed: 13 },
+        description: 'Drena hacia donde apuntes (rango {range}): {baseDmg} + {intRatio%} de tu Inteligencia como daño mágico y te curás {healPct%} del daño hecho. Proyectil real: si apuntás mal, no le pega a nadie.',
+        vfx: { color: '#6a4c93' },
         cast(caster) {
-            const target = nearestEnemy(caster, val(this, caster, 'range'));
-            if (!target) { log('Drenaje de Esencia: sin enemigos en rango.'); return false; }
+            const range = val(this, caster, 'range');
+            const aim = caster.aimPoint || nearestEnemy(caster, range);
+            if (!aim || Math.hypot(aim.x - caster.x, aim.y - caster.y) > range) { log('Drenaje de Esencia: sin objetivo en rango.'); return false; }
             const dmg = val(this, caster, 'baseDmg') + caster.int * val(this, caster, 'intRatio');
-            const { dealt } = dealDamage(caster, target, dmg, 'magical');
-            const healed = healUnit(caster, dealt * val(this, caster, 'healPct'), { fromDamage: true });
-            log(`🩸 ¡Drenaje de Esencia! -${dealt} HP al enemigo, +${healed} HP propia.`);
+            const healPct = val(this, caster, 'healPct');
+            fireSkillProjectile(caster, {
+                tx: aim.x, ty: aim.y, speed: val(this, caster, 'speed'), radius: val(this, caster, 'radius'),
+                dmg, dmgType: 'magical', vfx: this.vfx, skillName: this.name,
+                onHit: (target, dealt) => {
+                    const healed = healUnit(caster, dealt * healPct, { fromDamage: true });
+                    log(`🩸 ¡Drenaje de Esencia a ${target.label}! -${dealt} HP, +${healed} HP propia.`);
+                }
+            });
             return true;
         }
     },

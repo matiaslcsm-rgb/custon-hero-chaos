@@ -42,17 +42,25 @@ registerHero({
         }
     },
     ALCHEMIST_BREW: {
-        id: 'ALCHEMIST_BREW', name: 'Mezcla Inestable', kind: 'active',
+        id: 'ALCHEMIST_BREW', name: 'Mezcla Inestable', kind: 'active', pointTarget: true,
         tags: ['MÁGICO', 'CONTROL'],
-        values: { cooldown: [12, 11, 10, 9], manaCost: [40, 45, 50, 55], range: 5, baseDmg: [60, 110, 160, 210], intRatio: 0.6, stunDuration: [0.8, 1.0, 1.2, 1.4] }, // aturdimiento más corto tras medir
-        description: 'Lanza un frasco al enemigo más cercano (rango {range}): {baseDmg} + {intRatio%} de tu Inteligencia como daño mágico y lo aturde {stunDuration}s.',
+        values: { cooldown: [12, 11, 10, 9], manaCost: [40, 45, 50, 55], range: 5, baseDmg: [60, 110, 160, 210], intRatio: 0.6, stunDuration: [0.8, 1.0, 1.2, 1.4], radius: 0.6, speed: 12 }, // aturdimiento más corto tras medir
+        description: 'Lanza un frasco hacia donde apuntes (rango {range}): {baseDmg} + {intRatio%} de tu Inteligencia como daño mágico y aturde {stunDuration}s a quien toque. Proyectil real: si apuntás mal, no le pega a nadie.',
+        vfx: { color: '#80ed99' },
         cast(caster) {
-            const target = nearestEnemy(caster, val(this, caster, 'range'));
-            if (!target) { log('Mezcla Inestable: sin objetivos en rango.'); return false; }
+            const range = val(this, caster, 'range');
+            const aim = caster.aimPoint || nearestEnemy(caster, range);
+            if (!aim || Math.hypot(aim.x - caster.x, aim.y - caster.y) > range) { log('Mezcla Inestable: sin objetivo en rango.'); return false; }
             const dmg = val(this, caster, 'baseDmg') + caster.int * val(this, caster, 'intRatio');
-            const { dealt } = dealDamage(caster, target, dmg, 'magical');
-            if (target.isAlive()) addEffect(target, { id: 'STUN', name: 'Aturdido', duration: val(this, caster, 'stunDuration'), flags: ['stun'] });
-            log(`💥 ¡Mezcla Inestable a ${target.label}! (-${dealt} HP)`);
+            const stunDuration = val(this, caster, 'stunDuration');
+            fireSkillProjectile(caster, {
+                tx: aim.x, ty: aim.y, speed: val(this, caster, 'speed'), radius: val(this, caster, 'radius'),
+                dmg, dmgType: 'magical', vfx: this.vfx, skillName: this.name,
+                onHit: (target, dealt) => {
+                    if (target.isAlive()) addEffect(target, { id: 'STUN', name: 'Aturdido', duration: stunDuration, flags: ['stun'] });
+                    log(`💥 ¡Mezcla Inestable a ${target.label}! (-${dealt} HP)`);
+                }
+            });
             return true;
         }
     },

@@ -20,24 +20,25 @@ registerHero({
     }
 }, {
     FROSTWITCH_BLAST: {
-        id: 'FROSTWITCH_BLAST', name: 'Explosión Helada', kind: 'active',
+        id: 'FROSTWITCH_BLAST', name: 'Explosión Helada', kind: 'active', pointTarget: true,
         tags: ['MÁGICO', 'ÁREA', 'CONTROL'],
-        values: { cooldown: [11, 10, 9, 8], manaCost: [40, 45, 50, 55], baseDmg: [60, 100, 140, 180], intRatio: 0.5, range: 5, radius: 2.5, stunDuration: [0.6, 0.8, 1.0, 1.2] }, // más corto tras medir
-        description: 'Rompe el suelo bajo el enemigo más cercano (rango {range}): {baseDmg} + {intRatio%} de tu Inteligencia como daño mágico y aturde {stunDuration}s a los enemigos en radio {radius}.',
+        values: { cooldown: [11, 10, 9, 8], manaCost: [40, 45, 50, 55], baseDmg: [60, 100, 140, 180], intRatio: 0.5, range: 5, radius: 2.5, stunDuration: [0.6, 0.8, 1.0, 1.2], speed: 11 }, // más corto tras medir
+        description: 'Rompe el suelo donde apuntes (rango {range}): {baseDmg} + {intRatio%} de tu Inteligencia como daño mágico y aturde {stunDuration}s a los enemigos en radio {radius}. Proyectil real: si apuntás mal, no le pega a nadie.',
+        vfx: { color: '#48cae4' },
         cast(caster) {
-            const target = nearestEnemy(caster, val(this, caster, 'range'));
-            if (!target) { log('Explosión Helada: sin enemigos cerca.'); return false; }
+            const range = val(this, caster, 'range');
+            const aim = caster.aimPoint || nearestEnemy(caster, range);
+            if (!aim || Math.hypot(aim.x - caster.x, aim.y - caster.y) > range) { log('Explosión Helada: sin objetivo en rango.'); return false; }
             const radius = val(this, caster, 'radius'), stun = val(this, caster, 'stunDuration');
             const dmg = val(this, caster, 'baseDmg') + caster.int * val(this, caster, 'intRatio');
-            let hits = 0;
-            enemiesOf(caster).forEach(c => {
-                if (c.isAlive() && Math.hypot(c.x - target.x, c.y - target.y) <= radius) {
-                    dealDamage(caster, c, dmg, 'magical');
-                    if (c.isAlive()) addEffect(c, { id: 'STUN', name: 'Aturdido', duration: stun, flags: ['stun'] });
-                    hits++;
+            fireSkillProjectile(caster, {
+                tx: aim.x, ty: aim.y, speed: val(this, caster, 'speed'), radius,
+                dmg, dmgType: 'magical', vfx: this.vfx, skillName: this.name,
+                onHit: (target, dealt) => {
+                    if (target.isAlive()) addEffect(target, { id: 'STUN', name: 'Aturdido', duration: stun, flags: ['stun'] });
+                    log(`❄️ ¡Explosión Helada a ${target.label}! (-${dealt} HP)`);
                 }
             });
-            log(`❄️ ¡Explosión Helada! ${hits} enemigo(s) aturdidos.`);
             return true;
         }
     },
