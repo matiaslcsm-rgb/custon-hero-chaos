@@ -437,3 +437,15 @@ kbd { background: #2a2e3a; border: 1px solid #555; border-bottom-width: 3px; pad
 .bd-bet:disabled { background: #333; color: #777; cursor: default; }
 .bd-chosen { color: #ffd166; font-size: 0.78rem; }
 .bet-step { font-weight: bold; }
+
+/* Íconos de ítems */
+.item-icon { image-rendering: pixelated; vertical-align: middle; }
+.item-icon.sm { width: 16px; height: 16px; margin-right: 4px; }
+.item-icon.md { width: 22px; height: 22px; }
+.item-slot { height: 30px; }
+.item-slot.neutral { gap: 4px; }
+.item-card .item-name .item-icon.sm { width: 22px; height: 22px; }
+#inventory-panel .destiny-row { display: flex; align-items: center; gap: 6px; background: #1c1f26; border: 1px solid #333; padding: 4px 6px; }
+#inventory-panel .destiny-row > span { flex: 1; }
+#inventory-panel button { background: #2a2e3a; color: #ffd166; border: 1px solid #555; font-family: inherit; font-size: 0.72rem; padding: 2px 8px; cursor: pointer; }
+#inventory-panel button:hover { border-color: #ffd166; }

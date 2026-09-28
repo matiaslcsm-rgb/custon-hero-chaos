@@ -34,7 +34,7 @@ function renderPauseMenu() {
         };
     });
     document.getElementById('pause-info').textContent = player
-        ? `${player.name} · ronda ${waveNumber}/${MAX_ROUNDS} · ${heroRank(player)}º con ${player.points} puntos` : '';
+        ? `${player.name} · ronda ${waveNumber} · ${aliveHeroes().length} héroes en juego · ${heroRank(player)}º con ${player.points} puntos` : '';
 }
 
 // --- GLOSARIO (códices) ---

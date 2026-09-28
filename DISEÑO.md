@@ -687,6 +687,10 @@ Todo en `js/fx.js`, **solo visual** (no cambia reglas) y solo para la arena que 
   automáticas, piloto automático, mapa grande) y Salir al menú. El glosario también está en el menú de inicio.
 - **Tutorial rediseñado:** 9 páginas (objetivo, ronda, teclado, mouse, habilidades, tienda, vidas, duelos, jefes), cada una
   con su color e ícono, tarjetas, teclas dibujadas, los sprites de los héroes y navegación por íconos o flechas.
+- **Íconos de ítems** (`js/itemicons.js`): 26 formas de 12×12 en pixel art (espada, daga, martillo, lanza, bastón, guante, bota,
+  armadura, escudo, capa, anillo, gema, cristal, orbe, corazón, máscara, cáliz, colmillo, rama, cinturón, libro, corona,
+  amuleto, farol, reloj, moneda) con el color de cada ítem; los 33 ítems y los 20 neutrales tienen el suyo. Aparecen en la
+  tienda, las recetas, el inventario, la guía, la oferta de neutrales y el glosario.
 - **Escenarios en pixel art** (`js/scenery.js`): pradera con sendero, matas, flores y piedras (oleadas); coliseo de losas con
   círculo de arena y antorchas en las esquinas (duelos); suelo volcánico con grietas y charcos de lava (jefe); claro con
   estanque y fuente, caminos, árboles y fogatas (sala de espera). Partes animadas: llamas, brillo de la lava y brasas,

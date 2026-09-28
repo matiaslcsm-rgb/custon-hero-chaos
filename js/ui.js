@@ -330,7 +330,7 @@ function renderNeutralPanel() {
     player.neutralOffer.forEach(key => {
         const n = NEUTRAL_ITEMS[key];
         const card = document.createElement('div'); card.className = 'skill-card';
-        card.innerHTML = `<h4>${n.name}</h4><p>${describeNeutral(n)}</p><p class="meta">Le sirve a: ${n.fits.join(', ')}</p>`;
+        card.innerHTML = `<h4>${itemNameHtml(n)}</h4><p>${describeNeutral(n)}</p><p class="meta">Le sirve a: ${n.fits.join(', ')}</p>`;
         card.onclick = () => equipNeutral(player, key);
         offer.appendChild(card);
     });
@@ -350,7 +350,7 @@ function renderInventoryPanel() {
     player.inventory.forEach(inv => {
         const item = ITEMS[inv.key];
         const row = document.createElement('div'); row.className = 'destiny-row';
-        row.innerHTML = `<span>${item.name}${item.tier === 'basic' ? ' <span class="item-level">básico</span>' : ''}</span>`;
+        row.innerHTML = `<span>${itemNameHtml(item)}${item.tier === 'basic' ? ' <span class="item-level">básico</span>' : ''}</span>`;
         const sell = document.createElement('button');
         sell.textContent = `Vender (${Math.floor(itemTotalCost(item) * SELL_REFUND)}g)`;
         sell.onclick = () => sellItem(inv.key);
@@ -371,7 +371,7 @@ function itemColor(item) {
     if (isNeutral(item)) return ITEM_COLORS.neutral[item.tier - 1];
     return ITEM_COLORS[item.tier] || ITEM_COLORS.special;
 }
-function itemNameHtml(item) { return `<span class="item-name" style="color:${itemColor(item)}">${item.name}</span>`; }
+function itemNameHtml(item) { return `<span class="item-name" style="color:${itemColor(item)}">${itemIconHtml(item.key)}${item.name}</span>`; }
 
 function itemCard(item, price, extra = '') {
     const stats = Object.entries(item.mods || {}).map(([k, v]) => `<li>${MOD_LABELS[k] ? MOD_LABELS[k](v) : `${k} ${v}`}</li>`).join('');
@@ -619,12 +619,12 @@ function renderHeroBar() {
     for (let i = 0; i < INVENTORY_SLOTS; i++) {
         const inv = p.inventory[i], el = document.createElement('div');
         el.className = 'item-slot' + (inv ? '' : ' empty');
-        if (inv) { const item = ITEMS[inv.key]; el.textContent = shortName(item.name, 11); el.style.color = itemColor(item); el.style.borderColor = itemColor(item); el.title = `${item.name}\n${describeItem(item)}`; }
+        if (inv) { const item = ITEMS[inv.key]; el.innerHTML = itemIconHtml(item.key, 'md') || shortName(item.name, 11); el.style.color = itemColor(item); el.style.borderColor = itemColor(item); el.title = `${item.name}\n${describeItem(item)}`; }
         slots.appendChild(el);
     }
     const n = p.neutral ? NEUTRAL_ITEMS[p.neutral] : null, neutral = document.createElement('div');
     neutral.className = 'item-slot neutral' + (n ? '' : ' empty');
-    neutral.textContent = n ? shortName(n.name, 11) : 'neutral';
+    if (n) neutral.innerHTML = `${itemIconHtml(n.key, 'md')}<span>${shortName(n.name, 12)}</span>`; else neutral.textContent = 'neutral';
     if (n) { neutral.style.color = itemColor(n); neutral.style.borderColor = itemColor(n); neutral.title = `${n.name} (neutral)\n${describeNeutral(n)}`; }
     else neutral.title = 'Objeto neutral: se gana contra los jefes de ronda';
     slots.appendChild(neutral);
@@ -656,7 +656,7 @@ function updateHud() {
     if (!player) return;
     renderHeroStats();
     document.getElementById('player-gold').textContent = player.gold;
-    document.getElementById('round-num').textContent = `${waveNumber}/${MAX_ROUNDS}${isRoundBossRound() ? ' 👹' : ''}`;
+    document.getElementById('round-num').textContent = `${waveNumber}${isRoundBossRound() ? ' 👹' : ''}`; // sin límite fijo: hasta que quede uno
     document.getElementById('pause-btn').style.visibility = canPause() ? 'visible' : 'hidden';
     document.getElementById('lives-text').innerHTML = `<span class="hearts">${'♥'.repeat(Math.max(0, player.lives))}${'♡'.repeat(Math.max(0, 2 - player.lives))}</span>` +
         (isCondemned(player) ? ` <span class="cursed" title="Condenado: recibís más daño">☠ +${Math.round(player.condemnPct * 100)}%</span>` : '');

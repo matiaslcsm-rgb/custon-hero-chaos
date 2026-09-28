@@ -1490,6 +1490,17 @@ test('Presión al líder: los creeps se adaptan al poder del héroe (entre −15
     checkNear(arena.creeps[0].statMult, creepStatMult(waveNumber) * arena.pressure, 'se aplica a los creeps de su arena');
 });
 
+test('Íconos: cada ítem y cada neutral tiene el suyo, con formas de 12×12', () => {
+    Object.entries(ITEM_ICON_SHAPES).forEach(([name, rows]) => {
+        checkEq(rows.length, 12, name + ': 12 filas');
+        rows.forEach((r, i) => checkEq(r.length, 12, `${name} fila ${i}`));
+    });
+    [...Object.keys(ITEMS), ...Object.keys(NEUTRAL_ITEMS)].forEach(k => {
+        check(ITEM_ICONS[k] && ITEM_ICON_SHAPES[ITEM_ICONS[k][0]], 'ícono para ' + k);
+        check(itemIconUrl(k), 'se dibuja ' + k);
+    });
+});
+
 test('Guía de ítems: cada héroe tiene la suya y la tienda la muestra primero', () => {
     newGame('AXE');
     startPreparation();
