@@ -436,10 +436,18 @@ function renderDestinyPanel() {
 }
 
 // --- PREVIA DE DUELOS (apuestas, ver bets.js) ---
-function betHeroHtml(h) {
-    const lives = '♥'.repeat(Math.max(0, h.lives)) + (isCondemned(h) ? '☠' : '');
-    return `<span class="bet-name">${h.symbol} ${h.displayName}</span>` +
-        `<span class="bet-stats">${heroRank(h)}º · ${h.points} pts · niv ${h.level} · ${lives} · duelos ${h.duelWins}-${h.duelLosses}</span>`;
+// --- VENTANA DE APUESTAS (un duelo por ronda, pozo compartido) ---
+// Arriba: los dos duelistas enfrentados, con sus datos y cuánto le apostaron a cada uno. Abajo: cuánto apostás y a quién,
+// con lo que cobrarías si acertás (se recalcula con lo que ya apostaron los demás).
+function betDuelistHtml(h) {
+    const url = heroSpriteUrl({ isHero: true, key: h.key });
+    const lives = '♥'.repeat(Math.max(0, h.lives)) + (isCondemned(h) ? ' ☠' : '');
+    const n = duelBets.filter(b => b.on === h).length;
+    return `<div class="bd-portrait">${url ? `<img src="${url}" class="pixel-img">` : `<b>${h.symbol}</b>`}</div>` +
+        `<div class="bd-name">${h.displayName}</div>` +
+        `<div class="bd-stats"><span>${heroRank(h)}º · ${h.points} pts</span><span>Nivel ${h.level} · <span class="hearts">${lives}</span></span>` +
+        `<span>Duelos ${h.duelWins} ganados · ${h.duelLosses} perdidos</span></div>` +
+        `<div class="bd-pot">💰 ${betsOn(h)}g apostados${n ? ` (${n} apuesta${n > 1 ? 's' : ''})` : ''}</div>`;
 }
 
 let betAmount = 0; // monto elegido en la ventana de apuestas (arranca en 0: el riesgo lo decidís vos)
@@ -450,47 +458,50 @@ function setBetAmount(v) {
 }
 
 function renderBetting() {
-    const mine = duelPlan.pairs.find(p => p.includes(player));
-    const rival = mine ? mine.find(h => h !== player) : null;
+    const pair = bettablePairs()[0];
     const limit = betLimit();
     if (betAmount > limit) betAmount = limit;
-    const backing = rival ? betsOn(player) : 0;
-    document.getElementById('bet-info').innerHTML = (rival ? `Tu duelo: contra <strong>${rival.displayName}</strong>. ` : 'Esta ronda no peleás. ') +
-        (rival ? (backing ? `<span class="bet-backing">Te apostaron ${backing}g: si ganás cobrás +${Math.round(backing * BACKING_BONUS)}g de respaldo.</span> ` : 'Nadie te apostó todavía. ') : '') +
-        (currentBet ? `Apostaste <strong>${currentBet.amount}g</strong> a <strong>${currentBet.on.displayName}</strong>: si gana cobrás ${currentBet.amount * BET_PAYOUT}g.`
-                    : `Elegí cuánto arriesgar y a quién. Si acertás cobrás el doble; si no, lo perdés. Tope: ${limit}g (${BET_MAX_PCT * 100}% de tu oro).`);
+    const total = pair ? betsOn(pair[0]) + betsOn(pair[1]) : 0;
+    document.getElementById('bet-info').innerHTML = `<b>Duelo de la ronda ${waveNumber}.</b> Todos los que no pelean apuestan a este duelo. ` +
+        `<span class="bet-rule">🎲 Pozo compartido: si acertás recuperás lo tuyo y te llevás una parte de lo apostado al perdedor (apostar a la sorpresa paga más). Si fallás, lo perdés.</span>` +
+        `<span class="bet-total">Pozo: <b>${total}g</b></span>`;
+    const list = document.getElementById('bet-pairs'); list.innerHTML = '';
+    if (!pair) return;
+    const row = document.createElement('div'); row.className = 'bet-duel';
+    pair.forEach((h, i) => {
+        const side = document.createElement('div');
+        side.className = 'bet-duelist' + (currentBet && currentBet.on === h ? ' chosen' : '');
+        side.innerHTML = betDuelistHtml(h);
+        if (!currentBet) {
+            const win = betAmount ? potPayout(h, betAmount, betAmount) : 0;
+            const btn = document.createElement('button');
+            btn.className = 'bd-bet';
+            btn.innerHTML = betAmount ? `Apostar ${betAmount}g a ${h.name}<small>si gana cobrás ${win}g (+${win - betAmount})</small>` : `Elegí un monto abajo`;
+            btn.disabled = !betAmount;
+            btn.onclick = () => { if (placeBet(h, betAmount)) betAmount = 0; };
+            side.appendChild(btn);
+        } else if (currentBet.on === h) {
+            const tag = document.createElement('div'); tag.className = 'bd-chosen';
+            tag.textContent = `✔ Tu apuesta: ${currentBet.amount}g · si gana cobrás ${potPayout(h, currentBet.amount)}g`;
+            side.appendChild(tag);
+        }
+        row.appendChild(side);
+        if (i === 0) { const vs = document.createElement('div'); vs.className = 'bd-vs'; vs.textContent = 'VS'; row.appendChild(vs); }
+    });
+    list.appendChild(row);
+
     const box = document.getElementById('bet-amount-box');
     box.innerHTML = '';
     if (!currentBet) {
-        box.innerHTML = `<div class="bet-slider"><input id="bet-amount" type="range" min="0" max="${limit}" step="1" value="${betAmount}">` +
-            `<b class="bet-value">${betAmount}g</b></div>` +
-            `<div class="bet-quick">${[['0', 0], ['¼', 0.25], ['½', 0.5], ['Máx', 1]].map(([t, f]) => `<button data-f="${f}">${t}</button>`).join('')}</div>` +
-            `<div class="bet-odds">${betAmount ? `Si ganás: <span class="win">+${betAmount}g</span> (cobrás ${betAmount * BET_PAYOUT}g) · Si perdés: <span class="lose">−${betAmount}g</span>` : 'Mové el control para elegir cuánto apostar.'}</div>`;
+        box.innerHTML = `<div class="bet-step">¿Cuánto apostás? <span class="item-meta">(tenés ${player.gold}g; máximo ${limit}g, la mitad)</span></div>` +
+            `<div class="bet-slider"><input id="bet-amount" type="range" min="0" max="${limit}" step="1" value="${betAmount}"><b class="bet-value">${betAmount}g</b></div>` +
+            `<div class="bet-quick">${[['Nada', 0], ['¼', 0.25], ['½', 0.5], ['Máximo', 1]].map(([t, f]) => `<button data-f="${f}">${t}</button>`).join('')}</div>`;
         const input = box.querySelector('#bet-amount');
-        input.oninput = () => { betAmount = Number(input.value); box.querySelector('.bet-value').textContent = `${betAmount}g`;
-            box.querySelector('.bet-odds').innerHTML = betAmount ? `Si ganás: <span class="win">+${betAmount}g</span> (cobrás ${betAmount * BET_PAYOUT}g) · Si perdés: <span class="lose">−${betAmount}g</span>` : 'Mové el control para elegir cuánto apostar.';
-            document.querySelectorAll('#bet-pairs .bet-side button').forEach(b => { b.disabled = !betAmount; }); };
+        input.oninput = () => { betAmount = Number(input.value); box.querySelector('.bet-value').textContent = `${betAmount}g`; };
         input.onchange = () => renderBetting();
         box.querySelectorAll('.bet-quick button').forEach(btn => { btn.onclick = () => setBetAmount(limit * Number(btn.dataset.f)); });
     }
-    const list = document.getElementById('bet-pairs'); list.innerHTML = '';
-    bettablePairs().forEach(pair => {
-        const row = document.createElement('div'); row.className = 'bet-pair';
-        pair.forEach((h, i) => {
-            const side = document.createElement('div'); side.className = 'bet-side' + (currentBet && currentBet.on === h ? ' chosen' : '');
-            side.innerHTML = betHeroHtml(h) + (betsOn(h) ? `<span class="bet-stats">💰 le apostaron ${betsOn(h)}g</span>` : '');
-            if (!currentBet) {
-                const btn = document.createElement('button');
-                btn.textContent = `Apostar a ${h.name}`; btn.disabled = !betAmount;
-                btn.onclick = () => { if (placeBet(h, betAmount)) betAmount = 0; };
-                side.appendChild(btn);
-            }
-            row.appendChild(side);
-            if (i === 0) { const vs = document.createElement('div'); vs.className = 'bet-vs'; vs.textContent = 'vs'; row.appendChild(vs); }
-        });
-        list.appendChild(row);
-    });
-    document.getElementById('bet-done-btn').textContent = currentBet ? 'Listo, a los duelos' : 'No apuesto, a los duelos';
+    document.getElementById('bet-done-btn').textContent = currentBet ? 'Listo, al duelo' : 'No apuesto, al duelo';
 }
 
 // --- KIT (nivel, experiencia, puntos y habilidades) ---

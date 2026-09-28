@@ -417,3 +417,23 @@ kbd { background: #2a2e3a; border: 1px solid #555; border-bottom-width: 3px; pad
 .unit-icon.lg { width: 44px; height: 44px; background: #0d0e11; border: 1px solid #2f333d; }
 .hc-title { display: inline-flex; align-items: center; gap: 8px; }
 .pick-title { display: flex; align-items: center; gap: 8px; }
+
+/* Ventana de apuestas: un duelo */
+#bet-container .modal-box { max-width: 640px; }
+#bet-info { display: flex; flex-direction: column; gap: 4px; }
+.bet-rule { color: #bbb; font-size: 0.78rem; }
+.bet-total { color: #ffd166; }
+.bet-duel { display: grid; grid-template-columns: 1fr 50px 1fr; align-items: stretch; gap: 8px; }
+.bet-duelist { background: #1c1f26; border: 2px solid #333; padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+.bet-duelist.chosen { border-color: #ffd166; }
+.bd-portrait img { width: 64px; height: 64px; }
+.bd-name { font-weight: bold; color: #fff; }
+.bd-stats { display: flex; flex-direction: column; font-size: 0.74rem; color: #aaa; }
+.bd-stats .hearts { color: #ff477e; }
+.bd-pot { color: #ffd166; font-size: 0.8rem; }
+.bd-vs { align-self: center; text-align: center; font-size: 1.4rem; font-weight: bold; color: #ff477e; }
+.bd-bet { width: 100%; background: #ffb703; color: #000; border: none; padding: 6px; font-family: inherit; font-weight: bold; cursor: pointer; display: flex; flex-direction: column; }
+.bd-bet small { font-weight: normal; font-size: 0.7rem; }
+.bd-bet:disabled { background: #333; color: #777; cursor: default; }
+.bd-chosen { color: #ffd166; font-size: 0.78rem; }
+.bet-step { font-weight: bold; }

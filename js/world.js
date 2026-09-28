@@ -7,7 +7,7 @@
 // mirando (viewedHero): por defecto el jugador; con un clic en el ranking se mira la de cualquier otro.
 
 const MAX_HEROES = 8;
-let MAX_ROUNDS = 20;        // si se llega, gana el primero del ranking (las pruebas lo achican)
+let MAX_ROUNDS = 60;        // tope de seguridad: la partida sigue hasta que quede uno (si se llega, gana el primero del ranking)
 const POINTS = { duelWin: 3, waveClean: 1 };
 
 let heroes = [];            // todos los héroes de la partida; el jugador es el primero

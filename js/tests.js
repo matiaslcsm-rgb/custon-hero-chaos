@@ -378,19 +378,22 @@ test('Voluntad de Titán: revive en el lugar, inmortal, x2 vel. ataque y sin man
     check(!getEffect(player, 'TITAN_WILL'), 'dura ' + TITAN_WILL.duration + 's');
 });
 
-test('Sin vidas: al revivir queda Condenado y recibe +10% de daño', () => {
+test('Sin vidas contra creeps: queda eliminado (espectador)', () => {
     newGame('AXE');
     player.lives = 1; player.hp = 1;
     const c = dummy({ atk: 9999, attackTimer: 99 });
     updateCreep(c, 0.016);
     checkEq(player.lives, 0, 'vidas');
-    checkEq(gameState, 'WAVE', 'no termina la partida');
-    waitRespawn();
-    check(isCondemned(player), 'queda Condenado');
-    removeEffect(player, 'TITAN_WILL');
-    const hp = player.hp;
-    dealDamage(c, player, 100, 'pure');
-    checkEq(hp - player.hp, 110, 'recibe +10% de daño');
+    check(player.eliminated, 'eliminado sin pasar por Condenado');
+});
+
+test('Los creeps nunca maldicen (aunque queden 3 héroes)', () => {
+    newGame('AXE');
+    heroes.slice(3).forEach(h => { h.eliminated = true; });
+    player.hp = 1;
+    updateCreep(dummy({ atk: 9999, attackTimer: 99 }), 0.016);
+    checkEq(player.lives, 1, 'perdió una vida');
+    check(!isCondemned(player), 'sin maldición');
 });
 
 test('Condenado: si lo mata un creep queda eliminado (una sola vez aunque peguen varios)', () => {
@@ -410,21 +413,17 @@ test('Condenado: cada duelo perdido suma +10% de daño recibido', () => {
     checkNear(sumMod(player, 'dmgTakenPct'), 0.30, 'el efecto aplica el 30%');
 });
 
-test('Injusticia de los Codiciosos: solo Condenado, vida, precio doble y castigo doble', () => {
+test('Injusticia de los Codiciosos: solo Condenado, vida y precio doble', () => {
     newGame('AXE');
     check(!itemAvailable(ITEMS.GREED, player), 'no aparece sin estar Condenado');
-    player.lives = 0; setCondemned(player, 0.3);
+    player.lives = 1; setCondemned(player, 0.3);
     check(itemAvailable(ITEMS.GREED, player), 'aparece estando Condenado');
     checkEq(itemCost(ITEMS.GREED, player), GREED.baseCost, 'primer precio');
     gameState = 'PREP'; player.gold = 1000;
     buyItem(ITEMS.GREED);
-    checkEq(player.lives, 1, 'compró una vida');
+    checkEq(player.lives, 2, 'compró una vida');
     check(!isCondemned(player), 'deja de estar Condenado');
     checkEq(itemCost(ITEMS.GREED, player), GREED.baseCost * 2, 'la próxima cuesta el doble');
-    gameState = 'WAVE'; player.hp = 1;
-    updateCreep(dummy({ atk: 9999, attackTimer: 99 }), 0.016);
-    waitRespawn();
-    checkNear(player.condemnPct, 0.6, 'al volver a quedar sin vidas el castigo se duplica');
 });
 
 test('Oleada: pasado el límite los creeps se enfurecen', () => {
@@ -939,7 +938,7 @@ test('Las arenas se juegan en paralelo; al terminar todas, la ronda suma puntos 
     check(!inCombat(), 'terminó la ronda (oleadas, previa y duelos)');
     checkEq(waveNumber, DUEL_START_ROUND + 2, 'pasó a la ronda siguiente');
     const total = heroes.reduce((s, h) => s + h.points, 0);
-    checkEq(total, MAX_HEROES * POINTS.waveClean + (MAX_HEROES / 2) * POINTS.duelWin, 'puntos: 8 oleadas limpias + 4 duelos');
+    checkEq(total, MAX_HEROES * POINTS.waveClean + POINTS.duelWin, 'puntos: 8 oleadas limpias + 1 duelo');
     check(heroes.every(h => h.inRest && !h.arena), 'todos en el Área de Descanso');
 });
 
@@ -1011,33 +1010,33 @@ test('Fin de partida al llegar al máximo de rondas: gana el primero del ranking
 });
 
 // ============================================================ DUELOS (fase F2)
-// Deja la partida lista en la fase de duelos (todas las oleadas limpias).
-function toDuels(heroKey = 'AXE') {
+// Deja la partida lista en el duelo de la ronda (todas las oleadas limpias). Por defecto el jugador pelea contra heroes[1]
+// (la rotación elige a los que menos duelos pelearon).
+function toDuels(heroKey = 'AXE', playerFights = true) {
     resetGame();
     selectHero(HERO_TEMPLATES[heroKey]);
     learnSkill(currentDraft.options[0]);
     waveNumber = DUEL_START_ROUND + 1; // los duelos arrancan en la ronda 5 (y la 5 tiene jefe)
+    heroes.forEach((h, i) => { h.duelWins = playerFights ? (i < 2 ? 0 : 5) : (i === 0 ? 5 : 0); });
     startWave();
     clearAllWaves();
     return arenas;
 }
 
-test('Duelos: parejas al azar sin repetir el rival anterior; con impares, uno descansa', () => {
+test('Un duelo por ronda: pelean los que menos pelearon, sin repetir la pareja anterior; los demás miran', () => {
     toDuels();
-    checkEq(gameState, 'DUEL', 'fase de duelos');
-    checkEq(arenas.length, MAX_HEROES / 2, '4 duelos');
-    const inDuels = arenas.flatMap(a => a.heroes);
-    checkEq(new Set(inDuels).size, MAX_HEROES, 'cada héroe en un solo duelo');
-    check(arenas.every(a => a.kind === 'duel' && enemiesOf(a.heroes[0])[0] === a.heroes[1]), 'cada uno enfrenta a su rival');
-    for (let i = 0; i < 30; i++) {
-        const list = heroes.slice(0, 4);
-        list[0].lastOpponent = list[1]; list[1].lastOpponent = list[0];
-        const { pairs } = makeDuelPairs(list);
-        check(!pairs.some(([a, b]) => (a === list[0] && b === list[1]) || (a === list[1] && b === list[0])), 'no repite el rival anterior');
+    checkEq(gameState, 'DUEL', 'fase de duelo');
+    checkEq(arenas.length, 1, 'un solo duelo');
+    check(arenas[0].heroes.includes(player) && arenas[0].heroes.includes(heroes[1]), 'los que menos pelearon');
+    check(heroes.slice(2).every(h => h.inRest), 'los demás, en la sala');
+    for (let i = 0; i < 20; i++) {
+        heroes.forEach(h => { h.duelWins = 0; h.duelLosses = 0; });
+        lastDuelPair = [heroes[2], heroes[3]];
+        const pair = pickDuelPair(heroes.slice(2, 5));
+        check(!(pair.includes(heroes[2]) && pair.includes(heroes[3])), 'no repite la pareja anterior');
     }
-    const { pairs, bye } = makeDuelPairs(heroes.slice(0, 5));
-    checkEq(pairs.length, 2, 'con 5 héroes, 2 duelos');
-    check(!!bye, 'y uno descansa');
+    toDuels('AXE', false);
+    check(!arenas[0].heroes.includes(player) && viewedHero && arenas[0].heroes.includes(viewedHero), 'si no peleás, la cámara va al duelo');
 }, { random: true });
 
 test('Duelo: gana quien mata al otro (+3 puntos); con 5 o más en juego perder no cuesta nada', () => {
@@ -1054,14 +1053,11 @@ test('Duelo: gana quien mata al otro (+3 puntos); con 5 o más en juego perder n
     checkEq(rival.hp, rival.maxHp, 'el perdedor se recupera en el descanso');
 });
 
-test('Duelo con la mitad de los héroes o menos: el perdedor queda maldito (aunque tenga vidas)', () => {
+test('Duelo con 3 héroes o menos: el perdedor queda maldito (aunque tenga vidas)', () => {
     toDuels();
-    heroes.slice(4).forEach(h => { h.eliminated = true; });
-    const arena = arenas.find(a => a.heroes.every(h => !h.eliminated)) || arenas[0];
-    const [a, b] = arena.heroes;
-    a.eliminated = false; b.eliminated = false;
-    heroes.filter(h => !h.eliminated).slice(4).forEach(h => { h.eliminated = true; }); // quedan 4
-    checkEq(aliveHeroes().length, DUEL_CURSE_ALIVE, 'quedan 4');
+    const [a, b] = arenas[0].heroes;
+    heroes.filter(h => h !== a && h !== b).slice(1).forEach(h => { h.eliminated = true; }); // quedan 3
+    checkEq(aliveHeroes().length, DUEL_CURSE_ALIVE, 'quedan 3');
     dealDamage(a, b, 99999, 'pure');
     check(isCondemned(b) && b.lives === 2, 'maldito y con sus 2 vidas');
 });
@@ -1087,25 +1083,38 @@ test('Maldito con vidas: un creep lo mata y pierde una vida (no queda eliminado)
     checkEq(player.lives, 1, 'perdió una vida');
 });
 
-test('Duelo: perder estando maldito (con más de 3 en juego) suma +10% y no elimina', () => {
+test('Duelo: con más de 3 en juego, perder no cambia nada aunque esté maldito', () => {
     toDuels();
     const [a, b] = arenas[0].heroes;
-    heroes.filter(h => h !== a && h !== b).slice(0, 3).forEach(h => { h.eliminated = true; }); // quedan 5... se ajusta abajo
-    heroes.filter(h => h !== a && h !== b && !h.eliminated).slice(0, 1).forEach(h => { h.eliminated = true; }); // quedan 4
-    setCondemned(b, 0.1); b.lives = 0;
+    heroes.filter(h => h !== a && h !== b).slice(2).forEach(h => { h.eliminated = true; }); // quedan 4
+    setCondemned(b, 0.1);
     dealDamage(a, b, 99999, 'pure');
-    checkNear(b.condemnPct, 0.2, '+10% por el duelo perdido');
+    checkNear(b.condemnPct, 0.1, 'sin castigo extra');
     check(!b.eliminated, 'sigue en la partida');
 });
 
-test('Con 3 o menos en juego, perder un duelo estando maldito elimina', () => {
+test('Con 3 en juego, cada duelo perdido suma una instancia; con 2, además cuesta una vida', () => {
     toDuels();
-    const arena = arenas[0];
-    const [a, b] = arena.heroes;
-    heroes.forEach(h => { if (h !== a && h !== b) h.eliminated = true; });
-    setCondemned(b, 0.2);
+    const [a, b] = arenas[0].heroes;
+    heroes.filter(h => h !== a && h !== b).slice(1).forEach(h => { h.eliminated = true; }); // quedan 3
+    setCondemned(b, 0.1);
     dealDamage(a, b, 99999, 'pure');
-    check(b.eliminated, 'eliminado en el duelo a muerte');
+    checkNear(b.condemnPct, 0.2, 'una instancia más');
+    checkEq(b.lives, 2, 'con 3 no cuesta vidas');
+    check(!b.eliminated, 'sigue');
+    toDuels();
+    const [c, d] = arenas[0].heroes;
+    heroes.forEach(h => { if (h !== c && h !== d) h.eliminated = true; }); // quedan 2
+    dealDamage(c, d, 99999, 'pure');
+    checkEq(d.lives, 1, 'con 2 pierde una vida');
+    check(isCondemned(d), 'y una instancia de maldición');
+    d.lives = 1; d.eliminated = false;
+    toDuels();
+    const [e, f] = arenas[0].heroes;
+    heroes.forEach(h => { if (h !== e && h !== f) h.eliminated = true; });
+    f.lives = 1;
+    dealDamage(e, f, 99999, 'pure');
+    check(f.eliminated, 'sin vidas: eliminado');
 });
 
 test('Duelo: si se acaba el tiempo gana el que tiene más % de vida; los enfriamientos arrancan en 0', () => {
@@ -1143,51 +1152,53 @@ test('Coraza de Espinas también devuelve daño a héroes cuerpo a cuerpo en los
 });
 
 // ============================================================ APUESTAS Y PREMIOS (fase F3)
-// Deja la partida en la previa de duelos, con oro para apostar.
-function toBetting(gold = 400) {
+// Deja la partida en la previa del duelo, con oro para apostar. El jugador no pelea (la rotación elige a otros), salvo
+// que se pida lo contrario.
+function toBetting(gold = 400, playerFights = false) {
     resetGame();
     selectHero(HERO_TEMPLATES.AXE);
     learnSkill(currentDraft.options[0]);
     waveNumber = DUEL_START_ROUND + 1;
+    heroes.forEach((h, i) => { h.duelWins = playerFights ? (i < 2 ? 0 : 5) : (i === 0 ? 5 : 0); });
     startWave();
     player.gold = gold;
     clearAllWaves(false);
     player.gold = gold; // sin el interés de la oleada
 }
 
-test('Previa de duelos: al terminar las oleadas se sortean las parejas y se espera; después pelean esas parejas', () => {
+test('Previa: al terminar las oleadas se eligen los duelistas; todos los demás apuestan; después pelean esos dos', () => {
     toBetting();
     checkEq(gameState, 'BETTING', 'previa');
-    checkEq(bettablePairs().length, MAX_HEROES / 2 - 1, 'se puede apostar a los 3 duelos ajenos');
-    const plan = duelPlan.pairs.map(p => p.slice());
+    checkEq(bettablePairs().length, 1, 'un solo duelo para apostar');
+    const pair = duelPlan.pairs[0].slice();
     tickPhaseTimer(PHASE_TIMES.betting + 0.1);
-    checkEq(gameState, 'DUEL', 'al vencer el tiempo arrancan los duelos');
-    checkEq(arenas.map(a => a.heroes.join()).join('|'), plan.map(p => p.join()).join('|'), 'las mismas parejas de la previa');
+    checkEq(gameState, 'DUEL', 'al vencer el tiempo arranca el duelo');
+    checkEq(arenas[0].heroes.join(), pair.join(), 'los mismos de la previa');
 });
 
-test('Apuesta: tope del 25% del oro, una por ronda y nunca a tu propio duelo', () => {
+test('Apuesta: tope del 50% del oro y una por ronda', () => {
     toBetting(400);
-    const mine = duelPlan.pairs.find(p => p.includes(player));
-    const rival = mine.find(h => h !== player);
-    check(!placeBet(rival, 50), 'no se apuesta al propio duelo');
-    const [a] = bettablePairs()[0];
+    const [a, b] = bettablePairs()[0];
     check(!placeBet(a, 201), 'más del tope (200g)');
     check(placeBet(a, 100), 'apuesta válida');
     checkEq(player.gold, 300, 'se descuenta al apostar');
-    check(!placeBet(bettablePairs()[1][0], 1), 'una sola apuesta por ronda');
+    check(!placeBet(b, 1), 'una sola apuesta por ronda');
 });
 
-test('Apuesta: si gana tu elegido cobrás el doble; si pierde, perdés lo apostado', () => {
+test('Pozo compartido: los que aciertan recuperan lo suyo y se reparten lo apostado al perdedor', () => {
     toBetting(400);
     const [a, b] = bettablePairs()[0];
+    const other = heroes.find(h => h !== player && h !== a && h !== b);
+    duelBets = []; other.gold = 1000;
+    duelBets.push({ bettor: other, on: b, against: a, amount: 300 });
+    checkEq(potPayout(a, 100, 100), 400, 'la ventana calcula lo que cobrarías');
     placeBet(a, 100);
     endBetting();
-    const arena = arenas.find(x => x.heroes.includes(a));
     dealDamage(a, b, 99999, 'pure');
-    check(arena.done, 'terminó el duelo');
-    checkEq(player.gold, 300 + 200, 'cobró el doble');
+    checkEq(player.gold, 300 + 100 + 300, 'recupera sus 100 y se lleva los 300 del otro lado');
     toBetting(400);
     const [c, d] = bettablePairs()[0];
+    duelBets = [];
     placeBet(c, 100);
     endBetting();
     dealDamage(d, c, 99999, 'pure');
@@ -1195,19 +1206,16 @@ test('Apuesta: si gana tu elegido cobrás el doble; si pierde, perdés lo aposta
 });
 
 test('La IA apuesta (nunca a su propio duelo) y el ganador cobra el 25% de lo que le apostaron', () => {
-    toBetting(400);
-    duelBets = [];
-    const mine = duelPlan.pairs.find(p => p.includes(player));
-    const rival = mine.find(h => h !== player);
-    const other = bettablePairs()[0][0];
-    other.gold = 1000;
-    duelBets.push({ bettor: other, on: player, against: rival, amount: 200 }); // un rival te apuesta a vos
+    toBetting(400, true); // el jugador pelea: no hay ventana, pero la IA apuesta igual
+    checkEq(gameState, 'DUEL', 'directo al duelo');
+    const rival = arenas[0].heroes.find(h => h !== player);
     for (let i = 0; i < 30; i++) { const saved = duelBets; duelBets = []; aiPlaceBets(); check(duelBets.every(b => !(b.bettor === b.on || b.bettor === b.against)), 'nadie apuesta a su propio duelo'); duelBets = saved; }
-    endBetting();
+    const other = heroes.find(h => h !== player && h !== rival);
+    duelBets = [{ bettor: other, on: player, against: rival, amount: 200 }];
     const gold = player.gold, otherGold = other.gold;
     dealDamage(player, rival, 99999, 'pure');
     checkEq(player.gold - gold, Math.round(200 * BACKING_BONUS), 'respaldo: 25% de lo que te apostaron');
-    checkEq(other.gold - otherGold, 200 * BET_PAYOUT, 'el que te apostó cobra el doble');
+    checkEq(other.gold - otherGold, 200, 'el que te apostó recupera lo suyo (nadie apostó al otro lado)');
 });
 
 test('Sin oro para apostar (o eliminado) no hay previa: los duelos arrancan directo', () => {

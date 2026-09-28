@@ -1,7 +1,8 @@
 // Previa de duelos y apuestas (DISEÑO.md §9).
 //
-//   Al terminar las oleadas se sortean las parejas y hay una previa de PHASE_TIMES.betting segundos: se muestran los duelos
-//   y el jugador puede apostar oro a quién gana UN duelo en el que no pelea. Si acierta, cobra el doble (BET_PAYOUT).
+//   Un duelo por ronda: al terminar las oleadas se eligen los 2 duelistas y hay una previa de PHASE_TIMES.betting segundos
+//   en la que TODOS los demás (vos y la IA) apuestan a ese duelo. Pozo compartido: los que aciertan recuperan lo suyo y se
+//   reparten lo apostado al perdedor en proporción a lo que pusieron (apostar a la sorpresa paga más).
 //   El monto lo elige el jugador (arranca en 0). Tope: BET_MAX_PCT de su oro. Medido en 207 duelos: el que va arriba en puntos gana el 73%, así que sin tope apostar
 //   todo al favorito dejaba +46% de ganancia por apuesta y rendía más que farmear.
 //   La IA también apuesta (ver aiPlaceBets), nunca a su propio duelo. Nadie puede apostarse a sí mismo.
@@ -11,7 +12,7 @@
 const BET_MAX_PCT = 0.5;  // subido de 25% a 50% a pedido: cada uno elige cuánto arriesgar (el monto arranca en 0)
 const BET_PAYOUT = 2;
 const BACKING_BONUS = 0.25; // el ganador cobra el 25% de lo que le apostaron
-const AI_BET = { chance: 0.6, favoriteChance: 0.7, minPct: 0.1, maxPct: 0.35 };
+const AI_BET = { chance: 0.85, favoriteChance: 0.7, minPct: 0.1, maxPct: 0.35 };
 
 let duelPlan = null;   // { pairs, bye } sorteados en la previa (los usa startDuels)
 let currentBet = null; // { on, against, amount }: la apuesta del jugador en esta ronda
@@ -23,7 +24,7 @@ function betLimit(hero = player) { return Math.floor(hero.gold * BET_MAX_PCT); }
 function bettablePairs() { return duelPlan ? duelPlan.pairs.filter(p => !p.includes(player)) : []; }
 
 function startBetting() {
-    duelPlan = makeDuelPairs(aliveHeroes());
+    duelPlan = duelPlanOfRound();
     currentBet = null; duelBets = [];
     betAmount = 0;
     quietly(aiPlaceBets);
@@ -34,7 +35,7 @@ function startBetting() {
     setPhaseTimer(PHASE_TIMES.betting);
     showPanel('bet-container', true);
     renderBetting();
-    log(`🎲 Previa de duelos: podés apostar hasta ${betLimit()}g a quién gana un duelo ajeno. Si acertás, cobrás el doble.`);
+    log(`🎲 Apuestas del duelo de la ronda: ${duelPlan.pairs[0][0].displayName} vs ${duelPlan.pairs[0][1].displayName}. Podés apostar hasta ${betLimit()}g (pozo compartido).`);
 }
 
 // Apuesta amount de oro a que `on` gana su duelo. Una apuesta por ronda. Devuelve true si se hizo.
@@ -76,18 +77,32 @@ function aiPlaceBets() {
 // Total apostado a un héroe en esta ronda (por los demás).
 function betsOn(hero) { return duelBets.filter(b => b.on === hero).reduce((s, b) => s + b.amount, 0); }
 
-// Se llama al resolver cada duelo: paga las apuestas de ese duelo y el respaldo al ganador.
+// Pozo compartido: cuánto cobraría una apuesta de `amount` a `on` si gana (lo suyo + su parte de lo apostado al otro).
+function potPayout(on, amount, extra = 0) {
+    const pair = duelPlan && duelPlan.pairs.find(p => p.includes(on));
+    if (!pair) return 0;
+    const other = pair.find(h => h !== on);
+    const onSide = betsOn(on) + extra, otherSide = betsOn(other);
+    return onSide > 0 ? Math.floor(amount + otherSide * amount / onSide) : amount;
+}
+
+// Se llama al resolver cada duelo. Pozo compartido: los que acertaron recuperan lo suyo y se reparten lo apostado al
+// perdedor, en proporción a cuánto pusieron. Si nadie acertó, lo apostado se pierde. El ganador cobra además el respaldo.
 function settleBet(winner, loser) {
     const bets = duelBets.filter(b => b.on === winner || b.on === loser);
     if (!bets.length) return;
     duelBets = duelBets.filter(b => !bets.includes(b));
+    const onWinner = bets.filter(b => b.on === winner).reduce((s, b) => s + b.amount, 0);
+    const onLoser = bets.filter(b => b.on === loser).reduce((s, b) => s + b.amount, 0);
     bets.forEach(b => {
-        if (b.on === winner) b.bettor.gold += b.amount * BET_PAYOUT;
+        const prize = b.on === winner ? Math.floor(b.amount + onLoser * b.amount / onWinner) : 0;
+        b.bettor.gold += prize;
         if (b.bettor !== player) return;
         currentBet = null;
-        log(b.on === winner ? `🎲 ¡Ganaste la apuesta! ${winner.displayName} ganó: cobrás ${b.amount * BET_PAYOUT}g.`
+        log(prize ? `🎲 ¡Acertaste! ${winner.displayName} ganó: cobrás ${prize}g (apostaste ${b.amount}g, +${prize - b.amount}g del pozo).`
             : `🎲 Perdiste la apuesta (${b.amount}g): ${winner.displayName} le ganó a ${loser.displayName}.`);
     });
+    if (bets.length) { const w = logMuted; logMuted = false; log(`🎲 Pozo del duelo: ${onWinner + onLoser}g (${onWinner}g a ${winner.name}, ${onLoser}g a ${loser.name}).`); logMuted = w; }
     const backing = bets.filter(b => b.on === winner).reduce((s, b) => s + b.amount, 0);
     const bonus = Math.round(backing * BACKING_BONUS);
     if (bonus > 0) {

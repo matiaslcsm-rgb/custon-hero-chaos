@@ -3,7 +3,8 @@
 //
 //   Vidas > 0   → muere, pierde 1 vida, queda RESPAWN_DELAY segundos muerto (los creeps pierden el agro
 //                 y vuelven a su lugar) y revive en el lugar con Voluntad de Titán.
-//   Vidas = 0   → al revivir queda Condenado: recibe +10% de daño (+10% por cada duelo perdido).
+//   Vidas = 0   → queda eliminado (espectador). (Antes quedaba Condenado y recién a la muerte siguiente se eliminaba.)
+//   Maldición: solo por perder un duelo con 3 héroes en juego o menos (ver duels.js); los creeps nunca maldicen.
 //   Maldición   → perder un duelo cuando queda la mitad de los héroes o menos también deja Condenado (ver duels.js),
 //                 aunque todavía tenga vidas. El castigo aplica al daño de creeps y de héroes SIN maldición.
 //   Condenado sin vidas → si lo mata un creep, queda eliminado (espectador). Con vidas, pierde una como siempre.
@@ -83,8 +84,8 @@ function handleHeroDeath(hero, killer) {
     const you = hero === player;
     const cause = killer ? `${killer.label} ${you ? 'te mató' : 'mató a ' + hero.displayName}` : (you ? 'Moriste' : `${hero.displayName} murió`);
     hero.diedThisRound = true;
-    if (isCondemned(hero) && hero.lives <= 0) { eliminateHero(hero, cause); return; }
     hero.lives--;
+    if (hero.lives <= 0) { eliminateHero(hero, cause + ' y te quedaste sin vidas'.replace('te quedaste', you ? 'te quedaste' : 'se quedó')); return; } // sin vidas: afuera
     hero.hp = 0;
     hero.effects = hero.effects.filter(e => e.flags.includes('persistent')); // al morir se pierden las mejoras
     hero.respawnAt = gameClock + RESPAWN_DELAY;
@@ -118,7 +119,6 @@ function tryRespawn(hero = player) {
     hero.hp = hero.maxHp;
     applyTitanWill(hero);
     log(`⚡ ¡Voluntad de Titán! ${TITAN_WILL.duration}s de inmortalidad, +${TITAN_WILL.atkSpeedPct * 100}% vel. ataque y habilidades sin costo de maná.`);
-    if (hero.lives <= 0 && !isCondemned(hero)) enterCondemned(hero);
     return true;
 }
 

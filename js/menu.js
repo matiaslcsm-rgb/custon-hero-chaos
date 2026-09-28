@@ -68,7 +68,7 @@ const TUTORIAL_PAGES = [
     { icon: '🎯', color: '#ffb703', title: 'El objetivo', heroes: true, body: `
         <p class="tut-lead">Sos uno de <b>8 héroes</b>. Cada ronda peleás contra creeps y, desde la ronda 5, en duelos contra los demás.</p>
         <div class="tut-cards">
-            ${tutCard('🏆', 'Cómo se gana', 'Quedando último en pie o, si se llega a la ronda 20, primero en el ranking.')}
+            ${tutCard('🏆', 'Cómo se gana', 'Quedando último en pie. Los creeps se hacen más fuertes cada ronda, así que la partida siempre termina.')}
             ${tutCard('⭐', 'Puntos', 'Ganar un duelo da <b>+3</b>; superar la oleada sin morir, <b>+1</b>. El oro desempata.')}
             ${tutCard('🧩', 'Tu kit', 'Armás 4 habilidades mezclando las de cualquier héroe. Cada partida es distinta.')}
         </div>` },
@@ -77,7 +77,7 @@ const TUTORIAL_PAGES = [
             <div><span>1</span><b>Draft</b><p>Elegís una habilidad entre 3 (hasta tener 4).</p></div>
             <div><span>2</span><b>Preparación</b><p>Tienda, subir habilidades, ver qué oleada viene.</p></div>
             <div><span>3</span><b>Oleada</b><p>Cada héroe contra los mismos creeps, en su arena.</p></div>
-            <div><span>4</span><b>Previa y duelos</b><p>Desde la ronda 5: apuestas y duelos 1 contra 1.</p></div>
+            <div><span>4</span><b>Apuestas y duelo</b><p>Desde la ronda 5: UN duelo por ronda; los demás miran y apuestan.</p></div>
             <div><span>5</span><b>Jefe</b><p>Rondas 5, 10, 15 y 20: cada uno contra un jefe.</p></div>
             <div><span>6</span><b>Ranking</b><p>Ayuda para los de abajo y a la ronda siguiente.</p></div>
         </div>
@@ -116,16 +116,16 @@ const TUTORIAL_PAGES = [
         </div>` },
     { icon: '💀', color: '#ff477e', title: 'Vidas y muerte', body: `
         <div class="tut-cards">
-            ${tutCard('♥♥', '2 vidas', 'Se pierden contra creeps y jefes, no en duelos. Al morir revivís a los 3s con la <b>Voluntad de Titán</b>: 5s sin recibir daño.')}
-            ${tutCard('☠', 'Condenado', 'Sin vidas recibís más daño y, si te matan otra vez, quedás eliminado (podés seguir mirando).')}
+            ${tutCard('♥♥', '2 vidas', 'Se pierden contra creeps y jefes, no en duelos. Al morir revivís a los 3s con la <b>Voluntad de Titán</b>: 5s sin recibir daño. Sin vidas, quedás eliminado (podés seguir mirando).')}
+            ${tutCard('☠', 'Maldición', 'Solo se gana perdiendo duelos: con 3 héroes en juego, cada duelo perdido suma una instancia (recibís +10% de daño por cada una).')}
             ${tutCard('💰', 'Injusticia de los Codiciosos', 'Estando Condenado, en la tienda (Otros) podés comprar una vida.')}
         </div>` },
     { icon: '⚔️', color: '#e63946', title: 'Duelos y apuestas', body: `
         <div class="tut-cards">
-            ${tutCard('🤺', 'Duelos', 'Desde la ronda 5, parejas al azar. En duelo se hacen menos daño, se curan menos y los aturdimientos duran menos. A los 45s gana el de más % de vida.')}
-            ${tutCard('☠', 'Maldición', 'Perder no cuesta vidas, pero con 4 héroes o menos quedás maldito; con 3 o menos, perder maldito elimina.')}
-            ${tutCard('🎲', 'Apuestas', 'En la previa elegís cuánto arriesgar (hasta la mitad de tu oro) en un duelo ajeno. Si acertás, cobrás el doble.')}
-            ${tutCard('🤝', 'Respaldo', 'La IA también apuesta. Si te apostaron a vos y ganás, cobrás el 25% de lo que te apostaron.')}
+            ${tutCard('🤺', 'Un duelo por ronda', 'Desde la ronda 5 pelean 2 héroes (primero los que menos pelearon) y los demás miran. En duelo se hacen menos daño, se curan menos y los aturdimientos duran menos. A los 45s gana el de más % de vida.')}
+            ${tutCard('☠', 'Perder', 'Con 4 o más en juego no pasa nada. Con 3, suma una instancia de maldición. Con 2 (el mano a mano final), cuesta una vida y suma una instancia.')}
+            ${tutCard('🎲', 'Pozo de apuestas', 'Todos los que no pelean apuestan (hasta la mitad de su oro). Los que aciertan recuperan lo suyo y se reparten lo apostado al perdedor: apostar a la sorpresa paga más.')}
+            ${tutCard('🤝', 'Respaldo', 'El que gana el duelo cobra además el 25% de lo que le apostaron.')}
         </div>` },
     { icon: '👹', color: '#9d0208', title: 'Jefes y ayudas', body: `
         <div class="tut-cards">

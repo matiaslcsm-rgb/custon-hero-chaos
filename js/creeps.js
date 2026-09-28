@@ -16,7 +16,7 @@ function groupUnits(g) { return g.count * (CREEP_TYPES[g.type].groupSize || 1); 
 
 // Los creeps se hacen CREEP_GROWTH veces más fuertes por ronda, acumulado (exponencial): tienen que alcanzar a los héroes,
 // que escalan con niveles, ítems y Ascensos, para que el PvE vaya eliminando héroes (medido en DISEÑO.md §9).
-const CREEP_GROWTH = 1.13;
+let CREEP_GROWTH = 1.10; // con un duelo por ronda: partidas de ~30 rondas (con 1,13 duraban ~20). let: se puede ajustar para medir
 function creepStatMult(round) { return Math.pow(CREEP_GROWTH, round - 1); }
 
 // --- PRESIÓN AL LÍDER ---

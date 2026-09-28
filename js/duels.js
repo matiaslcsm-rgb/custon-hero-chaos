@@ -1,4 +1,4 @@
-// Duelos 1v1 después de las oleadas de cada ronda. Reglas: DISEÑO.md §9.
+// Duelos 1v1: UNO por ronda (desde la ronda 5), después de las oleadas; los demás miran y apuestan. Reglas: DISEÑO.md §9.
 //
 //   Parejas al azar entre los héroes en juego, evitando repetir el rival de la ronda anterior; si son impares,
 //   uno descansa. Cada pareja pelea en su propia arena ('duel'), todas en paralelo.
@@ -8,15 +8,16 @@
 //   Ganador: +3 puntos y el escalado por duelo de su héroe. Los dos van al Área de Descanso.
 //   Perdedor (las vidas NO se pierden en duelos, solo contra creeps):
 //     - quedan más de la mitad de los héroes → sin castigo (solo se queda sin los puntos);
-//     - quedan la mitad o menos (DUEL_CURSE_ALIVE) → queda Condenado (maldito); si ya lo estaba, +10% de castigo;
-//     - quedan DUEL_DEATH_ALIVE o menos → duelo a muerte: si ya estaba Condenado, queda eliminado.
+//     - quedan 3 (DUEL_CURSE_ALIVE) → suma una instancia de maldición (Condenado; cada instancia, +10% de castigo);
+//     - quedan 2 (DUEL_DEATH_ALIVE) → pierde una vida y suma una instancia; si era la última vida, queda eliminado.
+//   Los creeps nunca maldicen: solo perder un duelo.
 //   Es para que la partida no se estanque cuando todos tienen builds que los creeps no pueden derrotar.
 
 const DUEL_TIME = 45;
 const DUEL_START_ROUND = 5; // rondas 1-4: solo draft y creeps (armás el kit); los duelos y las apuestas arrancan acá
 const DUEL_DAMAGE_REDUCTION = 0.6; // en duelo, los héroes se hacen 60% menos daño entre sí (sin esto duraban ~3 s)
-const DUEL_CURSE_ALIVE = MAX_HEROES / 2; // con esta cantidad de héroes en juego o menos, perder un duelo maldice
-const DUEL_DEATH_ALIVE = 3;              // con esta cantidad o menos, perder un duelo estando maldito elimina
+const DUEL_CURSE_ALIVE = 3; // con 3 héroes en juego o menos, perder un duelo suma una instancia de maldición
+const DUEL_DEATH_ALIVE = 2; // con 2, perder el duelo además cuesta una vida
 const DUEL_STARTS = [{ x: 3, y: 6 }, { x: 16, y: 6 }];
 
 function inCombat() { return gameState === 'WAVE' || gameState === 'DUEL' || gameState === 'BOSS'; }
@@ -43,7 +44,21 @@ function makeDuelPairs(list) {
 }
 
 // plan: parejas ya sorteadas en la previa de apuestas (ver bets.js).
-function startDuels(plan = makeDuelPairs(aliveHeroes())) {
+// Un duelo por ronda: pelean los que menos duelos pelearon (al azar entre ellos), sin repetir la pareja anterior.
+let lastDuelPair = [];
+function pickDuelPair(list = aliveHeroes()) {
+    if (list.length < 2) return null;
+    const fought = h => h.duelWins + h.duelLosses;
+    const order = shuffle(list.slice()).sort((a, b) => fought(a) - fought(b));
+    const sameAsLast = (a, b) => lastDuelPair.includes(a) && lastDuelPair.includes(b);
+    for (let i = 0; i < order.length; i++) for (let j = i + 1; j < order.length; j++) {
+        if (!sameAsLast(order[i], order[j])) return [order[i], order[j]];
+    }
+    return [order[0], order[1]];
+}
+function duelPlanOfRound() { const pair = pickDuelPair(); return { pairs: pair ? [pair] : [], bye: null }; }
+
+function startDuels(plan = duelPlanOfRound()) {
     gameState = 'DUEL';
     const { pairs, bye } = plan;
     arenas = pairs.map(([a, b]) => {
@@ -59,14 +74,15 @@ function startDuels(plan = makeDuelPairs(aliveHeroes())) {
         return arena;
     });
     if (bye) bye.arena = null;
-    const mine = arenas.find(a => a.heroes.includes(player));
-    if (mine) viewedHero = player;
-    else if (!viewedHero || !viewedHero.arena) viewedHero = arenas.length ? arenas[0].heroes[0] : player;
-    setStateText(`DUELOS · RONDA ${waveNumber}`);
+    if (pairs.length) lastDuelPair = pairs[0].slice();
+    // Todos miran el duelo: si no peleás, la cámara va al duelo (con clic en el ranking podés volver a vos)
+    viewedHero = arenas.length ? (arenas[0].heroes.includes(player) ? player : arenas[0].heroes[0]) : player;
+    setStateText(`DUELO · RONDA ${waveNumber}`);
     sfx('duel');
+    const mine = arenas.find(a => a.heroes.includes(player));
     const rival = mine ? mine.heroes.find(h => h !== player) : null;
-    log(`⚔️ ¡Duelos! ${rival ? `Te toca contra ${rival.displayName}.` : player.eliminated ? 'Mirás los duelos.' : 'Esta ronda descansás.'} ` +
-        pairs.map(([a, b]) => `${a.name} vs ${b.name}`).join(' · ') + (bye ? ` · descansa ${bye.name}` : ''));
+    log(`⚔️ ¡Duelo de la ronda! ${pairs.map(([a, b]) => `${a.displayName} vs ${b.displayName}`).join(' · ')}. ` +
+        (rival ? `Te toca a vos contra ${rival.displayName}.` : 'Mirás el duelo desde la sala.'));
     if (!arenas.length) onDuelsDone();
 }
 
@@ -95,12 +111,13 @@ function resolveDuel(arena, winner, loser, reason) {
 function penalizeDuelLoser(loser) {
     const alive = aliveHeroes().length;
     if (alive > DUEL_CURSE_ALIVE) return;
-    if (alive <= DUEL_DEATH_ALIVE && isCondemned(loser)) {
-        eliminateHero(loser, loser === player ? 'Perdiste un duelo a muerte' : `${loser.displayName} perdió un duelo a muerte`);
-        return;
+    if (isCondemned(loser)) registerDuelLoss(loser); else curseHero(loser); // una instancia más de maldición
+    if (alive <= DUEL_DEATH_ALIVE) { // mano a mano final: además cuesta una vida
+        loser.lives--;
+        log(loser === player ? `💔 Perdiste el duelo con 2 héroes en juego: perdés una vida (te queda${loser.lives === 1 ? '' : 'n'} ${Math.max(0, loser.lives)}).`
+            : `💔 ${loser.displayName} pierde una vida.`);
+        if (loser.lives <= 0) eliminateHero(loser, loser === player ? 'Perdiste el duelo final sin vidas' : `${loser.displayName} perdió el duelo final sin vidas`);
     }
-    if (isCondemned(loser)) registerDuelLoss(loser);
-    else curseHero(loser);
 }
 
 // Llamado desde updateArena para las arenas de duelo: vence el tiempo o alguien murió.

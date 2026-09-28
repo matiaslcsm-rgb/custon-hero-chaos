@@ -399,6 +399,20 @@ partidas con cada héroe** y murió entre las oleadas 1 y 3. No juega bien, pero
 
 ## 9. PvP: duelos, apuestas y ranking
 
+> **Formato vigente (reemplaza lo que se contradiga más abajo):**
+> - **Un duelo por ronda** (desde la ronda 5). Pelean los que menos duelos pelearon (al azar entre ellos), sin repetir la pareja
+>   anterior; los demás lo miran desde la sala (la cámara va al duelo).
+> - **Apuestas:** todos los que no pelean (vos y la IA) apuestan a ese duelo, hasta la mitad de su oro. **Pozo compartido:** los
+>   que aciertan recuperan lo suyo y se reparten lo apostado al perdedor en proporción a lo que pusieron; si nadie acertó, se
+>   pierde. El ganador del duelo cobra además el 25% de lo que le apostaron (respaldo). La ventana muestra a los dos duelistas,
+>   lo apostado a cada uno y cuánto cobrarías.
+> - **Vidas:** si los creeps te dejan sin vidas, quedás eliminado (espectador). Los creeps **nunca** maldicen.
+> - **Maldición (Condenado):** solo por perder duelos. Con **3** héroes en juego, cada duelo perdido suma una instancia (+10% de
+>   daño recibido cada una). Con **2**, perder el duelo además **cuesta una vida** (sin vidas, eliminado).
+> - **Sin límite de 20 rondas:** la partida sigue hasta que quede uno (tope de seguridad: 60). Creeps ×1,10 por ronda (antes
+>   ×1,13). Medido (14 partidas): duran ~31 rondas (28-35). **Desbalance a revisar:** gana el que mejor sobrevive a los creeps y
+>   el Sniper ganó 8 de 14 (Nigromante 4).
+
 - Partidas de **8 héroes**: el jugador + 7 rivales controlados por la IA, que hacen el mismo recorrido con las mismas reglas.
 - **Ronda:** Draft → Preparación (Área de Descanso) → Oleada (cada héroe en su propia arena, en paralelo) → Duelos → Ranking.
 - **Duelos 1v1** después de cada oleada. **Parejas al azar**, evitando repetir el rival de la ronda anterior. Si quedan impares,
