@@ -37,7 +37,7 @@ function renderHeroPick() {
             card.className = 'skill-card';
             card.style.borderLeft = `4px solid ${info.color}`;
             const scalingText = `Escalado: +${t.scaling.perKillsAmount} ${scalingStatLabel(t.scaling.stat)} cada ${t.scaling.perKills} bajas &middot; +${t.scaling.perHeroKill} al ganar un duelo.`;
-            card.innerHTML = `<h4><span style="color:${info.color}">[${t.symbol}] ${t.name}</span> <span class="item-meta">${t.role}</span></h4><p>${t.description}</p><p style="color:#ffb703; margin-top:4px;">${scalingText}</p>`;
+            card.innerHTML = `<h4 class="pick-title">${heroIconHtml(t, 'md')}<span style="color:${info.color}">${t.name}</span> <span class="item-meta">${t.role}</span></h4><p>${t.description}</p><p style="color:#ffb703; margin-top:4px;">${scalingText}</p>`;
             card.onclick = () => selectHero(t);
             container.appendChild(card);
         });
@@ -85,7 +85,7 @@ function heroCard(t) {
     const natural = Object.values(HERO_SKILLS[t.key]).sort((a, b) => (a.isUltimate ? 1 : 0) - (b.isUltimate ? 1 : 0));
     const g = guideOf(t.key);
     return `<div class="item-card hero-card" style="border-left-color:${color}">` +
-        `<div class="item-head"><span><span class="hc-symbol" style="color:${color}">${t.symbol}</span> <span class="item-name" style="color:${color}; font-size:1.05rem">${t.name}</span></span>` +
+        `<div class="item-head"><span class="hc-title">${heroIconHtml(t, 'lg')} <span class="item-name" style="color:${color}; font-size:1.05rem">${t.name}</span></span>` +
         `<span class="item-price">${t.role}</span></div>` +
         `<p class="item-text">${t.description}</p>` +
         `<div class="hc-cols"><ul class="item-stats">${attrs}</ul><ul class="item-stats">${stats}</ul></div>` +
@@ -132,7 +132,7 @@ function stripHtml(html) { return html.replace(/<[^>]+>/g, ''); }
 
 
 // --- CÓDICE DE CREEPS ---
-function creepTag(t) { return `<span class="creep-symbol" style="color:${t.color}">${t.symbol}</span>`; }
+function creepTag(t, size = 'sm') { return unitIconHtml(t, size); }
 
 // Mismo formato que el códice de ítems: nombre en el color del creep, descripción en blanco, secciones con botones
 // para saltar: básicos, con mecánica, temas de oleada y jefes de ronda.
@@ -150,7 +150,7 @@ function creepStatLines(t, hpText) {
 
 function creepCard(t, extra = '', hpText) {
     return `<div class="item-card" style="border-left-color:${t.color}">` +
-        `<div class="item-head"><span>${creepTag(t)} ${creepNameHtml(t)}</span>${t.gold ? `<span class="item-price">${t.gold}g</span>` : ''}</div>` +
+        `<div class="item-head"><span class="hc-title">${creepTag(t, 'lg')} ${creepNameHtml(t)}</span>${t.gold ? `<span class="item-price">${t.gold}g</span>` : ''}</div>` +
         creepStatLines(t, hpText) + `<p class="item-text">${t.mechanic}</p>` + extra + `</div>`;
 }
 

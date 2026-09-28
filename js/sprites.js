@@ -142,6 +142,24 @@ function heroSpriteUrl(hero) {
     return spriteUrlCache[hero.key] || (spriteUrlCache[hero.key] = s.img.toDataURL());
 }
 
+// Imagen (data URL) de cualquier unidad para la interfaz: héroes, creeps y jefes (glosarios, aviso de oleada).
+const unitUrlCache = {};
+function unitSpriteUrl(u, cacheKey) {
+    if (!spritesOn) return null;
+    if (!unitUrlCache[cacheKey]) { const s = spriteFor(u); if (!s) return null; unitUrlCache[cacheKey] = s.img.toDataURL(); }
+    return unitUrlCache[cacheKey];
+}
+// Ícono de un tipo de creep o de un jefe de ronda (o su símbolo si están las letras ASCII).
+function unitIconHtml(t, size = 'md') {
+    const isRoundBoss = typeof ROUND_BOSSES !== 'undefined' && ROUND_BOSSES.includes(t);
+    const url = unitSpriteUrl(isRoundBoss ? { isRoundBoss: true, type: t, color: t.color } : { type: t }, (isRoundBoss ? 'boss:' : 'creep:') + t.key);
+    return url ? `<img src="${url}" alt="${t.symbol}" class="pixel-img unit-icon ${size}">` : `<span class="creep-symbol" style="color:${t.color}">${t.symbol}</span>`;
+}
+function heroIconHtml(t, size = 'md') {
+    const url = heroSpriteUrl({ isHero: true, key: t.key });
+    return url ? `<img src="${url}" alt="${t.symbol}" class="pixel-img unit-icon ${size}">` : `<span class="hc-symbol" style="color:${ATTR_INFO[t.primaryAttr].color}">${t.symbol}</span>`;
+}
+
 // --- DIBUJO ---
 let spritesOn = true;
 try { spritesOn = localStorage.getItem('chc-sprites') !== 'off'; } catch (e) { /* queda prendido */ }
@@ -153,6 +171,8 @@ function setSprites(on) {
     if (btn) btn.textContent = on ? '🎨 Pixel' : '🔤 ASCII';
     if (typeof lastKitSignature !== 'undefined') lastKitSignature = '';
     if (typeof lastScoreboardSignature !== 'undefined') lastScoreboardSignature = '';
+    // los glosarios muestran los íconos o las letras según el modo
+    if (typeof renderHeroCodex === 'function' && document.getElementById('hero-codex')) { renderHeroCodex(); renderCreepCodex(); }
 }
 
 // Dibuja el sprite centrado en (cx, cy) con el tamaño size (px). facing: 1 mira a la derecha, -1 a la izquierda.
