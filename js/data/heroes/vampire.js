@@ -25,7 +25,8 @@ registerHero({
     VAMP_DARKBLOOD: {
         id: 'VAMP_DARKBLOOD', name: 'Sangre Oscura', kind: 'active',
         tags: ['MEJORA', 'ROBO_VIDA'],
-        values: { cooldown: 12, manaCost: 25, hpCost: 0.08, duration: 5, atkPct: [0.2, 0.3, 0.4, 0.5], lifestealBonus: [0.3, 0.5, 0.7, 0.9] },
+        // Costo de vida bajado de 8% a 4% tras medir (el Vampiro ganaba 11% de los duelos).
+        values: { cooldown: 12, manaCost: 25, hpCost: 0.04, duration: 5, atkPct: [0.2, 0.3, 0.4, 0.5], lifestealBonus: [0.3, 0.5, 0.7, 0.9] },
         description: 'Consumís {hpCost%} de tu vida actual y ganás +{atkPct%} daño físico por {duration}s; tu robo de vida cura +{lifestealBonus%} mientras dura.',
         cast(caster) {
             const cost = Math.round(caster.hp * val(this, caster, 'hpCost'));
@@ -43,7 +44,7 @@ registerHero({
     VAMP_CLAW: {
         id: 'VAMP_CLAW', name: 'Garra Vampírica', kind: 'active',
         tags: ['FÍSICO', 'ROBO_VIDA'],
-        values: { cooldown: [7, 6, 5, 4], manaCost: 30, dmgMult: [1.0, 1.3, 1.6, 1.9], healPct: 0.2 },
+        values: { cooldown: [7, 6, 5, 4], manaCost: 30, dmgMult: [1.0, 1.3, 1.6, 1.9], healPct: 0.35 },
         description: '{dmgMult%} de tu daño físico al enemigo más cercano; recuperás {healPct%} del daño como vida (el doble si tiene <30% HP).',
         cast(caster) {
             const target = nearestEnemy(caster, caster.attackRange + 1);
@@ -51,7 +52,7 @@ registerHero({
             const dmg = Math.round(caster.atk * val(this, caster, 'dmgMult'));
             const lowHp = target.maxHp && target.hp / target.maxHp < 0.3;
             const { dealt } = dealDamage(caster, target, dmg, 'physical');
-            const heal = healUnit(caster, Math.round(dealt * val(this, caster, 'healPct') * (lowHp ? 2 : 1)));
+            const heal = healUnit(caster, Math.round(dealt * val(this, caster, 'healPct') * (lowHp ? 2 : 1)), { fromDamage: true });
             log(`🐾 ¡Garra Vampírica a ${target.label}! (-${dealt} HP, +${heal} HP propia)`);
             return true;
         }
@@ -59,7 +60,8 @@ registerHero({
     VAMP_LEAP: {
         id: 'VAMP_LEAP', name: 'Salto Sangriento', kind: 'active',
         tags: ['MOVILIDAD', 'FÍSICO', 'CONTROL'],
-        values: { cooldown: [12, 11, 10, 9], manaCost: 35, range: 6, dmgMult: [0.8, 1.0, 1.2, 1.4], slow: 0.4, slowDuration: [1.5, 2, 2.5, 3] },
+        // Alcance 6 → 7 y ralentización 40% → 50%: tiene que poder alcanzar a los de distancia.
+        values: { cooldown: [12, 11, 10, 9], manaCost: 35, range: 7, dmgMult: [0.8, 1.0, 1.2, 1.4], slow: 0.5, slowDuration: [1.5, 2, 2.5, 3] },
         description: 'Saltás hasta {range} casillas hacia el enemigo más cercano: {dmgMult%} de daño físico de impacto y -{slow%} velocidad por {slowDuration}s.',
         cast(caster) {
             const target = nearestEnemy(caster, val(this, caster, 'range'));

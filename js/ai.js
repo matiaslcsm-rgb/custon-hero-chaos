@@ -57,7 +57,10 @@ function retreatStep(hero, enemies) {
 }
 
 // --- HABILIDADES ---
-function aiWantsToCast(hero, skill, nearCount, bossNear) {
+function aiWantsToCast(hero, skill, nearCount, bossNear, nearestDist = Infinity) {
+    // Cuerpo a cuerpo: los saltos y teletransportes se guardan para cuando el enemigo está fuera de su alcance
+    // (antes los usaba apenas estaban listos, aunque ya estuviera pegado, y después no podía alcanzar a los que se alejaban).
+    if (skill.tags.includes('MOVILIDAD') && !isRanged(hero)) return nearestDist > hero.attackRange + 0.5 && nearestDist <= 8;
     // En un duelo (o contra el jefe de ronda) hay un enemigo principal: definitiva y área apenas lo tiene cerca
     if (hero.arena && hero.arena.kind !== 'wave') {
         if (skill.tags.includes('MOVILIDAD') && isRanged(hero)) return nearCount === 0;
@@ -74,9 +77,11 @@ function aiWantsToCast(hero, skill, nearCount, bossNear) {
 function aiCastSkills(hero) {
     const near = enemiesOf(hero).filter(c => c.isAlive() && distance(hero, c) <= AI.nearRadius);
     const bossNear = near.some(c => c.isBoss);
+    const nearest = nearestEnemy(hero);
+    const nearestDist = nearest ? distance(hero, nearest) : Infinity;
     hero.skills.forEach(s => {
         if (s.kind !== 'active' || skillLevel(hero, s) === 0 || (hero.cooldowns[s.id] || 0) > 0) return;
-        if (!aiWantsToCast(hero, s, near.length, bossNear)) return;
+        if (!aiWantsToCast(hero, s, near.length, bossNear, nearestDist)) return;
         tryCastSkill(hero, s, { quiet: true });
     });
 }

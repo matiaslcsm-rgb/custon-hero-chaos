@@ -511,6 +511,13 @@ Lo aplicado:
   valía mucho más que pegar (el Elixir del Alquimista era la mitad de su ventaja).
 - **En duelo, el control entre héroes dura la mitad** (aturdir primero decidía el duelo).
 
+**Retoques de kits (35 partidas):** la curación que sale del daño (Garra Vampírica, Drenaje, Pacto de la Muerte) no se reduce en
+duelo (corrige que quedaba castigada dos veces); Sangre Oscura cuesta 4% de vida (antes 8%); Garra cura 35% del daño (antes 20%);
+Salto Sangriento alcance 7 y ralentiza 50%; Drenaje alcance 5; la Maldición del Nigromante también ralentiza 25%; Aura de
+Podredumbre radio 3,5. La IA de los cuerpo a cuerpo guarda saltos y teletransportes para cuando el enemigo está fuera de alcance.
+Resultado: Bruja 71%, Alquimista 70%, Axe 67%, Sniper 62%, Arcanista 58%, Asesino 44%, Sabio 43%, Nigromante 19%, Vampiro 12%;
+ganan partidas 6 héroes distintos.
+
 **Sigue pendiente:** Vampiro (11%) y Nigromante (17%) no suben solo con stats: hay que revisar sus kits. El Alquimista y la
 Bruja bajaron de 94% a ~75%, siguen fuertes por sus aturdimientos.
 

@@ -22,14 +22,14 @@ registerHero({
     NECROMANCER_DRAIN: {
         id: 'NECROMANCER_DRAIN', name: 'Drenaje de Esencia', kind: 'active',
         tags: ['MÁGICO', 'ROBO_VIDA'],
-        values: { cooldown: [10, 9, 8, 7], manaCost: [40, 45, 50, 55], range: 4, baseDmg: [50, 85, 120, 155], intRatio: 0.5, healPct: [0.6, 0.7, 0.8, 0.9] },
+        values: { cooldown: [10, 9, 8, 7], manaCost: [40, 45, 50, 55], range: 5, baseDmg: [50, 85, 120, 155], intRatio: 0.5, healPct: [0.6, 0.7, 0.8, 0.9] },
         description: 'Drena al enemigo más cercano (rango {range}): {baseDmg} + {intRatio%} de tu Inteligencia como daño mágico y te curás {healPct%} del daño hecho.',
         cast(caster) {
             const target = nearestEnemy(caster, val(this, caster, 'range'));
             if (!target) { log('Drenaje de Esencia: sin enemigos en rango.'); return false; }
             const dmg = val(this, caster, 'baseDmg') + caster.int * val(this, caster, 'intRatio');
             const { dealt } = dealDamage(caster, target, dmg, 'magical');
-            const healed = healUnit(caster, dealt * val(this, caster, 'healPct'));
+            const healed = healUnit(caster, dealt * val(this, caster, 'healPct'), { fromDamage: true });
             log(`🩸 ¡Drenaje de Esencia! -${dealt} HP al enemigo, +${healed} HP propia.`);
             return true;
         }
@@ -37,7 +37,7 @@ registerHero({
     NECROMANCER_DECAY: {
         id: 'NECROMANCER_DECAY', name: 'Aura de Podredumbre', kind: 'passive',
         tags: ['PURO', 'DAÑO_EN_EL_TIEMPO', 'ÁREA'],
-        values: { radius: 3, hpDmgPct: [0.015, 0.02, 0.025, 0.03] },
+        values: { radius: 3.5, hpDmgPct: [0.015, 0.02, 0.025, 0.03] },
         description: 'Pasiva: los enemigos en radio {radius} pierden {hpDmgPct%} de su HP máximo por segundo como daño puro.',
         hooks: {
             onTick(owner, { dt }) {
@@ -52,14 +52,15 @@ registerHero({
     NECROMANCER_CURSE: {
         id: 'NECROMANCER_CURSE', name: 'Maldición de Marchitamiento', kind: 'active',
         tags: ['PERJUICIO'],
-        values: { cooldown: [12, 11, 10, 9], manaCost: [35, 40, 45, 50], range: 5, duration: 4, dmgTakenPct: [0.15, 0.2, 0.25, 0.3] },
-        description: 'Maldice al enemigo más cercano (rango {range}) por {duration}s: recibe +{dmgTakenPct%} de daño de todas las fuentes.',
+        // Suma una ralentización tras medir: sin ella el Nigromante no tenía cómo frenar a nadie (17% de duelos).
+        values: { cooldown: [12, 11, 10, 9], manaCost: [35, 40, 45, 50], range: 5, duration: 4, dmgTakenPct: [0.15, 0.2, 0.25, 0.3], slow: 0.25 },
+        description: 'Maldice al enemigo más cercano (rango {range}) por {duration}s: recibe +{dmgTakenPct%} de daño de todas las fuentes y se mueve {slow%} más lento.',
         cast(caster) {
             const target = nearestEnemy(caster, val(this, caster, 'range'));
             if (!target) { log('Maldición de Marchitamiento: sin objetivos.'); return false; }
             addEffect(target, {
                 id: this.id, name: 'Marchito', duration: val(this, caster, 'duration'), tags: ['PERJUICIO'],
-                mods: { dmgTakenPct: val(this, caster, 'dmgTakenPct') }
+                mods: { dmgTakenPct: val(this, caster, 'dmgTakenPct'), moveSpeedPct: -val(this, caster, 'slow') }
             });
             log(`☠️ ¡Maldición! ${target.label} recibe +${Math.round(val(this, caster, 'dmgTakenPct') * 100)}% de daño.`);
             return true;
@@ -80,7 +81,7 @@ registerHero({
                 total += dealDamage(caster, c, dmg, 'pure').dealt;
                 if (!c.isAlive()) grantPermanent(caster, 'lifesteal', val(this, caster, 'lifestealPerKill'), this.name);
             });
-            const healed = healUnit(caster, total);
+            const healed = healUnit(caster, total, { fromDamage: true });
             log(`💀 ¡Pacto de la Muerte! ${targets.length} enemigo(s) drenados, +${healed} HP.`);
             return true;
         }
