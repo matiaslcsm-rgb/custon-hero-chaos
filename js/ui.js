@@ -655,6 +655,14 @@ function updateHud() {
     renderCombatInfo();
 }
 
+// Aviso de la presión al líder en tu arena.
+function pressureNote(arena) {
+    if (!arena || !arena.pressure || Math.abs(arena.pressure - 1) < 0.02) return '';
+    const pct = Math.round((arena.pressure - 1) * 100);
+    return pct > 0 ? `<p class="subtitle pressure up">⚖ Vas más fuerte que el promedio: tus creeps tienen +${pct}% de vida y daño.</p>`
+        : `<p class="subtitle pressure down">⚖ Vas atrás del promedio: tus creeps tienen ${pct}% de vida y daño.</p>`;
+}
+
 // Panel derecho durante el combate (no hay nada para elegir): qué está pasando y qué hacer.
 function renderCombatInfo() {
     const box = document.getElementById('combat-info');
@@ -671,12 +679,12 @@ function renderCombatInfo() {
         html = `<h3>🎲 Previa de duelos</h3><p class="subtitle">Apostá en la ventana antes de que arranquen los duelos.</p>`;
     } else if (gameState === 'ENDED') html = `<h3>Fin de la partida</h3><p class="subtitle">Mirá el ranking a la izquierda. Tocá "Nueva Partida" para jugar otra.</p>`;
     else if (player.eliminated) html = `<h3>Quedaste eliminado</h3><p class="subtitle">Podés seguir mirando: clic en un héroe del ranking.</p>`;
-    else if (gameState === 'BOSS') html = `<h3>👹 Jefe de ronda</h3><p class="subtitle">${arena && arena.boss ? `<b>${arena.boss.label}</b>: ${arena.boss.type.mechanic} ${arena.boss.type.escalation}` : 'Esperando a que terminen los demás.'}</p><p class="subtitle">Morir cuesta vidas. Pasados ${BOSS_FIGHT.enrageAfter}s se enfurece. Los 3 más rápidos cobran extra.</p>`;
+    else if (gameState === 'BOSS') html = `<h3>👹 Jefe de ronda</h3>${pressureNote(arena)}<p class="subtitle">${arena && arena.boss ? `<b>${arena.boss.label}</b>: ${arena.boss.type.mechanic} ${arena.boss.type.escalation}` : 'Esperando a que terminen los demás.'}</p><p class="subtitle">Morir cuesta vidas. Pasados ${BOSS_FIGHT.enrageAfter}s se enfurece. Los 3 más rápidos cobran extra.</p>`;
     else if (gameState === 'DUEL') {
         const rival = arena && arena.kind === 'duel' ? arena.heroes.find(h => h !== hero) : null;
         html = `<h3>⚔ Duelos</h3><p class="subtitle">${rival ? `${hero === player ? 'Peleás' : hero.name + ' pelea'} contra <b>${rival.displayName}</b>. Gana quien mata al otro o, a los ${DUEL_TIME}s, quien tenga más % de vida.` : 'Esperando que terminen los demás duelos.'}</p>` +
             (currentBet ? `<p class="subtitle">🎲 Apostaste ${currentBet.amount}g a ${currentBet.on.displayName}.</p>` : '');
-    } else html = `<h3>🌊 Oleada ${waveNumber}</h3><p class="subtitle">${hero.inRest ? 'Terminaste: esperás en el Área de Descanso a que terminen los demás.' : 'Matá a todos los creeps antes de que se acabe el tiempo (después se enfurecen). El ataque es automático: movete y usá tus habilidades.'}</p>`;
+    } else html = `<h3>🌊 Oleada ${waveNumber}</h3>${pressureNote(arena)}<p class="subtitle">${hero.inRest ? 'Terminaste: esperás en el Área de Descanso a que terminen los demás.' : 'Matá a todos los creeps antes de que se acabe el tiempo (después se enfurecen). El ataque es automático: movete y usá tus habilidades.'}</p>`;
     if (box.dataset.html !== html) { box.dataset.html = html; box.innerHTML = html; }
 }
 

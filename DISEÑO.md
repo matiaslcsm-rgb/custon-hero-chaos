@@ -518,6 +518,19 @@ Podredumbre radio 3,5. La IA de los cuerpo a cuerpo guarda saltos y teletranspor
 Resultado: Bruja 71%, Alquimista 70%, Axe 67%, Sniper 62%, Arcanista 58%, Asesino 44%, Sabio 43%, Nigromante 19%, Vampiro 12%;
 ganan partidas 6 héroes distintos.
 
+**Presión al líder** (`PRESSURE` en creeps.js, a pedido): los creeps y jefes de cada arena se adaptan al **poder** del héroe
+(nivel ×100 + oro en ítems + neutral) comparado con el promedio de los que siguen en juego: entre −15% y +25% de vida y daño.
+Se avisa en el panel derecho. Medido (18 partidas con y sin): casi no cambia quién gana (el líder de la ronda 6 gana 28-29%
+de las partidas en ambos casos), porque las oleadas dan 1 punto y los duelos 3; el juego ya no premiaba mucho ir adelante.
+
+**Balance por habilidades (ablación, 18 partidas por prueba):** sin el aturdimiento de la Mezcla, el Alquimista baja de 88% a
+73%; con el ácido a la mitad, a 66%. Aplicado: ácido −30% y menos reducción de armadura; Mezcla aturde 0,8-1,4s (antes
+1,0-1,9). Bruja: aura −30%, Armadura de Escarcha +3/4/5/6 de armadura y ralentiza 15-30% (antes +4-10 y 20-50%), Explosión
+aturde 0,6-1,2s, Cero Absoluto congela 1,5s. Vampiro: robo de vida base 20% y el Salto **inmoviliza 0,6s** al caer.
+Asesino y Sabio: 140 de vida. **Validado con 34 partidas:** Alquimista 74%, Axe 71%, Bruja 68%, Sniper 63%, Arcanista 59%,
+Asesino 45%, Sabio 37%, Nigromante 24%, Vampiro 17%; ganan partidas **7 héroes distintos** (Bruja 10, Alquimista 7, Sniper 6…).
+Las mediciones de un mismo ajuste varían ±10 puntos entre corridas de 18 partidas: conviene validar con 30+.
+
 **Sigue pendiente:** Vampiro (11%) y Nigromante (17%) no suben solo con stats: hay que revisar sus kits. El Alquimista y la
 Bruja bajaron de 94% a ~75%, siguen fuertes por sus aturdimientos.
 

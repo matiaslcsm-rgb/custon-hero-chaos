@@ -408,3 +408,4 @@ kbd { background: #2a2e3a; border: 1px solid #555; border-bottom-width: 3px; pad
 .tut-heroes { display: flex; justify-content: space-between; gap: 4px; margin-bottom: 14px; background: #0d0e11; border: 1px solid #2f333d; padding: 10px 8px; }
 .tut-heroes div { display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .tut-heroes span { font-size: 0.55rem; color: #aaa; text-align: center; max-width: 64px; }
+.pressure.up { color: #ff9f1c; } .pressure.down { color: #72efdd; }

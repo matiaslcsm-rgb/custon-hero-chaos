@@ -22,7 +22,7 @@ registerHero({
     FROSTWITCH_BLAST: {
         id: 'FROSTWITCH_BLAST', name: 'Explosión Helada', kind: 'active',
         tags: ['MÁGICO', 'ÁREA', 'CONTROL'],
-        values: { cooldown: [11, 10, 9, 8], manaCost: [40, 45, 50, 55], baseDmg: [60, 100, 140, 180], intRatio: 0.5, range: 5, radius: 2.5, stunDuration: [0.8, 1.0, 1.2, 1.4] },
+        values: { cooldown: [11, 10, 9, 8], manaCost: [40, 45, 50, 55], baseDmg: [60, 100, 140, 180], intRatio: 0.5, range: 5, radius: 2.5, stunDuration: [0.6, 0.8, 1.0, 1.2] }, // más corto tras medir
         description: 'Rompe el suelo bajo el enemigo más cercano (rango {range}): {baseDmg} + {intRatio%} de tu Inteligencia como daño mágico y aturde {stunDuration}s a los enemigos en radio {radius}.',
         cast(caster) {
             const target = nearestEnemy(caster, val(this, caster, 'range'));
@@ -44,7 +44,7 @@ registerHero({
     FROSTWITCH_ARMOR: {
         id: 'FROSTWITCH_ARMOR', name: 'Armadura de Escarcha', kind: 'active',
         tags: ['MEJORA', 'AL_RECIBIR_DAÑO', 'CONTROL'],
-        values: { cooldown: [15, 14, 13, 12], manaCost: [45, 50, 55, 60], duration: 5, armorBonus: [4, 6, 8, 10], attackerSlow: [0.2, 0.3, 0.4, 0.5], slowDuration: 3 },
+        values: { cooldown: [15, 14, 13, 12], manaCost: [45, 50, 55, 60], duration: 5, armorBonus: [3, 4, 5, 6], attackerSlow: [0.15, 0.2, 0.25, 0.3], slowDuration: 3 }, // bajado tras medir (ganaba 76% de duelos)
         description: 'Te cubre con hielo por {duration}s: +{armorBonus} de armadura, y quien te golpee pierde {attackerSlow%} de velocidad de ataque por {slowDuration}s.',
         cast(caster) {
             const skill = this;
@@ -68,7 +68,7 @@ registerHero({
     FROSTWITCH_AURA: {
         id: 'FROSTWITCH_AURA', name: 'Presencia Glacial', kind: 'passive',
         tags: ['MÁGICO', 'DAÑO_EN_EL_TIEMPO', 'ÁREA'],
-        values: { radius: 3, dmgPerSecond: [15, 25, 35, 45], intRatio: 0.15 },
+        values: { radius: 3, dmgPerSecond: [10, 17, 24, 31], intRatio: 0.15 }, // −30% tras medir
         description: 'Pasiva: los enemigos en radio {radius} sufren {dmgPerSecond} + {intRatio%} de tu Inteligencia como daño mágico por segundo.',
         hooks: {
             onTick(owner, { dt }) {
@@ -84,7 +84,7 @@ registerHero({
     FROSTWITCH_ZERO: {
         id: 'FROSTWITCH_ZERO', name: 'Cero Absoluto', kind: 'active', isUltimate: true,
         tags: ['MÁGICO', 'ÁREA', 'CONTROL', 'AL_MATAR'],
-        values: { cooldown: [65, 55, 45], manaCost: [110, 130, 150], baseDmg: [150, 230, 310], intRatio: 0.8, radius: 4, freeze: 2, armorPerKill: [1, 1.5, 2] },
+        values: { cooldown: [65, 55, 45], manaCost: [110, 130, 150], baseDmg: [150, 230, 310], intRatio: 0.8, radius: 4, freeze: 1.5, armorPerKill: [1, 1.5, 2] },
         description: 'DEFINITIVA. Ventisca en radio {radius}: {baseDmg} + {intRatio%} de tu Inteligencia como daño mágico y congela (aturde) {freeze}s. ASCENSO: cada enemigo que mata te da +{armorPerKill} de armadura permanente.',
         cast(caster) {
             const radius = val(this, caster, 'radius');

@@ -19,10 +19,30 @@ function groupUnits(g) { return g.count * (CREEP_TYPES[g.type].groupSize || 1); 
 const CREEP_GROWTH = 1.13;
 function creepStatMult(round) { return Math.pow(CREEP_GROWTH, round - 1); }
 
-// Llena una arena con los creeps de la oleada.
+// --- PRESIÓN AL LÍDER ---
+// Los creeps y jefes se adaptan al poder del héroe que enfrentan: más fuertes contra el que va más fuerte que el promedio
+// de los que siguen en juego, más suaves con el que va atrás. Poder = nivel (×100) + oro invertido en ítems + neutral.
+// Multiplicador = 1 + (poder / promedio − 1) × PRESSURE.factor, entre PRESSURE.min y PRESSURE.max (vida y daño).
+const PRESSURE = { factor: 1, min: 0.85, max: 1.25 };
+let PRESSURE_ON = true; // se puede apagar para medir
+
+function heroPower(h) {
+    const items = h.inventory.reduce((s, inv) => s + (itemTotalCost(ITEMS[inv.key]) || 0), 0);
+    return h.level * 100 + items + (h.neutral ? NEUTRAL_ITEMS[h.neutral].tier * 150 : 0);
+}
+function pressureMult(hero) {
+    const alive = aliveHeroes();
+    if (!PRESSURE_ON || alive.length < 2 || !hero) return 1;
+    const avg = alive.reduce((s, h) => s + heroPower(h), 0) / alive.length;
+    if (avg <= 0) return 1;
+    return Math.max(PRESSURE.min, Math.min(PRESSURE.max, 1 + (heroPower(hero) / avg - 1) * PRESSURE.factor));
+}
+
+// Llena una arena con los creeps de la oleada (ajustados al poder del héroe de esa arena).
 function spawnWave(arena, wave) {
     arena.creeps = []; arena.boss = null; arena.projectiles = [];
-    const statMult = creepStatMult(waveNumber);
+    arena.pressure = pressureMult(arena.heroes[0]);
+    const statMult = creepStatMult(waveNumber) * arena.pressure;
     const add = c => { c.arena = arena; arena.creeps.push(c); return c; };
     // Aparecen en casillas distintas de las columnas 13 a 18; el jefe, en la última columna
     const cells = shuffle(Array.from({ length: 6 * ROWS }, (_, i) => [13 + Math.floor(i / ROWS), i % ROWS]));

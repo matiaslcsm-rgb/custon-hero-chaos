@@ -268,10 +268,11 @@ test('Hambre + Sangre Oscura multiplican el robo de vida', () => {
     newGame('VAMPIRE');
     const c = dummy({ hp: 10, maxHp: 100 }); // <30% HP
     player.hp = 10; applyLifesteal(player, 100, c);
-    checkEq(player.hp - 10, Math.round(100 * 0.15 * 2), 'Hambre duplica contra <30% HP');
+    const ls = HERO_TEMPLATES.VAMPIRE.baseLifesteal / 100;
+    checkEq(player.hp - 10, Math.round(100 * ls * 2), 'Hambre duplica contra <30% HP');
     learn('VAMP_DARKBLOOD', 1).cast(player);
     player.hp = 10; applyLifesteal(player, 100, c);
-    checkEq(player.hp - 10, Math.round(100 * 0.15 * (2 + 0.3)), 'Sangre Oscura suma al multiplicador');
+    checkEq(player.hp - 10, Math.round(100 * ls * (2 + 0.3)), 'Sangre Oscura suma al multiplicador');
 });
 
 test('Hambre: cada baja cura 5% de la vida máxima', () => {
@@ -1464,6 +1465,21 @@ test('Pausa: congela la partida y Esc la abre y la cierra', () => {
     resetGame();
     setPaused(true);
     check(!paused, 'en el menú no se pausa');
+});
+
+test('Presión al líder: los creeps se adaptan al poder del héroe (entre −15% y +25%)', () => {
+    newGame('AXE');
+    heroes.forEach(h => { h.level = 5; h.inventory = []; });
+    checkNear(pressureMult(player), 1, 'igual al promedio: sin cambio');
+    player.level = 20;
+    checkNear(pressureMult(player), PRESSURE.max, 'mucho más fuerte: el tope');
+    player.level = 1;
+    checkNear(pressureMult(player), PRESSURE.min, 'mucho más débil: el piso');
+    player.level = 5; giveItem(player, 'HEART');
+    check(pressureMult(player) > 1, 'los ítems cuentan');
+    const arena = makeArena('wave', [player]);
+    spawnWave(arena, TEST_WAVE);
+    checkNear(arena.creeps[0].statMult, creepStatMult(waveNumber) * arena.pressure, 'se aplica a los creeps de su arena');
 });
 
 test('Guía de ítems: cada héroe tiene la suya y la tienda la muestra primero', () => {

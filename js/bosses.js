@@ -31,8 +31,8 @@ function roundBossOf() {
 // Héroes vivos a los que puede pegarle el jefe con sus mecánicas.
 function bossTargets(c) { return c.arena.heroes.filter(h => !h.eliminated && h.isAlive()); }
 
-function makeRoundBoss(t) {
-    const c = makeCreep(t, COLS - 4, Math.floor(ROWS / 2), creepStatMult(waveNumber), false, 0);
+function makeRoundBoss(t, pressure = 1) {
+    const c = makeCreep(t, COLS - 4, Math.floor(ROWS / 2), creepStatMult(waveNumber) * pressure, false, 0);
     c.isRoundBoss = true;
     return c;
 }
@@ -45,7 +45,8 @@ function startBossFight() {
         hero.respawnAt = 0; hero.attackTimer = 0;
         hero.cooldowns = Object.fromEntries(Object.keys(hero.cooldowns).map(k => [k, 0]));
         const arena = makeArena('boss', [hero]);
-        const boss = makeRoundBoss(t);
+        arena.pressure = pressureMult(hero);
+        const boss = makeRoundBoss(t, arena.pressure);
         boss.arena = arena;
         arena.creeps = [boss]; arena.boss = boss;
         return arena;

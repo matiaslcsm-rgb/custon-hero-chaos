@@ -5,7 +5,7 @@ registerHero({
     baseHp: 170, baseAtk: 17, baseAtkSpeed: 1.0, baseAttackRange: 1.4,
     baseArmor: 5, baseMagicResist: 12, baseHpRegen: 1.0,
     baseMaxMana: 100, baseManaRegen: 1.0, baseMoveSpeed: 3.3, baseProjectileSpeed: 0,
-    baseCritChance: 6, baseEvasion: 5, baseSpellAmp: 0, baseLifesteal: 15,
+    baseCritChance: 6, baseEvasion: 5, baseSpellAmp: 0, baseLifesteal: 20,
     description: 'Fuerza: guerrero resistente que se cura con el daño que hace. Dominante en peleas largas.',
     scaling: { stat: 'lifesteal', perKills: 9, perKillsAmount: 1, perHeroKill: 3 },
     innate: {
@@ -13,7 +13,7 @@ registerHero({
         tags: ['ROBO_VIDA', 'CURACIÓN', 'AL_MATAR'],
         // Cura por baja agregada tras medir: sin ella ganaba 1 de 12 partidas (sin área, no aguantaba multitudes).
         healPerKill: 0.05,
-        description: 'Innato: convierte una parte de tu daño físico en vida (Robo de Vida base 15%). La curación se duplica contra enemigos con menos de 30% HP. Cada enemigo que eliminás te cura 5% de tu vida máxima.',
+        description: 'Innato: convierte una parte de tu daño físico en vida (Robo de Vida base 20%). La curación se duplica contra enemigos con menos de 30% HP. Cada enemigo que eliminás te cura 5% de tu vida máxima.',
         hooks: {
             beforeLifesteal(owner, ctx) {
                 if (ctx.target && ctx.target.maxHp && ctx.target.hp / ctx.target.maxHp < 0.3) ctx.mult *= 2;
@@ -61,14 +61,16 @@ registerHero({
         id: 'VAMP_LEAP', name: 'Salto Sangriento', kind: 'active',
         tags: ['MOVILIDAD', 'FÍSICO', 'CONTROL'],
         // Alcance 6 → 7 y ralentización 40% → 50%: tiene que poder alcanzar a los de distancia.
-        values: { cooldown: [12, 11, 10, 9], manaCost: 35, range: 7, dmgMult: [0.8, 1.0, 1.2, 1.4], slow: 0.5, slowDuration: [1.5, 2, 2.5, 3] },
-        description: 'Saltás hasta {range} casillas hacia el enemigo más cercano: {dmgMult%} de daño físico de impacto y -{slow%} velocidad por {slowDuration}s.',
+        // Inmoviliza al caer (agregado tras medir): sin algo que frene a los de distancia, el Vampiro ganaba ~12% de duelos.
+        values: { cooldown: [12, 11, 10, 9], manaCost: 35, range: 7, dmgMult: [0.8, 1.0, 1.2, 1.4], rootDuration: 0.6, slow: 0.5, slowDuration: [1.5, 2, 2.5, 3] },
+        description: 'Saltás hasta {range} casillas hacia el enemigo más cercano: {dmgMult%} de daño físico de impacto, lo inmovilizás {rootDuration}s y queda con -{slow%} velocidad por {slowDuration}s.',
         cast(caster) {
             const target = nearestEnemy(caster, val(this, caster, 'range'));
             if (!target) { log('Salto Sangriento: sin objetivo en rango.'); return false; }
             blinkNextTo(caster, target);
             const dmg = Math.round(caster.atk * val(this, caster, 'dmgMult'));
             const { dealt } = dealDamage(caster, target, dmg, 'physical');
+            if (target.isAlive()) addEffect(target, { id: 'STUN', name: 'Inmovilizado', duration: val(this, caster, 'rootDuration'), flags: ['stun'] });
             if (target.isAlive()) addEffect(target, { id: 'SLOW_' + this.id, name: 'Desgarrado', duration: val(this, caster, 'slowDuration'), mods: { moveSpeedPct: -val(this, caster, 'slow') } });
             log(`🦇 ¡Salto Sangriento sobre ${target.label}! (-${dealt} HP)`);
             return true;

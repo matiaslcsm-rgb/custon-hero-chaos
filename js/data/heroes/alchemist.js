@@ -22,7 +22,8 @@ registerHero({
     ALCHEMIST_ACID: {
         id: 'ALCHEMIST_ACID', name: 'Pulverización Ácida', kind: 'active',
         tags: ['FÍSICO', 'ÁREA', 'DAÑO_EN_EL_TIEMPO', 'PERJUICIO'],
-        values: { cooldown: [13, 12, 11, 10], manaCost: [45, 50, 55, 60], radius: 3, duration: 5, dmgPerSecond: [20, 35, 50, 65], intRatio: 0.2, armorReduction: [2, 3, 4, 5] },
+        // Daño −30% y menos reducción de armadura tras medir: el ácido era lo que más le daba al Alquimista (ganaba 88% de duelos).
+        values: { cooldown: [13, 12, 11, 10], manaCost: [45, 50, 55, 60], radius: 3, duration: 5, dmgPerSecond: [14, 24, 34, 44], intRatio: 0.2, armorReduction: [1.5, 2, 2.5, 3] },
         description: 'Rocía ácido en radio {radius}: los enemigos alcanzados pierden {armorReduction} de armadura y sufren {dmgPerSecond} + {intRatio%} de tu Inteligencia como daño físico por segundo durante {duration}s.',
         cast(caster) {
             const radius = val(this, caster, 'radius');
@@ -43,7 +44,7 @@ registerHero({
     ALCHEMIST_BREW: {
         id: 'ALCHEMIST_BREW', name: 'Mezcla Inestable', kind: 'active',
         tags: ['MÁGICO', 'CONTROL'],
-        values: { cooldown: [12, 11, 10, 9], manaCost: [40, 45, 50, 55], range: 5, baseDmg: [60, 110, 160, 210], intRatio: 0.6, stunDuration: [1.0, 1.3, 1.6, 1.9] },
+        values: { cooldown: [12, 11, 10, 9], manaCost: [40, 45, 50, 55], range: 5, baseDmg: [60, 110, 160, 210], intRatio: 0.6, stunDuration: [0.8, 1.0, 1.2, 1.4] }, // aturdimiento más corto tras medir
         description: 'Lanza un frasco al enemigo más cercano (rango {range}): {baseDmg} + {intRatio%} de tu Inteligencia como daño mágico y lo aturde {stunDuration}s.',
         cast(caster) {
             const target = nearestEnemy(caster, val(this, caster, 'range'));
