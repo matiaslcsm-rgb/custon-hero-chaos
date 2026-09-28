@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Custom Hero Chaos · Ítems y requisitos</title>
+<!-- Documento imprimible con todos los ítems (tienda y neutrales) y los requisitos para sumar ítems nuevos.
+     Se arma solo con los datos del juego (js/data/items.js y js/data/neutrals.js), así que siempre está al día.
+     Para regenerar el PDF (con el servidor local andando):
+       msedge --headless --print-to-pdf=docs/items.pdf --no-pdf-header-footer http://localhost:8766/docs/items-pdf.html -->
+<style>
+    @page { size: A4; margin: 14mm 13mm; }
+    * { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; color: #1d1f24; font-size: 10.5pt; line-height: 1.42; margin: 0; background: #fff; }
+    h1, h2, h3 { margin: 0; }
+    .cover { height: 265mm; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; page-break-after: always; }
+    .cover h1 { font-size: 34pt; letter-spacing: 1px; }
+    .cover .sub { font-size: 15pt; color: #555; margin-top: 6px; }
+    .cover .icons { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 30px auto 24px; max-width: 150mm; }
+    .cover .icons img { width: 34px; height: 34px; }
+    .cover .meta { color: #777; font-size: 10pt; }
+    .cover .toc { margin-top: 30px; text-align: left; font-size: 11pt; }
+    section { page-break-before: always; }
+    h2 { font-size: 18pt; border-bottom: 3px solid #1d1f24; padding-bottom: 4px; margin-bottom: 12px; }
+    h3 { font-size: 12.5pt; margin: 14px 0 6px; page-break-after: avoid; }
+    p { margin: 5px 0; }
+    img.px { image-rendering: pixelated; }
+    table { border-collapse: collapse; width: 100%; font-size: 9.2pt; margin: 6px 0 10px; }
+    tr { page-break-inside: avoid; }
+    th, td { border: 1px solid #d0d3d9; padding: 4px 6px; text-align: left; vertical-align: top; }
+    th { background: #eef0f4; }
+    td.num { text-align: right; white-space: nowrap; }
+    .iname { display: inline-flex; align-items: center; gap: 5px; font-weight: 600; white-space: nowrap; }
+    .iname img { width: 22px; height: 22px; }
+    .item-card { border: 1px solid #d0d3d9; border-left: 5px solid #f08c00; border-radius: 5px; padding: 7px 10px; margin: 7px 0; page-break-inside: avoid; }
+    .item-card.neutral1 { border-left-color: #2f9e44; } .item-card.neutral2 { border-left-color: #1098ad; }
+    .item-card.neutral3 { border-left-color: #7048e8; } .item-card.neutral4 { border-left-color: #e8590c; }
+    .item-card.instant { border-left-color: #ae3ec9; }
+    .item-card .top { display: flex; justify-content: space-between; align-items: center; }
+    .item-card .price { font-weight: 700; color: #b8860b; white-space: nowrap; }
+    .item-card .recipe { font-size: 9pt; color: #495057; margin-top: 3px; }
+    .item-card .recipe .iname { font-weight: 500; }
+    .item-card .recipe .iname img { width: 16px; height: 16px; }
+    .item-card .text { margin-top: 3px; }
+    .item-card .extra { font-size: 8.8pt; color: #555; margin-top: 3px; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+    .note { padding: 7px 10px; border-radius: 6px; background: #e7f5ff; border-left: 4px solid #1971c2; margin: 8px 0; font-size: 9.5pt; page-break-inside: avoid; }
+    .warn { background: #fff4e6; border-left-color: #e8590c; }
+    ol li, ul li { margin: 3px 0; }
+    code { font-family: Consolas, monospace; font-size: 9pt; background: #f1f3f5; padding: 0 3px; border-radius: 3px; }
+    .check li { list-style: none; margin-left: -18px; }
+    .check li::before { content: '☐ '; font-size: 11pt; }
+    .hero-chip { display: inline-block; font-size: 8pt; background: #e9ecef; border-radius: 3px; padding: 0 5px; margin-right: 3px; }
+    .footer-note { color: #777; font-size: 8.5pt; margin-top: 14px; }
+</style>
+</head>
+<body>
+<div id="doc"></div>
+
+<!-- Mismos datos y motor que el juego (solo lo necesario para leer ítems, héroes y guías) -->
+<script src="../js/utils.js"></script>
+<script src="../js/data/tags.js"></script>
+<script src="../js/data/registry.js"></script>
+<script src="../js/data/heroes/axe.js"></script>
+<script src="../js/data/heroes/sniper.js"></script>
+<script src="../js/data/heroes/assassin.js"></script>
+<script src="../js/data/heroes/vampire.js"></script>
+<script src="../js/data/heroes/arcanist.js"></script>
+<script src="../js/data/heroes/frostwitch.js"></script>
+<script src="../js/data/heroes/necromancer.js"></script>
+<script src="../js/data/heroes/voidsage.js"></script>
+<script src="../js/data/heroes/alchemist.js"></script>
+<script src="../js/data/items.js"></script>
+<script src="../js/data/neutrals.js"></script>
+<script src="../js/data/guides.js"></script>
+<script src="../js/effects.js"></script>
+<script src="../js/sprites.js"></script>
+<script src="../js/itemicons.js"></script>
+<script src="../js/progression.js"></script>
+<script src="../js/hero.js"></script>
+<script src="../js/items.js"></script>
+<script>
+const TODAY = new Date().toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
+const all = Object.values(ITEMS);
+const basics = all.filter(i => i.tier === 'basic');
+const composites = all.filter(i => i.tier === 'composite');
+const instants = all.filter(i => i.kind === 'instant');
+const neutrals = Object.values(NEUTRAL_ITEMS);
+const NEUTRAL_ROUND = { 1: 5, 2: 10, 3: 15, 4: 20 };
+
+const icon = (k, size = 22) => { const u = itemIconUrl(k); return u ? `<img class="px" src="${u}" style="width:${size}px;height:${size}px" alt="">` : ''; };
+const iname = k => `<span class="iname">${icon(k)}${(ITEMS[k] || NEUTRAL_ITEMS[k] || {}).name || k}</span>`;
+const gold = n => n == null ? 'variable' : `${n}g`;
+// Héroes cuya guía sugiere el ítem
+const suggestedBy = k => Object.entries(BUILD_GUIDES).filter(([, g]) => [...g.early, ...g.core, ...g.late].includes(k)).map(([h]) => HERO_TEMPLATES[h].name);
+// Compuestos que usan un básico
+const usedIn = k => composites.filter(c => c.components.includes(k));
+const chips = list => list.map(n => `<span class="hero-chip">${n}</span>`).join('');
+const priceText = i => typeof i.cost === 'function' ? 'variable' : gold(i.cost);
+
+function cover() {
+    const keys = [...all, ...neutrals].map(i => i.key).filter(k => ITEM_ICONS[k]);
+    return `<div class="cover">
+        <h1>CUSTOM HERO CHAOS</h1>
+        <div class="sub">Ítems y requisitos para sumar ítems nuevos</div>
+        <div class="icons">${keys.map(k => icon(k, 34)).join('')}</div>
+        <div class="meta">${basics.length} básicos · ${composites.length} compuestos · ${instants.length} inmediatos · ${neutrals.length} neutrales · actualizado al ${TODAY}</div>
+        <ol class="toc">
+            <li>Cómo funcionan los ítems</li>
+            <li>Básicos</li>
+            <li>Compuestos (recetas)</li>
+            <li>Inmediatos</li>
+            <li>Objetos neutrales</li>
+            <li>Requisitos para sumar un ítem nuevo</li>
+        </ol>
+    </div>`;
+}
+
+function rules() {
+    return `<section><h2>1. Cómo funcionan los ítems</h2>
+        <ul>
+            <li><b>Básicos:</b> mejoran un solo stat. Se pueden tener repetidos y se acumulan.</li>
+            <li><b>Compuestos:</b> se arman con básicos + el precio de la <b>receta</b>. Suman los efectos de sus partes y suelen agregar algo especial.
+                Al comprarlo se usan los básicos que ya tenés y <b>pagás solo lo que falta</b>. Uno de cada compuesto como máximo.</li>
+            <li><b>Inventario de ${INVENTORY_SLOTS} espacios</b> (básicos y compuestos). Un compuesto entra aunque esté lleno si libera los espacios de sus componentes.</li>
+            <li><b>Vender</b> devuelve el ${Math.round(SELL_REFUND * 100)}% del precio total.</li>
+            <li><b>Inmediatos:</b> se usan al comprarlos y no ocupan espacio.</li>
+            <li><b>Neutrales:</b> no se compran. Se ganan al vencer al jefe de ronda (rondas 5, 10, 15 y 20): elegís 1 de 3 del escalón que toca.
+                Van en un espacio aparte y solo se puede tener uno. Se venden por ${NEUTRAL_SELL_PER_TIER}g × escalón.</li>
+            <li><b>Contras:</b> antes de cada oleada la tienda avisa qué ítems contrarrestan a los creeps que vienen.</li>
+            <li><b>Guía por héroe:</b> cada héroe tiene ítems sugeridos (⭐ en la tienda).</li>
+        </ul>
+        <h3>Colores</h3>
+        <table><tr><th>Clase</th><th>Color en el juego</th></tr>
+            <tr><td>Básico</td><td style="color:${'#1c7ed6'}">celeste</td></tr>
+            <tr><td>Compuesto</td><td style="color:#f08c00">dorado</td></tr>
+            <tr><td>Inmediato</td><td style="color:#ae3ec9">violeta</td></tr>
+            <tr><td>Neutral</td><td>verde (escalón 1) · turquesa (2) · violeta (3) · naranja (4)</td></tr>
+        </table>
+    </section>`;
+}
+
+function basicSection() {
+    const rows = basics.map(i => `<tr><td>${iname(i.key)}</td><td class="num">${priceText(i)}</td><td>${describeItem(i)}</td>
+        <td>${usedIn(i.key).map(c => c.name).join(', ') || '—'}</td></tr>`).join('');
+    return `<section><h2>2. Básicos</h2>
+        <table><tr><th>Ítem</th><th>Precio</th><th>Efecto</th><th>Se usa en</th></tr>${rows}</table></section>`;
+}
+
+function compositeCard(i) {
+    const parts = i.components.map(k => `${iname(k)} (${gold(itemTotalCost(ITEMS[k]))})`).join(' + ');
+    const heroes = suggestedBy(i.key);
+    return `<div class="item-card">
+        <div class="top">${iname(i.key)}<span class="price">${gold(itemTotalCost(i))}</span></div>
+        <div class="recipe">${parts} + receta ${gold(i.recipe)}</div>
+        <div class="text">${describeItem(i)}</div>
+        ${i.counters ? `<div class="extra"><b>Contrarresta:</b> ${i.counters}</div>` : ''}
+        ${heroes.length ? `<div class="extra"><b>Sugerido para:</b> ${chips(heroes)}</div>` : ''}
+    </div>`;
+}
+
+function compositeSection() {
+    return `<section><h2>3. Compuestos (recetas)</h2>
+        <p>El precio es el total (componentes + receta). Si ya tenés los componentes, pagás solo lo que falta.</p>
+        ${ITEM_GROUPS.map(g => {
+            const list = composites.filter(i => i.group === g);
+            return list.length ? `<h3>${g}</h3>${list.map(compositeCard).join('')}` : '';
+        }).join('')}
+    </section>`;
+}
+
+function instantSection() {
+    return `<section style="page-break-before:auto"><h2 style="margin-top:18px">4. Inmediatos</h2>
+        ${instants.map(i => `<div class="item-card instant"><div class="top">${iname(i.key)}<span class="price">${priceText(i)}</span></div>
+            <div class="text">${i.desc}</div>${i.available ? '<div class="extra">Solo aparece en ciertas condiciones.</div>' : ''}</div>`).join('')}
+    </section>`;
+}
+
+function neutralSection() {
+    return `<section><h2>5. Objetos neutrales</h2>
+        <p>Premio del jefe de ronda: de cada escalón se ofrecen 3 al azar y te quedás con uno (reemplaza al que tenías).</p>
+        ${[1, 2, 3, 4].map(t => `<h3>Escalón ${t} · ronda ${NEUTRAL_ROUND[t]} · se vende por ${NEUTRAL_SELL_PER_TIER * t}g</h3>
+            <div class="grid2">${neutrals.filter(n => n.tier === t).map(n => `<div class="item-card neutral${t}">
+                <div class="top">${iname(n.key)}</div>
+                <div class="text">${describeItem({ ...n, tier: 'basic' })}</div>
+                <div class="extra"><b>Para:</b> ${n.fits.map(a => ({ STR: 'Fuerza', AGI: 'Agilidad', INT: 'Inteligencia' })[a]).join(', ')}</div>
+            </div>`).join('')}</div>`).join('')}
+    </section>`;
+}
+
+function requirements() {
+    const prices = basics.map(i => i.cost).filter(n => typeof n === 'number');
+    const totals = composites.map(itemTotalCost);
+    const recipes = composites.map(i => i.recipe);
+    return `<section><h2>6. Requisitos para sumar un ítem nuevo</h2>
+        <h3>Diseño</h3>
+        <ol>
+            <li><b>Clase clara:</b> básico (un solo stat), compuesto (receta de básicos existentes + algo propio), inmediato o neutral (con escalón).</li>
+            <li><b>Rol claro:</b> a qué atributo o estilo sirve, y en qué momento de la partida (inicio, núcleo o final).</li>
+            <li><b>Sin duplicados:</b> no puede ser otro ítem con otro nombre; si repite stats, tiene que aportar algo distinto.</li>
+            <li><b>Contras:</b> si su efecto especial contrarresta algo (evasión, curación, magia, armadura…), declararlo en <code>counters</code>
+                para que la tienda lo recomiende antes de la oleada.</li>
+            <li><b>Autosuficiente:</b> tiene que servir en cualquier héroe que lo compre, sin depender de una habilidad puntual.</li>
+            <li><b>Descripción exacta:</b> los stats se describen solos desde <code>mods</code>; lo especial va en <code>special</code> y dice exactamente lo que hace el código.</li>
+            <li><b>Ícono propio:</b> una forma de pixel art (espada, guante, anillo, libro…) y su color en <code>ITEM_ICONS</code>.</li>
+        </ol>
+        <h3>Precios de referencia (actuales)</h3>
+        <table><tr><th>Qué</th><th>Rango</th></tr>
+            <tr><td>Básicos</td><td>${Math.min(...prices)}g – ${Math.max(...prices)}g</td></tr>
+            <tr><td>Recetas</td><td>${Math.min(...recipes)}g – ${Math.max(...recipes)}g</td></tr>
+            <tr><td>Compuestos (total)</td><td>${Math.min(...totals)}g – ${Math.max(...totals)}g</td></tr>
+            <tr><td>Neutrales</td><td>Sin precio: el poder sube con el escalón (1 → 4)</td></tr>
+        </table>
+        <h3>Checklist técnico</h3>
+        <ul class="check">
+            <li>Agregarlo en <code>ITEMS</code> (<code>js/data/items.js</code>) o en <code>NEUTRAL_ITEMS</code> (<code>js/data/neutrals.js</code>), con el formato explicado arriba de cada archivo.</li>
+            <li>Compuestos: <code>components</code> (básicos existentes), <code>recipe</code> y <code>group</code> (uno de ${ITEM_GROUPS.map(g => `<i>${g}</i>`).join(', ')}).</li>
+            <li>Efectos especiales con <code>hooks</code> (mismos eventos que las habilidades) o <code>flags</code>; curaciones que salen del daño con <code>{fromDamage: true}</code>.</li>
+            <li>Ícono en <code>ITEM_ICONS</code> (<code>js/itemicons.js</code>): forma + color.</li>
+            <li>Si conviene, sumarlo a la guía de algún héroe (<code>BUILD_GUIDES</code>) y a las compras de la IA (<code>AI_BUILDS</code> en <code>js/ai.js</code>).</li>
+            <li>Pruebas: <code>index.html?test</code> tiene que pasar entero; sumar una prueba del efecto especial.</li>
+            <li>Medir con <code>simulateGame</code> que no rompa el balance.</li>
+            <li>Documentar en <code>DISEÑO.md §7</code> y regenerar este PDF.</li>
+        </ul>
+        <div class="footer-note">Documento generado automáticamente desde los datos del juego (docs/items-pdf.html) el ${TODAY}.</div>
+    </section>`;
+}
+
+document.getElementById('doc').innerHTML = cover() + rules() + basicSection() + compositeSection() + instantSection() + neutralSection() + requirements();
+</script>
+</body>
+</html>

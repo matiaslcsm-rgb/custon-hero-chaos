@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Custom Hero Chaos · Héroes y requisitos</title>
+<!-- Documento imprimible con el roster de héroes y los requisitos para sumar héroes nuevos.
+     Se arma solo con los datos del juego (js/data/heroes/*.js), así que siempre está al día.
+     Para regenerar el PDF: abrir esta página y "Imprimir → Guardar como PDF", o con Edge/Chrome sin ventana:
+       msedge --headless --print-to-pdf=docs/heroes.pdf --no-pdf-header-footer docs/heroes-pdf.html
+     Al sumar un héroe, agregar su <script> abajo (igual que en index.html). -->
+<style>
+    @page { size: A4; margin: 14mm 13mm; }
+    * { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; color: #1d1f24; font-size: 10.5pt; line-height: 1.42; margin: 0; background: #fff; }
+    h1, h2, h3 { margin: 0; }
+    .cover { height: 265mm; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; page-break-after: always; }
+    .cover h1 { font-size: 34pt; letter-spacing: 1px; }
+    .cover .sub { font-size: 15pt; color: #555; margin-top: 6px; }
+    .cover .sprites { display: flex; gap: 10px; margin: 34px 0 26px; }
+    .cover .sprites img { width: 56px; height: 56px; }
+    .cover .meta { color: #777; font-size: 10pt; }
+    .cover .toc { margin-top: 30px; text-align: left; font-size: 11pt; }
+    .cover .toc li { margin: 3px 0; }
+    section { page-break-before: always; }
+    h2 { font-size: 18pt; border-bottom: 3px solid #1d1f24; padding-bottom: 4px; margin-bottom: 12px; }
+    h3 { font-size: 12.5pt; margin: 14px 0 6px; }
+    p { margin: 5px 0; }
+    img.px { image-rendering: pixelated; }
+    table { border-collapse: collapse; width: 100%; font-size: 9.2pt; margin: 6px 0 10px; }
+    th, td { border: 1px solid #d0d3d9; padding: 4px 6px; text-align: left; vertical-align: top; }
+    th { background: #eef0f4; }
+    td.num { text-align: right; white-space: nowrap; }
+    .attr { display: inline-block; padding: 0 6px; border-radius: 3px; color: #fff; font-size: 8.5pt; font-weight: 600; }
+    .attr.STR { background: #d9480f; } .attr.AGI { background: #2b8a3e; } .attr.INT { background: #1971c2; }
+    .hero { page-break-before: always; }
+    .intro2 + .hero { page-break-before: auto; }
+    .hero-head { display: flex; gap: 14px; align-items: center; padding: 10px 12px; border-radius: 8px; color: #fff; margin-bottom: 10px; }
+    .hero-head.STR { background: linear-gradient(90deg, #a61e4d, #d9480f); }
+    .hero-head.AGI { background: linear-gradient(90deg, #2b8a3e, #5c940d); }
+    .hero-head.INT { background: linear-gradient(90deg, #1864ab, #5f3dc4); }
+    .hero-head img { width: 64px; height: 64px; background: rgba(255,255,255,.15); border-radius: 6px; }
+    .hero-head h2 { border: 0; margin: 0; padding: 0; font-size: 20pt; }
+    .hero-head .role { font-size: 11pt; opacity: .95; }
+    .hero-head .sym { font-family: Consolas, monospace; background: rgba(0,0,0,.25); padding: 0 6px; border-radius: 3px; }
+    .desc { font-style: italic; color: #444; margin-bottom: 8px; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px 12px; font-size: 9.3pt; margin-bottom: 8px; padding: 8px 10px; background: #f6f7f9; border-radius: 6px; }
+    .stats b { display: inline-block; min-width: 84px; font-weight: 600; color: #555; }
+    .ability { border: 1px solid #d0d3d9; border-left: 4px solid #868e96; border-radius: 5px; padding: 6px 9px; margin: 6px 0; page-break-inside: avoid; }
+    .ability.innate { border-left-color: #f08c00; background: #fff9db; }
+    .ability.ult { border-left-color: #c2255c; background: #fff0f6; }
+    .ability .name { font-weight: 700; }
+    .ability .kind { font-size: 8.5pt; color: #666; margin-left: 6px; }
+    .ability .cost { font-size: 8.5pt; color: #495057; float: right; }
+    .ability .text { margin-top: 2px; }
+    .ability .text b { font-weight: 600; }
+    .tags { margin-top: 3px; }
+    .tag { display: inline-block; font-size: 7.8pt; background: #e9ecef; border-radius: 3px; padding: 0 5px; margin-right: 3px; color: #343a40; }
+    .guide { padding: 7px 10px; background: #f6f7f9; border-radius: 6px; margin-top: 8px; font-size: 9.3pt; page-break-inside: avoid; }
+    .guide .row { margin: 3px 0; }
+    .guide .lbl { display: inline-block; min-width: 58px; font-weight: 600; color: #555; }
+    .item { display: inline-flex; align-items: center; gap: 3px; margin-right: 8px; white-space: nowrap; }
+    .item img { width: 18px; height: 18px; }
+    .note { padding: 7px 10px; border-radius: 6px; background: #e7f5ff; border-left: 4px solid #1971c2; margin: 8px 0; font-size: 9.5pt; page-break-inside: avoid; }
+    .warn { background: #fff4e6; border-left-color: #e8590c; }
+    ol li, ul li { margin: 3px 0; }
+    code { font-family: Consolas, monospace; font-size: 9pt; background: #f1f3f5; padding: 0 3px; border-radius: 3px; }
+    .check li { list-style: none; margin-left: -18px; }
+    .check li::before { content: '☐ '; font-size: 11pt; }
+    .bar { display: inline-block; height: 9px; background: #1971c2; border-radius: 2px; vertical-align: middle; margin-right: 5px; }
+    .footer-note { color: #777; font-size: 8.5pt; margin-top: 14px; }
+</style>
+</head>
+<body>
+<div id="doc"></div>
+
+<!-- Mismos datos y motor que el juego (solo lo necesario para leer héroes, ítems y sprites) -->
+<script src="../js/utils.js"></script>
+<script src="../js/data/tags.js"></script>
+<script src="../js/data/registry.js"></script>
+<script src="../js/data/heroes/axe.js"></script>
+<script src="../js/data/heroes/sniper.js"></script>
+<script src="../js/data/heroes/assassin.js"></script>
+<script src="../js/data/heroes/vampire.js"></script>
+<script src="../js/data/heroes/arcanist.js"></script>
+<script src="../js/data/heroes/frostwitch.js"></script>
+<script src="../js/data/heroes/necromancer.js"></script>
+<script src="../js/data/heroes/voidsage.js"></script>
+<script src="../js/data/heroes/alchemist.js"></script>
+<script src="../js/data/items.js"></script>
+<script src="../js/data/neutrals.js"></script>
+<script src="../js/data/guides.js"></script>
+<script src="../js/data/creeps.js"></script>
+<script src="../js/data/bosses.js"></script>
+<script src="../js/effects.js"></script>
+<script src="../js/sprites.js"></script>
+<script src="../js/itemicons.js"></script>
+<script src="../js/progression.js"></script>
+<script src="../js/hero.js"></script>
+<script>
+const ATTR = { STR: 'Fuerza', AGI: 'Agilidad', INT: 'Inteligencia' };
+const ATTR_ORDER = ['STR', 'AGI', 'INT'];
+const TODAY = new Date().toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+// Resultados medidos con simulaciones (34 partidas de 8 héroes con la IA). Actualizar al volver a medir.
+const DUEL_WINRATE = { ALCHEMIST: 74, AXE: 71, FROSTWITCH: 68, SNIPER: 63, ARCANIST: 59, ASSASSIN: 45, VOIDSAGE: 37, NECROMANCER: 24, VAMPIRE: 17 };
+
+spritesOn = true;
+const heroes = Object.values(HERO_TEMPLATES).sort((a, b) => ATTR_ORDER.indexOf(a.primaryAttr) - ATTR_ORDER.indexOf(b.primaryAttr));
+const lvl1 = t => new Hero(t);
+const spr = (t, cls = 'px') => { const u = heroSpriteUrl({ isHero: true, key: t.key }); return u ? `<img class="${cls}" src="${u}" alt="">` : ''; };
+const fmt = n => Math.round(n * 10) / 10;
+const attrTag = a => `<span class="attr ${a}">${ATTR[a]}</span>`;
+const tags = list => `<div class="tags">${(list || []).map(t => `<span class="tag">${t}</span>`).join('')}</div>`;
+const itemHtml = k => `<span class="item">${itemIconUrl(k) ? `<img class="px" src="${itemIconUrl(k)}">` : ''}${(ITEMS[k] || {}).name || k}</span>`;
+const skillsOf = t => Object.values(HERO_SKILLS[t.key]).sort((a, b) => (a.isUltimate ? 1 : 0) - (b.isUltimate ? 1 : 0));
+const rangeLabel = t => t.baseAttackRange >= 2.5 ? `A distancia (${t.baseAttackRange})` : `Cuerpo a cuerpo (${t.baseAttackRange})`;
+const usedSymbols = () => {
+    const creepSyms = Object.values(typeof CREEP_TYPES !== 'undefined' ? CREEP_TYPES : {}).map(c => c.symbol);
+    return [...heroes.map(t => t.symbol), ...new Set(creepSyms), 'Ω'];
+};
+
+// --- PORTADA ---
+function cover() {
+    const counts = ATTR_ORDER.map(a => `${heroes.filter(t => t.primaryAttr === a).length} de ${ATTR[a]}`).join(' · ');
+    return `<div class="cover">
+        <h1>CUSTOM HERO CHAOS</h1>
+        <div class="sub">Héroes y requisitos para sumar héroes nuevos</div>
+        <div class="sprites">${heroes.map(t => spr(t)).join('')}</div>
+        <div class="meta">${heroes.length} héroes (${counts}) · actualizado al ${TODAY}</div>
+        <ol class="toc">
+            <li>Resumen del roster</li>
+            <li>Ficha de cada héroe (stats, innato, habilidades y guía de ítems)</li>
+            <li>Balance medido</li>
+            <li>Requisitos de diseño para un héroe nuevo</li>
+            <li>Números de referencia</li>
+            <li>Checklist técnico para sumarlo al juego</li>
+        </ol>
+    </div>`;
+}
+
+// --- 1. RESUMEN ---
+function summary() {
+    const rows = heroes.map(t => {
+        const h = lvl1(t);
+        return `<tr><td>${spr(t).replace('<img', '<img style="width:22px;height:22px;vertical-align:middle"')} <b>${t.name}</b> <code>${t.symbol}</code></td>
+            <td>${attrTag(t.primaryAttr)}</td><td>${t.role}</td><td>${rangeLabel(t)}</td>
+            <td class="num">${h.maxHp}</td><td class="num">${Math.round(h.atk)}</td><td class="num">${h.maxMana}</td>
+            <td>${t.innate.name}</td></tr>`;
+    }).join('');
+    return `<section><h2>1. Resumen del roster</h2>
+        <p>Cada héroe tiene un <b>innato</b> fijo (no se draftea) y <b>4 habilidades naturales</b> (3 normales + 1 definitiva).
+        En la partida todos draftean habilidades de todos los héroes y las mezclan; la ★ marca las del propio héroe.</p>
+        <table><tr><th>Héroe</th><th>Atributo</th><th>Rol</th><th>Ataque (rango)</th><th>HP</th><th>Daño</th><th>Maná</th><th>Innato</th></tr>${rows}</table>
+        <p style="font-size:9pt;color:#666">HP, daño y maná al nivel 1, sin ítems. Rango en casillas.</p>
+        <h3>Cómo crecen los atributos</h3>
+        <table><tr><th>Atributo</th><th>Cada punto da</th></tr>
+            <tr><td>${attrTag('STR')}</td><td>+${ATTRIBUTE_RULES.str.hp} HP y +${ATTRIBUTE_RULES.str.hpRegen} regeneración de vida</td></tr>
+            <tr><td>${attrTag('AGI')}</td><td>+1% vel. de ataque, +1% vel. de movimiento (tope +${ATTRIBUTE_RULES.agi.moveSpeedCap}%), +${ATTRIBUTE_RULES.agi.critChance}% crítico, +${ATTRIBUTE_RULES.agi.armor} armadura</td></tr>
+            <tr><td>${attrTag('INT')}</td><td>+${ATTRIBUTE_RULES.int.mana} maná, +${ATTRIBUTE_RULES.int.manaRegen} regeneración de maná, +${ATTRIBUTE_RULES.int.spellAmp}% amp. de hechizo, +${ATTRIBUTE_RULES.int.magicResist}% resistencia mágica</td></tr>
+            <tr><td>Principal</td><td>Además +${ATTRIBUTE_RULES.primaryAtk} de daño de ataque por punto. Los magos (Inteligencia) tienen +${ATTRIBUTE_RULES.mageSpellAmp}% de amplificación de hechizo.</td></tr>
+        </table>
+        <h3>Pasivas del roster</h3>
+        <p>Además de los innatos, estas habilidades drafteables son pasivas: ${heroes.flatMap(t => skillsOf(t).filter(s => s.kind === 'passive').map(s => `<b>${s.name}</b> (${t.name})`)).join(', ')}.
+        Axe, Sniper, Asesino y Guerrero Vampiro no tienen pasivas drafteables: todo su kit es activo.</p>
+    </section>`;
+}
+
+// --- 2. FICHAS ---
+function abilityHtml(a, type) {
+    const cls = type === 'innate' ? 'innate' : a.isUltimate ? 'ult' : '';
+    const kind = type === 'innate' ? 'INNATO' : a.isUltimate ? 'DEFINITIVA' : a.kind === 'passive' ? 'Pasiva' : 'Activa';
+    const text = type === 'innate' ? a.description.replace(/^Innato:\s*/, '') : describeSkill(a, 0).replace(/^DEFINITIVA\.\s*/, '');
+    const cost = type === 'innate' || a.kind === 'passive' ? '' : `<span class="cost">${skillCostLine(a, 0)}</span>`;
+    return `<div class="ability ${cls}">${cost}<span class="name">${a.name}</span><span class="kind">${kind}</span>
+        <div class="text">${text}</div>${tags(a.tags)}</div>`;
+}
+
+function heroPage(t) {
+    const h = lvl1(t);
+    const g = BUILD_GUIDES[t.key];
+    const sc = t.scaling;
+    const attrs = ['str', 'agi', 'int'].map(k => `${{ str: 'FUE', agi: 'AGI', int: 'INT' }[k]} ${t.attributes[k][0]} (+${t.attributes[k][1]}/nv)`).join(' · ');
+    const stat = (label, v) => `<div><b>${label}</b>${v}</div>`;
+    return `<div class="hero">
+        <div class="hero-head ${t.primaryAttr}">${spr(t)}
+            <div><h2>${t.name} <span class="sym">${t.symbol}</span></h2>
+            <div class="role">${ATTR[t.primaryAttr]} · ${t.role} · ${rangeLabel(t)}</div></div></div>
+        <div class="desc">${t.description}</div>
+        <div class="stats">
+            ${stat('Vida', h.maxHp)}${stat('Daño', Math.round(h.atk))}${stat('Vel. ataque', fmt(t.baseAtkSpeed))}${stat('Rango', t.baseAttackRange)}
+            ${stat('Maná', h.maxMana)}${stat('Armadura', fmt(h.armor))}${stat('Resist. mágica', Math.round(h.magicResist) + '%')}${stat('Movimiento', t.baseMoveSpeed)}
+            ${stat('Crítico', fmt(h.critChance) + '%')}${stat('Evasión', t.baseEvasion + '%')}${stat('Regen vida', fmt(h.hpRegen))}${stat('Regen maná', fmt(h.manaRegen))}
+            <div style="grid-column: span 4"><b>Atributos</b>${attrs}</div>
+            <div style="grid-column: span 4"><b>Crecimiento</b>+${sc.perKillsAmount} ${scalingStatLabel(sc.stat)} cada ${sc.perKills} creeps · +${sc.perHeroKill} por duelo ganado</div>
+        </div>
+        ${abilityHtml(t.innate, 'innate')}
+        ${skillsOf(t).map(s => abilityHtml(s)).join('')}
+        ${g ? `<div class="guide"><b>Guía de ítems</b> — ${g.why}
+            <div class="row"><span class="lbl">Inicio</span>${g.early.map(itemHtml).join('')}</div>
+            <div class="row"><span class="lbl">Núcleo</span>${g.core.map(itemHtml).join('')}</div>
+            <div class="row"><span class="lbl">Final</span>${g.late.map(itemHtml).join('')}</div></div>` : ''}
+    </div>`;
+}
+
+// --- 3. BALANCE ---
+function balance() {
+    const rows = heroes.slice().sort((a, b) => (DUEL_WINRATE[b.key] || 0) - (DUEL_WINRATE[a.key] || 0)).map(t => {
+        const w = DUEL_WINRATE[t.key];
+        return `<tr><td>${t.name}</td><td>${attrTag(t.primaryAttr)}</td><td><span class="bar" style="width:${(w || 0) * 1.6}px"></span>${w ?? '—'}%</td></tr>`;
+    }).join('');
+    return `<section><h2>3. Balance medido</h2>
+        <p>Victorias en duelos 1v1 en 34 partidas simuladas de 8 héroes (la IA juega sola: draftea, compra, apuesta y pelea).
+        Con muestras de unas 18 partidas el ruido es de ±10 puntos; desde 30 partidas los números son confiables.</p>
+        <table><tr><th>Héroe</th><th>Atributo</th><th>Duelos ganados</th></tr>${rows}</table>
+        <div class="note warn"><b>Temas abiertos</b><ul>
+            <li>En el formato de un duelo por ronda gana el último en pie, así que decide la <b>supervivencia contra creeps</b>:
+            el Sniper ganó 8 de 14 partidas largas y el Nigromante 4. Hay que balancearlo.</li>
+            <li><b>Guerrero Vampiro</b> y <b>Nigromante</b> siguen flojos en duelo (en duelo la curación se reduce 60%, salvo el robo de vida).</li>
+        </ul></div>
+        <div class="note"><b>Reglas que afectan a todos los héroes</b><ul>
+            <li>Enfriamientos: todos ×${COOLDOWN_MULT} sobre el valor escrito en la habilidad (las fichas ya muestran el valor final).</li>
+            <li>En duelo: curación −60% (el robo de vida y otras curaciones que salen del daño no se reducen) y controles −50%.</li>
+            <li>Se puede atacar mientras se camina; el balance se hace con los stats.</li>
+            <li>Habilidades automáticas (tecla H): la IA las lanza por el jugador según sus etiquetas.</li>
+        </ul></div>
+    </section>`;
+}
+
+// --- 4-6. REQUISITOS ---
+function requirements() {
+    const stats = heroes.map(lvl1);
+    const range = (f, d = 0) => { const v = stats.map(f); const r = x => d ? fmt(x) : Math.round(x); return `${r(Math.min(...v))} – ${r(Math.max(...v))}`; };
+    const byAttr = a => heroes.filter(t => t.primaryAttr === a).map(t => t.name).join(', ');
+    return `<section><h2>4. Requisitos de diseño para un héroe nuevo</h2>
+        <p>Un héroe entra solo si cumple <b>todo</b> esto (DISEÑO.md §6):</p>
+        <ol>
+            <li><b>Identidad clara:</b> atributo principal + un rol que no esté cubierto (o una variante claramente distinta).
+                Hoy hay ${attrTag('STR')} ${byAttr('STR')} · ${attrTag('AGI')} ${byAttr('AGI')} · ${attrTag('INT')} ${byAttr('INT')}.
+                <b>Faltan héroes de Fuerza y de Agilidad</b> (hay 5 magos).</li>
+            <li><b>Innato único:</b> una mecánica que no repite a otro héroe y funciona con cualquier kit drafteado.</li>
+            <li><b>4 habilidades naturales:</b> 3 normales + 1 definitiva, con al menos 1 activa.</li>
+            <li><b>Habilidades autosuficientes:</b> cada una tiene que servir aunque se draftee sola en otro héroe
+                (no puede depender del innato de su héroe ni de otra habilidad del kit).</li>
+            <li><b>Definitiva con Ascenso:</b> la más fuerte del kit, con enfriamiento largo y una mejora permanente con condición
+                (ej: “cada baja durante la Furia da +1 de armadura permanente”). Normales con valores para 4 niveles; la definitiva para 3 (niveles 6/12/18).</li>
+            <li><b>Etiquetas declaradas:</b> cada habilidad aporta al menos 1 sinergia con las etiquetas existentes. Lista: ${Object.keys(TAGS).map(t => `<span class="tag">${t}</span>`).join(' ')}</li>
+            <li><b>Contras:</b> al menos 1 ítem o tipo de creep que contrarreste sus habilidades principales; si no existe, se crea junto con el héroe.</li>
+            <li><b>Presupuesto de poder:</b> números dentro de los rangos de referencia (sección 5), y medido con simulaciones antes de darlo por bueno.</li>
+            <li><b>Sin duplicados:</b> ninguna habilidad copia la mecánica de otra ya existente con otro nombre.</li>
+            <li><b>Símbolo propio:</b> 1 carácter que no esté usado. Ocupados hoy: ${usedSymbols().map(s => `<code>${s}</code>`).join(' ')}</li>
+            <li><b>Sprite:</b> un diseño de pixel art 12×12 (forma <i>guerrero</i> o <i>túnica</i>, o una nueva) con su paleta de colores.</li>
+            <li><b>Guía de ítems:</b> 2 ítems de inicio, 3 de núcleo y 2 de final, con una línea de por qué.</li>
+        </ol>
+        <div class="note">Para diseñar héroes con otra IA (Gemini, ChatGPT…) está el prompt listo en <code>docs/prompt-heroes.md</code>:
+        pide exactamente el formato de datos del juego y las funciones del motor que se pueden usar.</div>
+
+        <h2 style="margin-top:22px">5. Números de referencia</h2>
+        <h3>Rangos actuales del roster (nivel 1, sin ítems)</h3>
+        <table><tr><th>Stat</th><th>Rango</th><th>Stat</th><th>Rango</th></tr>
+            <tr><td>Vida</td><td>${range(h => h.maxHp)}</td><td>Daño de ataque</td><td>${range(h => h.atk)}</td></tr>
+            <tr><td>Maná</td><td>${range(h => h.maxMana)}</td><td>Armadura</td><td>${range(h => h.armor, 1)}</td></tr>
+            <tr><td>Vel. de ataque</td><td>${range(h => h.baseAtkSpeed, 1)}</td><td>Movimiento</td><td>${range(h => h.baseMoveSpeed, 1)}</td></tr>
+            <tr><td>Rango cuerpo a cuerpo</td><td>1,2 – 1,5</td><td>Rango a distancia</td><td>4 – 6</td></tr>
+        </table>
+        <h3>Habilidades</h3>
+        <table><tr><th>Qué</th><th>Rango de referencia</th></tr>
+            <tr><td>Normales</td><td>Enfriamiento 5–16 s (antes del ×${COOLDOWN_MULT}), costo 25–60 de maná</td></tr>
+            <tr><td>Daño físico</td><td>70%–260% del daño de ataque</td></tr>
+            <tr><td>Daño mágico</td><td>40–160 de base según nivel, más un % de Inteligencia (el motor ya aplica la amplificación de hechizo: no multiplicar a mano)</td></tr>
+            <tr><td>Pasivas por segundo</td><td>Bajo: 5–25 de daño o curación por segundo, porque actúan todo el tiempo</td></tr>
+            <tr><td>Controles</td><td>Aturdir 0,5–2 s; ralentizar 20%–70% por 1,5–4 s (en duelo duran la mitad)</td></tr>
+            <tr><td>Definitivas</td><td>Enfriamiento 40–70 s, costo 80–150 de maná</td></tr>
+            <tr><td>Crecimiento propio</td><td>1 stat (armadura, daño, crítico, robo de vida o HP): un poco cada N creeps y más por duelo ganado</td></tr>
+        </table>
+        <h3>Objetivo de balance</h3>
+        <ul>
+            <li>Duelos: entre ~35% y ~65% de victorias en 30+ partidas simuladas (hoy el rango real es 17%–74%).</li>
+            <li>Creeps: que no domine las partidas largas por supervivencia (el caso actual del Sniper).</li>
+            <li>La IA tiene que poder ganar con él sola (draft, tienda y combate).</li>
+        </ul>
+    </section>
+
+    <section><h2>6. Checklist técnico para sumarlo al juego</h2>
+        <ul class="check">
+            <li>Crear <code>js/data/heroes/&lt;héroe&gt;.js</code> con <code>registerHero(plantilla, habilidades)</code> (formato explicado en <code>js/data/registry.js</code>).</li>
+            <li>Ids en MAYÚSCULAS con un prefijo único del héroe (ej: <code>AXE_GIRO</code>).</li>
+            <li>Las activas devuelven <code>false</code> si no pudieron lanzarse (sin objetivo): así no se cobra maná ni enfriamiento, y las habilidades automáticas no se gastan en el aire.</li>
+            <li>Las descripciones usan marcadores (<code>{dmgMult%}</code>, <code>{radius}</code>) y dicen exactamente lo que hace el código.</li>
+            <li>Algo “por segundo” usa <code>everyInterval</code> (no daño por frame). Curaciones que salen del daño llevan <code>{fromDamage: true}</code> para no reducirse en duelo.</li>
+            <li>Etiquetas bien puestas: la IA las usa para decidir cuándo lanzar (ÁREA con 2+ enemigos, MOVILIDAD para acercarse, definitiva con 3+ o el jefe cerca).</li>
+            <li>Agregar su <code>&lt;script&gt;</code> en <code>index.html</code> junto a los otros héroes (y en <code>docs/heroes-pdf.html</code> para este documento).</li>
+            <li>Sprite en <code>HERO_SPRITES</code> (<code>js/sprites.js</code>): forma + paleta.</li>
+            <li>Guía de ítems en <code>BUILD_GUIDES</code> (<code>js/data/guides.js</code>).</li>
+            <li>Si hace falta, un ítem o creep que lo contrarreste (<code>js/data/items.js</code> / <code>js/data/creeps.js</code>).</li>
+            <li>Pruebas: abrir <code>index.html?test</code> y que pasen todas; sumar pruebas de su innato y de su definitiva.</li>
+            <li>Medir balance con <code>simulateGame</code> (30+ partidas): duelos ganados y partidas ganadas contra creeps.</li>
+            <li>Documentar: tabla del roster en <code>DISEÑO.md §6</code>, <code>docs/ESTADO.md</code> y la lista de símbolos de <code>docs/prompt-heroes.md</code>.</li>
+            <li>Regenerar este PDF.</li>
+        </ul>
+        <div class="footer-note">Documento generado automáticamente desde los datos del juego (docs/heroes-pdf.html) el ${TODAY}.</div>
+    </section>`;
+}
+
+document.getElementById('doc').innerHTML =
+    cover() + summary() +
+    `<section><h2>2. Fichas de héroes</h2><p>Valores por nivel separados por “/” (4 niveles en las normales, 3 en la definitiva).
+     Enfriamientos ya con el ×${COOLDOWN_MULT} aplicado. Stats al nivel 1, sin ítems.</p></section>`.replace('<section>', '<section class="intro2">') +
+    heroes.map(heroPage).join('') + balance() + requirements();
+</script>
+</body>
+</html>
