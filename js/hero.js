@@ -6,7 +6,15 @@ const ATTRIBUTE_RULES = {
     agi: { atkSpeedPct: 0.01, moveSpeedPct: 0.01, moveSpeedCap: 40, critChance: 0.1, armor: 0.08 },
     int: { mana: 4, manaRegen: 0.05, spellAmp: 0.1, magicResist: 0.1 },
     primaryAtk: 0.8,     // daño de ataque por punto del atributo principal
-    mageSpellAmp: 100    // los héroes de Inteligencia (magos) tienen +100% de amplificación de hechizo
+    mageSpellAmp: 25     // los héroes de Inteligencia (magos) tienen +25% de amplificación de hechizo base
+                          // (bajado de 100% el 2026-09-28: se saca del escalado automático y pasa a depender
+                          // de ítems — Báculo Arcano y los nuevos "candidatos" de DISEÑO.md §7. A/B controlado
+                          // (mismo build, mismas condiciones, n=5): 60% vs 100% dan el mismo tiempo de limpiar
+                          // 5 oleadas con jugador invulnerable (Arcanista 144 vs 145, Bruja del Hielo 158 vs
+                          // 154) — el PvE contra creeps casi no lo nota. Con 25% no se volvió a medir el PvE,
+                          // pero por la misma razón (el daño mágico no es lo único que limpia oleada) debería
+                          // seguir siendo chico. Sin medir todavía: duelos 1v1 (ahí el nuke mágico pesa más),
+                          // con simulateGame(i, false, 60) como en DISEÑO.md §6)
 };
 
 // Teclas de habilidades activas, asignadas por orden de aprendizaje.

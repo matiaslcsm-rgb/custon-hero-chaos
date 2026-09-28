@@ -41,10 +41,19 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 | Draft de habilidades en ventana emergente (cartas con el ícono y color del héroe de origen) | ✅ |
 | Cuerpos físicos: pasar por la casilla de otro frena según su tamaño (+25/75/150%); `phasing` atraviesa | ✅ |
 | Regla: al menos 1 pasiva entre las 3 nativas (Axe, Sniper, Asesino y Vampiro convirtieron una activa) | ✅ |
+| Héroe 11: Zeus `Z` (fiel a Dota 2, pedido del usuario) + `mageSpellAmp` bajado de 100% a 25% (se saca del escalado, pasa a ítems) | ✅ (sin medir duelos) |
 
 ## Pendientes y temas abiertos
 - **En curso:** 3 héroes de Agilidad del usuario, de a uno y midiendo cada uno: Danzante ✅ → **Chakravin `Y`** (proyectiles
   de habilidad que vuelven + creep Guardián de Hierro) → **Trampero `P`** (zonas en el piso + creep Saltador).
+- **Ítems:** lista de candidatos sin implementar en DISEÑO.md §7 (Orquídea, Mariposa, Tarrasque, Núcleo de Octarine y más;
+  varios piden mecánica nueva: `silenced`, `cooldownReduction`, robo de vida mágico, `spellBlock`, `cyclone`). El usuario
+  pidió tener la lista lista y decidir después cómo se van sumando.
+- **Balance del recorte de `mageSpellAmp`** (100%→25%, 2026-09-28): medido en PvE con `simulateGame` (A/B controlado,
+  n=5): el tiempo para limpiar 5 oleadas con jugador invulnerable **casi no cambia** (Arcanista 144 vs 145, Bruja del
+  Hielo 158 vs 154, con 60% vs 100%). Ojo: la comparación contra la marca vieja de este documento (Arcanista 79s) estaba
+  confundida — el juego se puso más difícil en general desde esa medición, por otros cambios. **Sin medir:** el impacto
+  en duelos 1v1, donde el nuke mágico de golpe pesa más que en una oleada larga. Medir con `simulateGame(i, false, 60)`.
 - **Después:** balancear la supervivencia contra creeps en el formato de un duelo por ronda (gana el último en pie: el Sniper
   ganó 8 de 14 partidas simuladas y el Nigromante 4). Medir con `simulateGame(i, false, 60)` (~31 rondas por partida).
 - **Balance de duelos:** Vampiro (17%) y Nigromante (24%) siguen abajo; Alquimista, Axe y Bruja ~70% (ver DISEÑO.md §9).
@@ -65,8 +74,11 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 ## Cómo probar y medir
 - **Pruebas:** abrir `tests.html` (o `index.html?test`). Cada mecánica nueva suma su prueba en `js/tests.js`.
 - **Probar desde el navegador integrado de Claude:** servir la carpeta con un servidor **sin caché** (el navegador guardaba
-  versiones viejas de los `.js` con `python -m http.server`). Script usado: `http.server` con cabecera
-  `Cache-Control: no-store`, puerto 8766. El panel del navegador puede estar oculto y frenar `requestAnimationFrame`: para
+  versiones viejas de los `.js`). En esta máquina no hay Python ni Node, así que se armó `serve-nocache.ps1` (raíz del
+  repo): servidor mínimo en PowerShell (`System.Net.HttpListener`) con cabecera `Cache-Control: no-store`, puerto 8766.
+  Correrlo con `powershell -ExecutionPolicy Bypass -File serve-nocache.ps1` (en segundo plano) y abrir
+  `http://localhost:8766/index.html` (o `?test` para las pruebas). Si la máquina tiene Python, `python -m http.server`
+  con la misma cabecera también sirve. El panel del navegador puede estar oculto y frenar `requestAnimationFrame`: para
   probar en "tiempo real" se reproduce el cuerpo de `loop()` a mano a 60 cuadros por segundo.
 - **Medir balance:** `simulateGame(índiceDeHéroe, godMode, rondas)` (en tests.js) juega partidas completas con la IA.
   Para diagnosticar, se registran muertes/duelos envolviendo funciones (`resolveDuel`, `handlePlayerDeath`, `endRound`) y se

@@ -41,7 +41,7 @@ Además, con el kit al máximo cada punto sobrante da +1 a los tres (ver §3).
 | **Agilidad (AGI)** | +1% velocidad de ataque · +1% velocidad de movimiento (hasta 40 AGI) · +0,1% crítico · **+0,08 armadura** |
 | **Inteligencia (INT)** | +4 maná máximo · +0,05 regeneración de maná/s · +0,1% amplificación de hechizo · **+0,1% resistencia mágica** |
 | **Atributo principal** | Además: +0,8 daño de ataque |
-| **Magos** (principal Inteligencia) | Además: **+100% amplificación de hechizo** (su daño mágico se duplica) |
+| **Magos** (principal Inteligencia) | Además: **+25% amplificación de hechizo** (antes +100%; se bajó el 2026-09-28 para que el grueso de la amplificación venga de ítems — ver §7) |
 
 | Héroe | Fuerza | Agilidad | Inteligencia |
 |---|---|---|---|
@@ -172,7 +172,7 @@ El cálculo de daño suma lo que haya, sin conocer cada habilidad.
 
 ## 6. Roster y criterios para agregar un héroe
 
-### Roster actual (10 héroes)
+### Roster actual (11 héroes)
 | Héroe | Atributo | Rol | Innato |
 |---|---|---|---|
 | Axe `@` | Fuerza | Tanque de contraataque | Contraataque |
@@ -185,6 +185,7 @@ El cálculo de daño suma lo que haya, sin conocer cada habilidad.
 | Sabio del Vacío `Ø` | Inteligencia | Movilidad y ráfaga en área | Paso Etéreo |
 | Alquimista `L` | Inteligencia | Ácido y reducción de armadura | Gredas Transmutadoras |
 | Danzante Cinético `D` | Agilidad | Duelista móvil: el movimiento da daño | Danza Cinética |
+| Zeus `Z` | Inteligencia | Daño mágico masivo a distancia, sin límite de rango en la definitiva | Campo Estático |
 
 **Danzante Cinético** (diseño del usuario, héroe 10 de 3 de Agilidad que se suman de a uno: Danzante → Chakravin → Trampero).
 Ajustes al pasarlo al motor:
@@ -202,6 +203,14 @@ Ajustes al pasarlo al motor:
 - Contra: creep nuevo **Ancla** (ver §8).
 - **Medido** (53 partidas de 8 héroes con 10 en el roster): gana el 45% de sus duelos (objetivo 35-65%) y 6 de 53 partidas
   (~11%, lo esperable con 8 de 10 héroes por partida). La IA llega a 5 cargas de Danza seguido (427 veces en 12 partidas).
+
+**Zeus** (pedido del usuario, héroe 11, fiel al Zeus de Dota 2). Kit: Rayo Arco (salta entre enemigos), Rayo
+Relámpago (nuke directo + aturdimiento corto), Nimbo de Tormenta (área alrededor suyo), Campo Estático como
+innato (cada hechizo lanzado hace daño mágico a los enemigos cercanos, % de su vida actual) e Ira del Dios
+del Trueno como definitiva (golpea a TODOS los enemigos vivos de su arena, sin límite de rango — factible acá
+porque no hay fog of war ni mapa compartido, cada arena ya está acotada). Escala Inteligencia (no amplificación
+de hechizo: esa la dan los ítems, ver §7) — motivó bajar `mageSpellAmp` de 100% a 25% para los 5 magos también.
+**Sin medir todavía** (nuevo, sin duelos ni partidas de 8 jugados de verdad; solo `simulateGame` con IA).
 
 Los 5 magos se diseñaron con Gemini (con el prompt de `docs/prompt-heroes.md`) y se ajustaron al motor.
 Cada héroe vive en su propio archivo: `js/data/heroes/<héroe>.js`.
@@ -335,6 +344,31 @@ el Vampiro más (9/32, antes 3/26); duelos: Sniper 76%, Axe 75%, Asesino 63%, Va
 **Inmunidad mágica** (`magicImmune`): no recibe daño mágico ni aturdimientos ni ralentizaciones. El daño físico y puro sí entran.
 
 **Pendiente:** contras específicos para los duelos (silencio, disipar mejoras) y habilidades activas de ítems.
+
+### Candidatos a nuevos ítems (sin implementar, pedido del usuario 2026-09-28)
+
+Los ítems van a seguir creciendo: más básicos como base, y compuestos pensados para una combinación o un héroe en
+particular (al estilo Orquídea Malévola / Mariposa / Corazón de Tarrasque de Dota 2). Ninguno de estos está en
+`js/data/items.js` todavía — es la lista para ir sumando de a poco. Se excluyen consumibles por ahora (pedido
+del usuario); varios necesitan mecánica nueva en el motor, marcada abajo.
+
+| Grupo | Ítem (inspiración) | Idea | Motor |
+|---|---|---|---|
+| Magia | **Orquídea Malévola** | +vel. de ataque, +INT, activa: silencia al objetivo (no puede lanzar habilidades) por unos segundos y aumenta el daño físico que recibe mientras dura | Necesita el flag `silenced` (chequeo en el punto donde se lanza una habilidad) — no existe |
+| Ataque | **Mariposa** | +vel. de ataque, +vel. de movimiento, +evasión | Ninguna: son mods que ya existen (`atkSpeedPct`, `moveSpeedPct`, `evasion`) |
+| Defensa y tanque | **Corazón del Tarrasque** | +vida enorme, +regeneración de vida grande (más que Corazón del Titán) | Ninguna, mismo patrón que `HEART` con números más grandes |
+| Magia | **Núcleo de Octarine** (o similar) | +amplificación de hechizo, +regeneración de maná, **reducción de enfriamiento** | Necesita el stat `cooldownReduction` (hoy no existe: los enfriamientos no se pueden acortar salvo casos puntuales como Botas Firmes contra el control) |
+| Magia | **Kaya** (básico) | +amplificación de hechizo, +regeneración de maná (barato, temprano, para que un mago tenga algo de amplificación antes del Báculo Arcano) | Ninguna |
+| Magia | **Piedra de Sangre** (Bloodstone) | +maná enorme, cura vida y maná al lanzar una habilidad, robo de vida con el daño mágico | Necesita "robo de vida mágico" (hoy `lifesteal` en combat.js está pensado para daño físico/ataques — hay que revisar si ya alcanza a daño mágico o hace falta separarlo) |
+| Defensa y tanque | **Esfera de Linken** | +resistencia mágica, +vida; bloquea la próxima habilidad enemiga dirigida a vos (con enfriamiento) | Necesita un flag `spellBlock` que se consuma al recibir una habilidad apuntada |
+| Defensa y tanque | **Vara Áurea** (Eul's Scepter) | +INT, +vel. de movimiento; activa: te vuelve invulnerable e inatacable unos segundos, pero tampoco podés actuar | Necesita el estado `cyclone` (invulnerable + no puede actuar), parecido a `magicImmune` pero más restrictivo |
+| Defensa y tanque | **Guardia de Shiva** | +armadura, +INT; activa: onda helada en área que baja la velocidad de ataque enemiga y hace daño mágico | Ninguna nueva, mezcla de `FROST_ORB` (ralentizar) + `ARCANE_STAFF` (maná/INT) con un `cooldown` propio del ítem (los ítems hoy no tienen enfriamiento propio, solo hooks pasivos — revisar) |
+| Ataque | **Filo de Plata** (Silver Edge) | +daño, +crítico; activa: invisibilidad breve y el próximo golpe silencia | Necesita invisibilidad (`untargetable`/no ser objetivo de ataques automáticos) además de `silenced` |
+
+**Orden sugerido para implementar** (de más simple a más compleja, cuando se retome): Mariposa → Corazón del
+Tarrasque → Kaya → Núcleo de Octarine (agrega `cooldownReduction` al motor, lo pide Zeus explícitamente) →
+Orquídea Malévola (agrega `silenced`) → el resto, que necesitan mecánicas nuevas más grandes (invisibilidad,
+bloqueo de habilidades, cyclone).
 
 ---
 

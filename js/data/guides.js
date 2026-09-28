@@ -43,6 +43,10 @@ const BUILD_GUIDES = {
     DANCER: {
         why: 'Pega mientras se mueve: velocidad de ataque y movimiento para cargar la Danza, y Hoja Certera contra la evasión.',
         early: ['BLADE', 'QUICK_GLOVES'], core: ['SWIFT_BLADE', 'GLOVES', 'TRAVEL_BOOTS'], late: ['HAMMER', 'TRUESTRIKE']
+    },
+    ZEUS: {
+        why: 'Todo el daño sale de los hechizos: maná e inteligencia para tirar todo el kit seguido, y amplificación de hechizo en cuanto se pueda.',
+        early: ['MANA_CRYSTAL', 'BRANCH_INT'], core: ['ARCANE_STAFF', 'TOME', 'CLOAK'], late: ['AEGIS', 'DIADEM']
     }
 };
 

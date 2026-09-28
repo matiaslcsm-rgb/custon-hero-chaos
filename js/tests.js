@@ -475,7 +475,7 @@ test('Usar un Fragmento no reinicia el tiempo de preparación', () => {
     checkEq(phaseTimeLeft, 12, 'con el tiempo que le quedaba');
 });
 
-test('Magos (Inteligencia): +100% de amplificación de hechizo', () => {
+test('Magos (Inteligencia): amplificación de hechizo extra respecto a un no-mago', () => {
     const mage = new Hero({ ...HERO_TEMPLATES.AXE, primaryAttr: 'INT' });
     const warrior = new Hero(HERO_TEMPLATES.AXE);
     checkNear(mage.spellAmp - warrior.spellAmp, ATTRIBUTE_RULES.mageSpellAmp, 'amplificación extra');
@@ -584,6 +584,67 @@ test('Pacto de la Muerte: daño puro en área y cura lo que drena', () => {
     const expected = Math.round(valueAt(s, 'baseDmg', 1) + player.int * valueAt(s, 'intRatio', 1));
     checkEq(9999 - a.hp, expected, 'el daño puro ignora la armadura');
     checkEq(player.hp, Math.min(player.maxHp, 1 + 2 * expected), 'cura el total drenado');
+});
+
+// Daño mágico esperado tras pasar por dealDamage: aplica la amplificación de hechizo del que lanza
+// (spellAmp) antes de redondear. Los dummy() no tienen resistencia mágica, así que no hace falta mitigar.
+function magicDmg(rawAmount) { return Math.round(rawAmount * (1 + effSpellAmp(player) / 100)); }
+
+test('Campo Estático: cada hechizo lanzado hace daño mágico a los enemigos cercanos, % de su vida actual', () => {
+    newGame('ZEUS');
+    const near = dummy({ hp: 1000, maxHp: 1000 }); // pegado al jugador, adentro del radio 4
+    const far = dummy({ x: player.x + 15, y: player.y, hp: 1000, maxHp: 1000 }); // bien lejos, afuera del radio
+    emit(player, 'onCast', { skill: null });
+    checkEq(1000 - near.hp, magicDmg(Math.max(player.innate.minDmg, 1000 * player.innate.pct)), 'daño a un enemigo cercano (% de su vida)');
+    checkEq(far.hp, 1000, 'no llega a un enemigo lejos del radio');
+});
+
+test('Rayo Arco: salta entre varios enemigos y hace el mismo daño en cada salto', () => {
+    newGame('ZEUS');
+    const s = learn('ZEUS_ARC', 1);
+    const a = dummy({ hp: 9999, maxHp: 9999 }), b = dummy({ x: a.x + 1, y: a.y, hp: 9999, maxHp: 9999 });
+    const far = dummy({ x: player.x + 15, y: player.y, hp: 9999, maxHp: 9999 }); // fuera del alcance del primer salto
+    s.cast(player);
+    const expected = magicDmg(valueAt(s, 'baseDmg', 1) + player.int * valueAt(s, 'intRatio', 1));
+    checkEq(9999 - a.hp, expected, 'daño al primero (el más cercano)');
+    checkEq(9999 - b.hp, expected, 'daño al segundo (salta hacia el más cercano al anterior)');
+    checkEq(far.hp, 9999, 'no llega a uno lejos de la cadena');
+});
+
+test('Rayo Relámpago: daño directo y aturde', () => {
+    newGame('ZEUS');
+    const s = learn('ZEUS_BOLT', 1);
+    const c = dummy({ hp: 9999, maxHp: 9999 });
+    s.cast(player);
+    const expected = magicDmg(valueAt(s, 'baseDmg', 1) + player.int * valueAt(s, 'intRatio', 1));
+    checkEq(9999 - c.hp, expected, 'daño');
+    check(hasFlag(c, 'stun'), 'aturdido');
+});
+
+test('Nimbo de Tormenta: daño en área alrededor de Zeus', () => {
+    newGame('ZEUS');
+    const s = learn('ZEUS_NIMBUS', 1);
+    const near = dummy({ hp: 9999, maxHp: 9999 });
+    const far = dummy({ x: player.x + 15, y: player.y, hp: 9999, maxHp: 9999 });
+    s.cast(player);
+    const expected = magicDmg(valueAt(s, 'baseDmg', 1) + player.int * valueAt(s, 'intRatio', 1));
+    checkEq(9999 - near.hp, expected, 'daño a un enemigo en el radio');
+    checkEq(far.hp, 9999, 'no llega a uno lejos');
+});
+
+test('Ira del Dios del Trueno: golpea a TODOS los enemigos vivos, sin importar la distancia', () => {
+    newGame('ZEUS');
+    const s = learn('ZEUS_WRATH', 1);
+    const near = dummy({ hp: 9999, maxHp: 9999 });
+    const far = dummy({ x: player.x + 15, y: player.y, hp: 9999, maxHp: 9999 });
+    const dead = dummy({ hp: 0, maxHp: 9999 });
+    // El daño se calcula una sola vez al lanzar; medirlo antes del cast, porque golpea también a los Grunts
+    // reales de la oleada (mueren y su baja escala la Inteligencia de Zeus a mitad del propio lanzamiento).
+    const expected = magicDmg(valueAt(s, 'baseDmg', 1) + player.int * valueAt(s, 'intRatio', 1));
+    s.cast(player);
+    checkEq(9999 - near.hp, expected, 'daño al cercano');
+    checkEq(9999 - far.hp, expected, 'daño al lejano (sin límite de rango)');
+    checkEq(dead.hp, 0, 'no revive al que ya estaba muerto');
 });
 
 // ============================================================ CREEPS E ÍTEMS DE CONTRA
