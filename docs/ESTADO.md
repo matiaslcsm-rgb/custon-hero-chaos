@@ -32,6 +32,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 | Objetivo marcado con clic izquierdo y movimiento −35% | ✅ |
 | Ataque libre al moverse + balance por stats, curación y control −50/60% en duelo | ✅ (Vampiro y Nigromante siguen abajo) |
 | Retoques de kits (Vampiro, Nigromante), pausa con glosario y opciones, sin barras arriba, tutorial rediseñado | ✅ |
+| Presión al líder en creeps y jefes; balance por habilidades; escenarios en pixel art animados | ✅ |
 
 ## Pendientes y temas abiertos
 - **Balance de duelos:** Vampiro (17%) y Nigromante (24%) siguen abajo; Alquimista, Axe y Bruja ~70% (ver DISEÑO.md §9).

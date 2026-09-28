@@ -673,6 +673,10 @@ Todo en `js/fx.js`, **solo visual** (no cambia reglas) y solo para la arena que 
   automáticas, piloto automático, mapa grande) y Salir al menú. El glosario también está en el menú de inicio.
 - **Tutorial rediseñado:** 9 páginas (objetivo, ronda, teclado, mouse, habilidades, tienda, vidas, duelos, jefes), cada una
   con su color e ícono, tarjetas, teclas dibujadas, los sprites de los héroes y navegación por íconos o flechas.
+- **Escenarios en pixel art** (`js/scenery.js`): pradera con sendero, matas, flores y piedras (oleadas); coliseo de losas con
+  círculo de arena y antorchas en las esquinas (duelos); suelo volcánico con grietas y charcos de lava (jefe); claro con
+  estanque y fuente, caminos, árboles y fogatas (sala de espera). Partes animadas: llamas, brillo de la lava y brasas,
+  reflejos del agua, luciérnagas y polen. Solo decorativo.
 - **Pixel art dibujado en código** (`js/sprites.js`, opción 1 elegida entre pixel art propio, paquete gratuito o arte con IA):
   sprites de 12×12 hechos con plantillas (guerrero, mago con túnica, fantasma, bomba, insecto, gólem, dragón, hidra, demonio)
   y paletas. Cada héroe tiene los suyos; los creeps usan el color de su tipo; los jefes, su forma propia (y corona los que

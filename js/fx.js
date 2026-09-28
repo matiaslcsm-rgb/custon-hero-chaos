@@ -162,41 +162,4 @@ function drawPos(u, dt) {
     return { x, y };
 }
 
-// --- FONDOS DE LAS ARENAS ---
-// Se dibujan una sola vez por tipo en un canvas aparte (con una semilla fija, siempre igual).
-const ARENA_THEMES = {
-    wave: { base: ['#0b120c', '#0d150e', '#0a100b'], marks: ['"', ',', '.', '\''], markColors: ['#1d3b24', '#23452b', '#2b3a1f'], border: '#1f2e22' },
-    duel: { base: ['#15110e', '#18130f', '#120f0c'], marks: ['·', '+', '.'], markColors: ['#3a2b20', '#4a3526'], border: '#6a3b1f' },
-    boss: { base: ['#170709', '#1b080b', '#140608'], marks: ['~', '·', '^'], markColors: ['#4a0d14', '#6a1420', '#3a0a10'], border: '#8a0f24' },
-    rest: null
-};
-const arenaBgCache = {};
-
-function seededRandom(seed) { return () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }; }
-
-function arenaBackground(kind) {
-    if (arenaBgCache[kind]) return arenaBgCache[kind];
-    const theme = ARENA_THEMES[kind] || ARENA_THEMES.wave;
-    const bg = document.createElement('canvas');
-    const k = 2; // se dibuja al doble para que se vea nítido también con el mapa agrandado
-    bg.width = MAP_W * k; bg.height = MAP_H * k;
-    const g = bg.getContext('2d');
-    g.scale(k, k);
-    const rnd = seededRandom(kind.length * 7919 + 17);
-    for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) {
-        g.fillStyle = theme.base[Math.floor(rnd() * theme.base.length)];
-        g.fillRect(c * TILE, r * TILE, TILE, TILE);
-        if (rnd() < 0.22) {
-            g.fillStyle = theme.markColors[Math.floor(rnd() * theme.markColors.length)];
-            g.font = '14px monospace'; g.textAlign = 'center'; g.textBaseline = 'middle';
-            g.fillText(theme.marks[Math.floor(rnd() * theme.marks.length)], c * TILE + TILE / 2 + (rnd() - 0.5) * 8, r * TILE + TILE / 2 + (rnd() - 0.5) * 8);
-        }
-    }
-    // Viñeta: oscurece los bordes
-    const grad = g.createRadialGradient(MAP_W / 2, MAP_H / 2, MAP_H * 0.3, MAP_W / 2, MAP_H / 2, MAP_W * 0.65);
-    grad.addColorStop(0, 'rgba(0,0,0,0)'); grad.addColorStop(1, 'rgba(0,0,0,0.55)');
-    g.fillStyle = grad; g.fillRect(0, 0, MAP_W, MAP_H);
-    g.strokeStyle = theme.border; g.lineWidth = 2; g.strokeRect(1, 1, MAP_W - 2, MAP_H - 2);
-    arenaBgCache[kind] = bg;
-    return bg;
-}
+// Los fondos de las arenas están en scenery.js.

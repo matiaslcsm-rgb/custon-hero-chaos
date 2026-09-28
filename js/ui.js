@@ -808,18 +808,13 @@ function drawUnit(u, color, symbol, pos = u, opts = {}) {
 function heroColor(h) { return h === player ? '#00f5d4' : '#ffb703'; }
 
 function renderRestArea(dt = 0) {
-    ctx.fillStyle = '#07140d'; ctx.fillRect(0, 0, MAP_W, MAP_H);
-    ctx.strokeStyle = '#0f2418';
-    for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) ctx.strokeRect(c * TILE, r * TILE, TILE, TILE);
+    ctx.drawImage(arenaBackground('rest'), 0, 0, MAP_W, MAP_H);
+    drawSceneryOverlay('rest');
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.font = '14px monospace'; ctx.fillStyle = '#2d6a4f';
-    [[2, 2], [17, 2], [2, 10], [17, 10], [5, 5], [15, 8]].forEach(([x, y]) => ctx.fillText('♣', x * TILE + TILE / 2, y * TILE + TILE / 2));
-    ctx.font = '22px monospace'; ctx.fillStyle = '#48cae4';
-    ctx.fillText('≈', REST_SPOT.x * TILE + TILE / 2, (REST_SPOT.y - 3) * TILE + TILE / 2);
-    ctx.fillStyle = '#fb8500';
-    [[REST_SPOT.x - 5, REST_SPOT.y], [REST_SPOT.x + 5, REST_SPOT.y]].forEach(([x, y]) => ctx.fillText('♨', x * TILE + TILE / 2, y * TILE + TILE / 2));
-    ctx.font = 'bold 16px monospace'; ctx.fillStyle = '#95d5b2';
+    ctx.font = 'bold 16px monospace'; ctx.fillStyle = '#d8f3dc';
+    ctx.shadowColor = '#000'; ctx.shadowBlur = 4;
     ctx.fillText('ÁREA DE DESCANSO', MAP_W / 2, TILE * 0.8);
+    ctx.shadowBlur = 0;
     ctx.font = '11px monospace'; ctx.fillStyle = '#74c69d';
     ctx.fillText('Volvés al combate con vida y maná completos', MAP_W / 2, MAP_H - TILE * 0.6);
     ctx.font = '18px monospace';
@@ -871,6 +866,7 @@ function render() {
     ctx.save();
     if (shakeAmount) ctx.translate((Math.random() - 0.5) * shakeAmount * 2, (Math.random() - 0.5) * shakeAmount * 2);
     ctx.drawImage(arenaBackground(arena.kind), 0, 0, MAP_W, MAP_H);
+    drawSceneryOverlay(arena.kind);
     if (arena.kind === 'duel') {
         ctx.font = 'bold 13px monospace'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffb703';
         ctx.fillText(`⚔ DUELO: ${arena.heroes[0].displayName}  vs  ${arena.heroes[1].displayName}`, MAP_W / 2, TILE * 0.7);
