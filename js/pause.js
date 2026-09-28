@@ -1,0 +1,71 @@
+// Pausa, glosario y opciones.
+//
+//   Esc (o el botón ⏸ arriba del mapa) pausa la partida: se congelan el combate, los temporizadores y los efectos.
+//   El menú de pausa tiene: Continuar, Tutorial, Glosario (Héroes, Creeps y Jefes, Ítems), Opciones (sonido, gráficos,
+//   habilidades automáticas, piloto automático, mapa grande) y Salir al menú.
+//   El glosario también se abre desde el menú de inicio. Cada códice se muestra como una ventana a pantalla completa.
+
+let paused = false;
+let glossaryFromPause = false; // al cerrar el glosario, volver al menú de pausa si se abrió desde ahí
+
+function canPause() { return player && gameState !== 'MENU' && gameState !== 'HERO_SELECT' && gameState !== 'ENDED'; }
+
+function setPaused(on) {
+    if (on && !canPause()) return;
+    paused = on;
+    showPanel('pause-menu', on);
+    if (on) { cancelTargeting(); renderPauseMenu(); sfx('click'); }
+}
+function togglePause() { setPaused(!paused); }
+
+function renderPauseMenu() {
+    const opt = (id, label, on, fn) => `<button class="pm-toggle${on ? ' on' : ''}" data-opt="${id}">${label}<span>${on ? 'SÍ' : 'NO'}</span></button>`;
+    document.getElementById('pause-options').innerHTML =
+        opt('sound', '🔊 Sonido', soundOn) +
+        opt('sprites', '🎨 Pixel art (G)', spritesOn) +
+        opt('autocast', '✨ Habilidades automáticas (H)', autoCast) +
+        opt('autopilot', '🤖 Piloto automático (P)', autopilot) +
+        opt('bigmap', '⤢ Mapa grande (M)', mapScale > 1);
+    document.querySelectorAll('#pause-options .pm-toggle').forEach(btn => {
+        btn.onclick = () => {
+            ({ sound: () => setSound(!soundOn), sprites: () => setSprites(!spritesOn), autocast: () => setAutoCast(!autoCast),
+               autopilot: () => setAutopilot(!autopilot), bigmap: toggleBigMap })[btn.dataset.opt]();
+            renderPauseMenu();
+        };
+    });
+    document.getElementById('pause-info').textContent = player
+        ? `${player.name} · ronda ${waveNumber}/${MAX_ROUNDS} · ${heroRank(player)}º con ${player.points} puntos` : '';
+}
+
+// --- GLOSARIO (códices) ---
+function openGlossary(view) {
+    glossaryFromPause = paused;
+    if (paused) showPanel('pause-menu', false);
+    ['heroes', 'creeps', 'items'].forEach(v => { document.getElementById('view-' + v).style.display = v === view ? 'block' : 'none'; });
+    document.getElementById('view-' + view).scrollTop = 0;
+}
+function closeGlossary() {
+    const open = ['heroes', 'creeps', 'items'].some(v => document.getElementById('view-' + v).style.display === 'block');
+    ['heroes', 'creeps', 'items'].forEach(v => { document.getElementById('view-' + v).style.display = 'none'; });
+    if (open && glossaryFromPause && paused) showPanel('pause-menu', true);
+    return open;
+}
+function isGlossaryOpen() { return ['heroes', 'creeps', 'items'].some(v => document.getElementById('view-' + v).style.display === 'block'); }
+
+// Compatibilidad: antes había pestañas arriba; ahora el glosario se abre como ventana.
+function showView(view) { if (view === 'game') closeGlossary(); else openGlossary(view); }
+
+function quitToMenu() {
+    if (!confirm('¿Salir al menú? Se pierde la partida en curso.')) return;
+    setPaused(false);
+    resetGame();
+}
+
+// Esc: cierra lo que esté abierto (apuntado, tienda, tutorial, glosario) y si no hay nada, pausa o reanuda.
+function handleEscape() {
+    if (targeting) { cancelTargeting(); return; }
+    if (document.getElementById('tutorial').style.display === 'flex') { closeTutorial(); return; }
+    if (closeGlossary()) return;
+    if (document.getElementById('shop-container').style.display === 'block') { closeShop(); return; }
+    togglePause();
+}

@@ -476,7 +476,7 @@ test('Aturdido no se mueve; ralentizar reduce la velocidad', () => {
     removeEffect(c, 'STUN');
     c.x = 8; c.hp = c.maxHp = 9999;
     learn('VAMP_LEAP', 1).cast(player);
-    checkNear(effMoveMult(c), 1 - 0.4, 'Salto Sangriento ralentiza 40%');
+    checkNear(effMoveMult(c), 1 - SKILL_INDEX.VAMP_LEAP.values.slow, 'Salto Sangriento ralentiza');
 });
 
 // ============================================================ MAGOS Y MOTOR
@@ -1448,6 +1448,22 @@ test('Clic derecho: el héroe camina hasta el destino; el teclado lo cancela', (
     for (let i = 0; i < 200 && player.moveTarget; i++) { gameClock += 0.05; updateHero(player, player.arena, 0.05); }
     checkEq(player.x + ',' + player.y, '6,2', 'llegó');
     checkEq(player.moveTarget, null, 'sin destino');
+});
+
+test('Pausa: congela la partida y Esc la abre y la cierra', () => {
+    newGame('AXE');
+    setPaused(true);
+    check(paused, 'en pausa');
+    checkEq(document.getElementById('pause-menu').style.display, 'block', 'menú de pausa visible');
+    openGlossary('items');
+    check(isGlossaryOpen(), 'glosario abierto desde la pausa');
+    handleEscape();
+    check(!isGlossaryOpen() && paused, 'Esc cierra el glosario y vuelve a la pausa');
+    handleEscape();
+    check(!paused, 'Esc reanuda');
+    resetGame();
+    setPaused(true);
+    check(!paused, 'en el menú no se pausa');
 });
 
 test('Guía de ítems: cada héroe tiene la suya y la tienda la muestra primero', () => {

@@ -59,6 +59,7 @@ canvas.addEventListener('mousemove', e => { Object.assign(mouse, mouseToTile(e),
 canvas.addEventListener('mouseleave', () => { mouse.over = false; });
 canvas.addEventListener('contextmenu', e => e.preventDefault());
 canvas.addEventListener('mousedown', e => {
+    if (paused) return;
     const p = mouseToTile(e);
     Object.assign(mouse, p);
     if (e.button === 2) { // clic derecho: cancela el apuntado o camina

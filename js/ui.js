@@ -2,12 +2,12 @@
 
 const canvas = document.getElementById('ascii-canvas');
 const ctx = canvas.getContext('2d');
-const TILE = 30;
+const TILE = 34; // más grande desde que se sacó la barra de arriba
 const MAP_W = COLS * TILE, MAP_H = ROWS * TILE; // tamaño lógico del mapa (se dibuja siempre en estas coordenadas)
 
 // Tamaño real del canvas: el mapa normal o agrandado (M), y multiplicado por la densidad de la pantalla para que se vea nítido.
 let mapScale = 1;
-const BIG_MAP_SCALE = 1.45;
+const BIG_MAP_SCALE = 1.3;
 function applyMapSize() {
     const k = mapScale * (window.devicePixelRatio || 1);
     canvas.width = Math.round(MAP_W * k); canvas.height = Math.round(MAP_H * k);
@@ -130,11 +130,6 @@ function abilityRow(a, fixed, kind = '') {
 
 function stripHtml(html) { return html.replace(/<[^>]+>/g, ''); }
 
-function showView(view) {
-    document.getElementById('view-game').style.display = view === 'game' ? 'flex' : 'none';
-    ['heroes', 'creeps', 'items'].forEach(v => { document.getElementById('view-' + v).style.display = view === v ? 'block' : 'none'; });
-    ['game', 'heroes', 'creeps', 'items'].forEach(v => document.getElementById('nav-' + v).classList.toggle('active', view === v));
-}
 
 // --- CÓDICE DE CREEPS ---
 function creepTag(t) { return `<span class="creep-symbol" style="color:${t.color}">${t.symbol}</span>`; }
@@ -651,6 +646,7 @@ function updateHud() {
     renderHeroStats();
     document.getElementById('player-gold').textContent = player.gold;
     document.getElementById('round-num').textContent = `${waveNumber}/${MAX_ROUNDS}${isRoundBossRound() ? ' 👹' : ''}`;
+    document.getElementById('pause-btn').style.visibility = canPause() ? 'visible' : 'hidden';
     document.getElementById('lives-text').innerHTML = `<span class="hearts">${'♥'.repeat(Math.max(0, player.lives))}${'♡'.repeat(Math.max(0, 2 - player.lives))}</span>` +
         (isCondemned(player) ? ` <span class="cursed" title="Condenado: recibís más daño">☠ +${Math.round(player.condemnPct * 100)}%</span>` : '');
     document.getElementById('points-text').textContent = `🏆 ${player.points} pts · ${heroRank(player)}º`;
@@ -920,5 +916,11 @@ function render() {
     if (hero !== player) {
         ctx.font = '11px monospace'; ctx.fillStyle = '#ffb703';
         ctx.fillText(`👁 Mirando a ${hero.displayName} (clic en tu fila del ranking para volver)`, MAP_W / 2, MAP_H - 8);
+    }
+    if (paused) {
+        ctx.setTransform(mapScale * (window.devicePixelRatio || 1), 0, 0, mapScale * (window.devicePixelRatio || 1), 0, 0);
+        ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(0, 0, MAP_W, MAP_H);
+        ctx.font = 'bold 30px monospace'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffb703';
+        ctx.fillText('PAUSA', MAP_W / 2, MAP_H / 2);
     }
 }

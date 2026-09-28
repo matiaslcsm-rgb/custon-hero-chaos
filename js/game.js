@@ -25,7 +25,8 @@ window.addEventListener('keydown', e => {
     if (k === 'm') { toggleBigMap(); return; }
     if (k === 'h') { setAutoCast(!autoCast); return; }
     if (k === 'g') { setSprites(!spritesOn); return; }
-    if (k === 'escape') { cancelTargeting(); closeShop(); closeTutorial(); return; }
+    if (k === 'escape') { handleEscape(); return; }
+    if (paused) return; // en pausa no responden las demás teclas
     if (inCombat() && !autopilot) handleSkillKeypress(k);
 });
 window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
@@ -266,6 +267,7 @@ function resetGame() {
     currentDraft = null; savedPrepTime = null; nextWave = null; logMuted = false;
     duelPlan = null; currentBet = null; duelBets = []; nextRoundBoss = null; lastRoundBoss = null;
     cancelTargeting();
+    paused = false; showPanel('pause-menu', false);
     setPhaseTimer(PHASE_TIMES.heroSelect);
     resetHud();
     log('🔄 Nueva partida. Tocá "Iniciar partida" cuando quieras.');

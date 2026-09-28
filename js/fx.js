@@ -99,7 +99,7 @@ function fxCast(hero, skill) {
 // Avanza el reloj visual; devuelve el dt real del cuadro (limitado para que un salto de pestaña no rompa nada).
 function tickFx() {
     const now = performance.now() / 1000;
-    const dt = fxLastFrame ? Math.min(0.1, now - fxLastFrame) : 0;
+    const dt = fxLastFrame && !paused ? Math.min(0.1, now - fxLastFrame) : 0; // en pausa, los efectos se congelan
     fxLastFrame = now;
     fxClock += dt;
     shakeAmount *= Math.pow(0.02, dt); // se calma rápido

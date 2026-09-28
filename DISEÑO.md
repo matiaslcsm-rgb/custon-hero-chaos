@@ -652,6 +652,14 @@ Todo en `js/fx.js`, **solo visual** (no cambia reglas) y solo para la arena que 
   la primera pestaña (⭐ Guía) y los ítems sugeridos llevan ⭐ en todas las pestañas; también está en el códice de Héroes.
   Son sugerencias (los contras de la oleada siguen importando). La IA todavía compra con sus reglas propias (`AI_BUILDS`).
 - **Estadísticas del jugador** debajo del ranking (atributos con el principal marcado, daño, velocidad, defensas, escalado).
+- **Sin barras arriba:** se sacaron las pestañas y la barra superior. La ronda, fase, tiempo, vidas, oro y puntos van en una
+  franja fina sobre el mapa (con los botones de mapa grande y pausa), y el mapa creció (casillas de 34 px en vez de 30).
+  Entra justo en una pantalla de 1366×768.
+- **Pausa** (`js/pause.js`, tecla Esc o botón ⏸): congela combate, temporizadores y efectos. Menú con Continuar, Tutorial,
+  Glosario (Héroes, Creeps y Jefes, Ítems, que se abren como ventanas), Opciones (sonido, pixel art, habilidades
+  automáticas, piloto automático, mapa grande) y Salir al menú. El glosario también está en el menú de inicio.
+- **Tutorial rediseñado:** 9 páginas (objetivo, ronda, teclado, mouse, habilidades, tienda, vidas, duelos, jefes), cada una
+  con su color e ícono, tarjetas, teclas dibujadas, los sprites de los héroes y navegación por íconos o flechas.
 - **Pixel art dibujado en código** (`js/sprites.js`, opción 1 elegida entre pixel art propio, paquete gratuito o arte con IA):
   sprites de 12×12 hechos con plantillas (guerrero, mago con túnica, fantasma, bomba, insecto, gólem, dragón, hidra, demonio)
   y paletas. Cada héroe tiene los suyos; los creeps usan el color de su tipo; los jefes, su forma propia (y corona los que

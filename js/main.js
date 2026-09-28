@@ -1,19 +1,20 @@
 // Punto de entrada: conecta los botones y arranca el bucle principal.
 
-document.getElementById('nav-game').onclick = () => showView('game');
-document.getElementById('nav-heroes').onclick = () => showView('heroes');
-document.getElementById('nav-creeps').onclick = () => showView('creeps');
-document.getElementById('nav-items').onclick = () => showView('items');
 document.getElementById('start-wave-btn').onclick = startWave;
 document.getElementById('restart-btn').onclick = resetGame;
 document.getElementById('bet-done-btn').onclick = endBetting;
+document.getElementById('pause-btn').onclick = togglePause;
+document.getElementById('pause-continue').onclick = () => setPaused(false);
+document.getElementById('pause-tutorial').onclick = () => openTutorial();
+document.getElementById('pause-quit').onclick = quitToMenu;
+document.querySelectorAll('[data-glossary]').forEach(btn => { btn.onclick = () => openGlossary(btn.dataset.glossary); });
+document.querySelectorAll('.back-btn').forEach(btn => { btn.onclick = closeGlossary; });
 document.getElementById('shop-close').onclick = closeShop;
 document.getElementById('map-toggle').onclick = toggleBigMap;
 document.getElementById('shop-container').onclick = e => { if (e.target.id === 'shop-container') closeShop(); };
 window.addEventListener('resize', applyMapSize);
 document.getElementById('start-game-btn').onclick = startHeroPick;
 document.getElementById('menu-tutorial-btn').onclick = () => openTutorial();
-document.getElementById('nav-tutorial').onclick = () => openTutorial();
 document.getElementById('tutorial-close').onclick = closeTutorial;
 document.getElementById('tutorial-prev').onclick = () => tutorialStep(-1);
 document.getElementById('tutorial-next').onclick = () => tutorialStep(1);
@@ -36,13 +37,15 @@ document.getElementById('log-toggle').onclick = () => {
 let lastTime = 0;
 function loop(ts) {
     const dt = Math.max(0, Math.min(0.1, (ts - lastTime) / 1000 || 0)); lastTime = ts;
-    if (inCombat()) gameClock += dt;
-    tickPhaseTimer(dt);
-    tickAutopilot(dt);
+    if (!paused) { // en pausa se congela todo: combate, temporizadores y la sala de espera
+        if (inCombat()) gameClock += dt;
+        tickPhaseTimer(dt);
+        tickAutopilot(dt);
+        if (inCombat()) updateWave(dt); // oleadas o duelos (también con el jugador muerto: cuenta el tiempo para revivir)
+        if (player && gameState !== 'MENU' && gameState !== 'HERO_SELECT') updateRestArea(dt); // en la sala de espera se puede caminar
+    }
     updateHud();
     renderTimer();
-    if (inCombat()) updateWave(dt); // oleadas o duelos (también con el jugador muerto: cuenta el tiempo para revivir)
-    if (player && gameState !== 'MENU' && gameState !== 'HERO_SELECT') updateRestArea(dt); // en la sala de espera se puede caminar
     render();
     requestAnimationFrame(loop);
 }

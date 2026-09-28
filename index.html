@@ -8,31 +8,8 @@
 </head>
 <body>
     <div id="app">
-    <div id="top-nav">
-        <button id="nav-game" class="active">🎮 Jugar</button>
-        <button id="nav-heroes">🦸 Héroes</button>
-        <button id="nav-creeps">👹 Creeps y Jefes</button>
-        <button id="nav-items">🎒 Ítems</button>
-        <button id="nav-tutorial">📖 Tutorial</button>
-    </div>
-
     <div id="view-game" style="display:flex;">
     <div id="game-container">
-        <!-- Barra superior: ronda, fase, tiempo y lo tuyo (vidas, oro, puntos) -->
-        <div id="top-bar">
-            <span class="brand">CUSTOM HERO CHAOS</span>
-            <span class="tb-item">Ronda <b id="round-num">1</b></span>
-            <span class="tb-item"><span id="game-state-text">MENÚ</span> <span id="phase-timer"></span></span>
-            <span class="tb-spacer"></span>
-            <span class="tb-item" id="lives-text" title="Vidas"></span>
-            <span class="tb-item tb-gold" title="Oro">💰 <span id="player-gold">0</span>g</span>
-            <span class="tb-item" id="points-text" title="Puntos y puesto en el ranking"></span>
-            <button id="sprites-btn" title="Gráficos: pixel art o letras ASCII (tecla G)">🎨 Pixel</button>
-            <button id="sound-btn" title="Sonido (clic para silenciar)">🔊</button>
-            <button id="autocast-btn" title="Automáticas: tus habilidades se lanzan solas, vos solo te movés. Manual: las lanzás con E R T F (tecla H)">✨ Habilidades: AUTO</button>
-            <button id="autopilot-btn" title="La IA juega por vos (tecla P)">🤖 Piloto: OFF</button>
-        </div>
-
         <div id="hud-main">
             <!-- Izquierda: ranking (clic para mirar la arena de otro héroe) -->
             <div id="left-col">
@@ -47,9 +24,19 @@
 
             <!-- Centro: mapa y barra de tu héroe -->
             <div id="center-col">
+                <!-- Franja sobre el mapa: ronda, fase y tiempo; vidas, oro, puntos; mapa grande y pausa -->
+                <div id="map-hud">
+                    <span class="mh-item">Ronda <b id="round-num">1</b></span>
+                    <span class="mh-item"><span id="game-state-text">MENÚ</span> <span id="phase-timer"></span></span>
+                    <span class="mh-spacer"></span>
+                    <span class="mh-item" id="lives-text" title="Vidas"></span>
+                    <span class="mh-item mh-gold" title="Oro">💰 <span id="player-gold">0</span>g</span>
+                    <span class="mh-item" id="points-text" title="Puntos y puesto en el ranking"></span>
+                    <button id="map-toggle" title="Agrandar o achicar el mapa (tecla M)">⤢</button>
+                    <button id="pause-btn" title="Pausa, tutorial, glosario y opciones (Esc)">⏸</button>
+                </div>
                 <div id="map-wrap">
                     <canvas id="ascii-canvas"></canvas>
-                    <button id="map-toggle" title="Agrandar o achicar el mapa (tecla M)">⤢</button>
                 </div>
                 <div id="hero-bar" style="display: none;">
                     <div id="hb-portrait">
@@ -82,6 +69,13 @@
                         <p class="subtitle">8 héroes, oleadas de creeps, duelos, apuestas y jefes. Armá tu kit mezclando habilidades de cualquier héroe.</p>
                         <button id="start-game-btn" class="primary-btn">▶ Iniciar partida</button>
                         <button id="menu-tutorial-btn" class="secondary-btn">📖 Tutorial (cómo se juega)</button>
+                        <div class="menu-glossary">
+                            <p class="subtitle">Glosario</p>
+                            <button class="secondary-btn" data-glossary="heroes">🦸 Héroes</button>
+                            <button class="secondary-btn" data-glossary="creeps">👹 Creeps y Jefes</button>
+                            <button class="secondary-btn" data-glossary="items">🎒 Ítems</button>
+                        </div>
+                        <p class="subtitle menu-keys">En partida, <kbd>Esc</kbd> pausa y abre el tutorial, el glosario y las opciones.</p>
                     </div>
 
                     <!-- Elección de Héroe -->
@@ -152,33 +146,68 @@
         </div>
     </div>
 
+    <!-- Menú de pausa -->
+    <div id="pause-menu" class="modal" style="display: none;">
+        <div class="modal-box pause-box">
+            <h2>⏸ Pausa</h2>
+            <p id="pause-info" class="subtitle"></p>
+            <button id="pause-continue" class="primary-btn">▶ Continuar</button>
+            <button id="pause-tutorial" class="secondary-btn">📖 Tutorial</button>
+            <div class="pause-section">📚 Glosario</div>
+            <div class="pause-row">
+                <button class="secondary-btn" data-glossary="heroes">🦸 Héroes</button>
+                <button class="secondary-btn" data-glossary="creeps">👹 Creeps y Jefes</button>
+                <button class="secondary-btn" data-glossary="items">🎒 Ítems</button>
+            </div>
+            <div class="pause-section">⚙ Opciones</div>
+            <div id="pause-options"></div>
+            <button id="pause-quit" class="secondary-btn danger">🏠 Salir al menú</button>
+        </div>
+    </div>
+
+    <!-- Botones de opciones (se manejan desde la pausa; ocultos para que el código que los actualiza siga funcionando) -->
+    <div style="display: none;">
+        <button id="sprites-btn"></button><button id="sound-btn"></button>
+        <button id="autocast-btn"></button><button id="autopilot-btn"></button>
+    </div>
+
     <!-- Tutorial -->
     <div id="tutorial" style="display: none;">
         <div id="tutorial-box">
-            <div id="tutorial-head"><h3 id="tutorial-title"></h3><button id="tutorial-close" title="Cerrar">✕</button></div>
-            <div id="tutorial-body"></div>
-            <div id="tutorial-foot">
-                <button id="tutorial-prev">◀ Anterior</button>
-                <span id="tutorial-step"></span>
-                <button id="tutorial-next">Siguiente ▶</button>
+            <div id="tutorial-side">
+                <div id="tutorial-icon"></div>
+                <div id="tutorial-brand">CÓMO SE JUEGA</div>
+                <div id="tutorial-dots"></div>
+            </div>
+            <div id="tutorial-main">
+                <div id="tutorial-head"><h3 id="tutorial-title"></h3><button id="tutorial-close" title="Cerrar (Esc)">✕</button></div>
+                <div id="tutorial-body"></div>
+                <div id="tutorial-foot">
+                    <button id="tutorial-prev">◀ Anterior</button>
+                    <span id="tutorial-step"></span>
+                    <button id="tutorial-next">Siguiente ▶</button>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Códice de Héroes -->
-    <div id="view-heroes">
+    <div id="view-heroes" class="codex-view">
+        <div class="codex-back"><button class="primary-btn back-btn">← Volver</button><span>Glosario · Héroes</span></div>
         <div class="codex-layout">
             <div id="hero-codex"></div>
         </div>
     </div>
 
     <!-- Códice de Ítems -->
-    <div id="view-items">
+    <div id="view-items" class="codex-view">
+        <div class="codex-back"><button class="primary-btn back-btn">← Volver</button><span>Glosario · Ítems</span></div>
         <div class="codex-layout"><div id="item-codex"></div></div>
     </div>
 
     <!-- Códice de Creeps -->
-    <div id="view-creeps">
+    <div id="view-creeps" class="codex-view">
+        <div class="codex-back"><button class="primary-btn back-btn">← Volver</button><span>Glosario · Creeps y Jefes</span></div>
         <div class="codex-layout"><div id="creep-codex"></div></div>
     </div>
     </div>
@@ -222,6 +251,7 @@
     <script src="js/ai.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/mouse.js"></script>
+    <script src="js/pause.js"></script>
     <script src="js/main.js"></script>
     <!-- Pruebas automáticas: solo corren con index.html?test (abrir tests.html) -->
     <script src="js/tests.js"></script>

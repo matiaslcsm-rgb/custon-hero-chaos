@@ -31,6 +31,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 | Pixel art dibujado en código para héroes, creeps y jefes (G para volver a ASCII) | ✅ |
 | Objetivo marcado con clic izquierdo y movimiento −35% | ✅ |
 | Ataque libre al moverse + balance por stats, curación y control −50/60% en duelo | ✅ (Vampiro y Nigromante siguen abajo) |
+| Retoques de kits (Vampiro, Nigromante), pausa con glosario y opciones, sin barras arriba, tutorial rediseñado | ✅ |
 
 ## Pendientes y temas abiertos
 - **Balance de duelos:** Vampiro (11%) y Nigromante (17%) necesitan revisar sus kits; Alquimista y Bruja ~75% (ver DISEÑO.md §9).
@@ -43,7 +44,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **Idioma:** español rioplatense (voseo), en el código, los comentarios, los textos del juego y los commits.
 - **Decisiones de diseño:** se consultan con opciones y una recomendada, idealmente con números medidos. Lo que se decide
   se anota en DISEÑO.md (secciones de la fase y "Decisiones tomadas").
-- **Cada cambio:** pruebas automáticas (`tests.html`, hoy **130**) → commit en git → push a GitHub solo cuando el usuario lo pide.
+- **Cada cambio:** pruebas automáticas (`tests.html`, hoy **131**) → commit en git → push a GitHub solo cuando el usuario lo pide.
 - **Commits:** mensaje en español que explica el porqué; terminan con `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 - **Héroes nuevos con otra IA:** prompt en [`prompt-heroes.md`](prompt-heroes.md); lo que devuelva se revisa contra el motor
   (pasivas, efectos por segundo con `everyInterval`, descripciones que coincidan con el código) antes de integrarlo.
