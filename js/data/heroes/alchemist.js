@@ -2,8 +2,9 @@
 registerHero({
     key: 'ALCHEMIST', name: 'Alquimista', symbol: 'L', primaryAttr: 'INT', role: 'Ácido y reducción de armadura',
     attributes: { str: [19, 2.0], agi: [11, 1.1], int: [21, 2.8] },
-    baseHp: 95, baseAtk: 7, baseAtkSpeed: 0.65, baseAttackRange: 3,
-    baseArmor: 2, baseMagicResist: 5, baseHpRegen: 0.8,
+    // +40 de vida y +2 de armadura (2026-09-28): los magos morían en las oleadas (sobre todo a Arqueros) y quedaban eliminados en el primer jefe.
+    baseHp: 135, baseAtk: 7, baseAtkSpeed: 0.65, baseAttackRange: 3,
+    baseArmor: 4, baseMagicResist: 5, baseHpRegen: 0.8,
     baseMaxMana: 120, baseManaRegen: 1.9, baseMoveSpeed: 2.4, baseProjectileSpeed: 9,
     baseCritChance: 5, baseEvasion: 5, baseSpellAmp: 0, baseLifesteal: 0,
     description: 'Inteligencia: usa mezclas de ácido corrosivo para disolver las defensas enemigas.',

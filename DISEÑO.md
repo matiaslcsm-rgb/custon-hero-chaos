@@ -700,6 +700,13 @@ Bruja bajaron de 94% a ~75%, siguen fuertes por sus aturdimientos.
 > - **Medido** (33 partidas): eliminados contra el jefe desde la ronda 20: magos 64% → 40%, Axe 42% → 20%, Zeus 38% → 4%,
 >   Nigromante 32% → 10%. Ganadores: Zeus 11, Sniper 9, Danzante 5, Asesino 4, Vampiro 3, Alquimista 1.
 >   **Queda abierto:** los 4 magos siguen quedando eliminados cerca de la ronda 14 (mueren temprano, antes del late game).
+>
+> **Magos en el juego temprano (medido, 40 partidas, rondas 1-15):** 1 de cada 4 magos quedaba eliminado en el primer
+> jefe (ronda 5: 29 de 123; los de Agilidad 2 de 81). Llegaban con vidas de menos: morían en las oleadas 88 veces
+> (el resto, 25), sobre todo a **Arqueros** (34), que tienen rango 4,5 (Nigromante y Alquimista 3, Bruja y Sabio 4).
+> El daño no era el problema: limpiaban las oleadas en 12-15 s como los demás. Elegido por el usuario: **+40 de vida
+> base y +2 de armadura** a Arcanista, Bruja, Sabio y Alquimista. Medido (33 partidas): ronda de eliminación 14,1 → 18,6;
+> eliminados hasta la ronda 10 ~45% → 31% (los demás 0-15%); todavía no ganan partidas. Sniper 12/33, Zeus y Danzante 6.
 
 - Cada cierta cantidad de rondas, **al terminar los duelos se pausan** y **todos pelean contra un jefe**: un creep mucho más
   fuerte y resistente.

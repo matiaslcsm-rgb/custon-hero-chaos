@@ -2,8 +2,9 @@
 registerHero({
     key: 'FROSTWITCH', name: 'Bruja del Hielo', symbol: 'F', primaryAttr: 'INT', role: 'Control de masas y ralentización',
     attributes: { str: [17, 1.7], agi: [12, 1.2], int: [23, 3.0] },
-    baseHp: 95, baseAtk: 7, baseAtkSpeed: 0.65, baseAttackRange: 4,
-    baseArmor: 1, baseMagicResist: 15, baseHpRegen: 0.5,
+    // +40 de vida y +2 de armadura (2026-09-28): los magos morían en las oleadas (sobre todo a Arqueros) y quedaban eliminados en el primer jefe.
+    baseHp: 135, baseAtk: 7, baseAtkSpeed: 0.65, baseAttackRange: 4,
+    baseArmor: 3, baseMagicResist: 15, baseHpRegen: 0.5,
     baseMaxMana: 130, baseManaRegen: 2.1, baseMoveSpeed: 2.4, baseProjectileSpeed: 9,
     baseCritChance: 5, baseEvasion: 5, baseSpellAmp: 0, baseLifesteal: 0,
     description: 'Inteligencia: congela a sus enemigos, les quita movilidad y los desgasta con frío extremo.',
