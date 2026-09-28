@@ -555,7 +555,9 @@ La idea es que quien va perdiendo tenga herramientas para rehacer su kit y volve
 
 ### Implementado en F2 ✅
 - Después de las oleadas: parejas al azar (sin repetir el rival anterior; con impares uno descansa), una arena de duelo por
-  pareja, todas en paralelo. Al empezar: vida y maná llenos, sin mejoras temporales y **enfriamientos reiniciados**.
+  pareja, todas en paralelo. Al empezar: vida y maná llenos, sin mejoras temporales y **enfriamientos reiniciados**
+  (igual que al empezar una oleada nueva o un jefe de ronda, ver `returnFromRestArea` en §9 quinquies — pedido del
+  usuario 2026-09-28: antes los enfriamientos quedaban como estaban entre rondas).
 - Gana quien mata al otro; a los **45 s**, quien tenga más % de vida. Ganador **+3 puntos** y escalado por duelo; perdedor
   **−1 vida** (sin vidas → Condenado; ya Condenado → +10% de daño recibido, sin eliminar).
 - La IA en duelo usa definitivas y habilidades de área contra un solo rival. La Coraza de Espinas refleja también a héroes.
@@ -771,6 +773,20 @@ en Dota 2 que a un auto-target.
 - **Pendiente:** el resto del roster fuera de los magos (Danzante, Asesino, Vampiro, Sniper), si algún nuke suyo
   tiene sentido como punto de efecto. También falta una animación por forma de habilidad más allá del color
   (`vfx.shape`: rayo, orbe, etc.) si se quiere ir más lejos que un punto con estela.
+
+### 9 quinquies. Enfriamientos: se reinician al volver a pelear ✅ (pedido del usuario 2026-09-28)
+
+Antes, los enfriamientos de las habilidades solo se reiniciaban al empezar un **duelo** o un **jefe de ronda**; entre
+oleadas normales quedaban como estaban (el reloj de enfriamiento ni corre fuera de combate, ver `tickCooldowns` en
+`js/game.js`). Esto se notaba sobre todo con definitivas de enfriamiento largo lanzadas tarde en una oleada (ej. Pacto
+de la Muerte del Nigromante): si no llegaban a bajar del todo antes de terminarla, arrancaban la ronda siguiente
+todavía en uso.
+
+Ahora `returnFromRestArea` (el momento exacto de volver del Área de Descanso a pelear — oleada nueva o jefe de ronda,
+`js/game.js`) también reinicia los enfriamientos, igual que ya hacían `startDuels` (`js/duels.js`) y `startBossFight`
+(`js/bosses.js`, que tenía su propio reinicio duplicado — se sacó, ahora lo hace `returnFromRestArea`). A propósito
+**no** se tocan mientras el héroe está *en* el Área de Descanso (`sendToRestArea`): solo se reinician en el momento
+de volver a entrar en combate, no por el solo hecho de estar esperando ahí.
 
 ### Paso 2: HUD estilo MOBA ✅
 - **Barra superior:** ronda, fase y tiempo; a la derecha vidas, oro, puntos y puesto, y el piloto automático.

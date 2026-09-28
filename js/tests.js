@@ -1091,15 +1091,18 @@ test('Tormenta Cinética: onda cada N ataques y +vel. de ataque permanente por b
 
 test('Área de Descanso: al terminar la oleada vas ahí y volvés con vida, maná completos y sin mejoras temporales', () => {
     newGame('AXE');
+    const giro = learn('AXE_GIRO', 1);
     waveNumber = 1;
     creeps.forEach(c => { c.hp = 0; });
     player.hp = 5; player.mana = 0;
+    player.cooldowns[giro.id] = 20; // a mitad de recargar, como si lo hubiese lanzado justo antes de ganar
     addEffect(player, { id: 'TEMP', duration: 99, mods: { atkPct: 1 } });
     updateWave(0.016); // su arena quedó limpia: terminan las oleadas
     skipDuels();
     check(player.inRest, 'está en el Área de Descanso');
     checkEq(player.hp, player.maxHp, 'vida llena');
     check(!getEffect(player, 'TEMP'), 'sin mejoras temporales');
+    check(player.cooldowns[giro.id] > 19, 'en el Área de Descanso el enfriamiento no se toca'); // salvo el propio frame en que termina la oleada
     if (gameState === 'DRAFT') learnSkill(currentDraft.options[0]);
     player.hp = 5; player.x = 0;
     startWave();
@@ -1107,6 +1110,7 @@ test('Área de Descanso: al terminar la oleada vas ahí y volvés con vida, man�
     checkEq(player.hp, player.maxHp, 'con la vida llena');
     checkEq(player.mana, player.maxMana, 'y el maná lleno');
     checkEq(`${player.x},${player.y}`, `${WAVE_START.x},${WAVE_START.y}`, 'en el punto de inicio');
+    checkEq(player.cooldowns[giro.id], 0, 'al arrancar la ronda siguiente, los enfriamientos se reinician');
 });
 
 test('IA: con el inventario lleno vende un contra que no sirve para comprar el que necesita', () => {

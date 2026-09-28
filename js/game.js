@@ -193,10 +193,14 @@ function updateRestArea(dt) {
     });
 }
 
+// Al volver del Área de Descanso a pelear (oleada nueva o jefe de ronda) se reinician los enfriamientos,
+// igual que ya pasaba al empezar un duelo (duels.js) o un jefe (bosses.js). Mientras estás EN el descanso
+// (sendToRestArea) no se tocan: solo se resetean en el momento de volver a entrar en combate.
 function returnFromRestArea(hero) {
     hero.inRest = false;
     hero.x = WAVE_START.x; hero.y = WAVE_START.y;
     restoreHero(hero);
+    hero.cooldowns = Object.fromEntries(Object.keys(hero.cooldowns).map(k => [k, 0]));
 }
 
 // --- OLEADAS ---
