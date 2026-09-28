@@ -283,6 +283,9 @@ pasivos. Los 4 que no tenían ninguna recibieron la suya convirtiendo una activa
 | Asesino | Golpe Crítico | Golpe de 120-210% con +25% de crítico | Tus críticos hacen x2,2/2,4/2,6/2,8 en vez de x2 |
 | Vampiro | Sangre Oscura | Consumía 4% de vida: +20-50% daño y +robo de vida por 5 s | Por cada 10% de vida que falta: +2-5% daño y +3-9% de curación del robo de vida |
 
+**Excepción: Zeus** es a propósito **todo activo** (depende de sus habilidades, como en Dota 2). Decidido por el usuario
+el 2026-09-28: se deja sin pasiva nativa.
+
 Motor: `keepPassiveEffect` (effects.js) para pasivas con stats fijos y mod nuevo `critDamage`.
 **Medido** (32 partidas, contra 26 antes del cambio): el Sniper gana menos partidas (14/32 = 44%, antes 18/26 = 69%) y
 el Vampiro más (9/32, antes 3/26); duelos: Sniper 76%, Axe 75%, Asesino 63%, Vampiro 16% (sigue abajo).

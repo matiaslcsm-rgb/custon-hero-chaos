@@ -163,7 +163,7 @@ function summary() {
         </table>
         <h3>Pasivas del roster</h3>
         <p>Además de los innatos, estas habilidades drafteables son pasivas: ${heroes.flatMap(t => skillsOf(t).filter(s => s.kind === 'passive').map(s => `<b>${s.name}</b> (${t.name})`)).join(', ')}.
-        Regla: cada héroe tiene al menos 1 pasiva entre sus 3 nativas (Axe, Sniper, Asesino y Vampiro la recibieron convirtiendo una activa).</p>
+        Regla: cada héroe tiene al menos 1 pasiva entre sus 3 nativas (Axe, Sniper, Asesino y Vampiro la recibieron convirtiendo una activa). Excepción a propósito: Zeus es todo activo (depende de sus habilidades).</p>
     </section>`;
 }
 
