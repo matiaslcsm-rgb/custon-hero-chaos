@@ -688,6 +688,19 @@ Bruja bajaron de 94% a ~75%, siguen fuertes por sus aturdimientos.
 
 ## 9 bis. Jefes de ronda y objetos neutrales (fase G)
 
+> **Balance 2026-09-28 (hechizos contra jefes).** Diagnóstico medido (20 partidas): los jefes crecían +10% por ronda
+> como los creeps (×6 en la ronda 20, ×16 en la 30). Los ataques físicos acompañan (críticos, vel. de ataque) pero los
+> hechizos no: desde la ronda 20 los magos quedaban eliminados contra el jefe el 64% de las veces, Axe 42%, Zeus 38%,
+> Nigromante 32%, contra 9-15% de Asesino, Danzante y Sniper. No era la amplificación de hechizo: con 100% (el valor
+> viejo) los magos igual caían en la ronda ~18. Cambios (elegidos por el usuario):
+> - Desde la ronda 20 los jefes crecen **+4% por ronda** (`BOSS_LATE` en bosses.js).
+> - Ítems de magia: **Kaya** (básico, 100g: +10% amp. de hechizo, +0,8 maná/s) y **Cetro del Eclipse** (2 Kaya + 150g:
+>   +25% amp., +1,6 maná/s; el daño mágico suma 2,5% de la vida máxima del objetivo como daño puro, 1 vez por segundo
+>   por enemigo — así los hechizos escalan con la vida de jefes y creeps). La IA de Inteligencia lo arma y está en las guías.
+> - **Medido** (33 partidas): eliminados contra el jefe desde la ronda 20: magos 64% → 40%, Axe 42% → 20%, Zeus 38% → 4%,
+>   Nigromante 32% → 10%. Ganadores: Zeus 11, Sniper 9, Danzante 5, Asesino 4, Vampiro 3, Alquimista 1.
+>   **Queda abierto:** los 4 magos siguen quedando eliminados cerca de la ronda 14 (mueren temprano, antes del late game).
+
 - Cada cierta cantidad de rondas, **al terminar los duelos se pausan** y **todos pelean contra un jefe**: un creep mucho más
   fuerte y resistente.
 - Derrotarlo da **oro** y un **objeto neutral**.

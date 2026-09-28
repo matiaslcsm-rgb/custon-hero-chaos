@@ -75,6 +75,7 @@ const ITEM_ICONS = {
     STORM_BOOTS: ['boot', '#48cae4'], ARCHMAGE_ORB: ['orb', '#7b2cbf'], BLOOD_CHALICE: ['chalice', '#9d0208'],
     DOOM_SWORD: ['sword', '#ff5400'], CROWN_OF_THREE: ['crown', '#ffd166'], PHOENIX_HEART: ['heart', '#ff7b00'],
     FORBIDDEN_GRIMOIRE: ['book', '#6a040f'], BROKEN_CLOCK: ['clock', '#ffd166'],
+    KAYA: ['gem', '#9d4edd'], ECLIPSE_STAFF: ['staff', '#3c096c'],
     TALENT_STR: ['book', '#e03131'], TALENT_AGI: ['book', '#2f9e44'], TALENT_INT: ['book', '#1971c2']
 };
 

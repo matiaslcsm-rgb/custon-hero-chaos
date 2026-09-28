@@ -64,6 +64,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   Hielo 158 vs 154, con 60% vs 100%). Ojo: la comparación contra la marca vieja de este documento (Arcanista 79s) estaba
   confundida — el juego se puso más difícil en general desde esa medición, por otros cambios. **Sin medir:** el impacto
   en duelos 1v1, donde el nuke mágico de golpe pesa más que en una oleada larga. Medir con `simulateGame(i, false, 60)`.
+- **Balance en curso (2026-09-28):** jefes más suaves desde la ronda 20 + Kaya y Cetro del Eclipse (ver DISEÑO.md §9 bis).
+  Falta: los 4 magos (Arcanista, Bruja, Sabio, Alquimista) quedan eliminados cerca de la ronda 14; Zeus pasó a ganar 1 de 3.
 - **Después:** balancear la supervivencia contra creeps en el formato de un duelo por ronda (gana el último en pie: el Sniper
   ganó 8 de 14 partidas simuladas y el Nigromante 4). Medir con `simulateGame(i, false, 60)` (~31 rondas por partida).
 - **Balance de duelos:** Vampiro (17%) sigue abajo; Alquimista, Axe y Bruja ~70% (ver DISEÑO.md §9). El Nigromante

@@ -31,8 +31,17 @@ function roundBossOf() {
 // Héroes vivos a los que puede pegarle el jefe con sus mecánicas.
 function bossTargets(c) { return c.arena.heroes.filter(h => !h.eliminated && h.isAlive()); }
 
+// Crecimiento de los jefes: como los creeps (+10% por ronda) hasta la ronda 20; desde ahí, +4% por ronda. Medido: con el
+// +10% de siempre, desde la ronda 20 los que dependen de hechizos (magos, Zeus, Nigromante) o de aguantar (Axe) quedaban
+// eliminados contra el jefe el 32-64% de las veces, contra 9-15% de los de ataque (ver DISEÑO.md §9 bis).
+const BOSS_LATE = { fromRound: 20, growth: 1.04 };
+function bossStatMult(round = waveNumber) {
+    if (round <= BOSS_LATE.fromRound) return creepStatMult(round);
+    return creepStatMult(BOSS_LATE.fromRound) * Math.pow(BOSS_LATE.growth, round - BOSS_LATE.fromRound);
+}
+
 function makeRoundBoss(t, pressure = 1) {
-    const c = makeCreep(t, COLS - 4, Math.floor(ROWS / 2), creepStatMult(waveNumber) * pressure, false, 0);
+    const c = makeCreep(t, COLS - 4, Math.floor(ROWS / 2), bossStatMult(waveNumber) * pressure, false, 0);
     c.isRoundBoss = true;
     return c;
 }

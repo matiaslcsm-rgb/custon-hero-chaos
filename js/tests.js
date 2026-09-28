@@ -1073,6 +1073,28 @@ test('Pasivas nuevas: Golpe de Hacha, Visión de Cazador, Golpe Crítico y Sangr
     checkNear(getEffect(player, 'VAMP_DARKBLOOD').mods.atkPct, 5 * val(dark, player, 'atkPerStep'), 'a mitad de vida: 5 tramos de daño');
 });
 
+test('Cetro del Eclipse: el daño mágico suma % de la vida máxima (una vez por segundo por enemigo)', () => {
+    newGame('ARCANIST');
+    giveItem(player, 'ECLIPSE_STAFF');
+    const c = dummy({ hp: 10000, maxHp: 10000 });
+    dealDamage(player, c, 10, 'magical');
+    const extra = Math.round(10000 * ITEMS.ECLIPSE_STAFF.maxHpPct);
+    check(10000 - c.hp >= extra, 'sumó el % de vida máxima');
+    const hp = c.hp;
+    dealDamage(player, c, 10, 'magical');
+    check(hp - c.hp < extra, 'no se repite en el mismo segundo');
+    gameClock += 1.1;
+    const hp2 = c.hp;
+    dealDamage(player, c, 10, 'physical');
+    check(hp2 - c.hp < extra, 'el daño físico no lo activa');
+});
+
+test('Jefes de ronda: desde la ronda 20 crecen +4% por ronda en vez de +10%', () => {
+    checkNear(bossStatMult(20), creepStatMult(20), 'igual que los creeps hasta la 20');
+    checkNear(bossStatMult(25), creepStatMult(20) * Math.pow(BOSS_LATE.growth, 5), 'más lento después');
+    check(bossStatMult(30) < creepStatMult(30) * 0.6, 'en la 30, menos del 60% de los creeps');
+});
+
 test('Ancla: cada golpe ralentiza y quita evasión', () => {
     newGame('AXE');
     const ev = effEvasion(player);

@@ -22,23 +22,23 @@ const BUILD_GUIDES = {
     },
     ARCANIST: {
         why: 'Ráfagas mágicas: maná, inteligencia y amplificación de hechizos; defensa mágica para los duelos.',
-        early: ['MANA_CRYSTAL', 'BRANCH_INT'], core: ['ARCANE_STAFF', 'TOME', 'CLOAK'], late: ['AEGIS', 'DIADEM']
+        early: ['MANA_CRYSTAL', 'BRANCH_INT'], core: ['ARCANE_STAFF', 'ECLIPSE_STAFF', 'TOME'], late: ['AEGIS', 'DIADEM']
     },
     FROSTWITCH: {
         why: 'Control en área: hechizos más fuertes, resistencia al control y ralentizar también con el ataque.',
-        early: ['MANA_CRYSTAL', 'RUNE_CAPE'], core: ['ARCANE_STAFF', 'TOME', 'BOOTS'], late: ['SKADI', 'AEGIS']
+        early: ['MANA_CRYSTAL', 'RUNE_CAPE'], core: ['ARCANE_STAFF', 'ECLIPSE_STAFF', 'TOME'], late: ['SKADI', 'AEGIS']
     },
     NECROMANCER: {
         why: 'Desgaste y ejecución: vida y maná para sostener el aura y el Manto Fantasma, y amplificación para rematar con la Guadaña.',
-        early: ['VITALITY', 'MANA_CRYSTAL'], core: ['ARCANE_STAFF', 'HEART', 'CLOAK'], late: ['AEGIS', 'DIADEM']
+        early: ['VITALITY', 'MANA_CRYSTAL'], core: ['ARCANE_STAFF', 'ECLIPSE_STAFF', 'HEART'], late: ['AEGIS', 'DIADEM']
     },
     VOIDSAGE: {
         why: 'Entra y sale con teletransportes: movilidad, maná y amplificación para la ráfaga en área.',
-        early: ['TRAVEL_BOOTS', 'MANA_CRYSTAL'], core: ['ARCANE_STAFF', 'BOOTS', 'TOME'], late: ['AEGIS', 'CLOAK']
+        early: ['TRAVEL_BOOTS', 'MANA_CRYSTAL'], core: ['ARCANE_STAFF', 'ECLIPSE_STAFF', 'BOOTS'], late: ['AEGIS', 'CLOAK']
     },
     ALCHEMIST: {
         why: 'Ácido que baja la armadura: anticuración y rompe corazas para que su daño y el de sus ataques rindan.',
-        early: ['SERRATED', 'MANA_CRYSTAL'], core: ['ARCANE_STAFF', 'SPEAR', 'TOME'], late: ['HAMMER', 'HEART']
+        early: ['SERRATED', 'MANA_CRYSTAL'], core: ['ARCANE_STAFF', 'ECLIPSE_STAFF', 'SPEAR'], late: ['HAMMER', 'HEART']
     },
     DANCER: {
         why: 'Pega mientras se mueve: velocidad de ataque y movimiento para cargar la Danza, y Hoja Certera contra la evasión.',
@@ -46,7 +46,7 @@ const BUILD_GUIDES = {
     },
     ZEUS: {
         why: 'Todo el daño sale de los hechizos: maná e inteligencia para tirar todo el kit seguido, y amplificación de hechizo en cuanto se pueda.',
-        early: ['MANA_CRYSTAL', 'BRANCH_INT'], core: ['ARCANE_STAFF', 'TOME', 'CLOAK'], late: ['AEGIS', 'DIADEM']
+        early: ['MANA_CRYSTAL', 'BRANCH_INT'], core: ['ARCANE_STAFF', 'ECLIPSE_STAFF', 'TOME'], late: ['AEGIS', 'DIADEM']
     }
 };
 

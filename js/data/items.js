@@ -34,6 +34,8 @@ const ITEMS = {
     REGEN_RING: { key: 'REGEN_RING', name: 'Anillo de Regeneración', tier: 'basic', cost: 70, mods: { hpRegen: 3 } },
     VAMP_MASK: { key: 'VAMP_MASK', name: 'Máscara Vampírica', tier: 'basic', cost: 90, mods: { lifesteal: 10 } },
     MANA_CRYSTAL: { key: 'MANA_CRYSTAL', name: 'Cristal de Maná', tier: 'basic', cost: 70, mods: { maxMana: 75, manaRegen: 1 } },
+    // Amplificación de hechizo temprana (idea de la otra PC: la amplificación de los magos viene de ítems)
+    KAYA: { key: 'KAYA', name: 'Kaya', tier: 'basic', cost: 100, mods: { spellAmp: 10, manaRegen: 0.8 } },
     TRAVEL_BOOTS: { key: 'TRAVEL_BOOTS', name: 'Botas de Viaje', tier: 'basic', cost: 60, mods: { moveSpeedPct: 0.1 } },
     SERRATED: {
         key: 'SERRATED', name: 'Daga Serrada', tier: 'basic', cost: 80, antiHeal: 0.3,
@@ -121,6 +123,23 @@ const ITEMS = {
     ARCANE_STAFF: {
         key: 'ARCANE_STAFF', name: 'Báculo Arcano', tier: 'composite', group: 'Magia', components: ['BRANCH_INT', 'MANA_CRYSTAL'], recipe: 60,
         mods: { int: 6, maxMana: 150, manaRegen: 2, spellAmp: 15 }
+    },
+    // Hace que los hechizos escalen en late game: el daño extra depende de la vida máxima del objetivo (los jefes y los
+    // creeps crecen +10% por ronda; la amplificación sola no los alcanza).
+    ECLIPSE_STAFF: {
+        key: 'ECLIPSE_STAFF', name: 'Cetro del Eclipse', tier: 'composite', group: 'Magia', components: ['KAYA', 'KAYA'], recipe: 150,
+        mods: { spellAmp: 25, manaRegen: 1.6 }, maxHpPct: 0.025, perTargetEvery: 1,
+        special: 'Tu daño mágico suma además 2,5% de la vida máxima del objetivo como daño puro (una vez por segundo por enemigo).',
+        counters: 'Jefes y enemigos con mucha vida',
+        hooks: item => ({
+            onDealDamage(owner, { target, type }) {
+                if (type !== 'magical' || !target.isAlive()) return;
+                const key = '__eclipse_' + (owner.key || '');
+                if (gameClock < (target[key] || 0)) return;
+                target[key] = gameClock + item.perTargetEvery;
+                dealDamage(owner, target, Math.round(target.maxHp * item.maxHpPct), 'pure');
+            }
+        })
     },
 
     // ============================================================ INMEDIATOS (no ocupan espacio)

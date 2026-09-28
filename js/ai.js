@@ -152,7 +152,7 @@ let aiBuysCounters = true; // se puede apagar para medir cuánto importan los co
 const AI_BUILDS = {
     STR: ['BELT', 'HEART', 'THORNS', 'CRIMSON'],
     AGI: ['GLOVES', 'SWIFT_BLADE', 'CRIMSON', 'SKADI'],
-    INT: ['TOME', 'ARCANE_STAFF', 'AEGIS', 'DIADEM']
+    INT: ['ARCANE_STAFF', 'ECLIPSE_STAFF', 'TOME', 'AEGIS']
 };
 
 function aiNeededCounters(wave) {
