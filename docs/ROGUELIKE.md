@@ -109,6 +109,9 @@ Al morir no se pierde todo: **tu cadáver y tus cosas quedan en el mapa** y pued
      rodeando paredes; guardián (uno de los 8 jefes de ronda) en la sala más lejana, que cierra la escalera; niveles que
      quedan iguales; muerte: mitad de los atributos ganados, cadáver marcado y renacer en el círculo de piedra del nivel 1.
      Piloto automático (P) también en la Torre.
+   - Ajustes pedidos al probarla: el héroe camina en **diagonal** (camino de 8 direcciones sin cortar esquinas; los creeps
+     siguen en cruz) y **40% más rápido** que en una arena (`TOWER.heroSpeed`). En los dos modos, el dibujo ahora se
+     **desliza a velocidad constante** entre casillas (antes llegaba y frenaba: se notaba casilla por casilla).
    - Medido (22 runs simuladas de 25 min, piloto automático, solo ataque básico): la mayoría llega a los pisos 3-5 y muere
      varias veces; el Vampiro llega al 7-10 (se cura con su innato); Bruja y Alquimista casi no pasan del 1. Sin ítems
      es lo esperable: el balance de la Torre se hace en la fase 2.

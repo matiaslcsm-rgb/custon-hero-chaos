@@ -13,6 +13,7 @@
 
 const TOWER = {
     floors: 10, cols: 60, rows: 40,
+    heroSpeed: 1.4,       // el héroe camina 40% más rápido que en una arena (el mapa es mucho más grande)
     rooms: { tries: 260, want: 11, minW: 6, maxW: 12, minH: 5, maxH: 9 },
     sight: 7,             // radio de visión (descubre el mapa y muestra creeps)
     aggroRadius: 6,       // los creeps te persiguen si estás a esta distancia o menos

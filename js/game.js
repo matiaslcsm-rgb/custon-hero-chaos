@@ -19,6 +19,17 @@ let MOVE_ATTACK_RULE = 'free'; // a pedido: se ataca caminando; el equilibrio se
 // Solo el movimiento: ataques y proyectiles quedan igual.
 const MOVE_SPEED_MULT = 0.65; // bajado otra vez a pedido (antes 0,8)
 
+// Segundos que tarda una unidad en avanzar una casilla (con sus efectos). En Tower Chaos el héroe camina más rápido
+// (TOWER.heroSpeed): el mapa es mucho más grande que una arena. Lo usa también el dibujo para deslizarse sin frenar.
+function heroStepTime(hero) {
+    const tower = hero.arena && hero.arena.kind === 'tower' ? TOWER.heroSpeed : 1;
+    return hero.moveInterval / (effMoveMult(hero) * MOVE_SPEED_MULT * tower);
+}
+function unitStepTime(u) {
+    if (u.isHero) return u.inRest ? u.moveInterval / MOVE_SPEED_MULT : heroStepTime(u);
+    return u.moveInterval ? (u.moveInterval / 1000) / (effMoveMult(u) * MOVE_SPEED_MULT) : 0.4;
+}
+
 window.addEventListener('keydown', e => {
     if (e.target && e.target.tagName === 'INPUT') return; // escribiendo (tu nombre, el monto de la apuesta): no son teclas del juego
     const k = e.key.toLowerCase();
@@ -394,7 +405,7 @@ function updateHero(hero, arena, dt) {
 
     // Movimiento: del teclado o de la IA (la velocidad la modifican los efectos: Masacre, Visión de Cazador...)
     hero.moveTimer = (hero.moveTimer || 0) + dt;
-    const stepTime = hero.moveInterval / (effMoveMult(hero) * MOVE_SPEED_MULT);
+    const stepTime = heroStepTime(hero);
     if (!stunned && hero.moveTimer > stepTime) {
         let dir = aiControlled ? aiMoveDirection(hero) : keyboardDirection();
         if (!aiControlled) {
@@ -408,13 +419,18 @@ function updateHero(hero, arena, dt) {
             if (dir.dx && walkable(hero.arena, nx, y)) ny = y; else if (dir.dy && walkable(hero.arena, x, ny)) nx = x; else { nx = x; ny = y; }
         }
         // Cuerpos físicos (bodies.js): entrar a una casilla ocupada tarda más; mientras tanto, sigue empujando
-        const pushing = (nx !== x || ny !== y) && hero.moveTimer < stepTime * (1 + bodyPenalty(hero, nx, ny));
-        if (!pushing) { hero.x = nx; hero.y = ny; hero.moveTimer = 0; }
+        const penalty = (nx !== x || ny !== y) ? bodyPenalty(hero, nx, ny) : 0;
+        const pushing = hero.moveTimer < stepTime * (1 + penalty);
+        if (!pushing) {
+            // Se guarda el tiempo que sobró del paso (así caminar seguido no pierde un pedacito en cada casilla)
+            const carry = hero.moveTimer - stepTime;
+            hero.x = nx; hero.y = ny; hero.moveTimer = penalty === 0 && carry < stepTime ? carry : 0;
+        }
         if (hero.x !== x || hero.y !== y) {
             emit(hero, 'onMove', { steps: 1 });
             if (MOVE_ATTACK_RULE === 'reset' || (MOVE_ATTACK_RULE === 'reset-ranged' && isRanged(hero))) hero.attackTimer = 0;
             // "está caminando" hasta que le tocaría dar el próximo paso
-            hero.movingUntil = gameClock + hero.moveInterval / (effMoveMult(hero) * MOVE_SPEED_MULT) + dt;
+            hero.movingUntil = gameClock + stepTime + dt;
         }
     }
 

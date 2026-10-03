@@ -151,8 +151,14 @@ function drawPos(u, dt) {
     if (u.rx === undefined || Math.abs(u.rx - u.x) > 3 || Math.abs(u.ry - u.y) > 3) { u.rx = u.x; u.ry = u.y; } // teletransportes: sin deslizar
     const moveX = u.x - u.rx;
     if (Math.abs(moveX) > 0.05) u.facing = Math.sign(moveX); // mira hacia donde camina
-    const k = Math.min(1, dt * 14);
-    u.rx += (u.x - u.rx) * k; u.ry += (u.y - u.ry) * k;
+    // Se desliza a velocidad constante hacia su casilla: llega justo cuando empieza el paso siguiente, así caminar
+    // seguido se ve continuo (antes llegaba rápido y esperaba: se notaba casilla por casilla). Si quedó muy atrás
+    // (empujones, un paso doble), alcanza más rápido.
+    const step = Math.max(0.05, unitStepTime(u));
+    const behind = Math.max(Math.abs(u.x - u.rx), Math.abs(u.y - u.ry));
+    const speed = (1 / step) * 1.02 * (behind > 1.2 ? 3 : 1);
+    const toward = (from, to) => { const d = to - from, m = speed * dt; return Math.abs(d) <= m ? to : from + Math.sign(d) * m; };
+    u.rx = toward(u.rx, u.x); u.ry = toward(u.ry, u.y);
     let x = u.rx, y = u.ry;
     if (u.fxLunge) {
         const t = (fxClock - u.fxLunge.at) / 0.18;
