@@ -1135,6 +1135,18 @@ test('Torre: las paredes no se atraviesan y los creeps las rodean', () => {
     check(dir && f[(c.y + dir.dy) * COLS + c.x + dir.dx] < before, 'el paso acerca por el camino');
 }, { random: true });
 
+test('Torre: el héroe camina en diagonal hacia donde hiciste clic (los creeps, en cruz)', () => {
+    const level = newTower();
+    level.creeps.forEach(c => { c.hp = 0; });
+    const room = level.rooms.find(r => r.w >= 6 && r.h >= 5);
+    player.x = room.x + 1; player.y = room.y + 1;
+    const dir = towerPathDir(player, { x: room.x + 4, y: room.y + 4 });
+    checkEq([dir.dx, dir.dy].join(), '1,1', 'paso en diagonal');
+    const c = makeCreep(CREEP_TYPES.GRUNT, room.x + 1, room.y + 1, 1, false, 0); c.arena = level;
+    const cd = towerPathDir(c, { x: room.x + 4, y: room.y + 4 });
+    check(!(cd.dx && cd.dy), 'el creep sigue en cruz');
+}, { random: true });
+
 test('Torre: la escalera se abre al vencer al guardián y el nivel queda igual al volver', () => {
     const level = newTower();
     level.creeps.forEach(c => { if (!c.isGuardian) c.hp = 0; });

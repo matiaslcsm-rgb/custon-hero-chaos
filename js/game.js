@@ -403,7 +403,8 @@ function updateHero(hero, arena, dt) {
         }
         const x = hero.x, y = hero.y;
         let nx = Math.max(0, Math.min(COLS - 1, hero.x + dir.dx)), ny = Math.max(0, Math.min(ROWS - 1, hero.y + dir.dy));
-        if (!walkable(hero.arena, nx, ny)) { // paredes (Torre): si iba en diagonal, prueba deslizarse por un eje
+        const cutsCorner = dir.dx && dir.dy && (!walkable(hero.arena, nx, y) || !walkable(hero.arena, x, ny));
+        if (!walkable(hero.arena, nx, ny) || cutsCorner) { // paredes (Torre): si iba en diagonal, prueba deslizarse por un eje
             if (dir.dx && walkable(hero.arena, nx, y)) ny = y; else if (dir.dy && walkable(hero.arena, x, ny)) nx = x; else { nx = x; ny = y; }
         }
         // Cuerpos físicos (bodies.js): entrar a una casilla ocupada tarda más; mientras tanto, sigue empujando

@@ -145,16 +145,25 @@ function generateTowerLevel(floor) {
     return level;
 }
 
-// Distancias caminando desde (x, y) a todo el nivel (Int32Array; -1 = no se llega).
-function bfsFrom(level, x, y) {
+// Pasos posibles: en cruz (los creeps caminan así, como en el modo normal) y, para los héroes, también en diagonal.
+const STEPS_4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+const STEPS_8 = [...STEPS_4, [1, 1], [1, -1], [-1, 1], [-1, -1]];
+// Un paso en diagonal no puede cortar la esquina de una pared: las dos casillas en cruz tienen que estar libres.
+function canStep(level, x, y, dx, dy) {
+    if (!walkable(level, x + dx, y + dy)) return false;
+    return !(dx && dy) || (walkable(level, x + dx, y) && walkable(level, x, y + dy));
+}
+
+// Distancias caminando desde (x, y) a todo el nivel (Int32Array; -1 = no se llega). diagonal: contando pasos en diagonal.
+function bfsFrom(level, x, y, diagonal = false) {
     const W = COLS, H = ROWS, dist = new Int32Array(W * H).fill(-1);
     if (!walkable(level, x, y)) return dist;
     const queue = [y * W + x]; dist[y * W + x] = 0;
     for (let qi = 0; qi < queue.length; qi++) {
         const i = queue[qi], cx = i % W, cy = (i - cx) / W;
-        for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        for (const [dx, dy] of diagonal ? STEPS_8 : STEPS_4) {
             const nx = cx + dx, ny = cy + dy;
-            if (!walkable(level, nx, ny) || dist[ny * W + nx] >= 0) continue;
+            if (!canStep(level, cx, cy, dx, dy) || dist[ny * W + nx] >= 0) continue;
             dist[ny * W + nx] = dist[i] + 1; queue.push(ny * W + nx);
         }
     }
@@ -162,12 +171,12 @@ function bfsFrom(level, x, y) {
 }
 
 // Mapa de distancias hacia un destino, con caché por nivel (muchos creeps comparten el mismo destino: el héroe).
-function flowField(level, tx, ty) {
-    const key = tx + ',' + ty;
+function flowField(level, tx, ty, diagonal = false) {
+    const key = tx + ',' + ty + (diagonal ? 'd' : '');
     level.flowCache = level.flowCache || new Map();
     let f = level.flowCache.get(key);
     if (!f) {
-        f = bfsFrom(level, tx, ty);
+        f = bfsFrom(level, tx, ty, diagonal);
         if (level.flowCache.size > 24) level.flowCache.clear();
         level.flowCache.set(key, f);
     }
@@ -175,14 +184,19 @@ function flowField(level, tx, ty) {
 }
 
 // Paso siguiente (dx, dy) para ir de `unit` a `target` rodeando paredes, o null si ya llegó o no hay camino.
+// Los héroes caminan también en diagonal; entre pasos igual de buenos, el que apunta más derecho al destino.
 function towerPathDir(unit, target) {
-    const level = unit.arena, f = flowField(level, Math.round(target.x), Math.round(target.y));
+    const diagonal = !!unit.isHero, tx = Math.round(target.x), ty = Math.round(target.y);
+    const level = unit.arena, f = flowField(level, tx, ty, diagonal);
     const here = f[unit.y * COLS + unit.x];
     if (here <= 0) return null;
-    let best = null, bestD = here;
-    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+    let best = null, bestD = here, bestAim = Infinity;
+    for (const [dx, dy] of diagonal ? STEPS_8 : STEPS_4) {
+        if (!canStep(level, unit.x, unit.y, dx, dy)) continue;
         const d = f[(unit.y + dy) * COLS + unit.x + dx];
-        if (walkable(level, unit.x + dx, unit.y + dy) && d >= 0 && d < bestD) { bestD = d; best = { dx, dy }; }
+        if (d < 0) continue;
+        const aim = Math.hypot(tx - unit.x - dx, ty - unit.y - dy);
+        if (d < bestD || (d === bestD && best && aim < bestAim)) { bestD = d; bestAim = aim; best = { dx, dy }; }
     }
     return best;
 }
