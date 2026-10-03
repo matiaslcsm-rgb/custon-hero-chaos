@@ -119,17 +119,34 @@ function inkBorder(g, x0, x1, y, color) {
 // Cinta que flota (bufanda, listón)
 function inkRibbon(g, x, y, color, rnd, dir = 1) {
     g.strokeStyle = INK.line; g.lineWidth = 6; g.lineCap = 'round';
-    const pts = [[x, y], [x - 10 * dir, y + 4 + rnd() * 4], [x - 18 * dir, y - 2 + rnd() * 6], [x - 26 * dir, y + 6]];
+    const w = INK_A.sway * 4; // la cinta flamea
+    const pts = [[x, y], [x - 10 * dir, y + 4 + rnd() * 4 + w], [x - 18 * dir, y - 2 + rnd() * 6 - w], [x - 26 * dir, y + 6 + w * 1.5]];
     const path = () => { g.beginPath(); g.moveTo(pts[0][0], pts[0][1]); g.bezierCurveTo(pts[1][0], pts[1][1], pts[2][0], pts[2][1], pts[3][0], pts[3][1]); };
     path(); g.stroke(); g.strokeStyle = color; g.lineWidth = 3.6; path(); g.stroke();
 }
 
+// --- Animación ---
+// Cada figura se dibuja en varios cuadros: 8 de caminata y 4 de respiración (quieta). INK_A es la pose del cuadro que
+// se está dibujando: step (−1…1) adelanta una pierna y atrasa la otra, sway mueve la capa y las cintas (con retraso),
+// arm balancea los brazos.
+let INK_A = { step: 0, sway: 0, arm: 0 };
+const INK_WALK_FRAMES = 8, INK_IDLE_FRAMES = 4;
+function inkFramePose(kind, k) {
+    if (kind === 'walk') { const t = k / INK_WALK_FRAMES * Math.PI * 2; return { step: Math.sin(t), sway: Math.sin(t - 1.2) * 0.9, arm: -Math.sin(t) * 0.9 }; }
+    const t = k / INK_IDLE_FRAMES * Math.PI * 2; return { step: 0, sway: Math.sin(t) * 0.35, arm: Math.sin(t) * 0.15 };
+}
+// Corre un dibujo desplazado (brazos y armas siguen el balanceo)
+function inkArm(g, fn, k = 1) { g.save(); g.translate(INK_A.arm * 1.6 * k, -Math.abs(INK_A.arm) * 0.6); fn(); g.restore(); }
+// Desplazamiento de la tela según la altura (abajo se mueve más)
+const inkSwayX = y => INK_A.sway * Math.max(0, (y - 40) / 52) * 7;
+
 // --- Partes ---
 function inkLegs(g, rnd, color = INK.metalDark, top = 66) {
-    inkShape(g, [[27, top], [32, top], [31, FOOT - 2], [26, FOOT - 2]], color, rnd);
-    inkShape(g, [[34, top], [39, top], [40, FOOT - 2], [35, FOOT - 2]], color, rnd);
-    inkShape(g, [[24, FOOT - 4], [32, FOOT - 4], [32, FOOT + 1], [22, FOOT + 1]], INK.boot, rnd);
-    inkShape(g, [[34, FOOT - 4], [42, FOOT - 4], [44, FOOT + 1], [34, FOOT + 1]], INK.boot, rnd);
+    const s = INK_A.step, L = s * 4, R = -s * 4, upL = Math.max(0, s) * 3, upR = Math.max(0, -s) * 3;
+    inkShape(g, [[27, top], [32, top], [31 + L, FOOT - 2 - upL], [26 + L, FOOT - 2 - upL]], color, rnd);
+    inkShape(g, [[34, top], [39, top], [40 + R, FOOT - 2 - upR], [35 + R, FOOT - 2 - upR]], color, rnd);
+    inkShape(g, [[24 + L, FOOT - 4 - upL], [32 + L, FOOT - 4 - upL], [32 + L, FOOT + 1 - upL], [22 + L, FOOT + 1 - upL]], INK.boot, rnd);
+    inkShape(g, [[34 + R, FOOT - 4 - upR], [42 + R, FOOT - 4 - upR], [44 + R, FOOT + 1 - upR], [34 + R, FOOT + 1 - upR]], INK.boot, rnd);
 }
 // Armas: el aventurero lleva la de su equipo (forma del arma del héroe de origen)
 function inkWeapon(g, rnd, kind = 'sword') {
@@ -149,9 +166,9 @@ function inkHood(g, rnd, color, faceColor = INK.metal, cross = true) {
 }
 // Capa larga y ondulante con forro y dobladillo dentado
 function inkCape(g, c, rnd, pattern) {
-    const hem = []; for (let x = 58; x >= 6; x -= 4) hem.push([x, FOOT + (Math.round(x / 4) % 2 ? 1.5 : -1.5)]);
-    inkShape(g, [[23, 30], [43, 28], [52, 48], [58, 80], ...hem, [8, 76], [14, 48]], c.main, rnd, { pattern });
-    inkShape(g, [[43, 32], [52, 50], [57, 80], [58, FOOT], [46, FOOT], [44, 60]], c.dark, rnd, { width: 1.6 });
+    const sw = inkSwayX, hem = []; for (let x = 58; x >= 6; x -= 4) hem.push([x + sw(FOOT), FOOT + (Math.round(x / 4) % 2 ? 1.5 : -1.5)]);
+    inkShape(g, [[23, 30], [43, 28], [52 + sw(48), 48], [58 + sw(80), 80], ...hem, [8 + sw(76), 76], [14 + sw(48), 48]], c.main, rnd, { pattern });
+    inkShape(g, [[43, 32], [52 + sw(50), 50], [57 + sw(80), 80], [58 + sw(FOOT), FOOT], [46 + sw(FOOT), FOOT], [44 + sw(60), 60]], c.dark, rnd, { width: 1.6 });
     inkHatch(g, 6, 70, 18, FOOT + 1, 3);
     g.strokeStyle = 'rgba(29,23,18,0.4)'; g.lineWidth = 1;
     [[18, 48, 14, 90], [24, 52, 22, 91], [30, 60, 31, 91]].forEach(([x0, y0, x1, y1]) => { g.beginPath(); g.moveTo(x0, y0); g.quadraticCurveTo(x0 - 3, (y0 + y1) / 2, x1, y1); g.stroke(); });
@@ -166,10 +183,11 @@ const INK_PLANS = {
         inkShape(g, [[27, 36], [39, 36], [41, 74], [36, 79], [30, 79], [25, 74]], c.cloth, rnd); // tabardo
         inkBorder(g, 26, 40, 74, c.accent);
         inkShape(g, [[27, 52], [40, 52], [40, 55], [27, 55]], INK.boot, rnd, { width: 1.3 });
-        inkShape(g, [[24, 38], [18, 47], [14, 54], [17, 56], [22, 49], [27, 42]], INK.metalDark, rnd); // guantelete con garras
-        [[13, 54, 9, 52], [14, 56, 10, 58], [16, 57, 14, 61]].forEach(([x0, y0, x1, y1]) => inkShape(g, [[x0, y0], [x1, y1]], INK.line, rnd, { open: true, width: 1.8 }));
-        inkShape(g, [[38, 39], [45, 51], [42, 54], [36, 44]], INK.metalDark, rnd);
-        inkWeapon(g, rnd, c.weapon);
+        inkArm(g, () => { // guantelete con garras
+            inkShape(g, [[24, 38], [18, 47], [14, 54], [17, 56], [22, 49], [27, 42]], INK.metalDark, rnd);
+            [[13, 54, 9, 52], [14, 56, 10, 58], [16, 57, 14, 61]].forEach(([x0, y0, x1, y1]) => inkShape(g, [[x0, y0], [x1, y1]], INK.line, rnd, { open: true, width: 1.8 }));
+        }, -1);
+        inkArm(g, () => { inkShape(g, [[38, 39], [45, 51], [42, 54], [36, 44]], INK.metalDark, rnd); inkWeapon(g, rnd, c.weapon); });
         inkHood(g, rnd, c.hood || c.main);
     },
     // Soldado: casco con visera, tabardo de rombos y lanza
@@ -179,8 +197,7 @@ const INK_PLANS = {
         inkShape(g, [[24, 58], [42, 58], [42, 61], [24, 61]], INK.boot, rnd, { width: 1.4 });
         inkCircle(g, 33, 26, 8, INK.metal);
         inkShape(g, [[27, 27], [39, 27]], INK.line, rnd, { open: true, width: 2.6 });
-        inkShape(g, [[40, 42], [48, 46], [46, 50], [39, 47]], INK.metalDark, rnd);
-        inkWeapon(g, rnd, 'spear');
+        inkArm(g, () => { inkShape(g, [[40, 42], [48, 46], [46, 50], [39, 47]], INK.metalDark, rnd); inkWeapon(g, rnd, 'spear'); });
     },
     // Arquero encapuchado con bufanda al viento y arco
     archer(g, c, rnd) {
@@ -189,36 +206,39 @@ const INK_PLANS = {
         inkShape(g, [[28, 36], [38, 36], [39, 70], [27, 70]], c.cloth, rnd, { pattern: INK_PATTERNS.stripes(c.cloth, 'rgba(29,23,18,0.18)') });
         inkRibbon(g, 26, 38, c.accent, rnd);
         inkHood(g, rnd, c.main, INK.shadow, false);
-        g.beginPath(); g.arc(44, 54, 18, -1.2, 1.2); g.strokeStyle = '#6b4f33'; g.lineWidth = 3.2; g.stroke();
-        g.strokeStyle = INK.line; g.lineWidth = 1; g.beginPath(); g.moveTo(50.5, 37); g.lineTo(50.5, 71); g.stroke();
+        inkArm(g, () => {
+            g.beginPath(); g.arc(44, 54, 18, -1.2, 1.2); g.strokeStyle = '#6b4f33'; g.lineWidth = 3.2; g.stroke();
+            g.strokeStyle = INK.line; g.lineWidth = 1; g.beginPath(); g.moveTo(50.5, 37); g.lineTo(50.5, 71); g.stroke();
+        });
     },
     // Mago: sombrero de ala ancha en punta y túnica larga con guardas en zigzag
     mage(g, c, rnd) {
-        inkShape(g, [[25, 36], [41, 36], [52, FOOT], [14, FOOT]], c.main, rnd, { pattern: INK_PATTERNS.zigzag(c.main, c.accent) });
+        inkShape(g, [[25, 36], [41, 36], [52 + inkSwayX(FOOT), FOOT], [14 + inkSwayX(FOOT), FOOT]], c.main, rnd, { pattern: INK_PATTERNS.zigzag(c.main, c.accent) });
         inkHatch(g, 14, 72, 24, FOOT, 3);
         inkBorder(g, 15, 51, FOOT - 2, c.accent);
-        inkShape(g, [[24, 38], [16, 56], [20, 58], [27, 44]], c.dark, rnd); // manga
+        inkArm(g, () => inkShape(g, [[24, 38], [16, 56], [20, 58], [27, 44]], c.dark, rnd), -1); // manga
         inkShape(g, [[28, 26], [38, 26], [38, 36], [28, 36]], INK.shadow, rnd); // cara en sombra
         g.fillStyle = '#f3e7c9'; g.fillRect(30, 30, 2, 2); g.fillRect(35, 30, 2, 2);
         inkShape(g, [[14, 26], [52, 26], [46, 22], [20, 22]], c.dark, rnd); // ala del sombrero
-        inkShape(g, [[22, 23], [44, 23], [36, 4]], c.dark, rnd);
-        inkWeapon(g, rnd, 'staff');
+        inkShape(g, [[22, 23], [44, 23], [36 + INK_A.sway, 4]], c.dark, rnd);
+        inkArm(g, () => inkWeapon(g, rnd, 'staff'));
     },
     // Bruto: ancho, hombreras, falda de rombos y garrote
     brute(g, c, rnd) {
-        inkShape(g, [[24, 74], [31, 74], [30, FOOT], [22, FOOT]], INK.boot, rnd);
-        inkShape(g, [[35, 74], [42, 74], [44, FOOT], [36, FOOT]], INK.boot, rnd);
+        const s = INK_A.step * 3;
+        inkShape(g, [[24, 74], [31, 74], [30 + s, FOOT - Math.max(0, INK_A.step) * 2], [22 + s, FOOT - Math.max(0, INK_A.step) * 2]], INK.boot, rnd);
+        inkShape(g, [[35, 74], [42, 74], [44 - s, FOOT - Math.max(0, -INK_A.step) * 2], [36 - s, FOOT - Math.max(0, -INK_A.step) * 2]], INK.boot, rnd);
         inkShape(g, [[18, 58], [48, 58], [52, 80], [14, 80]], c.accent, rnd, { pattern: INK_PATTERNS.diamonds(c.accent, c.dark) });
         inkShape(g, [[17, 32], [49, 32], [46, 62], [20, 62]], c.main, rnd);
         inkHatch(g, 20, 48, 30, 62);
         inkCircle(g, 18, 34, 8, INK.metal); inkCircle(g, 48, 34, 8, INK.metal);
         inkCircle(g, 33, 22, 9, INK.metalDark);
         inkShape(g, [[28, 23], [38, 23]], INK.line, rnd, { open: true, width: 2.6 });
-        inkShape(g, [[50, 46], [60, 86]], '#6b4f33', rnd, { open: true, width: 6 });
+        inkArm(g, () => inkShape(g, [[50, 46], [60, 86]], '#6b4f33', rnd, { open: true, width: 6 }));
     },
     // Espectro: túnica que flota, cintas al viento y dos espadas flotando
     wraith(g, c, rnd) {
-        const hem = []; for (let x = 50; x >= 16; x -= 5) hem.push([x, 82 + ((x / 5) % 2 ? 6 : 0)]);
+        const hem = []; for (let x = 50; x >= 16; x -= 5) hem.push([x + INK_A.sway * 3, 82 + ((x / 5) % 2 ? 6 : 0)]);
         inkShape(g, [[24, 30], [42, 30], [52, 54], ...hem, [14, 54]], c.main, rnd, { pattern: INK_PATTERNS.stripes(c.main, 'rgba(29,23,18,0.15)') });
         inkRibbon(g, 24, 40, c.accent, rnd); inkRibbon(g, 42, 44, c.accent, rnd, -1);
         inkHood(g, rnd, c.main, INK.shadow, false);
@@ -235,7 +255,7 @@ const INK_PLANS = {
         inkShape(g, [[39, 28], [56, 34], [39, 34]], INK.cloth, rnd); // pico
         inkCircle(g, 33, 27, 2.4, '#9fd3e6');
         inkShape(g, [[22, 22], [44, 22], [42, 14], [24, 14]], INK.shadow, rnd); // sombrero
-        inkShape(g, [[18, 54], [10, 58]], '#9fd3e6', rnd, { open: true, width: 4 }); // frasco
+        inkArm(g, () => inkShape(g, [[18, 54], [10, 58]], '#9fd3e6', rnd, { open: true, width: 4 }), -1); // frasco
     }
 };
 
@@ -269,20 +289,26 @@ function inkLookFor(u) {
 }
 
 const inkCache = {};
-function inkFigure(plan, look) {
-    const key = plan + JSON.stringify(look);
+// Un cuadro de la figura (kind 'walk' o 'idle', k = número de cuadro). La versión blanca (destello al recibir daño) se
+// dibuja recién cuando hace falta.
+function inkFigure(plan, look, kind = 'idle', k = 0) {
+    const key = plan + JSON.stringify(look) + kind + k;
     if (inkCache[key]) return inkCache[key];
     const make = white => {
         const c = document.createElement('canvas'); c.width = INK_W; c.height = INK_H;
         const g = c.getContext('2d');
-        let seed = [...plan].reduce((s, ch) => (s * 31 + ch.charCodeAt(0)) % 2147483647, 7);
+        let seed = [...plan].reduce((s, ch) => (s * 31 + ch.charCodeAt(0)) % 2147483647, 7); // mismo temblor en todos los cuadros
         const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
         g.lineCap = 'round'; g.lineJoin = 'round';
+        INK_A = inkFramePose(kind, k);
         INK_PLANS[plan](g, { dark: shade(look.main, -0.35), cloth: INK.cloth, accent: look.accent || '#c9a227', ...look }, rnd);
+        INK_A = { step: 0, sway: 0, arm: 0 };
         if (white) { g.globalCompositeOperation = 'source-in'; g.fillStyle = '#ffffff'; g.fillRect(0, 0, INK_W, INK_H); }
         return c;
     };
-    return (inkCache[key] = { img: make(false), white: make(true) });
+    const fig = { img: make(false), _white: null };
+    Object.defineProperty(fig, 'white', { get() { return this._white || (this._white = make(true)); } });
+    return (inkCache[key] = fig);
 }
 
 function inkScale(u) { return (u.isGuardian ? 2.0 : u.isBoss ? 1.45 : 1.1) * TILE / INK_W * 1.3; }
@@ -293,11 +319,18 @@ function inkHalfHeight(u) { return INK_H * inkScale(u) * 0.86 - TILE * 0.45 - 4;
 function drawInkUnit(u, cx, cy, size, facing, flash, pose) {
     const plan = inkPlanFor(u);
     if (!plan) return false;
-    const fig = inkFigure(plan, inkLookFor(u));
+    // Caminando (se desliza hacia su casilla): cuadros de caminata al ritmo de su paso; quieto: respira.
+    const moving = Math.hypot(u.x - (u.rx ?? u.x), u.y - (u.ry ?? u.y)) > 0.04 || plan === 'wraith';
+    let kind = 'idle', k, bob = 0;
+    if (moving) {
+        const phase = (fxClock / (2 * Math.max(0.12, unitStepTime(u))) + (u.bobSeed || 0)) % 1;
+        kind = 'walk'; k = Math.floor(phase * INK_WALK_FRAMES); bob = -Math.abs(Math.sin(phase * Math.PI * 2)) * 1.8;
+    } else k = Math.floor(((fxClock * 0.8 + (u.bobSeed || 0)) % 1) * INK_IDLE_FRAMES);
+    const fig = inkFigure(plan, inkLookFor(u), kind, k);
     const scale = inkScale(u);
     const w = INK_W * scale, h = INK_H * scale;
     ctx.save();
-    ctx.translate(cx, cy + TILE * 0.45); // pies en la parte de abajo de la casilla
+    ctx.translate(cx, cy + TILE * 0.45 + bob * scale); // pies en la parte de abajo de la casilla (y el rebote del paso)
     if (pose) { ctx.rotate(pose.rot * (facing < 0 ? -1 : 1)); ctx.scale(pose.sx, pose.sy); }
     if (facing < 0) ctx.scale(-1, 1);
     ctx.fillStyle = 'rgba(29,23,18,0.28)'; // sombra en el piso
@@ -318,4 +351,64 @@ function drawInkedSprite(sprite, cx, cy, size, facing, flash, pose) {
     }
     drawSprite(sprite, cx, cy, size, facing, flash, pose);
     ctx.restore();
+}
+
+// --- ÍCONOS EN TINTA (piezas de equipo, habilidades y retrato) ---
+// Cada ícono es un dibujo vectorial de 48×48 con contorno de tinta, sobre un disco de pergamino. Se dibujan una vez.
+const inkIconCache = {};
+const INK_ICON_DRAW = {
+    sword(g, c, r) { inkShape(g, [[12, 38], [36, 12], [40, 10], [38, 14], [14, 40]], '#d8d4cc', r); inkShape(g, [[10, 30], [20, 40]], INK.line, r, { open: true, width: 3.4 }); inkShape(g, [[8, 42], [13, 37]], c.main, r, { open: true, width: 4 }); },
+    hammer(g, c, r) { inkShape(g, [[12, 40], [32, 14]], '#7a5c3c', r, { open: true, width: 4 }); inkShape(g, [[24, 8], [40, 16], [36, 26], [22, 18]], c.main, r); },
+    spear(g, c, r) { inkShape(g, [[8, 42], [36, 12]], '#7a5c3c', r, { open: true, width: 3.4 }); inkShape(g, [[34, 8], [42, 6], [40, 14], [34, 16]], '#d8d4cc', r); inkShape(g, [[28, 18], [32, 22]], c.main, r, { open: true, width: 4 }); },
+    staff(g, c, r) { inkShape(g, [[14, 42], [30, 14]], '#7a5c3c', r, { open: true, width: 3.4 }); inkCircle(g, 32, 11, 7, c.main); g.fillStyle = 'rgba(255,255,255,0.6)'; g.fillRect(29, 8, 3, 3); },
+    crystal(g, c, r) { inkShape(g, [[24, 6], [34, 18], [30, 40], [18, 40], [14, 18]], c.main, r); inkShape(g, [[24, 6], [24, 40]], 'rgba(29,23,18,0.5)', r, { open: true, width: 1 }); },
+    orb(g, c, r) { inkCircle(g, 24, 22, 13, c.main); g.fillStyle = 'rgba(255,255,255,0.55)'; g.beginPath(); g.arc(19, 17, 4, 0, 7); g.fill(); inkShape(g, [[14, 36], [34, 36], [30, 42], [18, 42]], '#7a5c3c', r); },
+    dagger(g, c, r) { inkShape(g, [[10, 36], [30, 14], [34, 12], [32, 16], [12, 38]], '#d8d4cc', r); inkShape(g, [[38, 36], [18, 14], [14, 12], [16, 16], [36, 38]], '#d8d4cc', r); inkShape(g, [[22, 30], [26, 30]], c.main, r, { open: true, width: 5 }); },
+    helm(g, c, r) { inkShape(g, [[12, 30], [12, 18], [18, 9], [30, 9], [36, 18], [36, 30], [30, 38], [18, 38]], c.main, r); inkShape(g, [[16, 22], [32, 22]], INK.line, r, { open: true, width: 3 }); inkShape(g, [[24, 13], [24, 34]], INK.line, r, { open: true, width: 3 }); },
+    armor(g, c, r) { inkShape(g, [[10, 12], [18, 8], [24, 12], [30, 8], [38, 12], [36, 24], [34, 40], [14, 40], [12, 24]], c.main, r); inkHatch(g, 12, 26, 20, 40, 3); inkShape(g, [[24, 12], [24, 38]], 'rgba(29,23,18,0.5)', r, { open: true, width: 1.2 }); },
+    glove(g, c, r) { inkShape(g, [[14, 40], [12, 24], [16, 10], [20, 10], [21, 20], [24, 8], [28, 8], [28, 20], [32, 12], [36, 14], [34, 30], [30, 40]], c.main, r); },
+    boot(g, c, r) { inkShape(g, [[16, 8], [28, 8], [28, 30], [40, 34], [40, 40], [14, 40]], c.main, r); inkShape(g, [[16, 16], [28, 16]], INK.line, r, { open: true, width: 1.4 }); },
+    amulet(g, c, r) { g.strokeStyle = INK.line; g.lineWidth = 1.6; g.beginPath(); g.arc(24, 14, 12, 0.2, Math.PI - 0.2); g.stroke(); inkShape(g, [[24, 22], [32, 30], [24, 42], [16, 30]], c.main, r); },
+    ring(g, c, r) { g.strokeStyle = INK.line; g.lineWidth = 7; g.beginPath(); g.arc(24, 28, 11, 0, 7); g.stroke(); g.strokeStyle = '#c9a227'; g.lineWidth = 4; g.beginPath(); g.arc(24, 28, 11, 0, 7); g.stroke(); inkShape(g, [[19, 12], [29, 12], [27, 18], [21, 18]], c.main, r); },
+    // Habilidades (por lo que hacen)
+    physical(g, c, r) { INK_ICON_DRAW.dagger(g, c, r); },
+    magic(g, c, r) { const p = []; for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2 - Math.PI / 2, rad = i % 2 ? 7 : 17; p.push([24 + Math.cos(a) * rad, 24 + Math.sin(a) * rad]); } inkShape(g, p, c.main, r); },
+    control(g, c, r) { for (let i = 0; i < 3; i++) { const a = i * Math.PI / 3; inkShape(g, [[24 - Math.cos(a) * 16, 24 - Math.sin(a) * 16], [24 + Math.cos(a) * 16, 24 + Math.sin(a) * 16]], c.main, r, { open: true, width: 4 }); } inkCircle(g, 24, 24, 4, '#e9f5ff'); },
+    heal(g, c, r) { inkShape(g, [[24, 40], [8, 22], [10, 12], [18, 10], [24, 16], [30, 10], [38, 12], [40, 22]], c.main, r); inkShape(g, [[20, 24], [28, 24]], '#f3e7c9', r, { open: true, width: 3 }); inkShape(g, [[24, 20], [24, 28]], '#f3e7c9', r, { open: true, width: 3 }); },
+    mobility(g, c, r) { inkShape(g, [[10, 34], [20, 14], [26, 22], [34, 8], [38, 26], [28, 36]], c.main, r); for (let i = 0; i < 3; i++) inkShape(g, [[6, 40 - i * 6], [14, 40 - i * 6]], INK.line, r, { open: true, width: 1.6 }); },
+    area(g, c, r) { [16, 10, 4].forEach((rad, i) => { g.strokeStyle = i ? c.main : INK.line; g.lineWidth = i ? 3 : 2; g.beginPath(); g.arc(24, 24, rad, 0, 7); g.stroke(); }); },
+    lifesteal(g, c, r) { inkShape(g, [[24, 6], [34, 24], [32, 36], [24, 40], [16, 36], [14, 24]], '#9b2226', r); },
+    buff(g, c, r) { inkShape(g, [[24, 6], [38, 22], [30, 22], [30, 40], [18, 40], [18, 22], [10, 22]], c.main, r); },
+    eye(g, c, r) { inkShape(g, [[6, 24], [16, 14], [32, 14], [42, 24], [32, 34], [16, 34]], '#f3e7c9', r); inkCircle(g, 24, 24, 6, c.main); }
+};
+function inkIcon(kind, color = '#a33a3a') {
+    const key = kind + color;
+    if (inkIconCache[key]) return inkIconCache[key];
+    const c = document.createElement('canvas'); c.width = c.height = 48;
+    const g = c.getContext('2d');
+    let seed = [...key].reduce((s, ch) => (s * 31 + ch.charCodeAt(0)) % 2147483647, 11);
+    const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    g.lineCap = 'round'; g.lineJoin = 'round';
+    (INK_ICON_DRAW[kind] || INK_ICON_DRAW.eye)(g, { main: color }, rnd);
+    return (inkIconCache[key] = c.toDataURL());
+}
+// Ícono de una habilidad según lo que hace (su primera etiqueta reconocible)
+const INK_SKILL_KINDS = [['CURACIÓN', 'heal'], ['ROBO_VIDA', 'lifesteal'], ['MOVILIDAD', 'mobility'], ['CONTROL', 'control'], ['ÁREA', 'area'], ['MÁGICO', 'magic'], ['PURO', 'magic'], ['FÍSICO', 'physical'], ['MEJORA', 'buff']];
+function inkSkillIcon(skill) {
+    const kind = (INK_SKILL_KINDS.find(([t]) => (skill.tags || []).includes(t)) || [null, 'eye'])[1];
+    const hero = skill.heroKey && HERO_TEMPLATES[skill.heroKey];
+    return inkIcon(kind, inkMute(hero ? ATTR_INFO[hero.primaryAttr].color : '#a33a3a', 0.2));
+}
+// Retrato: busto de la figura del héroe (según su equipo)
+const inkPortraitCache = {};
+function inkPortrait(u) {
+    const look = inkLookFor(u), key = JSON.stringify(look);
+    if (inkPortraitCache[key]) return inkPortraitCache[key];
+    const fig = inkFigure('hoodedKnight', look);
+    const c = document.createElement('canvas'); c.width = c.height = 64;
+    const g = c.getContext('2d');
+    g.fillStyle = INK.paper; g.fillRect(0, 0, 64, 64);
+    g.drawImage(fig.img, 8, 6, 52, 52, -6, -2, 76, 76);
+    g.strokeStyle = INK.line; g.lineWidth = 3; g.strokeRect(1.5, 1.5, 61, 61);
+    return (inkPortraitCache[key] = c.toDataURL());
 }

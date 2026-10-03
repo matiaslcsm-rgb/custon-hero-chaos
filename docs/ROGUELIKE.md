@@ -181,6 +181,18 @@ vectoriales, primero en Tower Chaos. Código: `js/inkart.js`; hoja de muestra: `
   pico y espadas flotando. **El aventurero se ve según su equipo**: la capa toma el color del héroe de su armadura,
   la capucha el de su casco, la guarda el de sus botas y el arma tiene la forma de la suya (espada, hacha, báculo,
   rifle, dagas…).
+- **Upgrade gráfico grande** (pedido del usuario, solo Tower Chaos por ahora):
+  - **Animación de los cuerpos**: cada figura tiene 8 cuadros de caminata (piernas que alternan, capa y túnica que
+    ondean con retraso, brazos y arma que acompañan, rebote del paso, cintas que flamean) y 4 de respiración quieta.
+    Se dibujan una vez y se reutilizan (liviano).
+  - **Íconos en tinta** (`inkIcon`): 13 formas de piezas (espada, hacha, rifle/lanza, báculo, cristal, orbe, dagas,
+    casco, coraza, guantes, botas, amuleto, anillo) y 10 de habilidades según lo que hacen (físico, mágico, control,
+    curación, movilidad, área, robo de vida, mejora…). En el inventario, el botín, la barra del héroe y el equipo.
+  - **Retrato dibujado**: el busto del aventurero según su equipo.
+  - **Interfaz en pergamino**: columnas, barra del héroe (barras de vida y maná rayadas), ranuras de habilidad con
+    ícono, botones bordó, registro, contador, ventanas; tipografía con serifa; colores de calidad oscuros para leerse
+    sobre el papel; barras de vida de las unidades en tinta, sin brillos; menhires de tinta en el círculo de piedra.
+  - En la Torre las habilidades no se suben con puntos (sin botones [+]): crecen forjando.
 
 ## 5. Decisiones tomadas (2026-10-03)
 - Avance: **subir una torre**; cada nivel es aleatorio. Final en el **nivel 10**, con salón de la fama.

@@ -6,21 +6,17 @@
 let invOpen = false, forgeOpen = false, invHeld = null;
 function towerModalOpen() { return statsOpen || invOpen || forgeOpen; }
 
-const towerIconCache = {};
+// Ícono de una pieza en estilo tinta (inkart.js): forma según el arma o la ranura, color del atributo del héroe de origen.
+// Color de la calidad: sobre el pergamino de la Torre, en tinta oscura (los claros no se leen)
+const qColor = item => (gameMode === 'tower' ? ITEM_QUALITY[item.quality].ink : ITEM_QUALITY[item.quality].color);
+const SLOT_INK_ICON = { helm: 'helm', armor: 'armor', gloves: 'glove', boots: 'boot', amulet: 'amulet', ring: 'ring' };
 function towerItemIcon(item) {
-    const shape = item.slot === 'weapon' ? HERO_WEAPONS[item.heroKey].shape : TOWER_SLOTS[slotKind(item.slot)].icon;
-    const color = ATTR_INFO[HERO_TEMPLATES[item.heroKey].primaryAttr].color;
-    const key = shape + color;
-    if (towerIconCache[key]) return towerIconCache[key];
-    const pal = { m: color, d: shade(color, -0.45), l: shade(color, 0.5), w: '#dee2e6', h: '#7f5539' };
-    const c = document.createElement('canvas'); c.width = c.height = 36;
-    const g = c.getContext('2d');
-    ITEM_ICON_SHAPES[shape].forEach((row, y) => [...row].forEach((ch, x) => { if (pal[ch]) { g.fillStyle = pal[ch]; g.fillRect(x * 3, y * 3, 3, 3); } }));
-    return (towerIconCache[key] = c.toDataURL());
+    const kind = item.slot === 'weapon' ? HERO_WEAPONS[item.heroKey].shape : SLOT_INK_ICON[slotKind(item.slot)];
+    return inkIcon(kind, inkMute(ATTR_INFO[HERO_TEMPLATES[item.heroKey].primaryAttr].color, 0.2));
 }
 
 function itemTooltipHtml(item) {
-    const q = ITEM_QUALITY[item.quality], t = HERO_TEMPLATES[item.heroKey], skill = itemSkill(item);
+    const q = { ...ITEM_QUALITY[item.quality], color: qColor(item) }, t = HERO_TEMPLATES[item.heroKey], skill = itemSkill(item);
     const mods = Object.entries(itemMods(item)).map(([k, v]) => `<li>${MOD_LABELS[k] ? MOD_LABELS[k](v) : `${k} ${v}`}</li>`).join('');
     const w = item.slot === 'weapon' ? HERO_WEAPONS[item.heroKey] : null;
     const forged = Object.entries(item.boosts).map(([k, n]) => `${BOOSTABLE[k] ? BOOSTABLE[k].label : k} ×${n}`)
@@ -62,8 +58,8 @@ function renderInventory() {
         const item = player.gear[s];
         const box = document.createElement('div');
         box.className = 'gear-slot gear-' + slotKind(s) + (item ? ' filled' : '');
-        if (item) box.style.borderColor = ITEM_QUALITY[item.quality].color;
-        box.innerHTML = `<span class="gear-label">${TOWER_SLOTS[slotKind(s)].name}</span>` + (item ? `<img src="${towerItemIcon(item)}" class="pixel-img"><span class="gear-lvl">${item.level}</span>` : '');
+        if (item) box.style.borderColor = qColor(item);
+        box.innerHTML = `<span class="gear-label">${TOWER_SLOTS[slotKind(s)].name}</span>` + (item ? `<img src="${towerItemIcon(item)}" class="ink-icon"><span class="gear-lvl">${item.level}</span>` : '');
         box.onmouseenter = () => hover(item);
         box.onclick = () => {
             if (invHeld) { if (slotKind(s) === invHeld.item.slot) { const held = invHeld.item; invHeld = null; equipItem(player, held, s); } }
@@ -87,8 +83,8 @@ function renderInventory() {
         const [w, h] = itemSize(b.item);
         const el = document.createElement('div'); el.className = 'bag-item';
         el.style.gridColumn = `${b.x + 1} / span ${w}`; el.style.gridRow = `${b.y + 1} / span ${h}`;
-        el.style.borderColor = ITEM_QUALITY[b.item.quality].color;
-        el.innerHTML = `<img src="${towerItemIcon(b.item)}" class="pixel-img">`;
+        el.style.borderColor = qColor(b.item);
+        el.innerHTML = `<img src="${towerItemIcon(b.item)}" class="ink-icon">`;
         el.onmouseenter = () => hover(b.item);
         el.onclick = () => { if (!invHeld) { player.bag = player.bag.filter(o => o !== b); invHeld = { item: b.item }; renderInventory(); } };
         el.oncontextmenu = e => { e.preventDefault(); equipItem(player, b.item); renderInventory(); };
@@ -96,7 +92,7 @@ function renderInventory() {
     });
     const heldBox = document.getElementById('inv-held');
     heldBox.innerHTML = invHeld
-        ? `En la mano: <b style="color:${ITEM_QUALITY[invHeld.item.quality].color}">${invHeld.item.name}</b> — clic en una casilla libre o en su ranura. <button class="secondary-btn" id="inv-drop">Tirar al piso</button>`
+        ? `En la mano: <b style="color:${qColor(invHeld.item)}">${invHeld.item.name}</b> — clic en una casilla libre o en su ranura. <button class="secondary-btn" id="inv-drop">Tirar al piso</button>`
         : 'Clic en una pieza para moverla · clic derecho para equipar o desequipar';
     const dropBtn = document.getElementById('inv-drop');
     if (dropBtn) dropBtn.onclick = () => { dropOnFloor(player, invHeld.item); log(`Tiraste ${invHeld.item.name}.`); invHeld = null; renderInventory(); };
@@ -107,7 +103,7 @@ function renderInventory() {
 function openForge(item) {
     forgeOpen = true;
     showPanel('forge-container', true);
-    document.getElementById('forge-title').innerHTML = `⚒ Forjar · <span style="color:${ITEM_QUALITY[item.quality].color}">${item.name}</span> (nivel ${item.level})`;
+    document.getElementById('forge-title').innerHTML = `⚒ Forjar · <span style="color:${qColor(item)}">${item.name}</span> (nivel ${item.level})`;
     const skill = itemSkill(item);
     document.getElementById('forge-sub').textContent = skill ? `Elegí cómo crece ${skill.name}. Cada elección queda en la pieza para siempre.` : 'Elegí cómo crece la pieza.';
     const box = document.getElementById('forge-options'); box.innerHTML = '';

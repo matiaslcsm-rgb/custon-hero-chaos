@@ -81,9 +81,9 @@ function towerCatalog() {
 
 // --- CALIDADES Y AFIJOS (como Diablo) ---
 const ITEM_QUALITY = {
-    normal: { name: 'Normal', color: '#e9ecef', affixes: 0 },
-    magic: { name: 'Mágico', color: '#4dabf7', affixes: [1, 2] },
-    rare: { name: 'Raro', color: '#ffd43b', affixes: [3, 4] }
+    normal: { name: 'Normal', color: '#e9ecef', ink: '#2b2118', affixes: 0 },
+    magic: { name: 'Mágico', color: '#4dabf7', ink: '#1d4e89', affixes: [1, 2] },
+    rare: { name: 'Raro', color: '#ffd43b', ink: '#9a6b00', affixes: [3, 4] }
 };
 const AFFIXES = [
     { key: 'flatAtk', name: 'Feroz', roll: f => 3 + 2 * f, label: v => `+${v} daño` },

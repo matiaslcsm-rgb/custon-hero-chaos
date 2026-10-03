@@ -8,7 +8,7 @@
 <style>body { margin: 0; background: #e9dcc0; } canvas { display: block; }</style>
 </head>
 <body>
-<canvas id="c" width="1000" height="420"></canvas>
+<canvas id="c" width="1000" height="640"></canvas>
 <script>const TILE = 34;</script>
 <script src="../js/sprites.js"></script>
 <script src="../js/inkart.js"></script>
@@ -30,6 +30,12 @@ looks.forEach(([plan, look, name], i) => {
     g.drawImage(f.img, 6 + i * 122, 6, INK_W * 1.8, INK_H * 1.8);
     g.fillStyle = INK.line; g.font = '13px serif'; g.fillText(name, 12 + i * 122, 192);
 });
+// Ciclo de caminata (8 cuadros) del aventurero y del mago
+['hoodedKnight', 'mage'].forEach((plan, row) => {
+    const look = row ? looks[4][1] : looks[0][1];
+    for (let k = 0; k < INK_WALK_FRAMES; k++) g.drawImage(inkFigure(plan, look, 'walk', k).img, 430 + k * 70, 230 + row * 200, INK_W * 1.3, INK_H * 1.3);
+});
+g.fillText('caminata: 8 cuadros', 430, 222);
 const t = inkTiles();
 [t.face, t.top, t.floors[0], t.floors[1]].forEach((im, i) => g.drawImage(im, 20 + i * 90, 220, 80, 80));
 g.fillText('pared (frente) · pared (arriba) · piso · piso', 20, 320);

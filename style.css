@@ -578,3 +578,80 @@ body.ink-theme .modal-close { color: #2b2118; border-color: #8f8166; }
 
 /* El tiempo se muestra en el contador grande del centro (#center-timer) */
 #phase-timer { display: none; }
+
+/* ============================================================ TOWER CHAOS: INTERFAZ EN PERGAMINO (estética tinta)
+   Todo el HUD con papel viejo, tinta y tipografía con serifa. Solo con body.ink-theme (se prende al entrar a la Torre). */
+body.ink-theme { background: #2b2118 radial-gradient(ellipse at center, #3a2d21 0%, #1e1711 80%); color: #2b2118; }
+body.ink-theme, body.ink-theme button, body.ink-theme input { font-family: Georgia, 'Palatino Linotype', 'Book Antiqua', serif; }
+body.ink-theme #left-col, body.ink-theme #phase-area, body.ink-theme #log-panel, body.ink-theme #hero-bar, body.ink-theme #map-hud {
+    background: #e9dcc0 repeating-linear-gradient(0deg, rgba(90,70,40,0.035) 0 2px, transparent 2px 5px);
+    border: 2px solid #2b2118; box-shadow: inset 0 0 18px rgba(94,84,68,0.45), 0 3px 0 #1d1712; color: #2b2118; }
+body.ink-theme #map-hud { border-bottom: 2px solid #2b2118; }
+body.ink-theme #map-hud b, body.ink-theme #map-hud .mh-gold { color: #6b2a1f; }
+body.ink-theme #map-hud button { background: #f1e7d0; color: #2b2118; border: 1.5px solid #2b2118; }
+body.ink-theme #map-wrap { border: 3px solid #1d1712; box-shadow: 0 0 0 2px #8f8166, 0 8px 24px rgba(0,0,0,0.6); }
+body.ink-theme h3, body.ink-theme .section-title, body.ink-theme #left-col h4 { color: #6b2a1f; font-variant: small-caps; letter-spacing: 1px; }
+body.ink-theme .subtitle { color: #5e5444; }
+body.ink-theme #controls-hint { color: #c9b791; }
+/* Columna izquierda: ranking y stats */
+body.ink-theme .score-row { background: #f1e7d0; border: 1px solid #c9b791; color: #2b2118; }
+body.ink-theme .score-row.you { color: #6b2a1f; font-weight: bold; }
+body.ink-theme #hero-stats-panel { border-top-color: #b7a888; }
+body.ink-theme #hero-stats, body.ink-theme #hero-stats b { color: #2b2118; }
+/* Barra del héroe */
+body.ink-theme #hb-symbol { background: #e9dcc0; border: 2px solid #2b2118; }
+body.ink-theme #hb-symbol img.ink-portrait { width: 56px; height: 56px; }
+body.ink-theme #hb-name { color: #6b2a1f; font-variant: small-caps; font-size: 1.05rem; }
+body.ink-theme .hb-bar { background: #d8c7a3; border: 1.5px solid #2b2118; }
+body.ink-theme #hb-hp-fill { background: repeating-linear-gradient(-45deg, #8f2d24 0 4px, #a8382d 4px 8px); }
+body.ink-theme #hb-mana-fill { background: repeating-linear-gradient(-45deg, #2f5d62 0 4px, #3a7178 4px 8px); }
+body.ink-theme .hb-bar span { color: #f3e7c9; text-shadow: 0 0 2px #1d1712, 0 0 2px #1d1712; }
+body.ink-theme .skill-slot { background: #f1e7d0; border: 1.5px solid #2b2118; color: #2b2118; padding-left: 36px; }
+body.ink-theme .skill-slot.ult { border-color: #6b2a1f; box-shadow: inset 0 0 0 1px #c9a227; }
+body.ink-theme .skill-slot .key { color: #6b2a1f; }
+body.ink-theme .skill-slot.empty { background: #e4d6b9; border-style: dashed; color: #8f8166; padding-left: 4px; }
+body.ink-theme .skill-slot .pips i { border-color: #2b2118; }
+body.ink-theme .skill-slot .pips i.on { background: #6b2a1f; }
+body.ink-theme .ink-skill-icon { position: absolute; left: 2px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; }
+body.ink-theme .skill-slot .cd { background: rgba(43,33,24,0.55); }
+body.ink-theme .passive-chip { background: #f1e7d0; color: #2f5d62; border-color: #2f5d62; }
+body.ink-theme .passive-chip .badge-innate { background: #2f5d62; color: #f1e7d0; }
+body.ink-theme #hb-side .hb-title { color: #6b2a1f; }
+/* Botones */
+body.ink-theme button.primary-btn { background: #6b2a1f; color: #f3e7c9; border: 2px solid #1d1712; box-shadow: 0 2px 0 #1d1712; font-variant: small-caps; letter-spacing: 0.5px; }
+body.ink-theme button.primary-btn:hover { background: #82352a; }
+body.ink-theme button.secondary-btn { background: #f1e7d0; color: #2b2118; border: 1.5px solid #2b2118; box-shadow: 0 2px 0 #8f8166; }
+body.ink-theme button.secondary-btn:hover { background: #fff8e6; }
+/* Registro */
+body.ink-theme #combat-log { background: #f1e7d0; border: 1.5px solid #8f8166; color: #2b2118; }
+body.ink-theme #combat-log p { border-bottom: 1px dotted #c9b791; }
+/* Contador central */
+body.ink-theme #center-timer { background: #e9dcc0; border: 2px solid #2b2118; box-shadow: 0 3px 0 #1d1712; }
+body.ink-theme #center-timer .ct-label { color: #5e5444; }
+body.ink-theme #center-timer .ct-time, body.ink-theme #center-timer.small .ct-time { color: #6b2a1f; }
+/* Íconos de las piezas */
+.ink-icon { width: 40px; height: 40px; image-rendering: auto; }
+.gear-slot .ink-icon { width: 54px; height: 54px; }
+
+/* Ajustes de legibilidad sobre el pergamino */
+body.ink-theme * { font-family: Georgia, 'Palatino Linotype', 'Book Antiqua', serif; }
+body.ink-theme #left-col, body.ink-theme #left-col *, body.ink-theme #map-hud, body.ink-theme #map-hud *,
+body.ink-theme #hero-bar, body.ink-theme #hero-bar *, body.ink-theme #log-panel, body.ink-theme #log-panel *,
+body.ink-theme #phase-area, body.ink-theme #phase-area * { color: #2b2118; }
+body.ink-theme #game-state-text, body.ink-theme #map-hud .mh-gold, body.ink-theme #hb-name,
+body.ink-theme .skill-slot .key, body.ink-theme h3, body.ink-theme #phase-area h3 { color: #6b2a1f !important; }
+body.ink-theme .st-str, body.ink-theme #left-col .st-str { color: #9b2226 !important; }
+body.ink-theme .st-agi, body.ink-theme #left-col .st-agi { color: #2d6a4f !important; }
+body.ink-theme .st-int, body.ink-theme #left-col .st-int { color: #1d4e89 !important; }
+body.ink-theme #hb-hp-text, body.ink-theme #hb-mana-text { color: #f3e7c9 !important; }
+body.ink-theme button.primary-btn, body.ink-theme button.primary-btn * { color: #f3e7c9 !important; }
+body.ink-theme .passive-chip, body.ink-theme .passive-chip * { color: #2f5d62 !important; }
+body.ink-theme .passive-chip .badge-innate { color: #f1e7d0 !important; }
+body.ink-theme #game-container { background: #1e1711; border-color: #5e5444; }
+body.ink-theme .item-slot { background: #f1e7d0; border: 1.5px solid #8f8166; }
+body.ink-theme .item-slot.empty { background: #e4d6b9; border-style: dashed; }
+.item-slot.ink-gear { display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.item-slot.ink-gear .ink-icon { width: 30px; height: 30px; }
+body.ink-theme #hb-slots { grid-template-columns: repeat(4, 1fr); }
+.bag-item .ink-icon { width: 80%; height: auto; max-height: 90%; }
+.bag-item .ink-icon { max-width: 64px; }

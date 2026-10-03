@@ -1,7 +1,7 @@
 // Punto de entrada: conecta los botones y arranca el bucle principal.
 
 // Versión visible en el menú: si no coincide con la última subida, el navegador muestra una copia vieja (Ctrl+F5).
-const GAME_VERSION = '2026-10-03 · estética tinta v2';
+const GAME_VERSION = '2026-10-03 · upgrade gráfico (tinta animada)';
 document.getElementById('game-version').textContent = `Versión ${GAME_VERSION}`;
 
 document.getElementById('start-wave-btn').onclick = startWave;
@@ -158,4 +158,11 @@ if (location.search.includes('demo=tower')) setTimeout(() => {
         const c = makeCreep(CREEP_TYPES[k], x, y, 1, false, 0); c.arena = level; c.spawnTime = -1e9; level.creeps.push(c);
     });
     level.fovKey = null; computeFov(level, player);
+    if (location.search.includes('inv')) { // demo del inventario con piezas variadas
+        [['SNIPER', 'helm', 'rare'], ['VAMPIRE', 'boots', 'magic'], ['FROSTWITCH', 'armor', 'magic'], ['ZEUS', 'weapon', 'rare'], ['DANCER', 'gloves', 'normal']]
+            .forEach(([h, slot, q]) => addToBag(player, makeTowerItem(2, cat.find(e => e.heroKey === h && e.slot === slot), q)));
+        equipItem(player, makeTowerItem(2, cat.find(e => e.innateId === 'PERFECT_AIM'), 'magic'));
+        toggleInventory(true);
+        const w = document.querySelector('.gear-weapon'); if (w) w.dispatchEvent(new Event('mouseenter'));
+    }
 }, 300);

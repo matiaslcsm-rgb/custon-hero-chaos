@@ -567,7 +567,7 @@ function renderHeroBar() {
     }
 
     // Estructura (solo si cambió algo)
-    const signature = [p.level, p.skillPoints, p.neutral, p.inventory.map(i => i.key).join(','), Math.floor(p.attr('str')), Math.floor(p.attr('agi')),
+    const signature = [p.level, p.skillPoints, p.neutral, p.inventory.map(i => i.key).join(','), p.gear ? EQUIP_SLOTS.map(s => p.gear[s] && p.gear[s].id).join(',') : '', Math.floor(p.attr('str')), Math.floor(p.attr('agi')),
         Math.floor(p.attr('int')), p.armor.toFixed(1), ...p.skills.map(s => s.id + ':' + skillLevel(p, s) + ':' + p.keyBindings[s.id] + ':' + !!levelUpBlocker(p, s))].join('|');
     if (signature === lastKitSignature) return;
     lastKitSignature = signature;
@@ -575,10 +575,10 @@ function renderHeroBar() {
     const portrait = document.getElementById('hb-portrait');
     portrait.title = heroTooltip();
     const sym = document.getElementById('hb-symbol');
-    const url = heroSpriteUrl(p);
-    if (url) sym.innerHTML = `<img src="${url}" alt="${p.symbol}" class="pixel-img">`;
+    const url = gameMode === 'tower' ? inkPortrait(p) : heroSpriteUrl(p);
+    if (url) sym.innerHTML = `<img src="${url}" alt="${p.symbol}" class="${gameMode === 'tower' ? 'ink-portrait' : 'pixel-img'}">`;
     else { sym.textContent = p.symbol; sym.style.color = heroColor(p); }
-    document.getElementById('hb-level').innerHTML = `Nv ${p.level}` + (p.skillPoints > 0 ? ` <span class="pts" title="Puntos de habilidad para repartir con [+]">+${p.skillPoints}</span>` : '');
+    document.getElementById('hb-level').innerHTML = `Nv ${p.level}` + (p.skillPoints > 0 && gameMode !== 'tower' ? ` <span class="pts" title="Puntos de habilidad para repartir con [+]">+${p.skillPoints}</span>` : '');
     document.getElementById('hb-name').textContent = p.name;
     const stats = document.getElementById('hb-stats');
     stats.innerHTML = `<span class="st-str">FUE ${Math.floor(p.attr('str'))}</span> <span class="st-agi">AGI ${Math.floor(p.attr('agi'))}</span> ` +
@@ -591,15 +591,16 @@ function renderHeroBar() {
     for (let i = 0; i < Math.max(KIT_SIZE, actives.length); i++) {
         const s = actives[i];
         const slot = document.createElement('div');
-        if (!s) { slot.className = 'skill-slot empty'; slot.textContent = 'libre'; slot.title = 'Espacio libre: se llena en el draft'; skills.appendChild(slot); continue; }
+        if (!s) { slot.className = 'skill-slot empty'; slot.textContent = 'libre'; slot.title = gameMode === 'tower' ? 'Espacio libre: equipá una pieza con habilidad activa' : 'Espacio libre: se llena en el draft'; skills.appendChild(slot); continue; }
         const lvl = skillLevel(p, s), max = maxSkillLevel(s);
         slot.className = 'skill-slot' + (lvl === 0 ? ' locked' : '') + (s.isUltimate ? ' ult' : '');
         slot.dataset.id = s.id;
         slot.title = `${s.name}${s.isUltimate ? ' (definitiva)' : ''}\n${stripHtml(skillCostLine(s, lvl))}\n${stripHtml(describeSkill(s, lvl))}` +
             (p.skillPoints > 0 && levelUpBlocker(p, s) ? `\n🔒 ${levelUpBlocker(p, s)}` : '');
-        slot.innerHTML = `<span class="key">${(p.keyBindings[s.id] || '—').toUpperCase()}</span><span class="nm">${s.name}</span>` +
+        slot.innerHTML = (gameMode === 'tower' ? `<img class="ink-skill-icon" src="${inkSkillIcon(s)}">` : '') +
+            `<span class="key">${(p.keyBindings[s.id] || '—').toUpperCase()}</span><span class="nm">${s.name}</span>` +
             `<span class="pips">${Array.from({ length: max }, (_, j) => `<i class="${j < lvl ? 'on' : ''}"></i>`).join('')}</span><div class="cd"></div>`;
-        const btn = levelButton(s); if (btn) slot.appendChild(btn);
+        const btn = gameMode === 'tower' ? null : levelButton(s); if (btn) slot.appendChild(btn); // en la Torre las habilidades suben forjando
         skills.appendChild(slot);
     }
 
@@ -612,12 +613,25 @@ function renderHeroBar() {
         chip.className = 'passive-chip' + (innate ? ' innate' : '') + (lvl === 0 ? ' locked' : '');
         chip.innerHTML = innate ? `◆ ${a.name} <span class="badge-innate">Innato</span>` : `◇ ${a.name} ${lvl}/${maxSkillLevel(a)}`;
         chip.title = `${innate ? 'Innato' : 'Pasiva'}: ${a.name}\n${stripHtml(innate ? a.description : describeSkill(a, lvl))}`;
-        if (!innate) { const btn = levelButton(a); if (btn) chip.appendChild(btn); }
+        if (!innate && gameMode !== 'tower') { const btn = levelButton(a); if (btn) chip.appendChild(btn); }
         passives.appendChild(chip);
     });
 
-    // Inventario: 6 casillas + el neutral
+    // Inventario: 6 casillas + el neutral (en la Torre: las 8 ranuras de equipo; clic abre el inventario)
     const slots = document.getElementById('hb-slots'); slots.innerHTML = '';
+    if (gameMode === 'tower' && p.gear) {
+        document.querySelector('#hb-side .hb-title').textContent = 'Equipo (I)';
+        EQUIP_SLOTS.forEach(s => {
+            const item = p.gear[s], el = document.createElement('div');
+            el.className = 'item-slot ink-gear' + (item ? '' : ' empty');
+            if (item) { el.innerHTML = `<img class="ink-icon" src="${towerItemIcon(item)}">`; el.style.borderColor = qColor(item); el.title = `${item.name} (nivel ${item.level})`; }
+            else el.title = TOWER_SLOTS[slotKind(s)].name + ': vacío';
+            el.onclick = () => toggleInventory(true);
+            slots.appendChild(el);
+        });
+        return;
+    }
+    document.querySelector('#hb-side .hb-title').textContent = 'Inventario';
     for (let i = 0; i < INVENTORY_SLOTS; i++) {
         const inv = p.inventory[i], el = document.createElement('div');
         el.className = 'item-slot' + (inv ? '' : ' empty');
@@ -835,15 +849,17 @@ function drawUnit(u, color, symbol, pos = u, opts = {}) {
         halfHeight = Math.max(TILE / 2, size / 2);
         if (gameMode === 'tower' && inkPlanFor(u)) halfHeight = inkHalfHeight(u); // figuras de tinta: más altas
         // Sombra en el piso; en los héroes, un aro del color del bando (celeste vos, naranja los rivales)
+        if (gameMode !== 'tower') { // en la Torre la sombra la dibuja la figura de tinta
         ctx.fillStyle = 'rgba(0,0,0,0.45)';
         ctx.beginPath(); ctx.ellipse(cx, cy + size * 0.42, size * 0.34, size * 0.12, 0, 0, Math.PI * 2); ctx.fill();
-        if (u.isHero) { ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(cx, cy + size * 0.42, size * 0.4, size * 0.15, 0, 0, Math.PI * 2); ctx.stroke(); }
+        }
+        if (u.isHero && gameMode !== 'tower') { ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(cx, cy + size * 0.42, size * 0.4, size * 0.15, 0, 0, Math.PI * 2); ctx.stroke(); }
         if (u.bobSeed === undefined) u.bobSeed = Math.random() * 6;
         const bob = Math.sin(fxClock * 5 + u.bobSeed) * 1.2;
         const pose = pos.pose;
         const look = !u.isHero && u.type ? CREEP_LOOKS[u.type.key] : null;
         if (look) drawCreepLook(u, look, cx, cy, size);
-        if (opts.glow) { ctx.shadowColor = color; ctx.shadowBlur = 8; }
+        if (opts.glow && gameMode !== 'tower') { ctx.shadowColor = color; ctx.shadowBlur = 8; } // en la Torre, sin brillo (estética tinta)
         if (pose && pose.glow) { ctx.shadowColor = pose.glow; ctx.shadowBlur = 16; }
         const alpha = look && look.alpha ? look.alpha(u) : 1;
         if (alpha < 1) ctx.globalAlpha = alpha;
@@ -864,10 +880,11 @@ function drawUnit(u, color, symbol, pos = u, opts = {}) {
     }
     if (u.maxHp) {
         const pct = Math.max(0, u.hp / u.maxHp), w = Math.max(TILE - 4, opts.big ? 40 : 0), top = cy - halfHeight - 3;
-        ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(cx - w / 2 - 1, top - 1, w + 2, 5);
-        ctx.fillStyle = pct > 0.5 ? '#2dc653' : pct > 0.25 ? '#ffb703' : '#ff0055';
+        const ink = gameMode === 'tower'; // en la Torre: barra roja con borde de tinta
+        ctx.fillStyle = ink ? '#1d1712' : 'rgba(0,0,0,0.7)'; ctx.fillRect(cx - w / 2 - 1, top - 1, w + 2, 5);
+        ctx.fillStyle = ink ? (u.isHero ? '#a8382d' : pct > 0.5 ? '#8f2d24' : '#c0522f') : pct > 0.5 ? '#2dc653' : pct > 0.25 ? '#ffb703' : '#ff0055';
         ctx.fillRect(cx - w / 2, top, w * pct, 3);
-        if (u.isHero && u.maxMana) { ctx.fillStyle = '#4895ef'; ctx.fillRect(cx - w / 2, top + 4, w * Math.max(0, u.mana / u.maxMana), 2); }
+        if (u.isHero && u.maxMana) { ctx.fillStyle = ink ? '#2f5d62' : '#4895ef'; ctx.fillRect(cx - w / 2, top + 4, w * Math.max(0, u.mana / u.maxMana), 2); }
     }
     if (u.effects && u.effects.length) {
         ctx.font = '10px monospace';

@@ -499,7 +499,9 @@ function drawTowerTiles(level) {
         const cx = level.start.x * TILE + TILE / 2, cy = level.start.y * TILE + TILE / 2;
         for (let i = 0; i < 8; i++) {
             const a = i / 8 * Math.PI * 2, sx = cx + Math.cos(a) * TILE * 1.6, sy = cy + Math.sin(a) * TILE * 1.6;
-            ctx.fillStyle = '#8d99ae'; ctx.fillRect(sx - 5, sy - 8, 10, 14); ctx.fillStyle = '#5c677d'; ctx.fillRect(sx - 5, sy + 3, 10, 3);
+            ctx.fillStyle = INK.stone; ctx.strokeStyle = INK.line; ctx.lineWidth = 2; // menhir dibujado en tinta
+            ctx.beginPath(); ctx.moveTo(sx - 5, sy + 6); ctx.lineTo(sx - 6, sy - 6); ctx.lineTo(sx - 1, sy - 11); ctx.lineTo(sx + 5, sy - 7); ctx.lineTo(sx + 5, sy + 6); ctx.closePath(); ctx.fill(); ctx.stroke();
+            ctx.strokeStyle = 'rgba(29,23,18,0.45)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(sx - 4, sy + 4); ctx.lineTo(sx - 1, sy - 2); ctx.moveTo(sx - 4, sy); ctx.lineTo(sx - 2, sy - 4); ctx.stroke();
         }
     }
 }
@@ -546,7 +548,7 @@ function renderTower(level, dt) {
     });
     if (player.isAlive()) {
         const pos = drawPos(player, dt);
-        ctx.save(); ctx.strokeStyle = heroColor(player); ctx.globalAlpha = 0.45; ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]);
+        ctx.save(); ctx.strokeStyle = '#6b2a1f'; ctx.globalAlpha = 0.5; ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]);
         ctx.beginPath(); ctx.arc(pos.x * TILE + TILE / 2, pos.y * TILE + TILE / 2, effRange(player) * TILE, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
         drawUnit(player, heroColor(player), player.symbol, pos, { glow: true });
     }
