@@ -11,8 +11,13 @@ function towerModalOpen() { return statsOpen || invOpen || forgeOpen; }
 const qColor = item => (gameMode === 'tower' ? ITEM_QUALITY[item.quality].ink : ITEM_QUALITY[item.quality].color);
 const SLOT_INK_ICON = { helm: 'helm', armor: 'armor', gloves: 'glove', boots: 'boot', amulet: 'amulet', ring: 'ring' };
 function towerItemIcon(item) {
+    const color = inkMute(ATTR_INFO[HERO_TEMPLATES[item.heroKey].primaryAttr].color, 0.2);
+    // game-icons.net (js/data/gameIcons.js): el objeto grande y, en la esquina, la habilidad que trae
+    const main = typeof GAME_ICON_FOR !== 'undefined' && (item.slot === 'weapon' ? GAME_ICON_FOR.weapons[item.heroKey] : GAME_ICON_FOR.slots[slotKind(item.slot)]);
+    const skill = itemSkill(item);
+    if (hasGameIcon(main)) return inkGameIcon(main, color, skill && GAME_ICON_FOR.skills[skill.id], INK.line);
     const kind = item.slot === 'weapon' ? HERO_WEAPONS[item.heroKey].shape : SLOT_INK_ICON[slotKind(item.slot)];
-    return inkIcon(kind, inkMute(ATTR_INFO[HERO_TEMPLATES[item.heroKey].primaryAttr].color, 0.2));
+    return inkIcon(kind, color);
 }
 
 function itemTooltipHtml(item) {

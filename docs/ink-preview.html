@@ -12,6 +12,7 @@
 <script>const TILE = 34;</script>
 <script src="../js/sprites.js"></script>
 <script src="../js/inkart.js"></script>
+<script src="../js/data/gameIcons.js"></script>
 <script>
 const g = document.getElementById('c').getContext('2d');
 g.fillStyle = INK.paper; g.fillRect(0, 0, 1000, 420);
@@ -39,6 +40,12 @@ g.fillText('caminata: 8 cuadros', 430, 222);
 const t = inkTiles();
 [t.face, t.top, t.floors[0], t.floors[1]].forEach((im, i) => g.drawImage(im, 20 + i * 90, 220, 80, 80));
 g.fillText('pared (frente) · pared (arriba) · piso · piso', 20, 320);
+// Íconos de game-icons.net repintados en tinta (habilidades arriba, armas y ranuras abajo)
+g.fillStyle = INK.paper; g.fillRect(0, 420, 1000, 220);
+const cols = ['#a33a3a', '#2d6a4f', '#1d4e89'];
+const draw = (names, y, badge) => names.forEach((n, i) => { const im = new Image(); im.onload = () => g.drawImage(im, 8 + (i % 25) * 39, y + Math.floor(i / 25) * 40); im.src = inkGameIcon(n, inkMute(cols[i % 3], 0.2), badge ? Object.values(GAME_ICON_FOR.skills)[i] : null, INK.line); });
+draw(Object.values(GAME_ICON_FOR.skills), 424);
+draw(Object.values(GAME_ICON_FOR.weapons).concat(Object.values(GAME_ICON_FOR.slots)), 548, true);
 </script>
 </body>
 </html>

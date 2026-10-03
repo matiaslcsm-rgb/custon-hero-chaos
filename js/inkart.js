@@ -392,12 +392,40 @@ function inkIcon(kind, color = '#a33a3a') {
     (INK_ICON_DRAW[kind] || INK_ICON_DRAW.eye)(g, { main: color }, rnd);
     return (inkIconCache[key] = c.toDataURL());
 }
+// Ícono de game-icons.net (js/data/gameIcons.js) repintado en tinta: sombra corrida, relleno del color y contorno.
+// badge: otro ícono chico en la esquina (en las piezas, la habilidad que traen).
+function inkGameGlyph(g, name, color, x, y, size) {
+    const ps = (GAME_ICON_PATHS[name] || []).map(d => new Path2D(d)), k = size / 512;
+    g.save(); g.translate(x + size * 0.03, y + size * 0.035); g.scale(k, k);
+    g.fillStyle = 'rgba(29,23,18,0.5)'; ps.forEach(p => g.fill(p));
+    g.restore();
+    g.save(); g.translate(x, y); g.scale(k, k);
+    g.fillStyle = color; ps.forEach(p => g.fill(p));
+    g.strokeStyle = INK.line; g.lineWidth = 0.9 / k; g.lineJoin = 'round'; ps.forEach(p => g.stroke(p));
+    g.restore();
+}
+function hasGameIcon(name) { return typeof GAME_ICON_PATHS !== 'undefined' && !!GAME_ICON_PATHS[name]; }
+function inkGameIcon(name, color = '#a33a3a', badge = null, badgeColor = color) {
+    const key = ['gi', name, color, badge, badgeColor].join('|');
+    if (inkIconCache[key]) return inkIconCache[key];
+    const c = document.createElement('canvas'); c.width = c.height = 48;
+    const g = c.getContext('2d');
+    inkGameGlyph(g, name, color, 3, 3, 42);
+    if (badge && hasGameIcon(badge)) {
+        g.fillStyle = INK.paper; g.strokeStyle = INK.line; g.lineWidth = 1.6;
+        g.beginPath(); g.arc(36, 36, 11.5, 0, Math.PI * 2); g.fill(); g.stroke();
+        inkGameGlyph(g, badge, badgeColor, 27.5, 27.5, 17);
+    }
+    return (inkIconCache[key] = c.toDataURL());
+}
 // Ícono de una habilidad según lo que hace (su primera etiqueta reconocible)
 const INK_SKILL_KINDS = [['CURACIÓN', 'heal'], ['ROBO_VIDA', 'lifesteal'], ['MOVILIDAD', 'mobility'], ['CONTROL', 'control'], ['ÁREA', 'area'], ['MÁGICO', 'magic'], ['PURO', 'magic'], ['FÍSICO', 'physical'], ['MEJORA', 'buff']];
 function inkSkillIcon(skill) {
     const kind = (INK_SKILL_KINDS.find(([t]) => (skill.tags || []).includes(t)) || [null, 'eye'])[1];
     const hero = skill.heroKey && HERO_TEMPLATES[skill.heroKey];
-    return inkIcon(kind, inkMute(hero ? ATTR_INFO[hero.primaryAttr].color : '#a33a3a', 0.2));
+    const color = inkMute(hero ? ATTR_INFO[hero.primaryAttr].color : '#a33a3a', 0.2);
+    const name = typeof GAME_ICON_FOR !== 'undefined' && GAME_ICON_FOR.skills[skill.id];
+    return hasGameIcon(name) ? inkGameIcon(name, color) : inkIcon(kind, color);
 }
 // Retrato: busto de la figura del héroe (según su equipo)
 const inkPortraitCache = {};

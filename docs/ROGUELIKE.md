@@ -151,6 +151,9 @@ Al morir no se pierde todo: **tu cadáver y tus cosas quedan en el mapa** y pued
      principio. Deja 5 teclas (R T F Q V) para las activas del equipo.
    - **Hechizo inicial**: al empezar la run recibís, ya equipada, una pieza normal con una activa al azar (ni
      definitiva ni de movilidad). Cada run arranca distinta.
+   - **Íconos**: habilidades, armas y ranuras usan íconos de game-icons.net (CC BY 3.0, créditos en docs/CREDITOS.md y
+     en el menú), repintados en tinta. Las piezas muestran el objeto grande y, en la esquina, la habilidad que traen.
+     La tabla de qué ícono va con qué está en js/data/gameIcons.js (GAME_ICON_FOR).
    - **55 piezas**: cada habilidad (44) y cada innato (11) de los héroes. La definitiva va en la armadura, el innato en
      el amuleto, la de movilidad en las botas, la primera que pega en el arma y el resto en casco o guantes. Anillos con
      stats. Calidades Normal / Mágico (1-2 afijos) / Raro (3-4 afijos), con nombre al estilo Diablo.
