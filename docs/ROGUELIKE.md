@@ -13,6 +13,18 @@ Mjölnir que tira rayos encadenados) y que **suben de nivel con el uso**, eligie
 partida termine en combinaciones únicas y raras, armadas con lo que te tocó o con lo que fuiste buscando.
 Al morir no se pierde todo: **tu cadáver y tus cosas quedan en el mapa** y pueden terminar en manos de los monstruos.
 
+## 1 bis. Decisiones del 2026-10-03 (tarde): héroes convertidos en ítems
+
+- **Sin elección de héroe en Tower Chaos**: arrancás como un **aventurero sin clase**, con stats parejos y sin innato.
+  Tu "clase" sale de lo que encontrás y de cómo repartís los puntos de stats.
+- **Los 11 héroes se convierten en ítems**: cada habilidad (44) y cada innato (11) pasa a ser una **pieza de equipo**
+  (arma, casco, armadura, guantes, botas, anillo, amuleto) que trae esa habilidad y sus stats. Ej: un rifle con
+  Disparo Potente, unas botas con Salto Sangriento, un amuleto con Puntería Perfecta.
+- **Sin bonos de set**: juntar piezas del mismo héroe no da nada extra. Los bonos de set encasillan en arquetipos;
+  lo que se busca son **sinergias**: mezclar libremente (el arma del Sniper con la armadura de Axe y las botas del Danzante).
+- **Las habilidades de cada pieza crecen con el uso**: lanzarla o que se active le suma experiencia y sube de nivel
+  (la mecánica de ítems que suben de nivel de §2.4).
+
 ## 2. Reglas propuestas
 
 ### 2.1 Mapa
@@ -43,6 +55,7 @@ Al morir no se pierde todo: **tu cadáver y tus cosas quedan en el mapa** y pued
 - Tienen **radio de alerta**: están quietos o patrullando hasta que te ven.
 
 ### 2.3 Héroe
+- *(Cambió: ver §1 bis — ahora arrancás como aventurero sin clase.)*
 - Arranca **solo con su héroe y su innato**, sin habilidades. Sube de nivel con la experiencia (atributos, como ahora).
 - **Sin draft de habilidades en este modo** (por ahora): las habilidades vienen de los **ítems** (un arma única puede
   traer su propio efecto o una activa con tecla).
