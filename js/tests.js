@@ -1147,6 +1147,20 @@ test('Torre: el héroe camina en diagonal hacia donde hiciste clic (los creeps, 
     check(!(cd.dx && cd.dy), 'el creep sigue en cruz');
 }, { random: true });
 
+test('Torre: visión con paredes que tapan y distancia según el héroe', () => {
+    const level = newTower();
+    // Una casilla de piso detrás de una pared, cerca del héroe: no se ve
+    let hidden = null;
+    for (let y = 1; y < ROWS - 1 && !hidden; y++) for (let x = 1; x < COLS - 2 && !hidden; x++)
+        if (walkable(level, x, y) && !walkable(level, x + 1, y) && walkable(level, x + 2, y)) hidden = { x, y };
+    if (hidden) {
+        player.x = hidden.x; player.y = hidden.y; level.fovKey = null; computeFov(level, player);
+        check(!canSee(level, hidden.x + 2, hidden.y), 'la pared tapa lo que hay detrás');
+        check(canSee(level, hidden.x + 1, hidden.y), 'la pared misma se ve');
+    }
+    checkEq(heroSight(player), TOWER.baseSight, 'visión base');
+}, { random: true });
+
 test('Torre: la escalera se abre al vencer al guardián y el nivel queda igual al volver', () => {
     const level = newTower();
     level.creeps.forEach(c => { if (!c.isGuardian) c.hp = 0; });

@@ -12,10 +12,11 @@
 //   persiguen rodeando paredes (mapa de distancias, ver flowField).
 
 const TOWER = {
-    floors: 10, cols: 60, rows: 40,
+    floors: 10, cols: 90, rows: 60,
     heroSpeed: 1.4,       // el héroe camina 40% más rápido que en una arena (el mapa es mucho más grande)
-    rooms: { tries: 260, want: 11, minW: 6, maxW: 12, minH: 5, maxH: 9 },
-    sight: 7,             // radio de visión (descubre el mapa y muestra creeps)
+    rooms: { tries: 900, want: 24, minW: 6, maxW: 13, minH: 5, maxH: 10 },
+    baseSight: 6,         // distancia de visión base del héroe (las paredes tapan la vista)
+    visionPerPoint: 0.5,  // cada punto de Visión suma media casilla
     aggroRadius: 6,       // los creeps te persiguen si estás a esta distancia o menos
     leash: 16,            // y te sueltan si te alejás más que esto de su lugar
     respawnDelay: 3,
@@ -71,7 +72,7 @@ function enterTowerFloor(floor, where = 'start') {
     player.x = level.start.x; player.y = level.start.y;
     player.moveTarget = null; player.focus = null;
     level.creeps.forEach(c => { c.aggro = false; });
-    revealAround(level, player.x, player.y);
+    level.fovKey = null; computeFov(level, player);
     setStateText(`TOWER CHAOS · NIVEL ${floor} DE ${TOWER.floors}`);
     sfx('wave');
     if (where === 'start') log(floor === 1 ? '🪨 Estás en el círculo de piedra, en la base de la torre.' : `🗼 Subiste al nivel ${floor}. El guardián cuida la escalera al siguiente.`);
@@ -214,12 +215,38 @@ function towerStepCreep(c, tx, ty, dt) {
     c.x += dir.dx; c.y += dir.dy;
 }
 
-function revealAround(level, x, y) {
-    const r = TOWER.sight;
-    for (let yy = Math.max(0, y - r); yy <= Math.min(ROWS - 1, y + r); yy++)
-        for (let xx = Math.max(0, x - r); xx <= Math.min(COLS - 1, x + r); xx++)
-            if (Math.hypot(xx - x, yy - y) <= r) level.explored[yy][xx] = 1;
+// --- VISIÓN ---
+// Distancia de visión del héroe: base + puntos de Visión (ver la ventana de stats).
+function heroSight(hero) { return TOWER.baseSight + ((hero.towerStats && hero.towerStats.vis) || 0) * TOWER.visionPerPoint; }
+
+// ¿Hay pared entre (x0, y0) y (x1, y1)? Recorre la línea casilla por casilla (sin contar las puntas).
+function lineClear(level, x0, y0, x1, y1) {
+    let x = x0, y = y0;
+    const dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0), sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
+    let err = dx + dy;
+    while (true) {
+        if (x === x1 && y === y1) return true;
+        if ((x !== x0 || y !== y0) && level.walls[y][x]) return false;
+        const e2 = 2 * err;
+        if (e2 >= dy) { err += dy; x += sx; }
+        if (e2 <= dx) { err += dx; y += sy; }
+    }
 }
+
+// Campo de visión: lo que el héroe ve ahora (las paredes tapan) y lo que ya descubrió. Se recalcula solo si se movió.
+function computeFov(level, hero) {
+    const r = heroSight(hero), key = hero.x + ',' + hero.y + ',' + r;
+    if (level.fovKey === key && level.visible) return;
+    level.fovKey = key;
+    const W = COLS, vis = level.visible = new Uint8Array(W * ROWS), R = Math.ceil(r);
+    for (let y = Math.max(0, hero.y - R); y <= Math.min(ROWS - 1, hero.y + R); y++)
+        for (let x = Math.max(0, hero.x - R); x <= Math.min(COLS - 1, hero.x + R); x++) {
+            if (Math.hypot(x - hero.x, y - hero.y) > r || !lineClear(level, hero.x, hero.y, x, y)) continue;
+            vis[y * W + x] = 1;
+            if (!level.explored[y][x]) { level.explored[y][x] = 1; markMinimap(level, x, y); }
+        }
+}
+function canSee(level, x, y) { return !!(level.visible && level.visible[y * COLS + x]); }
 
 // --- CADA FRAME ---
 function updateTower(dt) {
@@ -230,13 +257,13 @@ function updateTower(dt) {
     // Renacer en el círculo de piedra (nivel 1)
     if (!player.isAlive() && player.respawnAt && gameClock >= player.respawnAt) { towerRespawn(); return; }
     updateHero(player, level, dt);
-    if (player.isAlive()) revealAround(level, player.x, player.y);
+    if (player.isAlive()) computeFov(level, player);
     updateProjectiles(level, dt);
     // Creeps: solo se mueven los que te vieron (radio de alerta); te sueltan si te alejás mucho de su lugar
     level.creeps.forEach(c => {
         if (!c.isAlive()) return;
         const d = Math.hypot(c.x - player.x, c.y - player.y);
-        if (!c.aggro && player.isAlive() && d <= TOWER.aggroRadius) c.aggro = true;
+        if (!c.aggro && player.isAlive() && d <= TOWER.aggroRadius && canSee(level, c.x, c.y)) c.aggro = true; // te tienen que ver
         if (c.aggro && (!player.isAlive() || Math.hypot(player.x - c.spawnX, player.y - c.spawnY) > TOWER.leash)) {
             c.aggro = false;
         }
@@ -305,37 +332,51 @@ function towerInfoHtml() {
         `<p class="subtitle" style="color:#888">En construcción: ítems, cofres, biomas y más (ver docs/ROGUELIKE.md).</p>`;
 }
 
-// Fondo del nivel (se dibuja una vez): piso de piedra y paredes de ladrillo.
-function towerBackground(level) {
-    if (level.bg) return level.bg;
-    const c = document.createElement('canvas');
-    c.width = COLS * TILE; c.height = ROWS * TILE;
-    const g = c.getContext('2d');
-    let seed = level.floor * 9973 + 17;
+// Baldosas del nivel (se dibujan una vez y se reutilizan): 4 pisos de piedra, pared de frente y pared de arriba.
+// Se dibujan solo las casillas de la pantalla (un nivel de 90×60 entero serían ~25 MB de imagen).
+let towerTileCache = null;
+function towerTiles() {
+    if (towerTileCache) return towerTileCache;
+    let seed = 4242;
     const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-    for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) {
-        const px = x * TILE, py = y * TILE;
-        if (level.walls[y][x]) {
-            g.fillStyle = '#1b1820'; g.fillRect(px, py, TILE, TILE);
-            const open = y + 1 < ROWS && !level.walls[y + 1][x]; // cara de la pared que da al piso
-            g.fillStyle = open ? '#4a3f52' : '#2a2430';
-            for (let r = 0; r < 3; r++) for (let k = 0; k < 2; k++) g.fillRect(px + ((r % 2) * 8) + k * 17, py + r * 11 + 1, 15, 9);
-        } else {
-            const shade = ['#2e2b33', '#2a2730', '#322e37', '#29262d'][Math.floor(rnd() * 4)];
-            g.fillStyle = shade; g.fillRect(px, py, TILE, TILE);
-            g.fillStyle = '#24212a'; g.fillRect(px, py, TILE, 1); g.fillRect(px, py, 1, TILE);
-            for (let i = 0; i < 5; i++) { g.fillStyle = rnd() < 0.5 ? '#38343e' : '#232028'; g.fillRect(px + Math.floor(rnd() * 15) * 2, py + Math.floor(rnd() * 15) * 2, 2, 2); }
-        }
+    const tile = draw => { const c = document.createElement('canvas'); c.width = c.height = TILE; draw(c.getContext('2d')); return c; };
+    const floor = shade => tile(g => {
+        g.fillStyle = shade; g.fillRect(0, 0, TILE, TILE);
+        g.fillStyle = '#24212a'; g.fillRect(0, 0, TILE, 1); g.fillRect(0, 0, 1, TILE);
+        for (let i = 0; i < 6; i++) { g.fillStyle = rnd() < 0.5 ? '#38343e' : '#232028'; g.fillRect(Math.floor(rnd() * 15) * 2, Math.floor(rnd() * 15) * 2, 2, 2); }
+    });
+    const wall = face => tile(g => {
+        g.fillStyle = '#1b1820'; g.fillRect(0, 0, TILE, TILE);
+        g.fillStyle = face ? '#4a3f52' : '#2a2430';
+        for (let r = 0; r < 3; r++) for (let k = 0; k < 2; k++) g.fillRect(((r % 2) * 8) + k * 17, r * 11 + 1, 15, 9);
+    });
+    return (towerTileCache = { floors: ['#2e2b33', '#2a2730', '#322e37', '#29262d'].map(floor), face: wall(true), top: wall(false) });
+}
+function drawTowerTiles(level) {
+    const t = towerTiles();
+    const x0 = Math.floor(camera.x), y0 = Math.floor(camera.y);
+    for (let y = y0; y <= Math.min(ROWS - 1, y0 + VIEW_ROWS); y++) for (let x = x0; x <= Math.min(COLS - 1, x0 + VIEW_COLS); x++) {
+        if (!level.explored[y][x]) continue;
+        const img = level.walls[y][x] ? (y + 1 < ROWS && !level.walls[y + 1][x] ? t.face : t.top) : t.floors[((x * 73856093) ^ (y * 19349663)) & 3];
+        ctx.drawImage(img, x * TILE, y * TILE);
     }
     // Círculo de piedra en la entrada del nivel 1
-    if (level.floor === 1) {
+    if (level.floor === 1 && level.explored[level.start.y][level.start.x]) {
         const cx = level.start.x * TILE + TILE / 2, cy = level.start.y * TILE + TILE / 2;
         for (let i = 0; i < 8; i++) {
             const a = i / 8 * Math.PI * 2, sx = cx + Math.cos(a) * TILE * 1.6, sy = cy + Math.sin(a) * TILE * 1.6;
-            g.fillStyle = '#8d99ae'; g.fillRect(sx - 5, sy - 8, 10, 14); g.fillStyle = '#5c677d'; g.fillRect(sx - 5, sy + 3, 10, 3);
+            ctx.fillStyle = '#8d99ae'; ctx.fillRect(sx - 5, sy - 8, 10, 14); ctx.fillStyle = '#5c677d'; ctx.fillRect(sx - 5, sy + 3, 10, 3);
         }
     }
-    return (level.bg = c);
+}
+
+// Minimapa guardado en una imagen chica (2 px por casilla) que se va pintando a medida que descubrís.
+function markMinimap(level, x, y) {
+    if (typeof document === 'undefined') return;
+    if (!level.minimap) { level.minimap = document.createElement('canvas'); level.minimap.width = COLS * 2; level.minimap.height = ROWS * 2; }
+    const g = level.minimap.getContext('2d');
+    g.fillStyle = level.walls[y][x] ? '#4a3f52' : '#8d8a94';
+    g.fillRect(x * 2, y * 2, 2, 2);
 }
 
 function updateCamera(level, hero, dt) {
@@ -350,7 +391,7 @@ function renderTower(level, dt) {
     ctx.save();
     if (shakeAmount) ctx.translate((Math.random() - 0.5) * shakeAmount * 2, (Math.random() - 0.5) * shakeAmount * 2);
     ctx.translate(-camera.x * TILE, -camera.y * TILE);
-    ctx.drawImage(towerBackground(level), 0, 0);
+    drawTowerTiles(level);
     // Escalera (cerrada hasta vencer al guardián)
     const st = level.stairs, sx = st.x * TILE, sy = st.y * TILE;
     if (level.explored[st.y][st.x]) {
@@ -362,7 +403,7 @@ function renderTower(level, dt) {
     ctx.font = '16px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#adb5bd';
     level.corpses.forEach(c => ctx.fillText('☠', c.x * TILE + TILE / 2, c.y * TILE + TILE / 2));
     // Creeps visibles (dentro de tu radio de visión) y proyectiles
-    const visible = c => Math.hypot(c.x - player.x, c.y - player.y) <= TOWER.sight;
+    const visible = c => canSee(level, c.x, c.y);
     level.creeps.forEach(c => { if (c.isAlive() && visible(c)) drawUnit(c, c.color, c.symbol, drawPos(c, dt), { glow: c.isGuardian, big: c.isGuardian }); });
     level.projectiles.forEach(p => {
         ctx.fillStyle = p.isCrit ? '#ffd166' : (p.attacker.isHero ? heroColor(p.attacker) : p.attacker.color || '#fefae0');
@@ -380,7 +421,7 @@ function renderTower(level, dt) {
     const x0 = Math.floor(camera.x), y0 = Math.floor(camera.y);
     for (let y = y0; y <= Math.min(ROWS - 1, y0 + VIEW_ROWS); y++) for (let x = x0; x <= Math.min(COLS - 1, x0 + VIEW_COLS); x++) {
         if (!level.explored[y][x]) { ctx.fillStyle = '#000'; ctx.fillRect(x * TILE, y * TILE, TILE + 1, TILE + 1); }
-        else if (Math.hypot(x - player.x, y - player.y) > TOWER.sight) { ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(x * TILE, y * TILE, TILE + 1, TILE + 1); }
+        else if (!canSee(level, x, y)) { ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(x * TILE, y * TILE, TILE + 1, TILE + 1); }
     }
     ctx.restore();
     renderTowerMinimap(level);
@@ -401,13 +442,9 @@ function renderTower(level, dt) {
 
 // Minimapa (arriba a la derecha): lo descubierto, la escalera, el guardián si lo viste y vos.
 function renderTowerMinimap(level) {
-    const s = 2.4, w = COLS * s, h = ROWS * s, ox = MAP_W - w - 8, oy = 8;
+    const s = 1.7, w = COLS * s, h = ROWS * s, ox = MAP_W - w - 8, oy = 8;
     ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(ox - 3, oy - 3, w + 6, h + 6);
-    for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) {
-        if (!level.explored[y][x]) continue;
-        ctx.fillStyle = level.walls[y][x] ? '#4a3f52' : '#8d8a94';
-        ctx.fillRect(ox + x * s, oy + y * s, s, s);
-    }
+    if (level.minimap) ctx.drawImage(level.minimap, ox, oy, w, h);
     const dot = (x, y, color, r = 2.2) => { ctx.fillStyle = color; ctx.beginPath(); ctx.arc(ox + (x + 0.5) * s, oy + (y + 0.5) * s, r, 0, Math.PI * 2); ctx.fill(); };
     if (level.explored[level.stairs.y][level.stairs.x]) dot(level.stairs.x, level.stairs.y, level.stairsOpen ? '#2dc653' : '#adb5bd', 2.6);
     const g = level.guardian;
