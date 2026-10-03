@@ -57,7 +57,7 @@ function castAt(hero, skill, x, y) {
 
 function mouseToTile(e) {
     const rect = canvas.getBoundingClientRect();
-    return { x: (e.clientX - rect.left) / rect.width * COLS - 0.5, y: (e.clientY - rect.top) / rect.height * ROWS - 0.5 };
+    return { x: (e.clientX - rect.left) / rect.width * VIEW_COLS - 0.5 + camera.x, y: (e.clientY - rect.top) / rect.height * VIEW_ROWS - 0.5 + camera.y };
 }
 
 function canControlPlayer() { return player && inCombat() && !autopilot && player.arena && !player.inRest && player.isAlive(); }
@@ -110,6 +110,7 @@ function focusChaseDirection(hero) {
     const f = hero.focusChase && validFocus(hero);
     if (!f) return null;
     if (Math.hypot(f.x - hero.x, f.y - hero.y) <= effRange(hero)) return null;
+    if (hero.arena && hero.arena.walls) return towerPathDir(hero, f); // en la Torre, rodeando paredes
     return { dx: Math.sign(f.x - hero.x), dy: Math.sign(f.y - hero.y) };
 }
 
@@ -118,6 +119,7 @@ function moveTargetDirection(hero) {
     const t = hero.moveTarget;
     if (!t) return null;
     if (t.arena !== hero.arena || (hero.x === t.x && hero.y === t.y)) { hero.moveTarget = null; return null; }
+    if (hero.arena && hero.arena.walls) return towerPathDir(hero, t) || (hero.moveTarget = null); // en la Torre, rodeando paredes
     return { dx: Math.sign(t.x - hero.x), dy: Math.sign(t.y - hero.y) };
 }
 

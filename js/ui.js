@@ -3,7 +3,7 @@
 const canvas = document.getElementById('ascii-canvas');
 const ctx = canvas.getContext('2d');
 const TILE = 34; // más grande desde que se sacó la barra de arriba
-const MAP_W = COLS * TILE, MAP_H = ROWS * TILE; // tamaño lógico del mapa (se dibuja siempre en estas coordenadas)
+const MAP_W = VIEW_COLS * TILE, MAP_H = VIEW_ROWS * TILE; // tamaño lógico de la pantalla (se dibuja siempre en estas coordenadas)
 
 // Tamaño real del canvas: el mapa normal o agrandado (M), y multiplicado por la densidad de la pantalla para que se vea nítido.
 let mapScale = 1;
@@ -693,6 +693,7 @@ function renderCombatInfo() {
     } else if (gameState === 'ENDED') html = `<h3>Fin de la partida</h3><p class="subtitle">Mirá el ranking a la izquierda. Tocá "Nueva Partida" para jugar otra.</p>`;
     else if (player.eliminated) html = `<h3>Quedaste eliminado</h3><p class="subtitle">Podés seguir mirando: clic en un héroe del ranking.</p>`;
     else if (gameState === 'BOSS') html = `<h3>👹 Jefe de ronda</h3>${pressureNote(arena)}<p class="subtitle">${arena && arena.boss ? `<b>${arena.boss.label}</b>: ${arena.boss.type.mechanic} ${arena.boss.type.escalation}` : 'Esperando a que terminen los demás.'}</p><p class="subtitle">Morir cuesta vidas. Pasados ${BOSS_FIGHT.enrageAfter}s se enfurece. Los 3 más rápidos cobran extra.</p>`;
+    else if (arena && arena.kind === 'tower') html = towerInfoHtml();
     else if (arena && arena.kind === 'duel') {
         const rival = arena.heroes.find(h => h !== hero);
         html = `<h3>⚔ Duelo</h3><p class="subtitle">${hero === player ? 'Peleás' : hero.name + ' pelea'} contra <b>${rival.displayName}</b>. Gana quien mata al otro o, a los ${DUEL_TIME}s, quien tenga más % de vida.</p>` +
@@ -711,7 +712,8 @@ function renderTimer() {
     } else if (inCombat() && player) {
         const hero = viewedHero || player, arena = hero.arena;
         const waiting = arenas.filter(a => !a.done).length;
-        if (hero.inRest || !arena || arena.done) { text = `🏕 Descansando · ${waiting} arena${waiting === 1 ? '' : 's'} en curso`; }
+        if (arena && arena.kind === 'tower') { text = towerStatusText(); }
+        else if (hero.inRest || !arena || arena.done) { text = `🏕 Descansando · ${waiting} arena${waiting === 1 ? '' : 's'} en curso`; }
         else if (arena.kind === 'duel') { const left = DUEL_TIME - arena.elapsed; text = `⚔ Duelo ${Math.max(0, Math.ceil(left))}s`; if (left <= 5) cls = 'urgent'; }
         else if (!hero.isAlive() && hero.respawnAt) { text = `☠ Revive en ${Math.max(0, hero.respawnAt - gameClock).toFixed(1)}s`; cls = 'urgent'; }
         else if (arena.kind === 'boss') { const left = BOSS_FIGHT.enrageAfter - arena.elapsed; text = left > 0 ? `👹 Jefe · se enfurece en ${Math.ceil(left)}s` : `🔥 Jefe enfurecido +${Math.round((enrageMult(arena) - 1) * 100)}%`; if (left <= 10) cls = 'urgent'; }
@@ -913,11 +915,12 @@ function render() {
     ctx.fillStyle = '#050507'; ctx.fillRect(0, 0, MAP_W, MAP_H);
     if (gameState === 'MENU' || gameState === 'HERO_SELECT' || !hero || !hero.arena || !inCombat()) {
         ctx.strokeStyle = '#151821';
-        for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) ctx.strokeRect(c * TILE, r * TILE, TILE, TILE);
+        for (let c = 0; c < VIEW_COLS; c++) for (let r = 0; r < VIEW_ROWS; r++) ctx.strokeRect(c * TILE, r * TILE, TILE, TILE);
         if (gameState === 'MENU' || gameState === 'HERO_SELECT') renderTitle();
         return;
     }
     const arena = hero.arena;
+    if (arena.kind === 'tower') { renderTower(arena, dt); return; }
     updateArenaFx(arena, dt);
     ctx.save();
     if (shakeAmount) ctx.translate((Math.random() - 0.5) * shakeAmount * 2, (Math.random() - 0.5) * shakeAmount * 2);

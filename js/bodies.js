@@ -19,6 +19,12 @@ function bodySize(u) {
     return 'medium';
 }
 
+// ¿Se puede pisar (x, y)? Dentro del mundo y sin pared (solo la Torre tiene paredes).
+function walkable(arena, x, y) {
+    if (x < 0 || y < 0 || x >= COLS || y >= ROWS) return false;
+    return !(arena && arena.walls && arena.walls[y][x]);
+}
+
 // Unidades vivas de la arena que ocupan una casilla (sin contar a `self`).
 function bodiesAt(arena, x, y, self) {
     if (!arena) return [];

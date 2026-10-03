@@ -23,6 +23,7 @@ function isRanged(hero) { return hero.attackRange >= AI.rangedFrom; }
 // --- MOVIMIENTO ---
 // Devuelve la dirección del próximo paso: { dx, dy } con valores -1, 0 o 1.
 function aiMoveDirection(hero) {
+    if (hero.arena && hero.arena.walls) return towerAutoDir(hero); // la Torre tiene su propio piloto (tower.js)
     const enemies = enemiesOf(hero).filter(c => c.isAlive());
     if (!enemies.length) return { dx: 0, dy: 0 };
     const nearest = nearestEnemy(hero);

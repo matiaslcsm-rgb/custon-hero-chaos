@@ -1095,6 +1095,84 @@ test('Jefes de ronda: desde la ronda 20 crecen +4% por ronda en vez de +10%', ()
     check(bossStatMult(30) < creepStatMult(30) * 0.6, 'en la 30, menos del 60% de los creeps');
 });
 
+// ============================================================ LA TORRE (modo roguelike, fase 1)
+function newTower(heroKey = 'AXE') {
+    resetGame();
+    gameMode = 'tower';
+    selectHero(HERO_TEMPLATES[heroKey]);
+    return player.arena;
+}
+
+test('Torre: el nivel se genera conectado, con guardián, escalera y creeps con nivel', () => {
+    const level = newTower();
+    checkEq(gameState, 'TOWER', 'fase de la Torre');
+    checkEq(COLS + 'x' + ROWS, TOWER.cols + 'x' + TOWER.rows, 'mundo grande');
+    checkEq(player.skills.length, 0, 'arranca sin habilidades');
+    const dist = bfsFrom(level, level.start.x, level.start.y);
+    check(level.rooms.every(r => dist[r.cy * COLS + r.cx] >= 0), 'todas las salas se alcanzan');
+    check(dist[level.stairs.y * COLS + level.stairs.x] >= 0, 'la escalera se alcanza');
+    check(level.guardian && level.guardian.isRoundBoss, 'guardián');
+    const creeps = level.creeps.filter(c => !c.isGuardian);
+    check(creeps.length > 5 && creeps.every(c => c.level >= 1 && walkable(level, c.x, c.y)), 'creeps con nivel, sobre el piso');
+    resetGame();
+    checkEq(COLS + 'x' + ROWS, '20x12', 'al salir, el mundo vuelve al tamaño normal');
+}, { random: true });
+
+test('Torre: las paredes no se atraviesan y los creeps las rodean', () => {
+    const level = newTower();
+    let spot = null;
+    for (let y = 1; y < ROWS - 1 && !spot; y++) for (let x = 1; x < COLS - 2 && !spot; x++) if (walkable(level, x, y) && !walkable(level, x + 1, y)) spot = { x, y };
+    player.x = spot.x; player.y = spot.y;
+    level.creeps.forEach(c => { c.hp = 0; });
+    keys['d'] = true;
+    try { player.moveTimer = 99; updateHero(player, level, 0); } finally { keys['d'] = false; }
+    checkEq(player.x, spot.x, 'la pared frena');
+    // Un creep lejos encuentra el camino hacia el héroe
+    const far = level.rooms.slice(-1)[0];
+    const c = makeCreep(CREEP_TYPES.GRUNT, far.cx, far.cy, 1, false, 0); c.arena = level; level.creeps.push(c);
+    const f = flowField(level, player.x, player.y), before = f[c.y * COLS + c.x];
+    const dir = towerPathDir(c, player);
+    check(dir && f[(c.y + dir.dy) * COLS + c.x + dir.dx] < before, 'el paso acerca por el camino');
+}, { random: true });
+
+test('Torre: la escalera se abre al vencer al guardián y el nivel queda igual al volver', () => {
+    const level = newTower();
+    level.creeps.forEach(c => { if (!c.isGuardian) c.hp = 0; });
+    player.x = level.stairs.x; player.y = level.stairs.y;
+    updateTower(0.016);
+    checkEq(towerRun.floor, 1, 'cerrada con el guardián vivo');
+    level.guardian.hp = 0;
+    updateTower(0.016);
+    check(level.stairsOpen, 'se abrió');
+    player.x = level.stairs.x; player.y = level.stairs.y;
+    updateTower(0.016);
+    checkEq(towerRun.floor, 2, 'subió al nivel 2');
+    const second = player.arena;
+    enterTowerFloor(1);
+    check(player.arena === level && level.stairsOpen && !level.guardian.isAlive(), 'el nivel 1 sigue como lo dejaste');
+    enterTowerFloor(2);
+    check(player.arena === second, 'y el 2 también');
+}, { random: true });
+
+test('Torre: al morir perdés la mitad de lo ganado y renacés en el círculo de piedra del nivel 1', () => {
+    const level = newTower();
+    level.guardian.hp = 0; updateTower(0.016);
+    enterTowerFloor(2);
+    const base = towerRun.base.str;
+    player.str = base + 10; player.recalculateStats();
+    const killer = player.arena.creeps.find(c => !c.isGuardian);
+    dealDamage(killer, player, 99999, 'pure');
+    check(!player.isAlive(), 'murió');
+    checkNear(player.str, base + 5, 'mitad de lo ganado');
+    checkEq(player.arena.corpses.length, 1, 'cadáver marcado');
+    gameClock = player.respawnAt + 0.1;
+    updateTower(0.016);
+    check(player.isAlive() && towerRun.floor === 1, 'renació en el nivel 1');
+    checkEq([player.x, player.y].join(), [level.start.x, level.start.y].join(), 'en el círculo de piedra');
+    player.str = base; dealDamage(killer, player, 99999, 'pure');
+    checkNear(player.str, base, 'nunca baja de la base');
+}, { random: true });
+
 test('Ancla: cada golpe ralentiza y quita evasión', () => {
     newGame('AXE');
     const ev = effEvasion(player);

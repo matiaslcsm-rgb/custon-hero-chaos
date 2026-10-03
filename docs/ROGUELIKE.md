@@ -1,6 +1,7 @@
 # Modo Roguelike (nombre provisorio: «Profundidades»)
 
-Documento de diseño del modo roguelike. Estado: **en diseño** (2026-10-03). Nada de esto está programado todavía.
+Documento de diseño del modo roguelike. Estado: **fase 1 hecha** (2026-10-03, botón «🗼 La Torre» en el menú; código en
+`js/tower.js`). Las demás fases están por hacer.
 Las decisiones marcadas ❓ están abiertas.
 
 ## 1. Visión (idea del usuario)
@@ -101,8 +102,16 @@ Al morir no se pierde todo: **tu cadáver y tus cosas quedan en el mapa** y pued
 
 ## 4. Orden propuesto (de a una fase, jugable al final de cada una)
 
-1. **Un nivel explorable**: mapa procedural con cámara y minimapa, creeps con nivel sueltos, escalera con puerta y jefe.
+1. ✅ **Un nivel explorable**: mapa procedural con cámara y minimapa, creeps con nivel sueltos, escalera con puerta y jefe.
    El héroe solo con su innato y su ataque básico, subiendo de nivel.
+   - Hecho: niveles de 60×40 (salas unidas por pasillos de 2 casillas), cámara que sigue al héroe, niebla (radio de visión
+     7) y minimapa; creeps con nivel (vida y daño ×1+0,4 por nivel) quietos hasta que te ven (radio 6) y que te persiguen
+     rodeando paredes; guardián (uno de los 8 jefes de ronda) en la sala más lejana, que cierra la escalera; niveles que
+     quedan iguales; muerte: mitad de los atributos ganados, cadáver marcado y renacer en el círculo de piedra del nivel 1.
+     Piloto automático (P) también en la Torre.
+   - Medido (22 runs simuladas de 25 min, piloto automático, solo ataque básico): la mayoría llega a los pisos 3-5 y muere
+     varias veces; el Vampiro llega al 7-10 (se cura con su innato); Bruja y Alquimista casi no pasan del 1. Sin ítems
+     es lo esperable: el balance de la Torre se hace en la fase 2.
 2. **Ítems Diablo básicos**: ranuras de equipo, inventario en grilla, calidades y afijos, cofres custodiados.
 3. **Ítems vivos**: suben de nivel con el uso, mejoras para elegir y los primeros únicos (Mjölnir y 4-5 más).
 4. **Biomas y varios niveles**: perjuicios, creeps por bioma, dificultad por nivel.

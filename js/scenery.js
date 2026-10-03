@@ -73,7 +73,7 @@ const SCENES = {
     },
     duel(g, rnd) {
         // Losas de piedra con juntas y grietas
-        for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+        for (let r = 0; r < VIEW_ROWS; r++) for (let c = 0; c < VIEW_COLS; c++) {
             const base = pick(rnd, ['#3a3530', '#35302b', '#403a33', '#2f2b27']);
             scenePixel(g, c * TILE, r * TILE, base, TILE, TILE);
             for (let i = 0; i < 18; i++) scenePixel(g, c * TILE + Math.floor(rnd() * 16) * 2, r * TILE + Math.floor(rnd() * 16) * 2, rnd() < 0.5 ? '#4a443c' : '#2a2622');
@@ -89,7 +89,7 @@ const SCENES = {
         }
         g.strokeStyle = '#5a4128'; g.lineWidth = 3; g.beginPath(); g.arc(cx, cy, R - 1, 0, Math.PI * 2); g.stroke();
         // Antorchas en las esquinas (el pie; la llama se anima)
-        sceneData.duel = { torches: [[1, 1], [COLS - 2, 1], [1, ROWS - 2], [COLS - 2, ROWS - 2]].map(([x, y]) => ({ x: tileCenter(x), y: tileCenter(y) })) };
+        sceneData.duel = { torches: [[1, 1], [VIEW_COLS - 2, 1], [1, VIEW_ROWS - 2], [VIEW_COLS - 2, VIEW_ROWS - 2]].map(([x, y]) => ({ x: tileCenter(x), y: tileCenter(y) })) };
         sceneData.duel.torches.forEach(t => { scenePixel(g, t.x - 2, t.y - 2, '#5c3d24', 4, 14); scenePixel(g, t.x - 5, t.y - 4, '#2b2b2b', 10, 4); });
         sceneVignette(g, 0.6);
         g.strokeStyle = '#6a3b1f'; g.lineWidth = 4; g.strokeRect(2, 2, MAP_W - 4, MAP_H - 4);

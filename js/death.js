@@ -76,6 +76,7 @@ function buyGreedLife(hero) {
 // En un duelo, morir no cuesta la vida acá: lo resuelve resolveDuel (duels.js).
 function handleHeroDeath(hero, killer) {
     if (!inCombat() || hero.respawnAt || hero.eliminated) return; // evita procesar la misma muerte dos veces
+    if (hero.arena && hero.arena.kind === 'tower') { towerHeroDeath(hero, killer); return; } // Torre: renacés en la base
     if (hero.arena && hero.arena.kind === 'duel') {
         const winner = hero.arena.heroes.find(h => h !== hero);
         resolveDuel(hero.arena, winner, hero);

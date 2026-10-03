@@ -20,7 +20,7 @@ const DUEL_CURSE_ALIVE = 3; // con 3 héroes en juego o menos, perder un duelo s
 const DUEL_DEATH_ALIVE = 2; // con 2, perder el duelo además cuesta una vida
 const DUEL_STARTS = [{ x: 3, y: 6 }, { x: 16, y: 6 }];
 
-function inCombat() { return gameState === 'WAVE' || gameState === 'DUEL' || gameState === 'BOSS'; }
+function inCombat() { return gameState === 'WAVE' || gameState === 'DUEL' || gameState === 'BOSS' || gameState === 'TOWER'; }
 
 // Parejas al azar evitando repetir el rival de la ronda anterior. Arma parejas de a una sobre un orden al azar;
 // como eso puede dejar al final justo a dos que ya pelearon, prueba varios órdenes y se queda con el que menos repite.

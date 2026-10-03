@@ -1,7 +1,9 @@
 // Flujo de la partida: estado global, selección de héroe, draft, tienda, oleadas en paralelo de los 8 héroes
 // (ver world.js) y la actualización de cada frame de cada arena (movimiento, ataques, IA).
 
-const COLS = 20, ROWS = 12;
+// Pantalla: siempre 20×12 casillas. Mundo: 20×12 en el modo normal; en la Torre, el tamaño del nivel (tower.js).
+const VIEW_COLS = 20, VIEW_ROWS = 12;
+let COLS = VIEW_COLS, ROWS = VIEW_ROWS;
 
 let player = null;
 let gameState = 'MENU', waveNumber = 1, gameClock = 0, keys = {};
@@ -38,6 +40,7 @@ window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
 const GOLD_PENALTY_FREE_PICK = 0;
 
 function selectHero(template, freePick = false) {
+    if (gameMode === 'tower') { startTowerRun(template); return; }
     player = new Hero(template);
     if (freePick) player.gold = GOLD_PENALTY_FREE_PICK;
     player.ownerName = playerName();
@@ -286,6 +289,7 @@ function endGame() {
 // Vuelve todo al estado inicial (menú) sin recargar la página.
 function resetGame() {
     player = null; heroes = []; arenas = []; viewedHero = null;
+    gameMode = 'normal'; towerRun = null; COLS = VIEW_COLS; ROWS = VIEW_ROWS; camera.x = 0; camera.y = 0;
     gameState = 'MENU'; waveNumber = 1; gameClock = 0; heroOffers = null;
     currentDraft = null; savedPrepTime = null; nextWave = null; logMuted = false;
     duelPlan = null; currentBet = null; duelBets = []; nextRoundBoss = null; lastRoundBoss = null; lastDuelPair = [];
@@ -338,6 +342,7 @@ function tryCastSkill(hero, skill, opts = {}) {
 // Actualiza todas las arenas activas (oleadas o duelos). Los mensajes solo se muestran si son de la arena que mirás.
 function updateWave(dt) {
     if (!inCombat()) return;
+    if (gameState === 'TOWER') { updateTower(dt); return; }
     const shown = viewArena();
     arenas.forEach(arena => {
         if (arena.done) return;
@@ -397,7 +402,10 @@ function updateHero(hero, arena, dt) {
             else dir = moveTargetDirection(hero) || focusChaseDirection(hero) || dir;
         }
         const x = hero.x, y = hero.y;
-        const nx = Math.max(0, Math.min(COLS - 1, hero.x + dir.dx)), ny = Math.max(0, Math.min(ROWS - 1, hero.y + dir.dy));
+        let nx = Math.max(0, Math.min(COLS - 1, hero.x + dir.dx)), ny = Math.max(0, Math.min(ROWS - 1, hero.y + dir.dy));
+        if (!walkable(hero.arena, nx, ny)) { // paredes (Torre): si iba en diagonal, prueba deslizarse por un eje
+            if (dir.dx && walkable(hero.arena, nx, y)) ny = y; else if (dir.dy && walkable(hero.arena, x, ny)) nx = x; else { nx = x; ny = y; }
+        }
         // Cuerpos físicos (bodies.js): entrar a una casilla ocupada tarda más; mientras tanto, sigue empujando
         const pushing = (nx !== x || ny !== y) && hero.moveTimer < stepTime * (1 + bodyPenalty(hero, nx, ny));
         if (!pushing) { hero.x = nx; hero.y = ny; hero.moveTimer = 0; }

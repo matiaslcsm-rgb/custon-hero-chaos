@@ -75,6 +75,7 @@ function creepTarget(c) {
 // (el paso tarda más según el tamaño del que está ahí).
 function stepCreepToward(c, tx, ty, dt) {
     if (c.x === tx && c.y === ty) return;
+    if (c.arena && c.arena.walls) { towerStepCreep(c, tx, ty, dt); return; } // Torre: camino rodeando paredes
     c.moveTimer += dt * 1000;
     const stepTime = c.moveInterval / (effMoveMult(c) * MOVE_SPEED_MULT);
     if (c.moveTimer < stepTime) return;
