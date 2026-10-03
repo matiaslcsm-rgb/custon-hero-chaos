@@ -184,10 +184,11 @@ function setSprites(on) {
 }
 
 // Dibuja el sprite centrado en (cx, cy) con el tamaño size (px). facing: 1 mira a la derecha, -1 a la izquierda.
-function drawSprite(s, cx, cy, size, facing, flash) {
+function drawSprite(s, cx, cy, size, facing, flash, pose) {
     ctx.save();
     ctx.imageSmoothingEnabled = false;
     ctx.translate(cx, cy);
+    if (pose) { ctx.rotate(pose.rot * (facing < 0 ? -1 : 1)); ctx.scale(pose.sx, pose.sy); }
     if (facing < 0) ctx.scale(-1, 1);
     ctx.drawImage(flash ? s.white : s.img, -size / 2, -size / 2, size, size);
     ctx.restore();

@@ -125,7 +125,9 @@ function updateCreep(c, dt) {
     if (c.attackTimer < 1 / (effAtkSpeed(c) * enrage)) return;
     c.attackTimer = 0;
     // dealDamage resuelve la muerte del héroe (revivir, Condenado o eliminación) a través de onHeroDeath
-    if (c.range <= 2) fxLunge(c, target);
+    // Animación según cómo ataca: golpe (con tajo), disparo o hechizo
+    if (c.range <= 2) { fxAttack(c, target, 'melee'); if (fxArena(c)) fxSlash(c, target, c.color, false); }
+    else fxAttack(c, target, c.attackType === 'magical' ? 'cast' : 'ranged', c.attackType === 'magical' ? c.color : '#fefae0');
     const result = dealDamage(c, target, Math.round(effAtk), c.attackType, { isAttack: true });
     if (result.evaded) log(`💨 Esquivaste el ataque de ${c.label}.`);
     if (c.type.onAttack) c.type.onAttack(c, target, result);

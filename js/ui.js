@@ -839,9 +839,20 @@ function drawUnit(u, color, symbol, pos = u, opts = {}) {
         if (u.isHero) { ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(cx, cy + size * 0.42, size * 0.4, size * 0.15, 0, 0, Math.PI * 2); ctx.stroke(); }
         if (u.bobSeed === undefined) u.bobSeed = Math.random() * 6;
         const bob = Math.sin(fxClock * 5 + u.bobSeed) * 1.2;
+        const pose = pos.pose;
+        const look = !u.isHero && u.type ? CREEP_LOOKS[u.type.key] : null;
+        if (look) drawCreepLook(u, look, cx, cy, size);
         if (opts.glow) { ctx.shadowColor = color; ctx.shadowBlur = 8; }
-        drawSprite(sprite, cx, cy + bob, size, u.facing || (u.isHero ? 1 : -1), hit);
-        ctx.shadowBlur = 0;
+        if (pose && pose.glow) { ctx.shadowColor = pose.glow; ctx.shadowBlur = 16; }
+        const alpha = look && look.alpha ? look.alpha(u) : 1;
+        if (alpha < 1) ctx.globalAlpha = alpha;
+        const jitter = look && look.jitter ? (Math.random() - 0.5) * look.jitter : 0;
+        drawSprite(sprite, cx + jitter, cy + bob, size, u.facing || (u.isHero ? 1 : -1), hit, pose);
+        ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+        if (pose && pose.flash > 0 && u.fxAttack) { // fogonazo del disparo
+            const a = u.fxAttack; ctx.globalAlpha = pose.flash; ctx.fillStyle = '#fff3b0';
+            ctx.beginPath(); ctx.arc(cx + a.dx * size * 0.55, cy + a.dy * size * 0.55, 4 + 3 * pose.flash, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
+        }
     } else {
         if (opts.glow) { ctx.shadowColor = color; ctx.shadowBlur = 10; }
         ctx.font = opts.big ? 'bold 26px monospace' : opts.glow ? 'bold 19px monospace' : '18px monospace';
@@ -859,6 +870,47 @@ function drawUnit(u, color, symbol, pos = u, opts = {}) {
         ctx.font = '10px monospace';
         if (hasFlag(u, 'stun')) { ctx.fillStyle = '#ffd166'; ctx.fillText('✦✦', cx, cy - halfHeight - 9 + Math.sin(fxClock * 10) * 1.5); }
         else if (sumMod(u, 'moveSpeedPct') < 0) { ctx.fillStyle = '#90e0ef'; ctx.fillText('❄', cx + TILE / 2 - 3, cy - TILE / 2 + 6); }
+    }
+}
+
+// Rasgos visuales de cada creep según su mecánica (aura, brillo, transparencia, temblor…).
+const CREEP_LOOKS = {
+    HEALER: { pulse: '#80ffdb' },
+    DRUMMER: { aura: '#f4a261' },
+    SHAMAN: { orb: '#c77dff' }, WARLOCK: { orb: '#e0aaff' }, FROSTCASTER: { orb: '#90e0ef' },
+    SPECTER: { alpha: () => 0.45 + 0.25 * Math.sin(fxClock * 6) },
+    KAMIKAZE: { blink: '#ff5400' },
+    SWARM: { jitter: 2 },
+    STUNNER: { sparks: '#ffd166' },
+    THIEF: { sparks: '#ffe066' },
+    ARMORED: { sheen: true },
+    ANCHOR: { chain: '#a8dadc' }
+};
+function drawCreepLook(u, look, cx, cy, size) {
+    if (look.aura) { // aura que se expande (Tamborilero: los cercanos atacan más rápido)
+        const r = (u.type.auraRadius || 3) * TILE * (0.5 + 0.5 * ((fxClock * 0.8) % 1));
+        ctx.strokeStyle = look.aura; ctx.globalAlpha = 0.25 * (1 - ((fxClock * 0.8) % 1)); ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke(); ctx.globalAlpha = 1;
+    }
+    if (look.pulse) { // pulso de curación
+        ctx.strokeStyle = look.pulse; ctx.globalAlpha = 0.35 + 0.25 * Math.sin(fxClock * 4); ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(cx, cy, size * 0.62, 0, Math.PI * 2); ctx.stroke(); ctx.globalAlpha = 1;
+    }
+    if (look.orb) { // orbe mágico flotando sobre la cabeza
+        ctx.fillStyle = look.orb; ctx.shadowColor = look.orb; ctx.shadowBlur = 10;
+        ctx.beginPath(); ctx.arc(cx + size * 0.32, cy - size * 0.45 + Math.sin(fxClock * 3 + (u.bobSeed || 0)) * 2, 3, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+    }
+    if (look.blink && player && Math.hypot(u.x - player.x, u.y - player.y) < 3 && Math.sin(fxClock * 18) > 0) { // a punto de explotar
+        ctx.fillStyle = look.blink; ctx.globalAlpha = 0.45; ctx.beginPath(); ctx.arc(cx, cy, size * 0.55, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
+    }
+    if (look.sparks && Math.random() < 0.15) { ctx.fillStyle = look.sparks; ctx.fillRect(cx + (Math.random() - 0.5) * size, cy + (Math.random() - 0.5) * size, 2, 2); }
+    if (look.sheen) { // brillo metálico que recorre la armadura
+        const t = (fxClock * 0.7 + (u.bobSeed || 0)) % 1.6;
+        if (t < 1) { ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.fillRect(cx - size / 2 + t * size, cy - size / 2, 3, size); }
+    }
+    if (look.chain && u.fxAttack && player) { // cadena del ancla hacia su objetivo
+        ctx.strokeStyle = look.chain; ctx.setLineDash([3, 3]); ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(player.x * TILE + TILE / 2, player.y * TILE + TILE / 2); ctx.stroke(); ctx.setLineDash([]);
     }
 }
 

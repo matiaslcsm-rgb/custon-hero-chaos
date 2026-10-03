@@ -63,12 +63,44 @@ function fxDeath(unit) {
     if (unit.isHero) fxShake(5);
 }
 
-// El atacante "salta" hacia su objetivo al golpear.
-function fxLunge(attacker, target) {
-    if (!fxArena(attacker)) return;
+// --- ANIMACIÓN DE ATAQUE (sirve para cualquier sprite: se anima con movimiento, giro y estiramiento) ---
+//   kind 'melee'  golpe: se estira y gira hacia el objetivo (y antes se echa atrás, ver attackPose)
+//   kind 'ranged' disparo: retroceso y fogonazo, y una estela hasta el objetivo
+//   kind 'cast'   hechizo: se eleva y brilla del color de su magia, y un rayo hasta el objetivo
+const ATTACK_ANIM = { melee: 0.26, ranged: 0.2, cast: 0.34 };
+function fxAttack(attacker, target, kind = 'melee', color) {
+    const arena = fxArena(attacker);
+    if (!arena) return;
     const d = Math.hypot(target.x - attacker.x, target.y - attacker.y) || 1;
     if (target.x !== attacker.x) attacker.facing = Math.sign(target.x - attacker.x); // mira a quien ataca
-    attacker.fxLunge = { dx: (target.x - attacker.x) / d, dy: (target.y - attacker.y) / d, at: fxClock };
+    attacker.fxAttack = { kind, dx: (target.x - attacker.x) / d, dy: (target.y - attacker.y) / d, at: fxClock, color };
+    // Estela hasta el objetivo (los héroes no: ya tienen su proyectil propio)
+    if (kind !== 'melee' && !attacker.isHero) pushFx(arena, { kind: 'bolt', x: attacker.x, y: attacker.y, tx: target.x, ty: target.y, color: color || '#fefae0', cast: kind === 'cast', life: kind === 'cast' ? 0.24 : 0.14 });
+}
+// Compatibilidad: el "salto" de antes ahora es la animación de golpe.
+function fxLunge(attacker, target) { fxAttack(attacker, target, 'melee'); }
+
+// Pose del momento: desplazamiento (casillas), giro, estiramiento y brillo. Antes del golpe se echa atrás
+// según cuánto le falta al próximo ataque (attackTimer), así se anticipa.
+function attackPose(u) {
+    const pose = { ox: 0, oy: 0, rot: 0, sx: 1, sy: 1, glow: null, flash: 0 };
+    const a = u.fxAttack;
+    const atkSpeed = u.isHero ? effAtkSpeed(u) : (u.atkSpeed ? effAtkSpeed(u) : 0);
+    const frac = atkSpeed ? (u.attackTimer || 0) * atkSpeed : 0;
+    const wind = frac > 0.6 && frac < 1 && inCombat() ? (frac - 0.6) / 0.4 : 0;
+    const dir = a || { dx: u.facing || 1, dy: 0 };
+    if (wind > 0 && (!a || a.kind === 'melee')) { // preparación: se echa atrás y se comprime
+        pose.ox -= dir.dx * 0.12 * wind; pose.oy -= dir.dy * 0.12 * wind;
+        pose.rot -= 0.2 * wind; pose.sx += 0.08 * wind; pose.sy -= 0.08 * wind;
+    }
+    if (!a) return pose;
+    const t = (fxClock - a.at) / ATTACK_ANIM[a.kind];
+    if (t >= 1) { u.fxAttack = null; return pose; }
+    const k = Math.sin(t * Math.PI);
+    if (a.kind === 'melee') { pose.ox += a.dx * 0.42 * k; pose.oy += a.dy * 0.42 * k; pose.rot += 0.35 * k; pose.sx += 0.14 * k; pose.sy -= 0.06 * k; }
+    else if (a.kind === 'ranged') { pose.ox -= a.dx * 0.16 * k; pose.oy -= a.dy * 0.16 * k; pose.flash = t < 0.35 ? 1 - t / 0.35 : 0; }
+    else { pose.oy -= 0.22 * k; pose.sy += 0.1 * k; pose.glow = a.color || '#c77dff'; }
+    return pose;
 }
 
 // Tajo de un ataque cuerpo a cuerpo: un arco que barre sobre el objetivo, del color de quien pega (dorado si es crítico).
@@ -91,6 +123,7 @@ function fxCast(hero, skill) {
     const tag = (skill.tags || []).find(t => SKILL_FX_COLORS[t]);
     const color = tag ? SKILL_FX_COLORS[tag] : '#00f5d4';
     if (fxArena(hero)) sfx(skill.isUltimate ? 'ult' : 'cast');
+    hero.fxAttack = { kind: 'cast', dx: hero.facing || 1, dy: 0, at: fxClock, color }; // se eleva y brilla al lanzar
     fxRing(hero, color, skill.isUltimate ? 3.2 : 1.8, skill.isUltimate ? 0.7 : 0.45);
     if (skill.isUltimate) { fxBurst(hero, color, 18, 5); fxShake(3); }
 }
@@ -138,6 +171,14 @@ function drawArenaFx(arena) {
             ctx.arc(px, py, TILE * 0.62, Math.min(a0, a1), Math.max(a0, a1));
             ctx.stroke();
             ctx.shadowBlur = 0; ctx.lineCap = 'butt';
+        } else if (f.kind === 'bolt') {
+            // Estela de un disparo o rayo de un hechizo, del atacante al objetivo
+            const ex = f.tx * TILE + TILE / 2, ey = f.ty * TILE + TILE / 2, head = Math.min(1, t * 2.5);
+            const hx = px + (ex - px) * head, hy = py + (ey - py) * head;
+            ctx.strokeStyle = f.color; ctx.lineCap = 'round'; ctx.shadowColor = f.color; ctx.shadowBlur = f.cast ? 10 : 4;
+            ctx.lineWidth = f.cast ? 3 : 2; ctx.beginPath(); ctx.moveTo(px + (ex - px) * Math.max(0, head - 0.35), py + (ey - py) * Math.max(0, head - 0.35)); ctx.lineTo(hx, hy); ctx.stroke();
+            ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(hx, hy, f.cast ? 3.5 : 2.2, 0, Math.PI * 2); ctx.fill();
+            ctx.shadowBlur = 0; ctx.lineCap = 'butt';
         } else if (f.kind === 'ring') {
             ctx.strokeStyle = f.color; ctx.lineWidth = 3 * (1 - t) + 1;
             ctx.beginPath(); ctx.arc(px, py, f.radius * TILE * (0.3 + 0.7 * t), 0, Math.PI * 2); ctx.stroke();
@@ -159,13 +200,8 @@ function drawPos(u, dt) {
     const speed = (1 / step) * 1.02 * (behind > 1.2 ? 3 : 1);
     const toward = (from, to) => { const d = to - from, m = speed * dt; return Math.abs(d) <= m ? to : from + Math.sign(d) * m; };
     u.rx = toward(u.rx, u.x); u.ry = toward(u.ry, u.y);
-    let x = u.rx, y = u.ry;
-    if (u.fxLunge) {
-        const t = (fxClock - u.fxLunge.at) / 0.18;
-        if (t >= 1) u.fxLunge = null;
-        else { const push = Math.sin(t * Math.PI) * 0.42; x += u.fxLunge.dx * push; y += u.fxLunge.dy * push; }
-    }
-    return { x, y };
+    const pose = attackPose(u);
+    return { x: u.rx + pose.ox, y: u.ry + pose.oy, pose };
 }
 
 // Los fondos de las arenas están en scenery.js.

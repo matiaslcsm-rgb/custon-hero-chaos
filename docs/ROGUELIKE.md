@@ -125,6 +125,14 @@ Al morir no se pierde todo: **tu cadáver y tus cosas quedan en el mapa** y pued
    - Ajustes pedidos al probarla: el héroe camina en **diagonal** (camino de 8 direcciones sin cortar esquinas; los creeps
      siguen en cruz) y **40% más rápido** que en una arena (`TOWER.heroSpeed`). En los dos modos, el dibujo ahora se
      **desliza a velocidad constante** entre casillas (antes llegaba y frenaba: se notaba casilla por casilla).
+   - Segunda tanda (pedido del usuario): niveles de **90×60**; **visión** como stat (base 6 casillas) con **paredes que
+     tapan** la vista (campo de visión propio, sin librerías); **stats con puntos** (5 por nivel: Fuerza, Agilidad,
+     Inteligencia, Vitalidad, Visión; ventana con la tecla C; al morir se pierde la mitad de lo puesto); **creeps
+     inteligentes** (avisan a la manada, te rodean, los de lejos y el apoyo mantienen distancia, huyen con poca vida);
+     **animaciones de ataque** para héroes y creeps en los dos modos (preparación, golpe con tajo, disparo con estela,
+     hechizo con brillo) y **rasgos visuales** por creep (aura del Tamborilero, pulso del Sanador, Espectro translúcido…).
+   - Librerías evaluadas: rot.js (BSD), Yuka (MIT), packs de arte 0x72/Kenney (CC0). Por ahora no se usan: el campo de
+     visión y la IA son poco código y el usuario prefirió mantener el pixel art propio.
    - Medido (22 runs simuladas de 25 min, piloto automático, solo ataque básico): la mayoría llega a los pisos 3-5 y muere
      varias veces; el Vampiro llega al 7-10 (se cura con su innato); Bruja y Alquimista casi no pasan del 1. Sin ítems
      es lo esperable: el balance de la Torre se hace en la fase 2.
