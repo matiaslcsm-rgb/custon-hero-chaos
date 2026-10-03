@@ -1,6 +1,6 @@
-# Modo Roguelike (nombre provisorio: «Profundidades»)
+# Modo roguelike: Tower Chaos
 
-Documento de diseño del modo roguelike. Estado: **fase 1 hecha** (2026-10-03, botón «🗼 La Torre» en el menú; código en
+Documento de diseño del modo roguelike. Estado: **fase 1 hecha** (2026-10-03; en el menú se elige el modo: **Custom Hero Chaos** o **Tower Chaos**; código en
 `js/tower.js`). Las demás fases están por hacer.
 Las decisiones marcadas ❓ están abiertas.
 

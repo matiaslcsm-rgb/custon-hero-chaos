@@ -13,8 +13,8 @@ document.getElementById('shop-close').onclick = closeShop;
 document.getElementById('map-toggle').onclick = toggleBigMap;
 document.getElementById('shop-container').onclick = e => { if (e.target.id === 'shop-container') closeShop(); };
 window.addEventListener('resize', applyMapSize);
-document.getElementById('start-game-btn').onclick = () => { gameMode = 'normal'; startHeroPick(); };
-document.getElementById('tower-btn').onclick = () => { gameMode = 'tower'; startHeroPick(); };
+// Elegir modo: Custom Hero Chaos (el de siempre) o Tower Chaos (roguelike, tower.js)
+document.querySelectorAll('.mode-card').forEach(card => { card.onclick = () => { gameMode = card.dataset.mode; startHeroPick(); }; });
 { const input = document.getElementById('player-name'); input.value = playerName() === 'Vos' ? '' : playerName(); input.oninput = () => setPlayerName(input.value); }
 document.getElementById('hero-any-btn').onclick = openHeroDrawer;
 document.getElementById('hero-any-close').onclick = closeHeroDrawer;

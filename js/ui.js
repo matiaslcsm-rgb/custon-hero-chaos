@@ -893,9 +893,10 @@ function renderRestArea(dt = 0) {
 function renderTitle() {
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.font = 'bold 30px monospace'; ctx.fillStyle = '#ffb703';
-    ctx.fillText('CUSTOM HERO CHAOS', MAP_W / 2, MAP_H / 2 - 30);
+    const title = gameState === 'MENU' ? 'CUSTOM HERO CHAOS' : gameMode === 'tower' ? 'TOWER CHAOS' : 'CUSTOM HERO CHAOS';
+    ctx.fillText(title, MAP_W / 2, MAP_H / 2 - 30);
     ctx.font = '13px monospace'; ctx.fillStyle = '#8ecae6';
-    ctx.fillText(gameState === 'MENU' ? 'Iniciá una partida o mirá el tutorial →' : 'Elegí tu héroe →', MAP_W / 2, MAP_H / 2 + 10);
+    ctx.fillText(gameState === 'MENU' ? 'Elegí un modo: Custom Hero Chaos o Tower Chaos →' : 'Elegí tu héroe →', MAP_W / 2, MAP_H / 2 + 10);
     ctx.font = '20px monospace';
     const order = { STR: 0, AGI: 1, INT: 2 }; // agrupados por atributo, en su color
     Object.values(HERO_TEMPLATES).sort((a, b) => order[a.primaryAttr] - order[b.primaryAttr]).forEach((t, i, all) => {

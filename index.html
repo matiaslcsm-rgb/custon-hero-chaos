@@ -69,11 +69,18 @@
                 <div id="phase-area">
                     <!-- Menú de inicio -->
                     <div id="menu-panel">
-                        <h3>Bienvenido</h3>
-                        <p class="subtitle">8 héroes, oleadas de creeps, duelos, apuestas y jefes. Armá tu kit mezclando habilidades de cualquier héroe.</p>
+                        <h3>Elegí un modo</h3>
                         <label class="name-field">Tu nombre <input id="player-name" maxlength="14" placeholder="Vos" autocomplete="off"></label>
-                        <button id="start-game-btn" class="primary-btn">▶ Iniciar partida</button>
-                        <button id="tower-btn" class="secondary-btn">🗼 La Torre (roguelike · en construcción)</button>
+                        <button class="mode-card" data-mode="normal">
+                            <span class="mode-icon">⚔</span>
+                            <span class="mode-text"><b>Custom Hero Chaos</b>
+                                <span>8 héroes, oleadas de creeps, duelos, apuestas y jefes. Armá tu kit mezclando habilidades de cualquier héroe.</span></span>
+                        </button>
+                        <button class="mode-card tower" data-mode="tower">
+                            <span class="mode-icon">🗼</span>
+                            <span class="mode-text"><b>Tower Chaos</b> <em>en construcción</em>
+                                <span>Roguelike: subí una torre de 10 niveles al azar. Arrancás solo con tu innato; si morís, volvés a la base.</span></span>
+                        </button>
                         <button id="menu-tutorial-btn" class="secondary-btn">📖 Tutorial (cómo se juega)</button>
                         <div class="menu-glossary">
                             <p class="subtitle">Glosario</p>
@@ -86,8 +93,8 @@
 
                     <!-- Elección de Héroe -->
                     <div id="hero-select-panel" style="display: none;">
-                        <h3>Elegí tu héroe</h3>
-                        <p class="subtitle">Estas opciones son solo tuyas. Ningún héroe se repite en la partida.</p>
+                        <h3 id="hero-select-title">Elegí tu héroe</h3>
+                        <p class="subtitle" id="hero-select-subtitle">Estas opciones son solo tuyas. Ningún héroe se repite en la partida.</p>
                         <div id="hero-options" class="options-grid"></div>
                         <button id="hero-any-btn" class="secondary-btn">🔓 Elegir cualquier héroe (arrancás sin oro)</button>
                     </div>

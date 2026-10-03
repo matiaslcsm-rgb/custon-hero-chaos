@@ -43,7 +43,13 @@ function startHeroPick() {
     setStateText('ELECCIÓN DE HÉROE');
     setPhaseTimer(PHASE_TIMES.heroSelect);
     renderHeroPick();
-    log(`🎲 Elegí tu héroe entre tus ${HERO_PICK_OPTIONS} opciones o probá suerte con uno al azar.`);
+    const tower = gameMode === 'tower';
+    document.getElementById('hero-select-title').textContent = tower ? 'Tower Chaos · elegí tu héroe' : 'Custom Hero Chaos · elegí tu héroe';
+    document.getElementById('hero-select-subtitle').textContent = tower
+        ? 'Subís solo con su innato y su ataque básico. Elegí bien: si morís, volvés a la base de la torre.'
+        : 'Estas opciones son solo tuyas. Ningún héroe se repite en la partida.';
+    document.getElementById('hero-any-btn').textContent = tower ? '🔓 Elegir cualquier héroe' : '🔓 Elegir cualquier héroe (arrancás sin oro)';
+    log(`🎲 ${tower ? 'Tower Chaos' : 'Custom Hero Chaos'}: elegí tu héroe entre tus ${HERO_PICK_OPTIONS} opciones o probá suerte con uno al azar.`);
 }
 
 // --- ELEGIR CUALQUIER HÉROE (panel que se despliega desde la izquierda) ---

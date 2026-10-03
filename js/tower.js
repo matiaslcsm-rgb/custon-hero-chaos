@@ -1,4 +1,4 @@
-// La Torre: modo roguelike (fase 1 de docs/ROGUELIKE.md).
+// Tower Chaos: modo roguelike (fase 1 de docs/ROGUELIKE.md). Se elige en el menú, al lado de Custom Hero Chaos.
 //
 //   Una torre de TOWER.floors niveles que se sube. Cada nivel se genera al azar la primera vez que llegás y queda igual
 //   el resto de la run. En cada nivel hay creeps sueltos con NIVEL (stats fijos por nivel, no por ronda) y un GUARDIÁN
@@ -51,7 +51,7 @@ function startTowerRun(template) {
     showPanel('menu-panel', false);
     showPanel('hero-select-panel', false);
     gameState = 'TOWER';
-    log(`🗼 Entrás a la Torre con ${player.name}. Arrancás solo con tu innato: subí de nivel, encontrá al guardián de cada piso y subí la escalera. Hay ${TOWER.floors} niveles.`);
+    log(`🗼 Tower Chaos: entrás a la torre con ${player.name}. Arrancás solo con tu innato: subí de nivel, encontrá al guardián de cada piso y subí la escalera. Hay ${TOWER.floors} niveles.`);
     enterTowerFloor(1, 'start');
 }
 
@@ -71,7 +71,7 @@ function enterTowerFloor(floor, where = 'start') {
     player.moveTarget = null; player.focus = null;
     level.creeps.forEach(c => { c.aggro = false; });
     revealAround(level, player.x, player.y);
-    setStateText(`LA TORRE · NIVEL ${floor} DE ${TOWER.floors}`);
+    setStateText(`TOWER CHAOS · NIVEL ${floor} DE ${TOWER.floors}`);
     sfx('wave');
     if (where === 'start') log(floor === 1 ? '🪨 Estás en el círculo de piedra, en la base de la torre.' : `🗼 Subiste al nivel ${floor}. El guardián cuida la escalera al siguiente.`);
 }
@@ -284,7 +284,7 @@ function towerStatusText() {
 function towerInfoHtml() {
     const level = player.arena;
     const alive = level.creeps.filter(c => c.isAlive() && !c.isGuardian).length;
-    return `<h3>🗼 La Torre · nivel ${level.floor} de ${TOWER.floors}</h3>` +
+    return `<h3>🗼 Tower Chaos · nivel ${level.floor} de ${TOWER.floors}</h3>` +
         `<p class="subtitle">Explorá, subí de nivel y vencé al <b>guardián</b> (${level.guardian.label}) para abrir la escalera.</p>` +
         `<p class="subtitle">Creeps en este nivel: ${alive}. Muertes en la run: ${towerRun.deaths}. Al morir renacés en la base y perdés la mitad de los atributos ganados.</p>` +
         `<p class="subtitle" style="color:#888">En construcción: ítems, cofres, biomas y más (ver docs/ROGUELIKE.md).</p>`;
