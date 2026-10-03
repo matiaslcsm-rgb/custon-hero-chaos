@@ -149,6 +149,8 @@ Al morir no se pierde todo: **tu cadáver y tus cosas quedan en el mapa** y pued
      alcance, 7s / 15 de maná. Sube sola con el nivel del héroe (niveles 1, 9, 17 y 25: hasta 240% y 5,5s). Existe para
      que arranques con algo que lanzar y los innatos "al lanzar" (Arcanista, Sabio del Vacío, Zeus) sirvan desde el
      principio. Deja 5 teclas (R T F Q V) para las activas del equipo.
+   - **Hechizo inicial**: al empezar la run recibís, ya equipada, una pieza normal con una activa al azar (ni
+     definitiva ni de movilidad). Cada run arranca distinta.
    - **55 piezas**: cada habilidad (44) y cada innato (11) de los héroes. La definitiva va en la armadura, el innato en
      el amuleto, la de movilidad en las botas, la primera que pega en el arma y el resto en casco o guantes. Anillos con
      stats. Calidades Normal / Mágico (1-2 afijos) / Raro (3-4 afijos), con nombre al estilo Diablo.

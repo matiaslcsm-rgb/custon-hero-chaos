@@ -50,6 +50,7 @@ function startTowerRun() {
     giveTowerGear(player);
     player.addSkill(ADVENTURER_STRIKE); syncAdventurerStrike(player); // Golpe Certero en la E (towerItems.js)
     applyGear(player);
+    const starter = giveStarterSpell(player); // hechizo inicial al azar (towerItems.js)
     player.ownerName = playerName();
     player.displayName = `${player.name} (${player.ownerName})`;
     player.inRest = false;
@@ -65,6 +66,7 @@ function startTowerRun() {
     gameState = 'TOWER';
     document.body.classList.add('ink-theme');
     log(`🗼 Tower Chaos: entrás a la torre como aventurero sin clase. Tenés Golpe Certero en la E; cada pieza de equipo trae la habilidad de un héroe: buscala en cofres y en lo que sueltan los creeps (I: inventario, C: stats). Hay ${TOWER.floors} niveles.`);
+    log(`✨ Hechizo inicial: ${itemSkill(starter).name} (${starter.name}, ya equipada en la ${player.keyBindings[itemSkill(starter).id].toUpperCase()}).`);
     enterTowerFloor(1, 'start');
 }
 

@@ -186,6 +186,20 @@ function syncAdventurerStrike(hero) {
     hero.skillLevels[ADVENTURER_STRIKE.id] = Math.min(maxSkillLevel(ADVENTURER_STRIKE), 1 + Math.floor((hero.level - 1) / ADVENTURER_STRIKE.levelEvery));
 }
 
+// Hechizo inicial: al empezar la run el aventurero recibe, ya equipada, una pieza normal con una habilidad activa
+// al azar (ni definitiva ni de movilidad), así cada run arranca distinta y con algo para castear además del Golpe.
+function starterSpellEntries() {
+    return towerCatalog().filter(e => {
+        const s = e.skillId && SKILL_INDEX[e.skillId];
+        return s && s.kind === 'active' && !s.isUltimate && !s.tags.includes('MOVILIDAD');
+    });
+}
+function giveStarterSpell(hero) {
+    const item = makeTowerItem(1, pickRandom(starterSpellEntries()), 'normal');
+    equipItem(hero, item);
+    return item;
+}
+
 function giveTowerGear(hero) {
     hero.gear = Object.fromEntries(EQUIP_SLOTS.map(s => [s, null]));
     hero.bag = []; // { item, x, y }

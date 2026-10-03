@@ -1096,10 +1096,12 @@ test('Jefes de ronda: desde la ronda 20 crecen +4% por ronda en vez de +10%', ()
 });
 
 // ============================================================ LA TORRE (modo roguelike, fase 1)
-function newTower(heroKey = 'AXE') {
+// Por defecto saca el hechizo inicial (es al azar) para que las pruebas partan del aventurero pelado.
+function newTower(heroKey = 'AXE', { starter = false } = {}) {
     resetGame();
     gameMode = 'tower';
     selectHero(HERO_TEMPLATES[heroKey]);
+    if (!starter) EQUIP_SLOTS.forEach(s => { if (player.gear[s]) unequipSlot(player, s, false); });
     return player.arena;
 }
 
@@ -1215,6 +1217,20 @@ test('Torre: el aventurero arranca con Golpe Certero en la E y sube con su nivel
     equipItem(player, makeTowerItem(1, entry, 'normal'));
     checkEq(player.keyBindings.ADVENTURER_GOLPE, 'e', 'sigue en la E');
     check(player.skills.filter(s => s.kind === 'active').length === 2, 'la del arma se suma en otra tecla');
+}, { random: true });
+
+test('Torre: arrancás con un hechizo al azar ya equipado (activa, ni definitiva ni de movilidad)', () => {
+    const seen = new Set();
+    for (let i = 0; i < 12; i++) {
+        newTower('AXE', { starter: true });
+        const items = EQUIP_SLOTS.map(s => player.gear[s]).filter(Boolean);
+        checkEq(items.length, 1, 'una pieza equipada');
+        const skill = itemSkill(items[0]);
+        check(skill.kind === 'active' && !skill.isUltimate && !skill.tags.includes('MOVILIDAD'), 'hechizo para castear');
+        check(player.keyBindings[skill.id] && player.keyBindings[skill.id] !== 'e', 'con tecla propia');
+        seen.add(skill.id);
+    }
+    check(seen.size > 1, 'varía entre runs');
 }, { random: true });
 
 test('Torre: equipar un arma cambia el ataque y da su habilidad; sacarla la quita', () => {
