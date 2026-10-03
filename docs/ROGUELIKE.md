@@ -167,6 +167,16 @@ Al morir no se pierde todo: **tu cadáver y tus cosas quedan en el mapa** y pued
 5. **Muerte con consecuencias**: cadáver, criatura portadora, reparto y desgaste de ítems.
 6. **Élites y más contenido**: héroes de la IA como élites, más únicos, eventos.
 
+## 4 bis. Estética "tinta y pergamino" (en curso)
+Pedido del usuario con referencias de ilustraciones de caballeros en tinta (líneas negras gruesas, colores planos
+apagados, fondo crema, rayado; no se usan esas imágenes, solo el estilo). Decidido: dirección de arte + personajes
+vectoriales, primero en Tower Chaos. Código: `js/inkart.js`; hoja de muestra: `docs/ink-preview.html`; captura del juego:
+`index.html?demo=tower`.
+- Paso 1 hecho: piso de pergamino, paredes de piedra en tinta con rayado, niebla sepia, viñeta de papel viejo, contorno de
+  tinta y colores apagados en los sprites que todavía son pixel art, ventanas de la Torre color pergamino.
+- Paso 2 (prototipo): figuras vectoriales por silueta — caballero encapuchado (aventurero; la capa toma el color del
+  atributo de su arma), soldado, arquero, mago, bruto y espectro; los guardianes, más grandes.
+
 ## 5. Decisiones tomadas (2026-10-03)
 - Avance: **subir una torre**; cada nivel es aleatorio. Final en el **nivel 10**, con salón de la fama.
 - Al morir: perdés la **mitad de lo ganado** por encima de la base y renacés en el **círculo de piedra de la base de la

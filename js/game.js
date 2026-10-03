@@ -305,7 +305,7 @@ function resetGame() {
     if (statsOpen) toggleStatsWindow(false);
     if (invOpen) toggleInventory(false);
     if (forgeOpen) { forgeOpen = false; showPanel('forge-container', false); }
-    gameMode = 'normal'; towerRun = null; COLS = VIEW_COLS; ROWS = VIEW_ROWS; camera.x = 0; camera.y = 0;
+    gameMode = 'normal'; towerRun = null; document.body.classList.remove('ink-theme'); COLS = VIEW_COLS; ROWS = VIEW_ROWS; camera.x = 0; camera.y = 0;
     gameState = 'MENU'; waveNumber = 1; gameClock = 0; heroOffers = null;
     currentDraft = null; savedPrepTime = null; nextWave = null; logMuted = false;
     duelPlan = null; currentBet = null; duelBets = []; nextRoundBoss = null; lastRoundBoss = null; lastDuelPair = [];

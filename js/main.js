@@ -1,7 +1,7 @@
 // Punto de entrada: conecta los botones y arranca el bucle principal.
 
 // Versión visible en el menú: si no coincide con la última subida, el navegador muestra una copia vieja (Ctrl+F5).
-const GAME_VERSION = '2026-10-03 · héroes convertidos en ítems';
+const GAME_VERSION = '2026-10-03 · estética tinta (prototipo)';
 document.getElementById('game-version').textContent = `Versión ${GAME_VERSION}`;
 
 document.getElementById('start-wave-btn').onclick = startWave;
@@ -145,3 +145,17 @@ renderHeroCodex();
 renderCreepCodex();
 renderItemCodex();
 requestAnimationFrame(loop);
+
+// Demo para capturas de pantalla (index.html?demo=tower): arranca Tower Chaos con equipo y creeps a la vista.
+if (location.search.includes('demo=tower')) setTimeout(() => {
+    startTowerRun();
+    const cat = towerCatalog();
+    equipItem(player, makeTowerItem(1, cat.find(e => e.heroKey === 'AXE' && e.slot === 'weapon'), 'rare'));
+    const level = player.arena;
+    ['GRUNT', 'ARCHER', 'SHAMAN', 'BRUTE'].forEach((k, i) => {
+        const x = player.x + 2 + i, y = player.y + (i % 2 ? 1 : -1);
+        if (!walkable(level, x, y)) return;
+        const c = makeCreep(CREEP_TYPES[k], x, y, 1, false, 0); c.arena = level; c.spawnTime = -1e9; level.creeps.push(c);
+    });
+    level.fovKey = null; computeFov(level, player);
+}, 300);

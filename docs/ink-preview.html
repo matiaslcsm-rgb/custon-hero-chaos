@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Muestra de la estética tinta</title>
+<!-- Hoja de muestra de la estética "tinta y pergamino" de Tower Chaos (js/inkart.js): figuras y baldosas en grande.
+     Sirve para revisar el arte sin entrar al juego. -->
+<style>body { margin: 0; background: #e9dcc0; } canvas { display: block; }</style>
+</head>
+<body>
+<canvas id="c" width="1000" height="420"></canvas>
+<script>const TILE = 34;</script>
+<script src="../js/sprites.js"></script>
+<script src="../js/inkart.js"></script>
+<script>
+const g = document.getElementById('c').getContext('2d');
+g.fillStyle = INK.paper; g.fillRect(0, 0, 1000, 420);
+const figs = [['hoodedKnight', inkMute('#a33a3a', 0.25), 'Aventurero'], ['hoodedKnight', inkMute('#69db7c', 0.25), 'Aventurero (arma AGI)'],
+    ['footman', inkMute('#ffb703'), 'Grunt'], ['archer', inkMute('#8ecae6'), 'Arquero'], ['mage', inkMute('#c77dff'), 'Chamán'],
+    ['brute', inkMute('#e63946'), 'Bruto'], ['wraith', inkMute('#adb5bd'), 'Espectro']];
+figs.forEach(([plan, color, name], i) => {
+    const f = inkFigure(plan, color, '#c77dff');
+    g.drawImage(f.img, 10 + i * 140, 10, INK_W * 2, INK_H * 2);
+    g.fillStyle = INK.line; g.font = '13px serif'; g.fillText(name, 20 + i * 140, 190);
+});
+const t = inkTiles();
+[t.face, t.top, t.floors[0], t.floors[1]].forEach((im, i) => g.drawImage(im, 20 + i * 90, 220, 80, 80));
+g.fillText('pared (frente) · pared (arriba) · piso · piso', 20, 320);
+</script>
+</body>
+</html>

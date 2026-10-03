@@ -62,6 +62,7 @@ function startTowerRun() {
     showPanel('menu-panel', false);
     showPanel('hero-select-panel', false);
     gameState = 'TOWER';
+    document.body.classList.add('ink-theme');
     log(`🗼 Tower Chaos: entrás a la torre como aventurero sin clase. Cada pieza de equipo trae la habilidad de un héroe: buscala en cofres y en lo que sueltan los creeps (I: inventario, C: stats). Hay ${TOWER.floors} niveles.`);
     enterTowerFloor(1, 'start');
 }
@@ -486,7 +487,7 @@ function towerTiles() {
     return (towerTileCache = { floors: ['#2e2b33', '#2a2730', '#322e37', '#29262d'].map(floor), face: wall(true), top: wall(false) });
 }
 function drawTowerTiles(level) {
-    const t = towerTiles();
+    const t = inkTiles(); // estética tinta y pergamino (inkart.js)
     const x0 = Math.floor(camera.x), y0 = Math.floor(camera.y);
     for (let y = y0; y <= Math.min(ROWS - 1, y0 + VIEW_ROWS); y++) for (let x = x0; x <= Math.min(COLS - 1, x0 + VIEW_COLS); x++) {
         if (!level.explored[y][x]) continue;
@@ -508,7 +509,7 @@ function markMinimap(level, x, y) {
     if (typeof document === 'undefined') return;
     if (!level.minimap) { level.minimap = document.createElement('canvas'); level.minimap.width = COLS * 2; level.minimap.height = ROWS * 2; }
     const g = level.minimap.getContext('2d');
-    g.fillStyle = level.walls[y][x] ? '#4a3f52' : '#8d8a94';
+    g.fillStyle = level.walls[y][x] ? '#5e5444' : '#e9dcc0';
     g.fillRect(x * 2, y * 2, 2, 2);
 }
 
@@ -554,10 +555,11 @@ function renderTower(level, dt) {
     // Niebla: lo no descubierto, negro; lo descubierto fuera de la vista, oscurecido
     const x0 = Math.floor(camera.x), y0 = Math.floor(camera.y);
     for (let y = y0; y <= Math.min(ROWS - 1, y0 + VIEW_ROWS); y++) for (let x = x0; x <= Math.min(COLS - 1, x0 + VIEW_COLS); x++) {
-        if (!level.explored[y][x]) { ctx.fillStyle = '#000'; ctx.fillRect(x * TILE, y * TILE, TILE + 1, TILE + 1); }
-        else if (!canSee(level, x, y)) { ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(x * TILE, y * TILE, TILE + 1, TILE + 1); }
+        if (!level.explored[y][x]) { ctx.fillStyle = INK.shadow; ctx.fillRect(x * TILE, y * TILE, TILE + 1, TILE + 1); }
+        else if (!canSee(level, x, y)) { ctx.fillStyle = 'rgba(43,33,24,0.5)'; ctx.fillRect(x * TILE, y * TILE, TILE + 1, TILE + 1); }
     }
     ctx.restore();
+    drawInkVignette();
     renderTowerMinimap(level);
     // Barra del guardián cuando lo tenés a la vista
     const g = level.guardian;
@@ -577,7 +579,8 @@ function renderTower(level, dt) {
 // Minimapa (arriba a la derecha): lo descubierto, la escalera, el guardián si lo viste y vos.
 function renderTowerMinimap(level) {
     const s = 1.7, w = COLS * s, h = ROWS * s, ox = MAP_W - w - 8, oy = 8;
-    ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(ox - 3, oy - 3, w + 6, h + 6);
+    ctx.fillStyle = 'rgba(43,33,24,0.85)'; ctx.fillRect(ox - 3, oy - 3, w + 6, h + 6);
+    ctx.strokeStyle = INK.paperDark; ctx.lineWidth = 1; ctx.strokeRect(ox - 3, oy - 3, w + 6, h + 6);
     if (level.minimap) ctx.drawImage(level.minimap, ox, oy, w, h);
     const dot = (x, y, color, r = 2.2) => { ctx.fillStyle = color; ctx.beginPath(); ctx.arc(ox + (x + 0.5) * s, oy + (y + 0.5) * s, r, 0, Math.PI * 2); ctx.fill(); };
     if (level.explored[level.stairs.y][level.stairs.x]) dot(level.stairs.x, level.stairs.y, level.stairsOpen ? '#2dc653' : '#adb5bd', 2.6);

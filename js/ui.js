@@ -833,6 +833,7 @@ function drawUnit(u, color, symbol, pos = u, opts = {}) {
     if (sprite) {
         const size = spriteSize(u, opts);
         halfHeight = Math.max(TILE / 2, size / 2);
+        if (gameMode === 'tower' && inkPlanFor(u)) halfHeight = inkHalfHeight(u); // figuras de tinta: más altas
         // Sombra en el piso; en los héroes, un aro del color del bando (celeste vos, naranja los rivales)
         ctx.fillStyle = 'rgba(0,0,0,0.45)';
         ctx.beginPath(); ctx.ellipse(cx, cy + size * 0.42, size * 0.34, size * 0.12, 0, 0, Math.PI * 2); ctx.fill();
@@ -847,7 +848,9 @@ function drawUnit(u, color, symbol, pos = u, opts = {}) {
         const alpha = look && look.alpha ? look.alpha(u) : 1;
         if (alpha < 1) ctx.globalAlpha = alpha;
         const jitter = look && look.jitter ? (Math.random() - 0.5) * look.jitter : 0;
-        drawSprite(sprite, cx + jitter, cy + bob, size, u.facing || (u.isHero ? 1 : -1), hit, pose);
+        const facing = u.facing || (u.isHero ? 1 : -1);
+        if (gameMode === 'tower') { if (!drawInkUnit(u, cx + jitter, cy + bob, size, facing, hit, pose)) drawInkedSprite(sprite, cx + jitter, cy + bob, size, facing, hit, pose); }
+        else drawSprite(sprite, cx + jitter, cy + bob, size, facing, hit, pose);
         ctx.globalAlpha = 1; ctx.shadowBlur = 0;
         if (pose && pose.flash > 0 && u.fxAttack) { // fogonazo del disparo
             const a = u.fxAttack; ctx.globalAlpha = pose.flash; ctx.fillStyle = '#fff3b0';

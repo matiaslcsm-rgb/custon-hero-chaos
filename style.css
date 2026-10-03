@@ -480,6 +480,22 @@ kbd { background: #2a2e3a; border: 1px solid #555; border-bottom-width: 3px; pad
 .name-field { display: flex; align-items: center; gap: 8px; margin: 8px 0; font-size: 0.85rem; color: #8ecae6; }
 .name-field input { flex: 1; background: #11141a; color: #fff; border: 1px solid #444; padding: 4px 6px; font-family: inherit; }
 
+/* Tower Chaos: ventanas color pergamino (estética tinta) */
+body.ink-theme .modal-box { background: #e9dcc0; color: #2b2118; border-color: #5e5444; box-shadow: 0 0 0 3px #2b2118, 0 10px 30px rgba(0,0,0,0.6); }
+body.ink-theme .modal-head h3 { color: #6b2a1f; }
+body.ink-theme .subtitle, body.ink-theme .stat-gives, body.ink-theme .stat-spent { color: #5e5444 !important; }
+body.ink-theme .stat-row { border-bottom-color: #c9b791; }
+body.ink-theme .stat-value { color: #2b2118; }
+body.ink-theme #inv-tooltip, body.ink-theme #inv-bag { background: #d8c7a3; border-color: #8f8166; }
+body.ink-theme .bag-cell { background: #e4d6b9; border-color: #c9b791; }
+body.ink-theme .bag-item, body.ink-theme .gear-slot { background: #f1e7d0; }
+body.ink-theme .tt-mods, body.ink-theme .tt-kind, body.ink-theme .tt-cost { color: #2f5d62; }
+body.ink-theme .tt-skill { color: #2b2118; border-top-color: #b7a888; }
+body.ink-theme .tt-weapon { color: #8a4b0f; }
+body.ink-theme .skill-card { background: #f1e7d0; color: #2b2118; border-color: #8f8166; }
+body.ink-theme .skill-card h4 { color: #6b2a1f; }
+body.ink-theme .modal-close { color: #2b2118; border-color: #8f8166; }
+
 /* Tower Chaos: inventario y forja */
 .inv-box { max-width: 900px; border-color: #ffd43b; }
 .inv-layout { display: flex; gap: 14px; align-items: flex-start; }
