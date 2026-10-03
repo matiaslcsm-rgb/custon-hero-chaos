@@ -480,6 +480,33 @@ kbd { background: #2a2e3a; border: 1px solid #555; border-bottom-width: 3px; pad
 .name-field { display: flex; align-items: center; gap: 8px; margin: 8px 0; font-size: 0.85rem; color: #8ecae6; }
 .name-field input { flex: 1; background: #11141a; color: #fff; border: 1px solid #444; padding: 4px 6px; font-family: inherit; }
 
+/* Tower Chaos: inventario y forja */
+.inv-box { max-width: 900px; border-color: #ffd43b; }
+.inv-layout { display: flex; gap: 14px; align-items: flex-start; }
+#inv-gear { display: grid; grid-template-columns: repeat(2, 76px); gap: 6px; }
+.gear-slot { position: relative; height: 76px; border: 2px dashed #444; background: #11141a; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.gear-slot.filled { border-style: solid; }
+.gear-slot img { width: 48px; height: 48px; }
+.gear-label { position: absolute; top: 2px; left: 4px; font-size: 0.6rem; color: #777; }
+.gear-lvl { position: absolute; bottom: 2px; right: 4px; font-size: 0.7rem; color: #ffd166; font-weight: bold; }
+.inv-right { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+#inv-bag { display: grid; grid-template-columns: repeat(10, 40px); grid-template-rows: repeat(4, 40px); gap: 2px; background: #0c0e12; padding: 4px; width: max-content; }
+.bag-cell { background: #1a1d24; border: 1px solid #262a33; cursor: pointer; }
+.bag-item { background: rgba(30, 34, 44, 0.95); border: 2px solid #888; display: flex; align-items: center; justify-content: center; cursor: grab; z-index: 1; }
+.bag-item img { width: 34px; height: 34px; }
+#inv-tooltip { min-height: 120px; background: #0c0e12; border: 1px solid #333; padding: 8px; font-size: 0.78rem; }
+.tt-name { font-weight: bold; font-size: 0.95rem; }
+.tt-meta { color: #999; font-size: 0.72rem; margin: 2px 0 6px; }
+.tt-xp { display: inline-block; width: 70px; height: 5px; background: #333; vertical-align: middle; margin-left: 4px; }
+.tt-xp span { display: block; height: 100%; background: #ffd166; }
+.tt-weapon { color: #ffb703; margin-bottom: 4px; }
+.tt-mods { margin: 4px 0 6px 16px; color: #8ecae6; }
+.tt-skill { border-top: 1px solid #333; padding-top: 6px; color: #ddd; }
+.tt-kind, .tt-cost { color: #8ecae6; font-size: 0.7rem; }
+.tt-forged { margin-top: 6px; color: #ffd43b; font-size: 0.72rem; }
+.forge-box { max-width: 640px; border-color: #ffd43b; }
+.forge-card h4 { color: #ffd43b !important; }
+
 /* Tower Chaos: ventana de stats */
 #stats-container .modal-box { max-width: 620px; border-color: #c77dff; }
 .stat-row { display: grid; grid-template-columns: 26px 110px 50px 80px 32px 1fr; align-items: center; gap: 6px; padding: 6px 4px; border-bottom: 1px solid #2a2d36; }

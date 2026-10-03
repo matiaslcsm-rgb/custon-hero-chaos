@@ -1193,6 +1193,97 @@ test('Torre: creeps inteligentes (avisan, huyen con poca vida, los de lejos y el
     check(slot && Math.hypot(slot.x - player.x, slot.y - player.y) === 1, 'busca una casilla al lado tuyo');
 }, { random: true });
 
+test('Torre: arrancás como aventurero; cada habilidad e innato de cada héroe es una pieza (sin repetir)', () => {
+    newTower();
+    checkEq(player.key, 'ADVENTURER', 'aventurero sin clase');
+    const cat = towerCatalog();
+    const skills = Object.values(HERO_SKILLS).flatMap(k => Object.keys(k));
+    checkEq(cat.filter(e => e.skillId).length, skills.length, 'una pieza por habilidad');
+    checkEq(new Set(cat.filter(e => e.skillId).map(e => e.skillId)).size, skills.length, 'sin repetir');
+    checkEq(cat.filter(e => e.innateId).length, Object.keys(HERO_TEMPLATES).length, 'un amuleto por innato');
+    check(cat.every(e => TOWER_SLOTS[e.slot]), 'ranuras válidas');
+}, { random: true });
+
+test('Torre: equipar un arma cambia el ataque y da su habilidad; sacarla la quita', () => {
+    newTower();
+    const entry = towerCatalog().find(e => e.heroKey === 'SNIPER' && e.slot === 'weapon');
+    const rifle = makeTowerItem(1, entry, 'normal');
+    addToBag(player, rifle);
+    const range = player.attackRange;
+    equipItem(player, rifle);
+    checkEq(player.attackRange, HERO_WEAPONS.SNIPER.range, 'alcance del rifle');
+    check(player.projectileSpeed > 0, 'dispara');
+    const skill = itemSkill(rifle);
+    check(player.skills.includes(skill) && player.keyBindings[skill.id], 'tiene la habilidad con tecla');
+    unequipSlot(player, 'weapon');
+    checkEq(player.attackRange, range, 'vuelve a los puños');
+    check(!player.skills.includes(skill), 'sin la habilidad');
+    check(player.bag.some(b => b.item === rifle), 'el rifle volvió a la bolsa');
+}, { random: true });
+
+test('Torre: las piezas suben de nivel con el uso y la forja mejora su habilidad', () => {
+    newTower();
+    const entry = towerCatalog().find(e => e.skillId === 'SNIPER_POTENTE');
+    const item = makeTowerItem(1, entry, 'normal');
+    equipItem(player, item);
+    const skill = itemSkill(item);
+    const cd = skillCooldown(skill, player), dmg = val(skill, player, 'dmgMult');
+    for (let i = 0; i < 40; i++) gearEvent(player, 'onHit', {});
+    check(item.level > 1 && item.pendingChoices > 0, 'subió de nivel y espera una elección');
+    applyForge(player, item, { type: 'boost', key: 'cooldown', text: '' });
+    check(skillCooldown(skill, player) < cd, 'menos enfriamiento');
+    applyForge(player, item, { type: 'boost', key: 'dmgMult', text: '' });
+    checkNear(val(skill, player, 'dmgMult'), dmg * (1 + BOOST_PCT), '+15% daño');
+    const opts = forgeOptions(item);
+    check(opts.length === 3 && opts.every(o => o.text), '3 opciones para elegir');
+    const armorEntry = towerCatalog().find(e => e.slot === 'armor');
+    const armor = makeTowerItem(1, armorEntry, 'normal');
+    check(itemXpToNext(armor) > itemXpToNext(makeTowerItem(1, entry, 'normal')), 'las armaduras crecen más lento');
+}, { random: true });
+
+test('Torre: el amuleto trae el innato de su héroe (reacciona a eventos)', () => {
+    const level = newTower();
+    const amulet = makeTowerItem(1, towerCatalog().find(e => e.innateId === 'PERFECT_AIM'), 'normal');
+    equipItem(player, amulet);
+    player.baseAttackRange = 5; player.recalculateStats();
+    const c = makeCreep(CREEP_TYPES.GRUNT, player.x + 4, player.y, 1, false, 0); c.arena = level;
+    const ctx = { target: c, dmg: 100 }; emit(player, 'beforeAttack', ctx);
+    check(ctx.dmg > 100, 'Puntería Perfecta suma daño a distancia');
+}, { random: true });
+
+test('Torre: inventario en grilla, botín del guardián y cofres custodiados', () => {
+    const level = newTower();
+    let added = 0;
+    for (let i = 0; i < 60; i++) if (addToBag(player, makeTowerItem(1, towerCatalog().find(e => e.slot === 'armor'), 'normal'))) added++;
+    checkEq(added, Math.floor(BAG.cols / 2) * Math.floor(BAG.rows / 3), 'entran las armaduras (2×3) que caben');
+    player.bag = [];
+    killCreep(level.guardian, player);
+    checkEq(level.drops.length, LOOT.guardianDrops, 'el guardián suelta piezas');
+    player.x = level.drops[0].x; player.y = level.drops[0].y;
+    towerPickup(player);
+    checkEq(player.bag.length, LOOT.guardianDrops, 'las levantás al pisarlas');
+    const ch = level.chests[0];
+    check(ch && ch.guards.length >= 1, 'cofre con custodios');
+    player.x = ch.x; player.y = ch.y; towerPickup(player);
+    check(!ch.open, 'cerrado con los custodios vivos');
+    ch.guards.forEach(g => { g.hp = 0; });
+    towerPickup(player);
+    check(ch.open, 'se abre al vencerlos');
+}, { random: true });
+
+test('Torre: los saltos y teletransportes nunca te dejan dentro de una pared', () => {
+    const level = newTower();
+    let spot = null;
+    for (let y = 1; y < ROWS - 1 && !spot; y++) for (let x = 1; x < COLS - 2 && !spot; x++) if (walkable(level, x, y) && !walkable(level, x - 1, y)) spot = { x, y };
+    const c = makeCreep(CREEP_TYPES.GRUNT, spot.x, spot.y, 1, false, 0); c.arena = level;
+    player.x = spot.x + 3; player.y = spot.y;
+    blinkNextTo(player, { x: spot.x, y: spot.y, arena: level }); // del otro lado del objetivo hay pared
+    check(walkable(level, player.x, player.y), 'quedó sobre el piso');
+    player.x = spot.x - 1; player.y = spot.y; // forzado dentro de la pared
+    unstickFromWall(player);
+    check(walkable(level, player.x, player.y), 'la red de seguridad lo saca');
+}, { random: true });
+
 test('Torre: la escalera se abre al vencer al guardián y el nivel queda igual al volver', () => {
     const level = newTower();
     level.creeps.forEach(c => { if (!c.isGuardian) c.hp = 0; });

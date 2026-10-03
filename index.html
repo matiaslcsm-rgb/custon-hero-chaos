@@ -129,6 +129,32 @@
         </div>
     </div>
 
+    <!-- Tower Chaos: equipo e inventario (tecla I) -->
+    <div id="inv-container" class="modal" style="display: none;">
+        <div class="modal-box wide inv-box">
+            <div class="modal-head">
+                <h3>🎒 Equipo e inventario</h3>
+                <button class="modal-close" id="inv-close" title="Cerrar (I o Esc)">✕</button>
+            </div>
+            <div class="inv-layout">
+                <div id="inv-gear"></div>
+                <div class="inv-right">
+                    <div id="inv-bag"></div>
+                    <p class="subtitle" id="inv-held"></p>
+                    <div id="inv-tooltip"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Tower Chaos: forja (al subir de nivel una pieza) -->
+    <div id="forge-container" class="modal" style="display: none;">
+        <div class="modal-box forge-box">
+            <div class="modal-head"><h3 id="forge-title">⚒ Forjar</h3></div>
+            <p class="subtitle" id="forge-sub"></p>
+            <div id="forge-options" class="draft-grid"></div>
+        </div>
+    </div>
+
     <!-- Tower Chaos: ventana de stats (tecla C) -->
     <div id="stats-container" class="modal" style="display: none;">
         <div class="modal-box">
@@ -301,6 +327,8 @@
     <script src="js/creeps.js"></script>
     <script src="js/ai.js"></script>
     <script src="js/tower.js"></script>
+    <script src="js/towerItems.js"></script>
+    <script src="js/towerUI.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/mouse.js"></script>
     <script src="js/pause.js"></script>

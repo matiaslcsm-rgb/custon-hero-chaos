@@ -24,6 +24,11 @@ Al morir no se pierde todo: **tu cadáver y tus cosas quedan en el mapa** y pued
   lo que se busca son **sinergias**: mezclar libremente (el arma del Sniper con la armadura de Axe y las botas del Danzante).
 - **Las habilidades de cada pieza crecen con el uso**: lanzarla o que se active le suma experiencia y sube de nivel
   (la mecánica de ítems que suben de nivel de §2.4).
+- **Vos elegís cómo crece** (2026-10-03): cada vez que una pieza sube de nivel aparece una elección de cómo mejora su
+  habilidad: más daño, más área, más duración del efecto, más probabilidad de que salte la pasiva, menos enfriamiento,
+  menos maná… El jugador va **forjando** su arma según lo que elige. **Las armas crecen rápido**; las armaduras y los
+  demás objetos, más lento.
+- **Más adelante — crafteo**: desarmar piezas y combinar habilidades de armas, con un sistema de **materiales**.
 
 ## 2. Reglas propuestas
 
@@ -136,7 +141,27 @@ Al morir no se pierde todo: **tu cadáver y tus cosas quedan en el mapa** y pued
    - Medido (22 runs simuladas de 25 min, piloto automático, solo ataque básico): la mayoría llega a los pisos 3-5 y muere
      varias veces; el Vampiro llega al 7-10 (se cura con su innato); Bruja y Alquimista casi no pasan del 1. Sin ítems
      es lo esperable: el balance de la Torre se hace en la fase 2.
-2. **Ítems Diablo básicos**: ranuras de equipo, inventario en grilla, calidades y afijos, cofres custodiados.
+2. ✅ **Ítems Diablo básicos**: ranuras de equipo, inventario en grilla, calidades y afijos, cofres custodiados.
+   Hecho junto con la fase 3 (código: `js/towerItems.js` y `js/towerUI.js`):
+   - **Aventurero sin clase** (sin elegir héroe). El **arma** define el ataque básico: daño, velocidad, alcance,
+     proyectil y atributo principal (el del héroe de origen). Sin arma, puños.
+   - **55 piezas**: cada habilidad (44) y cada innato (11) de los héroes. La definitiva va en la armadura, el innato en
+     el amuleto, la de movilidad en las botas, la primera que pega en el arma y el resto en casco o guantes. Anillos con
+     stats. Calidades Normal / Mágico (1-2 afijos) / Raro (3-4 afijos), con nombre al estilo Diablo.
+   - **8 ranuras de equipo** e **inventario en grilla 10×4** con tamaños (arma 1×3, armadura 2×3, casco/guantes/botas
+     2×2, anillo y amuleto 1×1). Tecla **I**: clic para mover, clic derecho para equipar/desequipar. La partida espera.
+   - **Botín**: 3 cofres por nivel custodiados (un creep fuerte o tres), 7% de que un creep suelte una pieza y el
+     guardián suelta 2 (una rara). Se levantan al pisarlas.
+   - Hasta **6 habilidades activas** con el equipo (teclas E R T F Q V).
+3. ✅ **Ítems vivos**: suben de nivel con el uso y mejoras para elegir.
+   - Experiencia: el arma con cada golpe y baja; armadura, casco, guantes y botas con el daño que aguantan; anillos y
+     amuleto con las bajas; todas cuando se lanza su habilidad. Las armas suben rápido; el resto, 2,2 veces más lento.
+   - **Forja**: al subir de nivel, ventana con 3 opciones (la partida espera): +15% / −12% a un valor de su habilidad
+     (daño, área, duración, aturdimiento, probabilidad, enfriamiento, maná… ±1 en saltos, cargas o golpes necesarios),
+     subir el nivel de la habilidad, o +4 daño del arma / +30 vida de la pieza. Las mejoras quedan en la pieza.
+   - Medido (10 runs de 25 min con piloto automático): llegan a los pisos 4-9 con 4-6 piezas y el arma en nivel 9-13;
+     0-5 muertes. Se corrigió que los saltos (Parpadeo, Salto Sangriento, Paso del Vacío…) metieran al héroe en paredes.
+   - Pendiente de balance: el héroe llega al nivel 30 (tope) hacia el piso 8.
 3. **Ítems vivos**: suben de nivel con el uso, mejoras para elegir y los primeros únicos (Mjölnir y 4-5 más).
 4. **Biomas y varios niveles**: perjuicios, creeps por bioma, dificultad por nivel.
 5. **Muerte con consecuencias**: cadáver, criatura portadora, reparto y desgaste de ítems.

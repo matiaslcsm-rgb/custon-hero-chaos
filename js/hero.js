@@ -18,7 +18,7 @@ const ATTRIBUTE_RULES = {
 };
 
 // Teclas de habilidades activas, asignadas por orden de aprendizaje.
-const SKILL_KEYS = ['e', 'r', 't', 'f'];
+const SKILL_KEYS = ['e', 'r', 't', 'f', 'q', 'v']; // 4 en el modo normal; en Tower Chaos el equipo puede dar hasta 6 activas
 
 class Hero {
     constructor(template) {

@@ -81,6 +81,21 @@ function blinkNextTo(unit, target) {
     const dx = target.x - unit.x, dy = target.y - unit.y;
     unit.x = Math.max(0, Math.min(COLS - 1, target.x - Math.sign(dx || 1)));
     unit.y = Math.max(0, Math.min(ROWS - 1, dy === 0 ? target.y : target.y - Math.sign(dy)));
+    unstickFromWall(unit, target);
+}
+
+// Si una unidad terminó sobre una pared (saltos y teletransportes en Tower Chaos), la lleva a la casilla libre más
+// cercana (a `near` si se indica, si no a ella misma). En las arenas sin paredes no hace nada.
+function unstickFromWall(unit, near = unit) {
+    const arena = unit.arena;
+    if (!arena || !arena.walls || walkable(arena, unit.x, unit.y)) return;
+    let best = null, bestD = Infinity;
+    for (let r = 1; r <= 4 && !best; r++) for (let y = near.y - r; y <= near.y + r; y++) for (let x = near.x - r; x <= near.x + r; x++) {
+        if (!walkable(arena, x, y) || (x === near.x && y === near.y && near !== unit)) continue;
+        const d = Math.hypot(x - unit.x, y - unit.y);
+        if (d < bestD) { bestD = d; best = { x, y }; }
+    }
+    if (best) { unit.x = best.x; unit.y = best.y; }
 }
 
 // --- DAÑO ---
@@ -263,6 +278,7 @@ function killCreep(c, killer) {
     c.hp = 0;
     fxDeath(c);
     if (!killer || !killer.isHero) return;
+    if (c.arena && c.arena.kind === 'tower') towerLootOnKill(c.arena, c, killer); // Tower Chaos: botín
     if (c.type && c.type.onDeath) c.type.onDeath(c, killer);
     const timeAlive = gameClock - (c.spawnTime || gameClock);
     const speedMult = speedGoldMultiplier(timeAlive);

@@ -42,8 +42,13 @@ let towerRun = null;     // { floor, levels: [], base: { str, agi, int }, deaths
 const camera = { x: 0, y: 0 };
 
 // --- RUN ---
-function startTowerRun(template) {
-    player = new Hero(template);
+// Sin elección de héroe: arrancás como aventurero sin clase (towerItems.js); tu clase sale del equipo.
+function startTowerRun() {
+    resetGame();
+    gameMode = 'tower';
+    player = new Hero(ADVENTURER);
+    giveTowerGear(player);
+    applyGear(player);
     player.ownerName = playerName();
     player.displayName = `${player.name} (${player.ownerName})`;
     player.inRest = false;
@@ -57,7 +62,7 @@ function startTowerRun(template) {
     showPanel('menu-panel', false);
     showPanel('hero-select-panel', false);
     gameState = 'TOWER';
-    log(`🗼 Tower Chaos: entrás a la torre con ${player.name}. Arrancás solo con tu innato: subí de nivel, encontrá al guardián de cada piso y subí la escalera. Hay ${TOWER.floors} niveles.`);
+    log(`🗼 Tower Chaos: entrás a la torre como aventurero sin clase. Cada pieza de equipo trae la habilidad de un héroe: buscala en cofres y en lo que sueltan los creeps (I: inventario, C: stats). Hay ${TOWER.floors} niveles.`);
     enterTowerFloor(1, 'start');
 }
 
@@ -147,6 +152,8 @@ function generateTowerLevel(floor) {
             }
         }
     });
+    level.drops = [];
+    placeChests(level, rooms.filter(r => r !== startRoom && r !== guardRoom));
     level.creeps.forEach(c => { c.spawnTime = -1e9; }); // sin el oro extra por velocidad de las oleadas (no aplica en la Torre)
     return level;
 }
@@ -319,14 +326,17 @@ function updateTower(dt) {
     level.creeps.forEach(c => { if (c.isAlive()) tickEffects(c, dt); });
     // Renacer en el círculo de piedra (nivel 1)
     if (!player.isAlive() && player.respawnAt && gameClock >= player.respawnAt) { towerRespawn(); return; }
-    if (statsOpen) return; // con la ventana de stats abierta, la partida espera
-    if (autopilot && player.statPoints) aiSpendStatPoints(player);
+    if (towerModalOpen()) return; // con stats, inventario o forja abiertos, la partida espera
+    if (autopilot) { if (player.statPoints) aiSpendStatPoints(player); aiManageGear(player); }
+    else if (pendingForge(player)) { openForge(pendingForge(player)); return; }
     updateHero(player, level, dt);
-    if (player.isAlive()) computeFov(level, player);
+    unstickFromWall(player);
+    if (player.isAlive()) { computeFov(level, player); towerPickup(player); }
     updateProjectiles(level, dt);
     // Creeps: solo se mueven los que te vieron (radio de alerta); te sueltan si te alejás mucho de su lugar
     level.creeps.forEach(c => {
         if (!c.isAlive()) return;
+        unstickFromWall(c);
         const d = Math.hypot(c.x - player.x, c.y - player.y);
         if (!c.aggro && player.isAlive() && d <= TOWER.aggroRadius && canSee(level, c.x, c.y)) { c.aggro = true; alertPack(level, c); } // te tienen que ver
         if (c.aggro && (!player.isAlive() || Math.hypot(player.x - c.spawnX, player.y - c.spawnY) > TOWER.leash)) {
@@ -448,8 +458,9 @@ function towerInfoHtml() {
     const level = player.arena;
     const alive = level.creeps.filter(c => c.isAlive() && !c.isGuardian).length;
     return `<h3>🗼 Tower Chaos · nivel ${level.floor} de ${TOWER.floors}</h3>` +
-        `<p class="subtitle">Explorá, subí de nivel y vencé al <b>guardián</b> (${level.guardian.label}) para abrir la escalera.</p>` +
+        `<p class="subtitle">Explorá, juntá equipo (cada pieza trae la habilidad de un héroe) y vencé al <b>guardián</b> (${level.guardian.label}) para abrir la escalera.</p>` +
         (player.statPoints ? `<button class="primary-btn" onclick="toggleStatsWindow(true)">📊 Repartir ${player.statPoints} punto${player.statPoints === 1 ? '' : 's'} de stats (C)</button>` : `<button class="secondary-btn" onclick="toggleStatsWindow(true)">📊 Stats del héroe (C)</button>`) +
+        `<button class="secondary-btn" onclick="toggleInventory(true)">🎒 Equipo e inventario (I) · ${player.bag.length} en la bolsa</button>` +
         `<p class="subtitle">Creeps en este nivel: ${alive}. Muertes en la run: ${towerRun.deaths}. Al morir renacés en la base y perdés la mitad de los atributos ganados.</p>` +
         `<p class="subtitle" style="color:#888">En construcción: ítems, cofres, biomas y más (ver docs/ROGUELIKE.md).</p>`;
 }
@@ -514,6 +525,7 @@ function renderTower(level, dt) {
     if (shakeAmount) ctx.translate((Math.random() - 0.5) * shakeAmount * 2, (Math.random() - 0.5) * shakeAmount * 2);
     ctx.translate(-camera.x * TILE, -camera.y * TILE);
     drawTowerTiles(level);
+    drawTowerLoot(level);
     // Escalera (cerrada hasta vencer al guardián)
     const st = level.stairs, sx = st.x * TILE, sy = st.y * TILE;
     if (level.explored[st.y][st.x]) {
@@ -587,6 +599,11 @@ function towerAutoDir(hero) {
     const inRange = chasing.find(c => Math.hypot(c.x - hero.x, c.y - hero.y) <= range);
     if (inRange) return movesToFight(hero) ? circleStep(hero, inRange) : { dx: 0, dy: 0 };
     let target = null;
+    // Botín a la vista (si hay lugar) y cofres sin custodios
+    const loot = (level.drops || []).filter(d => !d.unreachable && canSee(level, d.x, d.y) && bagSpotFor(hero, d.item))
+        .concat((level.chests || []).filter(ch => !ch.open && !ch.unreachable && level.explored[ch.y][ch.x] && ch.guards.every(g => !g.isAlive())));
+    if (loot.length) target = loot.reduce((a, b) => (Math.hypot(a.x - hero.x, a.y - hero.y) <= Math.hypot(b.x - hero.x, b.y - hero.y) ? a : b));
+    if (target) { const dir = towerPathDir(hero, target); if (dir) return dir; target.unreachable = true; target = null; } // si no se llega, se saltea
     if (level.stairsOpen) target = level.stairs;
     else {
         const dist = bfsFrom(level, hero.x, hero.y);

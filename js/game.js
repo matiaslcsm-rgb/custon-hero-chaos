@@ -40,6 +40,7 @@ window.addEventListener('keydown', e => {
     if (k === 'h') { setAutoCast(!autoCast); return; }
     if (k === 'g') { setSprites(!spritesOn); return; }
     if (k === 'c' && gameMode === 'tower') { toggleStatsWindow(); return; }
+    if (k === 'i' && gameMode === 'tower') { toggleInventory(); return; }
     if (k === 'escape') { handleEscape(); return; }
     if (paused) return; // en pausa no responden las demás teclas
     if (inCombat() && !autopilot) handleSkillKeypress(k);
@@ -52,7 +53,7 @@ window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
 const GOLD_PENALTY_FREE_PICK = 0;
 
 function selectHero(template, freePick = false) {
-    if (gameMode === 'tower') { startTowerRun(template); return; }
+    if (gameMode === 'tower') { startTowerRun(); return; }
     player = new Hero(template);
     if (freePick) player.gold = GOLD_PENALTY_FREE_PICK;
     player.ownerName = playerName();
@@ -302,6 +303,8 @@ function endGame() {
 function resetGame() {
     player = null; heroes = []; arenas = []; viewedHero = null;
     if (statsOpen) toggleStatsWindow(false);
+    if (invOpen) toggleInventory(false);
+    if (forgeOpen) { forgeOpen = false; showPanel('forge-container', false); }
     gameMode = 'normal'; towerRun = null; COLS = VIEW_COLS; ROWS = VIEW_ROWS; camera.x = 0; camera.y = 0;
     gameState = 'MENU'; waveNumber = 1; gameClock = 0; heroOffers = null;
     currentDraft = null; savedPrepTime = null; nextWave = null; logMuted = false;

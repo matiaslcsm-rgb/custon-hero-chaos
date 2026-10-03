@@ -47,6 +47,7 @@ registerHero({
                 const x = caster.x, y = caster.y;
                 caster.x = Math.max(0, Math.min(COLS - 1, caster.x + Math.sign(target.x - caster.x)));
                 caster.y = Math.max(0, Math.min(ROWS - 1, caster.y + Math.sign(target.y - caster.y)));
+                if (!walkable(caster.arena, caster.x, caster.y)) { caster.x = x; caster.y = y; } // en Tower Chaos no atraviesa paredes
                 if (caster.x !== x || caster.y !== y) emit(caster, 'onMove', { steps: 1 });
             }
             const { dealt } = dealDamage(caster, target, Math.round(caster.atk * val(this, caster, 'dmgMult')), 'physical');
@@ -160,7 +161,7 @@ function circleNext(unit, target) {
     for (let k = 1; k <= 8; k++) {
         const [dx, dy] = CIRCLE_STEPS[(i + k) % 8];
         const x = target.x + dx, y = target.y + dy;
-        if (x < 0 || y < 0 || x >= COLS || y >= ROWS || Math.hypot(dx, dy) > range + 0.01) continue;
+        if (!walkable(unit.arena, x, y) || Math.hypot(dx, dy) > range + 0.01) continue;
         return x === unit.x && y === unit.y ? null : { x, y };
     }
     return null;

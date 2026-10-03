@@ -87,6 +87,7 @@ const HERO_SPRITES = {
     NECROMANCER: ['robed', { h: '#1b1b1b', s: '#adb5bd', e: '#80ffdb', b: '#2d6a4f', a: '#95d5b2', d: '#111', w: '#6c757d' }],
     VOIDSAGE: ['robed', { h: '#240046', s: '#c8b6ff', e: '#e0aaff', b: '#5a189a', a: '#e0aaff', d: '#10002b', w: '#9d4edd' }],
     ALCHEMIST: ['robed', { h: '#606c38', s: '#f1c27d', e: '#111', b: '#bc6c25', a: '#a7c957', d: '#3a2a1a', w: '#8d6e63' }],
+    ADVENTURER: ['humanoid', { h: '#6d4c41', s: '#f1c27d', e: '#111', b: '#495057', a: '#adb5bd', l: '#343a40', d: '#212529', w: '#ced4da' }],
     DANCER: ['duelist', { h: '#1d3557', s: '#e0c097', e: '#48cae4', b: '#14213d', a: '#8d99ae', l: '#22223b', d: '#0b0c10', w: '#ced4da' }],
     ZEUS: ['robed', { h: '#023e8a', s: '#f1c27d', e: '#ffd60a', b: '#03045e', a: '#ffd60a', d: '#03071e', w: '#ffea00' }]
 };

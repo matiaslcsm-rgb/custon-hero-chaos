@@ -588,7 +588,7 @@ function renderHeroBar() {
     // Habilidades activas: 4 casillas (las vacías se llenan en el draft)
     const skills = document.getElementById('hb-skills'); skills.innerHTML = '';
     const actives = p.skills.filter(s => s.kind === 'active');
-    for (let i = 0; i < KIT_SIZE; i++) {
+    for (let i = 0; i < Math.max(KIT_SIZE, actives.length); i++) {
         const s = actives[i];
         const slot = document.createElement('div');
         if (!s) { slot.className = 'skill-slot empty'; slot.textContent = 'libre'; slot.title = 'Espacio libre: se llena en el draft'; skills.appendChild(slot); continue; }

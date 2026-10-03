@@ -65,7 +65,9 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   confundida — el juego se puso más difícil en general desde esa medición, por otros cambios. **Sin medir:** el impacto
   en duelos 1v1, donde el nuke mágico de golpe pesa más que en una oleada larga. Medir con `simulateGame(i, false, 60)`.
 - **Modo roguelike «Tower Chaos» (2026-10-03, se elige en el menú junto a Custom Hero Chaos):** diseño en `docs/ROGUELIKE.md`; fase 1 hecha (nivel explorable con cámara,
-  creeps con nivel, guardián y escalera, muerte con renacer en la base). Próximo: fase 2, ítems estilo Diablo.
+  creeps con nivel, guardián y escalera, muerte con renacer en la base) y fases 2-3 (aventurero sin clase, héroes convertidos
+  en 55 piezas de equipo, inventario en grilla, cofres, forja al subir de nivel). Próximo: biomas (fase 4) y muerte con
+  cadáver portador (fase 5); más adelante, crafteo con materiales.
 - **Balance en curso (2026-09-28):** jefes más suaves desde la ronda 20 + Kaya y Cetro del Eclipse (ver DISEÑO.md §9 bis).
   Falta: los 4 magos (Arcanista, Bruja, Sabio, Alquimista) quedan eliminados cerca de la ronda 14; Zeus pasó a ganar 1 de 3.
 - **Después:** balancear la supervivencia contra creeps en el formato de un duelo por ronda (gana el último en pie: el Sniper

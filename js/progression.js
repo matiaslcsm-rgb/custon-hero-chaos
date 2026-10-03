@@ -25,7 +25,8 @@ function valueAt(skill, key, level) {
     return v[Math.max(0, Math.min(v.length, level) - 1)];
 }
 // Valor de una habilidad según el nivel que tiene en ese héroe (lo usan cast() y los hooks).
-function val(skill, hero, key) { return valueAt(skill, key, skillLevel(hero, skill)); }
+// Con las mejoras forjadas en la pieza que trae la habilidad (Tower Chaos, ver applySkillBoost en towerItems.js).
+function val(skill, hero, key) { return applySkillBoost(skill, hero, key, valueAt(skill, key, skillLevel(hero, skill))); }
 
 // Texto de un valor: "100/120/140/160%" con el nivel actual resaltado (level 0 = ninguno).
 function formatKey(skill, key, level, pct, mult = 1) {

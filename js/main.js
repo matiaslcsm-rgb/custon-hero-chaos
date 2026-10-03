@@ -1,7 +1,7 @@
 // Punto de entrada: conecta los botones y arranca el bucle principal.
 
 // Versión visible en el menú: si no coincide con la última subida, el navegador muestra una copia vieja (Ctrl+F5).
-const GAME_VERSION = '2026-10-03 · stats, visión y animaciones';
+const GAME_VERSION = '2026-10-03 · héroes convertidos en ítems';
 document.getElementById('game-version').textContent = `Versión ${GAME_VERSION}`;
 
 document.getElementById('start-wave-btn').onclick = startWave;
@@ -15,11 +15,13 @@ document.querySelectorAll('[data-glossary]').forEach(btn => { btn.onclick = () =
 document.querySelectorAll('.back-btn').forEach(btn => { btn.onclick = closeGlossary; });
 document.getElementById('shop-close').onclick = closeShop;
 document.getElementById('stats-close').onclick = () => toggleStatsWindow(false);
+document.getElementById('inv-close').onclick = () => toggleInventory(false);
 document.getElementById('map-toggle').onclick = toggleBigMap;
 document.getElementById('shop-container').onclick = e => { if (e.target.id === 'shop-container') closeShop(); };
 window.addEventListener('resize', applyMapSize);
 // Elegir modo: Custom Hero Chaos (el de siempre) o Tower Chaos (roguelike, tower.js)
-document.querySelectorAll('.mode-card').forEach(card => { card.onclick = () => { gameMode = card.dataset.mode; startHeroPick(); }; });
+// Tower Chaos no tiene elección de héroe: arrancás como aventurero sin clase
+document.querySelectorAll('.mode-card').forEach(card => { card.onclick = () => { gameMode = card.dataset.mode; if (gameMode === 'tower') startTowerRun(); else startHeroPick(); }; });
 { const input = document.getElementById('player-name'); input.value = playerName() === 'Vos' ? '' : playerName(); input.oninput = () => setPlayerName(input.value); }
 document.getElementById('hero-any-btn').onclick = openHeroDrawer;
 document.getElementById('hero-back-btn').onclick = () => { closeHeroDrawer(); resetGame(); };
