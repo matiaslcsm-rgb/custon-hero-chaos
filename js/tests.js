@@ -1173,6 +1173,26 @@ test('Torre: cada nivel da 5 puntos de stats para repartir (Vitalidad da vida, V
     checkEq(player.statPoints, TOWER.pointsPerLevel - 2, 'gastó 2');
 }, { random: true });
 
+test('Torre: creeps inteligentes (avisan, huyen con poca vida, los de lejos y el apoyo mantienen distancia, te rodean)', () => {
+    const level = newTower();
+    level.creeps.forEach(c => { c.hp = 0; });
+    const room = level.rooms.reduce((a, b) => (b.w * b.h > a.w * a.h ? b : a));
+    player.x = room.cx; player.y = room.cy; level.fovKey = null; computeFov(level, player);
+    const add = (key, dx, dy) => { const c = makeCreep(CREEP_TYPES[key], room.cx + dx, room.cy + dy, 1, false, 0); Object.assign(c, { arena: level, spawnTime: -1e9 }); level.creeps.push(c); return c; };
+    const a = add('GRUNT', 2, 0), b = add('GRUNT', 3, 1);
+    a.aggro = true; alertPack(level, a);
+    check(b.aggro, 'avisó al compañero');
+    a.hp = a.maxHp * 0.1;
+    a.moveTimer = 9999; const before = Math.hypot(a.x - player.x, a.y - player.y);
+    check(towerCreepBrain(a, 0.016) && Math.hypot(a.x - player.x, a.y - player.y) >= before, 'huye con poca vida');
+    const archer = add('ARCHER', 1, 0); archer.moveTimer = 9999;
+    check(towerCreepBrain(archer, 0.016), 'el arquero se aleja si lo tenés encima');
+    const healer = add('HEALER', 0, 2); healer.moveTimer = 9999;
+    check(towerCreepBrain(healer, 0.016), 'el sanador se queda atrás');
+    const g = add('GRUNT', -3, 0), slot = surroundSlot(g);
+    check(slot && Math.hypot(slot.x - player.x, slot.y - player.y) === 1, 'busca una casilla al lado tuyo');
+}, { random: true });
+
 test('Torre: la escalera se abre al vencer al guardián y el nivel queda igual al volver', () => {
     const level = newTower();
     level.creeps.forEach(c => { if (!c.isGuardian) c.hp = 0; });

@@ -212,11 +212,70 @@ function towerStepCreep(c, tx, ty, dt) {
     c.moveTimer += dt * 1000;
     const stepTime = c.moveInterval / (effMoveMult(c) * MOVE_SPEED_MULT);
     if (c.moveTimer < stepTime) return;
+    // Los de cuerpo a cuerpo te rodean: van a una casilla libre a tu lado en vez de hacer fila detrás del primero
+    if (player && tx === player.x && ty === player.y && c.range < 2.5) { const slot = surroundSlot(c); if (slot) { tx = slot.x; ty = slot.y; } }
     const dir = towerPathDir(c, { x: tx, y: ty });
     if (!dir) return;
     if (c.moveTimer < stepTime * (1 + bodyPenalty(c, c.x + dir.dx, c.y + dir.dy))) return;
     c.moveTimer = 0;
     c.x += dir.dx; c.y += dir.dy;
+}
+
+// --- IA DE LOS CREEPS (Torre) ---
+// Comportamientos: avisan a los compañeros, te rodean, los de lejos mantienen distancia, el apoyo se queda atrás y
+// huyen con poca vida. Los mueve towerCreepBrain antes de su ataque normal (updateCreep).
+const CREEP_AI = { alertRadius: 5, kiteBelow: 2.5, supportKeep: 3.5, fleeBelow: 0.25, fleeFor: 3 };
+const SUPPORT_CREEPS = ['HEALER', 'DRUMMER', 'SHAMAN'];
+
+// Casilla libre al lado del héroe, la más cercana al creep (o null si no hay).
+function surroundSlot(c) {
+    const level = c.arena;
+    let best = null, bestD = Infinity;
+    for (const [dx, dy] of STEPS_4) {
+        const x = player.x + dx, y = player.y + dy;
+        if (!walkable(level, x, y)) continue;
+        const taken = level.creeps.some(o => o !== c && o.isAlive() && o.x === x && o.y === y);
+        if (taken && !(c.x === x && c.y === y)) continue;
+        const d = Math.hypot(x - c.x, y - c.y);
+        if (d < bestD) { bestD = d; best = { x, y }; }
+    }
+    return best;
+}
+
+// Un paso alejándose de `from` (por el piso, sin cortar esquinas). Devuelve false si está acorralado.
+function towerStepAway(c, from, dt) {
+    c.moveTimer += dt * 1000;
+    const stepTime = c.moveInterval / (effMoveMult(c) * MOVE_SPEED_MULT);
+    if (c.moveTimer < stepTime) return true;
+    const here = Math.hypot(c.x - from.x, c.y - from.y);
+    let best = null, bestD = here;
+    for (const [dx, dy] of STEPS_4) {
+        if (!canStep(c.arena, c.x, c.y, dx, dy) || bodyPenalty(c, c.x + dx, c.y + dy) > 0) continue;
+        const d = Math.hypot(c.x + dx - from.x, c.y + dy - from.y);
+        if (d > bestD) { bestD = d; best = { dx, dy }; }
+    }
+    if (!best) return false;
+    c.moveTimer = 0;
+    c.x += best.dx; c.y += best.dy;
+    return true;
+}
+
+// Decide qué hace un creep que te persigue. Devuelve true si ya se movió (no ataca este frame).
+function towerCreepBrain(c, dt) {
+    const d = Math.hypot(c.x - player.x, c.y - player.y);
+    if (!c.isGuardian && c.hp / c.maxHp < CREEP_AI.fleeBelow && !c.fledOnce) { c.fledOnce = true; c.scaredUntil = gameClock + CREEP_AI.fleeFor; }
+    if (gameClock < (c.scaredUntil || 0)) return towerStepAway(c, player, dt);               // huye con poca vida
+    if (SUPPORT_CREEPS.includes(c.type.key) && d < CREEP_AI.supportKeep) return towerStepAway(c, player, dt); // apoyo: atrás
+    if (c.range >= 3 && d < CREEP_AI.kiteBelow) return towerStepAway(c, player, dt);         // a distancia: no te deja pegarle
+    return false;
+}
+
+// Cuando uno te ve, avisa a los que están cerca y lo pueden ver a él.
+function alertPack(level, c) {
+    level.creeps.forEach(o => {
+        if (o.aggro || !o.isAlive() || o.isGuardian) return;
+        if (Math.hypot(o.x - c.x, o.y - c.y) <= CREEP_AI.alertRadius && lineClear(level, o.x, o.y, c.x, c.y)) { o.aggro = true; o.alertedAt = gameClock; }
+    });
 }
 
 // --- VISIÓN ---
@@ -269,11 +328,11 @@ function updateTower(dt) {
     level.creeps.forEach(c => {
         if (!c.isAlive()) return;
         const d = Math.hypot(c.x - player.x, c.y - player.y);
-        if (!c.aggro && player.isAlive() && d <= TOWER.aggroRadius && canSee(level, c.x, c.y)) c.aggro = true; // te tienen que ver
+        if (!c.aggro && player.isAlive() && d <= TOWER.aggroRadius && canSee(level, c.x, c.y)) { c.aggro = true; alertPack(level, c); } // te tienen que ver
         if (c.aggro && (!player.isAlive() || Math.hypot(player.x - c.spawnX, player.y - c.spawnY) > TOWER.leash)) {
             c.aggro = false;
         }
-        if (c.aggro) updateCreep(c, dt);
+        if (c.aggro) { if (!(player.isAlive() && towerCreepBrain(c, dt))) updateCreep(c, dt); }
         else if (c.x !== c.spawnX || c.y !== c.spawnY) stepCreepToward(c, c.spawnX, c.spawnY, dt); // vuelve a su lugar
     });
     // El guardián muerto abre la escalera; pisarla te sube
