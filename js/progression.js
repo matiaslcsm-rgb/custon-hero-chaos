@@ -63,7 +63,7 @@ function gainXp(hero, amount) {
         hero.level++;
         hero.skillPoints++;
         hero.gainLevelAttributes();
-        log(`⬆️ ¡Nivel ${hero.level}! +1 punto de habilidad y atributos.`);
+        log(hero.towerStats ? `⬆️ ¡Nivel ${hero.level}! +${TOWER.pointsPerLevel} puntos de stats: apretá C para repartirlos.` : `⬆️ ¡Nivel ${hero.level}! +1 punto de habilidad y atributos.`);
         if (hero === player) sfx('levelup');
         fxText(hero, `¡NIVEL ${hero.level}!`, '#ffd166', 15, 1.4); fxRing(hero, '#ffd166', 1.5, 0.6);
     }

@@ -88,6 +88,7 @@ class Hero {
     }
     // Al subir de nivel: suma la ganancia de atributos del héroe (más en el principal).
     gainLevelAttributes() {
+        if (this.towerStats) { this.statPoints += TOWER.pointsPerLevel; return; } // Tower Chaos: puntos para repartir (tower.js)
         this.str += this.attrGain.str; this.agi += this.attrGain.agi; this.int += this.attrGain.int;
         this.recalculateStats();
     }

@@ -66,6 +66,7 @@ function handleEscape() {
     if (targeting) { cancelTargeting(); return; }
     if (document.getElementById('tutorial').style.display === 'flex') { closeTutorial(); return; }
     if (closeGlossary()) return;
+    if (statsOpen) { toggleStatsWindow(false); return; }
     if (document.getElementById('hero-any-drawer').classList.contains('open')) { closeHeroDrawer(); return; }
     if (document.getElementById('shop-container').style.display === 'block') { closeShop(); return; }
     togglePause();

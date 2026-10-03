@@ -14,6 +14,7 @@ document.getElementById('pause-quit').onclick = quitToMenu;
 document.querySelectorAll('[data-glossary]').forEach(btn => { btn.onclick = () => openGlossary(btn.dataset.glossary); });
 document.querySelectorAll('.back-btn').forEach(btn => { btn.onclick = closeGlossary; });
 document.getElementById('shop-close').onclick = closeShop;
+document.getElementById('stats-close').onclick = () => toggleStatsWindow(false);
 document.getElementById('map-toggle').onclick = toggleBigMap;
 document.getElementById('shop-container').onclick = e => { if (e.target.id === 'shop-container') closeShop(); };
 window.addEventListener('resize', applyMapSize);

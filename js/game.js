@@ -39,6 +39,7 @@ window.addEventListener('keydown', e => {
     if (k === 'm') { toggleBigMap(); return; }
     if (k === 'h') { setAutoCast(!autoCast); return; }
     if (k === 'g') { setSprites(!spritesOn); return; }
+    if (k === 'c' && gameMode === 'tower') { toggleStatsWindow(); return; }
     if (k === 'escape') { handleEscape(); return; }
     if (paused) return; // en pausa no responden las demás teclas
     if (inCombat() && !autopilot) handleSkillKeypress(k);
@@ -300,6 +301,7 @@ function endGame() {
 // Vuelve todo al estado inicial (menú) sin recargar la página.
 function resetGame() {
     player = null; heroes = []; arenas = []; viewedHero = null;
+    if (statsOpen) toggleStatsWindow(false);
     gameMode = 'normal'; towerRun = null; COLS = VIEW_COLS; ROWS = VIEW_ROWS; camera.x = 0; camera.y = 0;
     gameState = 'MENU'; waveNumber = 1; gameClock = 0; heroOffers = null;
     currentDraft = null; savedPrepTime = null; nextWave = null; logMuted = false;

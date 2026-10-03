@@ -17,6 +17,8 @@ const TOWER = {
     rooms: { tries: 900, want: 24, minW: 6, maxW: 13, minH: 5, maxH: 10 },
     baseSight: 6,         // distancia de visión base del héroe (las paredes tapan la vista)
     visionPerPoint: 0.5,  // cada punto de Visión suma media casilla
+    pointsPerLevel: 5,    // puntos de stats por nivel del héroe (se reparten en la ventana de stats, tecla C)
+    vitHp: 15, vitRegen: 0.1,   // lo que da cada punto de Vitalidad
     aggroRadius: 6,       // los creeps te persiguen si estás a esta distancia o menos
     leash: 16,            // y te sueltan si te alejás más que esto de su lugar
     respawnDelay: 3,
@@ -45,6 +47,8 @@ function startTowerRun(template) {
     player.ownerName = playerName();
     player.displayName = `${player.name} (${player.ownerName})`;
     player.inRest = false;
+    player.towerStats = { str: 0, agi: 0, int: 0, vit: 0, vis: 0 }; // puntos puestos en cada stat
+    player.statPoints = 0;
     heroes = [player];
     viewedHero = player;
     heroOffers = null;
@@ -256,6 +260,8 @@ function updateTower(dt) {
     level.creeps.forEach(c => { if (c.isAlive()) tickEffects(c, dt); });
     // Renacer en el círculo de piedra (nivel 1)
     if (!player.isAlive() && player.respawnAt && gameClock >= player.respawnAt) { towerRespawn(); return; }
+    if (statsOpen) return; // con la ventana de stats abierta, la partida espera
+    if (autopilot && player.statPoints) aiSpendStatPoints(player);
     updateHero(player, level, dt);
     if (player.isAlive()) computeFov(level, player);
     updateProjectiles(level, dt);
@@ -284,6 +290,63 @@ function updateTower(dt) {
     } else level.stairsWarned = false;
 }
 
+// --- STATS DEL HÉROE (puntos para repartir, como Diablo) ---
+const TOWER_STATS = {
+    str: { name: 'Fuerza', icon: '💪', color: '#ff6b6b', gives: () => `+${ATTRIBUTE_RULES.str.hp} vida y +${ATTRIBUTE_RULES.str.hpRegen} regeneración por punto (daño si es tu atributo principal)` },
+    agi: { name: 'Agilidad', icon: '🏹', color: '#69db7c', gives: () => `+1% vel. de ataque, +${ATTRIBUTE_RULES.agi.armor} armadura y +${ATTRIBUTE_RULES.agi.critChance}% crítico por punto (daño si es tu principal)` },
+    int: { name: 'Inteligencia', icon: '🔮', color: '#74c0fc', gives: () => `+${ATTRIBUTE_RULES.int.mana} maná y +${ATTRIBUTE_RULES.int.spellAmp}% amplificación por punto (daño si es tu principal)` },
+    vit: { name: 'Vitalidad', icon: '❤', color: '#ff477e', gives: () => `+${TOWER.vitHp} vida y +${TOWER.vitRegen} regeneración por punto` },
+    vis: { name: 'Visión', icon: '👁', color: '#ffd166', gives: () => `+${TOWER.visionPerPoint} casilla de distancia de visión por punto` }
+};
+function towerStatValue(hero, k) {
+    if (k === 'vit') return hero.towerStats.vit;
+    if (k === 'vis') return heroSight(hero);
+    return Math.floor(hero[k]);
+}
+// Suma (o resta, n < 0) puntos a un stat y aplica lo que da.
+function changeTowerStat(hero, k, n) {
+    hero.towerStats[k] += n;
+    if (k === 'str' || k === 'agi' || k === 'int') hero[k] += n;
+    else if (k === 'vit') { hero.bonus.maxHp += n * TOWER.vitHp; hero.bonus.hpRegen = (hero.bonus.hpRegen || 0) + n * TOWER.vitRegen; if (n > 0) hero.hp += n * TOWER.vitHp; }
+    hero.recalculateStats();
+}
+function spendStatPoint(hero, k) {
+    if (!hero.statPoints || !TOWER_STATS[k]) return false;
+    hero.statPoints--;
+    changeTowerStat(hero, k, 1);
+    if (hero === player) renderStatsWindow();
+    return true;
+}
+// La IA (piloto automático) reparte: 3 al atributo principal y 2 a Vitalidad por nivel.
+function aiSpendStatPoints(hero) {
+    const main = { STR: 'str', AGI: 'agi', INT: 'int' }[hero.primaryAttr];
+    while (hero.statPoints > 0) spendStatPoint(hero, (hero.towerStats[main] + hero.towerStats.vit) % 5 < 3 ? main : 'vit');
+}
+
+// Ventana de stats (tecla C): la partida se pausa mientras está abierta.
+let statsOpen = false;
+function toggleStatsWindow(open = !statsOpen) {
+    if (gameMode !== 'tower' || !player || !player.towerStats) return;
+    statsOpen = open;
+    showPanel('stats-container', open);
+    if (open) renderStatsWindow();
+}
+function renderStatsWindow() {
+    if (!statsOpen) return;
+    document.getElementById('stats-points').textContent = player.statPoints ? `${player.statPoints} punto${player.statPoints === 1 ? '' : 's'} para repartir` : 'Sin puntos (subí de nivel)';
+    const rows = document.getElementById('stats-rows'); rows.innerHTML = '';
+    Object.entries(TOWER_STATS).forEach(([k, st]) => {
+        const row = document.createElement('div');
+        row.className = 'stat-row';
+        row.innerHTML = `<span class="stat-icon">${st.icon}</span><span class="stat-name" style="color:${st.color}">${st.name}</span>` +
+            `<span class="stat-value">${k === 'vis' ? towerStatValue(player, k).toFixed(1) : towerStatValue(player, k)}</span>` +
+            `<span class="stat-spent">${player.towerStats[k] ? `+${player.towerStats[k]} puestos` : ''}</span>` +
+            `<button class="stat-plus" ${player.statPoints ? '' : 'disabled'}>+</button><span class="stat-gives">${st.gives()}</span>`;
+        row.querySelector('.stat-plus').onclick = () => spendStatPoint(player, k);
+        rows.appendChild(row);
+    });
+}
+
 // --- MUERTE ---
 function towerHeroDeath(hero, killer) {
     const level = hero.arena;
@@ -292,13 +355,12 @@ function towerHeroDeath(hero, killer) {
     hero.respawnAt = gameClock + TOWER.respawnDelay;
     towerRun.deaths++;
     level.corpses.push({ x: hero.x, y: hero.y, killer: killer ? killer.label : null, at: gameClock });
-    // Perdés la mitad de lo ganado por encima de la base (nunca bajás de la base)
+    // Perdés la mitad de los puntos puestos en cada stat (lo de base nunca se pierde)
     const lost = [];
-    ['str', 'agi', 'int'].forEach(k => {
-        const base = towerRun.base[k], gained = hero[k] - base;
-        if (gained > 0) { hero[k] = base + gained / 2; lost.push(`${Math.floor(gained / 2)} de ${{ str: 'Fuerza', agi: 'Agilidad', int: 'Inteligencia' }[k]}`); }
+    Object.keys(hero.towerStats).forEach(k => {
+        const n = Math.ceil(hero.towerStats[k] / 2);
+        if (n > 0) { changeTowerStat(hero, k, -n); lost.push(`${n} de ${TOWER_STATS[k].name}`); }
     });
-    hero.recalculateStats();
     sfx('lose');
     log(`💀 ${killer ? killer.label + ' te mató' : 'Moriste'} en el nivel ${level.floor}. ${lost.length ? 'Perdés ' + lost.join(', ') + '. ' : ''}Renacés en el círculo de piedra de la base en ${TOWER.respawnDelay}s.`);
 }
@@ -328,6 +390,7 @@ function towerInfoHtml() {
     const alive = level.creeps.filter(c => c.isAlive() && !c.isGuardian).length;
     return `<h3>🗼 Tower Chaos · nivel ${level.floor} de ${TOWER.floors}</h3>` +
         `<p class="subtitle">Explorá, subí de nivel y vencé al <b>guardián</b> (${level.guardian.label}) para abrir la escalera.</p>` +
+        (player.statPoints ? `<button class="primary-btn" onclick="toggleStatsWindow(true)">📊 Repartir ${player.statPoints} punto${player.statPoints === 1 ? '' : 's'} de stats (C)</button>` : `<button class="secondary-btn" onclick="toggleStatsWindow(true)">📊 Stats del héroe (C)</button>`) +
         `<p class="subtitle">Creeps en este nivel: ${alive}. Muertes en la run: ${towerRun.deaths}. Al morir renacés en la base y perdés la mitad de los atributos ganados.</p>` +
         `<p class="subtitle" style="color:#888">En construcción: ítems, cofres, biomas y más (ver docs/ROGUELIKE.md).</p>`;
 }

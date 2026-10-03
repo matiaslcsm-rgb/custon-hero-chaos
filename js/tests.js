@@ -1161,6 +1161,18 @@ test('Torre: visión con paredes que tapan y distancia según el héroe', () => 
     checkEq(heroSight(player), TOWER.baseSight, 'visión base');
 }, { random: true });
 
+test('Torre: cada nivel da 5 puntos de stats para repartir (Vitalidad da vida, Visión da distancia)', () => {
+    newTower();
+    const str = player.str, hp = player.maxHp, sight = heroSight(player);
+    gainXp(player, xpToNext(1));
+    checkEq(player.statPoints, TOWER.pointsPerLevel, 'puntos al subir de nivel');
+    checkNear(player.str, str, 'sin atributos automáticos');
+    spendStatPoint(player, 'vit'); spendStatPoint(player, 'vis');
+    checkEq(player.maxHp, hp + TOWER.vitHp, 'Vitalidad: vida');
+    checkNear(heroSight(player), sight + TOWER.visionPerPoint, 'Visión: distancia');
+    checkEq(player.statPoints, TOWER.pointsPerLevel - 2, 'gastó 2');
+}, { random: true });
+
 test('Torre: la escalera se abre al vencer al guardián y el nivel queda igual al volver', () => {
     const level = newTower();
     level.creeps.forEach(c => { if (!c.isGuardian) c.hp = 0; });
@@ -1185,7 +1197,9 @@ test('Torre: al morir perdés la mitad de lo ganado y renacés en el círculo de
     level.guardian.hp = 0; updateTower(0.016);
     enterTowerFloor(2);
     const base = towerRun.base.str;
-    player.str = base + 10; player.recalculateStats();
+    player.statPoints = 10;
+    for (let i = 0; i < 10; i++) spendStatPoint(player, 'str');
+    checkNear(player.str, base + 10, 'puntos puestos en Fuerza');
     const killer = player.arena.creeps.find(c => !c.isGuardian);
     dealDamage(killer, player, 99999, 'pure');
     check(!player.isAlive(), 'murió');
@@ -1195,8 +1209,10 @@ test('Torre: al morir perdés la mitad de lo ganado y renacés en el círculo de
     updateTower(0.016);
     check(player.isAlive() && towerRun.floor === 1, 'renació en el nivel 1');
     checkEq([player.x, player.y].join(), [level.start.x, level.start.y].join(), 'en el círculo de piedra');
-    player.str = base; dealDamage(killer, player, 99999, 'pure');
-    checkNear(player.str, base, 'nunca baja de la base');
+    dealDamage(killer, player, 99999, 'pure'); dealDamage(killer, player, 99999, 'pure');
+    gameClock = player.respawnAt + 0.1; updateTower(0.016); dealDamage(killer, player, 99999, 'pure');
+    gameClock = player.respawnAt + 0.1; updateTower(0.016); dealDamage(killer, player, 99999, 'pure');
+    check(player.str >= base, 'nunca baja de la base');
 }, { random: true });
 
 test('Ancla: cada golpe ralentiza y quita evasión', () => {

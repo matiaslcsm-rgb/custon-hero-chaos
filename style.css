@@ -480,6 +480,17 @@ kbd { background: #2a2e3a; border: 1px solid #555; border-bottom-width: 3px; pad
 .name-field { display: flex; align-items: center; gap: 8px; margin: 8px 0; font-size: 0.85rem; color: #8ecae6; }
 .name-field input { flex: 1; background: #11141a; color: #fff; border: 1px solid #444; padding: 4px 6px; font-family: inherit; }
 
+/* Tower Chaos: ventana de stats */
+#stats-container .modal-box { max-width: 620px; border-color: #c77dff; }
+.stat-row { display: grid; grid-template-columns: 26px 110px 50px 80px 32px 1fr; align-items: center; gap: 6px; padding: 6px 4px; border-bottom: 1px solid #2a2d36; }
+.stat-icon { font-size: 1.1rem; text-align: center; }
+.stat-name { font-weight: bold; }
+.stat-value { font-size: 1.1rem; color: #fff; text-align: right; }
+.stat-spent { font-size: 0.7rem; color: #8ecae6; }
+.stat-plus { background: #2dc653; color: #000; font-weight: bold; border: none; width: 28px; height: 26px; cursor: pointer; font-family: inherit; font-size: 1rem; }
+.stat-plus:disabled { background: #333; color: #666; cursor: default; }
+.stat-gives { font-size: 0.68rem; color: #999; }
+
 /* Ventana del draft: cartas como en la elección de héroe (ícono y color del héroe de origen) */
 .draft-box { border-color: #00b4d8; }
 .draft-box .modal-head h3 { color: #00f5d4; }
