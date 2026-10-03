@@ -115,12 +115,11 @@ Al morir no se pierde todo: **tu cadáver y tus cosas quedan en el mapa** y pued
   torre**: hay que subirla de nuevo.
 - Cada stat se sube por separado (sistema propio) y los jefes y creeps pueden soltar stats o habilidades: **se diseña después**.
 - Héroes rivales: como **élites**.
+- **Los niveles quedan iguales durante la run**: se generan al llegar por primera vez y, si morís y volvés a subir,
+  están como los dejaste (con tu cadáver y la criatura que se quedó con tus cosas).
 - Sin draft de habilidades en este modo por ahora: las habilidades vienen de los ítems.
 
 ## 6. Preguntas abiertas ❓
-- Al subir de nuevo después de morir, ¿los niveles se vuelven a generar al azar o quedan iguales? Tu cadáver y la
-  criatura con tus cosas tienen que seguir en el nivel donde moriste (propuesta: los niveles ya visitados quedan
-  iguales durante la run; se generan nuevos solo al llegar a uno por primera vez).
 - Cómo funciona el sistema de niveles de cada stat (¿sube con el uso, con puntos, con botín?).
 - Tamaño de la grilla del inventario y si el peso o el tamaño limitan cuánto cargás.
 - Cuántos únicos para arrancar y cuáles (Mjölnir es el primero).
