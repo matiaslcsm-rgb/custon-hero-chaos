@@ -1,5 +1,9 @@
 // Punto de entrada: conecta los botones y arranca el bucle principal.
 
+// Versión visible en el menú: si no coincide con la última subida, el navegador muestra una copia vieja (Ctrl+F5).
+const GAME_VERSION = '2026-10-03 · dos modos';
+document.getElementById('game-version').textContent = `Versión ${GAME_VERSION}`;
+
 document.getElementById('start-wave-btn').onclick = startWave;
 document.getElementById('restart-btn').onclick = resetGame;
 document.getElementById('bet-done-btn').onclick = endBetting;
@@ -17,6 +21,7 @@ window.addEventListener('resize', applyMapSize);
 document.querySelectorAll('.mode-card').forEach(card => { card.onclick = () => { gameMode = card.dataset.mode; startHeroPick(); }; });
 { const input = document.getElementById('player-name'); input.value = playerName() === 'Vos' ? '' : playerName(); input.oninput = () => setPlayerName(input.value); }
 document.getElementById('hero-any-btn').onclick = openHeroDrawer;
+document.getElementById('hero-back-btn').onclick = () => { closeHeroDrawer(); resetGame(); };
 document.getElementById('hero-any-close').onclick = closeHeroDrawer;
 document.getElementById('hero-any-backdrop').onclick = closeHeroDrawer;
 document.getElementById('menu-tutorial-btn').onclick = () => openTutorial();

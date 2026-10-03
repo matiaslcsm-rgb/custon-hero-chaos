@@ -399,6 +399,7 @@ kbd { background: #2a2e3a; border: 1px solid #555; border-bottom-width: 3px; pad
 .mode-card.tower b { color: #e0aaff; }
 .mode-card em { font-size: 0.65rem; color: #ffb703; font-style: normal; margin-left: 4px; }
 .mode-card .mode-text span { font-size: 0.72rem; color: #aaa; }
+.menu-version { color: #555 !important; font-size: 0.65rem !important; margin-top: 6px; }
 .menu-glossary { display: grid; grid-template-columns: 1fr; gap: 0; margin-top: 10px; }
 .menu-glossary .secondary-btn { margin-top: 4px; }
 .menu-keys { margin-top: 10px; }

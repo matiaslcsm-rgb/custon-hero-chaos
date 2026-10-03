@@ -8,7 +8,7 @@
 let paused = false;
 let glossaryFromPause = false; // al cerrar el glosario, volver al menú de pausa si se abrió desde ahí
 
-function canPause() { return player && gameState !== 'MENU' && gameState !== 'HERO_SELECT' && gameState !== 'ENDED'; }
+function canPause() { return gameState !== 'MENU' && gameState !== 'ENDED'; }
 
 function setPaused(on) {
     if (on && !canPause()) return;
@@ -56,7 +56,7 @@ function isGlossaryOpen() { return ['heroes', 'creeps', 'items'].some(v => docum
 function showView(view) { if (view === 'game') closeGlossary(); else openGlossary(view); }
 
 function quitToMenu() {
-    if (!confirm('¿Salir al menú? Se pierde la partida en curso.')) return;
+    if (player && !confirm('¿Salir al menú? Se pierde la partida en curso.')) return; // eligiendo héroe no hay nada que perder
     setPaused(false);
     resetGame();
 }
