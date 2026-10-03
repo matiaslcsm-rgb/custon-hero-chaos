@@ -45,6 +45,9 @@ Al morir no se pierde todo: **tu cadáver y tus cosas quedan en el mapa** y pued
 - Arranca **solo con su héroe y su innato**, sin habilidades. Sube de nivel con la experiencia (atributos, como ahora).
 - **Sin draft de habilidades en este modo** (por ahora): las habilidades vienen de los **ítems** (un arma única puede
   traer su propio efecto o una activa con tecla).
+- **Stats con niveles propios** (a desarrollar más adelante): cada stat del personaje (Fuerza, Agilidad, Inteligencia,
+  vida, armadura…) se sube **por separado**, con un sistema de niveles distinto al de las armas y los ítems.
+- **Botín de stats y habilidades** (a desarrollar más adelante): los jefes y los creeps pueden soltar stats o habilidades.
 - **Stats base**: los del héroe al empezar. Lo que ganás encima se puede perder al morir (ver §2.5), pero nunca bajás
   del punto base (salvo maldiciones, más adelante).
 
@@ -73,9 +76,8 @@ Al morir no se pierde todo: **tu cadáver y tus cosas quedan en el mapa** y pued
 - El resto de tus ítems puede **repartirse por el mapa**. Cada ítem tiene chance de **perder calidad**, **romperse** o
   **equiparse en otro monstruo** del mismo nivel.
 - Lo roguelike es eso: tu partida se va inventando con lo que perdés y lo que recuperás.
-- **Renacer**: reaparecés en un **círculo de piedra**. *Interpretación (a confirmar):* hay un círculo de piedra por nivel,
-  cerca de la entrada; se activa al pisarlo y renacés en el último que activaste. Así perder no te obliga a subir toda la
-  torre de nuevo, pero sí a volver hasta tu cadáver.
+- **Renacer**: reaparecés en el **círculo de piedra** de la base de la torre. **Cada muerte te obliga a subir la torre
+  de nuevo** (decidido por el usuario 2026-10-03).
 - **Stats al morir**: perdés **la mitad de lo que ganaste por encima de la base**, y nunca bajás de la base.
   Ej: Fuerza base 20, llegaste a 40 → al morir quedás en 30. (Maldiciones que bajen de la base: más adelante.)
 
@@ -109,11 +111,16 @@ Al morir no se pierde todo: **tu cadáver y tus cosas quedan en el mapa** y pued
 
 ## 5. Decisiones tomadas (2026-10-03)
 - Avance: **subir una torre**; cada nivel es aleatorio. Final en el **nivel 10**, con salón de la fama.
-- Al morir: perdés la **mitad de lo ganado** por encima de la base; renacés en un **círculo de piedra**.
+- Al morir: perdés la **mitad de lo ganado** por encima de la base y renacés en el **círculo de piedra de la base de la
+  torre**: hay que subirla de nuevo.
+- Cada stat se sube por separado (sistema propio) y los jefes y creeps pueden soltar stats o habilidades: **se diseña después**.
 - Héroes rivales: como **élites**.
 - Sin draft de habilidades en este modo por ahora: las habilidades vienen de los ítems.
 
 ## 6. Preguntas abiertas ❓
-- ¿Un círculo de piedra por nivel (interpretación actual) o uno solo en la base de la torre?
+- Al subir de nuevo después de morir, ¿los niveles se vuelven a generar al azar o quedan iguales? Tu cadáver y la
+  criatura con tus cosas tienen que seguir en el nivel donde moriste (propuesta: los niveles ya visitados quedan
+  iguales durante la run; se generan nuevos solo al llegar a uno por primera vez).
+- Cómo funciona el sistema de niveles de cada stat (¿sube con el uso, con puntos, con botín?).
 - Tamaño de la grilla del inventario y si el peso o el tamaño limitan cuánto cargás.
 - Cuántos únicos para arrancar y cuáles (Mjölnir es el primero).
