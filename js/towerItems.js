@@ -162,6 +162,30 @@ const ADVENTURER = {
     innate: { id: 'ADVENTURER_INNATE', name: 'Sin clase', tags: [], description: 'Tu clase la arma tu equipo: cada pieza trae la habilidad de un héroe.' }
 };
 
+// Habilidad propia del Aventurero: siempre la tiene (tecla E), así arranca con algo que lanzar y los innatos
+// "al lanzar" (Arcanista, Sabio del Vacío, Zeus) funcionan desde el principio. No sale del equipo: sube con tu nivel.
+const ADVENTURER_STRIKE = {
+    id: 'ADVENTURER_GOLPE', name: 'Golpe Certero', kind: 'active', heroKey: 'ADVENTURER',
+    tags: ['FÍSICO'],
+    values: { cooldown: [7, 6.5, 6, 5.5], manaCost: 15, dmgMult: [1.5, 1.8, 2.1, 2.4] },
+    levelEvery: 8, // sube un nivel cada 8 niveles del héroe (1, 9, 17, 25)
+    description: 'Golpe con tu arma: {dmgMult%} de tu daño físico al enemigo más cercano en tu alcance. Sube con tu nivel (cada 8).',
+    cast(caster) {
+        const target = nearestEnemy(caster, caster.attackRange + 1);
+        if (!target) { log('Golpe Certero: sin objetivo en alcance.'); return false; }
+        const dmg = Math.round(caster.atk * val(this, caster, 'dmgMult'));
+        const { dealt } = dealDamage(caster, target, dmg, 'physical');
+        if (fxArena(caster)) fxText(target, '¡CERTERO!', '#c9a227', 11, 0.8);
+        log(`🗡️ ¡Golpe Certero a ${target.label}! (-${dealt} HP)`);
+        return true;
+    }
+};
+SKILL_INDEX[ADVENTURER_STRIKE.id] = ADVENTURER_STRIKE;
+function syncAdventurerStrike(hero) {
+    if (!hero.hasSkill(ADVENTURER_STRIKE.id)) return;
+    hero.skillLevels[ADVENTURER_STRIKE.id] = Math.min(maxSkillLevel(ADVENTURER_STRIKE), 1 + Math.floor((hero.level - 1) / ADVENTURER_STRIKE.levelEvery));
+}
+
 function giveTowerGear(hero) {
     hero.gear = Object.fromEntries(EQUIP_SLOTS.map(s => [s, null]));
     hero.bag = []; // { item, x, y }

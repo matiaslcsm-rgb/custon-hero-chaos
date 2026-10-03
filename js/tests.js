@@ -1107,7 +1107,7 @@ test('Torre: el nivel se genera conectado, con guardián, escalera y creeps con 
     const level = newTower();
     checkEq(gameState, 'TOWER', 'fase de la Torre');
     checkEq(COLS + 'x' + ROWS, TOWER.cols + 'x' + TOWER.rows, 'mundo grande');
-    checkEq(player.skills.length, 0, 'arranca sin habilidades');
+    checkEq(player.skills.map(s => s.id).join(), 'ADVENTURER_GOLPE', 'arranca solo con Golpe Certero');
     const dist = bfsFrom(level, level.start.x, level.start.y);
     check(level.rooms.every(r => dist[r.cy * COLS + r.cx] >= 0), 'todas las salas se alcanzan');
     check(dist[level.stairs.y * COLS + level.stairs.x] >= 0, 'la escalera se alcanza');
@@ -1202,6 +1202,19 @@ test('Torre: arrancás como aventurero; cada habilidad e innato de cada héroe e
     checkEq(new Set(cat.filter(e => e.skillId).map(e => e.skillId)).size, skills.length, 'sin repetir');
     checkEq(cat.filter(e => e.innateId).length, Object.keys(HERO_TEMPLATES).length, 'un amuleto por innato');
     check(cat.every(e => TOWER_SLOTS[e.slot]), 'ranuras válidas');
+}, { random: true });
+
+test('Torre: el aventurero arranca con Golpe Certero en la E y sube con su nivel', () => {
+    newTower();
+    check(player.hasSkill('ADVENTURER_GOLPE'), 'tiene la habilidad');
+    checkEq(player.keyBindings.ADVENTURER_GOLPE, 'e', 'en la E');
+    checkEq(skillLevel(player, ADVENTURER_STRIKE), 1, 'nivel 1');
+    while (player.level < 9) gainXp(player, 5000);
+    checkEq(skillLevel(player, ADVENTURER_STRIKE), 2, 'nivel 2 al llegar al 9');
+    const entry = towerCatalog().find(e => e.heroKey === 'SNIPER' && e.slot === 'weapon');
+    equipItem(player, makeTowerItem(1, entry, 'normal'));
+    checkEq(player.keyBindings.ADVENTURER_GOLPE, 'e', 'sigue en la E');
+    check(player.skills.filter(s => s.kind === 'active').length === 2, 'la del arma se suma en otra tecla');
 }, { random: true });
 
 test('Torre: equipar un arma cambia el ataque y da su habilidad; sacarla la quita', () => {
