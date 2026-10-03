@@ -174,8 +174,13 @@ vectoriales, primero en Tower Chaos. Código: `js/inkart.js`; hoja de muestra: `
 `index.html?demo=tower`.
 - Paso 1 hecho: piso de pergamino, paredes de piedra en tinta con rayado, niebla sepia, viñeta de papel viejo, contorno de
   tinta y colores apagados en los sprites que todavía son pixel art, ventanas de la Torre color pergamino.
-- Paso 2 (prototipo): figuras vectoriales por silueta — caballero encapuchado (aventurero; la capa toma el color del
-  atributo de su arma), soldado, arquero, mago, bruto y espectro; los guardianes, más grandes.
+- Paso 2 (prototipo): figuras vectoriales por silueta — caballero encapuchado (aventurero), soldado, arquero, mago,
+  bruto, espectro y médico de la peste (Sanador); los guardianes, más grandes.
+- Segunda tanda con más referencias del usuario: proporciones más altas y esbeltas (lienzo 64×96), telas con dibujo
+  (rombos, zigzag, rayas, puntitos y guardas en los dobladillos), cintas al viento, sombrero de ala ancha, máscara de
+  pico y espadas flotando. **El aventurero se ve según su equipo**: la capa toma el color del héroe de su armadura,
+  la capucha el de su casco, la guarda el de sus botas y el arma tiene la forma de la suya (espada, hacha, báculo,
+  rifle, dagas…).
 
 ## 5. Decisiones tomadas (2026-10-03)
 - Avance: **subir una torre**; cada nivel es aleatorio. Final en el **nivel 10**, con salón de la fama.

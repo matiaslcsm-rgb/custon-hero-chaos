@@ -15,13 +15,20 @@
 <script>
 const g = document.getElementById('c').getContext('2d');
 g.fillStyle = INK.paper; g.fillRect(0, 0, 1000, 420);
-const figs = [['hoodedKnight', inkMute('#a33a3a', 0.25), 'Aventurero'], ['hoodedKnight', inkMute('#69db7c', 0.25), 'Aventurero (arma AGI)'],
-    ['footman', inkMute('#ffb703'), 'Grunt'], ['archer', inkMute('#8ecae6'), 'Arquero'], ['mage', inkMute('#c77dff'), 'Chamán'],
-    ['brute', inkMute('#e63946'), 'Bruto'], ['wraith', inkMute('#adb5bd'), 'Espectro']];
-figs.forEach(([plan, color, name], i) => {
-    const f = inkFigure(plan, color, '#c77dff');
-    g.drawImage(f.img, 10 + i * 140, 10, INK_W * 2, INK_H * 2);
-    g.fillStyle = INK.line; g.font = '13px serif'; g.fillText(name, 20 + i * 140, 190);
+const HERO_WEAPONS = { AXE: { shape: 'hammer' } }; // solo para la muestra
+const looks = [
+    ['hoodedKnight', { main: inkMute('#a33a3a', 0.25), accent: inkMute('#c9a227', 0.25), weapon: 'sword' }, 'Aventurero (espada)'],
+    ['hoodedKnight', { main: inkMute('#69db7c', 0.25), hood: inkMute('#74c0fc', 0.25), accent: inkMute('#ff6b6b', 0.25), weapon: 'staff' }, 'Aventurero (báculo)'],
+    ['footman', { main: inkMute('#ffb703'), accent: '#7a5c3c' }, 'Grunt'],
+    ['archer', { main: inkMute('#8ecae6'), accent: inkMute('#e63946') }, 'Arquero'],
+    ['mage', { main: inkMute('#7b6cd9'), accent: inkMute('#ffd166') }, 'Chamán'],
+    ['plague', { main: inkMute('#d4a017'), accent: '#7a5c3c' }, 'Sanador'],
+    ['brute', { main: inkMute('#e63946'), accent: inkMute('#2f9e8f') }, 'Bruto'],
+    ['wraith', { main: inkMute('#8e7cc3'), accent: inkMute('#a8e6cf') }, 'Espectro']];
+looks.forEach(([plan, look, name], i) => {
+    const f = inkFigure(plan, look);
+    g.drawImage(f.img, 6 + i * 122, 6, INK_W * 1.8, INK_H * 1.8);
+    g.fillStyle = INK.line; g.font = '13px serif'; g.fillText(name, 12 + i * 122, 192);
 });
 const t = inkTiles();
 [t.face, t.top, t.floors[0], t.floors[1]].forEach((im, i) => g.drawImage(im, 20 + i * 90, 220, 80, 80));
