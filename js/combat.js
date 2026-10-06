@@ -280,14 +280,15 @@ function killCreep(c, killer) {
     if (!killer || !killer.isHero) return;
     if (c.arena && c.arena.kind === 'tower') towerLootOnKill(c.arena, c, killer); // Tower Chaos: botín
     if (c.type && c.type.onDeath) c.type.onDeath(c, killer);
+    if (c.champion) championOnDeath(c);
     const timeAlive = gameClock - (c.spawnTime || gameClock);
     const speedMult = speedGoldMultiplier(timeAlive);
-    const gold = Math.max(1, Math.round(c.gold * speedMult));
+    const gold = Math.max(1, Math.round(c.gold * speedMult * (c.arena && c.arena.kind === 'tower' ? TOWER.goldMult : 1))); // Torre: economía propia
     killer.gold += gold;
     fxText(c, `+${gold}g`, '#ffd166', 10, 1);
     if (fxArena(c) && killer === player) sfx('coin');
     applyScalingOnCreepKill(killer);
-    gainXp(killer, c.xp || 0);
+    gainXp(killer, (c.xp || 0) * (c.arena && c.arena.kind === 'tower' ? towerXpFactor(killer, c.arena.floor) : 1)); // Torre: ritmo de niveles (towerWorld.js)
     emit(killer, 'onKill', { victim: c });
     const bonusTag = speedMult > 1.05 ? ` ⚡x${speedMult.toFixed(1)}` : '';
     log(`${c.isBoss ? '👹 ¡Eliminaste al Jefe!' : '⚔️ Eliminaste un ' + c.label} (+${gold}g${bonusTag})`);

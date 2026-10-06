@@ -213,7 +213,7 @@ function generateTowerLevel(floor) {
 
     // 9. Creeps: grupos sueltos por el campo y uno por sala del laberinto (estos, un nivel más)
     const pool = towerCreepPool(floor);
-    const spawnPack = (cx, cy, n, lvlBonus, xpMult) => {
+    const spawnPack = (cx, cy, n, lvlBonus, xpMult, champion = null) => {
         for (let i = 0; i < n; i++) {
             const type = pickRandom(pool);
             const lvl = floor + lvlBonus + (Math.random() < 0.3 ? 1 : 0);
@@ -225,6 +225,7 @@ function generateTowerLevel(floor) {
                 }
                 const c = makeCreep(type, x, y, TOWER.creepMult(lvl), false, 0);
                 Object.assign(c, { arena: level, level: lvl, xp: Math.round(type.xp * TOWER.xpMult(lvl) * xpMult) });
+                if (champion) makeChampion(c, champion);
                 level.creeps.push(c);
             }
         }
@@ -235,7 +236,9 @@ function generateTowerLevel(floor) {
         if (zone[i] !== ZONE.field || !walkable(level, x, y) || dist[i] < WORLD.safeFromStart || inRect(town, x, y, 6)) continue;
         if (packs.some(p => Math.max(Math.abs(p.x - x), Math.abs(p.y - y)) < WORLD.packSpacing)) continue;
         packs.push({ x, y });
-        spawnPack(x, y, rint(TOWER.packSize[0], TOWER.packSize[1]), 0, WORLD.fieldXp);
+        // Grupo campeón: 1 a 3 afijos según el piso (más chance en los pisos altos)
+        const champ = Math.random() < CHAMPION.baseChance + CHAMPION.perFloor * floor ? shuffle(Object.keys(CHAMPION_AFFIXES)).slice(0, championAffixCount(floor)) : null;
+        spawnPack(x, y, rint(TOWER.packSize[0], TOWER.packSize[1]), 0, WORLD.fieldXp, champ);
     }
     rooms.filter(r => r !== first && r !== guardRoom).forEach(r => spawnPack(r.cx, r.cy, rint(TOWER.packSize[0], TOWER.packSize[1]), 1, 1));
 
@@ -248,6 +251,7 @@ function generateTowerLevel(floor) {
         for (let oy = 0; oy < 3 && ok; oy++) for (let ox = 0; ox < 4 && ok; ox++) ok = walkable(level, x + ox, y + oy) && zone[at(x + ox, y + oy)] === ZONE.field && dist[at(x + ox, y + oy)] >= 0;
         if (ok && clearings.every(c => Math.hypot(c.x - x, c.y - y) > 30)) clearings.push({ x, y, w: 4, h: 3 });
     }
+    placeShrines(level, dist);
     level.drops = [];
     placeChests(level, clearings.concat(shuffle(rooms.filter(r => r !== first && r !== guardRoom)).slice(0, 4 - clearings.length)));
     level.creeps.forEach(c => { c.spawnTime = -1e9; }); // sin el oro extra por velocidad de las oleadas (no aplica en la Torre)
@@ -308,6 +312,10 @@ function towerTerrainTick(level, hero, dt) {
         addEffect(hero, { id: 'CLIMATE', name: B.climate.name, duration: 0.8, tags: ['PERJUICIO'], mods: B.climate.mods(hero) });
     if (z === ZONE.town && everyInterval(hero, 'TOWN_REST', dt, 0.5))
         addEffect(hero, { id: 'TOWN_REST', name: 'Descanso en el pueblo', duration: 0.8, tags: ['MEJORA'], mods: { hpRegen: hero.maxHp * WORLD.townRegenPct, manaRegen: hero.maxMana * WORLD.townRegenPct } });
+    if (z === ZONE.town) level.visitedTown = true;
+    if (z === ZONE.lab) level.enteredLab = true;
+    useShrines(level, hero);
+    if (z !== hero.towerZone && level.town && z !== ZONE.town) level.town.aiShopped = false; // la IA vuelve a comprar en la próxima visita
     if (z !== hero.towerZone) {
         if (hero.towerZone !== undefined && hero === player) {
             if (z === ZONE.town) log(`🏘️ Entraste al pueblo: zona segura (los creeps no te siguen y recuperás vida y maná). El mercader vende y compra piezas (B).`);
@@ -462,4 +470,130 @@ function drawTowerMerchant(level) {
     ctx.drawImage(fig.img, cx - w / 2, cy - h * (FOOT + 2) / INK_H, w, h);
     ctx.font = 'bold 11px Georgia, serif'; ctx.textAlign = 'center'; ctx.fillStyle = INK.line;
     ctx.fillText('Mercader (B)', cx, m.y * TILE - TILE * 0.9);
+}
+
+// --- RITMO DE LA RUN (revisión de diseño 2026-10-05, ver docs/ROGUELIKE.md §5) ---
+// Experiencia al estilo Diablo II: cada piso tiene un "nivel de zona" (el nivel esperado del héroe ahí). Si lo pasás,
+// los creeps dan cada vez menos (−18% por nivel de más, mínimo 5%); si venís atrasado, un poco más (hasta +50%).
+// Meta: ~3 niveles por piso (nivel 30 al llegar al último).
+const PACE = { levelsPerFloor: 3, overPenalty: 0.18, overFloor: 0.05, catchUp: 0.1, catchUpMax: 1.5 };
+function towerZoneLevel(floor) { return PACE.levelsPerFloor * floor; }
+function towerXpFactor(hero, floor) {
+    const diff = hero.level - towerZoneLevel(floor);
+    let f = diff <= 0 ? Math.min(PACE.catchUpMax, 1 + PACE.catchUp * Math.max(0, -diff - 2)) : Math.max(PACE.overFloor, 1 - PACE.overPenalty * diff);
+    if (getEffect(hero, 'SHRINE_XP')) f *= 1.5;
+    return f;
+}
+
+// --- GRUPOS CAMPEONES (como los campeones azules de Diablo III) ---
+// Algunos grupos del campo vienen con 1 a 3 afijos (más en los pisos altos): más vida y daño, y mejor botín y experiencia.
+const CHAMPION = { baseChance: 0.03, perFloor: 0.025, hpMult: 1.5, atkMult: 1.25, xpMult: 2.5, goldMult: 2, dropChance: 0.35 };
+const CHAMPION_AFFIXES = {
+    fast: { name: 'Veloz', apply(c) { c.moveInterval *= 0.7; c.atkSpeed *= 1.3; } },
+    strong: { name: 'Feroz', apply(c) { c.atk = Math.round(c.atk * 1.4); } },
+    armored: { name: 'Blindado', apply(c) { c.armor += 6; c.magicResist += 25; } },
+    vampiric: { name: 'Vampírico', onAttack(c, t, r) { if (r.dealt > 0) c.hp = Math.min(c.maxHp, c.hp + r.dealt * 0.5); } },
+    burning: { name: 'Ardiente', onAttack(c, t, r) { if (r.dealt > 0 && t.isAlive()) CREEP_TRAITS.burn.apply(c, t); } },
+    frozen: { name: 'Gélido', onAttack(c, t, r) { if (r.dealt > 0 && t.isAlive()) CREEP_TRAITS.chill.apply(c, t); } },
+    regen: { name: 'Regenerador', regenPct: 0.03 },
+    explosive: { name: 'Explosivo', onDeath(c) {
+        if (!player || !player.isAlive() || player.arena !== c.arena || Math.hypot(player.x - c.x, player.y - c.y) > 2) return;
+        dealDamage(null, player, Math.round(c.atk * 2), 'magical');
+        if (fxArena(c)) fxRing(c, '#e0702a', 2, 0.5);
+        log(`💥 ¡${c.label} explotó al morir!`);
+    } }
+};
+function championAffixCount(floor) { return floor <= 4 ? 1 : floor <= 8 ? 2 : 3; }
+// Convierte un creep recién creado en campeón (mismos afijos para todo el grupo).
+function makeChampion(c, affixes) {
+    c.champion = affixes;
+    c.hp = c.maxHp = Math.round(c.maxHp * CHAMPION.hpMult);
+    c.atk = Math.round(c.atk * CHAMPION.atkMult);
+    c.xp = Math.round(c.xp * CHAMPION.xpMult); c.gold = Math.round(c.gold * CHAMPION.goldMult);
+    affixes.forEach(k => { const a = CHAMPION_AFFIXES[k]; if (a.apply) a.apply(c); if (a.regenPct) c.regenPct = a.regenPct; });
+    c.label = `${c.label} Campeón (${affixes.map(k => CHAMPION_AFFIXES[k].name).join(', ')})`;
+}
+function championOnAttack(c, target, result) { (c.champion || []).forEach(k => { const a = CHAMPION_AFFIXES[k]; if (a.onAttack) a.onAttack(c, target, result); }); }
+function championOnDeath(c) { (c.champion || []).forEach(k => { const a = CHAMPION_AFFIXES[k]; if (a.onDeath) a.onDeath(c); }); }
+
+// --- SANTUARIOS (como los de Diablo): premian explorar el campo ---
+// Tres por piso, en lugares apartados del camino. Se activan al pisarlos, una sola vez.
+const SHRINES = {
+    fury: { name: 'Santuario de la Furia', color: '#9b2226', desc: '+35% de daño por 60 s', effect: { mods: { atkPct: 0.35 } } },
+    haste: { name: 'Santuario de la Celeridad', color: '#2d6a4f', desc: '+30% de velocidad y +25% de vel. de ataque por 60 s', effect: { mods: { moveSpeedPct: 0.3, atkSpeedPct: 0.25 } } },
+    ward: { name: 'Santuario de la Guardia', color: '#1d4e89', desc: '−30% de daño recibido por 60 s', effect: { mods: { dmgReduction: 0.3 } } },
+    wisdom: { name: 'Santuario de la Sabiduría', color: '#c9a227', desc: '+50% de experiencia por 90 s', effect: { id: 'SHRINE_XP', duration: 90 } },
+    life: { name: 'Santuario de la Vida', color: '#ff477e', desc: 'te cura del todo (vida y maná)', instant: h => { h.hp = h.maxHp; h.mana = h.maxMana; } }
+};
+const SHRINES_PER_FLOOR = 3;
+function placeShrines(level, dist) {
+    const W = COLS, H = ROWS, at = (x, y) => y * W + x;
+    level.shrines = [];
+    for (let t = 0; t < 8000 && level.shrines.length < SHRINES_PER_FLOOR; t++) {
+        const x = 2 + Math.floor(Math.random() * (W - 4)), y = 2 + Math.floor(Math.random() * (H - 4)), i = at(x, y);
+        if (level.zone[i] !== ZONE.field || level.ground[i] === GROUND.road || !walkable(level, x, y) || dist[i] < 25) continue;
+        if (level.shrines.some(s => Math.hypot(s.x - x, s.y - y) < (t < 4000 ? 35 : 15))) continue; // separados (si no entran, más juntos)
+        level.shrines.push({ x, y, kind: pickRandom(Object.keys(SHRINES)), used: false });
+    }
+}
+function useShrines(level, hero) {
+    (level.shrines || []).forEach(s => {
+        if (s.used || s.x !== hero.x || s.y !== hero.y) return;
+        s.used = true;
+        if (towerRun && hero === player) towerRun.stats.shrines++;
+        const S = SHRINES[s.kind];
+        if (S.instant) S.instant(hero);
+        else addEffect(hero, { id: S.effect.id || 'SHRINE_' + s.kind.toUpperCase(), name: S.name, duration: S.effect.duration || 60, tags: ['MEJORA'], mods: S.effect.mods || {} });
+        if (fxArena(hero)) { fxRing(hero, S.color, 2.2, 0.8); fxText(hero, S.name, S.color, 12, 1.6); }
+        log(`✨ ${S.name}: ${S.desc}.`); sfx('levelup');
+    });
+}
+function drawTowerShrines(level) {
+    (level.shrines || []).forEach(s => {
+        if (!level.explored[s.y][s.x]) return;
+        const S = SHRINES[s.kind], cx = s.x * TILE + TILE / 2, by = s.y * TILE + TILE - 3;
+        ctx.save();
+        if (!s.used) { ctx.globalAlpha = 0.35 + 0.2 * Math.sin(fxClock * 3); ctx.fillStyle = S.color; ctx.beginPath(); ctx.ellipse(cx, by - 2, 14, 5, 0, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1; }
+        ctx.fillStyle = s.used ? INK.stoneDark : INK.stone; ctx.strokeStyle = INK.line; ctx.lineWidth = 1.8; // obelisco en tinta
+        ctx.beginPath(); ctx.moveTo(cx - 7, by); ctx.lineTo(cx - 5, by - 22); ctx.lineTo(cx, by - 28); ctx.lineTo(cx + 5, by - 22); ctx.lineTo(cx + 7, by); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = s.used ? '#6b6155' : S.color; ctx.beginPath(); ctx.arc(cx, by - 15, 3.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.restore();
+    });
+}
+
+// --- OBJETIVO DEL PISO Y TÍTULO AL LLEGAR ---
+// Qué toca hacer ahora y hacia dónde (la flecha en el borde de la pantalla apunta ahí).
+function towerObjective(level) {
+    const c = towerRun && towerRun.corpse;
+    if (c && c.floor === level.floor) return { text: `Recuperá tus restos (+${c.points} puntos de stats)`, x: c.x, y: c.y };
+    if (level.stairsOpen) return { text: 'Subí la escalera al piso siguiente', x: level.stairs.x, y: level.stairs.y };
+    if (level.enteredLab) return { text: `Vencé al guardián (${level.guardian.label})`, x: level.guardian.x, y: level.guardian.y, inLab: true };
+    if (!level.visitedTown) return { text: 'Seguí el camino hasta el pueblo', x: level.town.merchant.x, y: level.town.merchant.y };
+    return { text: 'Entrá al laberinto de la torre', x: level.gate.x, y: level.gate.y };
+}
+// Flecha de tinta en el borde de la pantalla hacia el objetivo (si está fuera de la vista; en el laberinto no: hay que explorarlo).
+function drawObjectiveArrow(level) {
+    if (!level.town || !player.isAlive()) return;
+    const o = towerObjective(level);
+    if (o.inLab) return;
+    const px = (o.x - camera.x + 0.5) * TILE, py = (o.y - camera.y + 0.5) * TILE;
+    if (px > 0 && py > 0 && px < MAP_W && py < MAP_H) return;
+    const cx = MAP_W / 2, cy = MAP_H / 2, a = Math.atan2(py - cy, px - cx);
+    const r = Math.min((MAP_W / 2 - 26) / Math.max(1e-6, Math.abs(Math.cos(a))), (MAP_H / 2 - 26) / Math.max(1e-6, Math.abs(Math.sin(a))));
+    ctx.save(); ctx.translate(cx + Math.cos(a) * r, cy + Math.sin(a) * r); ctx.rotate(a);
+    ctx.fillStyle = '#6b2a1f'; ctx.strokeStyle = '#f3e7c9'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(14, 0); ctx.lineTo(-8, -10); ctx.lineTo(-3, 0); ctx.lineTo(-8, 10); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.restore();
+}
+// Título grande al llegar a un piso (como el nombre de cada piso de Aincrad), 3,5 s con fundido.
+function drawFloorTitle(level) {
+    const t = gameClock - (level.titleAt ?? -99);
+    if (t > 3.5 || t < 0) return;
+    const B = BIOMES[level.biome], alpha = Math.max(0, Math.min(1, t * 2, (3.5 - t) * 1.5));
+    ctx.save(); ctx.globalAlpha = alpha; ctx.textAlign = 'center';
+    ctx.fillStyle = 'rgba(233,220,192,0.9)'; ctx.fillRect(MAP_W / 2 - 220, MAP_H * 0.28, 440, 74);
+    ctx.strokeStyle = INK.line; ctx.lineWidth = 2; ctx.strokeRect(MAP_W / 2 - 220, MAP_H * 0.28, 440, 74);
+    ctx.fillStyle = '#6b2a1f'; ctx.font = 'bold 15px Georgia, serif'; ctx.fillText(`PISO ${level.floor} DE ${TOWER.floors} · ${B.icon}`, MAP_W / 2, MAP_H * 0.28 + 24);
+    ctx.fillStyle = INK.line; ctx.font = 'bold 26px Georgia, serif'; ctx.fillText(B.name, MAP_W / 2, MAP_H * 0.28 + 56);
+    ctx.restore();
 }

@@ -148,9 +148,10 @@ function towerIconImage(item) {
 
 // --- MERCADER DEL PUEBLO ---
 // Vende 6 piezas del piso (3 normales, 2 mágicas, 1 rara; se reponen al cambiar de piso) y compra lo que tengas en la bolsa.
-const TSHOP = { stock: { normal: 3, magic: 2, rare: 1 }, base: { normal: 50, magic: 140, rare: 320 }, perFloor: 0.35, perLevel: 15, sellPct: 0.3 };
+const TSHOP = { stock: { normal: 3, magic: 2, rare: 1 }, base: { normal: 80, magic: 220, rare: 520 }, perFloor: 0.5, perLevel: 20, sell: { normal: 4, magic: 10, rare: 25 } };
+// Vender paga poco (como los vendedores de Diablo): con ~17 piezas por piso, vender todo era la mayor fuente de oro.
 function towerItemPrice(item) { return Math.round(TSHOP.base[item.quality] * (1 + TSHOP.perFloor * (item.floor - 1)) + TSHOP.perLevel * (item.level - 1)); }
-function towerSellPrice(item) { return Math.max(1, Math.round(towerItemPrice(item) * TSHOP.sellPct)); }
+function towerSellPrice(item) { return TSHOP.sell[item.quality] * item.floor; }
 function towerShopStock(level) {
     if (!level.town.stock) {
         level.town.stock = [];
@@ -165,6 +166,17 @@ function buyTowerItem(hero, item) {
     hero.gold -= price;
     level.town.stock = level.town.stock.filter(i => i !== item);
     log(`🛒 Compraste ${item.name} (-${price}g).`); sfx('coin');
+    return true;
+}
+// Tomo de Talento: +1 punto de stats para repartir. Siempre a la venta; cada uno cuesta 25% más que el anterior
+// (como los Libros de Talento del modo normal). Le da sentido al oro que sobra y ayuda a reponerse de una muerte.
+const TOME = { base: 300, growth: 1.25 };
+function towerTomePrice(hero) { return Math.round(TOME.base * Math.pow(TOME.growth, hero.tomesBought || 0)); }
+function buyTowerTome(hero) {
+    const price = towerTomePrice(hero);
+    if (hero.gold < price) { log(`🛒 Te faltan ${price - hero.gold}g para el Tomo de Talento.`); return false; }
+    hero.gold -= price; hero.tomesBought = (hero.tomesBought || 0) + 1; hero.statPoints++;
+    log(`📘 Tomo de Talento: +1 punto de stats (C para repartir). El próximo cuesta ${towerTomePrice(hero)}g.`); sfx('levelup');
     return true;
 }
 function sellTowerItem(hero, item) {
@@ -201,8 +213,33 @@ function renderTowerShop() {
     const stock = document.getElementById('tshop-stock'); stock.innerHTML = '';
     towerShopStock(level).forEach(item => stock.appendChild(row(item, 'Comprar', towerItemPrice(item), player.gold >= towerItemPrice(item), () => buyTowerItem(player, item))));
     if (!level.town.stock.length) stock.innerHTML = '<p class="subtitle">No le queda nada: vuelve a tener en el próximo piso.</p>';
+    const tome = document.createElement('div'); tome.className = 'tshop-row';
+    const tp = towerTomePrice(player);
+    tome.innerHTML = `<span class="tshop-tome">📘</span><span class="tshop-name"><b>Tomo de Talento</b> · +1 punto de stats</span>` +
+        `<button class="${player.gold >= tp ? 'primary-btn' : 'secondary-btn'}" ${player.gold >= tp ? '' : 'disabled'}>Comprar · ${tp}g</button>`;
+    tome.onmouseenter = () => { tip.innerHTML = `<div class="tt-name">📘 Tomo de Talento</div><div>+1 punto de stats para repartir (tecla C). Siempre a la venta; cada uno cuesta 25% más que el anterior. Al morir cuenta como cualquier punto puesto (la mitad queda en tus restos).</div>`; };
+    tome.querySelector('button').onclick = () => { buyTowerTome(player); renderTowerShop(); };
+    stock.appendChild(tome);
     const bag = document.getElementById('tshop-bag'); bag.innerHTML = '';
     player.bag.forEach(b => bag.appendChild(row(b.item, 'Vender', towerSellPrice(b.item), true, () => sellTowerItem(player, b.item))));
     if (!player.bag.length) bag.innerHTML = '<p class="subtitle">La bolsa está vacía (lo equipado no se vende).</p>';
     if (!tip.innerHTML) hover(null);
 }
+
+// IA (piloto automático y mediciones): en el pueblo compra la mejor pieza que pueda pagar si mejora una ranura
+// (vacía o de peor calidad) y vende lo que le sobra en la bolsa.
+function aiTowerShop(hero) {
+    const level = hero.arena;
+    if (!level || !level.town || !heroInTown(hero) || level.town.aiShopped) return;
+    level.town.aiShopped = true;
+    const rank = { normal: 0, magic: 1, rare: 2 };
+    aiManageGear(hero); // primero se pone lo que le sirve de la bolsa; el resto se vende
+    hero.bag.slice().forEach(b => sellTowerItem(hero, b.item));
+    towerShopStock(level).slice().sort((a, b) => rank[b.quality] - rank[a.quality]).forEach(item => {
+        const slot = item.slot === 'ring' ? (!hero.gear.ring1 ? 'ring1' : 'ring2') : item.slot, cur = hero.gear[slot];
+        if ((!cur || rank[item.quality] > rank[cur.quality]) && hero.gold >= towerItemPrice(item)) buyTowerItem(hero, item);
+    });
+    while (hero.gold >= towerTomePrice(hero) + 200) buyTowerTome(hero); // el resto en tomos (guarda un poco)
+    aiManageGear(hero);
+}
+

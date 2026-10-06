@@ -22,11 +22,12 @@ const TOWER = {
     aggroRadius: 6,       // los creeps te persiguen si estás a esta distancia o menos
     leash: 16,            // y te sueltan si te alejás más que esto de su lugar
     respawnDelay: 3,
+    goldMult: 0.5,        // oro de los creeps (con el mercader, el oro del modo normal alcanzaba para todo)
     packSize: [2, 4],     // creeps por sala
     // Stats fijos por nivel de creep (vida y daño ×) y experiencia (×)
-    creepMult: level => 1 + 0.4 * (level - 1),
+    creepMult: level => 1 + 0.8 * (level - 1), // 0,4 → 0,8 en la revisión de diseño (con 0,4 y 0,55 el piloto automático ganaba en ~60 min con 0-2 muertes)
     xpMult: level => 1 + 0.3 * (level - 1),
-    guardianMult: floor => 0.35 * (1 + 0.45 * (floor - 1))
+    guardianMult: floor => 0.35 * (1 + 0.85 * (floor - 1))
 };
 
 let gameMode = 'normal'; // 'normal' | 'tower'
@@ -51,7 +52,8 @@ function startTowerRun() {
     heroes = [player];
     viewedHero = player;
     heroOffers = null;
-    towerRun = { floor: 1, levels: [], base: { str: player.str, agi: player.agi, int: player.int }, deaths: 0, startedAt: gameClock };
+    towerRun = { floor: 1, levels: [], base: { str: player.str, agi: player.agi, int: player.int }, deaths: 0, startedAt: gameClock,
+        stats: { kills: 0, champions: 0, guardians: 0, shrines: 0, gold: 0, bestFloor: 1 } }; // crónica de la run
     COLS = TOWER.cols; ROWS = TOWER.rows;
     showPanel('menu-panel', false);
     showPanel('hero-select-panel', false);
@@ -71,6 +73,7 @@ function towerLevel(floor) {
 function enterTowerFloor(floor, where = 'start') {
     const level = towerLevel(floor);
     towerRun.floor = floor;
+    towerRun.stats.bestFloor = Math.max(towerRun.stats.bestFloor, floor);
     arenas = [level];
     level.heroes = [player];
     player.arena = level;
@@ -78,6 +81,7 @@ function enterTowerFloor(floor, where = 'start') {
     player.moveTarget = null; player.focus = null;
     level.creeps.forEach(c => { c.aggro = false; });
     player.towerZone = undefined;
+    level.titleAt = gameClock;
     level.fovKey = null; computeFov(level, player);
     const B = BIOMES[level.biome];
     setStateText(`TOWER CHAOS · PISO ${floor} DE ${TOWER.floors} · ${B.name.toUpperCase()}`);
@@ -257,13 +261,13 @@ function updateTower(dt) {
     // Renacer en el círculo de piedra (nivel 1)
     if (!player.isAlive() && player.respawnAt && gameClock >= player.respawnAt) { towerRespawn(); return; }
     if (towerModalOpen()) return; // con stats, inventario o forja abiertos, la partida espera
-    if (autopilot) { if (player.statPoints) aiSpendStatPoints(player); aiManageGear(player); }
+    if (autopilot) { if (player.statPoints) aiSpendStatPoints(player); aiManageGear(player); aiTowerShop(player); }
     else if (pendingForge(player)) { openForge(pendingForge(player)); return; }
     updateHero(player, level, dt);
     unstickFromWall(player);
     towerTerrainTick(level, player, dt); // terreno, clima, pueblo y mercader (towerWorld.js)
     const safe = heroInTown(player);     // en el pueblo los creeps no te persiguen
-    if (player.isAlive()) { computeFov(level, player); towerPickup(player); }
+    if (player.isAlive()) { computeFov(level, player); towerPickup(player); recoverCorpse(level, player); }
     updateProjectiles(level, dt);
     // Creeps: solo se mueven los que te vieron (radio de alerta); te sueltan si te alejás mucho de su lugar
     level.creeps.forEach(c => {
@@ -274,6 +278,7 @@ function updateTower(dt) {
         if (c.aggro && (!player.isAlive() || safe || Math.hypot(player.x - c.spawnX, player.y - c.spawnY) > TOWER.leash)) {
             c.aggro = false;
         }
+        if (c.regenPct) c.hp = Math.min(c.maxHp, c.hp + c.maxHp * c.regenPct * dt); // campeón Regenerador
         if (c.aggro) { if (!(player.isAlive() && towerCreepBrain(c, dt))) updateCreep(c, dt); }
         else if (c.x !== c.spawnX || c.y !== c.spawnY) stepCreepToward(c, c.spawnX, c.spawnY, dt); // vuelve a su lugar
     });
@@ -355,15 +360,31 @@ function towerHeroDeath(hero, killer) {
     hero.effects = hero.effects.filter(e => e.flags.includes('persistent'));
     hero.respawnAt = gameClock + TOWER.respawnDelay;
     towerRun.deaths++;
-    level.corpses.push({ x: hero.x, y: hero.y, killer: killer ? killer.label : null, at: gameClock });
-    // Perdés la mitad de los puntos puestos en cada stat (lo de base nunca se pierde)
-    const lost = [];
+    // Perdés la mitad de los puntos puestos en cada stat (lo de base nunca se pierde), pero quedan en tus restos:
+    // si volvés hasta ellos los recuperás (como en Dark Souls). Si morís otra vez antes, los anteriores se pierden.
+    const lost = {}, lostText = [];
     Object.keys(hero.towerStats).forEach(k => {
         const n = Math.ceil(hero.towerStats[k] / 2);
-        if (n > 0) { changeTowerStat(hero, k, -n); lost.push(`${n} de ${TOWER_STATS[k].name}`); }
+        if (n > 0) { changeTowerStat(hero, k, -n); lost[k] = n; lostText.push(`${n} de ${TOWER_STATS[k].name}`); }
     });
+    const old = towerRun.corpse;
+    if (old && !old.recovered) { old.recovered = true; old.faded = true; }
+    const corpse = { x: hero.x, y: hero.y, killer: killer ? killer.label : null, at: gameClock, floor: level.floor, lost, points: Object.values(lost).reduce((a, b) => a + b, 0) };
+    level.corpses.push(corpse);
+    towerRun.corpse = corpse.points ? corpse : null;
     sfx('lose');
-    log(`💀 ${killer ? killer.label + ' te mató' : 'Moriste'} en el piso ${level.floor}. ${lost.length ? 'Perdés ' + lost.join(', ') + '. ' : ''}Renacés en el círculo de piedra de la base en ${TOWER.respawnDelay}s.`);
+    log(`💀 ${killer ? killer.label + ' te mató' : 'Moriste'} en el piso ${level.floor}. ${lostText.length ? 'Perdés ' + lostText.join(', ') + ': quedan en tus restos, volvé a buscarlos. ' : ''}` +
+        `${old && old.faded && old.points ? `Tus restos anteriores (${old.points} puntos) se perdieron. ` : ''}Renacés en el círculo de piedra de la base en ${TOWER.respawnDelay}s.`);
+}
+
+// Pisar tus restos (los de la última muerte) te devuelve los puntos de stats que perdiste.
+function recoverCorpse(level, hero) {
+    const c = towerRun.corpse;
+    if (!c || c.recovered || c.floor !== level.floor || Math.max(Math.abs(hero.x - c.x), Math.abs(hero.y - c.y)) > 1) return;
+    c.recovered = true; towerRun.corpse = null;
+    Object.entries(c.lost).forEach(([k, n]) => changeTowerStat(hero, k, n));
+    if (fxArena(hero)) { fxRing(hero, '#c9a227', 2, 0.8); fxText(hero, `+${c.points} puntos recuperados`, '#c9a227', 13, 1.6); }
+    log(`🕯️ Recuperaste tus restos: vuelven ${c.points} puntos de stats.`); sfx('levelup');
 }
 
 function towerRespawn() {
@@ -376,7 +397,8 @@ function towerRespawn() {
 function towerVictory() {
     gameState = 'ENDED';
     setStateText('¡CONQUISTASTE LA TORRE!');
-    log(`🏆 ¡Venciste al guardián del último nivel! ${player.displayName} conquistó la Torre (nivel ${player.level}, ${towerRun.deaths} muerte${towerRun.deaths === 1 ? '' : 's'}).`);
+    const s = towerRun.stats;
+    log(`🏆 ¡Venciste al guardián del último piso! ${player.displayName} conquistó la Torre: nivel ${player.level}, ${Math.floor((gameClock - towerRun.startedAt) / 60)} minutos, ${towerRun.deaths} muerte${towerRun.deaths === 1 ? '' : 's'}, ${s.kills} bajas (${s.champions} campeones), ${s.shrines} santuarios.`);
     showPanel('restart-btn', true);
 }
 
@@ -384,7 +406,7 @@ function towerVictory() {
 function towerStatusText() {
     if (!player.isAlive() && player.respawnAt) return `☠ Renacés en ${Math.max(0, player.respawnAt - gameClock).toFixed(1)}s`;
     const level = player.arena;
-    return `${BIOMES[level.biome].icon} Piso ${level.floor}/${TOWER.floors} · ${level.stairsOpen ? 'escalera abierta' : 'guardián vivo'}`;
+    return `${BIOMES[level.biome].icon} Piso ${level.floor}/${TOWER.floors} · ${towerObjective(level).text}`;
 }
 function towerInfoHtml() {
     const level = player.arena;
@@ -394,8 +416,14 @@ function towerInfoHtml() {
         `<p class="subtitle">Cruzá el campo, descansá en el <b>pueblo</b> (zona segura, mercader con B) y entrá al <b>laberinto</b>: el guardián (${level.guardian.label}) cuida la escalera.</p>` +
         (player.statPoints ? `<button class="primary-btn" onclick="toggleStatsWindow(true)">📊 Repartir ${player.statPoints} punto${player.statPoints === 1 ? '' : 's'} de stats (C)</button>` : `<button class="secondary-btn" onclick="toggleStatsWindow(true)">📊 Stats del héroe (C)</button>`) +
         `<button class="secondary-btn" onclick="toggleInventory(true)">🎒 Equipo e inventario (I) · ${player.bag.length} en la bolsa</button>` +
-        `<p class="subtitle">Creeps en este piso: ${alive}. Muertes en la run: ${towerRun.deaths}. Al morir renacés en la base y perdés la mitad de los atributos ganados.</p>` +
-        '';
+        `<p class="subtitle">Creeps en este piso: ${alive}. Al morir renacés en la base y perdés la mitad de los atributos ganados.</p>` +
+        towerChronicleHtml();
+}
+// Crónica de la run (como el resumen de Hades): lo que llevás hecho, aunque mueras.
+function towerChronicleHtml() {
+    const s = towerRun.stats, min = Math.floor((gameClock - towerRun.startedAt) / 60);
+    return `<p class="subtitle tower-chronicle">📜 <b>Crónica</b> · ${min} min · mejor piso ${s.bestFloor} · ${towerRun.deaths} muerte${towerRun.deaths === 1 ? '' : 's'} · ` +
+        `${s.kills} bajas (${s.champions} campeones, ${s.guardians} guardianes) · ${s.shrines} santuarios · ${s.gold}g ganados</p>`;
 }
 
 // Baldosas del nivel (se dibujan una vez y se reutilizan): 4 pisos de piedra, pared de frente y pared de arriba.
@@ -464,6 +492,7 @@ function renderTower(level, dt) {
     drawTowerTiles(level);
     drawTowerLoot(level);
     drawTowerMerchant(level);
+    drawTowerShrines(level);
     // Escalera (cerrada hasta vencer al guardián)
     const st = level.stairs, sx = st.x * TILE, sy = st.y * TILE;
     if (level.explored[st.y][st.x]) {
@@ -472,11 +501,25 @@ function renderTower(level, dt) {
         if (!level.stairsOpen) { ctx.font = '14px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('🔒', sx + TILE / 2, sy + TILE / 2); }
     }
     // Cadáveres
-    ctx.font = '16px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#adb5bd';
-    level.corpses.forEach(c => ctx.fillText('☠', c.x * TILE + TILE / 2, c.y * TILE + TILE / 2));
+    ctx.font = '16px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    level.corpses.forEach(c => {
+        if (!level.explored[c.y][c.x]) return;
+        const active = c === towerRun.corpse, cx = c.x * TILE + TILE / 2, cy = c.y * TILE + TILE / 2;
+        if (active) { ctx.save(); ctx.globalAlpha = 0.4 + 0.25 * Math.sin(fxClock * 4); ctx.fillStyle = '#c9a227'; ctx.beginPath(); ctx.arc(cx, cy, 14, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+        ctx.fillStyle = active ? INK.line : '#8f8166'; ctx.fillText('☠', cx, cy);
+        if (active) { ctx.font = 'bold 10px Georgia, serif'; ctx.fillText(`tus restos (+${c.points})`, cx, cy - 18); ctx.font = '16px monospace'; }
+    });
     // Creeps visibles (dentro de tu radio de visión) y proyectiles
     const visible = c => canSee(level, c.x, c.y);
-    level.creeps.forEach(c => { if (c.isAlive() && visible(c)) drawUnit(c, c.color, c.symbol, drawPos(c, dt), { glow: c.isGuardian, big: c.isGuardian }); });
+    level.creeps.forEach(c => {
+        if (!c.isAlive() || !visible(c)) return;
+        const p = drawPos(c, dt);
+        if (c.champion) { // campeón: aro azul de tinta a sus pies
+            ctx.save(); ctx.strokeStyle = '#1d4e89'; ctx.lineWidth = 2.5; ctx.globalAlpha = 0.8;
+            ctx.beginPath(); ctx.ellipse(p.x * TILE + TILE / 2, p.y * TILE + TILE - 4, 13, 5, 0, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+        }
+        drawUnit(c, c.color, c.symbol, p, { glow: c.isGuardian, big: c.isGuardian });
+    });
     level.projectiles.forEach(p => {
         ctx.fillStyle = p.isCrit ? '#ffd166' : (p.attacker.isHero ? heroColor(p.attacker) : p.attacker.color || '#fefae0');
         ctx.beginPath(); ctx.arc(p.x * TILE + TILE / 2, p.y * TILE + TILE / 2, p.isCrit ? 4 : 3, 0, Math.PI * 2); ctx.fill();
@@ -497,7 +540,9 @@ function renderTower(level, dt) {
     }
     ctx.restore();
     drawInkVignette();
+    drawObjectiveArrow(level);
     renderTowerMinimap(level);
+    drawFloorTitle(level);
     // Barra del guardián cuando lo tenés a la vista
     const g = level.guardian;
     if (g && g.isAlive() && visible(g)) {
@@ -525,7 +570,8 @@ function renderTowerMinimap(level) {
     if (level.explored[level.stairs.y][level.stairs.x]) dot(level.stairs.x, level.stairs.y, level.stairsOpen ? '#2dc653' : '#adb5bd', 2.6);
     const g = level.guardian;
     if (g && g.isAlive() && level.explored[g.y][g.x]) dot(g.x, g.y, '#ff0055', 2.6);
-    level.corpses.forEach(c => dot(c.x, c.y, '#adb5bd', 1.6));
+    level.corpses.forEach(c => dot(c.x, c.y, c === towerRun.corpse ? '#c9a227' : '#8f8166', c === towerRun.corpse ? 3 : 1.4));
+    (level.shrines || []).forEach(sh => { if (!sh.used && level.explored[sh.y][sh.x]) dot(sh.x, sh.y, SHRINES[sh.kind].color, 2.2); });
     if (player.isAlive()) dot(player.x, player.y, '#00f5d4', 2.4);
     ctx.strokeStyle = '#555'; ctx.lineWidth = 1;
     ctx.strokeRect(ox + camera.x * s, oy + camera.y * s, VIEW_COLS * s, VIEW_ROWS * s);
@@ -541,18 +587,25 @@ function towerAutoDir(hero) {
     const inRange = chasing.find(c => Math.hypot(c.x - hero.x, c.y - hero.y) <= range);
     if (inRange) return movesToFight(hero) ? circleStep(hero, inRange) : { dx: 0, dy: 0 };
     let target = null;
+    const corpse = towerRun.corpse;
+    if (corpse && corpse.floor === level.floor && !corpse.unreachable) { const dir = towerPathDir(hero, corpse); if (dir) return dir; corpse.unreachable = true; }
     // Botín a la vista (si hay lugar) y cofres sin custodios
     const loot = (level.drops || []).filter(d => !d.unreachable && canSee(level, d.x, d.y) && bagSpotFor(hero, d.item))
-        .concat((level.chests || []).filter(ch => !ch.open && !ch.unreachable && level.explored[ch.y][ch.x] && ch.guards.every(g => !g.isAlive())));
+        .concat((level.chests || []).filter(ch => !ch.open && !ch.unreachable && level.explored[ch.y][ch.x] && ch.guards.every(g => !g.isAlive())))
+        .concat((level.shrines || []).filter(sh => !sh.used && !sh.unreachable && canSee(level, sh.x, sh.y)));
     if (loot.length) target = loot.reduce((a, b) => (Math.hypot(a.x - hero.x, a.y - hero.y) <= Math.hypot(b.x - hero.x, b.y - hero.y) ? a : b));
     if (target) { const dir = towerPathDir(hero, target); if (dir) return dir; target.unreachable = true; target = null; } // si no se llega, se saltea
+    // Primero pasa por el pueblo (a comprar, como pide el objetivo del piso)
+    if (level.town && !level.visitedTown) { const dir = towerPathDir(hero, { x: level.town.merchant.x, y: level.town.merchant.y + 2 }); if (dir) return dir; }
     if (level.stairsOpen) target = level.stairs;
     else {
         const dist = bfsFrom(level, hero.x, hero.y);
-        const others = level.creeps.filter(c => c.isAlive() && (!c.isGuardian || level.creeps.every(o => !o.isAlive() || o.isGuardian || dist[o.y * COLS + o.x] < 0)));
+        const others = level.creeps.filter(c => c.isAlive() && !(c.autoSkipUntil > gameClock) && (!c.isGuardian || level.creeps.every(o => !o.isAlive() || o.isGuardian || dist[o.y * COLS + o.x] < 0)));
         let best = Infinity;
         others.forEach(c => { const d = dist[c.y * COLS + c.x]; if (d >= 0 && d < best) { best = d; target = c; } });
         if (!target) target = level.guardian;
     }
-    return (target && towerPathDir(hero, target)) || { dx: 0, dy: 0 };
+    const dir = target && towerPathDir(hero, target);
+    if (!dir && target && !target.isGuardian && target !== level.stairs) target.autoSkipUntil = gameClock + 10; // no lleva a ningún lado: probar con otro
+    return dir || { dx: 0, dy: 0 };
 }

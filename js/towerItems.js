@@ -366,7 +366,7 @@ ADVENTURER.innate.hooks = {
 function pendingForge(hero) { return EQUIP_SLOTS.map(s => hero.gear[s]).concat(hero.bag.map(b => b.item)).find(i => i && i.pendingChoices > 0) || null; }
 
 // --- BOTÍN: cofres y lo que sueltan los creeps ---
-const LOOT = { creepChance: 0.07, chestsPerFloor: 4, guardianDrops: 2 };
+const LOOT = { creepChance: 0.04, chestsPerFloor: 4, guardianDrops: 2 }; // creepChance: con ~140 creeps por piso
 function dropOnFloor(hero, item, x = hero.x, y = hero.y) {
     const level = hero.arena;
     if (!level || !level.drops) return;
@@ -374,7 +374,9 @@ function dropOnFloor(hero, item, x = hero.x, y = hero.y) {
 }
 function towerLootOnKill(level, c, killer) {
     if (!killer || !killer.isHero) return;
+    if (towerRun && killer === player) { const s = towerRun.stats; s.kills++; s.gold += c.gold || 0; if (c.champion) s.champions++; if (c.isGuardian) s.guardians++; }
     if (c.isGuardian) { for (let i = 0; i < LOOT.guardianDrops; i++) level.drops.push({ x: c.x, y: c.y, item: makeTowerItem(level.floor, undefined, i === 0 ? 'rare' : rollQuality(level.floor)) }); return; }
+    if (c.champion) { if (Math.random() < CHAMPION.dropChance) level.drops.push({ x: c.x, y: c.y, item: makeTowerItem(level.floor, undefined, Math.random() < 0.3 ? 'rare' : 'magic') }); return; }
     if (Math.random() < LOOT.creepChance * (c.isChestGuard ? 0 : 1)) level.drops.push({ x: c.x, y: c.y, item: makeTowerItem(level.floor) });
 }
 // Recoge lo que hay en tu casilla (si entra en el inventario); abre el cofre si ya no tiene custodios.
@@ -384,7 +386,7 @@ function towerPickup(hero) {
         if (ch.open || ch.x !== hero.x || ch.y !== hero.y) return;
         if (ch.guards.some(g => g.isAlive())) { if (!ch.warned) { ch.warned = true; log('🔒 El cofre está custodiado: vencé a sus guardias.'); } return; }
         ch.open = true;
-        level.drops.push({ x: ch.x, y: ch.y, item: makeTowerItem(level.floor, undefined, Math.random() < 0.5 ? 'rare' : 'magic') });
+        level.drops.push({ x: ch.x, y: ch.y, item: makeTowerItem(level.floor, undefined, Math.random() < 0.25 ? 'rare' : 'magic') });
         log('🧰 ¡Abriste el cofre!'); sfx('coin');
     });
     level.drops = level.drops.filter(d => {

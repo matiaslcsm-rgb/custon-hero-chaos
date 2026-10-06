@@ -67,7 +67,11 @@ function retreatStep(hero, enemies) {
 }
 
 // --- HABILIDADES ---
-function aiWantsToCast(hero, skill, nearCount, bossNear, nearestDist = Infinity) {
+function aiWantsToCast(hero, skill, nearCount, bossNear, nearestDist = Infinity, nearest = null) {
+    // En la Torre, la movilidad solo para alcanzar a un enemigo a la vista y cerca (si no, se teletransportaba hacia
+    // creeps del otro lado de una pared y quedaba yendo y viniendo para siempre)
+    if (skill.tags.includes('MOVILIDAD') && hero.arena && hero.arena.kind === 'tower')
+        return !!nearest && nearestDist > hero.attackRange + 0.5 && nearestDist <= 6 && lineClear(hero.arena, hero.x, hero.y, nearest.x, nearest.y);
     // Cuerpo a cuerpo: los saltos y teletransportes se guardan para cuando el enemigo está fuera de su alcance
     // (antes los usaba apenas estaban listos, aunque ya estuviera pegado, y después no podía alcanzar a los que se alejaban).
     if (skill.tags.includes('MOVILIDAD') && !isRanged(hero)) return nearestDist > hero.attackRange + 0.5 && nearestDist <= 8;
@@ -91,7 +95,7 @@ function aiCastSkills(hero) {
     const nearestDist = nearest ? distance(hero, nearest) : Infinity;
     hero.skills.forEach(s => {
         if (s.kind !== 'active' || skillLevel(hero, s) === 0 || (hero.cooldowns[s.id] || 0) > 0) return;
-        if (!aiWantsToCast(hero, s, near.length, bossNear, nearestDist)) return;
+        if (!aiWantsToCast(hero, s, near.length, bossNear, nearestDist, nearest)) return;
         tryCastSkill(hero, s, { quiet: true });
     });
 }

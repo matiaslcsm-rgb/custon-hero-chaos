@@ -665,3 +665,4 @@ body.ink-theme #hb-slots { grid-template-columns: repeat(4, 1fr); }
 .tshop-row button { white-space: nowrap; font-size: 0.8rem; padding: 3px 8px; }
 #tshop-tooltip { border: 1.5px solid #8f8166; background: #f1e7d0; padding: 8px; min-height: 160px; font-size: 0.85rem; }
 @media (max-width: 700px) { .tshop-layout { grid-template-columns: 1fr; } }
+.tshop-row .tshop-tome { font-size: 1.6rem; width: 34px; text-align: center; }

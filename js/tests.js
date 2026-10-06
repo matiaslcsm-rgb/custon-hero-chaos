@@ -1159,6 +1159,9 @@ test('Torre: el mercader del pueblo vende y compra piezas', () => {
     check(player.bag.some(b => b.item === item) && !L.town.stock.includes(item), 'pasa a la bolsa');
     sellTowerItem(player, item);
     checkEq(player.gold, 10000 - price + towerSellPrice(item), 'vender devuelve una parte');
+    const tp = towerTomePrice(player), pts = player.statPoints;
+    check(buyTowerTome(player) && player.statPoints === pts + 1, 'el Tomo de Talento da un punto de stats');
+    check(towerTomePrice(player) > tp, 'el siguiente tomo cuesta más');
     check(!player.bag.some(b => b.item === item), 'sale de la bolsa');
 }, { random: true });
 
@@ -1172,6 +1175,39 @@ test('Torre: los creeps de bioma tienen su rasgo (veneno, quemadura, frío)', ()
     yeti.onAttack(makeCreep(yeti, 0, 0, 1, false, 0), player, { dealt: 5 });
     check(sumMod(player, 'moveSpeedPct') < 0, 'el frío frena');
     check(towerCreepPool(1).every(t => !t.from) && towerCreepPool(2).some(t => t.from === 1), 'el segundo piso del bioma suma creeps');
+}, { random: true });
+
+test('Torre: ritmo de niveles al estilo Diablo II (experiencia según el nivel de zona del piso)', () => {
+    newTower();
+    player.level = towerZoneLevel(3);
+    checkEq(towerXpFactor(player, 3), 1, 'en el nivel de zona: experiencia completa');
+    player.level = towerZoneLevel(3) + 3;
+    checkNear(towerXpFactor(player, 3), 1 - 3 * PACE.overPenalty, 'tres niveles de más: menos experiencia');
+    player.level = towerZoneLevel(3) + 10;
+    checkEq(towerXpFactor(player, 3), PACE.overFloor, 'muy pasado: casi nada');
+    player.level = 1;
+    check(towerXpFactor(player, 3) > 1, 'atrasado: un poco más');
+}, { random: true });
+
+test('Torre: campeones con afijos, santuarios y objetivo del piso', () => {
+    newTower();
+    const L = player.arena;
+    const c = makeCreep(towerCreepPool(1)[0], player.x + 1, player.y, 1, false, 0); c.arena = L;
+    const hp = c.maxHp;
+    makeChampion(c, ['explosive', 'strong']);
+    check(c.maxHp > hp && c.label.includes('Campeón') && c.label.includes('Explosivo'), 'campeón con más vida y sus afijos en el nombre');
+    const php = player.hp;
+    championOnDeath(c);
+    check(player.hp < php, 'el Explosivo daña al morir cerca tuyo');
+    L.shrines = [{ x: player.x, y: player.y, kind: 'fury', used: false }];
+    useShrines(L, player);
+    check(L.shrines[0].used && getEffect(player, 'SHRINE_FURY'), 'el santuario se usa una vez y da su efecto');
+    check(towerObjective(L).text.includes('pueblo'), 'primero: ir al pueblo');
+    L.visitedTown = true;
+    check(towerObjective(L).text.includes('laberinto'), 'después: entrar al laberinto');
+    L.enteredLab = true;
+    check(towerObjective(L).text.includes('guardián'), 'adentro: vencer al guardián');
+    checkEq(towerLevel(2).shrines.length, SHRINES_PER_FLOOR, 'cada piso trae sus santuarios');
 }, { random: true });
 
 test('Torre: el nivel se genera conectado, con guardián, escalera y creeps con nivel', () => {
@@ -1422,6 +1458,30 @@ test('Torre: al morir perdés la mitad de lo ganado y renacés en el círculo de
     gameClock = player.respawnAt + 0.1; updateTower(0.016); dealDamage(killer, player, 99999, 'pure');
     gameClock = player.respawnAt + 0.1; updateTower(0.016); dealDamage(killer, player, 99999, 'pure');
     check(player.str >= base, 'nunca baja de la base');
+}, { random: true });
+
+test('Torre: tus restos guardan lo que perdiste; si volvés los recuperás, si morís antes se pierden', () => {
+    newTower();
+    enterTowerFloor(2);
+    const base = towerRun.base.str;
+    player.statPoints = 10;
+    for (let i = 0; i < 10; i++) spendStatPoint(player, 'str');
+    const killer = player.arena.creeps.find(c => !c.isGuardian);
+    dealDamage(killer, player, 99999, 'pure');
+    const corpse = towerRun.corpse;
+    checkEq(corpse.points, 5, 'los 5 puntos perdidos quedan en los restos');
+    checkEq(towerObjective(player.arena).text.startsWith('Recuperá'), true, 'el objetivo te lleva a tus restos');
+    towerRespawn();
+    enterTowerFloor(2);
+    player.x = corpse.x; player.y = corpse.y;
+    recoverCorpse(player.arena, player);
+    checkNear(player.str, base + 10, 'recuperó lo perdido');
+    check(!towerRun.corpse, 'los restos ya no están');
+    dealDamage(killer, player, 99999, 'pure');
+    const first = towerRun.corpse;
+    towerRespawn();
+    dealDamage(killer, player, 99999, 'pure');
+    check(first.faded && towerRun.corpse !== first, 'al morir otra vez, los restos anteriores se pierden');
 }, { random: true });
 
 test('Ancla: cada golpe ralentiza y quita evasión', () => {
