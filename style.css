@@ -666,3 +666,9 @@ body.ink-theme #hb-slots { grid-template-columns: repeat(4, 1fr); }
 #tshop-tooltip { border: 1.5px solid #8f8166; background: #f1e7d0; padding: 8px; min-height: 160px; font-size: 0.85rem; }
 @media (max-width: 700px) { .tshop-layout { grid-template-columns: 1fr; } }
 .tshop-row .tshop-tome { font-size: 1.6rem; width: 34px; text-align: center; }
+/* Tower Chaos: bestiario */
+#bestiary-list { max-height: 60vh; overflow-y: auto; }
+#bestiary-list h4 { margin: 10px 0 4px; color: #6b2a1f; }
+.beast-row { display: flex; gap: 10px; align-items: center; padding: 4px 6px; margin-bottom: 4px; border: 1px solid #c9b791; background: #f1e7d0; }
+.beast-row .beast-fig { width: 42px; height: 63px; }
+.beast-row .beast-stats { font-size: 0.8rem; color: #5e5444; }

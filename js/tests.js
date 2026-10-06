@@ -1268,6 +1268,27 @@ test('Torre: cuevas con niveles de profundidad, jefe y tesoro en el fondo, y vol
     check(player.arena === L && COLS === TOWER.cols, 'volvió a la superficie con el mundo grande');
 }, { random: true });
 
+test('Torre: generador de criaturas (bestiario propio por run, nombres, rasgos del bioma, figuras con partes)', () => {
+    newTower();
+    const list = generateBestiary('swamp');
+    checkEq(list.length, 9, '6 del primer piso + 3 difíciles');
+    checkEq(list.filter(t => t.from === 1).length, 3, 'tres difíciles');
+    checkEq(new Set(list.map(t => t.label)).size, list.length, 'sin nombres repetidos');
+    check(list.every(t => t.traits.every(k => BEAST_TRAITS[k].biomes.includes('swamp'))), 'rasgos con afinidad por el bioma');
+    check(list.every(t => INK_PLANS[t.plan] && CREEP_TYPES[t.key]), 'cuerpo dibujable y mecánica de un creep conocido');
+    list.forEach(t => inkFigure(t.plan, inkLookFor({ type: t, color: t.color }), 'walk', 3));
+    check(towerCreepPool(1).every(t => t.genome && t.biome === 'forest'), 'los pisos usan el bestiario generado de la run');
+    check(towerCreepPool(1)[0] === towerCreepPool(1)[0] && towerBestiary('forest') === towerBestiary('forest'), 'el bestiario queda fijo durante la run');
+    // Espinas
+    const t = generateBeast('forest', 'brawler', 0); t.thorns = 0.2;
+    const c = makeCreep(t, player.x + 1, player.y, 1, false, 0); c.arena = player.arena;
+    const hp = player.hp;
+    dealDamage(player, c, 20, 'physical', { isAttack: true });
+    check(player.hp < hp, 'las espinas devuelven daño cuerpo a cuerpo');
+    let names = 0; for (let i = 0; i < 30; i++) names += /Gran |Pequeñ/.test(generateBeast('desert', 'brawler', 0).label) ? 1 : 0;
+    check(names > 0, 'el tamaño aparece en el nombre');
+}, { random: true });
+
 test('Torre: el nivel se genera conectado, con guardián, escalera y creeps con nivel', () => {
     const level = newTower();
     checkEq(gameState, 'TOWER', 'fase de la Torre');

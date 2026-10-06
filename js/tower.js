@@ -269,7 +269,7 @@ function updateTower(dt) {
         if (!c.isAlive()) return;
         unstickFromWall(c);
         const d = Math.hypot(c.x - player.x, c.y - player.y);
-        if (!c.aggro && !safe && player.isAlive() && d <= TOWER.aggroRadius && canSee(level, c.x, c.y)) { c.aggro = true; alertPack(level, c); } // te tienen que ver
+        if (!c.aggro && !safe && player.isAlive() && d <= TOWER.aggroRadius && canSee(level, c.x, c.y)) { c.aggro = true; alertPack(level, c); noteBeastSeen(c.type); } // te tienen que ver
         if (c.aggro && (!player.isAlive() || safe || Math.hypot(player.x - c.spawnX, player.y - c.spawnY) > TOWER.leash)) {
             c.aggro = false;
         }
@@ -419,6 +419,7 @@ function towerInfoHtml() {
         `<p class="subtitle">Cruzá el campo, descansá en el <b>pueblo</b> (zona segura, mercader con B) y entrá al <b>laberinto</b>: el guardián (${level.guardian.label}) cuida la escalera.</p>` +
         (player.statPoints ? `<button class="primary-btn" onclick="toggleStatsWindow(true)">📊 Repartir ${player.statPoints} punto${player.statPoints === 1 ? '' : 's'} de stats (C)</button>` : `<button class="secondary-btn" onclick="toggleStatsWindow(true)">📊 Stats del héroe (C)</button>`) +
         `<button class="secondary-btn" onclick="toggleInventory(true)">🎒 Equipo e inventario (I) · ${player.bag.length} en la bolsa</button>` +
+        `<button class="secondary-btn" onclick="toggleBestiary(true)">📖 Bestiario (K) · ${Object.keys(towerRun.seen || {}).length} criaturas</button>` +
         `<p class="subtitle">Creeps en este piso: ${alive}. Al morir renacés en la base y perdés la mitad de los atributos ganados.</p>` +
         towerChronicleHtml();
 }

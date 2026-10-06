@@ -41,6 +41,7 @@ window.addEventListener('keydown', e => {
     if (k === 'g') { setSprites(!spritesOn); return; }
     if (k === 'c' && gameMode === 'tower') { toggleStatsWindow(); return; }
     if (k === 'i' && gameMode === 'tower') { toggleInventory(); return; }
+    if (k === 'k' && gameMode === 'tower') { toggleBestiary(); return; }
     if (k === 'escape') { handleEscape(); return; }
     if (paused) return; // en pausa no responden las demás teclas
     if (inCombat() && !autopilot) handleSkillKeypress(k);

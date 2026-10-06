@@ -503,7 +503,9 @@ function inkLookFor(u) {
         return { main, hood: gear.helm ? muted(col(gear.helm)) : main, accent: muted(col(gear.boots) || '#c9a227'), weapon: w };
     }
     const main = inkMute(u.color || '#888888');
-    return { main, accent: inkMute(shade(u.color || '#888888', 0.35), 0.4) };
+    const look = { main, accent: inkMute(shade(u.color || '#888888', 0.35), 0.4) };
+    if (u.type && u.type.parts && u.type.parts.length) look.parts = u.type.parts; // criaturas generadas
+    return look;
 }
 
 const inkCache = {};
@@ -519,7 +521,10 @@ function inkFigure(plan, look, kind = 'idle', k = 0) {
         const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
         g.lineCap = 'round'; g.lineJoin = 'round';
         INK_A = inkFramePose(kind, k);
-        INK_PLANS[plan](g, { dark: shade(look.main, -0.35), cloth: INK.cloth, accent: look.accent || '#c9a227', ...look }, rnd);
+        const colors = { dark: shade(look.main, -0.35), cloth: INK.cloth, accent: look.accent || '#c9a227', ...look };
+        if (look.parts && typeof inkPartsBehind === 'function') inkPartsBehind(g, plan, colors, rnd); // alas (towerBestiary.js)
+        INK_PLANS[plan](g, colors, rnd);
+        if (look.parts && typeof inkPartsFront === 'function') inkPartsFront(g, plan, colors, rnd);  // cuernos, púas, ojos, manchas
         INK_A = { step: 0, sway: 0, arm: 0 };
         if (white) { g.globalCompositeOperation = 'source-in'; g.fillStyle = '#ffffff'; g.fillRect(0, 0, INK_W, INK_H); }
         return c;
@@ -529,7 +534,7 @@ function inkFigure(plan, look, kind = 'idle', k = 0) {
     return (inkCache[key] = fig);
 }
 
-function inkScale(u) { return (u.isGuardian ? 2.0 : u.isCaveBoss ? 1.7 : u.isBoss ? 1.45 : 1.1) * TILE / INK_W * 1.3; }
+function inkScale(u) { return (u.isGuardian ? 2.0 : u.isCaveBoss ? 1.7 : u.isBoss ? 1.45 : 1.1) * ((!u.isCaveBoss && u.type && u.type.scale) || 1) * TILE / INK_W * 1.3; }
 // Altura de la figura por encima del centro de la casilla (para ubicar la barra de vida arriba de la cabeza)
 function inkHalfHeight(u) { return INK_H * inkScale(u) * 0.86 - TILE * 0.45 - 4; }
 

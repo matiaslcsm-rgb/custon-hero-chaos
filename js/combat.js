@@ -137,6 +137,7 @@ function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     fxDamage(target, hpLost, type, opts.isCrit);
     // dealt en el evento es el daño completo (sin recortar por la vida restante): lo usa Forma Inmortal para acumular
     emit(target, 'onDamaged', { source, dealt: final, type });
+    if (target.type && target.type.thorns) beastThorns(target, source, hpLost, opts); // criaturas con espinas (towerBestiary.js)
     if (source && hpLost > 0) emit(source, 'onDealDamage', { target, dealt: hpLost, type });
     if (!target.isAlive()) onUnitDeath(target, source);
     return { dealt: hpLost, evaded: false };

@@ -101,7 +101,8 @@ function biomeCreepTypes(key) {
 // Creeps de un piso: los del bioma (el segundo piso del bioma suma los más difíciles).
 function towerCreepPool(floor) {
     const stage = (floor - 1) % 2;
-    return biomeCreepTypes(biomeFor(floor)).filter(t => t.from <= stage);
+    const list = towerBestiary(biomeFor(floor)) || biomeCreepTypes(biomeFor(floor)); // bestiario generado de la run (towerBestiary.js)
+    return list.filter(t => t.from <= stage);
 }
 
 // --- GENERACIÓN ---
@@ -706,7 +707,7 @@ function towerDayNightTick(level) {
                 const c = makeCreep(type, x, y, TOWER.creepMult(lvl), false, 0);
                 Object.assign(c, { arena: level, level: lvl, xp: Math.round(type.xp * TOWER.xpMult(lvl) * WORLD.fieldXp * 1.5), nocturnal: true, spawnTime: -1e9 });
                 c.atk = Math.round(c.atk * DAYNIGHT.nightAtk);
-                c.label = `${type.label} Nocturno`; c.color = shade(type.color, -0.35);
+                c.label = `${type.label} (nocturno)`; c.color = shade(type.color, -0.35);
                 level.creeps.push(c);
             }
         }

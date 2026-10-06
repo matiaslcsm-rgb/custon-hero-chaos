@@ -4,7 +4,7 @@
 //   clic derecho equipa o desequipa. Mientras está abierto (o la forja, o los stats), la partida espera.
 
 let invOpen = false, forgeOpen = false, invHeld = null, tshopOpen = false;
-function towerModalOpen() { return statsOpen || invOpen || forgeOpen || tshopOpen; }
+function towerModalOpen() { return statsOpen || invOpen || forgeOpen || tshopOpen || bestiaryOpen; }
 
 // Ícono de una pieza en estilo tinta (inkart.js): forma según el arma o la ranura, color del atributo del héroe de origen.
 // Color de la calidad: sobre el pergamino de la Torre, en tinta oscura (los claros no se leen)

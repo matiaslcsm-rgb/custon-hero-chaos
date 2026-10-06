@@ -17,6 +17,7 @@ document.getElementById('shop-close').onclick = closeShop;
 document.getElementById('stats-close').onclick = () => toggleStatsWindow(false);
 document.getElementById('inv-close').onclick = () => toggleInventory(false);
 document.getElementById('tshop-close').onclick = () => toggleTowerShop(false);
+document.getElementById('bestiary-close').onclick = () => toggleBestiary(false);
 document.getElementById('map-toggle').onclick = toggleBigMap;
 document.getElementById('shop-container').onclick = e => { if (e.target.id === 'shop-container') closeShop(); };
 window.addEventListener('resize', applyMapSize);
@@ -162,6 +163,26 @@ if (location.search.includes('demo=biomes')) setTimeout(() => {
         g.fillStyle = '#0a0'; g.fillRect(L.start.x * 2.5 - 3, L.start.y * 2.5 - 3, 7, 7);
         g.font = 'bold 14px Georgia'; g.fillStyle = '#1d1712'; g.fillText(`Piso ${f}: ${BIOMES[L.biome].name}`, 10, 18);
         wrap.appendChild(c);
+    });
+}, 300);
+
+// Muestra del generador de criaturas (index.html?demo=bestiary): un bestiario por bioma, como saldría en una run.
+if (location.search.includes('demo=bestiary')) setTimeout(() => {
+    startTowerRun();
+    const c = document.createElement('canvas'); c.width = 1400; c.height = 1000;
+    c.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#e9dcc0';
+    document.body.appendChild(c);
+    const g = c.getContext('2d'); g.fillStyle = '#e9dcc0'; g.fillRect(0, 0, 1400, 1000);
+    BIOME_ORDER.forEach((b, row) => {
+        g.fillStyle = '#6b2a1f'; g.font = 'bold 15px Georgia'; g.fillText(`${BIOMES[b].name}`, 8, 18 + row * 196);
+        towerBestiary(b).forEach((t, i) => {
+            const f = inkFigure(t.plan, inkLookFor({ type: t, color: t.color }), 'walk', 2), s = 1.05 * t.scale;
+            g.drawImage(f.img, 10 + i * 152 + (64 - 64 * s) / 2, 22 + row * 196 + 120 - 96 * s * 1.25, 64 * s * 1.25, 96 * s * 1.25);
+            g.fillStyle = '#1d1712'; g.font = '11px Georgia';
+            const words = t.label.split(' '), l1 = words.slice(0, 2).join(' '), l2 = words.slice(2).join(' ');
+            g.fillText(l1, 10 + i * 152, 160 + row * 196); g.fillText(l2, 10 + i * 152, 173 + row * 196);
+            g.fillStyle = '#5e5444'; g.fillText(t.genome.role + (t.from ? ' ★' : ''), 10 + i * 152, 186 + row * 196);
+        });
     });
 }, 300);
 

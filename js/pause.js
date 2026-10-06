@@ -69,6 +69,7 @@ function handleEscape() {
     if (statsOpen) { toggleStatsWindow(false); return; }
     if (invOpen) { toggleInventory(false); return; }
     if (tshopOpen) { toggleTowerShop(false); return; }
+    if (bestiaryOpen) { toggleBestiary(false); return; }
     if (document.getElementById('hero-any-drawer').classList.contains('open')) { closeHeroDrawer(); return; }
     if (document.getElementById('shop-container').style.display === 'block') { closeShop(); return; }
     togglePause();
