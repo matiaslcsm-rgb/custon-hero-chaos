@@ -67,8 +67,10 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **Modo roguelike «Tower Chaos» (2026-10-03, se elige en el menú junto a Custom Hero Chaos):** diseño en `docs/ROGUELIKE.md`; fase 1 hecha (nivel explorable con cámara,
   creeps con nivel, guardián y escalera, muerte con renacer en la base) y fases 2-3 (aventurero sin clase, héroes convertidos
   en 55 piezas de equipo, inventario en grilla, cofres, forja al subir de nivel) y fase 4 (2026-10-05: pisos de 160×110 al
-  estilo Aincrad con 5 biomas, pueblo seguro con mercader y torre-laberinto; ver `js/towerWorld.js`). Próximo: bajar la
-  experiencia (nivel 30 en el piso 5) y muerte con cadáver portador (fase 5); más adelante, crafteo con materiales.
+  estilo Aincrad con 5 biomas, pueblo seguro con mercader y torre-laberinto; ver `js/towerWorld.js`) y una revisión de diseño
+  medida (ritmo de niveles estilo Diablo II, campeones y santuarios, restos que guardan lo perdido, objetivo del piso,
+  crónica, Tomo de Talento; ver ROGUELIKE.md §4 ter). Próximo: la criatura que carga tus ítems (resto de la fase 5),
+  élites con nombre, eventos en el campo; más adelante, crafteo con materiales.
 - **Balance en curso (2026-09-28):** jefes más suaves desde la ronda 20 + Kaya y Cetro del Eclipse (ver DISEÑO.md §9 bis).
   Falta: los 4 magos (Arcanista, Bruja, Sabio, Alquimista) quedan eliminados cerca de la ronda 14; Zeus pasó a ganar 1 de 3.
 - **Después:** balancear la supervivencia contra creeps en el formato de un duelo por ronda (gana el último en pie: el Sniper

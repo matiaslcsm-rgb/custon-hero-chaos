@@ -495,7 +495,7 @@ const CHAMPION_AFFIXES = {
     vampiric: { name: 'Vampírico', onAttack(c, t, r) { if (r.dealt > 0) c.hp = Math.min(c.maxHp, c.hp + r.dealt * 0.5); } },
     burning: { name: 'Ardiente', onAttack(c, t, r) { if (r.dealt > 0 && t.isAlive()) CREEP_TRAITS.burn.apply(c, t); } },
     frozen: { name: 'Gélido', onAttack(c, t, r) { if (r.dealt > 0 && t.isAlive()) CREEP_TRAITS.chill.apply(c, t); } },
-    regen: { name: 'Regenerador', regenPct: 0.03 },
+    regen: { name: 'Regenerador', regenPct: 0.012 }, // 3% se curaba más rápido de lo que pegaba un héroe recién muerto
     explosive: { name: 'Explosivo', onDeath(c) {
         if (!player || !player.isAlive() || player.arena !== c.arena || Math.hypot(player.x - c.x, player.y - c.y) > 2) return;
         dealDamage(null, player, Math.round(c.atk * 2), 'magical');

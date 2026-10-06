@@ -194,12 +194,12 @@ Al morir no se pierde todo: **tu cadáver y tus cosas quedan en el mapa** y pued
      Los creeps de bioma son variantes de los 18 tipos de siempre (misma mecánica e IA) con otro nombre, color y un rasgo.
    - **Pueblo = zona segura**: los creeps no te persiguen adentro (te sueltan al entrar) y recuperás 4% de vida y maná por
      segundo. **Mercader** (B en el pueblo, o se abre al acercarte): 6 piezas del piso (3 normales, 2 mágicas, 1 rara;
-     precio 50/140/320 × (1 + 0,35 por piso) + 15 por nivel) y compra lo de tu bolsa al 30%. Sin portales: morir sigue
+     precios y venta: ver la revisión de diseño, §4 ter) y compra lo de tu bolsa. Sin portales: morir sigue
      mandándote al piso 1 (decisión del usuario).
    - **Creeps**: 26 grupos en el campo (experiencia ×0,6, porque son muchos) + uno por sala del laberinto (un nivel más).
      Cofres: 2 en claros del campo y 2 en el laberinto.
-   - **Medido (2 runs con piloto automático, 2026-10-05):** ~6-9 minutos por piso, **0 muertes**, nivel 10 al terminar el
-     piso 1 y **nivel 30 (tope) en el piso 5**. Pendiente: bajar la experiencia y subir la dificultad (decisión abierta).
+   - Medido al terminar la fase (2 runs con piloto automático): ~6-9 minutos por piso, 0 muertes y nivel 30 en el piso 5.
+     Lo corrigió la revisión de diseño (§4 ter).
 5. **Muerte con consecuencias**: cadáver, criatura portadora, reparto y desgaste de ítems.
 6. **Élites y más contenido**: héroes de la IA como élites, más únicos, eventos.
 
@@ -229,6 +229,49 @@ vectoriales, primero en Tower Chaos. Código: `js/inkart.js`; hoja de muestra: `
     ícono, botones bordó, registro, contador, ventanas; tipografía con serifa; colores de calidad oscuros para leerse
     sobre el papel; barras de vida de las unidades en tinta, sin brillos; menhires de tinta en el círculo de piedra.
   - En la Torre las habilidades no se suben con puntos (sin botones [+]): crecen forjando.
+
+## 4 ter. Revisión de diseño (2026-10-05)
+Pedido del usuario: "funcioná como diseñador de videojuegos, agarrá lo que tenemos y mejoralo en todos los sentidos,
+buscá referencias". Método: medir con el piloto automático (runs completas), encontrar el problema más grande, buscar
+cómo lo resolvió un juego conocido, cambiar y volver a medir.
+
+**Referencias usadas**
+- **Diablo II**: experiencia según la diferencia de nivel entre el personaje y el monstruo (dentro de ±5 niveles da el
+  100%, y baja rápido después). Fuente: [The Arreat Summit](https://classic.battle.net/diablo2exp/basics/experience.shtml),
+  [Maxroll](https://maxroll.gg/d2/resources/experience).
+- **Diablo III**: campeones (grupos azules con afijos que suben de 1 a 4 con el progreso) y santuarios de un solo uso que
+  premian explorar. Fuente: [Monster Traits](https://diablo.fandom.com/wiki/Monster_Traits_(Diablo_III)),
+  [Shrines](https://diablo.fandom.com/wiki/Shrines_(Diablo_III)).
+- **Hades**: la muerte no debe doler tanto que frustre; el principio es generoso y la dificultad sube con la habilidad;
+  cada intento tiene que dejar algo. Fuente: [Game Wisdom](https://game-wisdom.com/analysis/hades),
+  [GameSpot](https://www.gamespot.com/articles/hades-changes-what-it-means-to-be-a-roguelike/1100-6483420/).
+- **Dark Souls**: lo que perdés al morir queda en tus restos; si volvés, lo recuperás; si morís antes, se pierde.
+- **Sword Art Online (Aincrad)**: cada piso con nombre propio que se anuncia al llegar.
+
+**Problemas medidos y qué se hizo**
+
+| Problema (medido) | Referencia | Cambio |
+|---|---|---|
+| Nivel 30 (tope) en el piso 5 | Diablo II | **Nivel de zona** = 3 × piso. Si lo pasás, cada nivel de más quita 18% de experiencia (mínimo 5%); si venís atrasado, hasta +50%. `PACE` en `towerWorld.js` |
+| 0 muertes, todo igual de fácil | Diablo III | **Grupos campeones**: 5,5% en el piso 1 hasta 28% en el 10; 1 afijo (pisos 1-4), 2 (5-8), 3 (9-10) entre Veloz, Feroz, Blindado, Vampírico, Ardiente, Gélido, Regenerador y Explosivo. Más vida y daño; ×2,5 experiencia, ×2 oro, 35% de soltar pieza mágica o rara. Aro azul a sus pies |
+| El campo grande no premia explorar | Diablo III | **3 santuarios por piso**, lejos del camino: Furia, Celeridad, Guardia, Sabiduría (+50% experiencia) o Vida |
+| Espiral de muerte: cada muerte quita la mitad de los puntos y la siguiente es más fácil (una run: 27 muertes) | Dark Souls / Hades | **Restos**: lo que perdés queda en tu cadáver; pisarlo te lo devuelve. Si morís otra vez antes, los anteriores se pierden. El objetivo del piso te lleva a ellos |
+| No queda claro qué hacer en un mapa tan grande | SAO, ARPG modernos | **Objetivo del piso** arriba (ir al pueblo → entrar al laberinto → vencer al guardián → subir), **flecha de tinta** en el borde hacia el objetivo y **título del piso** al llegar |
+| Sobraban 26.000 de oro (vender botín era la mayor fuente) | Diablo (vendedores) | Oro de creeps ×0,5 en la Torre; precios 80 / 220 / 520 (+50% por piso); vender paga poco (4 / 10 / 25 × piso); menos botín de creeps (4%) y cofres con 25% de rara. Y un gasto para lo que sobra: **Tomo de Talento** (+1 punto de stats, 300g y +25% cada uno) |
+| Ganaba fácil (60-70 min, 0-2 muertes) | Hades (generoso al principio, exigente después) | Creeps más fuertes por nivel: ×(1 + 0,7 por nivel) (antes 0,4) y guardián ×(1 + 0,75 por piso). Probado: 0,55 seguía fácil; 0,8 llegaba a 15-24 muertes |
+| Nada queda de una run | Hades | **Crónica** en el panel: minutos, mejor piso, muertes, bajas, campeones, guardianes, santuarios y oro |
+| El piloto automático se trababa (horas sin avanzar) | — | Se teletransportaba hacia creeps del otro lado de una pared y volvía: en la Torre la movilidad solo se usa con el enemigo a la vista y a 6 casillas o menos. Saltea objetivos a los que no llega y deja una pelea que no avanza en 25 s. El afijo Regenerador bajó de 3% a 1,2% de vida por segundo (se curaba más rápido de lo que pegaba un héroe recién muerto) |
+
+**Medición final (piloto automático, que compra en el mercader pero no esquiva ni descansa)**
+Con la escala final (0,7), 10 runs completas (2 tandas de 5; la segunda con todos los arreglos): **ganó las 10**, en
+61 a 157 minutos (mediana ~80) con 0 a 16 muertes (mediana ~5); **ningún trabón** en la última tanda. Llega al nivel ~8
+al terminar el piso 1, ~13 en el 4, ~19 en el 6 y al 30 en el 9-10 (meta: 3 por piso). Usa 11-22 santuarios, mata
+100-180 campeones y compra 9-12 Tomos de Talento por run. Una persona que esquiva el terreno y elige su equipo debería
+tardar menos y morir menos: la meta es que la primera subida cueste.
+
+**Para después** (ideas de la revisión, sin hacer): la criatura que carga tus ítems (resto de la fase 5), élites con
+nombre propio en el laberinto, eventos en el campo (caravana atacada, emboscada), un "modo calor" estilo Hades para
+rejugar más difícil, sonido de ambiente por bioma.
 
 ## 5. Decisiones tomadas (2026-10-03)
 - Avance: **subir una torre**; cada nivel es aleatorio. Final en el **nivel 10**, con salón de la fama.

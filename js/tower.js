@@ -25,9 +25,9 @@ const TOWER = {
     goldMult: 0.5,        // oro de los creeps (con el mercader, el oro del modo normal alcanzaba para todo)
     packSize: [2, 4],     // creeps por sala
     // Stats fijos por nivel de creep (vida y daño ×) y experiencia (×)
-    creepMult: level => 1 + 0.8 * (level - 1), // 0,4 → 0,8 en la revisión de diseño (con 0,4 y 0,55 el piloto automático ganaba en ~60 min con 0-2 muertes)
+    creepMult: level => 1 + 0.7 * (level - 1), // 0,4 → 0,7 en la revisión de diseño (medido: 0,4-0,55 ganaba en ~60 min con 0-2 muertes; 0,8 llegaba a 15-24 muertes)
     xpMult: level => 1 + 0.3 * (level - 1),
-    guardianMult: floor => 0.35 * (1 + 0.85 * (floor - 1))
+    guardianMult: floor => 0.35 * (1 + 0.75 * (floor - 1))
 };
 
 let gameMode = 'normal'; // 'normal' | 'tower'
@@ -583,20 +583,26 @@ function renderTowerMinimap(level) {
 function towerAutoDir(hero) {
     const level = hero.arena;
     const range = effRange(hero);
-    const chasing = level.creeps.filter(c => c.isAlive() && c.aggro);
+    const chasing = level.creeps.filter(c => c.isAlive() && c.aggro && !(c.autoSkipUntil > gameClock));
     const inRange = chasing.find(c => Math.hypot(c.x - hero.x, c.y - hero.y) <= range);
-    if (inRange) return movesToFight(hero) ? circleStep(hero, inRange) : { dx: 0, dy: 0 };
+    if (inRange) {
+        // Pelea que no avanza (se cura más rápido de lo que le pega): la deja un rato, como haría una persona
+        if (hero.autoFight !== inRange) { hero.autoFight = inRange; hero.autoFightHp = inRange.hp; hero.autoFightAt = gameClock; }
+        else if (gameClock - hero.autoFightAt > 25) { if (inRange.hp >= hero.autoFightHp) inRange.autoSkipUntil = gameClock + 30; hero.autoFightHp = inRange.hp; hero.autoFightAt = gameClock; }
+        hero.autoGoal = 'pelea: ' + inRange.label;
+        return movesToFight(hero) ? circleStep(hero, inRange) : { dx: 0, dy: 0 };
+    }
     let target = null;
     const corpse = towerRun.corpse;
-    if (corpse && corpse.floor === level.floor && !corpse.unreachable) { const dir = towerPathDir(hero, corpse); if (dir) return dir; corpse.unreachable = true; }
+    if (corpse && corpse.floor === level.floor && !corpse.unreachable) { const dir = towerPathDir(hero, corpse); hero.autoGoal = 'restos'; if (dir) return dir; corpse.unreachable = true; }
     // Botín a la vista (si hay lugar) y cofres sin custodios
     const loot = (level.drops || []).filter(d => !d.unreachable && canSee(level, d.x, d.y) && bagSpotFor(hero, d.item))
         .concat((level.chests || []).filter(ch => !ch.open && !ch.unreachable && level.explored[ch.y][ch.x] && ch.guards.every(g => !g.isAlive())))
         .concat((level.shrines || []).filter(sh => !sh.used && !sh.unreachable && canSee(level, sh.x, sh.y)));
     if (loot.length) target = loot.reduce((a, b) => (Math.hypot(a.x - hero.x, a.y - hero.y) <= Math.hypot(b.x - hero.x, b.y - hero.y) ? a : b));
-    if (target) { const dir = towerPathDir(hero, target); if (dir) return dir; target.unreachable = true; target = null; } // si no se llega, se saltea
+    if (target) { const dir = towerPathDir(hero, target); hero.autoGoal = `botín ${target.x},${target.y}`; if (dir) return dir; target.unreachable = true; target = null; } // si no se llega, se saltea
     // Primero pasa por el pueblo (a comprar, como pide el objetivo del piso)
-    if (level.town && !level.visitedTown) { const dir = towerPathDir(hero, { x: level.town.merchant.x, y: level.town.merchant.y + 2 }); if (dir) return dir; }
+    if (level.town && !level.visitedTown) { const dir = towerPathDir(hero, { x: level.town.merchant.x, y: level.town.merchant.y + 2 }); hero.autoGoal = 'pueblo'; if (dir) return dir; }
     if (level.stairsOpen) target = level.stairs;
     else {
         const dist = bfsFrom(level, hero.x, hero.y);
@@ -606,6 +612,7 @@ function towerAutoDir(hero) {
         if (!target) target = level.guardian;
     }
     const dir = target && towerPathDir(hero, target);
+    hero.autoGoal = target ? `${target.label || 'escalera'} ${target.x},${target.y}` : 'nada'; // para depurar el piloto
     if (!dir && target && !target.isGuardian && target !== level.stairs) target.autoSkipUntil = gameClock + 10; // no lleva a ningún lado: probar con otro
     return dir || { dx: 0, dy: 0 };
 }
