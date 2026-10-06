@@ -174,6 +174,7 @@ if (location.search.includes('demo=tower')) setTimeout(() => {
     const q = new URLSearchParams(location.search);
     if (q.get('floor')) enterTowerFloor(+q.get('floor'), 'demo');
     if (q.get('at') === 'town') { player.x = player.arena.town.merchant.x + 2; player.y = player.arena.town.merchant.y + 2; }
+    if (q.get('time') === 'night') towerRun.startedAt = gameClock - (DAYNIGHT.day + DAYNIGHT.dusk + 10); // &time=night
     if (q.get('at') === 'plateau') { const L = player.arena, i = L.ramp.findIndex((v, j) => v && L.height[j] && L.zone[j] === ZONE.field && !L.ground[j]); if (i >= 0) { player.x = i % COLS; player.y = Math.floor(i / COLS); } }
     if (q.get('at') === 'boss') { const G = player.arena.guardian; player.x = G.x - 3; player.y = G.y; if (!walkable(player.arena, player.x, player.y)) { player.x = G.x; player.y = G.y + 2; } }
     if (q.get('at') === 'lab') { player.x = player.arena.gate.x - 2; player.y = player.arena.gate.y; }

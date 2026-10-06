@@ -1210,6 +1210,39 @@ test('Torre: campeones con afijos, santuarios y objetivo del piso', () => {
     checkEq(towerLevel(2).shrines.length, SHRINES_PER_FLOOR, 'cada piso trae sus santuarios');
 }, { random: true });
 
+test('Torre: día y noche (oscuridad, menos visión, criaturas nocturnas que se van al amanecer)', () => {
+    newTower();
+    const L = player.arena;
+    checkEq(towerDarkness(0), 0, 'arranca de día');
+    checkEq(towerDarkness(DAYNIGHT.day + DAYNIGHT.dusk + 10), 1, 'noche cerrada');
+    const sight = heroSight(player);
+    player.x = L.start.x; player.y = L.start.y;
+    gameClock = towerRun.startedAt + DAYNIGHT.day + DAYNIGHT.dusk + 5;
+    const before = L.creeps.length;
+    towerDayNightTick(L);
+    check(L.isNight && L.creeps.length > before && L.creeps.some(c => c.nocturnal), 'de noche salen criaturas nocturnas');
+    check(heroSight(player) < sight, 'de noche se ve menos en el campo');
+    player.level = 1;
+    check(towerXpFactor(player, 1) > 1, 'de noche se gana más experiencia');
+    gameClock = towerRun.startedAt + DAY_CYCLE + 5;
+    towerDayNightTick(L);
+    check(!L.isNight && !L.creeps.some(c => c.nocturnal && !c.aggro), 'al amanecer se van');
+}, { random: true });
+
+test('Torre: lugares altos (mesetas con rampas, más visión y daño desde arriba)', () => {
+    newTower();
+    const L = player.arena;
+    check(L.height.some(v => v) && L.ramp.some(v => v), 'hay mesetas y rampas');
+    check(L.walls.some(row => row.some(w => w === WALL.cliff)), 'con acantilados');
+    const i = L.height.findIndex((v, j) => v && !L.walls[Math.floor(j / COLS)][j % COLS] && !L.deep[j]);
+    const c = makeCreep(towerCreepPool(1)[0], 0, 0, 1, false, 0); c.arena = L;
+    player.x = i % COLS; player.y = Math.floor(i / COLS);
+    const j = L.height.findIndex((v, k) => !v && L.zone[k] === ZONE.field && walkable(L, k % COLS, Math.floor(k / COLS)));
+    c.x = j % COLS; c.y = Math.floor(j / COLS);
+    checkEq(heightDamageMult(player, c), HEIGHT_RULES.dmgUp, 'de arriba hacia abajo pega más');
+    checkEq(heightDamageMult(c, player), HEIGHT_RULES.dmgDown, 'de abajo hacia arriba, menos');
+}, { random: true });
+
 test('Torre: el nivel se genera conectado, con guardián, escalera y creeps con nivel', () => {
     const level = newTower();
     checkEq(gameState, 'TOWER', 'fase de la Torre');

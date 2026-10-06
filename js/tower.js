@@ -221,7 +221,7 @@ function alertPack(level, c) {
 
 // --- VISIÓN ---
 // Distancia de visión del héroe: base + puntos de Visión (ver la ventana de stats).
-function heroSight(hero) { return Math.max(2, TOWER.baseSight + ((hero.towerStats && hero.towerStats.vis) || 0) * TOWER.visionPerPoint + climateSight(hero) + (heightAt(hero.arena, hero.x, hero.y) ? HEIGHT_RULES.sight : 0)); }
+function heroSight(hero) { return Math.max(2, TOWER.baseSight + ((hero.towerStats && hero.towerStats.vis) || 0) * TOWER.visionPerPoint + climateSight(hero) + nightSight(hero) + (heightAt(hero.arena, hero.x, hero.y) ? HEIGHT_RULES.sight : 0)); }
 
 // ¿Hay pared entre (x0, y0) y (x1, y1)? Recorre la línea casilla por casilla (sin contar las puntas).
 function lineClear(level, x0, y0, x1, y1) {
@@ -407,13 +407,14 @@ function towerVictory() {
 function towerStatusText() {
     if (!player.isAlive() && player.respawnAt) return `☠ Renacés en ${Math.max(0, player.respawnAt - gameClock).toFixed(1)}s`;
     const level = player.arena;
-    return `${BIOMES[level.biome].icon} Piso ${level.floor}/${TOWER.floors} · ${towerObjective(level).text}`;
+    return `${BIOMES[level.biome].icon} Piso ${level.floor}/${TOWER.floors} · ${towerDayLabel()} · ${towerObjective(level).text}`;
 }
 function towerInfoHtml() {
     const level = player.arena;
     const alive = level.creeps.filter(c => c.isAlive() && !c.isGuardian).length;
     return `<h3>🗼 Tower Chaos · piso ${level.floor} de ${TOWER.floors}</h3>` +
         `<p class="subtitle">${biomeSummary(level)}</p>` +
+        (towerIsNight() ? `<p class="subtitle">🌙 <b>Es de noche</b>: en el campo ves menos y andan criaturas nocturnas; todo da +50% de experiencia y botín.</p>` : '') +
         `<p class="subtitle">Cruzá el campo, descansá en el <b>pueblo</b> (zona segura, mercader con B) y entrá al <b>laberinto</b>: el guardián (${level.guardian.label}) cuida la escalera.</p>` +
         (player.statPoints ? `<button class="primary-btn" onclick="toggleStatsWindow(true)">📊 Repartir ${player.statPoints} punto${player.statPoints === 1 ? '' : 's'} de stats (C)</button>` : `<button class="secondary-btn" onclick="toggleStatsWindow(true)">📊 Stats del héroe (C)</button>`) +
         `<button class="secondary-btn" onclick="toggleInventory(true)">🎒 Equipo e inventario (I) · ${player.bag.length} en la bolsa</button>` +
@@ -545,6 +546,7 @@ function renderTower(level, dt) {
         else if (!canSee(level, x, y)) { ctx.fillStyle = 'rgba(43,33,24,0.5)'; ctx.fillRect(x * TILE, y * TILE, TILE + 1, TILE + 1); }
     }
     ctx.restore();
+    drawTowerNight(level); // día y noche (towerWorld.js)
     drawInkVignette();
     drawObjectiveArrow(level);
     renderTowerMinimap(level);

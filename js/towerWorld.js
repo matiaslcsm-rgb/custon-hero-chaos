@@ -333,7 +333,9 @@ function climateSight(hero) {
 
 // Cada frame: terreno bajo tus pies, clima del campo, descanso en el pueblo, el mercader y los avisos al cambiar de zona.
 function towerTerrainTick(level, hero, dt) {
-    if (!level.ground || !hero.isAlive()) return;
+    if (!level.ground) return;
+    towerDayNightTick(level);
+    if (!hero.isAlive()) return;
     const i = hero.y * COLS + hero.x, B = BIOMES[level.biome], z = level.zone[i];
     if (z === ZONE.field && level.ground[i] === GROUND.hazard) {
         addEffect(hero, { id: 'TERRAIN', name: B.hazard.name, duration: 0.4, tags: ['PERJUICIO'], mods: B.hazard.mods || {} });
@@ -531,6 +533,7 @@ function towerXpFactor(hero, floor) {
     const diff = hero.level - towerZoneLevel(floor);
     let f = diff <= 0 ? Math.min(PACE.catchUpMax, 1 + PACE.catchUp * Math.max(0, -diff - 2)) : Math.max(PACE.overFloor, 1 - PACE.overPenalty * diff);
     if (getEffect(hero, 'SHRINE_XP')) f *= 1.5;
+    if (towerIsNight()) f *= DAYNIGHT.nightXp; // de noche, +50%
     return f;
 }
 
@@ -645,4 +648,86 @@ function drawFloorTitle(level) {
     ctx.fillStyle = '#6b2a1f'; ctx.font = 'bold 15px Georgia, serif'; ctx.fillText(`PISO ${level.floor} DE ${TOWER.floors} · ${B.icon}`, MAP_W / 2, MAP_H * 0.28 + 24);
     ctx.fillStyle = INK.line; ctx.font = 'bold 26px Georgia, serif'; ctx.fillText(B.name, MAP_W / 2, MAP_H * 0.28 + 56);
     ctx.restore();
+}
+
+// --- DÍA Y NOCHE ---
+// Ciclo de 8 minutos: 5 de día, 30 s de atardecer, 2 de noche y 30 s de amanecer. De noche, en el campo: menos visión,
+// salen criaturas nocturnas (más fuertes) y todo da más experiencia y botín. El pueblo y el laberinto (con antorchas)
+// quedan iluminados.
+const DAYNIGHT = { day: 300, dusk: 30, night: 120, dawn: 30, nightSight: -2.5, nightXp: 1.5, nightLoot: 1.5, nightPacks: 10, nightAtk: 1.25 };
+const DAY_CYCLE = DAYNIGHT.day + DAYNIGHT.dusk + DAYNIGHT.night + DAYNIGHT.dawn;
+function towerTimeOfDay() { return towerRun ? (gameClock - towerRun.startedAt) % DAY_CYCLE : 0; }
+// 0 = pleno día, 1 = noche cerrada
+function towerDarkness(t = towerTimeOfDay()) {
+    const D = DAYNIGHT;
+    if (t < D.day) return 0;
+    if (t < D.day + D.dusk) return (t - D.day) / D.dusk;
+    if (t < D.day + D.dusk + D.night) return 1;
+    return 1 - (t - D.day - D.dusk - D.night) / D.dawn;
+}
+function towerIsNight() { return towerDarkness() >= 0.5; }
+// Lo que falta para el próximo cambio (para el panel)
+function towerDayLabel() {
+    const t = towerTimeOfDay(), D = DAYNIGHT, night = towerIsNight();
+    const next = night ? D.day + D.dusk + D.night + D.dawn / 2 : D.day + D.dusk / 2;
+    const left = Math.max(0, Math.round((next - t + DAY_CYCLE) % DAY_CYCLE));
+    return `${night ? '🌙 Noche' : '☀️ Día'} (${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')})`;
+}
+// Visión que quita la noche en el campo
+function nightSight(hero) {
+    const level = hero.arena;
+    if (!level || !level.zone || towerZoneAt(level, hero.x, hero.y) !== ZONE.field) return 0;
+    return DAYNIGHT.nightSight * towerDarkness();
+}
+// Al caer la noche aparecen criaturas nocturnas en el campo del piso donde estás; al amanecer, las que no te vieron se van.
+function towerDayNightTick(level) {
+    if (!level.town) return;
+    const night = towerIsNight();
+    if (night === !!level.isNight) return;
+    level.isNight = night;
+    if (night) {
+        const pool = towerCreepPool(level.floor), at = (x, y) => y * COLS + x;
+        let packs = 0;
+        for (let t = 0; t < 3000 && packs < DAYNIGHT.nightPacks; t++) {
+            const x = 2 + Math.floor(Math.random() * (COLS - 4)), y = 2 + Math.floor(Math.random() * (ROWS - 4));
+            if (level.zone[at(x, y)] !== ZONE.field || !walkable(level, x, y) || Math.hypot(x - player.x, y - player.y) < 14) continue;
+            if (Math.abs(x - level.town.merchant.x) < 18 && Math.abs(y - level.town.merchant.y) < 14) continue;
+            packs++;
+            for (let n = 2 + Math.floor(Math.random() * 2); n > 0; n--) {
+                const type = pickRandom(pool), lvl = level.floor + 1;
+                const c = makeCreep(type, x, y, TOWER.creepMult(lvl), false, 0);
+                Object.assign(c, { arena: level, level: lvl, xp: Math.round(type.xp * TOWER.xpMult(lvl) * WORLD.fieldXp * 1.5), nocturnal: true, spawnTime: -1e9 });
+                c.atk = Math.round(c.atk * DAYNIGHT.nightAtk);
+                c.label = `${type.label} Nocturno`; c.color = shade(type.color, -0.35);
+                level.creeps.push(c);
+            }
+        }
+        log('🌙 Cae la noche: ves menos en el campo y salen criaturas nocturnas. Todo da +50% de experiencia y botín.');
+    } else {
+        level.creeps = level.creeps.filter(c => !(c.nocturnal && c.isAlive() && !c.aggro));
+        log('☀️ Amanece: las criaturas nocturnas que no te vieron se esconden.');
+    }
+}
+// Capa de oscuridad (en pantalla): se recorta donde hay luz (vos, el pueblo, los santuarios). El laberinto tiene antorchas.
+let nightLayer = null;
+function drawTowerNight(level) {
+    const dark = level.town ? towerDarkness() : 0;
+    if (dark <= 0.01 || towerZoneAt(level, player.x, player.y) === ZONE.lab) return;
+    if (!nightLayer) { nightLayer = document.createElement('canvas'); nightLayer.width = MAP_W; nightLayer.height = MAP_H; }
+    const g = nightLayer.getContext('2d');
+    g.globalCompositeOperation = 'source-over'; g.clearRect(0, 0, MAP_W, MAP_H);
+    g.fillStyle = `rgba(14,18,42,${0.62 * dark})`; g.fillRect(0, 0, MAP_W, MAP_H);
+    g.globalCompositeOperation = 'destination-out';
+    const light = (x, y, r) => {
+        const sx = (x - camera.x + 0.5) * TILE, sy = (y - camera.y + 0.5) * TILE;
+        const grd = g.createRadialGradient(sx, sy, r * 0.3, sx, sy, r);
+        grd.addColorStop(0, 'rgba(0,0,0,1)'); grd.addColorStop(1, 'rgba(0,0,0,0)');
+        g.fillStyle = grd; g.fillRect(sx - r, sy - r, r * 2, r * 2);
+    };
+    if (player.isAlive()) light(player.x, player.y, heroSight(player) * TILE);
+    const tw = level.town; light(tw.merchant.x, tw.merchant.y + 4, 11 * TILE);
+    (level.shrines || []).forEach(s => { if (!s.used) light(s.x, s.y, 2.2 * TILE); });
+    ctx.drawImage(nightLayer, 0, 0);
+    const dusk = 1 - Math.abs(dark - 0.5) * 2; // tono naranja en el atardecer y el amanecer
+    if (dusk > 0) { ctx.fillStyle = `rgba(255,140,60,${0.12 * dusk})`; ctx.fillRect(0, 0, MAP_W, MAP_H); }
 }

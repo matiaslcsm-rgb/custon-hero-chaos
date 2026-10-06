@@ -377,7 +377,7 @@ function towerLootOnKill(level, c, killer) {
     if (towerRun && killer === player) { const s = towerRun.stats; s.kills++; s.gold += c.gold || 0; if (c.champion) s.champions++; if (c.isGuardian) s.guardians++; }
     if (c.isGuardian) { for (let i = 0; i < LOOT.guardianDrops; i++) level.drops.push({ x: c.x, y: c.y, item: makeTowerItem(level.floor, undefined, i === 0 ? 'rare' : rollQuality(level.floor)) }); return; }
     if (c.champion) { if (Math.random() < CHAMPION.dropChance) level.drops.push({ x: c.x, y: c.y, item: makeTowerItem(level.floor, undefined, Math.random() < 0.3 ? 'rare' : 'magic') }); return; }
-    if (Math.random() < LOOT.creepChance * (c.isChestGuard ? 0 : 1)) level.drops.push({ x: c.x, y: c.y, item: makeTowerItem(level.floor) });
+    if (Math.random() < LOOT.creepChance * (c.isChestGuard ? 0 : 1) * (towerIsNight() ? DAYNIGHT.nightLoot : 1)) level.drops.push({ x: c.x, y: c.y, item: makeTowerItem(level.floor) });
 }
 // Recoge lo que hay en tu casilla (si entra en el inventario); abre el cofre si ya no tiene custodios.
 function towerPickup(hero) {
