@@ -546,10 +546,15 @@ function renderTower(level, dt) {
     // Barra del guardián cuando lo tenés a la vista
     const g = level.guardian;
     if (g && g.isAlive() && visible(g)) {
-        ctx.font = 'bold 13px monospace'; ctx.textAlign = 'center'; ctx.fillStyle = g.color;
-        ctx.fillText(`👹 Guardián: ${g.label} · ${Math.max(0, Math.round(g.hp))} / ${g.maxHp}`, MAP_W / 2, TILE * 0.5);
-        ctx.fillStyle = '#330010'; ctx.fillRect(TILE * 3, TILE * 0.8, MAP_W - TILE * 6, 5);
-        ctx.fillStyle = '#ff0055'; ctx.fillRect(TILE * 3, TILE * 0.8, (MAP_W - TILE * 6) * Math.max(0, g.hp) / g.maxHp, 5);
+        // Barra del jefe en tinta: placa de pergamino, nombre con serifa y vida en rojo sangre
+        const bx = 20, bw = MAP_W - 20 - 180; // deja libre el minimapa (arriba a la derecha)
+        ctx.fillStyle = 'rgba(233,220,192,0.92)'; ctx.fillRect(bx - 8, 4, bw + 16, 34);
+        ctx.strokeStyle = INK.line; ctx.lineWidth = 2; ctx.strokeRect(bx - 8, 4, bw + 16, 34);
+        ctx.font = 'bold 13px Georgia, serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#6b2a1f';
+        ctx.fillText(`${g.label} · ${Math.max(0, Math.round(g.hp))} / ${g.maxHp}`, bx + bw / 2, 19);
+        ctx.fillStyle = '#3a2d21'; ctx.fillRect(bx, 25, bw, 7);
+        ctx.fillStyle = '#9b2226'; ctx.fillRect(bx, 25, bw * Math.max(0, g.hp) / g.maxHp, 7);
+        ctx.strokeStyle = INK.line; ctx.lineWidth = 1.2; ctx.strokeRect(bx, 25, bw, 7);
     }
     if (paused) {
         ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(0, 0, MAP_W, MAP_H);

@@ -81,6 +81,9 @@ function creepDot(c, t, id, name, pct) {
     addEffect(t, { id, name, duration: 3, tags: ['PERJUICIO'], hooks: { onTick(u, { dt }) { if (everyInterval(u, id, dt, 1)) dealDamage(c, u, Math.max(1, Math.round(c.atk * pct)), 'pure'); } } });
 }
 
+// Figura de tinta propia para las bestias de los biomas (inkart.js); el resto usa la de su tipo base.
+const BIOME_CREEP_PLANS = { 'Lobo Gris': 'wolf', 'Lobo Blanco': 'wolf', 'Jabalí': 'boar', 'Sapo Venenoso': 'toad', 'Escorpión': 'scorpion',
+    'Salamandra': 'lizard', 'Gólem de Hielo': 'golem', 'Hombre de Lodo': 'golem', 'Acorazado de Obsidiana': 'golem' };
 // Tipos de creep de un bioma: variantes de los de siempre (misma mecánica, otro nombre y color, y su rasgo).
 const biomeCreepCache = {};
 function biomeCreepTypes(key) {
@@ -88,7 +91,7 @@ function biomeCreepTypes(key) {
     return (biomeCreepCache[key] = BIOMES[key].creeps.map(([base, label, color, trait, from]) => {
         const t = CREEP_TYPES[base], tr = trait && CREEP_TRAITS[trait];
         const onAttack = tr ? (c, target, result) => { if (t.onAttack) t.onAttack(c, target, result); if (result && result.dealt > 0 && target.isAlive()) tr.apply(c, target); } : t.onAttack;
-        return { ...t, label, color, biome: key, trait: trait || null, from: from || 0, onAttack,
+        return { ...t, label, color, biome: key, trait: trait || null, from: from || 0, onAttack, plan: BIOME_CREEP_PLANS[label],
             mechanic: (t.mechanic || '') + (tr ? ` Su golpe ${tr.label}.` : '') };
     }));
 }

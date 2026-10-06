@@ -1,7 +1,7 @@
 // Punto de entrada: conecta los botones y arranca el bucle principal.
 
 // Versión visible en el menú: si no coincide con la última subida, el navegador muestra una copia vieja (Ctrl+F5).
-const GAME_VERSION = '2026-10-05 · revisión de diseño (medida)';
+const GAME_VERSION = '2026-10-06 · jefes y bestias en tinta';
 document.getElementById('game-version').textContent = `Versión ${GAME_VERSION}`;
 
 document.getElementById('start-wave-btn').onclick = startWave;
@@ -174,6 +174,7 @@ if (location.search.includes('demo=tower')) setTimeout(() => {
     const q = new URLSearchParams(location.search);
     if (q.get('floor')) enterTowerFloor(+q.get('floor'), 'demo');
     if (q.get('at') === 'town') { player.x = player.arena.town.merchant.x + 2; player.y = player.arena.town.merchant.y + 2; }
+    if (q.get('at') === 'boss') { const G = player.arena.guardian; player.x = G.x - 3; player.y = G.y; if (!walkable(player.arena, player.x, player.y)) { player.x = G.x; player.y = G.y + 2; } }
     if (q.get('at') === 'lab') { player.x = player.arena.gate.x - 2; player.y = player.arena.gate.y; }
     if (q.get('at') === 'field') { const L = player.arena; const h = L.creeps.find(c => !c.isGuardian && L.zone[c.y * COLS + c.x] === ZONE.field); player.x = h.x - 3; player.y = h.y; if (!walkable(L, player.x, player.y)) { player.x = h.x; player.y = h.y + 1; } }
     const level = player.arena;

@@ -230,6 +230,13 @@ vectoriales, primero en Tower Chaos. Código: `js/inkart.js`; hoja de muestra: `
     sobre el papel; barras de vida de las unidades en tinta, sin brillos; menhires de tinta en el círculo de piedra.
   - En la Torre las habilidades no se suben con puntos (sin botones [+]): crecen forjando.
 
+- Paso 4 (2026-10-06): figura propia para los **8 jefes** (Gólem con runas, Reina de la Colmena con alas, Dragón de
+  Escarcha, Señor del Abismo con tridente, Hidra de 3 cabezas que se mecen, Liche con corona y báculo, Titán de Sangre
+  con cadenas, Espectro sin piernas), los **creeps chicos** (Enjambre, Kamikaze con mecha, Chusma) y las **bestias de los
+  biomas** de costado (Lobo Gris y Blanco, Jabalí, Sapo que salta, Escorpión, Salamandra; Gólem de Hielo, Hombre de Lodo y
+  Acorazado de Obsidiana usan el Gólem). Barra del jefe en tinta. Muestra: `docs/ink-preview.html`; en juego:
+  `index.html?demo=tower&floor=N&at=boss`.
+
 ## 4 ter. Revisión de diseño (2026-10-05)
 Pedido del usuario: "funcioná como diseñador de videojuegos, agarrá lo que tenemos y mejoralo en todos los sentidos,
 buscá referencias". Método: medir con el piloto automático (runs completas), encontrar el problema más grande, buscar

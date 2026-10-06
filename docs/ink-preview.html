@@ -8,7 +8,7 @@
 <style>body { margin: 0; background: #e9dcc0; } canvas { display: block; }</style>
 </head>
 <body>
-<canvas id="c" width="1000" height="640"></canvas>
+<canvas id="c" width="1000" height="900"></canvas>
 <script>const TILE = 34;</script>
 <script src="../js/sprites.js"></script>
 <script src="../js/inkart.js"></script>
@@ -40,6 +40,17 @@ g.fillText('caminata: 8 cuadros', 430, 222);
 const t = inkTiles();
 [t.face, t.top, t.floors[0], t.floors[1]].forEach((im, i) => g.drawImage(im, 20 + i * 90, 220, 80, 80));
 g.fillText('pared (frente) · pared (arriba) · piso · piso', 20, 320);
+// Jefes, creeps chicos y bestias de los biomas (fila de abajo)
+g.fillStyle = INK.paper; g.fillRect(0, 640, 1000, 260);
+[['golem', '#adb5bd', 'Gólem'], ['hiveQueen', '#b5e48c', 'Reina'], ['frostDragon', '#90e0ef', 'Dragón'], ['abyssLord', '#9d0208', 'Señor del Abismo'], ['hydra', '#52b788', 'Hidra'],
+ ['lich', '#c77dff', 'Liche'], ['bloodTitan', '#e63946', 'Titán'], ['phantom', '#e0e1dd', 'Espectro'], ['swarm', '#b5e48c', 'Enjambre'], ['kamikaze', '#fb8500', 'Kamikaze'],
+ ['chusma', '#6c757d', 'Chusma'], ['wolf', '#8d8d8d', 'Lobo'], ['boar', '#8b5e3c', 'Jabalí'], ['toad', '#7a9a3a', 'Sapo'], ['scorpion', '#c08552', 'Escorpión'], ['lizard', '#dc2f02', 'Salamandra']]
+    .forEach(([plan, col, name], i) => {
+        const f = inkFigure(plan, { main: inkMute(col), accent: inkMute(shade(col, 0.35), 0.4) }, 'walk', 2);
+        const x = 4 + (i % 8) * 124, y = 640 + Math.floor(i / 8) * 130;
+        g.drawImage(f.img, x, y, INK_W * 1.2, INK_H * 1.2);
+        g.fillStyle = INK.line; g.font = '12px serif'; g.fillText(name, x + 70, y + 110);
+    });
 // Íconos de game-icons.net repintados en tinta (habilidades arriba, armas y ranuras abajo)
 g.fillStyle = INK.paper; g.fillRect(0, 420, 1000, 220);
 const cols = ['#a33a3a', '#2d6a4f', '#1d4e89'];
