@@ -12,7 +12,7 @@
 //   persiguen rodeando paredes (mapa de distancias, ver flowField).
 
 const TOWER = {
-    floors: 10, cols: 160, rows: 110, // cada piso: campo del bioma + pueblo + laberinto (towerWorld.js)
+    floors: 10, cols: 220, rows: 150, // cada piso: campo del bioma + pueblo + laberinto (towerWorld.js); antes 160×110
     heroSpeed: 1.4,       // el héroe camina 40% más rápido que en una arena (el mapa es mucho más grande)
     rooms: { tries: 900, want: 24, minW: 6, maxW: 13, minH: 5, maxH: 10 },
     baseSight: 6,         // distancia de visión base del héroe (las paredes tapan la vista)
@@ -221,16 +221,17 @@ function alertPack(level, c) {
 
 // --- VISIÓN ---
 // Distancia de visión del héroe: base + puntos de Visión (ver la ventana de stats).
-function heroSight(hero) { return Math.max(2, TOWER.baseSight + ((hero.towerStats && hero.towerStats.vis) || 0) * TOWER.visionPerPoint + climateSight(hero)); }
+function heroSight(hero) { return Math.max(2, TOWER.baseSight + ((hero.towerStats && hero.towerStats.vis) || 0) * TOWER.visionPerPoint + climateSight(hero) + (heightAt(hero.arena, hero.x, hero.y) ? HEIGHT_RULES.sight : 0)); }
 
 // ¿Hay pared entre (x0, y0) y (x1, y1)? Recorre la línea casilla por casilla (sin contar las puntas).
 function lineClear(level, x0, y0, x1, y1) {
     let x = x0, y = y0;
+    const high = level.height && level.height[y0 * COLS + x0]; // desde una meseta, los acantilados no tapan
     const dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0), sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
     let err = dx + dy;
     while (true) {
         if (x === x1 && y === y1) return true;
-        if ((x !== x0 || y !== y0) && level.walls[y][x]) return false;
+        if ((x !== x0 || y !== y0) && level.walls[y][x] && !(high && level.walls[y][x] === WALL.cliff)) return false;
         const e2 = 2 * err;
         if (e2 >= dy) { err += dy; x += sx; }
         if (e2 <= dx) { err += dx; y += sy; }
@@ -455,6 +456,11 @@ function drawTowerTiles(level) {
         const img = !labTile ? biomeTileFor(level, x, y) // campo y pueblo del bioma (towerWorld.js)
             : w ? (y + 1 < ROWS && !level.walls[y + 1][x] ? t.face : t.top) : t.floors[((x * 73856093) ^ (y * 19349663)) & 3];
         ctx.drawImage(img, x * TILE, y * TILE);
+        if (level.height) { // relieve: arriba más claro; al pie del acantilado, sombra
+            const i = y * COLS + x;
+            if (level.height[i] && w !== WALL.cliff) { ctx.fillStyle = 'rgba(255,250,235,0.16)'; ctx.fillRect(x * TILE, y * TILE, TILE, TILE); }
+            else if (!level.height[i] && y > 0 && level.walls[y - 1][x] === WALL.cliff) { ctx.fillStyle = 'rgba(29,23,18,0.2)'; ctx.fillRect(x * TILE, y * TILE, TILE, TILE / 2); }
+        }
     }
     // Círculo de piedra en la entrada del nivel 1
     if (level.floor === 1 && level.explored[level.start.y][level.start.x]) {

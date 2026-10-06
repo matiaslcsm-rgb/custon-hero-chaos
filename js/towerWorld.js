@@ -7,15 +7,18 @@
 //   level.deep[i]      agua o lava profunda: no se pisa pero se ve a través (i = y * COLS + x)
 //   level.ground[i]    suelo (GROUND): llano, terreno del bioma (con efecto), camino, pueblo o laberinto
 //   level.zone[i]      ZONE: campo, pueblo (zona segura) o laberinto
+//   level.height[i]    1 = arriba de una meseta (se sube por rampas: level.ramp[i]); su borde es acantilado (WALL.cliff).
+//                      Desde arriba se ve por encima de los acantilados y se pega más fuerte a los de abajo.
 
-const WALL = { stone: 1, obstacle: 2, palisade: 3, edge: 4, fountain: 5 };
+const WALL = { stone: 1, obstacle: 2, palisade: 3, edge: 4, fountain: 5, cliff: 6 };
 const GROUND = { plain: 0, hazard: 1, road: 2, town: 3, lab: 4 };
 const ZONE = { field: 0, town: 1, lab: 2 };
 
 const WORLD = {
-    lab: { w: 54, h: 62, rooms: 16 },
+    lab: { w: 64, h: 72, rooms: 22 },
     town: { w: 20, h: 15 },
-    fieldPacks: 26,       // grupos de creeps sueltos en el campo
+    fieldPacks: 46,       // grupos de creeps sueltos en el campo (26 con el mapa de 160×110)
+    plateaus: 12,         // mesetas por piso (lugares altos con rampas)
     packSpacing: 10,      // distancia mínima entre grupos
     safeFromStart: 18,    // sin creeps a menos de esto (caminando) de la entrada del piso
     fieldXp: 0.6,         // experiencia de los creeps del campo (hay muchos más que en el laberinto)
@@ -107,7 +110,7 @@ function generateTowerLevel(floor) {
     const biomeKey = biomeFor(floor), B = BIOMES[biomeKey];
     const rint = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
     const walls = Array.from({ length: H }, () => new Uint8Array(W));
-    const deep = new Uint8Array(N), ground = new Uint8Array(N), zone = new Uint8Array(N);
+    const deep = new Uint8Array(N), ground = new Uint8Array(N), zone = new Uint8Array(N), height = new Uint8Array(N), ramp = new Uint8Array(N);
     const at = (x, y) => y * W + x;
     const inRect = (r, x, y, m = 0) => x >= r.x - m && x < r.x + r.w + m && y >= r.y - m && y < r.y + r.h + m;
     const inside = (x, y) => x > 0 && y > 0 && x < W - 1 && y < H - 1;
@@ -172,11 +175,25 @@ function generateTowerLevel(floor) {
         });
     }
 
+    // 5 bis. Mesetas: manchas altas cuyo borde es acantilado; dos rampas por meseta para subir
+    for (let p = 0; p < WORLD.plateaus; p++) {
+        const cx = rint(14, W - 14), cy = rint(10, H - 11), r = rint(5, 10), cells = [];
+        blob(cx, cy, r, (x, y) => { if (!deep[at(x, y)]) { height[at(x, y)] = 1; cells.push([x, y]); } });
+        const edges = cells.filter(([x, y]) => [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => !height[at(x + dx, y + dy)]));
+        edges.forEach(([x, y]) => { walls[y][x] = WALL.cliff; });
+        // Rampas: un borde con piso libre afuera y adentro
+        shuffle(edges.slice()).filter(([x, y]) => [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => {
+            const ox = x + dx, oy = y + dy, ix = x - dx, iy = y - dy;
+            return inside(ox, oy) && !height[at(ox, oy)] && !walls[oy][ox] && height[at(ix, iy)] && !walls[iy][ix];
+        })).slice(0, 2).forEach(([x, y]) => { walls[y][x] = 0; ramp[at(x, y)] = 1; });
+    }
+
     // 6. Caminos de 3 casillas: entrada → portón oeste del pueblo, y portón este → laberinto (garantizan el paso)
     const pave = (x, y) => {
         for (let oy = -1; oy <= 1; oy++) for (let ox = -1; ox <= 1; ox++) {
             const px = x + ox, py = y + oy;
             if (!inside(px, py) || zone[at(px, py)] !== ZONE.field) continue;
+            if (walls[py][px] === WALL.cliff) ramp[at(px, py)] = 1; // el camino corta el acantilado: rampa
             walls[py][px] = 0; deep[at(px, py)] = 0; ground[at(px, py)] = GROUND.road;
         }
     };
@@ -195,7 +212,7 @@ function generateTowerLevel(floor) {
     road({ x: town.x + T.w + 1, y: midY }, gate);
 
     const level = makeArena('tower', []);
-    Object.assign(level, { floor, biome: biomeKey, walls, deep, ground, zone, rooms, lab, town, gate, start,
+    Object.assign(level, { floor, biome: biomeKey, walls, deep, ground, zone, height, ramp, rooms, lab, town, gate, start,
         explored: Array.from({ length: H }, () => new Uint8Array(W)), corpses: [] });
 
     // 7. Lo que no se alcanza desde la entrada se tapa (sin bolsones aislados)
@@ -247,7 +264,7 @@ function generateTowerLevel(floor) {
 
     // 10. Cofres: dos en claros del campo y dos en salas del laberinto
     const clearings = [];
-    for (let t = 0; t < 3000 && clearings.length < 2; t++) {
+    for (let t = 0; t < 3000 && clearings.length < 3; t++) {
         const x = rint(2, W - 7), y = rint(2, H - 6);
         if (dist[at(x, y)] < 20 || inRect(town, x, y, 6)) continue;
         let ok = true;
@@ -256,7 +273,7 @@ function generateTowerLevel(floor) {
     }
     placeShrines(level, dist);
     level.drops = [];
-    placeChests(level, clearings.concat(shuffle(rooms.filter(r => r !== first && r !== guardRoom)).slice(0, 4 - clearings.length)));
+    placeChests(level, clearings.concat(shuffle(rooms.filter(r => r !== first && r !== guardRoom)).slice(0, 5 - clearings.length)));
     level.creeps.forEach(c => { c.spawnTime = -1e9; }); // sin el oro extra por velocidad de las oleadas (no aplica en la Torre)
     return level;
 }
@@ -292,6 +309,17 @@ function carveRooms(walls, rect, want, rint) {
     });
     for (let i = 0; i < 2 && rooms.length > 3; i++) corridor(pickRandom(rooms), pickRandom(rooms));
     return rooms;
+}
+
+// --- ALTURA ---
+function heightAt(level, x, y) { return level && level.height ? level.height[y * COLS + x] : 0; }
+const HEIGHT_RULES = { sight: 2, dmgUp: 1.2, dmgDown: 0.8 };
+// Daño según la altura: de arriba hacia abajo pega más; de abajo hacia arriba, menos (solo en la Torre).
+function heightDamageMult(source, target) {
+    const level = source && source.arena;
+    if (!level || !level.height || target.arena !== level) return 1;
+    const hs = heightAt(level, source.x, source.y), ht = heightAt(level, target.x, target.y);
+    return hs > ht ? HEIGHT_RULES.dmgUp : hs < ht ? HEIGHT_RULES.dmgDown : 1;
 }
 
 // --- EN JUEGO ---
@@ -430,7 +458,21 @@ function biomeTiles(key) {
         line(g, [[11, 18], [14, 16], [17, 18], [20, 16], [23, 18]], 'rgba(255,255,255,0.7)', 1.2);
         g.fillStyle = INK.stone; g.fillRect(15, 9, 4, 9); g.strokeRect(15, 9, 4, 9);
     });
-    return (biomeTileCache[key] = {
+    const cliff = v => tile(g => {
+        g.fillStyle = shade(C.obstacle, -0.1); g.fillRect(0, 0, TILE, TILE);
+        g.fillStyle = shade(C.ground, -0.18); g.fillRect(0, 0, TILE, 9);
+        g.strokeStyle = INK.line; g.lineWidth = 1.4; g.beginPath(); g.moveTo(0, 9); g.lineTo(TILE, 9); g.stroke();
+        g.strokeStyle = 'rgba(29,23,18,0.55)'; g.lineWidth = 1;
+        for (let y = 15; y < TILE; y += 7) { g.beginPath(); g.moveTo(0, y + (rnd() - 0.5) * 2); g.lineTo(TILE, y + (rnd() - 0.5) * 2); g.stroke(); }
+        for (let i = 0; i < 3; i++) { const x = 4 + rnd() * 26; g.beginPath(); g.moveTo(x, 10); g.lineTo(x + (rnd() - 0.5) * 4, TILE); g.stroke(); }
+        if (v) inkHatch(g, 0, 20, TILE, TILE, 3);
+    });
+    const rampTile = tile(g => {
+        base(g, C.road);
+        g.strokeStyle = 'rgba(29,23,18,0.5)'; g.lineWidth = 1.4;
+        for (let y = 5; y < TILE; y += 7) { g.beginPath(); g.moveTo(3, y); g.lineTo(TILE - 3, y); g.stroke(); }
+    });
+    return (biomeTileCache[key] = { cliff: [cliff(0), cliff(1)], ramp: rampTile,
         ground: [0, 1, 2, 3].map(groundTile), hazard: [hazardTile(), hazardTile()], deep: [deepTile(), deepTile()],
         road: [roadTile(), roadTile()], town: [townTile(), townTile()], obstacle: [0, 1, 2].map(obstacleTile), palisade, fountain
     });
@@ -440,6 +482,8 @@ function biomeTiles(key) {
 function biomeTileFor(level, x, y) {
     const bt = biomeTiles(level.biome), i = y * COLS + x, w = level.walls[y][x], h = ((x * 73856093) ^ (y * 19349663)) >>> 0;
     if (w === WALL.obstacle || w === WALL.edge) return bt.obstacle[h % 3];
+    if (w === WALL.cliff) return bt.cliff[h & 1];
+    if (level.ramp && level.ramp[i]) return bt.ramp;
     if (w === WALL.palisade) return bt.palisade;
     if (w === WALL.fountain) return bt.fountain;
     if (level.deep[i]) return bt.deep[h & 1];
@@ -454,6 +498,8 @@ function towerMiniColor(level, x, y) {
     const C = BIOMES[level.biome].colors, i = y * COLS + x;
     if (w === WALL.stone) return '#5e5444';
     if (w === WALL.obstacle || w === WALL.edge) return shade(C.obstacle, -0.15);
+    if (w === WALL.cliff) return '#5a4a38';
+    if (level.height && level.height[i] && !level.ramp[i]) return shade(C.ground, 0.12);
     if (w === WALL.palisade) return '#8a6a46';
     if (w === WALL.fountain) return '#7fa7c9';
     if (level.deep[i]) return C.deep;
@@ -528,7 +574,7 @@ const SHRINES = {
     wisdom: { name: 'Santuario de la Sabiduría', color: '#c9a227', desc: '+50% de experiencia por 90 s', effect: { id: 'SHRINE_XP', duration: 90 } },
     life: { name: 'Santuario de la Vida', color: '#ff477e', desc: 'te cura del todo (vida y maná)', instant: h => { h.hp = h.maxHp; h.mana = h.maxMana; } }
 };
-const SHRINES_PER_FLOOR = 3;
+const SHRINES_PER_FLOOR = 5;
 function placeShrines(level, dist) {
     const W = COLS, H = ROWS, at = (x, y) => y * W + x;
     level.shrines = [];

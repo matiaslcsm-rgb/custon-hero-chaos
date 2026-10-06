@@ -124,6 +124,7 @@ function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     let final = amount;
     if (type === 'magical' && source) final *= 1 + effSpellAmp(source) / 100;
     if (source && source.isHero && target.isHero && target.arena && target.arena.kind === 'duel') final *= 1 - DUEL_DAMAGE_REDUCTION;
+    if (source && target.arena && target.arena.height) final *= heightDamageMult(source, target); // Torre: altura (towerWorld.js)
     final = mitigate(target, final * (1 - effDmgReduction(target)), type);
     let takenPct = sumMod(target, 'dmgTakenPct'); // ej: Condenado
     // La maldición (Condenado) solo amplifica el daño de creeps y de héroes sin maldición
