@@ -12,7 +12,7 @@
 //   persiguen rodeando paredes (mapa de distancias, ver flowField).
 
 const TOWER = {
-    floors: 10, cols: 90, rows: 60,
+    floors: 10, cols: 160, rows: 110, // cada piso: campo del bioma + pueblo + laberinto (towerWorld.js)
     heroSpeed: 1.4,       // el héroe camina 40% más rápido que en una arena (el mapa es mucho más grande)
     rooms: { tries: 900, want: 24, minW: 6, maxW: 13, minH: 5, maxH: 10 },
     baseSight: 6,         // distancia de visión base del héroe (las paredes tapan la vista)
@@ -28,14 +28,6 @@ const TOWER = {
     xpMult: level => 1 + 0.3 * (level - 1),
     guardianMult: floor => 0.35 * (1 + 0.45 * (floor - 1))
 };
-
-// Creeps que aparecen según el nivel de la torre (primero los básicos; desde el 5, todos)
-function towerCreepPool(floor) {
-    const all = Object.values(CREEP_TYPES).filter(t => !t.oneHit);
-    if (floor <= 2) return all.filter(t => t.basic);
-    if (floor <= 4) return all.filter(t => t.basic || ['SHAMAN', 'HEALER', 'SPECTER', 'SWARM', 'KAMIKAZE'].includes(t.key));
-    return all;
-}
 
 let gameMode = 'normal'; // 'normal' | 'tower'
 let towerRun = null;     // { floor, levels: [], base: { str, agi, int }, deaths, startedAt }
@@ -65,7 +57,7 @@ function startTowerRun() {
     showPanel('hero-select-panel', false);
     gameState = 'TOWER';
     document.body.classList.add('ink-theme');
-    log(`🗼 Tower Chaos: entrás a la torre como aventurero sin clase. Tenés Golpe Certero en la E; cada pieza de equipo trae la habilidad de un héroe: buscala en cofres y en lo que sueltan los creeps (I: inventario, C: stats). Hay ${TOWER.floors} niveles.`);
+    log(`🗼 Tower Chaos: entrás a la torre como aventurero sin clase. Tenés Golpe Certero en la E; cada pieza de equipo trae la habilidad de un héroe: buscala en cofres y en lo que sueltan los creeps (I: inventario, C: stats). Hay ${TOWER.floors} pisos, cada uno con su bioma, su pueblo y su laberinto.`);
     log(`✨ Hechizo inicial: ${itemSkill(starter).name} (${starter.name}, ya equipada en la ${player.keyBindings[itemSkill(starter).id].toUpperCase()}).`);
     enterTowerFloor(1, 'start');
 }
@@ -85,82 +77,16 @@ function enterTowerFloor(floor, where = 'start') {
     player.x = level.start.x; player.y = level.start.y;
     player.moveTarget = null; player.focus = null;
     level.creeps.forEach(c => { c.aggro = false; });
+    player.towerZone = undefined;
     level.fovKey = null; computeFov(level, player);
-    setStateText(`TOWER CHAOS · NIVEL ${floor} DE ${TOWER.floors}`);
+    const B = BIOMES[level.biome];
+    setStateText(`TOWER CHAOS · PISO ${floor} DE ${TOWER.floors} · ${B.name.toUpperCase()}`);
     sfx('wave');
-    if (where === 'start') log(floor === 1 ? '🪨 Estás en el círculo de piedra, en la base de la torre.' : `🗼 Subiste al nivel ${floor}. El guardián cuida la escalera al siguiente.`);
+    if (where === 'start') log(`${floor === 1 ? '🪨 Estás en el círculo de piedra, en la base de la torre.' : `🗼 Subiste al piso ${floor}.`} ${B.icon} ${B.name}: seguí el camino al pueblo y, más allá, al laberinto donde el guardián cuida la escalera. ${B.hazard.name}: ${B.hazard.desc}.${B.climate ? ` ${B.climate.name}: ${B.climate.desc}.` : ''}`);
 }
 
 // --- GENERACIÓN ---
-// Salas rectangulares unidas por pasillos de 2 casillas de ancho. La sala más lejana de la entrada es la del guardián.
-function generateTowerLevel(floor) {
-    const W = TOWER.cols, H = TOWER.rows, R = TOWER.rooms;
-    const walls = Array.from({ length: H }, () => new Uint8Array(W).fill(1));
-    const carve = (x, y) => { if (x > 0 && y > 0 && x < W - 1 && y < H - 1) walls[y][x] = 0; };
-    const rooms = [];
-    const rint = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
-    for (let t = 0; t < R.tries && rooms.length < R.want; t++) {
-        const w = rint(R.minW, R.maxW), h = rint(R.minH, R.maxH);
-        const x = rint(1, W - w - 2), y = rint(1, H - h - 2);
-        if (rooms.some(r => x < r.x + r.w + 2 && x + w + 2 > r.x && y < r.y + r.h + 2 && y + h + 2 > r.y)) continue;
-        rooms.push({ x, y, w, h, cx: x + Math.floor(w / 2), cy: y + Math.floor(h / 2) });
-        for (let yy = y; yy < y + h; yy++) for (let xx = x; xx < x + w; xx++) carve(xx, yy);
-    }
-    // Respaldo: si el azar dejó menos de 3 salas, se agregan salas fijas (esquinas y centro) que no se pisen
-    [[2, 2], [W - 12, H - 10], [Math.floor(W / 2) - 4, Math.floor(H / 2) - 3], [W - 12, 2], [2, H - 10]].forEach(([x, y]) => {
-        if (rooms.length >= 3) return;
-        const w = 8, h = 6;
-        if (rooms.some(r => x < r.x + r.w + 2 && x + w + 2 > r.x && y < r.y + r.h + 2 && y + h + 2 > r.y)) return;
-        rooms.push({ x, y, w, h, cx: x + w / 2, cy: y + h / 2 });
-        for (let yy = y; yy < y + h; yy++) for (let xx = x; xx < x + w; xx++) carve(xx, yy);
-    });
-    // Pasillos: cada sala con la más cercana de las ya unidas (árbol) y un par de pasillos extra (vueltas)
-    const corridor = (a, b) => {
-        const horizontalFirst = Math.random() < 0.5;
-        const hLine = (x1, x2, y) => { for (let x = Math.min(x1, x2); x <= Math.max(x1, x2); x++) { carve(x, y); carve(x, y + 1); } };
-        const vLine = (y1, y2, x) => { for (let y = Math.min(y1, y2); y <= Math.max(y1, y2); y++) { carve(x, y); carve(x + 1, y); } };
-        if (horizontalFirst) { hLine(a.cx, b.cx, a.cy); vLine(a.cy, b.cy, b.cx); } else { vLine(a.cy, b.cy, a.cx); hLine(a.cx, b.cx, b.cy); }
-    };
-    const joined = [rooms[0]];
-    rooms.slice(1).forEach(r => {
-        const near = joined.reduce((best, o) => (Math.hypot(o.cx - r.cx, o.cy - r.cy) < Math.hypot(best.cx - r.cx, best.cy - r.cy) ? o : best));
-        corridor(near, r); joined.push(r);
-    });
-    for (let i = 0; i < 2 && rooms.length > 3; i++) corridor(pickRandom(rooms), pickRandom(rooms));
-
-    const level = makeArena('tower', []);
-    Object.assign(level, { floor, walls, rooms, explored: Array.from({ length: H }, () => new Uint8Array(W)), corpses: [] });
-    const startRoom = rooms[0];
-    level.start = { x: startRoom.cx, y: startRoom.cy };
-    // Sala del guardián: la más lejana caminando desde la entrada
-    const dist = bfsFrom(level, level.start.x, level.start.y);
-    const guardRoom = rooms.slice(1).reduce((best, r) => (dist[r.cy * W + r.cx] > dist[best.cy * W + best.cx] ? r : best), rooms[1]);
-    level.stairs = { x: guardRoom.cx + Math.min(2, Math.floor(guardRoom.w / 2) - 1), y: guardRoom.cy };
-    const t = pickRandom(ROUND_BOSSES);
-    const g = makeCreep(t, guardRoom.cx - 1, guardRoom.cy, TOWER.guardianMult(floor), false, 0);
-    Object.assign(g, { isRoundBoss: true, isGuardian: true, arena: level, level: floor + 1, xp: Math.round(120 * TOWER.xpMult(floor + 1)), gold: 50 * floor });
-    level.creeps.push(g);
-    level.boss = g;
-    level.guardian = g;
-    // Creeps sueltos: un grupo por sala (menos la de entrada y la del guardián)
-    const pool = towerCreepPool(floor);
-    rooms.filter(r => r !== startRoom && r !== guardRoom).forEach(r => {
-        const n = rint(TOWER.packSize[0], TOWER.packSize[1]);
-        for (let i = 0; i < n; i++) {
-            const type = pickRandom(pool);
-            const lvl = floor + (Math.random() < 0.3 ? 1 : 0);
-            for (let k = 0; k < (type.groupSize || 1); k++) {
-                const c = makeCreep(type, rint(r.x, r.x + r.w - 1), rint(r.y, r.y + r.h - 1), TOWER.creepMult(lvl), false, 0);
-                Object.assign(c, { arena: level, level: lvl, xp: Math.round(type.xp * TOWER.xpMult(lvl)) });
-                level.creeps.push(c);
-            }
-        }
-    });
-    level.drops = [];
-    placeChests(level, rooms.filter(r => r !== startRoom && r !== guardRoom));
-    level.creeps.forEach(c => { c.spawnTime = -1e9; }); // sin el oro extra por velocidad de las oleadas (no aplica en la Torre)
-    return level;
-}
+// Cada piso (campo del bioma, pueblo y laberinto) lo arma generateTowerLevel en towerWorld.js.
 
 // Pasos posibles: en cruz (los creeps caminan así, como en el modo normal) y, para los héroes, también en diagonal.
 const STEPS_4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
@@ -291,7 +217,7 @@ function alertPack(level, c) {
 
 // --- VISIÓN ---
 // Distancia de visión del héroe: base + puntos de Visión (ver la ventana de stats).
-function heroSight(hero) { return TOWER.baseSight + ((hero.towerStats && hero.towerStats.vis) || 0) * TOWER.visionPerPoint; }
+function heroSight(hero) { return Math.max(2, TOWER.baseSight + ((hero.towerStats && hero.towerStats.vis) || 0) * TOWER.visionPerPoint + climateSight(hero)); }
 
 // ¿Hay pared entre (x0, y0) y (x1, y1)? Recorre la línea casilla por casilla (sin contar las puntas).
 function lineClear(level, x0, y0, x1, y1) {
@@ -335,6 +261,8 @@ function updateTower(dt) {
     else if (pendingForge(player)) { openForge(pendingForge(player)); return; }
     updateHero(player, level, dt);
     unstickFromWall(player);
+    towerTerrainTick(level, player, dt); // terreno, clima, pueblo y mercader (towerWorld.js)
+    const safe = heroInTown(player);     // en el pueblo los creeps no te persiguen
     if (player.isAlive()) { computeFov(level, player); towerPickup(player); }
     updateProjectiles(level, dt);
     // Creeps: solo se mueven los que te vieron (radio de alerta); te sueltan si te alejás mucho de su lugar
@@ -342,8 +270,8 @@ function updateTower(dt) {
         if (!c.isAlive()) return;
         unstickFromWall(c);
         const d = Math.hypot(c.x - player.x, c.y - player.y);
-        if (!c.aggro && player.isAlive() && d <= TOWER.aggroRadius && canSee(level, c.x, c.y)) { c.aggro = true; alertPack(level, c); } // te tienen que ver
-        if (c.aggro && (!player.isAlive() || Math.hypot(player.x - c.spawnX, player.y - c.spawnY) > TOWER.leash)) {
+        if (!c.aggro && !safe && player.isAlive() && d <= TOWER.aggroRadius && canSee(level, c.x, c.y)) { c.aggro = true; alertPack(level, c); } // te tienen que ver
+        if (c.aggro && (!player.isAlive() || safe || Math.hypot(player.x - c.spawnX, player.y - c.spawnY) > TOWER.leash)) {
             c.aggro = false;
         }
         if (c.aggro) { if (!(player.isAlive() && towerCreepBrain(c, dt))) updateCreep(c, dt); }
@@ -435,14 +363,14 @@ function towerHeroDeath(hero, killer) {
         if (n > 0) { changeTowerStat(hero, k, -n); lost.push(`${n} de ${TOWER_STATS[k].name}`); }
     });
     sfx('lose');
-    log(`💀 ${killer ? killer.label + ' te mató' : 'Moriste'} en el nivel ${level.floor}. ${lost.length ? 'Perdés ' + lost.join(', ') + '. ' : ''}Renacés en el círculo de piedra de la base en ${TOWER.respawnDelay}s.`);
+    log(`💀 ${killer ? killer.label + ' te mató' : 'Moriste'} en el piso ${level.floor}. ${lost.length ? 'Perdés ' + lost.join(', ') + '. ' : ''}Renacés en el círculo de piedra de la base en ${TOWER.respawnDelay}s.`);
 }
 
 function towerRespawn() {
     player.respawnAt = 0;
     player.hp = player.maxHp; player.mana = player.maxMana;
     enterTowerFloor(1, 'respawn');
-    log('🪨 Renacés en el círculo de piedra. Los niveles siguen como los dejaste: hay que subir de nuevo.');
+    log('🪨 Renacés en el círculo de piedra. Los pisos siguen como los dejaste: hay que subir de nuevo.');
 }
 
 function towerVictory() {
@@ -456,17 +384,18 @@ function towerVictory() {
 function towerStatusText() {
     if (!player.isAlive() && player.respawnAt) return `☠ Renacés en ${Math.max(0, player.respawnAt - gameClock).toFixed(1)}s`;
     const level = player.arena;
-    return `🗼 Nivel ${level.floor}/${TOWER.floors} · ${level.stairsOpen ? 'escalera abierta' : 'guardián vivo'}`;
+    return `${BIOMES[level.biome].icon} Piso ${level.floor}/${TOWER.floors} · ${level.stairsOpen ? 'escalera abierta' : 'guardián vivo'}`;
 }
 function towerInfoHtml() {
     const level = player.arena;
     const alive = level.creeps.filter(c => c.isAlive() && !c.isGuardian).length;
-    return `<h3>🗼 Tower Chaos · nivel ${level.floor} de ${TOWER.floors}</h3>` +
-        `<p class="subtitle">Explorá, juntá equipo (cada pieza trae la habilidad de un héroe) y vencé al <b>guardián</b> (${level.guardian.label}) para abrir la escalera.</p>` +
+    return `<h3>🗼 Tower Chaos · piso ${level.floor} de ${TOWER.floors}</h3>` +
+        `<p class="subtitle">${biomeSummary(level)}</p>` +
+        `<p class="subtitle">Cruzá el campo, descansá en el <b>pueblo</b> (zona segura, mercader con B) y entrá al <b>laberinto</b>: el guardián (${level.guardian.label}) cuida la escalera.</p>` +
         (player.statPoints ? `<button class="primary-btn" onclick="toggleStatsWindow(true)">📊 Repartir ${player.statPoints} punto${player.statPoints === 1 ? '' : 's'} de stats (C)</button>` : `<button class="secondary-btn" onclick="toggleStatsWindow(true)">📊 Stats del héroe (C)</button>`) +
         `<button class="secondary-btn" onclick="toggleInventory(true)">🎒 Equipo e inventario (I) · ${player.bag.length} en la bolsa</button>` +
-        `<p class="subtitle">Creeps en este nivel: ${alive}. Muertes en la run: ${towerRun.deaths}. Al morir renacés en la base y perdés la mitad de los atributos ganados.</p>` +
-        `<p class="subtitle" style="color:#888">En construcción: ítems, cofres, biomas y más (ver docs/ROGUELIKE.md).</p>`;
+        `<p class="subtitle">Creeps en este piso: ${alive}. Muertes en la run: ${towerRun.deaths}. Al morir renacés en la base y perdés la mitad de los atributos ganados.</p>` +
+        '';
 }
 
 // Baldosas del nivel (se dibujan una vez y se reutilizan): 4 pisos de piedra, pared de frente y pared de arriba.
@@ -494,7 +423,9 @@ function drawTowerTiles(level) {
     const x0 = Math.floor(camera.x), y0 = Math.floor(camera.y);
     for (let y = y0; y <= Math.min(ROWS - 1, y0 + VIEW_ROWS); y++) for (let x = x0; x <= Math.min(COLS - 1, x0 + VIEW_COLS); x++) {
         if (!level.explored[y][x]) continue;
-        const img = level.walls[y][x] ? (y + 1 < ROWS && !level.walls[y + 1][x] ? t.face : t.top) : t.floors[((x * 73856093) ^ (y * 19349663)) & 3];
+        const w = level.walls[y][x], labTile = !level.zone || (level.zone[y * COLS + x] === ZONE.lab && (!w || w === WALL.stone));
+        const img = !labTile ? biomeTileFor(level, x, y) // campo y pueblo del bioma (towerWorld.js)
+            : w ? (y + 1 < ROWS && !level.walls[y + 1][x] ? t.face : t.top) : t.floors[((x * 73856093) ^ (y * 19349663)) & 3];
         ctx.drawImage(img, x * TILE, y * TILE);
     }
     // Círculo de piedra en la entrada del nivel 1
@@ -514,7 +445,7 @@ function markMinimap(level, x, y) {
     if (typeof document === 'undefined') return;
     if (!level.minimap) { level.minimap = document.createElement('canvas'); level.minimap.width = COLS * 2; level.minimap.height = ROWS * 2; }
     const g = level.minimap.getContext('2d');
-    g.fillStyle = level.walls[y][x] ? '#5e5444' : '#e9dcc0';
+    g.fillStyle = towerMiniColor(level, x, y);
     g.fillRect(x * 2, y * 2, 2, 2);
 }
 
@@ -532,6 +463,7 @@ function renderTower(level, dt) {
     ctx.translate(-camera.x * TILE, -camera.y * TILE);
     drawTowerTiles(level);
     drawTowerLoot(level);
+    drawTowerMerchant(level);
     // Escalera (cerrada hasta vencer al guardián)
     const st = level.stairs, sx = st.x * TILE, sy = st.y * TILE;
     if (level.explored[st.y][st.x]) {
@@ -583,11 +515,13 @@ function renderTower(level, dt) {
 
 // Minimapa (arriba a la derecha): lo descubierto, la escalera, el guardián si lo viste y vos.
 function renderTowerMinimap(level) {
-    const s = 1.7, w = COLS * s, h = ROWS * s, ox = MAP_W - w - 8, oy = 8;
+    const s = Math.min(1.7, 150 / COLS), w = COLS * s, h = ROWS * s, ox = MAP_W - w - 8, oy = 8;
     ctx.fillStyle = 'rgba(43,33,24,0.85)'; ctx.fillRect(ox - 3, oy - 3, w + 6, h + 6);
     ctx.strokeStyle = INK.paperDark; ctx.lineWidth = 1; ctx.strokeRect(ox - 3, oy - 3, w + 6, h + 6);
     if (level.minimap) ctx.drawImage(level.minimap, ox, oy, w, h);
     const dot = (x, y, color, r = 2.2) => { ctx.fillStyle = color; ctx.beginPath(); ctx.arc(ox + (x + 0.5) * s, oy + (y + 0.5) * s, r, 0, Math.PI * 2); ctx.fill(); };
+    const tw = level.town;
+    if (tw && level.explored[tw.merchant.y][tw.merchant.x]) { ctx.strokeStyle = '#6b2a1f'; ctx.lineWidth = 1.2; ctx.strokeRect(ox + tw.x * s, oy + tw.y * s, tw.w * s, tw.h * s); }
     if (level.explored[level.stairs.y][level.stairs.x]) dot(level.stairs.x, level.stairs.y, level.stairsOpen ? '#2dc653' : '#adb5bd', 2.6);
     const g = level.guardian;
     if (g && g.isAlive() && level.explored[g.y][g.x]) dot(g.x, g.y, '#ff0055', 2.6);

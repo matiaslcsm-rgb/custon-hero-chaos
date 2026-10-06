@@ -22,6 +22,7 @@ function bodySize(u) {
 // ¿Se puede pisar (x, y)? Dentro del mundo y sin pared (solo la Torre tiene paredes).
 function walkable(arena, x, y) {
     if (x < 0 || y < 0 || x >= COLS || y >= ROWS) return false;
+    if (arena && arena.deep && arena.deep[y * COLS + x]) return false; // agua o lava profunda (Tower Chaos)
     return !(arena && arena.walls && arena.walls[y][x]);
 }
 

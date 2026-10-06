@@ -1,7 +1,7 @@
 // Punto de entrada: conecta los botones y arranca el bucle principal.
 
 // Versión visible en el menú: si no coincide con la última subida, el navegador muestra una copia vieja (Ctrl+F5).
-const GAME_VERSION = '2026-10-03 · íconos de game-icons';
+const GAME_VERSION = '2026-10-05 · biomas al estilo Aincrad';
 document.getElementById('game-version').textContent = `Versión ${GAME_VERSION}`;
 
 document.getElementById('start-wave-btn').onclick = startWave;
@@ -16,6 +16,7 @@ document.querySelectorAll('.back-btn').forEach(btn => { btn.onclick = closeGloss
 document.getElementById('shop-close').onclick = closeShop;
 document.getElementById('stats-close').onclick = () => toggleStatsWindow(false);
 document.getElementById('inv-close').onclick = () => toggleInventory(false);
+document.getElementById('tshop-close').onclick = () => toggleTowerShop(false);
 document.getElementById('map-toggle').onclick = toggleBigMap;
 document.getElementById('shop-container').onclick = e => { if (e.target.id === 'shop-container') closeShop(); };
 window.addEventListener('resize', applyMapSize);
@@ -146,11 +147,35 @@ renderCreepCodex();
 renderItemCodex();
 requestAnimationFrame(loop);
 
+// Vista de los pisos para revisar la generación (index.html?demo=biomes): un mapa chico de cada bioma.
+if (location.search.includes('demo=biomes')) setTimeout(() => {
+    startTowerRun();
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#2b2118;display:flex;flex-wrap:wrap;gap:8px;padding:8px;align-content:flex-start';
+    document.body.appendChild(wrap);
+    [1, 3, 5, 7, 9].forEach(f => {
+        const L = towerLevel(f), c = document.createElement('canvas'), g = c.getContext('2d');
+        c.width = COLS * 2.5; c.height = ROWS * 2.5;
+        for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) { g.fillStyle = towerMiniColor(L, x, y); g.fillRect(x * 2.5, y * 2.5, 2.5, 2.5); }
+        L.creeps.forEach(cr => { g.fillStyle = cr.isGuardian ? '#d00' : '#1d1712'; g.fillRect(cr.x * 2.5, cr.y * 2.5, cr.isGuardian ? 6 : 2.5, cr.isGuardian ? 6 : 2.5); });
+        (L.chests || []).forEach(ch => { g.fillStyle = '#e0a800'; g.fillRect(ch.x * 2.5 - 2, ch.y * 2.5 - 2, 6, 6); });
+        g.fillStyle = '#0a0'; g.fillRect(L.start.x * 2.5 - 3, L.start.y * 2.5 - 3, 7, 7);
+        g.font = 'bold 14px Georgia'; g.fillStyle = '#1d1712'; g.fillText(`Piso ${f}: ${BIOMES[L.biome].name}`, 10, 18);
+        wrap.appendChild(c);
+    });
+}, 300);
+
 // Demo para capturas de pantalla (index.html?demo=tower): arranca Tower Chaos con equipo y creeps a la vista.
 if (location.search.includes('demo=tower')) setTimeout(() => {
     startTowerRun();
     const cat = towerCatalog();
     equipItem(player, makeTowerItem(1, cat.find(e => e.heroKey === 'AXE' && e.slot === 'weapon'), 'rare'));
+    // &floor=N: otro piso (bioma); &at=town|lab: parado en el pueblo o en la puerta del laberinto
+    const q = new URLSearchParams(location.search);
+    if (q.get('floor')) enterTowerFloor(+q.get('floor'), 'demo');
+    if (q.get('at') === 'town') { player.x = player.arena.town.merchant.x + 2; player.y = player.arena.town.merchant.y + 2; }
+    if (q.get('at') === 'lab') { player.x = player.arena.gate.x - 2; player.y = player.arena.gate.y; }
+    if (q.get('at') === 'field') { const L = player.arena; const h = L.creeps.find(c => !c.isGuardian && L.zone[c.y * COLS + c.x] === ZONE.field); player.x = h.x - 3; player.y = h.y; if (!walkable(L, player.x, player.y)) { player.x = h.x; player.y = h.y + 1; } }
     const level = player.arena;
     ['GRUNT', 'ARCHER', 'SHAMAN', 'BRUTE'].forEach((k, i) => {
         const x = player.x + 2 + i, y = player.y + (i % 2 ? 1 : -1);

@@ -78,8 +78,8 @@
                         </button>
                         <button class="mode-card tower" data-mode="tower">
                             <span class="mode-icon">🗼</span>
-                            <span class="mode-text"><b>Tower Chaos</b> <em>en construcción</em>
-                                <span>Roguelike: subí una torre de 10 niveles al azar. Arrancás solo con tu innato; si morís, volvés a la base.</span></span>
+                            <span class="mode-text"><b>Tower Chaos</b> <em>roguelike</em>
+                                <span>Subí 10 pisos al estilo Aincrad: cada uno es un bioma con su pueblo y su laberinto. Tu clase la arma el equipo; si morís, volvés a la base.</span></span>
                         </button>
                         <button id="menu-tutorial-btn" class="secondary-btn">📖 Tutorial (cómo se juega)</button>
                         <div class="menu-glossary">
@@ -153,6 +153,22 @@
             <div class="modal-head"><h3 id="forge-title">⚒ Forjar</h3></div>
             <p class="subtitle" id="forge-sub"></p>
             <div id="forge-options" class="draft-grid"></div>
+        </div>
+    </div>
+
+    <!-- Tower Chaos: mercader del pueblo (B en el pueblo) -->
+    <div id="tshop-container" class="modal" style="display: none;">
+        <div class="modal-box wide">
+            <div class="modal-head">
+                <h3>🛒 Mercader del pueblo</h3>
+                <span class="modal-gold" id="tshop-gold"></span>
+                <button class="modal-close" id="tshop-close" title="Cerrar (B o Esc)">✕</button>
+            </div>
+            <div class="tshop-layout">
+                <div><h4>A la venta</h4><div id="tshop-stock"></div></div>
+                <div><h4>Tu bolsa (vender)</h4><div id="tshop-bag"></div></div>
+                <div id="tshop-tooltip"></div>
+            </div>
         </div>
     </div>
 
@@ -331,6 +347,7 @@
     <script src="js/tower.js"></script>
     <script src="js/towerItems.js"></script>
     <script src="js/towerUI.js"></script>
+    <script src="js/towerWorld.js"></script>
     <script src="js/inkart.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/mouse.js"></script>

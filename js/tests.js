@@ -1105,6 +1105,75 @@ function newTower(heroKey = 'AXE', { starter = false } = {}) {
     return player.arena;
 }
 
+test('Torre: cada piso es un bioma con campo, pueblo y laberinto, todo conectado', () => {
+    newTower();
+    [1, 3, 5, 7, 9].forEach(f => {
+        const L = towerLevel(f), at = (x, y) => y * COLS + x;
+        checkEq(L.biome, biomeFor(f), `bioma del piso ${f}`);
+        const dist = bfsFrom(L, L.start.x, L.start.y);
+        check(dist[at(L.town.merchant.x, L.town.merchant.y)] >= 0, `se llega al mercader (piso ${f})`);
+        check(dist[at(L.stairs.x, L.stairs.y)] >= 0, `se llega a la escalera (piso ${f})`);
+        checkEq(L.zone[at(L.guardian.x, L.guardian.y)], ZONE.lab, 'el guardián está en el laberinto');
+        check(L.creeps.every(c => L.zone[at(c.x, c.y)] !== ZONE.town), 'no hay creeps en el pueblo');
+        check(L.creeps.some(c => L.zone[at(c.x, c.y)] === ZONE.field) && L.creeps.some(c => !c.isGuardian && L.zone[at(c.x, c.y)] === ZONE.lab), 'creeps en el campo y en el laberinto');
+        check(L.creeps.filter(c => !c.isGuardian).every(c => c.type.biome === L.biome), 'los creeps son del bioma');
+        for (let i = 0; i < COLS * ROWS; i++) if (L.deep[i]) { check(!walkable(L, i % COLS, Math.floor(i / COLS)), 'lo profundo no se pisa'); break; }
+    });
+    check(towerLevel(3).deep.some(v => v) && towerLevel(9).deep.some(v => v), 'la ciénaga tiene lagos y el volcán, lava');
+}, { random: true });
+
+test('Torre: terreno y clima del bioma, y el pueblo es zona segura', () => {
+    newTower();
+    enterTowerFloor(3); // Ciénaga: fango venenoso y niebla
+    const L = player.arena, at = (x, y) => y * COLS + x;
+    let cell = null;
+    for (let i = 0; i < COLS * ROWS && !cell; i++) { const x = i % COLS, y = Math.floor(i / COLS); if (L.ground[i] === GROUND.hazard && L.zone[i] === ZONE.field && walkable(L, x, y)) cell = { x, y }; }
+    player.x = cell.x; player.y = cell.y;
+    const hp = player.hp;
+    for (let i = 0; i < 70; i++) { gameClock += 1 / 60; towerTerrainTick(L, player, 1 / 60); }
+    checkNear(sumMod(player, 'moveSpeedPct'), -0.25, 'el fango frena');
+    check(player.hp < hp, 'el fango envenena');
+    checkEq(climateSight(player), -1.5, 'la niebla quita visión en el campo');
+    const c = L.creeps.find(o => !o.isGuardian);
+    c.aggro = true;
+    player.x = L.town.merchant.x + 3; player.y = L.town.merchant.y + 3;
+    updateTower(1 / 60);
+    for (let i = 0; i < 40; i++) { gameClock += 1 / 60; towerTerrainTick(L, player, 1 / 60); }
+    toggleTowerShop(false);
+    check(!c.aggro, 'en el pueblo los creeps te sueltan');
+    check(getEffect(player, 'TOWN_REST'), 'descansás en el pueblo');
+    checkEq(climateSight(player), 0, 'sin niebla en el pueblo');
+}, { random: true });
+
+test('Torre: el mercader del pueblo vende y compra piezas', () => {
+    newTower();
+    const L = player.arena, stock = towerShopStock(L);
+    checkEq(stock.length, 6, '6 piezas a la venta');
+    check(stock.filter(i => i.quality === 'rare').length === 1, 'una rara');
+    const item = stock[0], price = towerItemPrice(item);
+    player.gold = 50;
+    check(!buyTowerItem(player, stock.find(i => i.quality === 'rare')), 'sin oro no se compra');
+    player.gold = 10000;
+    check(buyTowerItem(player, item), 'se compra');
+    checkEq(player.gold, 10000 - price, 'cobra el precio');
+    check(player.bag.some(b => b.item === item) && !L.town.stock.includes(item), 'pasa a la bolsa');
+    sellTowerItem(player, item);
+    checkEq(player.gold, 10000 - price + towerSellPrice(item), 'vender devuelve una parte');
+    check(!player.bag.some(b => b.item === item), 'sale de la bolsa');
+}, { random: true });
+
+test('Torre: los creeps de bioma tienen su rasgo (veneno, quemadura, frío)', () => {
+    newTower();
+    const toad = biomeCreepTypes('swamp').find(t => t.trait === 'poison');
+    const c = makeCreep(toad, player.x + 1, player.y, 1, false, 0); c.arena = player.arena;
+    toad.onAttack(c, player, { dealt: 5 });
+    check(getEffect(player, 'POISON'), 'envenena');
+    const yeti = biomeCreepTypes('snow').find(t => t.trait === 'chill');
+    yeti.onAttack(makeCreep(yeti, 0, 0, 1, false, 0), player, { dealt: 5 });
+    check(sumMod(player, 'moveSpeedPct') < 0, 'el frío frena');
+    check(towerCreepPool(1).every(t => !t.from) && towerCreepPool(2).some(t => t.from === 1), 'el segundo piso del bioma suma creeps');
+}, { random: true });
+
 test('Torre: el nivel se genera conectado, con guardián, escalera y creeps con nivel', () => {
     const level = newTower();
     checkEq(gameState, 'TOWER', 'fase de la Torre');

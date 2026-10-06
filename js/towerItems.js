@@ -366,7 +366,7 @@ ADVENTURER.innate.hooks = {
 function pendingForge(hero) { return EQUIP_SLOTS.map(s => hero.gear[s]).concat(hero.bag.map(b => b.item)).find(i => i && i.pendingChoices > 0) || null; }
 
 // --- BOTÍN: cofres y lo que sueltan los creeps ---
-const LOOT = { creepChance: 0.07, chestsPerFloor: 3, guardianDrops: 2 };
+const LOOT = { creepChance: 0.07, chestsPerFloor: 4, guardianDrops: 2 };
 function dropOnFloor(hero, item, x = hero.x, y = hero.y) {
     const level = hero.arena;
     if (!level || !level.drops) return;

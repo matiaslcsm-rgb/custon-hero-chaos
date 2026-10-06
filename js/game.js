@@ -35,7 +35,7 @@ window.addEventListener('keydown', e => {
     const k = e.key.toLowerCase();
     keys[k] = true;
     if (k === 'p') { setAutopilot(!autopilot); return; }
-    if (k === 'b') { toggleShop(); return; }
+    if (k === 'b') { if (gameMode === 'tower') towerShopKey(); else toggleShop(); return; }
     if (k === 'm') { toggleBigMap(); return; }
     if (k === 'h') { setAutoCast(!autoCast); return; }
     if (k === 'g') { setSprites(!spritesOn); return; }

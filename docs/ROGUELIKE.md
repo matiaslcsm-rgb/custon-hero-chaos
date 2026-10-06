@@ -1,6 +1,6 @@
 # Modo roguelike: Tower Chaos
 
-Documento de diseño del modo roguelike. Estado: **fase 1 hecha** (2026-10-03; en el menú se elige el modo: **Custom Hero Chaos** o **Tower Chaos**; código en
+Documento de diseño del modo roguelike. Estado: **fases 1 a 4 hechas** (2026-10-03; en el menú se elige el modo: **Custom Hero Chaos** o **Tower Chaos**; código en
 `js/tower.js`). Las demás fases están por hacer.
 Las decisiones marcadas ❓ están abiertas.
 
@@ -172,7 +172,34 @@ Al morir no se pierde todo: **tu cadáver y tus cosas quedan en el mapa** y pued
      0-5 muertes. Se corrigió que los saltos (Parpadeo, Salto Sangriento, Paso del Vacío…) metieran al héroe en paredes.
    - Pendiente de balance: el héroe llega al nivel 30 (tope) hacia el piso 8.
 3. **Ítems vivos**: suben de nivel con el uso, mejoras para elegir y los primeros únicos (Mjölnir y 4-5 más).
-4. **Biomas y varios niveles**: perjuicios, creeps por bioma, dificultad por nivel.
+4. **Biomas y varios niveles**: perjuicios, creeps por bioma, dificultad por nivel. **Hecho (2026-10-05)**, al estilo
+   Aincrad (Sword Art Online), pedido del usuario. Código: `js/towerWorld.js`. Vista de los 5 biomas:
+   `index.html?demo=biomes`; captura en juego: `index.html?demo=tower&floor=N&at=field|town|lab`.
+   - **Pisos de 160×110** (antes 90×60; medido: generar un piso tarda ~3 ms y una pelea ~0,3 ms por cuadro). Cada piso:
+     **campo abierto** del bioma (bosquecitos/roquedales con autómata celular, manchas de terreno, lagos o lava),
+     **pueblo** con empalizada, 4 portones, fuente y **mercader**, y en el otro extremo la **torre-laberinto** (bloque de
+     piedra de 54×62 con 16 salas y pasillos) con el guardián y la escalera. Un camino une la entrada, el pueblo y la puerta
+     del laberinto; lo que no se alcanza se tapa.
+   - **5 biomas, 2 pisos cada uno** (el segundo suma 2 creeps más difíciles). Terreno: efecto mientras lo pisás. Clima:
+     solo en el campo.
+
+     | Pisos | Bioma | Terreno | Clima | Creeps (rasgo) |
+     |---|---|---|---|---|
+     | 1-2 | Bosque de Musgo | Maleza: −15% velocidad | — | Lobo Gris, Jabalí, Arquero Silvano, Bandido; Druida, Hada Sanadora |
+     | 3-4 | Ciénaga Turbia (lagos) | Fango: −25% y veneno 1,5%/s | Niebla: −1,5 visión | Sapo Venenoso (veneno), Mosquitos, Bruja del Pantano (veneno), Fuego Fatuo; Hombre de Lodo, Tamborilero Lagarto |
+     | 5-6 | Desierto Rojo | Arena movediza: −40% | Calor: −50% regen. de maná | Escorpión (veneno), Nómada Ballestero, Escarabajo Explosivo, Ladrón de Arena; Momia, Hechicero de Arena |
+     | 7-8 | Picos Nevados | Nieve profunda: −30% | Frío: −15% vel. de ataque | Lobo Blanco, Yeti, Espíritu Helado (los 3 congelan), Escarchador; Gólem de Hielo, Ancla Glaciar |
+     | 9-10 | Volcán de Ceniza (lava) | Roca ardiente: quema 3%/s | Aire sofocante: +10% daño recibido | Diablillo, Bruto de Magma, Piromante, Salamandra (las 3 queman); Acorazado de Obsidiana, Tamborilero de Guerra |
+
+     Los creeps de bioma son variantes de los 18 tipos de siempre (misma mecánica e IA) con otro nombre, color y un rasgo.
+   - **Pueblo = zona segura**: los creeps no te persiguen adentro (te sueltan al entrar) y recuperás 4% de vida y maná por
+     segundo. **Mercader** (B en el pueblo, o se abre al acercarte): 6 piezas del piso (3 normales, 2 mágicas, 1 rara;
+     precio 50/140/320 × (1 + 0,35 por piso) + 15 por nivel) y compra lo de tu bolsa al 30%. Sin portales: morir sigue
+     mandándote al piso 1 (decisión del usuario).
+   - **Creeps**: 26 grupos en el campo (experiencia ×0,6, porque son muchos) + uno por sala del laberinto (un nivel más).
+     Cofres: 2 en claros del campo y 2 en el laberinto.
+   - **Medido (2 runs con piloto automático, 2026-10-05):** ~6-9 minutos por piso, **0 muertes**, nivel 10 al terminar el
+     piso 1 y **nivel 30 (tope) en el piso 5**. Pendiente: bajar la experiencia y subir la dificultad (decisión abierta).
 5. **Muerte con consecuencias**: cadáver, criatura portadora, reparto y desgaste de ítems.
 6. **Élites y más contenido**: héroes de la IA como élites, más únicos, eventos.
 
