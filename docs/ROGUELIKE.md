@@ -227,6 +227,11 @@ Pedido del usuario: ciclo de día y noche, mapa más grande, cuevas con muchos n
   bioma, **0-2 rasgos** con afinidad por bioma (veneno, fuego, hielo, sangrado, robo de vida, blindado, veloz, espinas,
   furia) y **partes visuales** (cuernos, púas, alas, ojos, manchas). Nombre armado con las partes y concordancia de
   género. Ventana **Bestiario (K)** con las que ya viste. Muestra: `index.html?demo=bestiary`.
+- **Balance medido** (piloto automático, que no entra a las cuevas): con todo junto y los valores anteriores ganaba en
+  101-165 min con 0-6 muertes y llegaba al nivel 30 en el piso 8-9 (más creeps en el mapa grande). Ajustado: experiencia
+  del campo ×0,45 (antes 0,6) y creeps ×(1 + 0,78 por nivel) (antes 0,7). Resultado: ganó 2 de 2 en 140 y 153 min con 9 y
+  4 muertes, ~3 niveles por piso, sin trabones (se sumó una salida genérica: si el piloto queda quieto 15 s sin pelear,
+  camina al azar un momento).
 
 ## 4 bis. Estética "tinta y pergamino" (en curso)
 Pedido del usuario con referencias de ilustraciones de caballeros en tinta (líneas negras gruesas, colores planos
