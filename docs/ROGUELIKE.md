@@ -203,6 +203,31 @@ Al morir no se pierde todo: **tu cadáver y tus cosas quedan en el mapa** y pued
 5. **Muerte con consecuencias**: cadáver, criatura portadora, reparto y desgaste de ítems.
 6. **Élites y más contenido**: héroes de la IA como élites, más únicos, eventos.
 
+## 4 quater. Mundo con profundidad (2026-10-06)
+Pedido del usuario: ciclo de día y noche, mapa más grande, cuevas con muchos niveles de profundidad, lugares altos y
+"un algoritmo que tome muchas variables y las combine en criaturas variadas". Decidido con él (las 4 recomendadas):
+- **Pisos de 220×150** (antes 160×110): laberinto de 64×72 con 22 salas, 46 grupos en el campo, 5 santuarios, 5 cofres.
+- **Lugares altos**: 12 mesetas por piso con borde de acantilado (`WALL.cliff`) y 2 rampas cada una (el camino también
+  corta acantilados y deja rampa). Arriba: +2 de visión, se ve por encima de los acantilados y se pega +20% a los de abajo
+  (de abajo hacia arriba, −20%). Demo: `index.html?demo=tower&floor=5&at=plateau`.
+- **Día y noche** (`DAYNIGHT`): ciclo de 8 min (5 de día, 30 s de atardecer, 2 de noche, 30 s de amanecer). De noche, en
+  el campo: −2,5 de visión, 10 grupos de criaturas nocturnas (un nivel más, +25% de daño) que se van al amanecer si no te
+  vieron, y +50% de experiencia y botín. Luz alrededor del héroe, en el pueblo y en los santuarios; el laberinto tiene
+  antorchas. Demo: `&time=night`.
+- **Cuevas** (`CAVE`): 2 entradas por piso (al pie de rocas o acantilados). Mapa aparte de 90×70 (autómata celular) que
+  baja hasta −2 (pisos 1-3), −3 (4-7) o −4 (8-10). Cada nivel: siempre oscuro (−1,5 de visión), creeps de piso + nivel de
+  profundidad con +12% de stats por nivel, más campeones, +25% de experiencia y +50% de botín por nivel, 2 cofres. En el
+  fondo, el señor de la cueva (campeón grande) cuida un tesoro de 2 piezas raras. La soga sube un nivel. Si morís adentro,
+  tus restos quedan ahí (el objetivo del piso te lleva a la entrada). El piloto automático no entra.
+  Demo: `&at=cave&depth=N`.
+- **Generador de criaturas** (`js/towerBestiary.js`): cada run arma su bestiario por bioma (6 del primer piso + 3
+  difíciles del segundo) combinando **rol** (12: cuerpo a cuerpo, rápido, a distancia, hechicero, bruto, tanque,
+  maldiciones, sanador, aturdidor, fantasma, enjambre, bomba; cada uno reutiliza la mecánica e IA de un creep conocido),
+  **cuerpo** (16 figuras de tinta), **tamaño** (chico/normal/grande, cambia stats y escala), **color** de la paleta del
+  bioma, **0-2 rasgos** con afinidad por bioma (veneno, fuego, hielo, sangrado, robo de vida, blindado, veloz, espinas,
+  furia) y **partes visuales** (cuernos, púas, alas, ojos, manchas). Nombre armado con las partes y concordancia de
+  género. Ventana **Bestiario (K)** con las que ya viste. Muestra: `index.html?demo=bestiary`.
+
 ## 4 bis. Estética "tinta y pergamino" (en curso)
 Pedido del usuario con referencias de ilustraciones de caballeros en tinta (líneas negras gruesas, colores planos
 apagados, fondo crema, rayado; no se usan esas imágenes, solo el estilo). Decidido: dirección de arte + personajes

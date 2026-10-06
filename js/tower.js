@@ -25,7 +25,7 @@ const TOWER = {
     goldMult: 0.5,        // oro de los creeps (con el mercader, el oro del modo normal alcanzaba para todo)
     packSize: [2, 4],     // creeps por sala
     // Stats fijos por nivel de creep (vida y daño ×) y experiencia (×)
-    creepMult: level => 1 + 0.7 * (level - 1), // 0,4 → 0,7 en la revisión de diseño (medido: 0,4-0,55 ganaba en ~60 min con 0-2 muertes; 0,8 llegaba a 15-24 muertes)
+    creepMult: level => 1 + 0.78 * (level - 1), // con el mapa de 220×150 y el bestiario generado, 0,7 quedaba fácil (0-6 muertes) // 0,4 → 0,7 en la revisión de diseño (medido: 0,4-0,55 ganaba en ~60 min con 0-2 muertes; 0,8 llegaba a 15-24 muertes)
     xpMult: level => 1 + 0.3 * (level - 1),
     guardianMult: floor => 0.35 * (1 + 0.75 * (floor - 1))
 };
@@ -611,6 +611,11 @@ function towerAutoDir(hero) {
         hero.autoGoal = 'pelea: ' + inRange.label;
         return movesToFight(hero) ? circleStep(hero, inRange) : { dx: 0, dy: 0 };
     }
+    // Sin pelea y sin moverse hace 15 s: camina un poco al azar (salida genérica para casos raros de trabón)
+    const posKey = hero.x + ',' + hero.y;
+    if (hero.autoPos !== posKey) { hero.autoPos = posKey; hero.autoPosAt = gameClock; }
+    else if (gameClock - hero.autoPosAt > 15) { hero.autoWanderUntil = gameClock + 2; hero.autoWanderDir = pickRandom(STEPS_8); hero.autoPosAt = gameClock; }
+    if (gameClock < (hero.autoWanderUntil || 0)) { hero.autoGoal = 'paseo'; return { dx: hero.autoWanderDir[0], dy: hero.autoWanderDir[1] }; }
     let target = null;
     const corpse = towerRun.corpse;
     if (corpse && corpse.level === level && !corpse.unreachable) { const dir = towerPathDir(hero, corpse); hero.autoGoal = 'restos'; if (dir) return dir; corpse.unreachable = true; }

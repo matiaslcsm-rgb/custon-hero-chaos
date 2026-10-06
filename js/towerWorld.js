@@ -21,7 +21,7 @@ const WORLD = {
     plateaus: 12,         // mesetas por piso (lugares altos con rampas)
     packSpacing: 10,      // distancia mínima entre grupos
     safeFromStart: 18,    // sin creeps a menos de esto (caminando) de la entrada del piso
-    fieldXp: 0.6,         // experiencia de los creeps del campo (hay muchos más que en el laberinto)
+    fieldXp: 0.45,        // experiencia de los creeps del campo (hay muchos más que en el laberinto; 0,6 con el mapa de 160×110)
     townRegenPct: 0.04    // en el pueblo recuperás 4% de vida y maná por segundo
 };
 

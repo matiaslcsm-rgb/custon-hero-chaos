@@ -71,6 +71,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   medida (ritmo de niveles estilo Diablo II, campeones y santuarios, restos que guardan lo perdido, objetivo del piso,
   crónica, Tomo de Talento; ver ROGUELIKE.md §4 ter). Próximo: la criatura que carga tus ítems (resto de la fase 5),
   élites con nombre, eventos en el campo; más adelante, crafteo con materiales.
+- **Mundo con profundidad (2026-10-06):** pisos de 220×150 con mesetas, día y noche, cuevas con niveles de profundidad y
+  bestiario generado por run (ROGUELIKE.md §4 quater).
 - **Motor (decidido 2026-10-06):** seguimos en canvas + JavaScript puro. Pasar a un motor (Phaser para seguir en el
   navegador, Godot para publicar en PC/celular) se decide cuando el contenido de Tower Chaos esté más cerrado.
 - **Balance en curso (2026-09-28):** jefes más suaves desde la ronda 20 + Kaya y Cetro del Eclipse (ver DISEÑO.md §9 bis).
