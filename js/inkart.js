@@ -529,7 +529,7 @@ function inkFigure(plan, look, kind = 'idle', k = 0) {
     return (inkCache[key] = fig);
 }
 
-function inkScale(u) { return (u.isGuardian ? 2.0 : u.isBoss ? 1.45 : 1.1) * TILE / INK_W * 1.3; }
+function inkScale(u) { return (u.isGuardian ? 2.0 : u.isCaveBoss ? 1.7 : u.isBoss ? 1.45 : 1.1) * TILE / INK_W * 1.3; }
 // Altura de la figura por encima del centro de la casilla (para ubicar la barra de vida arriba de la cabeza)
 function inkHalfHeight(u) { return INK_H * inkScale(u) * 0.86 - TILE * 0.45 - 4; }
 

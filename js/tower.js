@@ -71,18 +71,12 @@ function towerLevel(floor) {
 
 // Entra a un nivel (lo genera si es la primera vez). where: 'start' = entrada del nivel (o el círculo de piedra en el 1).
 function enterTowerFloor(floor, where = 'start') {
+    COLS = TOWER.cols; ROWS = TOWER.rows; // (al volver de una cueva el mundo era más chico)
     const level = towerLevel(floor);
     towerRun.floor = floor;
     towerRun.stats.bestFloor = Math.max(towerRun.stats.bestFloor, floor);
-    arenas = [level];
-    level.heroes = [player];
-    player.arena = level;
-    player.x = level.start.x; player.y = level.start.y;
-    player.moveTarget = null; player.focus = null;
-    level.creeps.forEach(c => { c.aggro = false; });
-    player.towerZone = undefined;
+    enterTowerLevel(level, level.start); // towerWorld.js
     level.titleAt = gameClock;
-    level.fovKey = null; computeFov(level, player);
     const B = BIOMES[level.biome];
     setStateText(`TOWER CHAOS · PISO ${floor} DE ${TOWER.floors} · ${B.name.toUpperCase()}`);
     sfx('wave');
@@ -283,6 +277,8 @@ function updateTower(dt) {
         if (c.aggro) { if (!(player.isAlive() && towerCreepBrain(c, dt))) updateCreep(c, dt); }
         else if (c.x !== c.spawnX || c.y !== c.spawnY) stepCreepToward(c, c.spawnX, c.spawnY, dt); // vuelve a su lugar
     });
+    if (towerPortals(level, player)) return; // entradas, bajadas y salidas de cueva (towerWorld.js)
+    if (!level.stairs) return;               // en una cueva no hay escalera de la torre
     // El guardián muerto abre la escalera; pisarla te sube
     const g = level.guardian;
     if (g && !g.isAlive() && !level.stairsOpen) {
@@ -370,7 +366,7 @@ function towerHeroDeath(hero, killer) {
     });
     const old = towerRun.corpse;
     if (old && !old.recovered) { old.recovered = true; old.faded = true; }
-    const corpse = { x: hero.x, y: hero.y, killer: killer ? killer.label : null, at: gameClock, floor: level.floor, lost, points: Object.values(lost).reduce((a, b) => a + b, 0) };
+    const corpse = { x: hero.x, y: hero.y, killer: killer ? killer.label : null, at: gameClock, floor: level.floor, level, lost, points: Object.values(lost).reduce((a, b) => a + b, 0) };
     level.corpses.push(corpse);
     towerRun.corpse = corpse.points ? corpse : null;
     sfx('lose');
@@ -381,7 +377,7 @@ function towerHeroDeath(hero, killer) {
 // Pisar tus restos (los de la última muerte) te devuelve los puntos de stats que perdiste.
 function recoverCorpse(level, hero) {
     const c = towerRun.corpse;
-    if (!c || c.recovered || c.floor !== level.floor || Math.max(Math.abs(hero.x - c.x), Math.abs(hero.y - c.y)) > 1) return;
+    if (!c || c.recovered || c.level !== level || Math.max(Math.abs(hero.x - c.x), Math.abs(hero.y - c.y)) > 1) return;
     c.recovered = true; towerRun.corpse = null;
     Object.entries(c.lost).forEach(([k, n]) => changeTowerStat(hero, k, n));
     if (fxArena(hero)) { fxRing(hero, '#c9a227', 2, 0.8); fxText(hero, `+${c.points} puntos recuperados`, '#c9a227', 13, 1.6); }
@@ -407,11 +403,16 @@ function towerVictory() {
 function towerStatusText() {
     if (!player.isAlive() && player.respawnAt) return `☠ Renacés en ${Math.max(0, player.respawnAt - gameClock).toFixed(1)}s`;
     const level = player.arena;
+    if (level.isCave) return `🕳️ Piso ${level.floor} · cueva −${level.depth}/−${level.cave.max} · ${towerObjective(level).text}`;
     return `${BIOMES[level.biome].icon} Piso ${level.floor}/${TOWER.floors} · ${towerDayLabel()} · ${towerObjective(level).text}`;
 }
 function towerInfoHtml() {
     const level = player.arena;
     const alive = level.creeps.filter(c => c.isAlive() && !c.isGuardian).length;
+    if (level.isCave) return `<h3>🕳️ Cueva · nivel −${level.depth} de −${level.cave.max}</h3>` +
+        `<p class="subtitle">Bajo el piso ${level.floor} (${BIOMES[level.biome].name}). Está oscuro: ves menos. Cada nivel más hondo tiene creeps más fuertes, más campeones y mejor botín; en el fondo, el señor de la cueva cuida un tesoro. La soga te sube.</p>` +
+        `<button class="secondary-btn" onclick="toggleStatsWindow(true)">📊 Stats del héroe (C)</button><button class="secondary-btn" onclick="toggleInventory(true)">🎒 Equipo e inventario (I)</button>` +
+        `<p class="subtitle">Creeps en este nivel: ${alive}.</p>` + towerChronicleHtml();
     return `<h3>🗼 Tower Chaos · piso ${level.floor} de ${TOWER.floors}</h3>` +
         `<p class="subtitle">${biomeSummary(level)}</p>` +
         (towerIsNight() ? `<p class="subtitle">🌙 <b>Es de noche</b>: en el campo ves menos y andan criaturas nocturnas; todo da +50% de experiencia y botín.</p>` : '') +
@@ -425,7 +426,7 @@ function towerInfoHtml() {
 function towerChronicleHtml() {
     const s = towerRun.stats, min = Math.floor((gameClock - towerRun.startedAt) / 60);
     return `<p class="subtitle tower-chronicle">📜 <b>Crónica</b> · ${min} min · mejor piso ${s.bestFloor} · ${towerRun.deaths} muerte${towerRun.deaths === 1 ? '' : 's'} · ` +
-        `${s.kills} bajas (${s.champions} campeones, ${s.guardians} guardianes) · ${s.shrines} santuarios · ${s.gold}g ganados</p>`;
+        `${s.kills} bajas (${s.champions} campeones, ${s.guardians} guardianes) · ${s.shrines} santuarios${s.deepest ? ` · cueva más honda −${s.deepest}` : ''} · ${s.gold}g ganados</p>`;
 }
 
 // Baldosas del nivel (se dibujan una vez y se reutilizan): 4 pisos de piedra, pared de frente y pared de arriba.
@@ -454,7 +455,7 @@ function drawTowerTiles(level) {
     for (let y = y0; y <= Math.min(ROWS - 1, y0 + VIEW_ROWS); y++) for (let x = x0; x <= Math.min(COLS - 1, x0 + VIEW_COLS); x++) {
         if (!level.explored[y][x]) continue;
         const w = level.walls[y][x], labTile = !level.zone || (level.zone[y * COLS + x] === ZONE.lab && (!w || w === WALL.stone));
-        const img = !labTile ? biomeTileFor(level, x, y) // campo y pueblo del bioma (towerWorld.js)
+        const img = level.isCave ? caveTileFor(level, x, y) : !labTile ? biomeTileFor(level, x, y) // cueva, o campo y pueblo del bioma (towerWorld.js)
             : w ? (y + 1 < ROWS && !level.walls[y + 1][x] ? t.face : t.top) : t.floors[((x * 73856093) ^ (y * 19349663)) & 3];
         ctx.drawImage(img, x * TILE, y * TILE);
         if (level.height) { // relieve: arriba más claro; al pie del acantilado, sombra
@@ -464,7 +465,7 @@ function drawTowerTiles(level) {
         }
     }
     // Círculo de piedra en la entrada del nivel 1
-    if (level.floor === 1 && level.explored[level.start.y][level.start.x]) {
+    if (level.floor === 1 && !level.isCave && level.explored[level.start.y][level.start.x]) {
         const cx = level.start.x * TILE + TILE / 2, cy = level.start.y * TILE + TILE / 2;
         for (let i = 0; i < 8; i++) {
             const a = i / 8 * Math.PI * 2, sx = cx + Math.cos(a) * TILE * 1.6, sy = cy + Math.sin(a) * TILE * 1.6;
@@ -501,8 +502,9 @@ function renderTower(level, dt) {
     drawTowerMerchant(level);
     drawTowerShrines(level);
     // Escalera (cerrada hasta vencer al guardián)
-    const st = level.stairs, sx = st.x * TILE, sy = st.y * TILE;
-    if (level.explored[st.y][st.x]) {
+    drawCavePortals(level);
+    const st = level.stairs || { x: 0, y: 0 }, sx = st.x * TILE, sy = st.y * TILE;
+    if (level.stairs && level.explored[st.y][st.x]) {
         ctx.fillStyle = level.stairsOpen ? '#2dc653' : '#6c757d';
         for (let i = 0; i < 4; i++) ctx.fillRect(sx + 4 + i * 3, sy + TILE - 8 - i * 7, TILE - 8 - i * 6, 5);
         if (!level.stairsOpen) { ctx.font = '14px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('🔒', sx + TILE / 2, sy + TILE / 2); }
@@ -552,7 +554,7 @@ function renderTower(level, dt) {
     renderTowerMinimap(level);
     drawFloorTitle(level);
     // Barra del guardián cuando lo tenés a la vista
-    const g = level.guardian;
+    const g = level.guardian || level.caveBoss;
     if (g && g.isAlive() && visible(g)) {
         // Barra del jefe en tinta: placa de pergamino, nombre con serifa y vida en rojo sangre
         const bx = 20, bw = MAP_W - 20 - 180; // deja libre el minimapa (arriba a la derecha)
@@ -580,7 +582,10 @@ function renderTowerMinimap(level) {
     const dot = (x, y, color, r = 2.2) => { ctx.fillStyle = color; ctx.beginPath(); ctx.arc(ox + (x + 0.5) * s, oy + (y + 0.5) * s, r, 0, Math.PI * 2); ctx.fill(); };
     const tw = level.town;
     if (tw && level.explored[tw.merchant.y][tw.merchant.x]) { ctx.strokeStyle = '#6b2a1f'; ctx.lineWidth = 1.2; ctx.strokeRect(ox + tw.x * s, oy + tw.y * s, tw.w * s, tw.h * s); }
-    if (level.explored[level.stairs.y][level.stairs.x]) dot(level.stairs.x, level.stairs.y, level.stairsOpen ? '#2dc653' : '#adb5bd', 2.6);
+    (level.caves || []).forEach(c => { if (level.explored[c.y][c.x]) dot(c.x, c.y, '#1d1712', 2.6); });
+    if (level.down && level.explored[level.down.y][level.down.x]) dot(level.down.x, level.down.y, '#1d1712', 2.8);
+    if (level.exitUp) dot(level.exitUp.x, level.exitUp.y, '#c9a227', 2.6);
+    if (level.stairs && level.explored[level.stairs.y][level.stairs.x]) dot(level.stairs.x, level.stairs.y, level.stairsOpen ? '#2dc653' : '#adb5bd', 2.6);
     const g = level.guardian;
     if (g && g.isAlive() && level.explored[g.y][g.x]) dot(g.x, g.y, '#ff0055', 2.6);
     level.corpses.forEach(c => dot(c.x, c.y, c === towerRun.corpse ? '#c9a227' : '#8f8166', c === towerRun.corpse ? 3 : 1.4));
@@ -607,7 +612,7 @@ function towerAutoDir(hero) {
     }
     let target = null;
     const corpse = towerRun.corpse;
-    if (corpse && corpse.floor === level.floor && !corpse.unreachable) { const dir = towerPathDir(hero, corpse); hero.autoGoal = 'restos'; if (dir) return dir; corpse.unreachable = true; }
+    if (corpse && corpse.level === level && !corpse.unreachable) { const dir = towerPathDir(hero, corpse); hero.autoGoal = 'restos'; if (dir) return dir; corpse.unreachable = true; }
     // Botín a la vista (si hay lugar) y cofres sin custodios
     const loot = (level.drops || []).filter(d => !d.unreachable && canSee(level, d.x, d.y) && bagSpotFor(hero, d.item))
         .concat((level.chests || []).filter(ch => !ch.open && !ch.unreachable && level.explored[ch.y][ch.x] && ch.guards.every(g => !g.isAlive())))

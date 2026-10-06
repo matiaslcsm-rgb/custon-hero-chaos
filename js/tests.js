@@ -1243,6 +1243,31 @@ test('Torre: lugares altos (mesetas con rampas, más visión y daño desde arrib
     checkEq(heightDamageMult(c, player), HEIGHT_RULES.dmgDown, 'de abajo hacia arriba, menos');
 }, { random: true });
 
+test('Torre: cuevas con niveles de profundidad, jefe y tesoro en el fondo, y volver a la superficie', () => {
+    newTower();
+    const L = player.arena;
+    checkEq(L.caves.length, CAVE.mouths, 'dos entradas de cueva por piso');
+    const cave = L.caves[0];
+    player.x = cave.x; player.y = cave.y;
+    towerPortals(L, player);
+    const c1 = player.arena;
+    check(c1.isCave && c1.depth === 1 && COLS === CAVE.w, 'entró a la cueva (−1), mundo de 90×70');
+    check(c1.creeps.length > 0 && c1.down, 'con creeps y una bajada');
+    check(heroSight(player) < TOWER.baseSight, 'en la cueva se ve menos');
+    const dist = bfsFrom(c1, c1.exitUp.x, c1.exitUp.y);
+    check(dist[c1.down.y * COLS + c1.down.x] > 0, 'se llega a la bajada');
+    for (let d = 2; d <= cave.max; d++) enterCave(cave, d);
+    const bottom = player.arena;
+    check(!bottom.down && bottom.caveBoss && bottom.chests.some(ch => ch.treasure), 'en el fondo: jefe y tesoro');
+    const avg = lv => { const cs = lv.creeps.filter(c => !c.isCaveBoss && !c.isChestGuard); return cs.reduce((a, c) => a + c.level, 0) / cs.length; };
+    check(avg(bottom) > avg(c1), 'más hondo, creeps de más nivel');
+    player.x = bottom.exitUp.x; player.y = bottom.exitUp.y;
+    towerPortals(bottom, player);
+    checkEq(player.arena.depth, cave.max - 1, 'la soga sube un nivel');
+    for (let d = cave.max - 1; d >= 1; d--) leaveCave(player.arena);
+    check(player.arena === L && COLS === TOWER.cols, 'volvió a la superficie con el mundo grande');
+}, { random: true });
+
 test('Torre: el nivel se genera conectado, con guardián, escalera y creeps con nivel', () => {
     const level = newTower();
     checkEq(gameState, 'TOWER', 'fase de la Torre');

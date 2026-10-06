@@ -10,9 +10,9 @@
 //   level.height[i]    1 = arriba de una meseta (se sube por rampas: level.ramp[i]); su borde es acantilado (WALL.cliff).
 //                      Desde arriba se ve por encima de los acantilados y se pega más fuerte a los de abajo.
 
-const WALL = { stone: 1, obstacle: 2, palisade: 3, edge: 4, fountain: 5, cliff: 6 };
+const WALL = { stone: 1, obstacle: 2, palisade: 3, edge: 4, fountain: 5, cliff: 6, rock: 7 };
 const GROUND = { plain: 0, hazard: 1, road: 2, town: 3, lab: 4 };
-const ZONE = { field: 0, town: 1, lab: 2 };
+const ZONE = { field: 0, town: 1, lab: 2, cave: 3 };
 
 const WORLD = {
     lab: { w: 64, h: 72, rooms: 22 },
@@ -212,7 +212,7 @@ function generateTowerLevel(floor) {
     road({ x: town.x + T.w + 1, y: midY }, gate);
 
     const level = makeArena('tower', []);
-    Object.assign(level, { floor, biome: biomeKey, walls, deep, ground, zone, height, ramp, rooms, lab, town, gate, start,
+    Object.assign(level, { floor, biome: biomeKey, W, H, walls, deep, ground, zone, height, ramp, rooms, lab, town, gate, start,
         explored: Array.from({ length: H }, () => new Uint8Array(W)), corpses: [] });
 
     // 7. Lo que no se alcanza desde la entrada se tapa (sin bolsones aislados)
@@ -272,6 +272,7 @@ function generateTowerLevel(floor) {
         if (ok && clearings.every(c => Math.hypot(c.x - x, c.y - y) > 30)) clearings.push({ x, y, w: 4, h: 3 });
     }
     placeShrines(level, dist);
+    placeCaveMouths(level, dist);
     level.drops = [];
     placeChests(level, clearings.concat(shuffle(rooms.filter(r => r !== first && r !== guardRoom)).slice(0, 5 - clearings.length)));
     level.creeps.forEach(c => { c.spawnTime = -1e9; }); // sin el oro extra por velocidad de las oleadas (no aplica en la Torre)
@@ -617,7 +618,13 @@ function drawTowerShrines(level) {
 // Qué toca hacer ahora y hacia dónde (la flecha en el borde de la pantalla apunta ahí).
 function towerObjective(level) {
     const c = towerRun && towerRun.corpse;
-    if (c && c.floor === level.floor) return { text: `Recuperá tus restos (+${c.points} puntos de stats)`, x: c.x, y: c.y };
+    if (c && c.level === level) return { text: `Recuperá tus restos (+${c.points} puntos de stats)`, x: c.x, y: c.y };
+    if (c && c.level && c.level.isCave && c.level.cave.surface === level) return { text: `Tus restos quedaron en una cueva (−${c.level.depth})`, x: c.level.cave.x, y: c.level.cave.y };
+    if (level.isCave) {
+        if (level.down) return { text: `Bajá más hondo (cueva −${level.depth} de −${level.cave.max}) o volvé por la soga`, x: level.down.x, y: level.down.y };
+        if (level.caveBoss && level.caveBoss.isAlive()) return { text: `Vencé al señor de la cueva y abrí el tesoro`, x: level.caveBoss.x, y: level.caveBoss.y };
+        return { text: 'Volvé a la superficie por la soga', x: level.exitUp.x, y: level.exitUp.y };
+    }
     if (level.stairsOpen) return { text: 'Subí la escalera al piso siguiente', x: level.stairs.x, y: level.stairs.y };
     if (level.enteredLab) return { text: `Vencé al guardián (${level.guardian.label})`, x: level.guardian.x, y: level.guardian.y, inLab: true };
     if (!level.visitedTown) return { text: 'Seguí el camino hasta el pueblo', x: level.town.merchant.x, y: level.town.merchant.y };
@@ -645,8 +652,8 @@ function drawFloorTitle(level) {
     ctx.save(); ctx.globalAlpha = alpha; ctx.textAlign = 'center';
     ctx.fillStyle = 'rgba(233,220,192,0.9)'; ctx.fillRect(MAP_W / 2 - 220, MAP_H * 0.28, 440, 74);
     ctx.strokeStyle = INK.line; ctx.lineWidth = 2; ctx.strokeRect(MAP_W / 2 - 220, MAP_H * 0.28, 440, 74);
-    ctx.fillStyle = '#6b2a1f'; ctx.font = 'bold 15px Georgia, serif'; ctx.fillText(`PISO ${level.floor} DE ${TOWER.floors} · ${B.icon}`, MAP_W / 2, MAP_H * 0.28 + 24);
-    ctx.fillStyle = INK.line; ctx.font = 'bold 26px Georgia, serif'; ctx.fillText(B.name, MAP_W / 2, MAP_H * 0.28 + 56);
+    ctx.fillStyle = '#6b2a1f'; ctx.font = 'bold 15px Georgia, serif'; ctx.fillText(level.isCave ? `PISO ${level.floor} · BAJO TIERRA` : `PISO ${level.floor} DE ${TOWER.floors} · ${B.icon}`, MAP_W / 2, MAP_H * 0.28 + 24);
+    ctx.fillStyle = INK.line; ctx.font = 'bold 26px Georgia, serif'; ctx.fillText(level.isCave ? `Cueva · nivel −${level.depth}` : B.name, MAP_W / 2, MAP_H * 0.28 + 56);
     ctx.restore();
 }
 
@@ -676,6 +683,7 @@ function towerDayLabel() {
 // Visión que quita la noche en el campo
 function nightSight(hero) {
     const level = hero.arena;
+    if (level && level.isCave) return CAVE.sight; // la cueva es oscura siempre
     if (!level || !level.zone || towerZoneAt(level, hero.x, hero.y) !== ZONE.field) return 0;
     return DAYNIGHT.nightSight * towerDarkness();
 }
@@ -711,7 +719,7 @@ function towerDayNightTick(level) {
 // Capa de oscuridad (en pantalla): se recorta donde hay luz (vos, el pueblo, los santuarios). El laberinto tiene antorchas.
 let nightLayer = null;
 function drawTowerNight(level) {
-    const dark = level.town ? towerDarkness() : 0;
+    const dark = level.isCave ? 0.82 : level.town ? towerDarkness() : 0;
     if (dark <= 0.01 || towerZoneAt(level, player.x, player.y) === ZONE.lab) return;
     if (!nightLayer) { nightLayer = document.createElement('canvas'); nightLayer.width = MAP_W; nightLayer.height = MAP_H; }
     const g = nightLayer.getContext('2d');
@@ -725,9 +733,208 @@ function drawTowerNight(level) {
         g.fillStyle = grd; g.fillRect(sx - r, sy - r, r * 2, r * 2);
     };
     if (player.isAlive()) light(player.x, player.y, heroSight(player) * TILE);
-    const tw = level.town; light(tw.merchant.x, tw.merchant.y + 4, 11 * TILE);
+    const tw = level.town; if (tw) light(tw.merchant.x, tw.merchant.y + 4, 11 * TILE);
+    if (level.exitUp) light(level.exitUp.x, level.exitUp.y, 3 * TILE);
     (level.shrines || []).forEach(s => { if (!s.used) light(s.x, s.y, 2.2 * TILE); });
     ctx.drawImage(nightLayer, 0, 0);
-    const dusk = 1 - Math.abs(dark - 0.5) * 2; // tono naranja en el atardecer y el amanecer
+    const dusk = level.isCave ? 0 : 1 - Math.abs(dark - 0.5) * 2; // tono naranja en el atardecer y el amanecer
     if (dusk > 0) { ctx.fillStyle = `rgba(255,140,60,${0.12 * dusk})`; ctx.fillRect(0, 0, MAP_W, MAP_H); }
+}
+
+// --- CUEVAS (mazmorras opcionales) ---
+// Cada piso tiene 2 entradas en el campo. Una cueva es un mapa aparte (90×70, autómata celular) que baja de nivel en
+// nivel: −1, −2… hasta −2 en los pisos 1-3, −3 en los 4-7 y −4 en los 8-10. Más hondo: más oscuro, creeps más fuertes,
+// más campeones, más experiencia y mejor botín. En el fondo, un jefe cuida un tesoro (2 piezas raras). No hace falta
+// entrar para subir la torre. El piloto automático no entra.
+const CAVE = { w: 90, h: 70, mouths: 2, packs: 12, packsPerDepth: 3, statPerDepth: 0.12, xpPerDepth: 0.25, lootPerDepth: 0.5, champPerDepth: 0.08, sight: -1.5 };
+function caveMaxDepth(floor) { return 2 + Math.floor((floor - 1) / 3.5); }
+// Entradas de cueva en el campo de un piso (de preferencia al pie de un acantilado o de una roca)
+function placeCaveMouths(level, dist) {
+    const W = COLS, H = ROWS, at = (x, y) => y * W + x;
+    level.caves = [];
+    const nextToRock = (x, y) => [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => level.walls[y + dy] && level.walls[y + dy][x + dx] && level.walls[y + dy][x + dx] !== WALL.edge);
+    for (let t = 0; t < 8000 && level.caves.length < CAVE.mouths; t++) {
+        const x = 3 + Math.floor(Math.random() * (W - 6)), y = 3 + Math.floor(Math.random() * (H - 6)), i = at(x, y);
+        if (level.zone[i] !== ZONE.field || level.ground[i] === GROUND.road || level.height[i] || !walkable(level, x, y) || dist[i] < 30) continue;
+        if (t < 5000 && !nextToRock(x, y)) continue;
+        if (Math.abs(x - level.town.merchant.x) < 16 && Math.abs(y - level.town.merchant.y) < 12) continue;
+        if (level.caves.some(c => Math.hypot(c.x - x, c.y - y) < 40) || (level.shrines || []).some(s => s.x === x && s.y === y)) continue;
+        level.caves.push({ x, y, max: caveMaxDepth(level.floor), levels: [], surface: level });
+    }
+}
+function caveLevel(cave, depth) {
+    if (!cave.levels[depth]) cave.levels[depth] = generateCaveLevel(cave, depth);
+    return cave.levels[depth];
+}
+function generateCaveLevel(cave, depth) {
+    const W = CAVE.w, H = CAVE.h, N = W * H, floor = cave.surface.floor, at = (x, y) => y * W + x;
+    const rint = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+    let rock = new Uint8Array(N);
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) rock[at(x, y)] = (x < 2 || y < 2 || x > W - 3 || y > H - 3 || Math.random() < 0.45) ? 1 : 0;
+    for (let s = 0; s < 5; s++) {
+        const next = rock.slice();
+        for (let y = 2; y < H - 2; y++) for (let x = 2; x < W - 2; x++) {
+            let n = 0;
+            for (let oy = -1; oy <= 1; oy++) for (let ox = -1; ox <= 1; ox++) if ((ox || oy) && rock[at(x + ox, y + oy)]) n++;
+            next[at(x, y)] = n >= 5 ? 1 : n <= 3 ? 0 : rock[at(x, y)];
+        }
+        rock = next;
+    }
+    // Se queda con la zona abierta más grande (lo demás se tapa)
+    const region = new Int32Array(N).fill(-1), sizes = [];
+    for (let i = 0; i < N; i++) {
+        if (rock[i] || region[i] >= 0) continue;
+        const id = sizes.length, q = [i]; region[i] = id;
+        for (let k = 0; k < q.length; k++) { const p = q[k], px = p % W, py = (p - px) / W; [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(([dx, dy]) => { const j = at(px + dx, py + dy); if (!rock[j] && region[j] < 0) { region[j] = id; q.push(j); } }); }
+        sizes.push(q.length);
+    }
+    const best = sizes.indexOf(Math.max(...sizes));
+    const walls = Array.from({ length: H }, (_, y) => Uint8Array.from({ length: W }, (_, x) => (rock[at(x, y)] || region[at(x, y)] !== best) ? WALL.rock : 0));
+    const level = makeArena('tower', []);
+    Object.assign(level, { floor, biome: cave.surface.biome, isCave: true, cave, depth, W, H, walls, deep: new Uint8Array(N), ground: new Uint8Array(N),
+        zone: new Uint8Array(N).fill(ZONE.cave), height: null, ramp: null, rooms: [], explored: Array.from({ length: H }, () => new Uint8Array(W)),
+        corpses: [], drops: [], shrines: [], town: null, guardian: null, stairs: null });
+    // Salida hacia arriba (la casilla abierta más a la izquierda) y, lejos, la bajada o la sala del jefe
+    let up = null;
+    for (let x = 2; x < W - 2 && !up; x++) for (let y = 2; y < H - 2 && !up; y++) if (!walls[y][x]) up = { x, y };
+    level.exitUp = up;
+    const prevCols = COLS, prevRows = ROWS; COLS = W; ROWS = H; // bfsFrom usa el tamaño del mundo
+    const dist = bfsFrom(level, up.x, up.y);
+    let far = up;
+    for (let i = 0; i < N; i++) if (dist[i] > dist[at(far.x, far.y)]) far = { x: i % W, y: Math.floor(i / W) };
+    level.start = arrivalNear(level, up);
+    const pool = towerCreepPool(floor), bonus = 1 + CAVE.statPerDepth * depth;
+    const spawn = (x, y, lvl, mult, xpMult, champ) => {
+        const type = pickRandom(pool);
+        for (let k = 0; k < (type.groupSize || 1); k++) {
+            let px = x, py = y;
+            for (let t = 0; t < 12; t++) { const ax = x + rint(-2, 2), ay = y + rint(-2, 2); if (walkable(level, ax, ay) && dist[at(ax, ay)] >= 0) { px = ax; py = ay; break; } }
+            const c = makeCreep(type, px, py, mult, false, 0);
+            Object.assign(c, { arena: level, level: lvl, xp: Math.round(type.xp * TOWER.xpMult(lvl) * xpMult), spawnTime: -1e9 });
+            if (champ) makeChampion(c, champ);
+            level.creeps.push(c);
+        }
+    };
+    if (depth < cave.max) level.down = far;
+    else { // fondo: jefe de la cueva y su tesoro
+        const lvl = floor + depth + 1, type = pickRandom(pool);
+        const boss = makeCreep(type, far.x, far.y, TOWER.creepMult(lvl) * bonus * 2.4, false, 0);
+        Object.assign(boss, { arena: level, level: lvl, xp: Math.round(type.xp * TOWER.xpMult(lvl) * 6), spawnTime: -1e9, isCaveBoss: true });
+        makeChampion(boss, shuffle(Object.keys(CHAMPION_AFFIXES)).slice(0, Math.min(3, 1 + Math.floor(depth / 2))));
+        boss.label = `${type.label} Ancestral (señor de la cueva)`;
+        level.creeps.push(boss); level.caveBoss = boss;
+        const spot = arrivalNear(level, far);
+        level.chests = [{ x: spot.x, y: spot.y, open: false, guards: [boss], treasure: true }];
+    }
+    // Grupos (más y más fuertes cuanto más hondo) y cofres custodiados en claros
+    const packs = [];
+    for (let t = 0; t < 4000 && packs.length < CAVE.packs + CAVE.packsPerDepth * depth; t++) {
+        const x = rint(3, W - 4), y = rint(3, H - 4), i = at(x, y);
+        if (walls[y][x] || dist[i] < 12 || packs.some(p => Math.max(Math.abs(p.x - x), Math.abs(p.y - y)) < 7)) continue;
+        packs.push({ x, y });
+        const champ = Math.random() < CHAMPION.baseChance + CHAMPION.perFloor * floor + CAVE.champPerDepth * depth ? shuffle(Object.keys(CHAMPION_AFFIXES)).slice(0, championAffixCount(floor)) : null;
+        for (let n = rint(2, 3); n > 0; n--) { const lvl = floor + depth + (Math.random() < 0.3 ? 1 : 0); spawn(x, y, lvl, TOWER.creepMult(lvl) * bonus, 1 + CAVE.xpPerDepth * depth, champ); }
+    }
+    const spots = [];
+    for (let t = 0; t < 3000 && spots.length < 2; t++) {
+        const x = rint(3, W - 7), y = rint(3, H - 6);
+        let ok = dist[at(x, y)] >= 15;
+        for (let oy = 0; oy < 3 && ok; oy++) for (let ox = 0; ox < 4 && ok; ox++) ok = walkable(level, x + ox, y + oy) && dist[at(x + ox, y + oy)] >= 0;
+        if (ok) spots.push({ x, y, w: 4, h: 3 });
+    }
+    const treasure = level.chests || [];
+    placeChests(level, spots);
+    level.chests = level.chests.concat(treasure);
+    COLS = prevCols; ROWS = prevRows;
+    return level;
+}
+// Una casilla libre al lado de (x, y) (para llegar sin quedar parado arriba de una salida)
+function arrivalNear(level, p) {
+    for (const [dx, dy] of [[1, 0], [0, 1], [0, -1], [-1, 0], [1, 1], [-1, 1], [1, -1], [-1, -1], [2, 0], [0, 2]]) {
+        const x = p.x + dx, y = p.y + dy;
+        if (y >= 0 && x >= 0 && y < level.walls.length && x < level.walls[0].length && !level.walls[y][x] && !(level.deep && level.deep[y * level.walls[0].length + x])) return { x, y };
+    }
+    return { x: p.x, y: p.y };
+}
+// Entrar a un nivel cualquiera (piso o cueva): cambia el tamaño del mundo, la arena y la posición del héroe
+function enterTowerLevel(level, pos) {
+    COLS = level.W || TOWER.cols; ROWS = level.H || TOWER.rows;
+    arenas = [level];
+    level.heroes = [player];
+    player.arena = level;
+    player.x = pos.x; player.y = pos.y; player.rx = player.x; player.ry = player.y;
+    player.moveTarget = null; player.focus = null;
+    level.creeps.forEach(c => { c.aggro = false; });
+    player.towerZone = undefined;
+    level.fovKey = null; computeFov(level, player);
+}
+function enterCave(cave, depth, fromBelow = false) {
+    const level = caveLevel(cave, depth);
+    enterTowerLevel(level, fromBelow ? arrivalNear(level, level.down) : level.start);
+    level.titleAt = gameClock;
+    towerRun.stats.deepest = Math.max(towerRun.stats.deepest || 0, depth);
+    setStateText(`TOWER CHAOS · PISO ${cave.surface.floor} · CUEVA −${depth} DE −${cave.max}`);
+    sfx('wave');
+    if (!fromBelow) log(depth === 1 ? `🕳️ Entraste a una cueva (baja hasta −${cave.max}). Más hondo: más oscuro, más difícil y mejor botín; en el fondo, un tesoro.` : `🕳️ Bajaste al nivel −${depth} de la cueva.`);
+}
+function leaveCave(level) {
+    const cave = level.cave;
+    if (level.depth > 1) { enterCave(cave, level.depth - 1, true); return; }
+    enterTowerLevel(cave.surface, arrivalNear(cave.surface, cave));
+    setStateText(`TOWER CHAOS · PISO ${cave.surface.floor} DE ${TOWER.floors} · ${BIOMES[cave.surface.biome].name.toUpperCase()}`);
+    log('☀️ Saliste de la cueva.');
+}
+// Pisar una entrada, una bajada o una salida (al final del frame, ver updateTower)
+function towerPortals(level, hero) {
+    if (!hero.isAlive() || hero !== player) return false;
+    if (level.caves && !autopilot) {
+        const cave = level.caves.find(c => c.x === hero.x && c.y === hero.y);
+        if (cave) { enterCave(cave, 1); return true; }
+    }
+    if (!level.isCave) return false;
+    if (level.exitUp && hero.x === level.exitUp.x && hero.y === level.exitUp.y) { leaveCave(level); return true; }
+    if (level.down && hero.x === level.down.x && hero.y === level.down.y) { enterCave(level.cave, level.depth + 1); return true; }
+    return false;
+}
+// Dibujo: bocas de cueva en el campo; en la cueva, la salida (soga) y la bajada (pozo)
+function drawCavePortals(level) {
+    const hole = (x, y, deep) => {
+        if (!level.explored[y][x]) return;
+        const cx = x * TILE + TILE / 2, cy = y * TILE + TILE / 2;
+        ctx.fillStyle = deep ? '#0d0a08' : '#1d1712'; ctx.strokeStyle = INK.line; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.ellipse(cx, cy + 4, 13, 9, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        if (!deep) { ctx.fillStyle = INK.stoneDark; ctx.beginPath(); ctx.moveTo(cx - 15, cy + 6); ctx.quadraticCurveTo(cx, cy - 20, cx + 15, cy + 6); ctx.lineTo(cx + 11, cy + 6); ctx.quadraticCurveTo(cx, cy - 12, cx - 11, cy + 6); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+    };
+    (level.caves || []).forEach(c => hole(c.x, c.y, false));
+    if (level.down) hole(level.down.x, level.down.y, true);
+    if (level.exitUp && level.explored[level.exitUp.y][level.exitUp.x]) {
+        const cx = level.exitUp.x * TILE + TILE / 2, cy = level.exitUp.y * TILE + TILE / 2;
+        ctx.strokeStyle = '#7a5c3c'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(cx - 5, cy - 16); ctx.lineTo(cx - 5, cy + 12); ctx.moveTo(cx + 5, cy - 16); ctx.lineTo(cx + 5, cy + 12); ctx.stroke();
+        ctx.lineWidth = 2; for (let y = -12; y < 12; y += 6) { ctx.beginPath(); ctx.moveTo(cx - 5, cy + y); ctx.lineTo(cx + 5, cy + y); ctx.stroke(); }
+        ctx.fillStyle = 'rgba(255,230,160,0.25)'; ctx.beginPath(); ctx.arc(cx, cy, 16, 0, Math.PI * 2); ctx.fill();
+    }
+}
+// Baldosas de cueva: roca oscura con grietas y piso de tierra, con el color del bioma apagado
+const caveTileCache = {};
+function caveTiles(key) {
+    if (caveTileCache[key]) return caveTileCache[key];
+    const C = BIOMES[key].colors;
+    let seed = 4711 + key.length; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const tile = draw => { const c = document.createElement('canvas'); c.width = c.height = TILE; draw(c.getContext('2d')); return c; };
+    const floorT = v => tile(g => {
+        g.fillStyle = shade(C.ground, v ? -0.56 : -0.5); g.fillRect(0, 0, TILE, TILE);
+        for (let i = 0; i < 6; i++) { g.fillStyle = 'rgba(29,23,18,0.35)'; g.beginPath(); g.arc(rnd() * TILE, rnd() * TILE, 0.8 + rnd() * 1.6, 0, Math.PI * 2); g.fill(); }
+    });
+    const rockT = (v, face) => tile(g => {
+        g.fillStyle = shade(C.obstacle, face ? -0.35 : -0.55); g.fillRect(0, 0, TILE, TILE);
+        g.strokeStyle = 'rgba(10,8,6,0.6)'; g.lineWidth = 1.2;
+        for (let i = 0; i < 3; i++) { const x = rnd() * TILE, y = rnd() * TILE; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (rnd() - 0.5) * 14, y + 6 + rnd() * 8); g.stroke(); }
+        if (face) { g.strokeStyle = INK.line; g.lineWidth = 1.6; g.beginPath(); g.moveTo(0, TILE - 2); g.lineTo(TILE, TILE - 2); g.stroke(); inkHatch(g, 0, TILE - 12, TILE, TILE, 3); }
+    });
+    return (caveTileCache[key] = { floor: [floorT(0), floorT(1)], rock: [rockT(0, false), rockT(1, false)], face: [rockT(0, true), rockT(1, true)] });
+}
+function caveTileFor(level, x, y) {
+    const t = caveTiles(level.biome), h = ((x * 73856093) ^ (y * 19349663)) >>> 0;
+    if (!level.walls[y][x]) return t.floor[h & 1];
+    return y + 1 < ROWS && !level.walls[y + 1][x] ? t.face[h & 1] : t.rock[h & 1];
 }
