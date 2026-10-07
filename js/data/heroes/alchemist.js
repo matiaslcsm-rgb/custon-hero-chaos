@@ -81,6 +81,8 @@ registerHero({
         id: 'ALCHEMIST_CHEMICAL', name: 'Furia Química', kind: 'active', isUltimate: true,
         tags: ['MEJORA', 'AL_MATAR'],
         values: { cooldown: [50, 45, 40], manaCost: [80, 100, 120], duration: 8, atkSpeedPct: [0.4, 0.6, 0.8], moveSpeedPct: [0.2, 0.3, 0.4], intPerKill: [1, 1.5, 2] },
+        // Rebalanceo para la Torre (REWORK.md §2, fase 3): números más chicos para andar como activa común.
+        towerValues: { cooldown: [14, 12, 10], manaCost: [45, 55, 65], duration: 5, atkSpeedPct: [0.22, 0.32, 0.42], moveSpeedPct: [0.1, 0.15, 0.2], intPerKill: [0.5, 0.75, 1] },
         description: 'DEFINITIVA. Frenesí químico por {duration}s: +{atkSpeedPct%} de velocidad de ataque y +{moveSpeedPct%} de velocidad de movimiento. ASCENSO: cada baja durante la Furia te da +{intPerKill} de Inteligencia permanente.',
         cast(caster) {
             const skill = this;

@@ -1734,33 +1734,34 @@ test('Controles estilo Hades: esquive con Espacio (3 casillas, invulnerable, rec
 test('Torre: Códice (dominar al máximo), piezas sin alma y Herrero (imbuir y vaciar)', () => {
     newTower();
     codex = { unlocked: {}, best: {} };
-    const entry = codexEntries().find(e => e.skillId === 'ZEUS_ARC');
+    // ZEUS_WRATH (definitiva) siempre va en la ranura de armadura (fase 3, ver REWORK.md §2); las piezas sin
+    // alma nunca son armas, así que el poder a imbuir tiene que ser de una ranura que SÍ pueda ser sin alma.
+    const entry = codexEntries().find(e => e.skillId === 'ZEUS_WRATH');
     checkEq(codexEntries().length, towerCatalog().length, 'una entrada por habilidad e innato');
-    const piece = makeTowerItem(1, towerCatalog().find(e => e.skillId === 'ZEUS_ARC'), 'normal');
+    const piece = makeTowerItem(1, towerCatalog().find(e => e.skillId === 'ZEUS_WRATH'), 'normal');
     equipItem(player, piece);
     for (let i = 1; i < entry.max; i++) applyForge(player, piece, { type: 'skillLevel', text: 'nivel' });
-    check(codexUnlocked('ZEUS_ARC'), 'al llegar al nivel máximo queda dominada');
-    checkEq(codex.best.ZEUS_ARC, entry.max, 'registra la mejor marca');
+    check(codexUnlocked('ZEUS_WRATH'), 'al llegar al nivel máximo queda dominada');
+    checkEq(codex.best.ZEUS_WRATH, entry.max, 'registra la mejor marca');
     // Pieza sin alma: sin habilidad y con un afijo de más
     const blank = makeBlankItem(3, 'armor', 'magic');
     check(blank.blank && !itemSkill(blank) && blank.affixes.length >= 2, 'sin alma: sin habilidad, afijo extra');
     check(/sin alma/.test(blank.name) && itemTooltipHtml(blank).includes('sin alma'), 'nombre y detalle');
+    // La armadura solo tiene una ranura: hay que guardar la pieza natural para poder equipar la sin alma ahí.
+    unequipSlot(player, piece.slot);
     equipItem(player, blank);
     // Herrero: imbuir la pieza equipada
     const L = player.arena; L.town.smith = null; openTownSmith(L);
     check(L.town.smith && L.town.smith.stock.every(i => i.blank), 'el herrero vende piezas sin alma');
     player.gold = 10;
-    check(!infuseItem(player, blank, 'ZEUS_ARC'), 'sin oro no imbuye');
+    check(!infuseItem(player, blank, 'ZEUS_WRATH'), 'sin oro no imbuye');
     player.gold = 5000;
     check(!infuseItem(player, blank, 'AXE_GIRO'), 'lo no dominado no se imbuye');
-    check(infuseItem(player, blank, 'ZEUS_ARC'), 'imbuye lo dominado');
-    check(!blank.blank && blank.skillId === 'ZEUS_ARC' && blank.skillLevel === 1 && player.gear.armor === blank, 'la pieza trae el poder y sigue equipada');
-    // Dos piezas con la misma habilidad: sacar una no la quita
-    unequipSlot(player, piece.slot);
-    check(player.hasSkill('ZEUS_ARC'), 'la otra pieza sigue dando la habilidad');
+    check(infuseItem(player, blank, 'ZEUS_WRATH'), 'imbuye lo dominado');
+    check(!blank.blank && blank.skillId === 'ZEUS_WRATH' && blank.skillLevel === 1 && player.gear.armor === blank, 'la pieza trae el poder y sigue equipada');
     // Vaciar
     check(purgeItem(player, blank), 'vacía');
-    check(blank.blank && !player.hasSkill('ZEUS_ARC') && blank.affixes.length >= 2, 'pierde la habilidad, conserva los afijos');
+    check(blank.blank && !player.hasSkill('ZEUS_WRATH') && blank.affixes.length >= 2, 'pierde la habilidad, conserva los afijos');
     check(!purgeItem(player, makeTowerItem(1, towerCatalog().find(e => e.slot === 'weapon'))), 'las armas no se vacían');
     // El botín a veces trae piezas sin alma
     let blanks = 0; for (let i = 0; i < 400; i++) if (lootItem(2).blank) blanks++;

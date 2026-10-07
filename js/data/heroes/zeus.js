@@ -106,6 +106,9 @@ registerHero({
         id: 'ZEUS_WRATH', name: 'Ira del Dios del Trueno', kind: 'active', isUltimate: true,
         tags: ['MÁGICO', 'ÁREA'],
         values: { cooldown: [90, 75, 60], manaCost: [150, 175, 200], baseDmg: [120, 190, 260], intRatio: 0.5 },
+        // En la Torre ya no es "la definitiva" (botón de una vez cada rato largo): es una activa más de la
+        // armadura, con números propios más chicos para que ande a ese ritmo (REWORK.md §2, fase 3).
+        towerValues: { cooldown: [16, 14, 12], manaCost: [70, 80, 90], baseDmg: [55, 90, 125], intRatio: 0.3 },
         description: 'DEFINITIVA. Descarga toda su ira sobre TODOS los enemigos vivos, sin importar dónde estén: {baseDmg} + {intRatio%} de tu Inteligencia como daño mágico a cada uno.',
         cast(caster) {
             const targets = enemiesOf(caster).filter(c => c.isAlive());

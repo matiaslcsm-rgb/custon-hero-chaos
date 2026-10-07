@@ -100,6 +100,9 @@ registerHero({
         id: 'NECROMANCER_REAP', name: 'Guadaña del Segador', kind: 'active', isUltimate: true,
         tags: ['PURO', 'CONTROL', 'AL_MATAR'],
         values: { cooldown: [75, 65, 55], manaCost: [130, 150, 170], range: 6, stunDuration: 1.5, missingHpRatio: [0.7, 0.8, 0.9], hpRegenPerKill: [2, 4, 6], manaRegenPerKill: [1, 2, 3] },
+        // Rebalanceo para la Torre (REWORK.md §2, fase 3): el umbral de ejecución baja (si no, con este
+        // enfriamiento sería un botón de "matalo" casi siempre disponible) y números más chicos en general.
+        towerValues: { cooldown: [13, 11, 9], manaCost: [55, 65, 75], stunDuration: 1.0, missingHpRatio: [0.45, 0.55, 0.65], hpRegenPerKill: [1, 2, 3], manaRegenPerKill: [0.5, 1, 1.5] },
         description: 'DEFINITIVA. Aturde al enemigo objetivo (rango {range}) por {stunDuration}s; al terminar, le hace daño puro igual al {missingHpRatio%} de la vida que le falta — si alcanza, muere. Si lo mata, ganás para siempre +{hpRegenPerKill} de regen. de vida/s y +{manaRegenPerKill} de regen. de maná/s.',
         cast(caster) {
             const target = nearestEnemy(caster, val(this, caster, 'range'));

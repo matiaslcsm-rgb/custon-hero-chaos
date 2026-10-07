@@ -67,6 +67,8 @@ registerHero({
         id: 'ASSASSIN_MASACRE', name: 'Masacre', kind: 'active', isUltimate: true,
         tags: ['MEJORA', 'CRÍTICO', 'AL_MATAR'],
         values: { cooldown: [55, 50, 45], manaCost: 90, duration: 6, critChance: [40, 50, 60], atkSpeedPct: 0.4, moveSpeedPct: 0.25, extendPerKill: 1.5, critPerKill: [1, 1.5, 2] },
+        // Rebalanceo para la Torre (REWORK.md §2, fase 3): números más chicos para andar como activa común.
+        towerValues: { cooldown: [15, 13, 11], manaCost: 50, duration: 4, critChance: [22, 28, 34], atkSpeedPct: 0.22, moveSpeedPct: 0.14, extendPerKill: 0.8, critPerKill: [0.5, 0.75, 1] },
         description: 'DEFINITIVA. {duration}s: +{critChance}% prob. crítico, +{atkSpeedPct%} vel. ataque, +{moveSpeedPct%} vel. movimiento. Cada baja extiende la duración +{extendPerKill}s. ESCALADO: cada baja durante la Masacre te da +{critPerKill}% de crítico permanente.',
         cast(caster) {
             const skill = this;

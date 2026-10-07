@@ -586,10 +586,12 @@ function renderHeroBar() {
         `<span class="st-int">INT ${Math.floor(p.attr('int'))}</span> <span>ARM ${p.armor.toFixed(1)}</span> <span class="st-more">ⓘ</span>`;
     stats.title = heroTooltip();
 
-    // Habilidades activas: 4 casillas (las vacías se llenan en el draft)
+    // Habilidades activas: 4 casillas en Caos de Héroes (se llenan en el draft); en la Torre son exactamente
+    // 3 (arma/guantes/armadura, ver REWORK.md §2 fase 3), nunca 4, porque solo esas 3 ranuras dan activas.
     const skills = document.getElementById('hb-skills'); skills.innerHTML = '';
     const actives = p.skills.filter(s => s.kind === 'active');
-    for (let i = 0; i < Math.max(KIT_SIZE, actives.length); i++) {
+    const slotCount = gameMode === 'tower' ? 3 : Math.max(KIT_SIZE, actives.length);
+    for (let i = 0; i < slotCount; i++) {
         const s = actives[i];
         const slot = document.createElement('div');
         if (!s) { slot.className = 'skill-slot empty'; slot.textContent = 'libre'; slot.title = gameMode === 'tower' ? 'Espacio libre: equipá una pieza con habilidad activa' : 'Espacio libre: se llena en el draft'; skills.appendChild(slot); continue; }

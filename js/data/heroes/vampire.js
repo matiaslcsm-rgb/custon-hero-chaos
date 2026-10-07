@@ -73,6 +73,9 @@ registerHero({
         id: 'VAMP_IMMORTAL', name: 'Forma Inmortal', kind: 'active', isUltimate: true,
         tags: ['MEJORA', 'ROBO_VIDA', 'AL_RECIBIR_DAÑO'],
         values: { cooldown: [70, 60, 50], manaCost: 100, duration: [5, 6, 7], atkPct: 0.3, atkSpeedPct: 0.3, lifesteal: [20, 25, 30], payback: [0.4, 0.3, 0.2], healStep: 50, hpPerStep: [5, 7, 10] },
+        // Rebalanceo para la Torre (REWORK.md §2, fase 3): más corta y con enfriamiento más alto que el resto
+        // (sigue siendo una activa común, pero "no podés morir" spameable cada 10s sería demasiado).
+        towerValues: { cooldown: [22, 19, 16], manaCost: 55, duration: [3, 4, 5], atkPct: 0.16, atkSpeedPct: 0.16, lifesteal: [12, 16, 20], payback: [0.5, 0.4, 0.3], hpPerStep: [3, 4, 6] },
         description: 'DEFINITIVA. {duration}s: +{atkPct%} daño físico, +{atkSpeedPct%} vel. ataque, +{lifesteal}% robo de vida, y tu vida no puede bajar de 1. Al terminar recibís {payback%} del daño acumulado. ESCALADO: cada {healStep} de vida curada durante la forma te da +{hpPerStep} de HP máximo permanente.',
         cast(caster) {
             const skill = this;

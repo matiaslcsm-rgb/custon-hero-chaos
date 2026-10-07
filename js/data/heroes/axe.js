@@ -78,6 +78,8 @@ registerHero({
         id: 'AXE_FURIA', name: 'Furia del Guerrero', kind: 'active', isUltimate: true,
         tags: ['MEJORA', 'AL_RECIBIR_DAÑO', 'AL_MATAR'],
         values: { cooldown: [50, 45, 40], manaCost: [80, 100, 120], duration: [6, 8, 10], atkPct: [0.3, 0.4, 0.5], atkSpeedPct: 0.3, dmgReduction: 0.2, stackAtk: 2, stackCap: [20, 30, 40], armorPerKill: [0.5, 0.75, 1] },
+        // Rebalanceo para la Torre (REWORK.md §2, fase 3): números más chicos para andar como activa común.
+        towerValues: { cooldown: [14, 12, 10], manaCost: [45, 55, 65], duration: [4, 5, 6], atkPct: [0.16, 0.22, 0.28], atkSpeedPct: 0.16, dmgReduction: 0.12, stackCap: [10, 15, 20], armorPerKill: [0.25, 0.35, 0.5] },
         description: 'DEFINITIVA. {duration}s: +{atkPct%} daño físico, +{atkSpeedPct%} vel. ataque, +{dmgReduction%} reducción de daño. Cada golpe recibido suma +{stackAtk} de daño (hasta +{stackCap}). ESCALADO: cada baja durante la Furia te da +{armorPerKill} de armadura permanente.',
         cast(caster) {
             const skill = this;

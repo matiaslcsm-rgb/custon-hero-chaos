@@ -75,6 +75,8 @@ registerHero({
         id: 'VOIDSAGE_RIFT', name: 'Grieta del Vacío', kind: 'active', isUltimate: true,
         tags: ['PURO', 'ÁREA', 'AL_MATAR'],
         values: { cooldown: [60, 50, 40], manaCost: [100, 125, 150], baseDmg: [180, 260, 340], intRatio: 0.9, radius: 3, atkPerKill: [2, 3, 4] },
+        // Rebalanceo para la Torre (REWORK.md §2, fase 3): números más chicos para andar como activa común.
+        towerValues: { cooldown: [15, 13, 11], manaCost: [55, 65, 75], baseDmg: [75, 115, 155], intRatio: 0.45, radius: 2.5, atkPerKill: [1, 1.5, 2] },
         description: 'DEFINITIVA. Abre una grieta en radio {radius}: {baseDmg} + {intRatio%} de tu Inteligencia como daño puro. ASCENSO: cada enemigo que mata te da +{atkPerKill} de daño de ataque permanente.',
         cast(caster) {
             const radius = val(this, caster, 'radius');

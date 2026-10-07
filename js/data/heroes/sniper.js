@@ -68,6 +68,9 @@ registerHero({
         id: 'SNIPER_MORTAL', name: 'Disparo Mortal', kind: 'active', isUltimate: true,
         tags: ['FÍSICO', 'CRÍTICO', 'AL_MATAR'],
         values: { cooldown: [60, 50, 40], manaCost: [90, 110, 130], dmgMult: [3.0, 3.5, 4.0], farBonus: 0.5, critChance: 0.6, atkPerKill: [3, 4, 5] },
+        // Rebalanceo para la Torre (REWORK.md §2, fase 3): es de un solo objetivo, no de área, así que aguanta
+        // un enfriamiento algo más corto que las de área; igual números más chicos para andar como activa común.
+        towerValues: { cooldown: [12, 10, 8], manaCost: [45, 55, 65], dmgMult: [1.6, 1.9, 2.2], farBonus: 0.3, critChance: 0.3, atkPerKill: [1.5, 2, 2.5] },
         description: 'DEFINITIVA. Proyectil devastador: {dmgMult%} de tu daño físico (+{farBonus%} a distancia máxima), con {critChance%} de probabilidad de crítico. Alcance: 3 veces tu rango. ESCALADO: si mata al objetivo, +{atkPerKill} de daño de ataque permanente.',
         cast(caster) {
             const target = nearestEnemy(caster, caster.attackRange * 3);

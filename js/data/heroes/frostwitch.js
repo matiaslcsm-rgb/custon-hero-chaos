@@ -87,6 +87,8 @@ registerHero({
         id: 'FROSTWITCH_ZERO', name: 'Cero Absoluto', kind: 'active', isUltimate: true,
         tags: ['MÁGICO', 'ÁREA', 'CONTROL', 'AL_MATAR'],
         values: { cooldown: [65, 55, 45], manaCost: [110, 130, 150], baseDmg: [150, 230, 310], intRatio: 0.8, radius: 4, freeze: 1.5, armorPerKill: [1, 1.5, 2] },
+        // Rebalanceo para la Torre (REWORK.md §2, fase 3): números más chicos para andar como activa común.
+        towerValues: { cooldown: [16, 14, 12], manaCost: [60, 70, 80], baseDmg: [65, 100, 135], intRatio: 0.4, radius: 3, freeze: 0.8, armorPerKill: [0.5, 0.75, 1] },
         description: 'DEFINITIVA. Ventisca en radio {radius}: {baseDmg} + {intRatio%} de tu Inteligencia como daño mágico y congela (aturde) {freeze}s. ASCENSO: cada enemigo que mata te da +{armorPerKill} de armadura permanente.',
         cast(caster) {
             const radius = val(this, caster, 'radius');

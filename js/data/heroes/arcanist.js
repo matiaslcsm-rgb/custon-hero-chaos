@@ -90,6 +90,8 @@ registerHero({
         id: 'ARCANIST_OVERLOAD', name: 'Cataclismo Arcano', kind: 'active', isUltimate: true,
         tags: ['MÁGICO', 'ÁREA', 'AL_MATAR'],
         values: { cooldown: [60, 50, 40], manaCost: [100, 125, 150], baseDmg: [160, 240, 320], intRatio: 1.0, radius: 4, maxHpPerKill: [15, 25, 35] },
+        // Rebalanceo para la Torre (REWORK.md §2, fase 3): números más chicos para andar como activa común.
+        towerValues: { cooldown: [15, 13, 11], manaCost: [55, 65, 75], baseDmg: [65, 105, 145], intRatio: 0.5, radius: 3, maxHpPerKill: [6, 10, 14] },
         description: 'DEFINITIVA. Explosión en radio {radius}: {baseDmg} + {intRatio%} de tu Inteligencia como daño mágico. ASCENSO: cada enemigo que mata te da +{maxHpPerKill} de HP máximo permanente.',
         cast(caster) {
             const radius = val(this, caster, 'radius');

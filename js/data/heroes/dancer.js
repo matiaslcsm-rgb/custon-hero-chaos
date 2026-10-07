@@ -109,6 +109,8 @@ registerHero({
         tags: ['FÍSICO', 'ÁREA', 'MOVILIDAD', 'AL_GOLPEAR', 'AL_MATAR', 'MEJORA'],
         values: { cooldown: [60, 50, 40], manaCost: [100, 120, 140], duration: [6, 7, 8], atkSpeedPct: [0.25, 0.35, 0.45], waveEvery: [3, 3, 2],
                   waveMult: [0.7, 0.9, 1.1], radius: 2, evasion: [0, 10, 15], manaEvery: [0, 0, 10], manaPct: 0.1, atkSpeedPerKill: [1, 1.5, 2] },
+        // Rebalanceo para la Torre (REWORK.md §2, fase 3): números más chicos para andar como activa común.
+        towerValues: { cooldown: [15, 13, 11], manaCost: [55, 65, 75], duration: [4, 5, 6], atkSpeedPct: [0.15, 0.22, 0.28], waveMult: [0.4, 0.55, 0.7], evasion: [0, 6, 9], atkSpeedPerKill: [0.5, 0.75, 1] },
         description: 'DEFINITIVA. {duration}s: +{atkSpeedPct%} vel. de ataque y +{evasion}% de evasión. Con cada ataque te movés solo alrededor del objetivo, y cada {waveEvery} ataques lanzás una onda de {waveMult%} de tu daño físico a los enemigos en radio {radius}. En nivel 3, cada 10 ataques recuperás {manaPct%} de tu maná máximo. ASCENSO: cada baja durante la Tormenta te da +{atkSpeedPerKill}% de vel. de ataque permanente.',
         cast(caster) {
             const skill = this;

@@ -83,6 +83,14 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   acciones (despertar, caminar, esquivar, lanzar, primera baja, un cofre, el pueblo), persistentes entre runs. Ver
   ROGUELIKE.md §4 octies y REWORK.md §1-2. Falta solo la escena del despertar en el mundo (hoy es una ventana, no
   3 armas clavadas en el piso); la unión con el Códice/Bestiario en la Bitácora queda para la fase 6.
+- **Esqueleto mecánico de la fase 3 del rework (2026-10-07):** solo arma/guantes/armadura dan habilidad activa
+  (casco/botas/amuleto/anillos quedan en pasivas y stats), con teclas fijas Q/E/R sin importar el orden de
+  equipado. Decisión del usuario que pisa la recomendación anterior de REWORK.md: **sin sistema de carga** — las
+  11 definitivas pasan a ser activas comunes (maná y enfriamiento normal), rebalanceadas a la baja vía un
+  `towerValues` opcional por habilidad (`js/progression.js`) que solo aplica en la Torre y no toca Caos de
+  Héroes. De paso se cerró un bug del Herrero que dejaba imbuir un poder en una ranura que no era la suya
+  (rompía el límite de 3 activas). Ver REWORK.md §2. **Falta de esta fase:** "armar y balancear lo que tenemos"
+  — revisar el resto del catálogo (no solo las ex-definitivas) para que las 3 ranuras queden parejas entre sí.
 - **Motor (decidido 2026-10-06):** seguimos en canvas + JavaScript puro. Pasar a un motor (Phaser para seguir en el
   navegador, Godot para publicar en PC/celular) se decide cuando el contenido de Tower Chaos esté más cerrado.
 - **Balance en curso (2026-09-28):** jefes más suaves desde la ronda 20 + Kaya y Cetro del Eclipse (ver DISEÑO.md §9 bis).

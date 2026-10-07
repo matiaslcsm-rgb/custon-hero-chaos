@@ -446,6 +446,37 @@ en vez de agregar código nuevo en archivos compartidos; "primera baja" y "lanza
 Ventana con tecla N o desde la pausa (`✏️ Cuaderno`); las páginas que faltan se muestran como "???". La unión con
 el Códice y el Bestiario en una sola Bitácora (REWORK.md §6) queda para cuando se encare esa fase.
 
+## 4 nonies. Fase 3 del rework: 3 ranuras sin carga (2026-10-07)
+
+REWORK.md §2 proponía 2 activas + una definitiva con carga (estilo Llamado de Hades). El usuario lo pisó
+explícitamente: **sin sistema de carga nuevo**. Las 3 ranuras (arma/guantes/armadura) dan activas normales, con
+maná y enfriamiento, y las ex-definitivas se rebalancean para andar como una más — no un botón de una vez cada
+mucho.
+
+**Catálogo (`towerCatalog()`, `js/towerItems.js`):** por cada héroe, la definitiva va siempre a `armor`; de las
+activas normales, la primera que pega (física/mágica/pura) va al `weapon`; el resto de las activas (antes
+repartidas entre varias ranuras, incluida una `boots` solo para movilidad) compiten todas por `gloves`. Casco,
+botas, amuleto y anillos ya no reciben ninguna activa — solo pasivas y stats. Las teclas quedan fijas sin
+importar el orden de equipado: `TOWER_SLOT_KEY = { weapon: 'q', gloves: 'e', armor: 'r' }`, forzado dentro de
+`equipItem()`.
+
+**Rebalanceo de las 11 definitivas sin tocar Caos de Héroes:** los objetos de habilidad (`HERO_SKILLS`/
+`SKILL_INDEX`) son los mismos en los dos modos, así que no se puede simplemente cambiar `values`. Se agregó un
+override opcional por habilidad, `towerValues`, consultado solo en la Torre: `skillValueSource(skill, key)` en
+`js/progression.js` devuelve `skill.towerValues` si existe la clave y `gameMode === 'tower'`, si no cae a
+`skill.values` de siempre. Enchufado en `valueAt()` y `formatKey()`, cubre daño/maná/enfriamiento y los textos de
+la carta a la vez. Cada una de las 11 definitivas tiene ahora su `towerValues` con enfriamiento de ~8-16s (eran
+40-90s), maná más bajo y magnitud recortada a la par del resto del catálogo activo.
+
+**Bug cerrado de paso (Herrero):** `infuseItem`/`renderSmith`/`aiSmith` (`js/towerCodex.js`) nunca chequeaban que
+la ranura del poder desbloqueado coincidiera con la de la pieza sin alma — dejaba imbuir, por ejemplo, un poder
+de guantes en un casco, lo que rompía el límite de 3 activas apenas el Códice acumulaba desbloqueos. Ahora los
+tres puntos filtran/validan por `slot === slotKind(item.slot)`.
+
+**Falta de esta fase:** "armar y balancear lo que tenemos" — el pedido del usuario tiene una segunda parte más
+amplia que revisar las 11 definitivas: organizar y balancear el resto del catálogo (~44 habilidades + 11 innatos)
+para que arma/guantes/armadura tengan opciones parejas entre sí, no solo que "entren" en el límite de 3.
+
 ## 5. Decisiones tomadas (2026-10-03)
 - Avance: **subir una torre**; cada nivel es aleatorio. Final en el **nivel 10**, con salón de la fama.
 - Al morir: perdés la **mitad de lo ganado** por encima de la base y renacés en el **círculo de piedra de la base de la

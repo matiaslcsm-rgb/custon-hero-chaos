@@ -90,7 +90,7 @@ function equippedSlotOf(hero, item) { return EQUIP_SLOTS.find(s => hero.gear[s] 
 // Imbuir: la pieza sin alma pasa a traer el poder (nivel 1 de habilidad, sigue creciendo con la forja como cualquiera)
 function infuseItem(hero, item, entryId, floor = towerRun ? towerRun.floor : 1) {
     const e = codexEntry(entryId), cost = infuseCost(floor);
-    if (!item || !item.blank || !e || !codexUnlocked(entryId)) return false;
+    if (!item || !item.blank || !e || !codexUnlocked(entryId) || e.slot !== slotKind(item.slot)) return false;
     if (hero.gold < cost) { log(`⚒️ Te faltan ${cost - hero.gold}g para imbuir ${e.skill.name}.`); return false; }
     const slot = equippedSlotOf(hero, item);
     if (slot) unequipSlot(hero, slot, false);
@@ -183,9 +183,13 @@ function renderSmith() {
     if (!blanks.length) inf.innerHTML = '<p class="subtitle">No tenés piezas sin alma. Salen en el botín, se compran acá o se hacen vaciando una pieza.</p>';
     blanks.forEach(item => inf.appendChild(row(item, smithPick === item ? 'Elegida' : 'Elegir', null, true, () => { smithPick = smithPick === item ? null : item; }, smithPick === item)));
     const pw = document.getElementById('smith-powers'); pw.innerHTML = '';
-    const powers = codexUnlockedEntries(), cost = infuseCost(floor);
-    if (!powers.length) pw.innerHTML = '<p class="subtitle">Tu Códice está vacío: llevá la habilidad de una pieza a su nivel máximo para dominarla (J para verlo).</p>';
-    else if (!smithPick) pw.innerHTML = `<p class="subtitle">${powers.length} poder${powers.length > 1 ? 'es' : ''} en tu Códice. Elegí primero una pieza sin alma.</p>`;
+    const allPowers = codexUnlockedEntries(), cost = infuseCost(floor);
+    // Un poder solo se puede imbuir en una pieza de su propia ranura (si no, imbuirías una activa de guantes en
+    // un casco y te saltarías el límite de 3 activas de la fase 3, ver REWORK.md §2).
+    const powers = smithPick ? allPowers.filter(e => e.slot === slotKind(smithPick.slot)) : allPowers;
+    if (!allPowers.length) pw.innerHTML = '<p class="subtitle">Tu Códice está vacío: llevá la habilidad de una pieza a su nivel máximo para dominarla (J para verlo).</p>';
+    else if (!smithPick) pw.innerHTML = `<p class="subtitle">${allPowers.length} poder${allPowers.length > 1 ? 'es' : ''} en tu Códice. Elegí primero una pieza sin alma.</p>`;
+    else if (!powers.length) pw.innerHTML = `<p class="subtitle">Ningún poder de tu Códice es de la ranura de ${SLOT_NOUNS[slotKind(smithPick.slot)]}.</p>`;
     else powers.forEach(e => {
         const el = document.createElement('div'); el.className = 'tshop-row';
         const can = player.gold >= cost;
@@ -253,7 +257,7 @@ function aiSmith(hero) {
     s.aiVisited = true;
     const owned = new Set(heroPieces(hero).map(i => i.skillId || i.innateId).filter(Boolean));
     heroPieces(hero).filter(i => i.blank).forEach(item => {
-        const e = shuffle(codexUnlockedEntries().filter(x => !owned.has(x.id) && !x.skill.isInnateItem))[0];
+        const e = shuffle(codexUnlockedEntries().filter(x => !owned.has(x.id) && !x.skill.isInnateItem && x.slot === slotKind(item.slot)))[0];
         if (e && hero.gold >= infuseCost(level.floor) + 100 && infuseItem(hero, item, e.id)) owned.add(e.id);
     });
 }

@@ -53,12 +53,14 @@ buscar). La unión del Cuaderno con el Códice y el Bestiario en una sola Bitác
 **Problema:** hoy podés tener hasta 6 activas más pasivas de 8 piezas. Es confuso, y a mano (estilo Hades) no se puede
 manejar tanto.
 - **Reducir a 3 ranuras activas** (como Hades: ataque, especial y hechizo, más el esquive):
-  1. **Habilidad del arma** (Q o clic derecho): viene con el arma.
+  1. **Habilidad del arma** (Q): viene con el arma.
   2. **Habilidad de los guantes** (E): la ofensiva o de control que elijas.
-  3. **Definitiva de la armadura** (R): poderosa, con carga (se llena pegando, como el Llamado de Hades) en vez de maná.
+  3. **Habilidad de la armadura** (R): la que antes era la definitiva de cada héroe.
   - Casco, botas, amuleto y anillos dan **pasivas** y stats (las botas pueden cambiar cómo es el esquive).
-  - ❓ Alternativa: 3 activas sin la definitiva aparte. **Recomendado:** 2 activas + definitiva con carga. La definitiva
-    con carga es lo que hace épico el final de una pelea.
+  - **Decisión (2026-10-07):** sin sistema de carga. Las ex-definitivas pasan a ser activas comunes (maná y
+    enfriamiento, como cualquier otra), con sus números rebalanceados a la baja para que anden seguido en vez de
+    una vez cada mucho. Técnicamente, cada habilidad puede declarar un `towerValues` con los números que usa solo
+    en la Torre (`js/progression.js`, `skillValueSource`); Caos de Héroes sigue usando los valores de siempre.
 - **Rediseñar el catálogo** con roles claros y efectos que se lean:
   - **Control de unidades:** atraer (vórtice), empujar (onda), aturdir, congelar, raíz, provocar, miedo (huyen),
     convertir a un enemigo en aliado por unos segundos.
@@ -153,7 +155,11 @@ de Cazador de Hollow Knight):
 2. **Despertar y tutorial:** cuaderno y las 3 armas (espada, arco y bastón, con su habilidad). ✅ — las 3 armas
    como pedestal obligatorio y el Cuaderno con sus 7 páginas, ver más arriba. Falta solo la escena en el mundo
    (hoy el despertar es una ventana, no 3 armas clavadas en el piso).
-3. **Habilidades:** 3 ranuras (2 activas + definitiva con carga) y el catálogo rediseñado, con control y áreas.
+3. **Habilidades:** 3 ranuras (arma/guantes/armadura, sin carga) y el catálogo rediseñado, con control y áreas. ✅
+   el esqueleto mecánico (2026-10-07): catálogo solo arma/guantes/armadura dan activas, teclas fijas Q/E/R, las
+   11 definitivas rebalanceadas como activas comunes vía `towerValues`, y el Herrero ya no deja imbuir un poder
+   en una ranura que no es la suya. **Falta de esta fase:** "armar y balancear lo que tenemos" — revisar el resto
+   del catálogo (no solo las ex-definitivas) para que las 3 ranuras tengan sentido juntas.
 4. **Combate estilo Hades:** ataques anunciados en enemigos fuertes, 5 jefes con fases y definitiva.
 5. **Economía:** Esencia, desguace (5 piezas → pieza pura con calidad), mejoras permanentes y planos.
 6. **Bitácora:** unifica el Códice, el Bestiario, las recetas y el diario.
@@ -163,15 +169,18 @@ Las fases 3 y 4 son las más grandes: hay que rehacer pruebas y volver a medir e
 también tiene que aprender a esquivar los ataques anunciados).
 
 ## Decisiones tomadas (2026-10-07)
-- **Ranuras:** 2 activas (arma y guantes) + definitiva de la armadura que se carga pegando.
+- **Ranuras:** 3 activas (arma, guantes y armadura), todas con maná y enfriamiento normal. Sin sistema de carga:
+  las ex-definitivas se rebalancean para andar como una activa común (pedido explícito del usuario, pisa la
+  recomendación anterior de esta misma sección).
 - **Calidades de fabricación:** las 4 (roma, usada, nueva, obra maestra).
 - **Economía:** solo Esencia, sin energía con tiempo de espera.
 - **Primera fase:** pantalla, zoom y pausa con pestañas.
 
 ## Preguntas abiertas
 - ❓ 3 armas desde el principio o desbloqueables. Recomendado: desde el principio.
-- ❓ 2 activas + definitiva con carga, o 3 activas. Recomendado: 2 + definitiva.
 - ❓ Calidades: 4 (roma, usada, nueva, obra maestra) o 3. Recomendado: 4.
+- ❓ "Armar y balancear lo que tenemos": con el esqueleto de 3 ranuras ya andando, falta revisar el catálogo
+  completo (no solo las 11 ex-definitivas) para que arma/guantes/armadura tengan opciones parejas entre sí.
 - ❓ Energía con tiempo de espera, o solo Esencia. Recomendado: solo Esencia.
 - ❓ Música de bancos libres o generada con código. Recomendado: bancos libres con créditos.
 - ❓ El modo Custom Hero Chaos: ¿el rework de habilidades también lo toca? Recomendado: no, queda como está. El rework

@@ -53,8 +53,10 @@ const SLOT_NOUNS = { helm: 'Casco', armor: 'Coraza', gloves: 'Guantes', boots: '
 const INNATE_STATS = { DEADLY_STRIKE: { critChance: 15 }, BLOODLUST: { lifesteal: 15 } };
 
 // --- CATÁLOGO: cada habilidad e innato de cada héroe, en una ranura ---
-// La definitiva va en la armadura y el innato en el amuleto; la de movilidad en las botas; la primera que pega,
-// en el arma; las demás en casco (pasivas) o guantes.
+// Solo 3 ranuras traen activas (REWORK.md §2, fase 3): arma (la que pega primero), guantes (todas las demás
+// activas, incluida la de movilidad — ahí compiten entre sí: la que equipás es la que tenés) y armadura (la
+// que antes era "la definitiva": acá es una activa más, con números propios más chicos, ver towerValues en
+// cada heroes/*.js). Casco, botas, amuleto (el innato) y anillos quedan solo para pasivas y stats.
 let TOWER_CATALOG = null;
 function towerCatalog() {
     if (TOWER_CATALOG) return TOWER_CATALOG;
@@ -66,13 +68,11 @@ function towerCatalog() {
         const ult = skills.find(s => s.isUltimate);
         if (ult) place(ult, 'armor');
         const normals = skills.filter(s => !s.isUltimate);
-        const mobility = normals.find(s => s.tags.includes('MOVILIDAD'));
-        if (mobility) place(mobility, 'boots');
-        const hitter = normals.find(s => !used.has('weapon') && s !== mobility && s.kind === 'active' && s.tags.some(x => x === 'FÍSICO' || x === 'MÁGICO' || x === 'PURO'));
+        const hitter = normals.find(s => !used.has('weapon') && s.kind === 'active' && s.tags.some(x => x === 'FÍSICO' || x === 'MÁGICO' || x === 'PURO'));
         if (hitter) place(hitter, 'weapon');
-        normals.filter(s => s !== mobility && s !== hitter).forEach(s => {
-            const order = s.kind === 'passive' ? ['helm', 'gloves', 'weapon', 'boots'] : ['gloves', 'helm', 'weapon', 'boots'];
-            place(s, order.find(o => !used.has(o)) || 'gloves');
+        normals.filter(s => s !== hitter).forEach(s => {
+            if (s.kind === 'active') place(s, used.has('weapon') ? 'gloves' : 'weapon'); // sin arma propia: cae ahí
+            else place(s, ['helm', 'boots'].find(o => !used.has(o)) || 'helm');
         });
         TOWER_CATALOG.push({ heroKey: t.key, innateId: t.innate.id, slot: 'amulet' });
     });
@@ -276,6 +276,9 @@ function applyGear(hero) {
     hero.recalculateStats();
 }
 
+// Teclas fijas por ranura (REWORK.md §2, fase 3): el arma siempre en Q, los guantes en E, la armadura en R —
+// no importa en qué orden equipás, así los controles son siempre los mismos.
+const TOWER_SLOT_KEY = { weapon: 'q', gloves: 'e', armor: 'r' };
 function equipItem(hero, item, slot = null) {
     slot = slot || (item.slot === 'ring' ? (hero.gear.ring1 ? 'ring2' : 'ring1') : item.slot);
     if (slotKind(slot) !== item.slot) return false;
@@ -284,7 +287,10 @@ function equipItem(hero, item, slot = null) {
     hero.bag = hero.bag.filter(b => b.item !== item);
     hero.gear[slot] = item;
     const skill = itemSkill(item);
-    if (skill && !hero.skills.includes(skill)) { hero.addSkill(skill); hero.skillLevels[skill.id] = item.skillLevel; hero.skillBoosts[skill.id] = item.boosts; }
+    if (skill && !hero.skills.includes(skill)) {
+        hero.addSkill(skill); hero.skillLevels[skill.id] = item.skillLevel; hero.skillBoosts[skill.id] = item.boosts;
+        if (gameMode === 'tower' && skill.kind === 'active' && TOWER_SLOT_KEY[slot]) hero.keyBindings[skill.id] = TOWER_SLOT_KEY[slot];
+    }
     applyGear(hero);
     if (old && !addToBag(hero, old)) dropOnFloor(hero, old);
     return true;

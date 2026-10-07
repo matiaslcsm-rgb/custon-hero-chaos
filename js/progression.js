@@ -18,9 +18,16 @@ const ALL_SKILLS = Object.values(SKILL_INDEX);
 function maxSkillLevel(skill) { return skill.isUltimate ? 3 : 4; }
 function skillLevel(hero, skill) { return hero.skillLevels[skill.id] || 0; }
 
+// De dónde sale el valor de una clave: en la Torre, las ex-definitivas tienen números propios más chicos
+// (towerValues, ver el rebalanceo en cada heroes/*.js) para que anden como una activa común en vez de un botón
+// de una vez cada un rato largo; en Custom Hero Chaos no se toca nada. Solo hace falta definir en towerValues
+// las claves que cambian — el resto sigue saliendo de values.
+function skillValueSource(skill, key) {
+    return (gameMode === 'tower' && skill.towerValues && key in skill.towerValues) ? skill.towerValues : skill.values;
+}
 // Valor de una habilidad en un nivel dado. Con nivel 0 devuelve el de nivel 1.
 function valueAt(skill, key, level) {
-    const v = skill.values[key];
+    const v = skillValueSource(skill, key)[key];
     if (!Array.isArray(v)) return v;
     return v[Math.max(0, Math.min(v.length, level) - 1)];
 }
@@ -30,7 +37,7 @@ function val(skill, hero, key) { return applySkillBoost(skill, hero, key, valueA
 
 // Texto de un valor: "100/120/140/160%" con el nivel actual resaltado (level 0 = ninguno).
 function formatKey(skill, key, level, pct, mult = 1) {
-    const v = skill.values && skill.values[key];
+    const v = skill && skillValueSource(skill, key)[key];
     if (v === undefined) return null;
     const fmt = x => String(+((pct ? x * 100 : x) * mult).toFixed(2));
     const suffix = pct ? '%' : '';
