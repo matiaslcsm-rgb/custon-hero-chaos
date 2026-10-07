@@ -122,6 +122,7 @@ function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     const canEvade = opts.isAttack && !(source && hasFlag(source, 'trueStrike'));
     if (canEvade && Math.random() < effEvasion(target) / 100) { fxText(target, 'esquiva', '#8ecae6', 10); return { dealt: 0, evaded: true }; }
     let final = amount;
+    final *= elementReactionMult(source, target); // reacciones elementales (Torre, fxSkills.js)
     if (type === 'magical' && source) final *= 1 + effSpellAmp(source) / 100;
     if (source && source.isHero && target.isHero && target.arena && target.arena.kind === 'duel') final *= 1 - DUEL_DAMAGE_REDUCTION;
     if (source && target.arena && target.arena.height) final *= heightDamageMult(source, target); // Torre: altura (towerWorld.js)
@@ -138,6 +139,7 @@ function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     // dealt en el evento es el daño completo (sin recortar por la vida restante): lo usa Forma Inmortal para acumular
     emit(target, 'onDamaged', { source, dealt: final, type });
     if (target.type && target.type.thorns) beastThorns(target, source, hpLost, opts); // criaturas con espinas (towerBestiary.js)
+    if (target.pendingReaction) elementReactionAfter(source, target, final);
     if (source && hpLost > 0) emit(source, 'onDealDamage', { target, dealt: hpLost, type });
     if (!target.isAlive()) onUnitDeath(target, source);
     return { dealt: hpLost, evaded: false };
@@ -214,7 +216,7 @@ function fireSkillProjectile(attacker, opts) {
         attacker, kind: 'skill', x: attacker.x, y: attacker.y, tx: opts.tx, ty: opts.ty,
         dx: dx / dist, dy: dy / dist, dist, traveled: 0, speed: opts.speed, radius: opts.radius,
         dmg: opts.dmg, dmgType: opts.dmgType || 'magical', vfx: opts.vfx, skillName: opts.skillName,
-        onHit: opts.onHit, onArrive: opts.onArrive, hitSet: new Set()
+        onHit: opts.onHit, onArrive: opts.onArrive, hitSet: new Set(), fxEl: fxCastingSkill ? skillVfx(fxCastingSkill).el : null
     });
 }
 
@@ -229,10 +231,13 @@ function updateProjectiles(arena, dt) {
             enemiesOf(p.attacker).forEach(c => {
                 if (!c.isAlive() || p.hitSet.has(c) || Math.hypot(c.x - p.x, c.y - p.y) > p.radius) return;
                 p.hitSet.add(c);
-                const { dealt } = dealDamage(p.attacker, c, p.dmg, p.dmgType);
+                projectileElement = p.fxEl; // el proyectil de habilidad marca con su elemento
+                let dealt;
+                try { dealt = dealDamage(p.attacker, c, p.dmg, p.dmgType).dealt; } finally { projectileElement = null; }
                 if (p.onHit) p.onHit(c, dealt);
             });
             if (p.traveled >= p.dist) {
+                fxProjectileHit(p, p.tx, p.ty);
                 if (p.onArrive) p.onArrive(p.tx, p.ty);
                 if (!p.hitSet.size && p.attacker.isHero && fxArena(p.attacker)) log(`${p.skillName}: no le pegó a nadie.`);
                 projectiles.splice(i, 1);
@@ -244,6 +249,7 @@ function updateProjectiles(arena, dt) {
         const dist = Math.hypot(dx, dy);
         const step = p.speed * dt;
         if (dist < 0.35 || step >= dist) {
+            fxProjectileHit(p, p.target.x, p.target.y);
             resolveBasicHit(p.attacker, p.target, p.dmg, p.isCrit);
             projectiles.splice(i, 1);
             continue;
@@ -283,6 +289,7 @@ function killCreep(c, killer) {
     if (c.arena && c.arena.kind === 'tower') towerLootOnKill(c.arena, c, killer); // Tower Chaos: botín
     if (c.type && c.type.onDeath) c.type.onDeath(c, killer);
     if (c.champion) championOnDeath(c);
+    if (killer === player && fxArena(c) && (c.champion || c.isBoss || c.isGuardian || c.isCaveBoss || c.isCarrier)) { fxHitStop(0.09); fxShake(4); } // muerte pesada: pausa de impacto
     const timeAlive = gameClock - (c.spawnTime || gameClock);
     const speedMult = speedGoldMultiplier(timeAlive);
     const gold = Math.max(1, Math.round(c.gold * speedMult * (c.arena && c.arena.kind === 'tower' ? TOWER.goldMult : 1))); // Torre: economía propia

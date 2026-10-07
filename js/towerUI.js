@@ -37,7 +37,8 @@ function itemTooltipHtml(item) {
     if (skill) {
         const lvl = skill.isInnateItem ? 0 : item.skillLevel;
         const kind = skill.isInnateItem ? 'Innato' : skill.kind === 'passive' ? 'Pasiva' : skill.isUltimate ? 'Definitiva' : 'Activa';
-        html += `<div class="tt-skill"><b>${skill.name}</b> <span class="tt-kind">${kind}${skill.isInnateItem ? '' : ' · nivel ' + lvl}</span>` +
+        const elKey = skill.kind === 'active' && !skill.isInnateItem ? skillVfx(skill).el : null;
+        html += `<div class="tt-skill"><b>${skill.name}</b> <span class="tt-kind">${kind}${skill.isInnateItem ? '' : ' · nivel ' + lvl}${elKey ? ` · <span style="color:${ELEMENTS[elKey].c1}">◆ ${ELEMENT_NAMES[elKey]}</span>` : ''}</span>` +
             (skill.kind === 'active' && !skill.isInnateItem ? `<div class="tt-cost">${skillCostLine(skill, lvl)}</div>` : '') +
             `<div>${skill.isInnateItem ? skill.description.replace(/^Innato:\s*/, '') : describeSkill(skill, lvl)}</div></div>`;
     }

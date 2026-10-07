@@ -1,7 +1,7 @@
 // Punto de entrada: conecta los botones y arranca el bucle principal.
 
 // Versión visible en el menú: si no coincide con la última subida, el navegador muestra una copia vieja (Ctrl+F5).
-const GAME_VERSION = '2026-10-06 · eventos del campo';
+const GAME_VERSION = '2026-10-07 · habilidades con identidad';
 document.getElementById('game-version').textContent = `Versión ${GAME_VERSION}`;
 
 document.getElementById('start-wave-btn').onclick = startWave;
@@ -52,7 +52,7 @@ document.getElementById('log-toggle').onclick = () => {
 let lastTime = 0;
 function loop(ts) {
     const dt = Math.max(0, Math.min(0.1, (ts - lastTime) / 1000 || 0)); lastTime = ts;
-    if (!paused) { // en pausa se congela todo: combate, temporizadores y la sala de espera
+    if (!paused && !inHitStop()) { // en pausa se congela todo; en la pausa de impacto también (unos milisegundos)
         if (inCombat()) gameClock += dt;
         tickPhaseTimer(dt);
         tickAutopilot(dt);
@@ -196,6 +196,13 @@ if (location.search.includes('demo=tower')) setTimeout(() => {
     if (q.get('floor')) enterTowerFloor(+q.get('floor'), 'demo');
     if (q.get('at') === 'town') { player.x = player.arena.town.merchant.x + 2; player.y = player.arena.town.merchant.y + 2; }
     if (q.get('time') === 'night') towerRun.startedAt = gameClock - (DAYNIGHT.day + DAYNIGHT.dusk + 10); // &time=night
+    if (q.get('cast')) { // &cast=ID1,ID2: lanza esas habilidades en bucle con enemigos alrededor (para ver los efectos)
+        const L = player.arena, ids = q.get('cast').split(',');
+        ids.forEach(id => { const e = cat.find(o => o.skillId === id); if (e) equipItem(player, makeTowerItem(3, e, 'rare')); });
+        for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2, x = Math.round(player.x + Math.cos(a) * 2.5), y = Math.round(player.y + Math.sin(a) * 2); if (walkable(L, x, y)) { const c = makeCreep(towerCreepPool(1)[i % 3], x, y, 50, false, 0); c.arena = L; c.spawnTime = -1e9; L.creeps.push(c); } }
+        let k = 0;
+        setInterval(() => { const id = ids[k++ % ids.length], sk = SKILL_INDEX[id]; if (!sk) return; player.cooldowns[id] = 0; player.mana = player.maxMana; player.skillLevels[id] = Math.max(1, player.skillLevels[id] || 1); tryCastSkill(player, sk, { quiet: true }); }, 380);
+    }
     if (q.get('at') === 'event') { const L = player.arena, e = L.events.find(o => o.kind === q.get('kind')) || L.events[0]; player.x = e.x - 4; player.y = e.y; if (!walkable(L, player.x, player.y)) { player.x = e.x; player.y = e.y + 3; } }
     if (q.get('at') === 'carrier') { equipItem(player, makeTowerItem(1, cat.find(e => e.slot === 'helm'), 'rare')); const c = spawnItemCarrier(player.arena, player); c.x = player.x + 3; c.y = player.y; c.spawnX = c.x; c.spawnY = c.y; }
     if (q.get('at') === 'cave') { const L = player.arena; for (let d = 1; d <= +(q.get('depth') || 1); d++) enterCave(L.caves[0], d); }

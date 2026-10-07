@@ -1625,6 +1625,24 @@ test('Torre: eventos del campo (caravana, emboscada, cofre maldito, mercader amb
     check(buyTowerItem(player, item, pd.vendor) && player.gold === 99999 - vendorPrice(item, pd.vendor) && vendorPrice(item, pd.vendor) > towerItemPrice(item), 'vende más caro');
 }, { random: true });
 
+test('Torre: reacciones elementales (marca + otro elemento = reacción)', () => {
+    newTower();
+    const c = makeCreep(towerCreepPool(1)[0], player.x + 1, player.y, 20, false, 0); c.arena = player.arena; player.arena.creeps.push(c);
+    const fire = SKILL_INDEX.ALCHEMIST_BREW, ice = SKILL_INDEX.FROSTWITCH_BLAST;
+    fxCastingSkill = fire; dealDamage(player, c, 10, 'magical'); fxCastingSkill = null;
+    checkEq(c.elMark.el, 'fire', 'la habilidad de fuego marca');
+    const hp = c.hp;
+    fxCastingSkill = ice; dealDamage(player, c, 10, 'magical'); fxCastingSkill = null;
+    check(hp - c.hp >= 15 && !c.elMark, 'fuego + hielo = Derretir (+60%) y consume la marca');
+    check(towerRun.reactions && towerRun.reactions.Derretir === 1, 'queda registrada');
+    fxCastingSkill = SKILL_INDEX.ARCANIST_BOLT; dealDamage(player, c, 5, 'magical');
+    fxCastingSkill = SKILL_INDEX.ZEUS_ARC; dealDamage(player, c, 5, 'magical'); fxCastingSkill = null;
+    check(getEffect(c, 'UNSTABLE'), 'lo arcano con otro elemento desestabiliza');
+    const plain = makeCreep(towerCreepPool(1)[0], player.x + 2, player.y, 20, false, 0); plain.arena = player.arena;
+    dealDamage(player, plain, 10, 'physical');
+    check(!plain.elMark, 'los ataques básicos no marcan');
+}, { random: true });
+
 test('Ancla: cada golpe ralentiza y quita evasión', () => {
     newGame('AXE');
     const ev = effEvasion(player);

@@ -342,7 +342,10 @@ function tryCastSkill(hero, skill, opts = {}) {
     const outerBuffer = logBuffer;
     logBuffer = [];
     let ok;
+    const from = { x: hero.x, y: hero.y };
+    fxCastingSkill = skill;
     try { ok = skill.cast(hero); } finally {
+        fxCastingSkill = null;
         const messages = logBuffer;
         logBuffer = outerBuffer;
         if (ok || !opts.quiet) messages.forEach(log);
@@ -350,7 +353,7 @@ function tryCastSkill(hero, skill, opts = {}) {
     if (!ok) return false;
     hero.mana -= manaCost;
     hero.cooldowns[skill.id] = skillCooldown(skill, hero);
-    fxCast(hero, skill);
+    fxCast(hero, skill, from);
     emit(hero, 'onCast', { skill });
     return true;
 }
@@ -451,8 +454,8 @@ function updateHero(hero, arena, dt) {
         if (hero.attackTimer >= (1 / effAtkSpeed(hero))) {
             hero.attackTimer = 0;
             const { dmg, isCrit } = rollAttackDamage(hero, target);
-            if (hero.projectileSpeed > 0) { fxAttack(hero, target, 'ranged', heroColor(hero)); fireProjectile(hero, target, dmg, isCrit); }
-            else { fxAttack(hero, target, 'melee'); fxSlash(hero, target, heroColor(hero), isCrit); resolveBasicHit(hero, target, dmg, isCrit); }
+            if (hero.projectileSpeed > 0) { fxAttack(hero, target, 'ranged', heroColor(hero)); fxHeroShot(hero, target); fireProjectile(hero, target, dmg, isCrit); }
+            else { fxAttack(hero, target, 'melee'); fxHeroAttack(hero, target, isCrit); resolveBasicHit(hero, target, dmg, isCrit); } // según el arma (fxSkills.js)
         }
     } else {
         hero.attackTimer = 0;

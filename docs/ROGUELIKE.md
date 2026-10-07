@@ -253,6 +253,33 @@ Pedido del usuario: ciclo de día y noche, mapa más grande, cuevas con muchos n
   4 muertes, ~3 niveles por piso, sin trabones (se sumó una salida genérica: si el piloto queda quieto 15 s sin pelear,
   camina al azar un momento).
 
+## 4 quinquies. Habilidades con identidad (2026-10-07)
+Pedido del usuario: "los poderes y skills se ven muy monótonos". Diagnóstico medido: 30 de 34 activas no tenían efecto
+propio (todas: un anillo en 4 colores); los estados (veneno, frío, aturdido, escudo) no se veían; los golpes no pesaban
+(sin pausa de impacto); el ataque básico era igual con cualquier arma; y en juego todas eran "pegar X de daño".
+Referencias: "Juice it or lose it" (Jonasson y Purho, 2012: partículas, temblor, pausa de impacto), el hitstop de los
+juegos de pelea (40-80 ms en golpes fuertes), la identidad por color de los dioses de Hades, y las reacciones
+elementales de Magicka / Divinity / Genshin. Código: `js/fxSkills.js`.
+- **Forma + elemento por habilidad** (`SKILL_VFX`): 16 formas (proyectil, cono, nova, zona que dura, aura, escudo,
+  teletransporte, embestida, torbellino, grito, meteoro, guadaña, disparo, garras, cadena de rayos, rayos del cielo,
+  curación, rayo directo) y 10 elementos con paleta y partícula propias (fuego: brasas que suben; hielo: esquirlas;
+  rayo: chispas; veneno: burbujas; arcano: runas que giran; sombra: humo; sangre: gotas; acero; luz: cruces; vacío:
+  remolinos). Las que no están en la tabla se deducen de sus etiquetas.
+- **Definitivas**: cartel en tinta con el nombre, de lado a lado, y pausa de impacto de 120 ms.
+- **Estados visibles**: aturdido (estrellas), frenado (escarcha a los pies), veneno (burbujas), quemado (llamitas),
+  sangrado (gotas), escudo (burbuja), apurado (líneas de velocidad), provocando (!), marca de elemento (rombo).
+- **Peso**: pausa de impacto en los críticos (40 ms) y al matar campeones, jefes o portadores (90 ms, con temblor).
+- **Ataque básico según el arma**: hacha (tajo pesado con temblor), dagas y espadas gemelas (doble tajo), guadaña
+  (media luna), rifle (estela), rayo de Zeus (zigzag), báculos y matraz (orbe del elemento con halo), puños (impacto).
+- **Reacciones elementales** (solo en la Torre, para no tocar el balance de los duelos): una habilidad que daña marca
+  al enemigo con su elemento 5 s; otra de OTRO elemento produce una reacción y consume la marca. Derretir (fuego+hielo:
+  +60%), Explosión Tóxica (fuego+veneno: 50% en radio 2), Fragmentar (hielo+rayo: aturde 1,2 s), Sobrecarga
+  (rayo+veneno: salta al 40% a 2), Plasma (fuego+rayo: +40% y quema), Cosecha (sangre+sombra: te curás 35%), Desgarro
+  (sangre+acero: sangrado fuerte), Quebrar (hielo+acero: +50%), Plaga (veneno+sombra: contagia veneno), Desestabilizar
+  (arcano + cualquiera: +25% de daño recibido 4 s), Implosión (vacío + cualquiera: atrae y pega 30%). Aviso la primera
+  vez que descubrís cada una; el elemento de cada habilidad aparece en el detalle de la pieza; la crónica las cuenta.
+- Demo: `index.html?demo=tower&floor=1&cast=ZEUS_ARC,FROSTWITCH_ZERO` (lanza esas habilidades en bucle).
+
 ## 4 bis. Estética "tinta y pergamino" (en curso)
 Pedido del usuario con referencias de ilustraciones de caballeros en tinta (líneas negras gruesas, colores planos
 apagados, fondo crema, rayado; no se usan esas imágenes, solo el estilo). Decidido: dirección de arte + personajes

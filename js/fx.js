@@ -36,7 +36,7 @@ function fxDamage(target, amount, type, isCrit) {
     sfx(isCrit ? 'crit' : target.isHero ? 'heroHit' : 'hit');
     const color = target.isHero ? '#ff477e' : DMG_COLORS[type] || '#fff';
     pushFx(arena, { kind: 'text', x: target.x + (Math.random() - 0.5) * 0.6, y: target.y - 0.4, text: isCrit ? `${amount}!` : `${amount}`, color, size: isCrit ? 18 : 12, life: isCrit ? 1.1 : 0.8 });
-    if (isCrit) { fxBurst(target, '#ffd166', 6, 3); fxShake(2.5); }
+    if (isCrit) { fxBurst(target, '#ffd166', 6, 3); fxShake(2.5); if (!target.isHero) fxHitStop(0.04); }
 }
 
 function fxHeal(unit, amount) { if (amount >= 3) fxText(unit, `+${amount}`, '#72efdd', 11, 0.8); }
@@ -119,13 +119,9 @@ function fxShake(amount) {
     if (amount >= 4) sfx('boom');
 }
 
-function fxCast(hero, skill) {
-    const tag = (skill.tags || []).find(t => SKILL_FX_COLORS[t]);
-    const color = tag ? SKILL_FX_COLORS[tag] : '#00f5d4';
+function fxCast(hero, skill, from) {
     if (fxArena(hero)) sfx(skill.isUltimate ? 'ult' : 'cast');
-    hero.fxAttack = { kind: 'cast', dx: hero.facing || 1, dy: 0, at: fxClock, color }; // se eleva y brilla al lanzar
-    fxRing(hero, color, skill.isUltimate ? 3.2 : 1.8, skill.isUltimate ? 0.7 : 0.45);
-    if (skill.isUltimate) { fxBurst(hero, color, 18, 5); fxShake(3); }
+    fxSkill(hero, skill, from); // cada habilidad con su forma y su elemento (fxSkills.js)
 }
 
 // --- ACTUALIZAR Y DIBUJAR ---
@@ -144,7 +140,7 @@ function updateArenaFx(arena, dt) {
     if (!arena.fx) return;
     arena.fx = arena.fx.filter(f => fxClock - f.born < f.life);
     arena.fx.forEach(f => {
-        if (f.kind === 'particle') { f.x += f.vx * dt; f.y += f.vy * dt; f.vx *= Math.pow(0.05, dt); f.vy *= Math.pow(0.05, dt); }
+        if (f.kind === 'particle' && f.born <= fxClock) { f.x += f.vx * dt; f.y += f.vy * dt; f.vx *= Math.pow(0.05, dt); f.vy *= Math.pow(0.05, dt); }
         if (f.kind === 'text') f.y -= 1.1 * dt;
     });
 }
@@ -152,6 +148,7 @@ function updateArenaFx(arena, dt) {
 function drawArenaFx(arena) {
     (arena.fx || []).forEach(f => {
         const t = (fxClock - f.born) / f.life; // 0 → 1
+        if (t < 0) return; // todavía no empezó (efecto con retardo)
         const px = f.x * TILE + TILE / 2, py = f.y * TILE + TILE / 2;
         ctx.globalAlpha = Math.max(0, 1 - t * t);
         if (f.kind === 'text') {
@@ -159,7 +156,8 @@ function drawArenaFx(arena) {
             ctx.lineWidth = 3; ctx.strokeStyle = gameMode === 'tower' ? '#1d1712' : 'rgba(0,0,0,0.8)'; ctx.strokeText(f.text, px, py);
             ctx.fillStyle = f.color; ctx.fillText(f.text, px, py);
         } else if (f.kind === 'particle') {
-            ctx.fillStyle = f.color; ctx.fillRect(px - f.size / 2, py - f.size / 2, f.size, f.size);
+            if (f.style) drawStyledParticle(f, t, px, py);
+            else { ctx.fillStyle = f.color; ctx.fillRect(px - f.size / 2, py - f.size / 2, f.size, f.size); }
         } else if (f.kind === 'slash') {
             // El arco barre 140° alrededor del objetivo, perpendicular a la dirección del golpe
             const sweep = Math.PI * 0.78, start = f.angle + Math.PI - sweep / 2, dir = f.flip ? 1 : -1;
@@ -168,7 +166,7 @@ function drawArenaFx(arena) {
             ctx.shadowColor = f.color; ctx.shadowBlur = 8;
             ctx.beginPath();
             const a0 = from + dir * sweep * tail, a1 = from + dir * sweep * head;
-            ctx.arc(px, py, TILE * 0.62, Math.min(a0, a1), Math.max(a0, a1));
+            ctx.arc(px, py, TILE * 0.62 * (f.scale || 1), Math.min(a0, a1), Math.max(a0, a1));
             ctx.stroke();
             ctx.shadowBlur = 0; ctx.lineCap = 'butt';
         } else if (f.kind === 'bolt') {
@@ -182,9 +180,10 @@ function drawArenaFx(arena) {
         } else if (f.kind === 'ring') {
             ctx.strokeStyle = f.color; ctx.lineWidth = 3 * (1 - t) + 1;
             ctx.beginPath(); ctx.arc(px, py, f.radius * TILE * (0.3 + 0.7 * t), 0, Math.PI * 2); ctx.stroke();
-        }
+        } else drawSkillFx(f, t, px, py); // formas de habilidad (fxSkills.js)
     });
     ctx.globalAlpha = 1;
+    if (gameMode !== 'tower') drawUltBanner(MAP_W / 2, MAP_H * 0.72); // en la Torre va encima de la niebla (renderTower)
 }
 
 // Posición dibujada de una unidad: se desliza hacia su casilla (movimiento suave) + el salto del golpe.

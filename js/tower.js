@@ -430,7 +430,7 @@ function towerInfoHtml() {
 function towerChronicleHtml() {
     const s = towerRun.stats, min = Math.floor((gameClock - towerRun.startedAt) / 60);
     return `<p class="subtitle tower-chronicle">📜 <b>Crónica</b> · ${min} min · mejor piso ${s.bestFloor} · ${towerRun.deaths} muerte${towerRun.deaths === 1 ? '' : 's'} · ` +
-        `${s.kills} bajas (${s.champions} campeones, ${s.guardians} guardianes) · ${s.shrines} santuarios${s.events ? ` · ${s.events} eventos` : ''}${s.deepest ? ` · cueva más honda −${s.deepest}` : ''} · ${s.gold}g ganados</p>`;
+        `${s.kills} bajas (${s.champions} campeones, ${s.guardians} guardianes) · ${s.shrines} santuarios${s.events ? ` · ${s.events} eventos` : ''}${towerRun.reactions ? ` · ${Object.values(towerRun.reactions).reduce((a, b) => a + b, 0)} reacciones` : ''}${s.deepest ? ` · cueva más honda −${s.deepest}` : ''} · ${s.gold}g ganados</p>`;
 }
 
 // Baldosas del nivel (se dibujan una vez y se reutilizan): 4 pisos de piedra, pared de frente y pared de arriba.
@@ -540,8 +540,15 @@ function renderTower(level, dt) {
         drawUnit(c, c.color, c.symbol, p, { glow: c.isGuardian, big: c.isGuardian });
     });
     level.projectiles.forEach(p => {
+        const lk = projectileLook(p), x = p.x * TILE + TILE / 2, y = p.y * TILE + TILE / 2;
+        if (lk) { // orbe con halo del elemento (fxSkills.js)
+            ctx.globalAlpha = 0.45; ctx.fillStyle = lk.c2; ctx.beginPath(); ctx.arc(x, y, p.kind === 'skill' ? 9 : 6, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
+            ctx.fillStyle = p.isCrit ? '#ffd166' : lk.c1; ctx.beginPath(); ctx.arc(x, y, p.kind === 'skill' ? 5 : 3.5, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = INK.line; ctx.lineWidth = 1; ctx.stroke();
+            return;
+        }
         ctx.fillStyle = p.isCrit ? '#ffd166' : (p.attacker.isHero ? heroColor(p.attacker) : p.attacker.color || '#fefae0');
-        ctx.beginPath(); ctx.arc(p.x * TILE + TILE / 2, p.y * TILE + TILE / 2, p.isCrit ? 4 : 3, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(x, y, p.isCrit ? 4 : 3, 0, Math.PI * 2); ctx.fill();
     });
     if (player.isAlive()) {
         const pos = drawPos(player, dt);
@@ -559,6 +566,7 @@ function renderTower(level, dt) {
     }
     ctx.restore();
     drawTowerNight(level); // día y noche (towerWorld.js)
+    drawUltBanner(MAP_W / 2, MAP_H * 0.72); // cartel de la definitiva, encima de la niebla (fxSkills.js)
     drawInkVignette();
     drawObjectiveArrow(level);
     renderTowerMinimap(level);
