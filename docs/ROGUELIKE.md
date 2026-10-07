@@ -279,6 +279,8 @@ elementales de Magicka / Divinity / Genshin. Código: `js/fxSkills.js`.
   (arcano + cualquiera: +25% de daño recibido 4 s), Implosión (vacío + cualquiera: atrae y pega 30%). Aviso la primera
   vez que descubrís cada una; el elemento de cada habilidad aparece en el detalle de la pieza; la crónica las cuenta.
 - Demo: `index.html?demo=tower&floor=1&cast=ZEUS_ARC,FROSTWITCH_ZERO` (lanza esas habilidades en bucle).
+- Medido (2 runs con piloto automático): ganó las 2, en 83 y 128 min con 6 muertes cada una; produjo 140 y 213
+  reacciones. Queda dentro de la franja buscada (antes: 122-145 min con 0-6 muertes), así que no se tocó el balance.
 
 ## 4 bis. Estética "tinta y pergamino" (en curso)
 Pedido del usuario con referencias de ilustraciones de caballeros en tinta (líneas negras gruesas, colores planos
