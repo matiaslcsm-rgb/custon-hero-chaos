@@ -20,6 +20,7 @@ document.getElementById('tshop-close').onclick = () => toggleTowerShop(false);
 document.getElementById('bestiary-close').onclick = () => toggleBestiary(false);
 document.getElementById('codex-close').onclick = () => toggleCodex(false);
 document.getElementById('smith-close').onclick = () => toggleSmith(false);
+document.getElementById('notebook-close').onclick = () => toggleNotebook(false);
 document.getElementById('map-toggle').onclick = toggleBigMap;
 document.getElementById('shop-container').onclick = e => { if (e.target.id === 'shop-container') closeShop(); };
 window.addEventListener('resize', applyMapSize);

@@ -4,7 +4,7 @@
 //   clic derecho equipa o desequipa. Mientras está abierto (o la forja, o los stats), la partida espera.
 
 let invOpen = false, forgeOpen = false, invHeld = null, tshopOpen = false, tshopVendor = null;
-function towerModalOpen() { return statsOpen || invOpen || forgeOpen || tshopOpen || bestiaryOpen || codexOpen || smithOpen || weaponPickOpen; }
+function towerModalOpen() { return statsOpen || invOpen || forgeOpen || tshopOpen || bestiaryOpen || codexOpen || smithOpen || weaponPickOpen || notebookOpen; }
 
 // --- ELEGIR ARMA AL DESPERTAR (REWORK.md §1): obligatorio, sin botón de cerrar, bloquea la partida ---
 let weaponPickOpen = false;

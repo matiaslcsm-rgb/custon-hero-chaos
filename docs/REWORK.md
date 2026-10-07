@@ -33,16 +33,21 @@ planos), Diablo II (calidad de las piezas), Hollow Knight (el diario de cazador)
 - ❓ ¿Las 3 armas siempre disponibles, o se desbloquean (arrancás solo con la espada)?
   **Recomendado:** las 3 desde el principio; lo desbloqueable son sus variantes (Espada de Fuego, Arco Largo…) en el Códice.
 
-**Hecho (mitad mecánica, 2026-10-07, `js/towerItems.js`/`js/tower.js`/`js/towerUI.js`):** las 3 armas, como pedestal
-obligatorio al entrar a la torre (ventana sin botón de cerrar; Esc no la cierra ni se puede pausar por arriba —
+**Hecho (2026-10-07, `js/towerItems.js`/`js/tower.js`/`js/towerUI.js`):** las 3 armas, como pedestal obligatorio al
+entrar a la torre (ventana sin botón de cerrar; Esc no la cierra ni se puede pausar por arriba —
 `weaponPickOpen` en `towerModalOpen()`, igual que el inventario o la forja; el piloto automático elige Espada sola).
 Golpe Certero pasó de ser fijo del Aventurero a ser la habilidad de la Espada (se pierde si cambiás de arma, como
 cualquier otra pieza); se sumaron Ráfaga del Arco (pega a 3 enemigos distintos) y Proyectil Arcano (daño mágico,
 marca elemento arcano para las reacciones). Como las 3 armas no son de ningún héroe del roster, no entran en
 `HERO_TEMPLATES`: `heroOf()` las resuelve aparte (y de paso corrige que el ícono y el color de un arma sin héroe
-real crasheaban en un par de lugares). **Falta de esta fase:** la escena del despertar en el mundo (hoy es una
-ventana modal, no 3 armas clavadas en el piso que camines a buscar) y el cuaderno/tutorial jugado — eso es
-contenido a escribir, más grande, y se dejó para después (fase 6, la Bitácora, ya lo absorbe).
+real crasheaban en un par de lugares).
+
+**Hecho (2026-10-07, el Cuaderno, `js/towerNotebook.js`):** tutorial jugado mínimo — 7 páginas (despertar, caminar,
+esquivar, lanzar, primera baja, un cofre, el pueblo) que se escriben solas la primera vez que hacés esa acción, en
+la voz del Aventurero, y quedan guardadas para siempre (no se repiten en runs siguientes, como el Códice). Ventana
+con tecla N o desde la pausa, con las páginas que faltan mostradas como "???". **Falta de esta fase:** la escena
+del despertar en el mundo (hoy es una ventana modal con 3 cartas, no 3 armas clavadas en el piso que camines a
+buscar). La unión del Cuaderno con el Códice y el Bestiario en una sola Bitácora (§6) queda para más adelante.
 
 ## 2. Habilidades: menos, más claras y con más identidad
 **Problema:** hoy podés tener hasta 6 activas más pasivas de 8 piezas. Es confuso, y a mano (estilo Hades) no se puede
@@ -145,8 +150,9 @@ de Cazador de Hollow Knight):
 
 ## Orden propuesto (cada fase jugable y medida)
 1. **Pantalla:** zoom, HUD más chico y menú de pausa con pestañas. Es barato y mejora todo lo que viene después.
-2. **Despertar y tutorial:** cuaderno y las 3 armas (espada, arco y bastón, con su habilidad). ✅ parcial: las 3
-   armas como pedestal obligatorio, ver más arriba. Falta el cuaderno/tutorial jugado.
+2. **Despertar y tutorial:** cuaderno y las 3 armas (espada, arco y bastón, con su habilidad). ✅ — las 3 armas
+   como pedestal obligatorio y el Cuaderno con sus 7 páginas, ver más arriba. Falta solo la escena en el mundo
+   (hoy el despertar es una ventana, no 3 armas clavadas en el piso).
 3. **Habilidades:** 3 ranuras (2 activas + definitiva con carga) y el catálogo rediseñado, con control y áreas.
 4. **Combate estilo Hades:** ataques anunciados en enemigos fuertes, 5 jefes con fases y definitiva.
 5. **Economía:** Esencia, desguace (5 piezas → pieza pura con calidad), mejoras permanentes y planos.

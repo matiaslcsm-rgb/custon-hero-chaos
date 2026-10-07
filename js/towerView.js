@@ -90,7 +90,7 @@ function towerPauseHtml() {
     const b = (fn, label) => `<button class="secondary-btn" onclick="setPaused(false); ${fn}">${label}</button>`;
     return `<div class="pause-section">🗼 Torre</div><div class="pause-row tower-pause">` +
         b('toggleInventory(true)', '🎒 Equipo (I)') + b('toggleStatsWindow(true)', '📊 Stats (C)') + b('toggleCodex(true)', '📜 Códice (J)') +
-        b('toggleBestiary(true)', '📖 Bestiario (K)') + b('toggleTowerLog(true)', '📓 Diario del piso (L)') + `</div>` +
+        b('toggleBestiary(true)', '📖 Bestiario (K)') + b('toggleTowerLog(true)', '📓 Diario del piso (L)') + b('toggleNotebook(true)', '✏️ Cuaderno (N)') + `</div>` +
         `<div class="pause-zoom">🔍 Zoom <button class="secondary-btn" onclick="towerZoom(-1); renderPauseMenu()">−</button>` +
         `<span>${Math.round(VIEW.across)} casillas a lo ancho</span><button class="secondary-btn" onclick="towerZoom(1); renderPauseMenu()">+</button></div>` +
         `<p class="subtitle pause-controls">${TOWER_CONTROLS}</p>`;

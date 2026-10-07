@@ -1446,6 +1446,49 @@ test('Torre: Ráfaga del Arco pega a varios enemigos; Proyectil Arcano marca el 
     check(c.elMark && c.elMark.el === 'arcane', 'marcado con arcano para las reacciones (fxSkills.js)');
 });
 
+test('Torre: el Cuaderno escribe una página sola la primera vez que hacés cada cosa, y no se repite', () => {
+    notebookState = { seen: {} };
+    newTower(); // startTowerRun() ya escribió WAKE al despertar
+    check(notebookState.seen.WAKE, 'WAKE al despertar');
+
+    keys.w = true;
+    updateTower(1 / 60);
+    keys.w = false;
+    check(notebookState.seen.MOVE, 'MOVE al caminar');
+
+    player.dashReadyAt = gameClock + 1; // como si recién hubiese esquivado (fxSkills.js)
+    updateTower(1 / 60);
+    check(notebookState.seen.DODGE, 'DODGE con el esquive recién usado');
+
+    emit(player, 'onKill', { victim: {} });
+    check(notebookState.seen.KILL, 'KILL al matar (innato del Aventurero, towerItems.js)');
+    emit(player, 'onCast', { skill: SKILL_INDEX.ADVENTURER_GOLPE });
+    check(notebookState.seen.CAST, 'CAST al lanzar');
+
+    writeNotebookPage('CHEST'); writeNotebookPage('TOWN');
+    check(notebookState.seen.CHEST && notebookState.seen.TOWN, 'CHEST y TOWN');
+
+    checkEq(Object.keys(notebookState.seen).length, NOTEBOOK_PAGES.length, 'las 7 páginas');
+    const before = JSON.stringify(notebookState.seen);
+    writeNotebookPage('WAKE'); // repetir no hace nada
+    checkEq(JSON.stringify(notebookState.seen), before, 'repetir no cambia nada');
+}, { random: true });
+
+test('Torre: la ventana del Cuaderno (N) muestra las páginas que ya escribiste y "???" las demás', () => {
+    notebookState = { seen: { WAKE: true } };
+    newTower();
+    toggleNotebook(true);
+    check(notebookOpen, 'se abre');
+    const rows = [...document.querySelectorAll('#notebook-pages .notebook-page')];
+    checkEq(rows.length, NOTEBOOK_PAGES.length, 'una fila por página');
+    check(rows[0].textContent.includes('despertar'), 'la escrita muestra su texto');
+    check(!rows[0].classList.contains('locked'), 'sin candado');
+    check(rows[1].textContent.includes('???'), 'la que falta, oculta');
+    check(rows[1].classList.contains('locked'), 'con candado');
+    handleEscape();
+    check(!notebookOpen, 'Esc la cierra');
+});
+
 test('Torre: equipar un arma cambia el ataque y da su habilidad; sacarla la quita', () => {
     newTower('AXE', { weapon: null }); // sin arma de base, para que "vuelve a los puños" compare contra los puños
     const entry = towerCatalog().find(e => e.heroKey === 'SNIPER' && e.slot === 'weapon');
@@ -2721,6 +2764,7 @@ test('Nueva Partida deja todo como al empezar', () => {
 // ============================================================ EJECUCIÓN
 function runTests() {
     codexPersist = false; codex = { unlocked: {}, best: {} }; // el Códice guardado no se toca
+    notebookPersist = false; notebookState = { seen: {} }; // el cuaderno guardado tampoco
     autoCast = false; // las pruebas controlan a mano cuándo se lanza cada habilidad (la de habilidades automáticas lo prende)
     const results = TESTS.map(t => {
         try {

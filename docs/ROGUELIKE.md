@@ -422,8 +422,29 @@ igual que con cualquier otra pieza — es el comportamiento que ya existía para
 para las 3 iniciales.
 
 **Falta de esta fase:** la escena en el mundo (hoy es una ventana modal con 3 cartas, no 3 armas clavadas en el
-piso que camines a buscar) y el cuaderno/tutorial jugado que pedía REWORK.md §1 — eso es contenido para escribir
-(páginas que se completan con tus acciones), más grande, y la fase 6 (la Bitácora) ya lo va a absorber.
+piso que camines a buscar).
+
+### El Cuaderno (2026-10-07, completa la fase 2)
+
+El tutorial jugado que pedía REWORK.md §1: 7 páginas que se escriben solas, una sola vez por siempre (se guardan
+en el navegador, `localStorage` igual que el Códice), la primera vez que hacés esa acción — en la voz del propio
+Aventurero, no carteles. `js/towerNotebook.js`:
+
+| Página | Se escribe cuando… |
+|---|---|
+| El despertar | arranca la run (antes de elegir arma) |
+| Caminar | te movés por primera vez |
+| El esquive | usás el esquive (Espacio) por primera vez |
+| Lo que sé hacer | lanzás una habilidad por primera vez |
+| Primera baja | matás tu primer creep |
+| El cofre | abrís tu primer cofre |
+| El pueblo | llegás al pueblo por primera vez |
+
+La mayoría de los enganches leen estado que ya existía (`keys`, `player.dashReadyAt`, el resultado de `heroInTown`)
+en vez de agregar código nuevo en archivos compartidos; "primera baja" y "lanzar" reutilizan los hooks `onKill`/
+`onCast` que el innato del Aventurero ya tenía para repartir experiencia al equipo (`gearEvent`, `towerItems.js`).
+Ventana con tecla N o desde la pausa (`✏️ Cuaderno`); las páginas que faltan se muestran como "???". La unión con
+el Códice y el Bestiario en una sola Bitácora (REWORK.md §6) queda para cuando se encare esa fase.
 
 ## 5. Decisiones tomadas (2026-10-03)
 - Avance: **subir una torre**; cada nivel es aleatorio. Final en el **nivel 10**, con salón de la fama.

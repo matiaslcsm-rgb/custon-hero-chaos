@@ -44,6 +44,7 @@ window.addEventListener('keydown', e => {
     if (k === 'k' && gameMode === 'tower') { toggleBestiary(); return; }
     if (k === 'j' && gameMode === 'tower') { toggleCodex(); return; }
     if (k === 'l' && gameMode === 'tower') { toggleTowerLog(); return; }
+    if (k === 'n' && gameMode === 'tower') { toggleNotebook(); return; }
     if ((k === '+' || k === '=') && towerLayout) { towerZoom(1); return; }
     if ((k === '-' || k === '_') && towerLayout) { towerZoom(-1); return; }
     if (k === 'escape') { handleEscape(); return; }

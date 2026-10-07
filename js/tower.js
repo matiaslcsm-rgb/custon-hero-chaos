@@ -59,6 +59,7 @@ function startTowerRun() {
     document.body.classList.add('ink-theme');
     setTowerLayout(true); // mapa a toda la ventana, zoom (towerView.js)
     log(`🪨 Despertaste en el círculo de piedra de la base, sin nada. No recordás nada, salvo escribir: cada pieza de equipo que encuentres trae la habilidad de un héroe (buscala en cofres y en lo que sueltan los creeps; I: inventario, C: stats). Hay ${TOWER.floors} pisos, cada uno con su bioma, su pueblo y su laberinto.`);
+    writeNotebookPage('WAKE'); // el cuaderno (REWORK.md §1, towerNotebook.js)
     enterTowerFloor(1, 'start');
     openWeaponPick(); // elegís una de las 3 armas antes de poder moverte (REWORK.md §1, towerUI.js)
 }
@@ -269,8 +270,12 @@ function updateTower(dt) {
     else if (pendingForge(player)) { openForge(pendingForge(player)); return; }
     updateHero(player, level, dt);
     unstickFromWall(player);
+    // Cuaderno (REWORK.md §1): moverse y esquivar se detectan leyendo el estado, sin tocar el código compartido.
+    if (keys.w || keys.a || keys.s || keys.d) writeNotebookPage('MOVE');
+    if (player.dashReadyAt > gameClock) writeNotebookPage('DODGE');
     towerTerrainTick(level, player, dt); // terreno, clima, pueblo y mercader (towerWorld.js)
     const safe = heroInTown(player);     // en el pueblo los creeps no te persiguen
+    if (safe) writeNotebookPage('TOWN');
     if (player.isAlive()) { computeFov(level, player); towerPickup(player); recoverCorpse(level, player); }
     updateProjectiles(level, dt);
     // Creeps: solo se mueven los que te vieron (radio de alerta); te sueltan si te alejás mucho de su lugar

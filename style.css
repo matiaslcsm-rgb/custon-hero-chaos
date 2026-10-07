@@ -672,6 +672,13 @@ body.ink-theme #hb-slots { grid-template-columns: repeat(4, 1fr); }
 .beast-row { display: flex; gap: 10px; align-items: center; padding: 4px 6px; margin-bottom: 4px; border: 1px solid #c9b791; background: #f1e7d0; }
 .beast-row .beast-fig { width: 42px; height: 63px; }
 .beast-row .beast-stats { font-size: 0.8rem; color: #5e5444; }
+/* Tower Chaos: cuaderno */
+#notebook-pages { max-height: 60vh; overflow-y: auto; }
+.notebook-page { padding: 8px 10px; margin-bottom: 6px; border: 1px solid #c9b791; background: #f1e7d0; }
+.notebook-page h4 { margin: 0 0 4px; color: #6b2a1f; }
+.notebook-page p { margin: 0; font-style: italic; }
+.notebook-page.locked { opacity: 0.5; }
+.notebook-page.locked h4 { color: #8f8166; }
 
 /* Forja legible sobre el pergamino */
 body.ink-theme .forge-card h4 { color: #6b2a1f !important; }

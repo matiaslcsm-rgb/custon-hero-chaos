@@ -415,9 +415,9 @@ function gearEvent(hero, event, payload) {
 }
 ADVENTURER.innate.hooks = {
     onHit(owner, p) { gearEvent(owner, 'onHit', p); },
-    onKill(owner, p) { gearEvent(owner, 'onKill', p); },
+    onKill(owner, p) { gearEvent(owner, 'onKill', p); writeNotebookPage('KILL'); }, // el cuaderno (REWORK.md §1)
     onDamaged(owner, p) { gearEvent(owner, 'onDamaged', p); },
-    onCast(owner, p) { gearEvent(owner, 'onCast', p); }
+    onCast(owner, p) { gearEvent(owner, 'onCast', p); writeNotebookPage('CAST'); }
 };
 function pendingForge(hero) { return EQUIP_SLOTS.map(s => hero.gear[s]).concat(hero.bag.map(b => b.item)).find(i => i && i.pendingChoices > 0) || null; }
 
@@ -446,6 +446,7 @@ function towerPickup(hero) {
         if (ch.treasure) { for (let i = 0; i < 2; i++) level.drops.push({ x: ch.x, y: ch.y, item: makeTowerItem(level.floor + level.depth, undefined, 'rare') }); log('💎 ¡El tesoro de la cueva!'); }
         else level.drops.push({ x: ch.x, y: ch.y, item: lootItem(level.floor + (level.depth || 0), Math.random() < 0.25 + 0.1 * (level.depth || 0) ? 'rare' : 'magic') });
         log('🧰 ¡Abriste el cofre!'); sfx('coin');
+        writeNotebookPage('CHEST'); // el cuaderno (REWORK.md §1)
     });
     level.drops = level.drops.filter(d => {
         if (d.x !== hero.x || d.y !== hero.y) return true;
