@@ -304,6 +304,23 @@ usuario: controles estilo Hades, habilidades a mano al instante y con movimiento
   (barrido brillante), sombra (gruñido), sangre, acero (choque metálico), luz (acorde), vacío (succión); y el esquive.
 - Pendiente de medir con jugadores: la velocidad y la recarga del esquive (la IA no lo usa).
 
+## 4 septies. Códice, piezas sin alma y Herrero (2026-10-07, idea del usuario)
+Metaprogresión estilo Códice de Hades / runas de Rogue Legacy: lo que dominás queda para siempre.
+- **Códice (J):** una entrada por habilidad e innato del catálogo (55). Se **domina** al llevar la habilidad de una pieza a
+  su nivel máximo con la forja (4; la definitiva, 3). Los innatos no tienen nivel de habilidad: se dominan con la pieza a
+  nivel 5. Se guarda en el navegador (`localStorage` `chc-codex`): sobrevive a la muerte y a las runs nuevas. Cada entrada
+  muestra la mejor marca (◆◇) y cómo dominarla.
+- **Piezas sin alma:** casco, coraza, guantes, botas, amuleto o anillo **sin habilidad** y con **un afijo de más**. El 15%
+  del botín (creeps, campeones, cofres, eventos) sale así; el Herrero vende 3; o se hacen vaciando una pieza. Las armas no:
+  definen el ataque y siempre traen héroe.
+- **Herrero:** en el pueblo de la mitad de los pisos (nunca dos seguidos sin uno); el prisionero liberado también puede
+  ser herrero y se instala en el pueblo. **Imbuir** (150g × (1 + 0,5 por piso)): un poder dominado en una pieza sin alma a
+  elección; arranca en nivel 1 de habilidad y sigue creciendo con la forja. **Vaciar** (40g × piso): saca la habilidad, deja
+  nivel y afijos. Dos piezas con la misma habilidad no se pisan: sacar una no quita la habilidad si la otra sigue puesta.
+- **Medido** (piloto, run completa, forja eligiendo al azar): piso 10 en 149 min con 8 muertes (igual que antes); 2 poderes
+  dominados en la run (un innato en el piso 6 y la habilidad del arma al final). Un jugador que elija subir la habilidad
+  domina más. El rework de economía (docs/REWORK.md) puede sumar otras formas de dominar.
+
 ## 4 bis. Estética "tinta y pergamino" (en curso)
 Pedido del usuario con referencias de ilustraciones de caballeros en tinta (líneas negras gruesas, colores planos
 apagados, fondo crema, rayado; no se usan esas imágenes, solo el estilo). Decidido: dirección de arte + personajes

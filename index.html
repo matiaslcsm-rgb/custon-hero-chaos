@@ -61,7 +61,7 @@
                         <div id="hb-effects"></div>
                     </div>
                 </div>
-                <div id="controls-hint">Mover: W A S D · Esquive: Espacio · Habilidades: E R T F Q V (salen hacia el cursor) · Objetivo: clic izquierdo · Caminar: clic derecho · Automáticas: H · Tienda: B · Mapa grande: M · Piloto: P</div>
+                <div id="controls-hint">Mover: W A S D · Esquive: Espacio · Habilidades: E R T F Q V (salen hacia el cursor) · Objetivo: clic izquierdo · Caminar: clic derecho · Automáticas: H · Tienda/Herrero: B · Códice: J · Mapa grande: M · Piloto: P</div>
             </div>
 
             <!-- Derecha: lo que toca en esta fase y el registro -->
@@ -181,6 +181,35 @@
             </div>
             <p class="subtitle">Cada run genera sus propias criaturas combinando cuerpo, tamaño, forma de pelear y rasgos. Acá aparecen las que ya te cruzaste.</p>
             <div id="bestiary-list"></div>
+        </div>
+    </div>
+
+    <!-- Tower Chaos: Códice de poderes (tecla J), persiste entre runs -->
+    <div id="codex-container" class="modal" style="display: none;">
+        <div class="modal-box wide">
+            <div class="modal-head">
+                <h3>📜 Códice de poderes</h3>
+                <span class="modal-gold" id="codex-count"></span>
+                <button class="modal-close" id="codex-close" title="Cerrar (J o Esc)">✕</button>
+            </div>
+            <p class="subtitle">Llevá la habilidad de una pieza a su nivel máximo y queda dominada para siempre, aunque mueras. Un Herrero la puede imbuir en una pieza sin alma.</p>
+            <div class="codex-layout"><div id="codex-list"></div><div id="codex-tooltip"></div></div>
+        </div>
+    </div>
+
+    <!-- Tower Chaos: Herrero del pueblo (B al lado del yunque) -->
+    <div id="smith-container" class="modal" style="display: none;">
+        <div class="modal-box wide">
+            <div class="modal-head">
+                <h3>⚒️ Herrero</h3>
+                <span class="modal-gold" id="smith-gold"></span>
+                <button class="modal-close" id="smith-close" title="Cerrar (B o Esc)">✕</button>
+            </div>
+            <div class="tshop-layout">
+                <div><h4>1. Pieza sin alma</h4><div id="smith-infuse"></div><h4>2. Poder del Códice</h4><div id="smith-powers"></div></div>
+                <div><h4>Vaciar una pieza</h4><p class="subtitle">Pierde su habilidad, conserva nivel y afijos.</p><div id="smith-purge"></div><h4>A la venta</h4><div id="smith-stock"></div></div>
+                <div id="smith-tooltip"></div>
+            </div>
         </div>
     </div>
 
@@ -362,6 +391,7 @@
     <script src="js/towerUI.js"></script>
     <script src="js/towerWorld.js"></script>
     <script src="js/towerBestiary.js"></script>
+    <script src="js/towerCodex.js"></script>
     <script src="js/inkart.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/mouse.js"></script>

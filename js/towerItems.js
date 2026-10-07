@@ -47,7 +47,7 @@ const HERO_WEAPONS = {
     ZEUS: { noun: 'Rayo', shape: 'crystal', range: 4.5, atkSpeed: 0.8, atk: 9, projectile: 12 }
 };
 const FISTS = { noun: 'Puños', range: 1.3, atkSpeed: 1.0, atk: 8, projectile: 0 };
-const SLOT_NOUNS = { helm: 'Casco', armor: 'Coraza', gloves: 'Guantes', boots: 'Botas', amulet: 'Amuleto' };
+const SLOT_NOUNS = { helm: 'Casco', armor: 'Coraza', gloves: 'Guantes', boots: 'Botas', amulet: 'Amuleto', ring: 'Anillo' };
 
 // Innatos sin eventos (su efecto era un stat del héroe): como pieza, dan ese stat.
 const INNATE_STATS = { DEADLY_STRIKE: { critChance: 15 }, BLOODLUST: { lifesteal: 15 } };
@@ -246,7 +246,11 @@ function unequipSlot(hero, slot, toBag = true) {
     if (toBag && !bagSpotFor(hero, item)) { log('🎒 No hay lugar en el inventario.'); return null; }
     hero.gear[slot] = null;
     const skill = itemSkill(item);
-    if (skill && hero.skills.includes(skill)) { hero.removeSkill(skill); delete hero.skillBoosts[skill.id]; }
+    const other = skill && EQUIP_SLOTS.map(s => hero.gear[s]).find(i => i && itemSkill(i) === skill); // otra pieza imbuida con lo mismo
+    if (skill && hero.skills.includes(skill)) {
+        if (other) { hero.skillLevels[skill.id] = other.skillLevel; hero.skillBoosts[skill.id] = other.boosts; }
+        else { hero.removeSkill(skill); delete hero.skillBoosts[skill.id]; }
+    }
     applyGear(hero);
     if (toBag) addToBag(hero, item);
     return item;
@@ -331,6 +335,7 @@ function applyForge(hero, item, opt) {
     const skill = itemSkill(item);
     if (skill && hero.skills.includes(skill)) { hero.skillLevels[skill.id] = item.skillLevel; hero.skillBoosts[skill.id] = item.boosts; }
     applyGear(hero);
+    codexCheckItem(hero, item); // ¿llegó al máximo? queda en el Códice (towerCodex.js)
     log(`⚒️ Forjaste ${item.name}: ${opt.text}${opt.skillName ? ` (${opt.skillName})` : ''}.`);
 }
 
@@ -345,6 +350,7 @@ function giveItemXp(hero, item, amount) {
         item.level++;
         item.pendingChoices++;
         applyGear(hero);
+        codexCheckItem(hero, item); // los innatos se dominan con el nivel de la pieza
         if (hero === player) { log(`⚒️ ¡${item.name} subió a nivel ${item.level}! Elegí cómo crece.`); sfx('levelup'); }
     }
 }
@@ -377,8 +383,8 @@ function towerLootOnKill(level, c, killer) {
     if (c.carrier) carrierDrops(level, c); // el portador suelta tu equipo (towerWorld.js)
     if (towerRun && killer === player) { const s = towerRun.stats; s.kills++; s.gold += c.gold || 0; if (c.champion) s.champions++; if (c.isGuardian) s.guardians++; }
     if (c.isGuardian) { for (let i = 0; i < LOOT.guardianDrops; i++) level.drops.push({ x: c.x, y: c.y, item: makeTowerItem(level.floor, undefined, i === 0 ? 'rare' : rollQuality(level.floor)) }); return; }
-    if (c.champion) { if (Math.random() < CHAMPION.dropChance) level.drops.push({ x: c.x, y: c.y, item: makeTowerItem(level.floor, undefined, Math.random() < 0.3 ? 'rare' : 'magic') }); return; }
-    if (Math.random() < LOOT.creepChance * (c.isChestGuard ? 0 : 1) * (towerIsNight() ? DAYNIGHT.nightLoot : 1) * (1 + CAVE.lootPerDepth * (level.depth || 0))) level.drops.push({ x: c.x, y: c.y, item: makeTowerItem(level.floor + (level.depth || 0)) });
+    if (c.champion) { if (Math.random() < CHAMPION.dropChance) level.drops.push({ x: c.x, y: c.y, item: lootItem(level.floor, Math.random() < 0.3 ? 'rare' : 'magic') }); return; }
+    if (Math.random() < LOOT.creepChance * (c.isChestGuard ? 0 : 1) * (towerIsNight() ? DAYNIGHT.nightLoot : 1) * (1 + CAVE.lootPerDepth * (level.depth || 0))) level.drops.push({ x: c.x, y: c.y, item: lootItem(level.floor + (level.depth || 0)) }); // a veces sin alma (towerCodex.js)
 }
 // Recoge lo que hay en tu casilla (si entra en el inventario); abre el cofre si ya no tiene custodios.
 function towerPickup(hero) {
@@ -388,7 +394,7 @@ function towerPickup(hero) {
         if (ch.guards.some(g => g.isAlive())) { if (!ch.warned) { ch.warned = true; log('🔒 El cofre está custodiado: vencé a sus guardias.'); } return; }
         ch.open = true;
         if (ch.treasure) { for (let i = 0; i < 2; i++) level.drops.push({ x: ch.x, y: ch.y, item: makeTowerItem(level.floor + level.depth, undefined, 'rare') }); log('💎 ¡El tesoro de la cueva!'); }
-        else level.drops.push({ x: ch.x, y: ch.y, item: makeTowerItem(level.floor + (level.depth || 0), undefined, Math.random() < 0.25 + 0.1 * (level.depth || 0) ? 'rare' : 'magic') });
+        else level.drops.push({ x: ch.x, y: ch.y, item: lootItem(level.floor + (level.depth || 0), Math.random() < 0.25 + 0.1 * (level.depth || 0) ? 'rare' : 'magic') });
         log('🧰 ¡Abriste el cofre!'); sfx('coin');
     });
     level.drops = level.drops.filter(d => {
@@ -424,6 +430,7 @@ function aiManageGear(hero) {
     hero.bag.slice().forEach(({ item }) => {
         const slot = item.slot === 'ring' ? (!hero.gear.ring1 ? 'ring1' : !hero.gear.ring2 ? 'ring2' : 'ring1') : item.slot;
         const cur = hero.gear[slot];
+        if (item.blank && cur) return; // sin alma: solo si la ranura está vacía (la imbuye el herrero, ver aiSmith)
         if (!cur || rank[item.quality] > rank[cur.quality] || (rank[item.quality] === rank[cur.quality] && item.level > cur.level)) equipItem(hero, item, slot);
     });
     let item;

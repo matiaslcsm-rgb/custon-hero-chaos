@@ -676,3 +676,15 @@ body.ink-theme #hb-slots { grid-template-columns: repeat(4, 1fr); }
 /* Forja legible sobre el pergamino */
 body.ink-theme .forge-card h4 { color: #6b2a1f !important; }
 body.ink-theme .forge-card .meta { color: #2f5d62 !important; }
+
+/* Tower Chaos: Códice (J) y Herrero */
+.codex-layout { display: grid; grid-template-columns: 1fr 280px; gap: 14px; }
+#codex-list { max-height: 60vh; overflow-y: auto; }
+#codex-list h4 { margin: 10px 0 4px; color: #6b2a1f; }
+.codex-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+.codex-card { display: flex; align-items: center; gap: 6px; padding: 4px 8px; border: 1px solid rgba(43,33,24,0.25); border-radius: 6px; opacity: 0.55; filter: grayscale(0.9); font-size: 13px; }
+.codex-card.unlocked { opacity: 1; filter: none; border-color: #c9a227; box-shadow: 0 0 6px rgba(201,162,39,0.45); }
+.codex-card .ink-icon { width: 26px; height: 26px; }
+.codex-pips { color: #9a6b00; font-size: 11px; letter-spacing: 1px; }
+.tshop-row.picked { outline: 2px solid #c9a227; border-radius: 6px; }
+@media (max-width: 700px) { .codex-layout { grid-template-columns: 1fr; } }

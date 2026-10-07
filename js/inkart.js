@@ -497,7 +497,7 @@ function inkPlanFor(u) {
 function inkLookFor(u) {
     const muted = h => inkMute(h, 0.25);
     if (u.isHero) {
-        const gear = u.gear || {}, col = item => item ? ATTR_INFO[HERO_TEMPLATES[item.heroKey].primaryAttr].color : null;
+        const gear = u.gear || {}, col = item => item && item.heroKey ? ATTR_INFO[HERO_TEMPLATES[item.heroKey].primaryAttr].color : null;
         const main = muted(col(gear.armor) || col(gear.weapon) || '#a33a3a');
         const w = gear.weapon ? HERO_WEAPONS[gear.weapon.heroKey].shape : 'sword';
         return { main, hood: gear.helm ? muted(col(gear.helm)) : main, accent: muted(col(gear.boots) || '#c9a227'), weapon: w };

@@ -42,6 +42,7 @@ window.addEventListener('keydown', e => {
     if (k === 'c' && gameMode === 'tower') { toggleStatsWindow(); return; }
     if (k === 'i' && gameMode === 'tower') { toggleInventory(); return; }
     if (k === 'k' && gameMode === 'tower') { toggleBestiary(); return; }
+    if (k === 'j' && gameMode === 'tower') { toggleCodex(); return; }
     if (k === 'escape') { handleEscape(); return; }
     if (k === ' ') { e.preventDefault(); if (!paused) playerDash(); return; } // esquive (fxSkills.js)
     if (paused) return; // en pausa no responden las demás teclas

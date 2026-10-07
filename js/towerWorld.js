@@ -275,6 +275,7 @@ function generateTowerLevel(floor) {
     placeShrines(level, dist);
     placeCaveMouths(level, dist);
     placeEvents(level, dist);
+    placeTownSmith(level); // herrero en algunos pueblos (towerCodex.js)
     level.drops = [];
     placeChests(level, clearings.concat(shuffle(rooms.filter(r => r !== first && r !== guardRoom)).slice(0, 5 - clearings.length)));
     level.creeps.forEach(c => { c.spawnTime = -1e9; }); // sin el oro extra por velocidad de las oleadas (no aplica en la Torre)
@@ -352,10 +353,11 @@ function towerTerrainTick(level, hero, dt) {
     if (z === ZONE.lab) level.enteredLab = true;
     useShrines(level, hero);
     towerEventsTick(level, hero, dt); // eventos del campo
+    towerSmithTick(level, hero); // el herrero abre su ventana al acercarte (towerCodex.js)
     if (z !== hero.towerZone && level.town && z !== ZONE.town) level.town.aiShopped = false; // la IA vuelve a comprar en la próxima visita
     if (z !== hero.towerZone) {
         if (hero.towerZone !== undefined && hero === player) {
-            if (z === ZONE.town) log(`🏘️ Entraste al pueblo: zona segura (los creeps no te siguen y recuperás vida y maná). El mercader vende y compra piezas (B).`);
+            if (z === ZONE.town) log(`🏘️ Entraste al pueblo: zona segura (los creeps no te siguen y recuperás vida y maná). El mercader vende y compra piezas (B).${level.town.smith ? ' Hay un Herrero: imbuye poderes de tu Códice en piezas sin alma.' : ''}`);
             else if (z === ZONE.lab) log(`🗼 Entraste al laberinto de la torre: el guardián cuida la escalera al piso ${level.floor + 1}.`);
         }
         hero.towerZone = z;
@@ -1036,7 +1038,7 @@ function placeEvents(level, dist) {
     }
 }
 function eventReward(level, e, items, gold) {
-    items.forEach(q => level.drops.push({ x: e.x, y: e.y, item: makeTowerItem(level.floor, undefined, q) }));
+    items.forEach(q => level.drops.push({ x: e.x, y: e.y, item: lootItem(level.floor, q) }));
     if (gold) { player.gold += gold; if (fxArena(player)) fxText(player, `+${gold}g`, '#ffd166', 12, 1.2); }
     towerRun.stats.events = (towerRun.stats.events || 0) + 1;
     sfx('levelup');
@@ -1088,6 +1090,7 @@ function towerEventsTick(level, hero, dt) {
             e.state = 'freed'; hero.statPoints++;
             eventReward(level, e, [], 30 * level.floor);
             log('⛓ Liberaste al prisionero: te enseña un truco (+1 punto de stats, C para repartir) y te da unas monedas.');
+            if (openTownSmith(level)) log('⚒️ Era herrero: va a poner su yunque en el pueblo de este piso (imbuye poderes del Códice en piezas sin alma).');
         }
     });
 }

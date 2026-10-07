@@ -4,14 +4,14 @@
 //   clic derecho equipa o desequipa. Mientras está abierto (o la forja, o los stats), la partida espera.
 
 let invOpen = false, forgeOpen = false, invHeld = null, tshopOpen = false, tshopVendor = null;
-function towerModalOpen() { return statsOpen || invOpen || forgeOpen || tshopOpen || bestiaryOpen; }
+function towerModalOpen() { return statsOpen || invOpen || forgeOpen || tshopOpen || bestiaryOpen || codexOpen || smithOpen; }
 
 // Ícono de una pieza en estilo tinta (inkart.js): forma según el arma o la ranura, color del atributo del héroe de origen.
 // Color de la calidad: sobre el pergamino de la Torre, en tinta oscura (los claros no se leen)
 const qColor = item => (gameMode === 'tower' ? ITEM_QUALITY[item.quality].ink : ITEM_QUALITY[item.quality].color);
 const SLOT_INK_ICON = { helm: 'helm', armor: 'armor', gloves: 'glove', boots: 'boot', amulet: 'amulet', ring: 'ring' };
 function towerItemIcon(item) {
-    const color = inkMute(ATTR_INFO[HERO_TEMPLATES[item.heroKey].primaryAttr].color, 0.2);
+    const color = item.heroKey ? inkMute(ATTR_INFO[HERO_TEMPLATES[item.heroKey].primaryAttr].color, 0.2) : '#8a8a8a'; // sin alma: gris
     // game-icons.net (js/data/gameIcons.js): el objeto grande y, en la esquina, la habilidad que trae
     const main = typeof GAME_ICON_FOR !== 'undefined' && (item.slot === 'weapon' ? GAME_ICON_FOR.weapons[item.heroKey] : GAME_ICON_FOR.slots[slotKind(item.slot)]);
     const skill = itemSkill(item);
@@ -27,7 +27,7 @@ function itemTooltipHtml(item) {
     const forged = Object.entries(item.boosts).map(([k, n]) => `${BOOSTABLE[k] ? BOOSTABLE[k].label : k} ×${n}`)
         .concat(Object.entries(item.statBoosts || {}).map(([k, v]) => (k === 'weaponAtk' ? `+${v} daño del arma` : `+${v} vida`)));
     let html = `<div class="tt-name" style="color:${q.color}">${item.name}</div>` +
-        `<div class="tt-meta">${q.name} · ${TOWER_SLOTS[slotKind(item.slot)].name} de ${t.name} · nivel ${item.level} ` +
+        `<div class="tt-meta">${q.name} · ${TOWER_SLOTS[slotKind(item.slot)].name} ${t ? 'de ' + t.name : 'sin alma'} · nivel ${item.level} ` +
         `<span class="tt-xp"><span style="width:${Math.round(100 * item.xp / itemXpToNext(item))}%"></span></span></div>`;
     if (w) {
         const atk = Math.round(w.atk + 1.5 * (item.level - 1) + ((item.statBoosts && item.statBoosts.weaponAtk) || 0));
@@ -43,6 +43,8 @@ function itemTooltipHtml(item) {
             `<div>${skill.isInnateItem ? skill.description.replace(/^Innato:\s*/, '') : describeSkill(skill, lvl)}</div></div>`;
     }
     if (forged.length) html += `<div class="tt-forged">⚒ Forjado: ${forged.join(' · ')}</div>`;
+    if (item.blank) html += `<div class="tt-forged">Sin alma: no trae habilidad (por eso tiene un afijo de más). Un Herrero puede imbuirle un poder de tu Códice (J).</div>`;
+    if (item.infused) html += `<div class="tt-forged">✦ Imbuida por el Herrero.</div>`;
     return html;
 }
 
@@ -191,6 +193,8 @@ function sellTowerItem(hero, item) {
 // B: abre o cierra la tienda si estás en el pueblo
 function towerShopKey() {
     if (tshopOpen) { toggleTowerShop(false); return; }
+    if (smithOpen) { toggleSmith(false); return; }
+    if (player && nearSmith(player)) { toggleSmith(true); return; } // al lado del herrero, la B abre su ventana
     const peddler = player && player.arena && nearbyVendor(player.arena, player);
     if (peddler) toggleTowerShop(true, peddler);
     else if (player && heroInTown(player)) toggleTowerShop(true);
@@ -237,7 +241,9 @@ function renderTowerShop() {
 // (vacía o de peor calidad) y vende lo que le sobra en la bolsa.
 function aiTowerShop(hero) {
     const level = hero.arena;
-    if (!level || !level.town || !heroInTown(hero) || level.town.aiShopped) return;
+    if (!level || !level.town || !heroInTown(hero)) return;
+    aiSmith(hero); // antes de vender: las piezas sin alma se imbuyen (towerCodex.js)
+    if (level.town.aiShopped) return;
     level.town.aiShopped = true;
     const rank = { normal: 0, magic: 1, rare: 2 };
     aiManageGear(hero); // primero se pone lo que le sirve de la bolsa; el resto se vende
