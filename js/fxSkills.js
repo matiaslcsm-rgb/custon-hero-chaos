@@ -432,9 +432,9 @@ function flinchOffset(u) {
 const DASH = { tiles: 3, cooldown: 1.1, iframes: 0.3 };
 // Hacia donde apunta el cursor, en casillas del mundo (se recalcula con la cámara)
 function cursorWorld() { return mouse.over && mouse.fx !== undefined ? { x: mouse.fx * viewCols() - 0.5 + camera.x, y: mouse.fy * viewRows() - 0.5 + camera.y } : null; }
-function playerDash() {
-    if (!canControlPlayer() || hasFlag(player, 'stun') || gameClock < (player.dashReadyAt || 0)) return false;
-    let d = keyboardDirection();
+function playerDash(dir = null) { // dir: lo pasa el piloto automático (towerTelegraph.js)
+    if ((dir ? !(player && player.isAlive() && player.arena && inCombat()) : !canControlPlayer()) || hasFlag(player, 'stun') || gameClock < (player.dashReadyAt || 0)) return false;
+    let d = dir || keyboardDirection();
     if (!d.dx && !d.dy) { const c = cursorWorld(); d = c ? { dx: Math.sign(Math.round(c.x - player.x)), dy: Math.sign(Math.round(c.y - player.y)) } : { dx: player.facing || 1, dy: 0 }; }
     if (!d.dx && !d.dy) d = { dx: player.facing || 1, dy: 0 };
     const arena = player.arena, from = { x: player.x, y: player.y };

@@ -266,7 +266,7 @@ function updateTower(dt) {
     if (!player.isAlive() && player.respawnAt && gameClock >= player.respawnAt) { towerRespawn(); return; }
     if (weaponPickOpen && autopilot) chooseStarterWeapon('ADVENTURER_SWORD'); // el piloto no clickea: elige y sigue
     if (towerModalOpen()) return; // con stats, inventario, forja o la elección de arma abiertos, la partida espera
-    if (autopilot) { if (player.statPoints) aiSpendStatPoints(player); aiManageGear(player); aiTowerShop(player); }
+    if (autopilot) { if (player.statPoints) aiSpendStatPoints(player); aiManageGear(player); aiTowerShop(player); if (player.isAlive()) aiTelegraphDash(player); }
     else if (pendingForge(player)) { openForge(pendingForge(player)); return; }
     updateHero(player, level, dt);
     unstickFromWall(player);
@@ -289,9 +289,10 @@ function updateTower(dt) {
         }
         if (c.regenPct) c.hp = Math.min(c.maxHp, c.hp + c.maxHp * c.regenPct * dt); // campeón Regenerador
         if (c.isCarrier) carrierRoam(c); // el portador deambula (towerWorld.js)
-        if (c.aggro) { if (!(player.isAlive() && towerCreepBrain(c, dt))) updateCreep(c, dt); }
+        if (c.aggro) { if (!(player.isAlive() && (towerCreepTelegraph(c) || towerCreepBrain(c, dt)))) updateCreep(c, dt); } // ataques anunciados (towerTelegraph.js)
         else if (c.x !== c.spawnX || c.y !== c.spawnY) stepCreepToward(c, c.spawnX, c.spawnY, dt); // vuelve a su lugar
     });
+    towerTelegraphTick(level); // los ataques anunciados que se completaron pegan (towerTelegraph.js)
     if (towerPortals(level, player)) return; // entradas, bajadas y salidas de cueva (towerWorld.js)
     if (!level.stairs) return;               // en una cueva no hay escalera de la torre
     // El guardián muerto abre la escalera; pisarla te sube
@@ -372,6 +373,7 @@ function towerHeroDeath(hero, killer) {
     hero.effects = hero.effects.filter(e => e.flags.includes('persistent'));
     hero.respawnAt = gameClock + TOWER.respawnDelay;
     towerRun.deaths++;
+    level.telegraphs = []; // lo que estaba cargando no le pega al que renace
     // Perdés la mitad de los puntos puestos en cada stat (lo de base nunca se pierde), pero quedan en tus restos:
     // si volvés hasta ellos los recuperás (como en Dark Souls). Si morís otra vez antes, los anteriores se pierden.
     const lost = {}, lostText = [];
@@ -518,6 +520,7 @@ function renderTower(level, dt) {
     ctx.translate(-camera.x * TILE, -camera.y * TILE);
     drawTowerTiles(level);
     drawTowerLoot(level);
+    drawTowerTelegraphs(level); // zonas de los ataques anunciados, debajo de las unidades
     drawTowerMerchant(level);
     drawTowerSmith(level);
     drawTowerShrines(level);
@@ -587,19 +590,9 @@ function renderTower(level, dt) {
     drawObjectiveArrow(level);
     renderTowerMinimap(level);
     drawFloorTitle(level);
-    // Barra del guardián cuando lo tenés a la vista
+    // Barra del jefe abajo al centro, con sus fases (towerTelegraph.js)
     const g = level.guardian || level.caveBoss;
-    if (g && g.isAlive() && visible(g)) {
-        // Barra del jefe en tinta: placa de pergamino, nombre con serifa y vida en rojo sangre
-        const bx = 20, bw = screenW() - 20 - 180; // deja libre el minimapa (arriba a la derecha)
-        ctx.fillStyle = 'rgba(233,220,192,0.92)'; ctx.fillRect(bx - 8, 4, bw + 16, 34);
-        ctx.strokeStyle = INK.line; ctx.lineWidth = 2; ctx.strokeRect(bx - 8, 4, bw + 16, 34);
-        ctx.font = 'bold 13px Georgia, serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#6b2a1f';
-        ctx.fillText(`${g.label} · ${Math.max(0, Math.round(g.hp))} / ${g.maxHp}`, bx + bw / 2, 19);
-        ctx.fillStyle = '#3a2d21'; ctx.fillRect(bx, 25, bw, 7);
-        ctx.fillStyle = '#9b2226'; ctx.fillRect(bx, 25, bw * Math.max(0, g.hp) / g.maxHp, 7);
-        ctx.strokeStyle = INK.line; ctx.lineWidth = 1.2; ctx.strokeRect(bx, 25, bw, 7);
-    }
+    if (g && g.isAlive() && visible(g)) drawBossBar(g);
     if (paused) {
         ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(0, 0, screenW(), screenH());
         ctx.font = 'bold 30px monospace'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffb703';
@@ -636,6 +629,8 @@ function renderTowerMinimap(level) {
 // escalera abierta, a la escalera.
 function towerAutoDir(hero) {
     const level = hero.arena;
+    const dodge = towerDodgeDir(hero); // primero, salir de las zonas marcadas (towerTelegraph.js)
+    if (dodge) return dodge;
     const range = effRange(hero);
     const chasing = level.creeps.filter(c => c.isAlive() && c.aggro && !(c.autoSkipUntil > gameClock));
     const inRange = chasing.find(c => Math.hypot(c.x - hero.x, c.y - hero.y) <= range);

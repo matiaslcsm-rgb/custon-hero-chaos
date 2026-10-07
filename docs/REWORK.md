@@ -86,6 +86,24 @@ manejar tanto.
 - **Barra de jefe grande** abajo de la pantalla, con su nombre y las fases.
 - Los jefes sueltan **esencia** (§4), y la primera vez, una **receta** o un plano nuevo.
 
+**Hecho (fase 4, 2026-10-07, `js/towerTelegraph.js`):**
+- **Ataques anunciados:** una zona en el piso (círculo, línea o cono) se llena en ~1 s y al completarse pega a quien
+  siga adentro: campeones 2,4× su ataque, bestias 2×, jefes 2,6×. Se evitan saliendo o con el esquive (invulnerable).
+  Los tiran los campeones y, del bestiario, los brutos, aturdidores y tanques (golpe al piso), los hechiceros
+  (marcan tu lugar) y los arqueros (tiro cargado en línea). Mientras cargan se quedan quietos.
+- **Jefes con 3 fases** (guardianes, señores de cueva y guardianes malditos): al 66% y al 33% rugen invulnerables
+  con una onda alrededor y atacan más seguido (cada 4,6 → 3,7 → 2,9 s). Repertorio: golpe al piso, cono, embestida
+  en línea (el jefe la recorre) y, desde la fase 2, ráfagas de 3 zonas. En la fase 2 llaman 2 ayudantes. Al entrar en
+  la fase 3 tiran su **definitiva** (lluvia de 10 zonas en dos tandas, con huecos) y la repiten cada 14 s.
+- **Barra del jefe abajo al centro** con su nombre, la fase y las marcas del 66% y el 33%.
+- **El piloto esquiva:** sale de las zonas y usa el esquive a último momento.
+- **Freno a la espiral de muertes:** si ya hay un portador vivo con tus piezas, morir otra vez no se lleva más.
+- **Medido** (piloto, run completa): Espada 116 min/5 muertes y 104/6, Arco 105/1, Bastón 168/8. Antes de esta fase:
+  91-120 min con 1-6 muertes (y una espiral de 30). Volvió al rango de diseño (122-161). El piloto esquiva el 90-97%
+  de los ataques anunciados; una persona va a recibir más, así que en la práctica es algo más difícil que la medición.
+- **Falta:** un jefe con nombre y mecánica propia por bioma (por ahora todos comparten el repertorio), y que los
+  jefes suelten Esencia (fase 5).
+
 ## 4. Economía: monedas, energía y crafteo
 **Dos monedas** (separar lo de la run de lo permanente, como Hades u Oscuridad):
 | Moneda | Se consigue | Se pierde al morir | Para qué |

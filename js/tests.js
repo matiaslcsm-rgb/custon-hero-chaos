@@ -1811,6 +1811,62 @@ test('Torre: pantalla grande con zoom (rueda o + −) y mouse acorde al zoom', (
     check(!towerLayout && viewCols() === VIEW_COLS, 'fuera de la Torre vuelve la arena fija');
 }, { random: true });
 
+test('Torre: si ya hay un portador vivo, morir otra vez no se lleva más piezas (freno a la espiral)', () => {
+    newTower();
+    const L = player.arena;
+    ['helm', 'armor', 'gloves', 'boots'].forEach(s => equipItem(player, makeBlankItem(1, s, 'normal')));
+    const first = spawnItemCarrier(L, player);
+    check(first && first.carrier.length, 'la primera muerte deja un portador');
+    const before = EQUIP_SLOTS.filter(s => player.gear[s]).length;
+    check(!spawnItemCarrier(L, player), 'con el portador vivo no aparece otro');
+    checkEq(EQUIP_SLOTS.filter(s => player.gear[s]).length, before, 'no pierde más piezas');
+    first.hp = 0;
+    check(spawnItemCarrier(L, player), 'cazado el portador, la próxima muerte vuelve a costar');
+}, { random: true });
+
+test('Torre: ataques anunciados (la zona se llena y pega; salir o esquivar lo evita)', () => {
+    newTower();
+    const L = player.arena;
+    const c = makeCreep(towerCreepPool(1)[0], player.x + 1, player.y, 1, false, 0); Object.assign(c, { arena: L }); L.creeps.push(c);
+    const hp = player.hp;
+    const t = startTelegraph(c, { shape: 'circle', x: player.x, y: player.y, r: 1.5 }, 'champion');
+    check(gameClock < c.castingUntil, 'el que lo tira se queda cargando');
+    towerTelegraphTick(L); checkEq(player.hp, hp, 'mientras se llena no pega');
+    gameClock += t.windup + 0.01; towerTelegraphTick(L);
+    check(player.hp < hp, 'al completarse pega a quien sigue adentro');
+    check(!L.telegraphs.length, 'y desaparece');
+    const hp2 = player.hp;
+    startTelegraph(c, { shape: 'circle', x: player.x, y: player.y, r: 1.5 }, 'champion');
+    addEffect(player, { id: 'DASH', name: 'Esquive', duration: 5, flags: ['invulnerable'] });
+    gameClock += 1.1; towerTelegraphTick(L);
+    checkEq(player.hp, hp2, 'con el esquive (invulnerable) no pega');
+    // Formas
+    check(teleContains({ shape: 'line', x: 0, y: 0, dx: 1, dy: 0, len: 6, w: 1 }, 5, 0) && !teleContains({ shape: 'line', x: 0, y: 0, dx: 1, dy: 0, len: 6, w: 1 }, 3, 2), 'línea');
+    check(teleContains({ shape: 'cone', x: 0, y: 0, dx: 1, dy: 0, r: 4, half: 0.6 }, 3, 1) && !teleContains({ shape: 'cone', x: 0, y: 0, dx: 1, dy: 0, r: 4, half: 0.6 }, -2, 0), 'cono');
+    // El piloto sale de la zona
+    startTelegraph(c, { shape: 'circle', x: player.x, y: player.y, r: 1.2 }, 'champion');
+    const d = towerDodgeDir(player);
+    check(d && !teleContains(L.telegraphs[L.telegraphs.length - 1], player.x + d.dx, player.y + d.dy), 'el piloto elige un paso afuera');
+}, { random: true });
+
+test('Torre: los jefes tienen 3 fases (rugido, ayudantes y definitiva)', () => {
+    newTower();
+    const L = player.arena, g = L.guardian;
+    player.x = g.x - 2; player.y = g.y; computeFov(L, player);
+    checkEq(bossPhase(g), 0, 'arranca en la fase 1');
+    const creeps = L.creeps.length;
+    g.hp = Math.floor(g.maxHp * 0.6);
+    check(towerCreepTelegraph(g), 'al cruzar el 66% hace algo');
+    checkEq(g.bossPhase, 1, 'pasa a la fase 2');
+    check(hasFlag(g, 'invulnerable'), 'ruge invulnerable un instante');
+    check(L.creeps.length > creeps, 'llama ayudantes');
+    g.hp = Math.floor(g.maxHp * 0.3); g.castingUntil = 0;
+    towerCreepTelegraph(g); checkEq(g.bossPhase, 2, 'fase final');
+    gameClock += 3; g.castingUntil = 0;
+    const before = L.telegraphs.length;
+    check(towerCreepTelegraph(g) && L.telegraphs.length >= before + 8, 'tira su definitiva (lluvia de zonas)');
+}, { random: true });
+
 test('Ancla: cada golpe ralentiza y quita evasión', () => {
     newGame('AXE');
     const ev = effEvasion(player);

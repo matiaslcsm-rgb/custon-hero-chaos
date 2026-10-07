@@ -869,6 +869,7 @@ function arrivalNear(level, p) {
 // Entrar a un nivel cualquiera (piso o cueva): cambia el tamaño del mundo, la arena y la posición del héroe
 function enterTowerLevel(level, pos) {
     COLS = level.W || TOWER.cols; ROWS = level.H || TOWER.rows;
+    level.telegraphs = []; // ataques anunciados que quedaron a medio cargar (towerTelegraph.js)
     arenas = [level];
     level.heroes = [player];
     player.arena = level;
@@ -952,11 +953,12 @@ function caveTileFor(level, x, y) {
 // --- EL PORTADOR (fase 5: muerte con consecuencias) ---
 // Al morir, una criatura del bestiario del piso se lleva 1 pieza de tu equipo (2 desde el piso 5; nunca el arma) y
 // deambula por el nivel donde caíste. Con cada pieza tiene más vida y daño. Si la matás, suelta tus piezas. Si morís
-// otra vez antes, no se pierde nada: aparece otro portador (cada uno con lo suyo).
+// otra vez antes y el portador sigue vivo, no se lleva nada más (2026-10-07: sin este freno, cada muerte dejaba al
+// héroe más pelado y más fácil de matar; una run medida terminó con 30 muertes y sin equipo).
 const CARRIER = { items: floor => (floor >= 5 ? 2 : 1), hpPerItem: 0.3, atkPerItem: 0.15, statMult: 1.3, roam: 14, xpMult: 3 };
 function spawnItemCarrier(level, hero) {
     const slots = EQUIP_SLOTS.filter(s => s !== 'weapon' && hero.gear[s]);
-    if (!slots.length) return null;
+    if (!slots.length || (towerRun.carriers || []).some(c => c.isAlive() && c.carrier && c.carrier.length)) return null; // freno a la espiral
     const taken = shuffle(slots.slice()).slice(0, CARRIER.items(level.floor)).map(s => unequipSlot(hero, s, false)).filter(Boolean);
     const type = pickRandom(towerCreepPool(level.floor)), n = taken.length;
     const p = arrivalNear(level, { x: hero.x, y: hero.y }), lvl = level.floor + (level.depth || 0) + 1;

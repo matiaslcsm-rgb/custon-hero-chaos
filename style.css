@@ -704,7 +704,7 @@ body.tower-layout #right-col { display: none; }
 body.tower-layout.log-open #right-col { display: flex; position: fixed; top: 10px; right: 10px; bottom: 10px; width: 380px; height: auto; z-index: 40; box-shadow: -6px 0 24px rgba(0,0,0,0.5); }
 body.tower-layout.log-open #combat-log { height: 260px; }
 #float-log, #tower-badges { display: none; }
-body.tower-layout #float-log { display: block; position: absolute; left: 10px; bottom: 10px; max-width: 46%; pointer-events: none; }
+body.tower-layout #float-log { display: block; position: absolute; left: 10px; bottom: 10px; max-width: min(46%, calc(50% - 330px)); min-width: 220px; pointer-events: none; }
 #float-log p { margin: 2px 0; padding: 2px 8px; font-size: 0.8rem; background: rgba(233,220,192,0.86); color: #2b2118; border-left: 3px solid #6b2a1f; transition: opacity 0.8s; }
 #float-log p.fade { opacity: 0; }
 body.tower-layout #tower-badges { display: flex; flex-direction: column; gap: 4px; position: absolute; left: 10px; top: 10px; }

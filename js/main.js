@@ -1,7 +1,7 @@
 // Punto de entrada: conecta los botones y arranca el bucle principal.
 
 // Versión visible en el menú: si no coincide con la última subida, el navegador muestra una copia vieja (Ctrl+F5).
-const GAME_VERSION = '2026-10-07 · armas iniciales y 3 ranuras';
+const GAME_VERSION = '2026-10-07 · jefes estilo Hades';
 document.getElementById('game-version').textContent = `Versión ${GAME_VERSION}`;
 
 document.getElementById('start-wave-btn').onclick = startWave;
@@ -192,6 +192,7 @@ if (location.search.includes('demo=bestiary')) setTimeout(() => {
 // Demo para capturas de pantalla (index.html?demo=tower): arranca Tower Chaos con equipo y creeps a la vista.
 if (location.search.includes('demo=tower')) setTimeout(() => {
     startTowerRun();
+    if (weaponPickOpen) chooseStarterWeapon('ADVENTURER_SWORD'); // sin el pedestal (el demo arranca jugando)
     const cat = towerCatalog();
     equipItem(player, makeTowerItem(1, cat.find(e => e.heroKey === 'AXE' && e.slot === 'weapon'), 'rare'));
     // &floor=N: otro piso (bioma); &at=town|lab: parado en el pueblo o en la puerta del laberinto
@@ -210,7 +211,7 @@ if (location.search.includes('demo=tower')) setTimeout(() => {
     if (q.get('at') === 'carrier') { equipItem(player, makeTowerItem(1, cat.find(e => e.slot === 'helm'), 'rare')); const c = spawnItemCarrier(player.arena, player); c.x = player.x + 3; c.y = player.y; c.spawnX = c.x; c.spawnY = c.y; }
     if (q.get('at') === 'cave') { const L = player.arena; for (let d = 1; d <= +(q.get('depth') || 1); d++) enterCave(L.caves[0], d); }
     if (q.get('at') === 'plateau') { const L = player.arena, i = L.ramp.findIndex((v, j) => v && L.height[j] && L.zone[j] === ZONE.field && !L.ground[j]); if (i >= 0) { player.x = i % COLS; player.y = Math.floor(i / COLS); } }
-    if (q.get('at') === 'boss') { const G = player.arena.guardian; player.x = G.x - 3; player.y = G.y; if (!walkable(player.arena, player.x, player.y)) { player.x = G.x; player.y = G.y + 2; } }
+    if (q.get('at') === 'boss') { const G = player.arena.guardian; player.x = G.x - 3; player.y = G.y; if (!walkable(player.arena, player.x, player.y)) { player.x = G.x; player.y = G.y + 2; } if (q.get('phase')) { G.hp = Math.round(G.maxHp * [1, 0.6, 0.3][+q.get('phase') - 1]); G.aggro = true; } } // &phase=2|3: el jefe ya herido
     if (q.get('at') === 'lab') { player.x = player.arena.gate.x - 2; player.y = player.arena.gate.y; }
     if (q.get('at') === 'field') { const L = player.arena; const h = L.creeps.find(c => !c.isGuardian && L.zone[c.y * COLS + c.x] === ZONE.field); player.x = h.x - 3; player.y = h.y; if (!walkable(L, player.x, player.y)) { player.x = h.x; player.y = h.y + 1; } }
     const level = player.arena;
