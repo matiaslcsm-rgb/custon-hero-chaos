@@ -1731,6 +1731,27 @@ test('Controles estilo Hades: esquive con Espacio (3 casillas, invulnerable, rec
     checkEq(typeof autoCast, 'boolean', 'existe el modo automático (H)');
 }, { random: true });
 
+test('Torre: las habilidades de movilidad van siempre al espacio, y de última a su ranura', () => {
+    newTower();
+    // Parpadeo (arma, Asesino) es de movilidad: tiene que atarse a Espacio, no a Q.
+    const blinkPiece = makeTowerItem(1, towerCatalog().find(e => e.skillId === 'ASSASSIN_BLINK'), 'normal');
+    equipItem(player, blinkPiece);
+    checkEq(player.keyBindings['ASSASSIN_BLINK'], ' ', 'la primera de movilidad toma el espacio');
+    // Salto Sangriento (guantes, Vampiro) también es de movilidad: el espacio ya está tomado, cae a su tecla.
+    const leapPiece = makeTowerItem(1, towerCatalog().find(e => e.skillId === 'VAMP_LEAP'), 'normal');
+    equipItem(player, leapPiece);
+    checkEq(player.keyBindings['VAMP_LEAP'], 'e', 'la segunda de movilidad cae a la tecla fija de su ranura');
+    // Espacio prueba primero la de movilidad; si no se pudo lanzar (sin maná), cae al esquive de siempre.
+    player.mana = 0;
+    const x = player.x, y = player.y;
+    gameClock += DASH.cooldown + 1;
+    spaceAction();
+    check(Math.max(Math.abs(player.x - x), Math.abs(player.y - y)) > 0 || !player.isAlive(), 'sin maná para la habilidad, espacio esquiva igual');
+    player.mana = player.maxMana;
+    unequipSlot(player, blinkPiece.slot);
+    check(!Object.values(player.keyBindings).includes(' '), 'al sacar la pieza, el espacio queda libre de nuevo');
+}, { random: true });
+
 test('Torre: Códice (dominar al máximo), piezas sin alma y Herrero (imbuir y vaciar)', () => {
     newTower();
     codex = { unlocked: {}, best: {} };

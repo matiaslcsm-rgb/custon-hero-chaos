@@ -48,7 +48,7 @@ window.addEventListener('keydown', e => {
     if ((k === '+' || k === '=') && towerLayout) { towerZoom(1); return; }
     if ((k === '-' || k === '_') && towerLayout) { towerZoom(-1); return; }
     if (k === 'escape') { handleEscape(); return; }
-    if (k === ' ') { e.preventDefault(); if (!paused) playerDash(); return; } // esquive (fxSkills.js)
+    if (k === ' ') { e.preventDefault(); if (!paused) spaceAction(); return; } // esquive o habilidad de movilidad (ver spaceAction)
     if (paused) return; // en pausa no responden las demás teclas
     if (inCombat() && !autopilot) handleSkillKeypress(k);
 });
@@ -324,6 +324,14 @@ function resetGame() {
 }
 
 // --- HABILIDADES ACTIVAS ---
+// Espacio: en la Torre, las piezas de movilidad (tag MOVILIDAD) se atan siempre a esta tecla (equipItem,
+// towerItems.js) en vez de a Q/E/R — probá lanzarla primero y, si no se pudo (enfriamiento, maná, nivel 0,
+// o directamente no tenés ninguna equipada), caé al esquive de siempre para que la tecla nunca quede "pegada".
+function spaceAction() {
+    const skill = canControlPlayer() && player.skillForKey(' ');
+    if (skill && skillLevel(player, skill) > 0 && tryCastSkill(player, skill, { quiet: true })) return;
+    playerDash();
+}
 function handleSkillKeypress(k) {
     if (!player || !player.isAlive() || player.inRest || !player.arena) return;
     const skill = player.skillForKey(k);

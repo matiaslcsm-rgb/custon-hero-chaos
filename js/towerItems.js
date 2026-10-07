@@ -289,7 +289,14 @@ function equipItem(hero, item, slot = null) {
     const skill = itemSkill(item);
     if (skill && !hero.skills.includes(skill)) {
         hero.addSkill(skill); hero.skillLevels[skill.id] = item.skillLevel; hero.skillBoosts[skill.id] = item.boosts;
-        if (gameMode === 'tower' && skill.kind === 'active' && TOWER_SLOT_KEY[slot]) hero.keyBindings[skill.id] = TOWER_SLOT_KEY[slot];
+        if (gameMode === 'tower' && skill.kind === 'active') {
+            // Las habilidades de movilidad van siempre al espacio (se juegan como el esquive, la tecla con la que
+            // ya se piensa el movimiento); si el espacio ya lo tiene otra equipada, cae a la tecla fija de su
+            // ranura como cualquier otra activa.
+            const mobility = skill.tags && skill.tags.includes('MOVILIDAD');
+            if (mobility && !Object.values(hero.keyBindings).includes(' ')) hero.keyBindings[skill.id] = ' ';
+            else if (TOWER_SLOT_KEY[slot]) hero.keyBindings[skill.id] = TOWER_SLOT_KEY[slot];
+        }
     }
     applyGear(hero);
     if (old && !addToBag(hero, old)) dropOnFloor(hero, old);

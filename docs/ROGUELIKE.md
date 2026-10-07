@@ -473,9 +473,26 @@ la ranura del poder desbloqueado coincidiera con la de la pieza sin alma — dej
 de guantes en un casco, lo que rompía el límite de 3 activas apenas el Códice acumulaba desbloqueos. Ahora los
 tres puntos filtran/validan por `slot === slotKind(item.slot)`.
 
-**Falta de esta fase:** "armar y balancear lo que tenemos" — el pedido del usuario tiene una segunda parte más
-amplia que revisar las 11 definitivas: organizar y balancear el resto del catálogo (~44 habilidades + 11 innatos)
-para que arma/guantes/armadura tengan opciones parejas entre sí, no solo que "entren" en el límite de 3.
+**Balance de arma/guantes ("armar y balancear lo que tenemos"):** con las 11 definitivas ya rebalanceadas,
+faltaba revisar las 33 activas de arma/guantes contra ellas. La mayoría ya caía en un rango parejo (7-15s de
+enfriamiento); dos outliers corregidos vía `towerValues`: Manto Fantasma (Nigromante) tenía el doble de
+enfriamiento/maná que cualquier par suyo, y las 3 activas no-definitiva de Zeus pagaban 70-115 de maná contra
+30-50 del resto del roster (en Caos de Héroes lo compensa el maná que crece por nivel, acá no).
+
+**Movilidad → Espacio:** toda habilidad con el tag `MOVILIDAD` (Parpadeo, Salto Sangriento, Distorsión Espacial,
+Corte Errante, Paso Fantasma, Tormenta Cinética) se ata siempre a la tecla del esquive en vez de a su Q/E/R —
+tiene más sentido jugarla como una variante del esquive que como "una más del botón". Si el espacio ya lo tiene
+otra pieza de movilidad equipada, la siguiente cae a la tecla fija de su ranura (`equipItem()`, `towerItems.js`).
+Al apretar Espacio se prueba la habilidad primero (`spaceAction()`, `game.js`); si no se pudo lanzar (sin maná,
+enfriamiento, sin objetivo) o no tenés ninguna equipada, cae al esquive de siempre, así la tecla nunca queda
+pegada.
+
+**Fase 3 completa.** Quedan descartadas como pendiente, no como huecos: la ranura de botas no da ninguna
+habilidad activa en todo el roster, pero ya da velocidad de movimiento — cumple la idea original de REWORK.md
+de "botas que cambian el esquive" con lo que ya había; y que Zeus no tenga pasiva es fiel a su diseño original
+(puro daño, sin robo de vida ni control), no un hueco de esta fase. El resto del rediseño de catálogo que pide
+REWORK.md §2 (control nuevo tipo vórtice/empujar/convertir, zonas de área visibles, etiquetas de rol en la
+carta) es contenido nuevo, no "lo que tenemos" — queda para otra fase.
 
 ## 5. Decisiones tomadas (2026-10-03)
 - Avance: **subir una torre**; cada nivel es aleatorio. Final en el **nivel 10**, con salón de la fama.

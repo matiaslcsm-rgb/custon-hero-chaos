@@ -56,7 +56,14 @@ manejar tanto.
   1. **Habilidad del arma** (Q): viene con el arma.
   2. **Habilidad de los guantes** (E): la ofensiva o de control que elijas.
   3. **Habilidad de la armadura** (R): la que antes era la definitiva de cada héroe.
-  - Casco, botas, amuleto y anillos dan **pasivas** y stats (las botas pueden cambiar cómo es el esquive).
+  4. **Movilidad → Espacio (2026-10-07):** toda habilidad con el tag `MOVILIDAD` (Parpadeo, Salto Sangriento,
+     Distorsión Espacial, Corte Errante, Paso Fantasma, Tormenta Cinética) se ata siempre a la tecla del
+     esquive en vez de a su Q/E/R — se juegan como una variante del esquive, no como "una más del botón". Si
+     el espacio ya lo tiene otra pieza de movilidad equipada, la siguiente cae a la tecla fija de su ranura.
+     Al apretar Espacio se prueba la habilidad primero; si no se pudo lanzar (sin maná, enfriamiento, sin
+     objetivo), cae al esquive de toda la vida para que la tecla nunca quede pegada (`spaceAction()`, `js/game.js`).
+  - Casco, botas, amuleto y anillos dan **pasivas** y stats; botas da velocidad de movimiento (ya cumple la idea
+    original de "que cambien cómo es el esquive" con lo que ya había, sin ítem nuevo).
   - **Decisión (2026-10-07):** sin sistema de carga. Las ex-definitivas pasan a ser activas comunes (maná y
     enfriamiento, como cualquier otra), con sus números rebalanceados a la baja para que anden seguido en vez de
     una vez cada mucho. Técnicamente, cada habilidad puede declarar un `towerValues` con los números que usa solo
@@ -155,11 +162,14 @@ de Cazador de Hollow Knight):
 2. **Despertar y tutorial:** cuaderno y las 3 armas (espada, arco y bastón, con su habilidad). ✅ — las 3 armas
    como pedestal obligatorio y el Cuaderno con sus 7 páginas, ver más arriba. Falta solo la escena en el mundo
    (hoy el despertar es una ventana, no 3 armas clavadas en el piso).
-3. **Habilidades:** 3 ranuras (arma/guantes/armadura, sin carga) y el catálogo rediseñado, con control y áreas. ✅
-   el esqueleto mecánico (2026-10-07): catálogo solo arma/guantes/armadura dan activas, teclas fijas Q/E/R, las
-   11 definitivas rebalanceadas como activas comunes vía `towerValues`, y el Herrero ya no deja imbuir un poder
-   en una ranura que no es la suya. **Falta de esta fase:** "armar y balancear lo que tenemos" — revisar el resto
-   del catálogo (no solo las ex-definitivas) para que las 3 ranuras tengan sentido juntas.
+3. **Habilidades:** 3 ranuras (arma/guantes/armadura, sin carga) y el catálogo rediseñado, con control y áreas.
+   ✅ **completa (2026-10-07)**: catálogo solo arma/guantes/armadura dan activas, teclas fijas Q/E/R, las
+   11 definitivas rebalanceadas como activas comunes vía `towerValues`, el Herrero ya no deja imbuir un poder
+   en una ranura que no es la suya, "armar y balancear lo que tenemos" (los dos outliers de maná/enfriamiento
+   que quedaban en arma/guantes) y las habilidades de movilidad atadas siempre al espacio. Queda pendiente para
+   más adelante, como contenido nuevo y no como cierre de esta fase, el resto del catálogo rediseñado que pide
+   esta sección (control nuevo tipo vórtice/empujar/convertir, zonas de área visibles, etiquetas de rol en la
+   carta) — eso es "inventar", no "armar lo que tenemos".
 4. **Combate estilo Hades:** ataques anunciados en enemigos fuertes, 5 jefes con fases y definitiva.
 5. **Economía:** Esencia, desguace (5 piezas → pieza pura con calidad), mejoras permanentes y planos.
 6. **Bitácora:** unifica el Códice, el Bestiario, las recetas y el diario.

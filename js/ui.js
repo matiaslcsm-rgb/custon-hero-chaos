@@ -600,8 +600,9 @@ function renderHeroBar() {
         slot.dataset.id = s.id;
         slot.title = `${s.name}${s.isUltimate ? ' (definitiva)' : ''}\n${stripHtml(skillCostLine(s, lvl))}\n${stripHtml(describeSkill(s, lvl))}` +
             (p.skillPoints > 0 && levelUpBlocker(p, s) ? `\n🔒 ${levelUpBlocker(p, s)}` : '');
+        const keyLabel = p.keyBindings[s.id] === ' ' ? 'ESP' : (p.keyBindings[s.id] || '—').toUpperCase();
         slot.innerHTML = (gameMode === 'tower' ? `<img class="ink-skill-icon" src="${inkSkillIcon(s)}">` : '') +
-            `<span class="key">${(p.keyBindings[s.id] || '—').toUpperCase()}</span><span class="nm">${s.name}</span>` +
+            `<span class="key">${keyLabel}</span><span class="nm">${s.name}</span>` +
             `<span class="pips">${Array.from({ length: max }, (_, j) => `<i class="${j < lvl ? 'on' : ''}"></i>`).join('')}</span><div class="cd"></div>`;
         const btn = gameMode === 'tower' ? null : levelButton(s); if (btn) slot.appendChild(btn); // en la Torre las habilidades suben forjando
         skills.appendChild(slot);
