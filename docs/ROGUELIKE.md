@@ -211,6 +211,13 @@ Al morir no se pierde todo: **tu cadáver y tus cosas quedan en el mapa** y pued
      una; aparecieron 5 y 4 portadores y los cazó a todos (recuperó todas las piezas). Sin trabones.
    - Sin hacer (de la idea original): desgaste de ítems.
 6. **Élites y más contenido**: héroes de la IA como élites, más únicos, eventos.
+   - **Eventos del campo (hecho, 2026-10-06)**: 4 por piso, de tipos distintos, lejos del camino y del pueblo
+     (`EVENTS`, `towerWorld.js`). Caravana atacada (carreta con 100 de vida que pierde 0,7/s por atacante pegado: si los
+     matás a tiempo, 60g × piso y una pieza; si no, se pierde) · Emboscada (escondida: a 2 casillas salen 6 creeps, 8 de
+     noche, alrededor tuyo; al vencerlos, pieza y 40g × piso) · Cofre maldito (libera un campeón grande con 2 afijos; al
+     vencerlo, una rara, una mágica y 80g × piso) · Mercader ambulante (3 piezas, una rara, +20% de precio; B o al
+     acercarte) · Prisionero (3 guardias; al liberarlo, +1 punto de stats y 30g × piso). Aparecen en el minimapa cuando
+     los descubrís (la emboscada no). La crónica cuenta los eventos completados. Demo: `&at=event&kind=caravan`.
 
 ## 4 quater. Mundo con profundidad (2026-10-06)
 Pedido del usuario: ciclo de día y noche, mapa más grande, cuevas con muchos niveles de profundidad, lugares altos y

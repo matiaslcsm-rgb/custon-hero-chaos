@@ -274,6 +274,7 @@ function generateTowerLevel(floor) {
     }
     placeShrines(level, dist);
     placeCaveMouths(level, dist);
+    placeEvents(level, dist);
     level.drops = [];
     placeChests(level, clearings.concat(shuffle(rooms.filter(r => r !== first && r !== guardRoom)).slice(0, 5 - clearings.length)));
     level.creeps.forEach(c => { c.spawnTime = -1e9; }); // sin el oro extra por velocidad de las oleadas (no aplica en la Torre)
@@ -350,6 +351,7 @@ function towerTerrainTick(level, hero, dt) {
     if (z === ZONE.town) level.visitedTown = true;
     if (z === ZONE.lab) level.enteredLab = true;
     useShrines(level, hero);
+    towerEventsTick(level, hero, dt); // eventos del campo
     if (z !== hero.towerZone && level.town && z !== ZONE.town) level.town.aiShopped = false; // la IA vuelve a comprar en la próxima visita
     if (z !== hero.towerZone) {
         if (hero.towerZone !== undefined && hero === player) {
@@ -983,3 +985,147 @@ function carrierDrops(level, c) {
     c.carrier = null;
 }
 function carriersOn(level) { return (towerRun && towerRun.carriers || []).filter(c => c.isAlive() && c.arena === level); }
+
+// --- EVENTOS DEL CAMPO ---
+// 4 por piso, al azar, lejos del camino y del pueblo (pedido del usuario, 2026-10-06):
+//   caravana  carreta atacada: si matás a los atacantes antes de que la rompan, te dan oro y una pieza
+//   ambush    emboscada escondida: al pasar cerca salen dos grupos alrededor tuyo (más de noche); al vencerlos, botín
+//   cursed    cofre maldito: al abrirlo libera a un campeón grande; al vencerlo da una rara, una mágica y oro
+//   peddler   mercader ambulante: 3 piezas (una rara) un 20% más caras que en el pueblo (B o al acercarte)
+//   prisoner  prisionero custodiado: vencé a los guardias y liberalo: +1 punto de stats y oro
+const EVENTS = { perFloor: 4, kinds: ['caravan', 'ambush', 'cursed', 'peddler', 'prisoner'], cartHp: 100, cartDps: 0.7, sight: 9, ambushRadius: 2 };
+const EVENT_INFO = {
+    caravan: { name: 'Caravana atacada', color: '#e85d04' }, ambush: { name: 'Emboscada', color: '#9b2226' },
+    cursed: { name: 'Cofre maldito', color: '#7b2cbf' }, peddler: { name: 'Mercader ambulante', color: '#c9a227' },
+    prisoner: { name: 'Prisionero', color: '#1d4e89' }
+};
+// Creeps de un evento alrededor de (x, y)
+function spawnEventCreeps(level, x, y, n, opts = {}) {
+    const pool = towerCreepPool(level.floor), out = [];
+    for (let i = 0; i < n; i++) {
+        let px = x, py = y;
+        for (let t = 0; t < 20; t++) {
+            const a = Math.random() * Math.PI * 2, r = (opts.ring || 2) + Math.random() * 1.5;
+            const ax = Math.round(x + Math.cos(a) * r), ay = Math.round(y + Math.sin(a) * r);
+            if (walkable(level, ax, ay)) { px = ax; py = ay; break; }
+        }
+        const type = opts.type || pickRandom(pool), lvl = level.floor + (opts.lvlBonus || 0);
+        const c = makeCreep(type, px, py, TOWER.creepMult(lvl) * (opts.mult || 1), false, 0);
+        Object.assign(c, { arena: level, level: lvl, xp: Math.round(type.xp * TOWER.xpMult(lvl) * (opts.xpMult || WORLD.fieldXp)), spawnTime: -1e9, eventCreep: true });
+        if (opts.champion) makeChampion(c, opts.champion);
+        if (opts.aggro) c.aggro = true;
+        level.creeps.push(c); out.push(c);
+    }
+    return out;
+}
+function placeEvents(level, dist) {
+    const at = (x, y) => y * COLS + x, taken = (level.shrines || []).concat(level.caves || []);
+    level.events = [];
+    for (let t = 0; t < 6000 && level.events.length < EVENTS.perFloor; t++) {
+        const x = 4 + Math.floor(Math.random() * (COLS - 8)), y = 4 + Math.floor(Math.random() * (ROWS - 8)), i = at(x, y);
+        if (level.zone[i] !== ZONE.field || level.ground[i] === GROUND.road || level.height[i] || !walkable(level, x, y) || dist[i] < 25) continue;
+        if (Math.abs(x - level.town.merchant.x) < 18 && Math.abs(y - level.town.merchant.y) < 14) continue;
+        if (taken.concat(level.events).some(o => Math.hypot(o.x - x, o.y - y) < 28)) continue;
+        // sin repetir tipo en el mismo piso (mientras haya)
+        const left = EVENTS.kinds.filter(k => !level.events.some(e => e.kind === k));
+        const e = { kind: pickRandom(left), x, y, state: 'idle' };
+        if (e.kind === 'caravan') e.cart = { hp: EVENTS.cartHp, maxHp: EVENTS.cartHp };
+        if (e.kind === 'peddler') e.vendor = { name: 'Mercader ambulante', priceMult: 1.2, stock: ['rare', 'magic', 'magic'].map(q => makeTowerItem(level.floor, undefined, q)) };
+        if (e.kind === 'prisoner') e.guards = spawnEventCreeps(level, x, y, 3, { ring: 2, lvlBonus: 1 });
+        level.events.push(e);
+    }
+}
+function eventReward(level, e, items, gold) {
+    items.forEach(q => level.drops.push({ x: e.x, y: e.y, item: makeTowerItem(level.floor, undefined, q) }));
+    if (gold) { player.gold += gold; if (fxArena(player)) fxText(player, `+${gold}g`, '#ffd166', 12, 1.2); }
+    towerRun.stats.events = (towerRun.stats.events || 0) + 1;
+    sfx('levelup');
+}
+// Cada frame (desde towerTerrainTick)
+function towerEventsTick(level, hero, dt) {
+    (level.events || []).forEach(e => {
+        const d = Math.hypot(hero.x - e.x, hero.y - e.y);
+        if (!e.seen && e.kind !== 'ambush' && d <= EVENTS.sight && canSee(level, e.x, e.y)) {
+            e.seen = true;
+            const msg = { caravan: '🛒 ¡Una caravana atacada! Matá a los atacantes antes de que rompan la carreta.', cursed: '🟣 Un cofre maldito: abrirlo libera a su guardián (y da buen botín).',
+                peddler: '💰 Un mercader ambulante (acercate o B): vende piezas buenas, un poco más caras.', prisoner: '⛓ Un prisionero custodiado: vencé a los guardias y liberalo.' }[e.kind];
+            log(msg);
+        }
+        if (e.kind === 'caravan') {
+            if (e.state === 'idle' && e.seen) { e.state = 'attack'; e.attackers = spawnEventCreeps(level, e.x, e.y, 4 + Math.floor(level.floor / 4), { ring: 1.5 }); }
+            if (e.state === 'attack') {
+                const alive = e.attackers.filter(c => c.isAlive());
+                const near = alive.filter(c => Math.hypot(c.x - e.x, c.y - e.y) <= 2.5).length;
+                e.cart.hp -= near * EVENTS.cartDps * dt;
+                if (!alive.length) { e.state = 'saved'; eventReward(level, e, [Math.random() < 0.3 ? 'rare' : 'magic'], 60 * level.floor); log('🛒 ¡Salvaste la caravana! Los mercaderes te pagan y te dejan una pieza.'); }
+                else if (e.cart.hp <= 0) { e.state = 'lost'; e.cart.hp = 0; log('🛒 Rompieron la carreta: llegaste tarde.'); }
+            }
+        }
+        if (e.kind === 'ambush') {
+            if (e.state === 'idle' && d <= EVENTS.ambushRadius) {
+                e.state = 'sprung';
+                const n = 6 + (towerIsNight() ? 2 : 0);
+                e.ambushers = spawnEventCreeps(level, hero.x, hero.y, n, { ring: 4, aggro: true, lvlBonus: 1 });
+                log('⚔ ¡Emboscada! Salen de entre las sombras.'); if (fxArena(hero)) fxText(hero, '¡EMBOSCADA!', '#9b2226', 15, 1.4);
+            }
+            if (e.state === 'sprung' && e.ambushers.every(c => !c.isAlive())) { e.state = 'done'; e.x = hero.x; e.y = hero.y; eventReward(level, e, [Math.random() < 0.35 ? 'rare' : 'magic'], 40 * level.floor); log('⚔ Venciste la emboscada: quedó su botín.'); }
+        }
+        if (e.kind === 'cursed') {
+            if (e.state === 'idle' && hero.x === e.x && hero.y === e.y) {
+                e.state = 'cursed';
+                e.guardian = spawnEventCreeps(level, e.x, e.y, 1, { ring: 2, aggro: true, lvlBonus: 2, mult: 2.2, xpMult: 4, champion: shuffle(Object.keys(CHAMPION_AFFIXES)).slice(0, 2) })[0];
+                e.guardian.label = `${e.guardian.label.split(' Campeón')[0]} Maldito`; e.guardian.isCaveBoss = true; // figura grande
+                log('🟣 ¡El cofre estaba maldito! Su guardián despierta.');
+            }
+            if (e.state === 'cursed' && !e.guardian.isAlive()) { e.state = 'open'; eventReward(level, e, ['rare', 'magic'], 80 * level.floor); log('🟣 Rompiste la maldición: el cofre se abre.'); }
+        }
+        if (e.kind === 'peddler' && hero === player && !autopilot) {
+            const near = Math.max(Math.abs(hero.x - e.x), Math.abs(hero.y - e.y)) <= 1;
+            if (near && !e.greeted) { e.greeted = true; toggleTowerShop(true, e.vendor); }
+            else if (!near) e.greeted = false;
+        }
+        if (e.kind === 'prisoner' && e.state === 'idle' && e.guards.every(c => !c.isAlive()) && Math.max(Math.abs(hero.x - e.x), Math.abs(hero.y - e.y)) <= 1) {
+            e.state = 'freed'; hero.statPoints++;
+            eventReward(level, e, [], 30 * level.floor);
+            log('⛓ Liberaste al prisionero: te enseña un truco (+1 punto de stats, C para repartir) y te da unas monedas.');
+        }
+    });
+}
+// El vendedor que tenés al lado (mercader ambulante), para la tecla B fuera del pueblo
+function nearbyVendor(level, hero) {
+    const e = (level.events || []).find(o => o.kind === 'peddler' && Math.max(Math.abs(hero.x - o.x), Math.abs(hero.y - o.y)) <= 2);
+    return e ? e.vendor : null;
+}
+function drawTowerEvents(level) {
+    (level.events || []).forEach(e => {
+        if (e.kind === 'ambush' || !level.explored[e.y][e.x]) return;
+        const cx = e.x * TILE + TILE / 2, cy = e.y * TILE + TILE / 2;
+        ctx.save(); ctx.strokeStyle = INK.line; ctx.lineWidth = 1.8;
+        if (e.kind === 'caravan') { // carreta con toldo y ruedas
+            const broken = e.state === 'lost';
+            ctx.fillStyle = broken ? '#5a4030' : '#8a6a46'; ctx.fillRect(cx - 15, cy - 4, 30, 10); ctx.strokeRect(cx - 15, cy - 4, 30, 10);
+            if (!broken) { ctx.fillStyle = '#e9dcc0'; ctx.beginPath(); ctx.moveTo(cx - 14, cy - 4); ctx.quadraticCurveTo(cx, cy - 22, cx + 14, cy - 4); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+            [[-9, 8], [9, 8]].forEach(([dx, dy]) => { ctx.fillStyle = '#5a4030'; ctx.beginPath(); ctx.arc(cx + dx, cy + dy, 5, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); });
+            if (e.state === 'attack') {
+                ctx.fillStyle = '#3a2d21'; ctx.fillRect(cx - 16, cy - 30, 32, 5);
+                ctx.fillStyle = '#e85d04'; ctx.fillRect(cx - 16, cy - 30, 32 * e.cart.hp / e.cart.maxHp, 5); ctx.strokeRect(cx - 16, cy - 30, 32, 5);
+            }
+        } else if (e.kind === 'cursed') { // cofre con aura violeta
+            if (e.state !== 'open') { ctx.globalAlpha = 0.35 + 0.2 * Math.sin(fxClock * 3); ctx.fillStyle = '#7b2cbf'; ctx.beginPath(); ctx.arc(cx, cy + 2, 16, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1; }
+            ctx.fillStyle = e.state === 'open' ? '#3e2a1e' : '#4a2f5e'; ctx.fillRect(cx - 11, cy - 4, 22, 14); ctx.strokeRect(cx - 11, cy - 4, 22, 14);
+            ctx.fillStyle = '#c9a3e6'; ctx.fillRect(cx - 2, cy, 4, 5);
+        } else if (e.kind === 'peddler') { // mercader con mochila enorme
+            const k = Math.floor(((fxClock * 0.8) % 1) * INK_IDLE_FRAMES), fig = inkFigure('plague', { main: '#a47148', accent: '#c9a227' }, 'idle', k);
+            const s = 1.1 * TILE / INK_W * 1.3, w = INK_W * s, h = INK_H * s, by = cy + TILE * 0.45;
+            ctx.fillStyle = '#7a5c3c'; ctx.fillRect(cx - 18, cy - 20, 12, 18); ctx.strokeRect(cx - 18, cy - 20, 12, 18);
+            ctx.drawImage(fig.img, cx - w / 2, by - h * (FOOT + 2) / INK_H, w, h);
+            ctx.font = 'bold 10px Georgia, serif'; ctx.textAlign = 'center'; ctx.fillStyle = INK.line; ctx.fillText('Mercader (B)', cx, e.y * TILE - TILE * 0.9);
+        } else if (e.kind === 'prisoner') { // jaula con barrotes
+            if (e.state !== 'freed') { const fig = inkFigure('footman', { main: '#9fb8a0', accent: '#5e5444' }, 'idle', 0), s = 0.9 * TILE / INK_W * 1.3; ctx.drawImage(fig.img, cx - INK_W * s / 2, cy + TILE * 0.45 - INK_H * s * 0.98, INK_W * s, INK_H * s); }
+            ctx.strokeStyle = '#3f3a36'; ctx.lineWidth = 2.4;
+            ctx.strokeRect(cx - 14, cy - 26, 28, 40);
+            if (e.state !== 'freed') for (let x = -9; x <= 9; x += 6) { ctx.beginPath(); ctx.moveTo(cx + x, cy - 26); ctx.lineTo(cx + x, cy + 14); ctx.stroke(); }
+        }
+        ctx.restore();
+    });
+}

@@ -430,7 +430,7 @@ function towerInfoHtml() {
 function towerChronicleHtml() {
     const s = towerRun.stats, min = Math.floor((gameClock - towerRun.startedAt) / 60);
     return `<p class="subtitle tower-chronicle">📜 <b>Crónica</b> · ${min} min · mejor piso ${s.bestFloor} · ${towerRun.deaths} muerte${towerRun.deaths === 1 ? '' : 's'} · ` +
-        `${s.kills} bajas (${s.champions} campeones, ${s.guardians} guardianes) · ${s.shrines} santuarios${s.deepest ? ` · cueva más honda −${s.deepest}` : ''} · ${s.gold}g ganados</p>`;
+        `${s.kills} bajas (${s.champions} campeones, ${s.guardians} guardianes) · ${s.shrines} santuarios${s.events ? ` · ${s.events} eventos` : ''}${s.deepest ? ` · cueva más honda −${s.deepest}` : ''} · ${s.gold}g ganados</p>`;
 }
 
 // Baldosas del nivel (se dibujan una vez y se reutilizan): 4 pisos de piedra, pared de frente y pared de arriba.
@@ -505,6 +505,7 @@ function renderTower(level, dt) {
     drawTowerLoot(level);
     drawTowerMerchant(level);
     drawTowerShrines(level);
+    drawTowerEvents(level);
     // Escalera (cerrada hasta vencer al guardián)
     drawCavePortals(level);
     const st = level.stairs || { x: 0, y: 0 }, sx = st.x * TILE, sy = st.y * TILE;
@@ -600,6 +601,7 @@ function renderTowerMinimap(level) {
     level.corpses.forEach(c => dot(c.x, c.y, c === towerRun.corpse ? '#c9a227' : '#8f8166', c === towerRun.corpse ? 3 : 1.4));
     carriersOn(level).forEach(c => dot(c.x, c.y, '#c9a227', 3.2)); // portadores (sabés dónde anda tu equipo)
     (level.shrines || []).forEach(sh => { if (!sh.used && level.explored[sh.y][sh.x]) dot(sh.x, sh.y, SHRINES[sh.kind].color, 2.2); });
+    (level.events || []).forEach(e => { if (e.kind !== 'ambush' && e.seen && !['saved', 'lost', 'open', 'freed'].includes(e.state)) dot(e.x, e.y, EVENT_INFO[e.kind].color, 2.6); });
     if (player.isAlive()) dot(player.x, player.y, '#00f5d4', 2.4);
     ctx.strokeStyle = '#555'; ctx.lineWidth = 1;
     ctx.strokeRect(ox + camera.x * s, oy + camera.y * s, VIEW_COLS * s, VIEW_ROWS * s);
@@ -633,7 +635,8 @@ function towerAutoDir(hero) {
     // Botín a la vista (si hay lugar) y cofres sin custodios
     const loot = (level.drops || []).filter(d => !d.unreachable && canSee(level, d.x, d.y) && bagSpotFor(hero, d.item))
         .concat((level.chests || []).filter(ch => !ch.open && !ch.unreachable && level.explored[ch.y][ch.x] && ch.guards.every(g => !g.isAlive())))
-        .concat((level.shrines || []).filter(sh => !sh.used && !sh.unreachable && canSee(level, sh.x, sh.y)));
+        .concat((level.shrines || []).filter(sh => !sh.used && !sh.unreachable && canSee(level, sh.x, sh.y)))
+        .concat((level.events || []).filter(e => e.kind === 'prisoner' && e.state === 'idle' && !e.unreachable && canSee(level, e.x, e.y) && e.guards.every(c => !c.isAlive())));
     if (loot.length) target = loot.reduce((a, b) => (Math.hypot(a.x - hero.x, a.y - hero.y) <= Math.hypot(b.x - hero.x, b.y - hero.y) ? a : b));
     if (target) { const dir = towerPathDir(hero, target); hero.autoGoal = `botín ${target.x},${target.y}`; if (dir) return dir; target.unreachable = true; target = null; } // si no se llega, se saltea
     // Primero pasa por el pueblo (a comprar, como pide el objetivo del piso)

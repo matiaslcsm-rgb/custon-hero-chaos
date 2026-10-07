@@ -3,7 +3,7 @@
 //   Inventario: clic en una pieza la levanta; clic en una casilla libre o en su ranura la suelta (o la equipa);
 //   clic derecho equipa o desequipa. Mientras está abierto (o la forja, o los stats), la partida espera.
 
-let invOpen = false, forgeOpen = false, invHeld = null, tshopOpen = false;
+let invOpen = false, forgeOpen = false, invHeld = null, tshopOpen = false, tshopVendor = null;
 function towerModalOpen() { return statsOpen || invOpen || forgeOpen || tshopOpen || bestiaryOpen; }
 
 // Ícono de una pieza en estilo tinta (inkart.js): forma según el arma o la ranura, color del atributo del héroe de origen.
@@ -159,12 +159,14 @@ function towerShopStock(level) {
     }
     return level.town.stock;
 }
-function buyTowerItem(hero, item) {
-    const level = hero.arena, price = towerItemPrice(item);
+// Precio en un vendedor (el ambulante cobra 20% más)
+function vendorPrice(item, vendor) { return Math.round(towerItemPrice(item) * ((vendor && vendor.priceMult) || 1)); }
+function buyTowerItem(hero, item, vendor = hero.arena.town) {
+    const price = vendorPrice(item, vendor);
     if (hero.gold < price) { log(`🛒 Te faltan ${price - hero.gold}g para ${item.name}.`); return false; }
     if (!addToBag(hero, item)) { log('🎒 No hay lugar en el inventario.'); return false; }
     hero.gold -= price;
-    level.town.stock = level.town.stock.filter(i => i !== item);
+    vendor.stock = vendor.stock.filter(i => i !== item);
     log(`🛒 Compraste ${item.name} (-${price}g).`); sfx('coin');
     return true;
 }
@@ -188,19 +190,23 @@ function sellTowerItem(hero, item) {
 // B: abre o cierra la tienda si estás en el pueblo
 function towerShopKey() {
     if (tshopOpen) { toggleTowerShop(false); return; }
-    if (player && heroInTown(player)) toggleTowerShop(true);
+    const peddler = player && player.arena && nearbyVendor(player.arena, player);
+    if (peddler) toggleTowerShop(true, peddler);
+    else if (player && heroInTown(player)) toggleTowerShop(true);
     else log('🛒 El mercader está en el pueblo del piso (seguí el camino).');
 }
-function toggleTowerShop(open = !tshopOpen) {
+function toggleTowerShop(open = !tshopOpen, vendor = null) {
     if (gameMode !== 'tower' || !player || !player.arena || !player.arena.town) return;
+    tshopVendor = vendor || player.arena.town;
     tshopOpen = open;
     showPanel('tshop-container', open);
     if (open) { document.getElementById('tshop-tooltip').innerHTML = ''; renderTowerShop(); }
 }
 function renderTowerShop() {
     if (!tshopOpen) return;
-    const level = player.arena, tip = document.getElementById('tshop-tooltip');
+    const level = player.arena, tip = document.getElementById('tshop-tooltip'), v = tshopVendor || level.town, inTown = v === level.town;
     document.getElementById('tshop-gold').textContent = `💰 ${player.gold}g`;
+    document.getElementById('tshop-title').textContent = inTown ? '🛒 Mercader del pueblo' : `💰 ${v.name} (precios +${Math.round((v.priceMult - 1) * 100)}%)`;
     const hover = item => { tip.innerHTML = item ? itemTooltipHtml(item) : '<span class="subtitle">Pasá el mouse por una pieza para ver sus detalles.</span>'; };
     const row = (item, label, price, can, act) => {
         const el = document.createElement('div'); el.className = 'tshop-row';
@@ -211,15 +217,15 @@ function renderTowerShop() {
         return el;
     };
     const stock = document.getElementById('tshop-stock'); stock.innerHTML = '';
-    towerShopStock(level).forEach(item => stock.appendChild(row(item, 'Comprar', towerItemPrice(item), player.gold >= towerItemPrice(item), () => buyTowerItem(player, item))));
-    if (!level.town.stock.length) stock.innerHTML = '<p class="subtitle">No le queda nada: vuelve a tener en el próximo piso.</p>';
+    (inTown ? towerShopStock(level) : v.stock).forEach(item => stock.appendChild(row(item, 'Comprar', vendorPrice(item, v), player.gold >= vendorPrice(item, v), () => buyTowerItem(player, item, v))));
+    if (!v.stock.length) stock.innerHTML = '<p class="subtitle">No le queda nada.</p>';
     const tome = document.createElement('div'); tome.className = 'tshop-row';
     const tp = towerTomePrice(player);
     tome.innerHTML = `<span class="tshop-tome">📘</span><span class="tshop-name"><b>Tomo de Talento</b> · +1 punto de stats</span>` +
         `<button class="${player.gold >= tp ? 'primary-btn' : 'secondary-btn'}" ${player.gold >= tp ? '' : 'disabled'}>Comprar · ${tp}g</button>`;
     tome.onmouseenter = () => { tip.innerHTML = `<div class="tt-name">📘 Tomo de Talento</div><div>+1 punto de stats para repartir (tecla C). Siempre a la venta; cada uno cuesta 25% más que el anterior. Al morir cuenta como cualquier punto puesto (la mitad queda en tus restos).</div>`; };
     tome.querySelector('button').onclick = () => { buyTowerTome(player); renderTowerShop(); };
-    stock.appendChild(tome);
+    if (inTown) stock.appendChild(tome); // los tomos, solo en el pueblo
     const bag = document.getElementById('tshop-bag'); bag.innerHTML = '';
     player.bag.forEach(b => bag.appendChild(row(b.item, 'Vender', towerSellPrice(b.item), true, () => sellTowerItem(player, b.item))));
     if (!player.bag.length) bag.innerHTML = '<p class="subtitle">La bolsa está vacía (lo equipado no se vende).</p>';

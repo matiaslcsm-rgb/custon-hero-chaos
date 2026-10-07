@@ -1338,7 +1338,7 @@ test('Torre: visión con paredes que tapan y distancia según el héroe', () => 
     // Una casilla de piso detrás de una pared, cerca del héroe: no se ve
     let hidden = null;
     for (let y = 1; y < ROWS - 1 && !hidden; y++) for (let x = 1; x < COLS - 2 && !hidden; x++)
-        if (walkable(level, x, y) && !walkable(level, x + 1, y) && walkable(level, x + 2, y)) hidden = { x, y };
+        if (walkable(level, x, y) && !walkable(level, x + 1, y) && walkable(level, x + 2, y) && level.walls[y][x + 1] && level.walls[y][x + 1] !== WALL.cliff) hidden = { x, y }; // (desde una meseta los acantilados no tapan)
     if (hidden) {
         player.x = hidden.x; player.y = hidden.y; level.fovKey = null; computeFov(level, player);
         check(!canSee(level, hidden.x + 2, hidden.y), 'la pared tapa lo que hay detrás');
@@ -1582,6 +1582,47 @@ test('Torre: al morir, un portador se lleva piezas de tu equipo (nunca el arma) 
     killCreep(carrier, player);
     check(player.arena.drops.some(d => d.item === helm), 'al cazarlo suelta tu equipo');
     checkEq(carriersOn(player.arena).length, 0, 'ya no queda portador');
+}, { random: true });
+
+test('Torre: eventos del campo (caravana, emboscada, cofre maldito, mercader ambulante, prisionero)', () => {
+    newTower();
+    const L = player.arena;
+    checkEq(L.events.length, EVENTS.perFloor, 'cuatro eventos por piso');
+    checkEq(new Set(L.events.map(e => e.kind)).size, EVENTS.perFloor, 'sin repetir tipo');
+    const mk = (kind, extra = {}) => { const e = { kind, x: player.x + 5, y: player.y, state: 'idle', seen: true, ...extra }; L.events.push(e); return e; };
+    // Caravana: se salva matando a los atacantes
+    const car = mk('caravan', { cart: { hp: 100, maxHp: 100 } });
+    towerEventsTick(L, player, 0.1);
+    check(car.state === 'attack' && car.attackers.length >= 4, 'la atacan al verla');
+    car.attackers.forEach(c => { c.hp = 0; });
+    const gold = player.gold;
+    towerEventsTick(L, player, 0.1);
+    check(car.state === 'saved' && player.gold > gold, 'salvada: pagan');
+    // Caravana: se pierde si rompen la carreta
+    const car2 = mk('caravan', { cart: { hp: 1, maxHp: 100 } });
+    towerEventsTick(L, player, 0.1);
+    car2.attackers.forEach(c => { c.x = car2.x; c.y = car2.y; });
+    towerEventsTick(L, player, 2);
+    checkEq(car2.state, 'lost', 'llegaste tarde');
+    // Cofre maldito
+    const cur = mk('cursed'); player.x = cur.x; player.y = cur.y;
+    towerEventsTick(L, player, 0.1);
+    check(cur.state === 'cursed' && cur.guardian.champion, 'libera a su guardián campeón');
+    cur.guardian.hp = 0; towerEventsTick(L, player, 0.1);
+    checkEq(cur.state, 'open', 'al vencerlo se abre');
+    // Prisionero
+    const pr = mk('prisoner', { guards: [] }); player.x = pr.x + 1; player.y = pr.y;
+    const pts = player.statPoints;
+    towerEventsTick(L, player, 0.1);
+    check(pr.state === 'freed' && player.statPoints === pts + 1, 'liberado: +1 punto de stats');
+    // Emboscada
+    const am = mk('ambush', { seen: false }); player.x = am.x; player.y = am.y;
+    towerEventsTick(L, player, 0.1);
+    check(am.state === 'sprung' && am.ambushers.every(c => c.aggro), 'la emboscada sale y te ataca');
+    // Mercader ambulante: 20% más caro
+    const pd = mk('peddler', { vendor: { name: 'x', priceMult: 1.2, stock: [makeTowerItem(1, undefined, 'rare')] } });
+    player.gold = 99999; const item = pd.vendor.stock[0];
+    check(buyTowerItem(player, item, pd.vendor) && player.gold === 99999 - vendorPrice(item, pd.vendor) && vendorPrice(item, pd.vendor) > towerItemPrice(item), 'vende más caro');
 }, { random: true });
 
 test('Ancla: cada golpe ralentiza y quita evasión', () => {
