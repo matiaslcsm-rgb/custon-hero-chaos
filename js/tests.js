@@ -1696,6 +1696,25 @@ test('Torre: Códice (dominar al máximo), piezas sin alma y Herrero (imbuir y v
     check(miss <= 1, 'nunca dos pisos seguidos sin herrero');
 }, { random: true });
 
+test('Torre: pantalla grande con zoom (rueda o + −) y mouse acorde al zoom', () => {
+    newTower();
+    check(towerLayout && document.body.classList.contains('tower-layout'), 'la Torre usa la pantalla grande');
+    const saved = VIEW.across;
+    try {
+        setTowerZoom(30);
+        towerZoom(1); check(VIEW.across < 30, 'acercar muestra menos casillas');
+        setTowerZoom(1000); checkEq(VIEW.across, VIEW.max, 'tope de alejar');
+        setTowerZoom(24);
+        checkEq(viewCols(), 24, 'casillas a lo ancho');
+        check(Math.abs(viewRows() - VIEW.h / VIEW.w * 24) < 1e-6, 'las filas siguen la proporción de la pantalla');
+        const r = canvas.getBoundingClientRect();
+        const m = mouseToTile({ clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 });
+        check(Math.abs(m.x - (camera.x + 12 - 0.5)) < 1e-6, 'el mouse apunta a la casilla correcta con el zoom');
+    } finally { setTowerZoom(saved); }
+    resetGame();
+    check(!towerLayout && viewCols() === VIEW_COLS, 'fuera de la Torre vuelve la arena fija');
+}, { random: true });
+
 test('Ancla: cada golpe ralentiza y quita evasión', () => {
     newGame('AXE');
     const ev = effEvasion(player);

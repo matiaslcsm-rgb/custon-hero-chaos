@@ -9,12 +9,13 @@ const MAP_W = VIEW_COLS * TILE, MAP_H = VIEW_ROWS * TILE; // tamaño lógico de 
 let mapScale = 1;
 const BIG_MAP_SCALE = 1.3;
 function applyMapSize() {
+    if (typeof towerLayout !== 'undefined' && towerLayout) { fitTowerCanvas(); return; } // la Torre usa toda la ventana (towerView.js)
     const k = mapScale * (window.devicePixelRatio || 1);
     canvas.width = Math.round(MAP_W * k); canvas.height = Math.round(MAP_H * k);
     canvas.style.width = `${Math.round(MAP_W * mapScale)}px`; canvas.style.height = `${Math.round(MAP_H * mapScale)}px`;
     document.body.classList.toggle('big-map', mapScale > 1);
 }
-function toggleBigMap() { mapScale = mapScale > 1 ? 1 : BIG_MAP_SCALE; applyMapSize(); }
+function toggleBigMap() { if (typeof towerLayout !== 'undefined' && towerLayout) return; mapScale = mapScale > 1 ? 1 : BIG_MAP_SCALE; applyMapSize(); }
 applyMapSize();
 
 function setStateText(text) { document.getElementById('game-state-text').textContent = text; }
@@ -680,6 +681,7 @@ function updateHud() {
     renderScoreboard();
     renderHeroBar();
     renderCombatInfo();
+    renderTowerBadges(); // avisos sobre el mapa de la Torre (towerView.js)
 }
 
 // Aviso de la presión al líder en tu arena.
@@ -983,11 +985,11 @@ function renderTitle() {
 
 function render() {
     const dt = tickFx();
-    const k = mapScale * (window.devicePixelRatio || 1);
+    const k = (towerLayout ? 1 : mapScale) * (window.devicePixelRatio || 1);
     ctx.setTransform(k, 0, 0, k, 0, 0);
     const hero = viewedHero || player;
     if (hero && (hero.inRest || !hero.arena) && gameState !== 'HERO_SELECT' && gameState !== 'MENU') { renderRestArea(dt); return; }
-    ctx.fillStyle = '#050507'; ctx.fillRect(0, 0, MAP_W, MAP_H);
+    ctx.fillStyle = '#050507'; ctx.fillRect(0, 0, screenW(), screenH());
     if (gameState === 'MENU' || gameState === 'HERO_SELECT' || !hero || !hero.arena || !inCombat()) {
         ctx.strokeStyle = '#151821';
         for (let c = 0; c < VIEW_COLS; c++) for (let r = 0; r < VIEW_ROWS; r++) ctx.strokeRect(c * TILE, r * TILE, TILE, TILE);

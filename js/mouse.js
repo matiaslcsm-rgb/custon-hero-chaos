@@ -57,7 +57,7 @@ function castAt(hero, skill, x, y) {
 
 function mouseToTile(e) {
     const rect = canvas.getBoundingClientRect();
-    return { x: (e.clientX - rect.left) / rect.width * VIEW_COLS - 0.5 + camera.x, y: (e.clientY - rect.top) / rect.height * VIEW_ROWS - 0.5 + camera.y };
+    return { x: (e.clientX - rect.left) / rect.width * viewCols() - 0.5 + camera.x, y: (e.clientY - rect.top) / rect.height * viewRows() - 0.5 + camera.y }; // viewCols: con el zoom de la Torre (towerView.js)
 }
 
 function canControlPlayer() { return player && inCombat() && !autopilot && player.arena && !player.inRest && player.isAlive(); }
@@ -170,5 +170,5 @@ function drawMouseOverlay(arena) {
         ctx.beginPath(); ctx.moveTo(mx - 8, my); ctx.lineTo(mx + 8, my); ctx.moveTo(mx, my - 8); ctx.lineTo(mx, my + 8); ctx.stroke();
     }
     ctx.font = 'bold 12px monospace'; ctx.fillStyle = color; ctx.textAlign = 'center';
-    ctx.fillText(`${targeting.skill.name}: clic izquierdo para lanzar · clic derecho o Esc para cancelar`, MAP_W / 2, MAP_H - 12);
+    ctx.fillText(`${targeting.skill.name}: clic izquierdo para lanzar · clic derecho o Esc para cancelar`, screenW() / 2, screenH() - 12);
 }

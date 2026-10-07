@@ -43,6 +43,9 @@ window.addEventListener('keydown', e => {
     if (k === 'i' && gameMode === 'tower') { toggleInventory(); return; }
     if (k === 'k' && gameMode === 'tower') { toggleBestiary(); return; }
     if (k === 'j' && gameMode === 'tower') { toggleCodex(); return; }
+    if (k === 'l' && gameMode === 'tower') { toggleTowerLog(); return; }
+    if ((k === '+' || k === '=') && towerLayout) { towerZoom(1); return; }
+    if ((k === '-' || k === '_') && towerLayout) { towerZoom(-1); return; }
     if (k === 'escape') { handleEscape(); return; }
     if (k === ' ') { e.preventDefault(); if (!paused) playerDash(); return; } // esquive (fxSkills.js)
     if (paused) return; // en pausa no responden las demás teclas
@@ -308,7 +311,7 @@ function resetGame() {
     if (statsOpen) toggleStatsWindow(false);
     if (invOpen) toggleInventory(false);
     if (forgeOpen) { forgeOpen = false; showPanel('forge-container', false); }
-    gameMode = 'normal'; towerRun = null; document.body.classList.remove('ink-theme'); COLS = VIEW_COLS; ROWS = VIEW_ROWS; camera.x = 0; camera.y = 0;
+    gameMode = 'normal'; towerRun = null; document.body.classList.remove('ink-theme'); if (towerLayout) setTowerLayout(false); COLS = VIEW_COLS; ROWS = VIEW_ROWS; camera.x = 0; camera.y = 0;
     gameState = 'MENU'; waveNumber = 1; gameClock = 0; heroOffers = null;
     currentDraft = null; savedPrepTime = null; nextWave = null; logMuted = false;
     duelPlan = null; currentBet = null; duelBets = []; nextRoundBoss = null; lastRoundBoss = null; lastDuelPair = [];

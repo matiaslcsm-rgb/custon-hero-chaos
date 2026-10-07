@@ -25,7 +25,7 @@ function renderPauseMenu() {
         opt('sprites', '🎨 Pixel art (G)', spritesOn) +
         opt('autocast', '✨ Habilidades automáticas (H)', autoCast) +
         opt('autopilot', '🤖 Piloto automático (P)', autopilot) +
-        opt('bigmap', '⤢ Mapa grande (M)', mapScale > 1);
+        (gameMode === 'tower' ? '' : opt('bigmap', '⤢ Mapa grande (M)', mapScale > 1)); // en la Torre el mapa ya ocupa la ventana
     document.querySelectorAll('#pause-options .pm-toggle').forEach(btn => {
         btn.onclick = () => {
             ({ sound: () => setSound(!soundOn), sprites: () => setSprites(!spritesOn), autocast: () => setAutoCast(!autoCast),
@@ -33,7 +33,9 @@ function renderPauseMenu() {
             renderPauseMenu();
         };
     });
-    document.getElementById('pause-info').textContent = player
+    document.getElementById('pause-tower').innerHTML = gameMode === 'tower' && towerRun ? towerPauseHtml() : '';
+    document.getElementById('pause-glossary').style.display = gameMode === 'tower' ? 'none' : '';
+    document.getElementById('pause-info').textContent = gameMode === 'tower' && towerRun ? `Aventurero nivel ${player.level} · piso ${towerRun.floor} de ${TOWER.floors} · ${player.gold}g` : player
         ? `${player.name} · ronda ${waveNumber} · ${aliveHeroes().length} héroes en juego · ${heroRank(player)}º con ${player.points} puntos` : '';
 }
 
@@ -72,6 +74,7 @@ function handleEscape() {
     if (bestiaryOpen) { toggleBestiary(false); return; }
     if (codexOpen) { toggleCodex(false); return; }
     if (smithOpen) { toggleSmith(false); return; }
+    if (towerLogOpen) { toggleTowerLog(false); return; }
     if (document.getElementById('hero-any-drawer').classList.contains('open')) { closeHeroDrawer(); return; }
     if (document.getElementById('shop-container').style.display === 'block') { closeShop(); return; }
     togglePause();

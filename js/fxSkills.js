@@ -431,7 +431,7 @@ function flinchOffset(u) {
 // --- ESQUIVE (Espacio) ---
 const DASH = { tiles: 3, cooldown: 1.1, iframes: 0.3 };
 // Hacia donde apunta el cursor, en casillas del mundo (se recalcula con la cámara)
-function cursorWorld() { return mouse.over && mouse.fx !== undefined ? { x: mouse.fx * VIEW_COLS - 0.5 + camera.x, y: mouse.fy * VIEW_ROWS - 0.5 + camera.y } : null; }
+function cursorWorld() { return mouse.over && mouse.fx !== undefined ? { x: mouse.fx * viewCols() - 0.5 + camera.x, y: mouse.fy * viewRows() - 0.5 + camera.y } : null; }
 function playerDash() {
     if (!canControlPlayer() || hasFlag(player, 'stun') || gameClock < (player.dashReadyAt || 0)) return false;
     let d = keyboardDirection();

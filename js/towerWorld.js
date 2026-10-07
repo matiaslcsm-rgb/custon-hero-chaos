@@ -644,10 +644,10 @@ function drawObjectiveArrow(level) {
     if (!level.town || !player.isAlive()) return;
     const o = towerObjective(level);
     if (o.inLab) return;
-    const px = (o.x - camera.x + 0.5) * TILE, py = (o.y - camera.y + 0.5) * TILE;
-    if (px > 0 && py > 0 && px < MAP_W && py < MAP_H) return;
-    const cx = MAP_W / 2, cy = MAP_H / 2, a = Math.atan2(py - cy, px - cx);
-    const r = Math.min((MAP_W / 2 - 26) / Math.max(1e-6, Math.abs(Math.cos(a))), (MAP_H / 2 - 26) / Math.max(1e-6, Math.abs(Math.sin(a))));
+    const px = (o.x - camera.x + 0.5) * TILE * viewScale(), py = (o.y - camera.y + 0.5) * TILE * viewScale();
+    if (px > 0 && py > 0 && px < screenW() && py < screenH()) return;
+    const cx = screenW() / 2, cy = screenH() / 2, a = Math.atan2(py - cy, px - cx);
+    const r = Math.min((screenW() / 2 - 26) / Math.max(1e-6, Math.abs(Math.cos(a))), (screenH() / 2 - 26) / Math.max(1e-6, Math.abs(Math.sin(a))));
     ctx.save(); ctx.translate(cx + Math.cos(a) * r, cy + Math.sin(a) * r); ctx.rotate(a);
     ctx.fillStyle = '#6b2a1f'; ctx.strokeStyle = '#f3e7c9'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(14, 0); ctx.lineTo(-8, -10); ctx.lineTo(-3, 0); ctx.lineTo(-8, 10); ctx.closePath(); ctx.fill(); ctx.stroke();
@@ -659,10 +659,10 @@ function drawFloorTitle(level) {
     if (t > 3.5 || t < 0) return;
     const B = BIOMES[level.biome], alpha = Math.max(0, Math.min(1, t * 2, (3.5 - t) * 1.5));
     ctx.save(); ctx.globalAlpha = alpha; ctx.textAlign = 'center';
-    ctx.fillStyle = 'rgba(233,220,192,0.9)'; ctx.fillRect(MAP_W / 2 - 220, MAP_H * 0.28, 440, 74);
-    ctx.strokeStyle = INK.line; ctx.lineWidth = 2; ctx.strokeRect(MAP_W / 2 - 220, MAP_H * 0.28, 440, 74);
-    ctx.fillStyle = '#6b2a1f'; ctx.font = 'bold 15px Georgia, serif'; ctx.fillText(level.isCave ? `PISO ${level.floor} · BAJO TIERRA` : `PISO ${level.floor} DE ${TOWER.floors} · ${B.icon}`, MAP_W / 2, MAP_H * 0.28 + 24);
-    ctx.fillStyle = INK.line; ctx.font = 'bold 26px Georgia, serif'; ctx.fillText(level.isCave ? `Cueva · nivel −${level.depth}` : B.name, MAP_W / 2, MAP_H * 0.28 + 56);
+    ctx.fillStyle = 'rgba(233,220,192,0.9)'; ctx.fillRect(screenW() / 2 - 220, screenH() * 0.28, 440, 74);
+    ctx.strokeStyle = INK.line; ctx.lineWidth = 2; ctx.strokeRect(screenW() / 2 - 220, screenH() * 0.28, 440, 74);
+    ctx.fillStyle = '#6b2a1f'; ctx.font = 'bold 15px Georgia, serif'; ctx.fillText(level.isCave ? `PISO ${level.floor} · BAJO TIERRA` : `PISO ${level.floor} DE ${TOWER.floors} · ${B.icon}`, screenW() / 2, screenH() * 0.28 + 24);
+    ctx.fillStyle = INK.line; ctx.font = 'bold 26px Georgia, serif'; ctx.fillText(level.isCave ? `Cueva · nivel −${level.depth}` : B.name, screenW() / 2, screenH() * 0.28 + 56);
     ctx.restore();
 }
 
@@ -730,13 +730,14 @@ let nightLayer = null;
 function drawTowerNight(level) {
     const dark = level.isCave ? 0.82 : level.town ? towerDarkness() : 0;
     if (dark <= 0.01 || towerZoneAt(level, player.x, player.y) === ZONE.lab) return;
-    if (!nightLayer) { nightLayer = document.createElement('canvas'); nightLayer.width = MAP_W; nightLayer.height = MAP_H; }
+    if (!nightLayer || nightLayer.width !== screenW() || nightLayer.height !== screenH()) { nightLayer = document.createElement('canvas'); nightLayer.width = screenW(); nightLayer.height = screenH(); }
     const g = nightLayer.getContext('2d');
-    g.globalCompositeOperation = 'source-over'; g.clearRect(0, 0, MAP_W, MAP_H);
-    g.fillStyle = `rgba(14,18,42,${0.62 * dark})`; g.fillRect(0, 0, MAP_W, MAP_H);
+    g.globalCompositeOperation = 'source-over'; g.clearRect(0, 0, screenW(), screenH());
+    g.fillStyle = `rgba(14,18,42,${0.62 * dark})`; g.fillRect(0, 0, screenW(), screenH());
     g.globalCompositeOperation = 'destination-out';
+    const z = viewScale();
     const light = (x, y, r) => {
-        const sx = (x - camera.x + 0.5) * TILE, sy = (y - camera.y + 0.5) * TILE;
+        const sx = (x - camera.x + 0.5) * TILE * z, sy = (y - camera.y + 0.5) * TILE * z; r *= z;
         const grd = g.createRadialGradient(sx, sy, r * 0.3, sx, sy, r);
         grd.addColorStop(0, 'rgba(0,0,0,1)'); grd.addColorStop(1, 'rgba(0,0,0,0)');
         g.fillStyle = grd; g.fillRect(sx - r, sy - r, r * 2, r * 2);
@@ -747,7 +748,7 @@ function drawTowerNight(level) {
     (level.shrines || []).forEach(s => { if (!s.used) light(s.x, s.y, 2.2 * TILE); });
     ctx.drawImage(nightLayer, 0, 0);
     const dusk = level.isCave ? 0 : 1 - Math.abs(dark - 0.5) * 2; // tono naranja en el atardecer y el amanecer
-    if (dusk > 0) { ctx.fillStyle = `rgba(255,140,60,${0.12 * dusk})`; ctx.fillRect(0, 0, MAP_W, MAP_H); }
+    if (dusk > 0) { ctx.fillStyle = `rgba(255,140,60,${0.12 * dusk})`; ctx.fillRect(0, 0, screenW(), screenH()); }
 }
 
 // --- CUEVAS (mazmorras opcionales) ---

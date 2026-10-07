@@ -688,3 +688,27 @@ body.ink-theme .forge-card .meta { color: #2f5d62 !important; }
 .codex-pips { color: #9a6b00; font-size: 11px; letter-spacing: 1px; }
 .tshop-row.picked { outline: 2px solid #c9a227; border-radius: 6px; }
 @media (max-width: 700px) { .codex-layout { grid-template-columns: 1fr; } }
+
+/* Tower Chaos: pantalla grande (towerView.js) */
+body.tower-layout #hud-main { grid-template-columns: minmax(0, 1fr); }
+body.tower-layout #left-col, body.tower-layout #controls-hint { display: none; }
+body.tower-layout #game-container { padding: 8px 10px; }
+body.tower-layout #right-col { display: none; }
+body.tower-layout.log-open #right-col { display: flex; position: fixed; top: 10px; right: 10px; bottom: 10px; width: 380px; height: auto; z-index: 40; box-shadow: -6px 0 24px rgba(0,0,0,0.5); }
+body.tower-layout.log-open #combat-log { height: 260px; }
+#float-log, #tower-badges { display: none; }
+body.tower-layout #float-log { display: block; position: absolute; left: 10px; bottom: 10px; max-width: 46%; pointer-events: none; }
+#float-log p { margin: 2px 0; padding: 2px 8px; font-size: 0.8rem; background: rgba(233,220,192,0.86); color: #2b2118; border-left: 3px solid #6b2a1f; transition: opacity 0.8s; }
+#float-log p.fade { opacity: 0; }
+body.tower-layout #tower-badges { display: flex; flex-direction: column; gap: 4px; position: absolute; left: 10px; top: 10px; }
+#tower-badges button { background: #e9dcc0; color: #6b2a1f; border: 2px solid #2b2118; font-family: Georgia, serif; font-weight: bold; padding: 4px 10px; cursor: pointer; animation: badge-pulse 1.6s infinite; }
+@keyframes badge-pulse { 50% { box-shadow: 0 0 10px #c9a227; } }
+.pause-zoom { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 8px 0; }
+.pause-zoom button { width: 34px; }
+.pause-controls { font-size: 0.72rem; margin-top: 6px; }
+.tower-pause { flex-wrap: wrap; }
+body.tower-layout .pause-box { max-width: 560px; }
+body.tower-layout { align-items: flex-start; }
+body.tower-layout #app, body.tower-layout #view-game, body.tower-layout #game-container { width: 100%; box-sizing: border-box; }
+body.tower-layout #game-container { border: none; box-shadow: none; }
+body.tower-layout #map-hud .mh-item:first-child, body.tower-layout #lives-text, body.tower-layout #points-text, body.tower-layout #map-toggle { display: none; }

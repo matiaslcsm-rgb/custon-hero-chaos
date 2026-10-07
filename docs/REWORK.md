@@ -99,6 +99,18 @@ manejar tanto.
   efectos, zoom, habilidades automáticas) · Salir. Hoy el Esc cierra ventanas y pausa: queda igual, pero con estas pestañas.
 - Se mantiene la estética de tinta y pergamino.
 
+**Hecho (fase 1, 2026-10-07, `js/towerView.js`):**
+- El mapa ocupa toda la ventana: sin ranking ni panel derecho, y la barra del héroe queda abajo. En 1600×900 se ven
+  ~30×13 casillas (antes 20×12 en un recuadro chico).
+- **Zoom** con la rueda o + / −, de 14 a 64 casillas a lo ancho. Se guarda como "casillas a lo ancho" para que se vea
+  igual en cualquier pantalla; el mouse y el apuntado siguen al zoom.
+- Los mensajes **flotan** 7 s abajo a la izquierda del mapa (los últimos 5). La **L** abre el diario del piso
+  (información del piso y registro completo) como panel a la derecha.
+- Aviso arriba a la izquierda cuando hay puntos de stats para repartir.
+- **Pausa de la Torre:** accesos a Equipo, Stats, Códice, Bestiario y Diario, zoom con − y +, y la lista de controles.
+  Sin el glosario del otro modo ni "mapa grande". Las pestañas completas llegan con la Bitácora (§6).
+- Falta: achicar la barra del héroe cuando haya 3 ranuras (fase 3) y la barra de jefe abajo (fase 4).
+
 ## 6. La Bitácora (diario del personaje)
 Une el Códice, el Bestiario y el tutorial en **un cuaderno escrito a mano**, persistente entre runs (como el Diario
 de Cazador de Hollow Knight):

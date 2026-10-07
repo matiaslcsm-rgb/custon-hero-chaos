@@ -59,6 +59,7 @@ function startTowerRun() {
     showPanel('hero-select-panel', false);
     gameState = 'TOWER';
     document.body.classList.add('ink-theme');
+    setTowerLayout(true); // mapa a toda la ventana, zoom (towerView.js)
     log(`🗼 Tower Chaos: entrás a la torre como aventurero sin clase. Tenés Golpe Certero en la E; cada pieza de equipo trae la habilidad de un héroe: buscala en cofres y en lo que sueltan los creeps (I: inventario, C: stats). Hay ${TOWER.floors} pisos, cada uno con su bioma, su pueblo y su laberinto.`);
     log(`✨ Hechizo inicial: ${itemSkill(starter).name} (${starter.name}, ya equipada en la ${player.keyBindings[itemSkill(starter).id].toUpperCase()}).`);
     enterTowerFloor(1, 'start');
@@ -456,7 +457,7 @@ function towerTiles() {
 function drawTowerTiles(level) {
     const t = inkTiles(); // estética tinta y pergamino (inkart.js)
     const x0 = Math.floor(camera.x), y0 = Math.floor(camera.y);
-    for (let y = y0; y <= Math.min(ROWS - 1, y0 + VIEW_ROWS); y++) for (let x = x0; x <= Math.min(COLS - 1, x0 + VIEW_COLS); x++) {
+    for (let y = y0; y <= Math.min(ROWS - 1, y0 + viewRows()); y++) for (let x = x0; x <= Math.min(COLS - 1, x0 + viewCols()); x++) {
         if (!level.explored[y][x]) continue;
         const w = level.walls[y][x], labTile = !level.zone || (level.zone[y * COLS + x] === ZONE.lab && (!w || w === WALL.stone));
         const img = level.isCave ? caveTileFor(level, x, y) : !labTile ? biomeTileFor(level, x, y) // cueva, o campo y pueblo del bioma (towerWorld.js)
@@ -491,8 +492,8 @@ function markMinimap(level, x, y) {
 
 function updateCamera(level, hero, dt) {
     const pos = drawPos(hero, 0);
-    camera.x = Math.max(0, Math.min(COLS - VIEW_COLS, pos.x - VIEW_COLS / 2 + 0.5));
-    camera.y = Math.max(0, Math.min(ROWS - VIEW_ROWS, pos.y - VIEW_ROWS / 2 + 0.5));
+    camera.x = Math.max(0, Math.min(COLS - viewCols(), pos.x - viewCols() / 2 + 0.5));
+    camera.y = Math.max(0, Math.min(ROWS - viewRows(), pos.y - viewRows() / 2 + 0.5));
 }
 
 function renderTower(level, dt) {
@@ -500,6 +501,7 @@ function renderTower(level, dt) {
     updateCamera(level, player, dt);
     ctx.save();
     if (shakeAmount) ctx.translate((Math.random() - 0.5) * shakeAmount * 2, (Math.random() - 0.5) * shakeAmount * 2);
+    ctx.scale(viewScale(), viewScale()); // zoom (towerView.js)
     ctx.translate(-camera.x * TILE, -camera.y * TILE);
     drawTowerTiles(level);
     drawTowerLoot(level);
@@ -561,13 +563,13 @@ function renderTower(level, dt) {
     drawMouseOverlay(level);
     // Niebla: lo no descubierto, negro; lo descubierto fuera de la vista, oscurecido
     const x0 = Math.floor(camera.x), y0 = Math.floor(camera.y);
-    for (let y = y0; y <= Math.min(ROWS - 1, y0 + VIEW_ROWS); y++) for (let x = x0; x <= Math.min(COLS - 1, x0 + VIEW_COLS); x++) {
+    for (let y = y0; y <= Math.min(ROWS - 1, y0 + viewRows()); y++) for (let x = x0; x <= Math.min(COLS - 1, x0 + viewCols()); x++) {
         if (!level.explored[y][x]) { ctx.fillStyle = INK.shadow; ctx.fillRect(x * TILE, y * TILE, TILE + 1, TILE + 1); }
         else if (!canSee(level, x, y)) { ctx.fillStyle = 'rgba(43,33,24,0.5)'; ctx.fillRect(x * TILE, y * TILE, TILE + 1, TILE + 1); }
     }
     ctx.restore();
     drawTowerNight(level); // día y noche (towerWorld.js)
-    drawUltBanner(MAP_W / 2, MAP_H * 0.72); // cartel de la definitiva, encima de la niebla (fxSkills.js)
+    drawUltBanner(screenW() / 2, screenH() * 0.72); // cartel de la definitiva, encima de la niebla (fxSkills.js)
     drawInkVignette();
     drawObjectiveArrow(level);
     renderTowerMinimap(level);
@@ -576,7 +578,7 @@ function renderTower(level, dt) {
     const g = level.guardian || level.caveBoss;
     if (g && g.isAlive() && visible(g)) {
         // Barra del jefe en tinta: placa de pergamino, nombre con serifa y vida en rojo sangre
-        const bx = 20, bw = MAP_W - 20 - 180; // deja libre el minimapa (arriba a la derecha)
+        const bx = 20, bw = screenW() - 20 - 180; // deja libre el minimapa (arriba a la derecha)
         ctx.fillStyle = 'rgba(233,220,192,0.92)'; ctx.fillRect(bx - 8, 4, bw + 16, 34);
         ctx.strokeStyle = INK.line; ctx.lineWidth = 2; ctx.strokeRect(bx - 8, 4, bw + 16, 34);
         ctx.font = 'bold 13px Georgia, serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#6b2a1f';
@@ -586,15 +588,15 @@ function renderTower(level, dt) {
         ctx.strokeStyle = INK.line; ctx.lineWidth = 1.2; ctx.strokeRect(bx, 25, bw, 7);
     }
     if (paused) {
-        ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(0, 0, MAP_W, MAP_H);
+        ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(0, 0, screenW(), screenH());
         ctx.font = 'bold 30px monospace'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffb703';
-        ctx.fillText('PAUSA', MAP_W / 2, MAP_H / 2);
+        ctx.fillText('PAUSA', screenW() / 2, screenH() / 2);
     }
 }
 
 // Minimapa (arriba a la derecha): lo descubierto, la escalera, el guardián si lo viste y vos.
 function renderTowerMinimap(level) {
-    const s = Math.min(1.7, 150 / COLS), w = COLS * s, h = ROWS * s, ox = MAP_W - w - 8, oy = 8;
+    const s = Math.min(1.7, Math.max(150, screenW() * 0.14) / COLS), w = COLS * s, h = ROWS * s, ox = screenW() - w - 8, oy = 8;
     ctx.fillStyle = 'rgba(43,33,24,0.85)'; ctx.fillRect(ox - 3, oy - 3, w + 6, h + 6);
     ctx.strokeStyle = INK.paperDark; ctx.lineWidth = 1; ctx.strokeRect(ox - 3, oy - 3, w + 6, h + 6);
     if (level.minimap) ctx.drawImage(level.minimap, ox, oy, w, h);
@@ -613,7 +615,7 @@ function renderTowerMinimap(level) {
     (level.events || []).forEach(e => { if (e.kind !== 'ambush' && e.seen && !['saved', 'lost', 'open', 'freed'].includes(e.state)) dot(e.x, e.y, EVENT_INFO[e.kind].color, 2.6); });
     if (player.isAlive()) dot(player.x, player.y, '#00f5d4', 2.4);
     ctx.strokeStyle = '#555'; ctx.lineWidth = 1;
-    ctx.strokeRect(ox + camera.x * s, oy + camera.y * s, VIEW_COLS * s, VIEW_ROWS * s);
+    ctx.strokeRect(ox + camera.x * s, oy + camera.y * s, viewCols() * s, viewRows() * s);
 }
 
 // --- PILOTO AUTOMÁTICO EN LA TORRE (también lo usan las pruebas y las mediciones) ---

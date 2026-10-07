@@ -61,12 +61,13 @@ function inkTiles() {
 // Papel viejo encima de todo: viñeta sepia en los bordes de la pantalla
 let inkVignette = null;
 function drawInkVignette() {
-    if (!inkVignette) {
-        inkVignette = document.createElement('canvas'); inkVignette.width = MAP_W; inkVignette.height = MAP_H;
+    const W = screenW(), H = screenH();
+    if (!inkVignette || inkVignette.width !== W || inkVignette.height !== H) {
+        inkVignette = document.createElement('canvas'); inkVignette.width = W; inkVignette.height = H;
         const g = inkVignette.getContext('2d');
-        const grd = g.createRadialGradient(MAP_W / 2, MAP_H / 2, MAP_H * 0.35, MAP_W / 2, MAP_H / 2, MAP_W * 0.62);
+        const grd = g.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, W * 0.62);
         grd.addColorStop(0, 'rgba(43,33,24,0)'); grd.addColorStop(1, 'rgba(43,33,24,0.55)');
-        g.fillStyle = grd; g.fillRect(0, 0, MAP_W, MAP_H);
+        g.fillStyle = grd; g.fillRect(0, 0, W, H);
     }
     ctx.drawImage(inkVignette, 0, 0);
 }

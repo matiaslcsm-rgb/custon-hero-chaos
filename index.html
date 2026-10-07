@@ -41,6 +41,8 @@
                 <div id="bet-banner"></div>
                 <div id="map-wrap">
                     <canvas id="ascii-canvas"></canvas>
+                    <div id="float-log"></div>
+                    <div id="tower-badges"></div>
                 </div>
                 <div id="hero-bar" style="display: none;">
                     <div id="hb-portrait">
@@ -271,11 +273,14 @@
             <p id="pause-info" class="subtitle"></p>
             <button id="pause-continue" class="primary-btn">▶ Continuar</button>
             <button id="pause-tutorial" class="secondary-btn">📖 Tutorial</button>
+            <div id="pause-tower"></div>
+            <div id="pause-glossary">
             <div class="pause-section">📚 Glosario</div>
             <div class="pause-row">
                 <button class="secondary-btn" data-glossary="heroes">🦸 Héroes</button>
                 <button class="secondary-btn" data-glossary="creeps">👹 Creeps y Jefes</button>
                 <button class="secondary-btn" data-glossary="items">🎒 Ítems</button>
+            </div>
             </div>
             <div class="pause-section">⚙ Opciones</div>
             <div id="pause-options"></div>
@@ -394,6 +399,7 @@
     <script src="js/towerCodex.js"></script>
     <script src="js/inkart.js"></script>
     <script src="js/ui.js"></script>
+    <script src="js/towerView.js"></script>
     <script src="js/mouse.js"></script>
     <script src="js/pause.js"></script>
     <script src="js/main.js"></script>
