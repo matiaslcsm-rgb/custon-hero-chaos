@@ -626,6 +626,14 @@ function towerAutoDir(hero) {
     const posKey = hero.x + ',' + hero.y;
     if (hero.autoPos !== posKey) { hero.autoPos = posKey; hero.autoPosAt = gameClock; }
     else if (gameClock - hero.autoPosAt > 15) { hero.autoWanderUntil = gameClock + 2; hero.autoWanderDir = pickRandom(STEPS_8); hero.autoPosAt = gameClock; }
+    // Va y viene sin avanzar (en 20 s se movió menos de 3 casillas y no mató nada): abandona ese objetivo un rato
+    if (!hero.autoCheck || gameClock - hero.autoCheck.at > 20) {
+        const ck = hero.autoCheck;
+        if (ck && Math.hypot(hero.x - ck.x, hero.y - ck.y) < 3 && towerRun.stats.kills === ck.kills && ck.target && ck.target === hero.autoTarget) {
+            ck.target.autoSkipUntil = gameClock + 30; hero.autoWanderUntil = gameClock + 2; hero.autoWanderDir = pickRandom(STEPS_8);
+        }
+        hero.autoCheck = { at: gameClock, x: hero.x, y: hero.y, kills: towerRun.stats.kills, target: hero.autoTarget };
+    }
     if (gameClock < (hero.autoWanderUntil || 0)) { hero.autoGoal = 'paseo'; return { dx: hero.autoWanderDir[0], dy: hero.autoWanderDir[1] }; }
     let target = null;
     const corpse = towerRun.corpse;
@@ -651,6 +659,7 @@ function towerAutoDir(hero) {
     }
     const dir = target && towerPathDir(hero, target);
     hero.autoGoal = target ? `${target.label || 'escalera'} ${target.x},${target.y}` : 'nada'; // para depurar el piloto
+    hero.autoTarget = target;
     if (!dir && target && !target.isGuardian && target !== level.stairs) target.autoSkipUntil = gameClock + 10; // no lleva a ningún lado: probar con otro
     return dir || { dx: 0, dy: 0 };
 }

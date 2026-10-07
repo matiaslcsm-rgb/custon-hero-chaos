@@ -218,6 +218,10 @@ Al morir no se pierde todo: **tu cadáver y tus cosas quedan en el mapa** y pued
      vencerlo, una rara, una mágica y 80g × piso) · Mercader ambulante (3 piezas, una rara, +20% de precio; B o al
      acercarte) · Prisionero (3 guardias; al liberarlo, +1 punto de stats y 30g × piso). Aparecen en el minimapa cuando
      los descubrís (la emboscada no). La crónica cuenta los eventos completados. Demo: `&at=event&kind=caravan`.
+     Medido (piloto automático): ganó 3 de 3 runs completas en 122-145 min con 0-2 muertes, completando 9-15 eventos.
+     Una run anterior se trabó yendo y viniendo hacia un creep del laberinto: el piloto ahora abandona un objetivo si en
+     20 s se movió menos de 3 casillas sin matar nada. Con los eventos la torre quedó un poco más fácil (más botín y
+     puntos de stats): a vigilar.
 
 ## 4 quater. Mundo con profundidad (2026-10-06)
 Pedido del usuario: ciclo de día y noche, mapa más grande, cuevas con muchos niveles de profundidad, lugares altos y
