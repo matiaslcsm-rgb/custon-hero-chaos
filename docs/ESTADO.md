@@ -78,7 +78,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   habilidad, jefes estilo Hades, Esencia y crafteo con calidades, pantalla con zoom y pausa, Bitácora, música. Con orden
   de fases y preguntas abiertas.
 - **Fase 2 del rework completa (2026-10-07):** las 3 armas iniciales (Espada/Arco/Bastón) como pedestal obligatorio
-  al entrar a la torre, cada una con su habilidad propia (Golpe Certero, Ráfaga del Arco, Proyectil Arcano); ya no
+  al entrar a la torre, cada una con su habilidad propia (Golpe Certero, Ráfaga del Arco, Saeta Arcana); ya no
   hay hechizo inicial al azar. El Cuaderno (tecla N): 7 páginas de tutorial jugado que se escriben solas con tus
   acciones (despertar, caminar, esquivar, lanzar, primera baja, un cofre, el pueblo), persistentes entre runs. Ver
   ROGUELIKE.md §4 octies y REWORK.md §1-2. Falta solo la escena del despertar en el mundo (hoy es una ventana, no
@@ -106,6 +106,13 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   ya había; y que Zeus no tenga pasiva es fiel a su diseño original (puro daño, sin robo de vida ni control), no
   un hueco del catálogo. El resto del rediseño del catálogo que pide REWORK.md §2 (control nuevo, zonas de área,
   etiquetas de rol en la carta) queda para más adelante como contenido nuevo, no como cierre de esta fase.
+- **Medición después de las fases 2 y 3 (2026-10-07, piloto, run completa):** Espada 91 min/1 muerte y 105/3, Arco
+  120/6, Bastón 92/3; antes de las fases 2-3 eran 122-161 min con 0-9 muertes. **La Torre quedó más fácil y más
+  rápida** (las ex-definitivas como activas comunes pegan mucho). Una run de Espada cayó en una **espiral de muertes**
+  (30 muertes, trabada en el piso 6, sin equipo: cada muerte un portador se lleva piezas, el héroe queda más débil y
+  vuelve a morir). Pendiente: subir la dificultad o bajar las ex-definitivas, y frenar la espiral (por ejemplo, que
+  no se lleve piezas si hay un portador vivo sin cazar). La habilidad del Bastón pasó a llamarse Saeta Arcana
+  (chocaba con el Proyectil Arcano del Arcanista).
 - **Motor (decidido 2026-10-06):** seguimos en canvas + JavaScript puro. Pasar a un motor (Phaser para seguir en el
   navegador, Godot para publicar en PC/celular) se decide cuando el contenido de Tower Chaos esté más cerrado.
 - **Balance en curso (2026-09-28):** jefes más suaves desde la ronda 20 + Kaya y Cetro del Eclipse (ver DISEÑO.md §9 bis).

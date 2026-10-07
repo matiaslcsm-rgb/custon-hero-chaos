@@ -1428,7 +1428,7 @@ function towerDummy(level, dx = 1, dy = 0) {
     level.creeps.push(c);
     return c;
 }
-test('Torre: Ráfaga del Arco pega a varios enemigos; Proyectil Arcano marca el elemento para las reacciones', () => {
+test('Torre: Ráfaga del Arco pega a varios enemigos; Saeta Arcana marca el elemento para las reacciones', () => {
     const level = newTower('AXE', { weapon: 'ADVENTURER_BOW' });
     level.creeps.forEach(c => { c.hp = 0; });
     const volley = SKILL_INDEX.ADVENTURER_VOLLEY;

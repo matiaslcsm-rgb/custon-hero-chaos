@@ -37,7 +37,7 @@ planos), Diablo II (calidad de las piezas), Hollow Knight (el diario de cazador)
 entrar a la torre (ventana sin botón de cerrar; Esc no la cierra ni se puede pausar por arriba —
 `weaponPickOpen` en `towerModalOpen()`, igual que el inventario o la forja; el piloto automático elige Espada sola).
 Golpe Certero pasó de ser fijo del Aventurero a ser la habilidad de la Espada (se pierde si cambiás de arma, como
-cualquier otra pieza); se sumaron Ráfaga del Arco (pega a 3 enemigos distintos) y Proyectil Arcano (daño mágico,
+cualquier otra pieza); se sumaron Ráfaga del Arco (pega a 3 enemigos distintos) y Saeta Arcana (daño mágico,
 marca elemento arcano para las reacciones). Como las 3 armas no son de ningún héroe del roster, no entran en
 `HERO_TEMPLATES`: `heroOf()` las resuelve aparte (y de paso corrige que el ícono y el color de un arma sin héroe
 real crasheaban en un par de lugares).

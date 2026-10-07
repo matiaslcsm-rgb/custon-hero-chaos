@@ -410,7 +410,7 @@ su propia habilidad (`js/towerItems.js`):
 |---|---|---|
 | Espada | Golpe Certero (`ADVENTURER_GOLPE`) | daño físico al más cercano — ya existía, era fija del Aventurero; ahora es la del arma, se pierde si cambiás de arma |
 | Arco | Ráfaga del Arco (`ADVENTURER_VOLLEY`) | daño físico a hasta 3 enemigos distintos en rango |
-| Bastón | Proyectil Arcano (`ADVENTURER_BOLT`) | daño mágico, elemento arcano — marca para las reacciones (§4 quinquies) |
+| Bastón | Saeta Arcana (`ADVENTURER_BOLT`) | daño mágico, elemento arcano — marca para las reacciones (§4 quinquies) |
 
 Las 3 no son piezas de ningún héroe del roster (no hay "Espada de Axe" en el catálogo): son la identidad propia
 del Aventurero, por eso no tienen una entrada real en `HERO_TEMPLATES`. Varios lugares (ícono, color del retrato,

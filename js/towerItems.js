@@ -195,7 +195,7 @@ function giveStarterWeapon(hero, weaponKey) {
 }
 
 // Golpe Certero: la habilidad de la Espada (antes era fija en el Aventurero; ahora sale del arma, como Ráfaga
-// del Arco y Proyectil Arcano, y se pierde si cambiás de arma — igual que cualquier otra pieza).
+// del Arco y Saeta Arcana, y se pierde si cambiás de arma — igual que cualquier otra pieza).
 const ADVENTURER_STRIKE = {
     id: 'ADVENTURER_GOLPE', name: 'Golpe Certero', kind: 'active', heroKey: 'ADVENTURER',
     tags: ['FÍSICO'],
@@ -233,18 +233,18 @@ const ADVENTURER_VOLLEY = {
 };
 SKILL_INDEX[ADVENTURER_VOLLEY.id] = ADVENTURER_VOLLEY;
 
-// Proyectil Arcano: la habilidad del Bastón — daño mágico, marca con su elemento para las reacciones (fxSkills.js).
+// Saeta Arcana: la habilidad del Bastón — daño mágico, marca con su elemento para las reacciones (fxSkills.js).
 const ADVENTURER_BOLT = {
-    id: 'ADVENTURER_BOLT', name: 'Proyectil Arcano', kind: 'active', heroKey: 'ADVENTURER',
+    id: 'ADVENTURER_BOLT', name: 'Saeta Arcana', kind: 'active', heroKey: 'ADVENTURER',
     tags: ['MÁGICO'],
     values: { cooldown: [6, 5.5, 5, 4.5], manaCost: 20, dmgMult: [1.1, 1.3, 1.5, 1.7] },
     description: 'Un proyectil arcano: {dmgMult%} de tu daño como daño mágico al enemigo más cercano en tu alcance. Marca con su elemento para las reacciones.',
     cast(caster) {
         const target = nearestEnemy(caster, caster.attackRange + 1);
-        if (!target) { log('Proyectil Arcano: sin objetivo en alcance.'); return false; }
+        if (!target) { log('Saeta Arcana: sin objetivo en alcance.'); return false; }
         const dmg = Math.round(caster.atk * val(this, caster, 'dmgMult'));
         const { dealt } = dealDamage(caster, target, dmg, 'magical');
-        log(`✨ ¡Proyectil Arcano a ${target.label}! (-${dealt} HP)`);
+        log(`✨ ¡Saeta Arcana a ${target.label}! (-${dealt} HP)`);
         return true;
     }
 };
