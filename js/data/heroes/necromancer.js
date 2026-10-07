@@ -74,6 +74,9 @@ registerHero({
         id: 'NECROMANCER_SHROUD', name: 'Manto Fantasma', kind: 'active',
         tags: ['MEJORA', 'CONTROL'],
         values: { cooldown: [26, 22, 18, 14], manaCost: [60, 65, 70, 75], duration: [3, 3.5, 4, 4.5], slowRadius: 4, slowPct: 0.3, magicResistPenalty: 40, healingBonusPct: 0.5 },
+        // Rebalanceo para la Torre (fase 3, "armar y balancear lo que tenemos"): el enfriamiento/maná quedaban
+        // el doble que cualquier otra activa de guantes (la siguiente más cara: 15s/45 maná); la bajamos a la par.
+        towerValues: { cooldown: [16, 14, 12], manaCost: [45, 50, 55] },
         description: 'Te volvés espectral por {duration}s: inmune a daño físico (pero no podés atacar), con {magicResistPenalty} puntos menos de resistencia mágica y {healingBonusPct%} más de curación recibida. Al activarse, ralentiza {slowPct%} a los enemigos en radio {slowRadius}.',
         cast(caster) {
             const duration = val(this, caster, 'duration');

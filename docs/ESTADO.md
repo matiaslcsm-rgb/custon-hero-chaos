@@ -89,8 +89,15 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   11 definitivas pasan a ser activas comunes (maná y enfriamiento normal), rebalanceadas a la baja vía un
   `towerValues` opcional por habilidad (`js/progression.js`) que solo aplica en la Torre y no toca Caos de
   Héroes. De paso se cerró un bug del Herrero que dejaba imbuir un poder en una ranura que no era la suya
-  (rompía el límite de 3 activas). Ver REWORK.md §2. **Falta de esta fase:** "armar y balancear lo que tenemos"
-  — revisar el resto del catálogo (no solo las ex-definitivas) para que las 3 ranuras queden parejas entre sí.
+  (rompía el límite de 3 activas). Ver REWORK.md §2.
+- **Balance de arma/guantes (2026-10-07, "armar y balancear lo que tenemos"):** revisadas las 33 activas de
+  arma/guantes contra las 11 ex-definitivas ya rebalanceadas — la mayoría ya caía en un rango parejo (7-15s de
+  enfriamiento). Dos outliers corregidos vía `towerValues`: Manto Fantasma (Nigromante) tenía el doble de
+  enfriamiento/maná que cualquier par suyo (26s/60 maná → 16-12s/55-45); las 3 activas no-definitiva de Zeus
+  pagaban 70-115 de maná contra 30-50 del resto del roster (en Caos de Héroes lo compensa el maná que crece por
+  nivel, en la Torre no) → recortadas a 45-60. **Pendiente, menor:** la ranura de botas no recibe ninguna
+  habilidad en todo el roster (queda solo con stats) y Zeus no tiene pasiva (no aporta nada al pool de casco);
+  son asimetrías de contenido, no de balance numérico — se dejan anotadas, no se tocaron.
 - **Motor (decidido 2026-10-06):** seguimos en canvas + JavaScript puro. Pasar a un motor (Phaser para seguir en el
   navegador, Godot para publicar en PC/celular) se decide cuando el contenido de Tower Chaos esté más cerrado.
 - **Balance en curso (2026-09-28):** jefes más suaves desde la ronda 20 + Kaya y Cetro del Eclipse (ver DISEÑO.md §9 bis).

@@ -37,6 +37,10 @@ registerHero({
         id: 'ZEUS_ARC', name: 'Rayo Arco', kind: 'active',
         tags: ['MÁGICO', 'ÁREA'],
         values: { cooldown: [9, 8, 7, 6], manaCost: [70, 80, 90, 100], baseDmg: [70, 110, 150, 190], intRatio: 0.4, jumps: [3, 4, 5, 6], jumpRange: 4, range: 6 },
+        // Rebalanceo para la Torre ("armar y balancear lo que tenemos"): Zeus pagaba 70-115 de maná por
+        // activa contra 30-50 del resto del roster; en Caos de Héroes lo compensa el maná que crece por nivel,
+        // en la Torre depende solo del equipo. Se recorta a la par de sus pares.
+        towerValues: { manaCost: [45, 50, 55] },
         description: 'Lanza un rayo al enemigo más cercano (rango {range}) que salta a otros {jumps} enemigos cercanos (hasta {jumpRange} de un salto al siguiente): {baseDmg} + {intRatio%} de tu Inteligencia como daño mágico por salto.',
         cast(caster) {
             const first = nearestEnemy(caster, val(this, caster, 'range'));
@@ -65,6 +69,7 @@ registerHero({
         id: 'ZEUS_BOLT', name: 'Rayo Relámpago', kind: 'active', pointTarget: true,
         tags: ['MÁGICO', 'CONTROL'],
         values: { cooldown: [7, 6, 5, 4], manaCost: [85, 95, 105, 115], baseDmg: [100, 165, 230, 295], intRatio: 0.7, stun: [0.3, 0.4, 0.5, 0.6], range: 6, speed: 14, radius: 0.8 },
+        towerValues: { manaCost: [50, 55, 60] },
         description: 'Dispara un rayo hacia donde apuntes (rango {range}, radio {radius}): {baseDmg} + {intRatio%} de tu Inteligencia como daño mágico y aturde {stun}s a quien toque. Proyectil real: si apuntás mal y no hay nadie en el área, no le pega a nadie.',
         vfx: { color: '#ffe066' },
         // pointTarget: a diferencia de las demás (que usan nearestEnemy y siempre le "enganchan" al más cercano
@@ -91,6 +96,7 @@ registerHero({
         id: 'ZEUS_NIMBUS', name: 'Nimbo de Tormenta', kind: 'active',
         tags: ['MÁGICO', 'ÁREA'],
         values: { cooldown: [11, 10, 9, 8], manaCost: [75, 85, 95, 105], baseDmg: [55, 90, 125, 160], intRatio: 0.35, radius: [3, 3.5, 4, 4.5] },
+        towerValues: { manaCost: [45, 50, 55] },
         description: 'Hace estallar un nimbo de tormenta a tu alrededor (radio {radius}): {baseDmg} + {intRatio%} de tu Inteligencia como daño mágico a todos los enemigos alcanzados.',
         cast(caster) {
             const dmg = val(this, caster, 'baseDmg') + caster.int * val(this, caster, 'intRatio');
