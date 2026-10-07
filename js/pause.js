@@ -11,7 +11,7 @@ let glossaryFromPause = false; // al cerrar el glosario, volver al menú de paus
 function canPause() { return gameState !== 'MENU' && gameState !== 'ENDED'; }
 
 function setPaused(on) {
-    if (on && !canPause()) return;
+    if (on && (!canPause() || weaponPickOpen)) return; // elegir arma es obligatorio: no se puede pausar por arriba
     paused = on;
     showPanel('pause-menu', on);
     if (on) { cancelTargeting(); renderPauseMenu(); sfx('click'); }
@@ -65,6 +65,7 @@ function quitToMenu() {
 
 // Esc: cierra lo que esté abierto (apuntado, tienda, tutorial, glosario) y si no hay nada, pausa o reanuda.
 function handleEscape() {
+    if (weaponPickOpen) return; // elegir arma es obligatorio: Esc no la cierra
     if (targeting) { cancelTargeting(); return; }
     if (document.getElementById('tutorial').style.display === 'flex') { closeTutorial(); return; }
     if (closeGlossary()) return;

@@ -398,6 +398,33 @@ tardar menos y morir menos: la meta es que la primera subida cueste.
 nombre propio en el laberinto, eventos en el campo (caravana atacada, emboscada), un "modo calor" estilo Hades para
 rejugar más difícil, sonido de ambiente por bioma.
 
+## 4 octies. Las 3 armas iniciales (2026-10-07, fase 2 del rework — mitad mecánica)
+
+Reemplaza el "hechizo inicial al azar": al entrar a la torre, antes de poder moverte, un pedestal obligatorio te
+hace elegir una de 3 armas (`js/towerUI.js`: `weaponPickOpen`, ventana sin botón de cerrar — Esc no la cierra, no
+se puede pausar por arriba; `towerModalOpen()` la trata igual que el inventario o la forja, así que la partida
+espera; el piloto automático elige Espada sola y sigue). Cada una es un arma de verdad en la ranura de arma, con
+su propia habilidad (`js/towerItems.js`):
+
+| Arma | Habilidad | Qué hace |
+|---|---|---|
+| Espada | Golpe Certero (`ADVENTURER_GOLPE`) | daño físico al más cercano — ya existía, era fija del Aventurero; ahora es la del arma, se pierde si cambiás de arma |
+| Arco | Ráfaga del Arco (`ADVENTURER_VOLLEY`) | daño físico a hasta 3 enemigos distintos en rango |
+| Bastón | Proyectil Arcano (`ADVENTURER_BOLT`) | daño mágico, elemento arcano — marca para las reacciones (§4 quinquies) |
+
+Las 3 no son piezas de ningún héroe del roster (no hay "Espada de Axe" en el catálogo): son la identidad propia
+del Aventurero, por eso no tienen una entrada real en `HERO_TEMPLATES`. Varios lugares (ícono, color del retrato,
+tooltip) asumían que toda arma equipada venía de un héroe real y habrían roto con un `heroKey` sin plantilla;
+`heroOf()` (`towerItems.js`) resuelve estas 3 aparte, de paso corrigiendo esos puntos.
+
+Encontrar y equipar otra arma (un Hacha, un Rifle…) te saca la habilidad de la inicial y pone la nueva, exactamente
+igual que con cualquier otra pieza — es el comportamiento que ya existía para el resto del roster, ahora también
+para las 3 iniciales.
+
+**Falta de esta fase:** la escena en el mundo (hoy es una ventana modal con 3 cartas, no 3 armas clavadas en el
+piso que camines a buscar) y el cuaderno/tutorial jugado que pedía REWORK.md §1 — eso es contenido para escribir
+(páginas que se completan con tus acciones), más grande, y la fase 6 (la Bitácora) ya lo va a absorber.
+
 ## 5. Decisiones tomadas (2026-10-03)
 - Avance: **subir una torre**; cada nivel es aleatorio. Final en el **nivel 10**, con salón de la fama.
 - Al morir: perdés la **mitad de lo ganado** por encima de la base y renacés en el **círculo de piedra de la base de la

@@ -4,14 +4,37 @@
 //   clic derecho equipa o desequipa. Mientras está abierto (o la forja, o los stats), la partida espera.
 
 let invOpen = false, forgeOpen = false, invHeld = null, tshopOpen = false, tshopVendor = null;
-function towerModalOpen() { return statsOpen || invOpen || forgeOpen || tshopOpen || bestiaryOpen || codexOpen || smithOpen; }
+function towerModalOpen() { return statsOpen || invOpen || forgeOpen || tshopOpen || bestiaryOpen || codexOpen || smithOpen || weaponPickOpen; }
+
+// --- ELEGIR ARMA AL DESPERTAR (REWORK.md §1): obligatorio, sin botón de cerrar, bloquea la partida ---
+let weaponPickOpen = false;
+function openWeaponPick() {
+    weaponPickOpen = true;
+    renderWeaponPick();
+    showPanel('weapon-pick-container', true);
+}
+function closeWeaponPick() {
+    weaponPickOpen = false;
+    showPanel('weapon-pick-container', false);
+}
+function renderWeaponPick() {
+    const box = document.getElementById('weapon-pick-options');
+    box.innerHTML = '';
+    Object.entries(STARTER_WEAPONS).forEach(([key, w]) => {
+        const card = document.createElement('div');
+        card.className = 'skill-card';
+        card.innerHTML = `<h4><img src="${inkIcon(w.shape, '#5a4632')}" class="pixel-img unit-icon md"> ${w.noun}</h4><p>${w.why}</p>`;
+        card.onclick = () => chooseStarterWeapon(key);
+        box.appendChild(card);
+    });
+}
 
 // Ícono de una pieza en estilo tinta (inkart.js): forma según el arma o la ranura, color del atributo del héroe de origen.
 // Color de la calidad: sobre el pergamino de la Torre, en tinta oscura (los claros no se leen)
 const qColor = item => (gameMode === 'tower' ? ITEM_QUALITY[item.quality].ink : ITEM_QUALITY[item.quality].color);
 const SLOT_INK_ICON = { helm: 'helm', armor: 'armor', gloves: 'glove', boots: 'boot', amulet: 'amulet', ring: 'ring' };
 function towerItemIcon(item) {
-    const color = item.heroKey ? inkMute(ATTR_INFO[HERO_TEMPLATES[item.heroKey].primaryAttr].color, 0.2) : '#8a8a8a'; // sin alma: gris
+    const color = item.heroKey ? inkMute(ATTR_INFO[heroOf(item.heroKey).primaryAttr].color, 0.2) : '#8a8a8a'; // sin alma: gris
     // game-icons.net (js/data/gameIcons.js): el objeto grande y, en la esquina, la habilidad que trae
     const main = typeof GAME_ICON_FOR !== 'undefined' && (item.slot === 'weapon' ? GAME_ICON_FOR.weapons[item.heroKey] : GAME_ICON_FOR.slots[slotKind(item.slot)]);
     const skill = itemSkill(item);
@@ -21,7 +44,7 @@ function towerItemIcon(item) {
 }
 
 function itemTooltipHtml(item) {
-    const q = { ...ITEM_QUALITY[item.quality], color: qColor(item) }, t = HERO_TEMPLATES[item.heroKey], skill = itemSkill(item);
+    const q = { ...ITEM_QUALITY[item.quality], color: qColor(item) }, t = item.heroKey ? heroOf(item.heroKey) : null, skill = itemSkill(item);
     const mods = Object.entries(itemMods(item)).map(([k, v]) => `<li>${MOD_LABELS[k] ? MOD_LABELS[k](v) : `${k} ${v}`}</li>`).join('');
     const w = item.slot === 'weapon' ? HERO_WEAPONS[item.heroKey] : null;
     const forged = Object.entries(item.boosts).map(([k, n]) => `${BOOSTABLE[k] ? BOOSTABLE[k].label : k} ×${n}`)

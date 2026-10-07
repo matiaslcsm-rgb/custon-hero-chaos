@@ -162,14 +162,45 @@ const ADVENTURER = {
     innate: { id: 'ADVENTURER_INNATE', name: 'Sin clase', tags: [], description: 'Tu clase la arma tu equipo: cada pieza trae la habilidad de un héroe.' }
 };
 
-// Habilidad propia del Aventurero: siempre la tiene (tecla E), así arranca con algo que lanzar y los innatos
-// "al lanzar" (Arcanista, Sabio del Vacío, Zeus) funcionan desde el principio. No sale del equipo: sube con tu nivel.
+// --- LAS 3 ARMAS INICIALES (REWORK.md §1: el despertar) ---
+// Reemplazan el viejo "hechizo inicial al azar": al entrar a la torre, el aventurero elige una de las 3 en un
+// pedestal (no se sortea más) y la trae puesta. Cada una es un arma de verdad en la ranura de arma: cambiarla
+// por otra que encuentres (un Hacha, un Rifle...) te saca su habilidad igual que a cualquier otra, por diseño.
+// No son piezas de ningún héroe del roster, son la identidad propia de cada estilo de juego del Aventurero —
+// por eso no tienen una entrada real en HERO_TEMPLATES. heroOf() resuelve estas 3 aparte de cualquier héroe real.
+const STARTER_WEAPON_IDENTITY = {
+    ADVENTURER_SWORD: { name: 'Aventurero', primaryAttr: 'STR' },
+    ADVENTURER_BOW: { name: 'Aventurero', primaryAttr: 'AGI' },
+    ADVENTURER_STAFF: { name: 'Aventurero', primaryAttr: 'INT' }
+};
+function heroOf(heroKey) { return STARTER_WEAPON_IDENTITY[heroKey] || HERO_TEMPLATES[heroKey]; }
+
+const STARTER_WEAPONS = {
+    ADVENTURER_SWORD: { noun: 'Espada', shape: 'sword', range: 1.4, atkSpeed: 1.0, atk: 10, projectile: 0, skillId: 'ADVENTURER_GOLPE', why: 'Golpe fuerte cuerpo a cuerpo.' },
+    ADVENTURER_BOW: { noun: 'Arco', shape: 'spear', range: 4.5, atkSpeed: 0.9, atk: 8, projectile: 11, skillId: 'ADVENTURER_VOLLEY', why: 'Ráfaga de flechas a distancia.' },
+    ADVENTURER_STAFF: { noun: 'Bastón', shape: 'staff', range: 4, atkSpeed: 0.8, atk: 7, projectile: 10, skillId: 'ADVENTURER_BOLT', why: 'Hechizo elemental que marca para reacciones.' }
+};
+Object.assign(HERO_WEAPONS, STARTER_WEAPONS);
+
+// Arma inicial ya equipada: pieza normal, sin afijos (es el punto de partida, no botín).
+function makeStarterWeapon(weaponKey) {
+    const w = STARTER_WEAPONS[weaponKey];
+    return { id: ++towerItemSeq, heroKey: weaponKey, slot: 'weapon', skillId: w.skillId, innateId: null,
+        quality: 'normal', level: 1, xp: 0, floor: 1, affixes: [], boosts: {}, skillLevel: 1, pendingChoices: 0, name: w.noun };
+}
+function giveStarterWeapon(hero, weaponKey) {
+    const item = makeStarterWeapon(weaponKey);
+    equipItem(hero, item);
+    return item;
+}
+
+// Golpe Certero: la habilidad de la Espada (antes era fija en el Aventurero; ahora sale del arma, como Ráfaga
+// del Arco y Proyectil Arcano, y se pierde si cambiás de arma — igual que cualquier otra pieza).
 const ADVENTURER_STRIKE = {
     id: 'ADVENTURER_GOLPE', name: 'Golpe Certero', kind: 'active', heroKey: 'ADVENTURER',
     tags: ['FÍSICO'],
     values: { cooldown: [7, 6.5, 6, 5.5], manaCost: 15, dmgMult: [1.5, 1.8, 2.1, 2.4] },
-    levelEvery: 8, // sube un nivel cada 8 niveles del héroe (1, 9, 17, 25)
-    description: 'Golpe con tu arma: {dmgMult%} de tu daño físico al enemigo más cercano en tu alcance. Sube con tu nivel (cada 8).',
+    description: 'Golpe fuerte en arco con tu espada: {dmgMult%} de tu daño físico al enemigo más cercano en tu alcance.',
     cast(caster) {
         const target = nearestEnemy(caster, caster.attackRange + 1);
         if (!target) { log('Golpe Certero: sin objetivo en alcance.'); return false; }
@@ -181,24 +212,43 @@ const ADVENTURER_STRIKE = {
     }
 };
 SKILL_INDEX[ADVENTURER_STRIKE.id] = ADVENTURER_STRIKE;
-function syncAdventurerStrike(hero) {
-    if (!hero.hasSkill(ADVENTURER_STRIKE.id)) return;
-    hero.skillLevels[ADVENTURER_STRIKE.id] = Math.min(maxSkillLevel(ADVENTURER_STRIKE), 1 + Math.floor((hero.level - 1) / ADVENTURER_STRIKE.levelEvery));
-}
 
-// Hechizo inicial: al empezar la run el aventurero recibe, ya equipada, una pieza normal con una habilidad activa
-// al azar (ni definitiva ni de movilidad), así cada run arranca distinta y con algo para castear además del Golpe.
-function starterSpellEntries() {
-    return towerCatalog().filter(e => {
-        const s = e.skillId && SKILL_INDEX[e.skillId];
-        return s && s.kind === 'active' && !s.isUltimate && !s.tags.includes('MOVILIDAD');
-    });
-}
-function giveStarterSpell(hero) {
-    const item = makeTowerItem(1, pickRandom(starterSpellEntries()), 'normal');
-    equipItem(hero, item);
-    return item;
-}
+// Ráfaga del Arco: la habilidad del Arco — pega a varios objetivos distintos en vez de a uno solo más fuerte.
+const ADVENTURER_VOLLEY = {
+    id: 'ADVENTURER_VOLLEY', name: 'Ráfaga del Arco', kind: 'active', heroKey: 'ADVENTURER',
+    tags: ['FÍSICO'],
+    values: { cooldown: [7, 6.5, 6, 5.5], manaCost: 18, dmgMult: [0.9, 1.05, 1.2, 1.35], targets: 3 },
+    description: 'Dispara una ráfaga: {dmgMult%} de tu daño físico a hasta {targets} enemigos distintos en tu alcance.',
+    cast(caster) {
+        const range = caster.attackRange + 1;
+        const near = enemiesOf(caster).filter(c => c.isAlive() && Math.hypot(c.x - caster.x, c.y - caster.y) <= range)
+            .sort((a, b) => Math.hypot(a.x - caster.x, a.y - caster.y) - Math.hypot(b.x - caster.x, b.y - caster.y))
+            .slice(0, val(this, caster, 'targets'));
+        if (!near.length) { log('Ráfaga del Arco: sin objetivos en alcance.'); return false; }
+        const dmg = Math.round(caster.atk * val(this, caster, 'dmgMult'));
+        near.forEach(t => dealDamage(caster, t, dmg, 'physical'));
+        log(`🏹 ¡Ráfaga del Arco! ${near.length} objetivo(s) alcanzados.`);
+        return true;
+    }
+};
+SKILL_INDEX[ADVENTURER_VOLLEY.id] = ADVENTURER_VOLLEY;
+
+// Proyectil Arcano: la habilidad del Bastón — daño mágico, marca con su elemento para las reacciones (fxSkills.js).
+const ADVENTURER_BOLT = {
+    id: 'ADVENTURER_BOLT', name: 'Proyectil Arcano', kind: 'active', heroKey: 'ADVENTURER',
+    tags: ['MÁGICO'],
+    values: { cooldown: [6, 5.5, 5, 4.5], manaCost: 20, dmgMult: [1.1, 1.3, 1.5, 1.7] },
+    description: 'Un proyectil arcano: {dmgMult%} de tu daño como daño mágico al enemigo más cercano en tu alcance. Marca con su elemento para las reacciones.',
+    cast(caster) {
+        const target = nearestEnemy(caster, caster.attackRange + 1);
+        if (!target) { log('Proyectil Arcano: sin objetivo en alcance.'); return false; }
+        const dmg = Math.round(caster.atk * val(this, caster, 'dmgMult'));
+        const { dealt } = dealDamage(caster, target, dmg, 'magical');
+        log(`✨ ¡Proyectil Arcano a ${target.label}! (-${dealt} HP)`);
+        return true;
+    }
+};
+SKILL_INDEX[ADVENTURER_BOLT.id] = ADVENTURER_BOLT;
 
 function giveTowerGear(hero) {
     hero.gear = Object.fromEntries(EQUIP_SLOTS.map(s => [s, null]));
@@ -212,7 +262,7 @@ function applyWeaponProfile(hero) {
     const p = w ? HERO_WEAPONS[w.heroKey] : FISTS;
     hero.baseAtk = p.atk + (w ? 1.5 * (w.level - 1) + (w.statBoosts && w.statBoosts.weaponAtk || 0) : 0);
     hero.baseAtkSpeed = p.atkSpeed; hero.baseAttackRange = p.range; hero.baseProjectileSpeed = p.projectile;
-    hero.primaryAttr = w ? HERO_TEMPLATES[w.heroKey].primaryAttr : 'STR';
+    hero.primaryAttr = w ? heroOf(w.heroKey).primaryAttr : 'STR';
 }
 
 // Rehace los efectos del equipo (uno permanente por pieza) y el ataque. Lo llaman equipar/desequipar/subir de nivel.

@@ -14,7 +14,7 @@ const ELEMENTS = {
 };
 // Forma y elemento de cada habilidad activa (las demás se deducen de sus etiquetas)
 const SKILL_VFX = {
-    ADVENTURER_GOLPE: { el: 'steel', shape: 'strike' },
+    ADVENTURER_GOLPE: { el: 'steel', shape: 'strike' }, ADVENTURER_VOLLEY: { el: 'steel', shape: 'shot' }, ADVENTURER_BOLT: { el: 'arcane', shape: 'proj' },
     ALCHEMIST_ACID: { el: 'poison', shape: 'cone' }, ALCHEMIST_BREW: { el: 'fire', shape: 'proj' }, ALCHEMIST_CHEMICAL: { el: 'poison', shape: 'aura' },
     ARCANIST_BOLT: { el: 'arcane', shape: 'proj' }, ARCANIST_SHIELD: { el: 'arcane', shape: 'shield' }, ARCANIST_OVERLOAD: { el: 'arcane', shape: 'meteor' },
     ASSASSIN_BLINK: { el: 'shadow', shape: 'blink' }, ASSASSIN_LETHALSPEED: { el: 'blood', shape: 'aura' }, ASSASSIN_MASACRE: { el: 'blood', shape: 'whirl' },

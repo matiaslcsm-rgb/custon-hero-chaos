@@ -41,9 +41,7 @@ function startTowerRun() {
     gameMode = 'tower';
     player = new Hero(ADVENTURER);
     giveTowerGear(player);
-    player.addSkill(ADVENTURER_STRIKE); syncAdventurerStrike(player); // Golpe Certero en la E (towerItems.js)
     applyGear(player);
-    const starter = giveStarterSpell(player); // hechizo inicial al azar (towerItems.js)
     player.ownerName = playerName();
     player.displayName = `${player.name} (${player.ownerName})`;
     player.inRest = false;
@@ -60,9 +58,18 @@ function startTowerRun() {
     gameState = 'TOWER';
     document.body.classList.add('ink-theme');
     setTowerLayout(true); // mapa a toda la ventana, zoom (towerView.js)
-    log(`🗼 Tower Chaos: entrás a la torre como aventurero sin clase. Tenés Golpe Certero en la E; cada pieza de equipo trae la habilidad de un héroe: buscala en cofres y en lo que sueltan los creeps (I: inventario, C: stats). Hay ${TOWER.floors} pisos, cada uno con su bioma, su pueblo y su laberinto.`);
-    log(`✨ Hechizo inicial: ${itemSkill(starter).name} (${starter.name}, ya equipada en la ${player.keyBindings[itemSkill(starter).id].toUpperCase()}).`);
+    log(`🪨 Despertaste en el círculo de piedra de la base, sin nada. No recordás nada, salvo escribir: cada pieza de equipo que encuentres trae la habilidad de un héroe (buscala en cofres y en lo que sueltan los creeps; I: inventario, C: stats). Hay ${TOWER.floors} pisos, cada uno con su bioma, su pueblo y su laberinto.`);
     enterTowerFloor(1, 'start');
+    openWeaponPick(); // elegís una de las 3 armas antes de poder moverte (REWORK.md §1, towerUI.js)
+}
+
+// Elegís una de las 3 armas iniciales al despertar (pedestal); la partida esperaba hasta este momento.
+function chooseStarterWeapon(weaponKey) {
+    const w = STARTER_WEAPONS[weaponKey];
+    if (!w || !player) return;
+    giveStarterWeapon(player, weaponKey);
+    closeWeaponPick();
+    log(`🗡️ Elegiste ${w.noun}: tenés ${SKILL_INDEX[w.skillId].name} en la ${player.keyBindings[w.skillId].toUpperCase()}.`);
 }
 
 function towerLevel(floor) {
@@ -256,7 +263,8 @@ function updateTower(dt) {
     level.creeps.forEach(c => { if (c.isAlive()) tickEffects(c, dt); });
     // Renacer en el círculo de piedra (nivel 1)
     if (!player.isAlive() && player.respawnAt && gameClock >= player.respawnAt) { towerRespawn(); return; }
-    if (towerModalOpen()) return; // con stats, inventario o forja abiertos, la partida espera
+    if (weaponPickOpen && autopilot) chooseStarterWeapon('ADVENTURER_SWORD'); // el piloto no clickea: elige y sigue
+    if (towerModalOpen()) return; // con stats, inventario, forja o la elección de arma abiertos, la partida espera
     if (autopilot) { if (player.statPoints) aiSpendStatPoints(player); aiManageGear(player); aiTowerShop(player); }
     else if (pendingForge(player)) { openForge(pendingForge(player)); return; }
     updateHero(player, level, dt);

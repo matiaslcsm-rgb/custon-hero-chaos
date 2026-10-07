@@ -77,6 +77,10 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **Rework grande de Tower Chaos (plan 2026-10-07):** `docs/REWORK.md` — despertar con cuaderno y 3 armas, 3 ranuras de
   habilidad, jefes estilo Hades, Esencia y crafteo con calidades, pantalla con zoom y pausa, Bitácora, música. Con orden
   de fases y preguntas abiertas.
+- **Fase 2 del rework, mitad mecánica (2026-10-07):** las 3 armas iniciales (Espada/Arco/Bastón) como pedestal
+  obligatorio al entrar a la torre, cada una con su habilidad propia (Golpe Certero, Ráfaga del Arco, Proyectil
+  Arcano); ya no hay hechizo inicial al azar. Ver ROGUELIKE.md §4 octies y REWORK.md §1. Falta de esta fase: la
+  escena del despertar en el mundo (hoy es una ventana, no 3 armas en el piso) y el cuaderno/tutorial jugado.
 - **Motor (decidido 2026-10-06):** seguimos en canvas + JavaScript puro. Pasar a un motor (Phaser para seguir en el
   navegador, Godot para publicar en PC/celular) se decide cuando el contenido de Tower Chaos esté más cerrado.
 - **Balance en curso (2026-09-28):** jefes más suaves desde la ronda 20 + Kaya y Cetro del Eclipse (ver DISEÑO.md §9 bis).
@@ -94,7 +98,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **Idioma:** español rioplatense (voseo), en el código, los comentarios, los textos del juego y los commits.
 - **Decisiones de diseño:** se consultan con opciones y una recomendada, idealmente con números medidos. Lo que se decide
   se anota en DISEÑO.md (secciones de la fase y "Decisiones tomadas").
-- **Cada cambio:** pruebas automáticas (`tests.html`, hoy **157**) → commit en git → push a GitHub siempre al terminar cada paso (pedido del usuario 2026-10-07, para trabajar desde otros lugares).
+- **Cada cambio:** pruebas automáticas (`tests.html`, hoy **194**) → commit en git → push a GitHub siempre al terminar cada paso (pedido del usuario 2026-10-07, para trabajar desde otros lugares).
 - **Commits:** mensaje en español que explica el porqué; terminan con `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 - **Héroes nuevos con otra IA:** prompt en [`prompt-heroes.md`](prompt-heroes.md); lo que devuelva se revisa contra el motor
   (pasivas, efectos por segundo con `everyInterval`, descripciones que coincidan con el código) antes de integrarlo.

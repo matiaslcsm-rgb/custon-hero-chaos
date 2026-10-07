@@ -1094,12 +1094,14 @@ test('Jefes de ronda: desde la ronda 20 crecen +4% por ronda en vez de +10%', ()
 });
 
 // ============================================================ LA TORRE (modo roguelike, fase 1)
-// Por defecto saca el hechizo inicial (es al azar) para que las pruebas partan del aventurero pelado.
-function newTower(heroKey = 'AXE', { starter = false } = {}) {
+// Por defecto elige la Espada (como antes el Golpe Certero, siempre disponible) para que las pruebas partan de
+// un aventurero que ya puede pelear. Pasale weapon: null para probar el momento de elegir (el modal queda
+// abierto y la partida espera, como con el inventario o la forja).
+function newTower(heroKey = 'AXE', { weapon = 'ADVENTURER_SWORD' } = {}) {
     resetGame();
     gameMode = 'tower';
     selectHero(HERO_TEMPLATES[heroKey]);
-    if (!starter) EQUIP_SLOTS.forEach(s => { if (player.gear[s]) unequipSlot(player, s, false); });
+    if (weapon) chooseStarterWeapon(weapon);
     return player.arena;
 }
 
@@ -1291,7 +1293,7 @@ test('Torre: el nivel se genera conectado, con guardián, escalera y creeps con 
     const level = newTower();
     checkEq(gameState, 'TOWER', 'fase de la Torre');
     checkEq(COLS + 'x' + ROWS, TOWER.cols + 'x' + TOWER.rows, 'mundo grande');
-    checkEq(player.skills.map(s => s.id).join(), 'ADVENTURER_GOLPE', 'arranca solo con Golpe Certero');
+    checkEq(player.skills.map(s => s.id).join(), 'ADVENTURER_GOLPE', 'arranca con la Espada puesta (Golpe Certero)');
     const dist = bfsFrom(level, level.start.x, level.start.y);
     check(level.rooms.every(r => dist[r.cy * COLS + r.cx] >= 0), 'todas las salas se alcanzan');
     check(dist[level.stairs.y * COLS + level.stairs.x] >= 0, 'la escalera se alcanza');
@@ -1388,35 +1390,64 @@ test('Torre: arrancás como aventurero; cada habilidad e innato de cada héroe e
     check(cat.every(e => TOWER_SLOTS[e.slot]), 'ranuras válidas');
 }, { random: true });
 
-test('Torre: el aventurero arranca con Golpe Certero en la E y sube con su nivel', () => {
-    newTower();
-    check(player.hasSkill('ADVENTURER_GOLPE'), 'tiene la habilidad');
-    checkEq(player.keyBindings.ADVENTURER_GOLPE, 'e', 'en la E');
-    checkEq(skillLevel(player, ADVENTURER_STRIKE), 1, 'nivel 1');
-    while (player.level < 9) gainXp(player, 5000);
-    checkEq(skillLevel(player, ADVENTURER_STRIKE), 2, 'nivel 2 al llegar al 9');
+test('Torre: al despertar hay que elegir una de las 3 armas; la partida espera y Esc no la cierra', () => {
+    newTower('AXE', { weapon: null });
+    check(weaponPickOpen, 'el panel queda abierto');
+    check(towerModalOpen(), 'la partida espera (como con el inventario o la forja)');
+    handleEscape();
+    check(weaponPickOpen, 'Esc no lo cierra: es obligatorio');
+    setPaused(true);
+    check(!paused, 'tampoco se puede pausar por arriba mientras tanto');
+    chooseStarterWeapon('ADVENTURER_STAFF');
+    check(!weaponPickOpen, 'elegir una cierra el panel');
+    check(!towerModalOpen(), 'la partida sigue');
+});
+
+test('Torre: cada arma inicial da su propia habilidad y atributo; cambiar de arma te la saca', () => {
+    ['ADVENTURER_SWORD', 'ADVENTURER_BOW', 'ADVENTURER_STAFF'].forEach(key => {
+        newTower('AXE', { weapon: key });
+        const w = STARTER_WEAPONS[key];
+        check(player.hasSkill(w.skillId), `tiene ${w.skillId}`);
+        check(player.keyBindings[w.skillId], 'con tecla propia');
+        checkEq(player.primaryAttr, heroOf(key).primaryAttr, 'el atributo principal sale del arma elegida');
+    });
+    // Cambiar de arma (como con cualquier otra pieza) saca la habilidad vieja y pone la nueva.
+    newTower('AXE', { weapon: 'ADVENTURER_SWORD' });
+    check(player.hasSkill('ADVENTURER_GOLPE'), 'arrancó con Golpe Certero');
     const entry = towerCatalog().find(e => e.heroKey === 'SNIPER' && e.slot === 'weapon');
     equipItem(player, makeTowerItem(1, entry, 'normal'));
-    checkEq(player.keyBindings.ADVENTURER_GOLPE, 'e', 'sigue en la E');
-    check(player.skills.filter(s => s.kind === 'active').length === 2, 'la del arma se suma en otra tecla');
-}, { random: true });
+    check(!player.hasSkill('ADVENTURER_GOLPE'), 'perdió Golpe Certero al cambiar de arma');
+    check(player.hasSkill(entry.skillId), 'tiene la del rifle en su lugar');
+});
 
-test('Torre: arrancás con un hechizo al azar ya equipado (activa, ni definitiva ni de movilidad)', () => {
-    const seen = new Set();
-    for (let i = 0; i < 12; i++) {
-        newTower('AXE', { starter: true });
-        const items = EQUIP_SLOTS.map(s => player.gear[s]).filter(Boolean);
-        checkEq(items.length, 1, 'una pieza equipada');
-        const skill = itemSkill(items[0]);
-        check(skill.kind === 'active' && !skill.isUltimate && !skill.tags.includes('MOVILIDAD'), 'hechizo para castear');
-        check(player.keyBindings[skill.id] && player.keyBindings[skill.id] !== 'e', 'con tecla propia');
-        seen.add(skill.id);
-    }
-    check(seen.size > 1, 'varía entre runs');
-}, { random: true });
+// Crea un creep de prueba en la Torre (dummy() usa el array `creeps` global, que acá no se usa: cada nivel
+// tiene el suyo en level.creeps, ver "Torre: las paredes no se atraviesan...").
+function towerDummy(level, dx = 1, dy = 0) {
+    const c = makeCreep(CREEP_TYPES.GRUNT, player.x + dx, player.y + dy, 1, false, 0);
+    Object.assign(c, { arena: level, hp: 9999, maxHp: 9999, spawnTime: -1e9 });
+    level.creeps.push(c);
+    return c;
+}
+test('Torre: Ráfaga del Arco pega a varios enemigos; Proyectil Arcano marca el elemento para las reacciones', () => {
+    const level = newTower('AXE', { weapon: 'ADVENTURER_BOW' });
+    level.creeps.forEach(c => { c.hp = 0; });
+    const volley = SKILL_INDEX.ADVENTURER_VOLLEY;
+    const a = towerDummy(level, 1, 0), b = towerDummy(level, 1, 1), far = towerDummy(level, 15, 0);
+    volley.cast(player);
+    check(a.hp < 9999 && b.hp < 9999, 'pegó a los dos cercanos');
+    checkEq(far.hp, 9999, 'no al de lejos');
+
+    const level2 = newTower('AXE', { weapon: 'ADVENTURER_STAFF' });
+    level2.creeps.forEach(c => { c.hp = 0; });
+    const bolt = SKILL_INDEX.ADVENTURER_BOLT;
+    const c = towerDummy(level2);
+    fxCastingSkill = bolt; bolt.cast(player); fxCastingSkill = null; // así currentDamageElement() resuelve el elemento (fxSkills.js)
+    check(c.hp < 9999, 'daño mágico');
+    check(c.elMark && c.elMark.el === 'arcane', 'marcado con arcano para las reacciones (fxSkills.js)');
+});
 
 test('Torre: equipar un arma cambia el ataque y da su habilidad; sacarla la quita', () => {
-    newTower();
+    newTower('AXE', { weapon: null }); // sin arma de base, para que "vuelve a los puños" compare contra los puños
     const entry = towerCatalog().find(e => e.heroKey === 'SNIPER' && e.slot === 'weapon');
     const rifle = makeTowerItem(1, entry, 'normal');
     addToBag(player, rifle);
