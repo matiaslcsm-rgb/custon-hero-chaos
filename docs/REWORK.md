@@ -132,6 +132,12 @@ de Cazador de Hollow Knight):
 Las fases 3 y 4 son las más grandes: hay que rehacer pruebas y volver a medir el balance con el piloto (el piloto
 también tiene que aprender a esquivar los ataques anunciados).
 
+## Decisiones tomadas (2026-10-07)
+- **Ranuras:** 2 activas (arma y guantes) + definitiva de la armadura que se carga pegando.
+- **Calidades de fabricación:** las 4 (roma, usada, nueva, obra maestra).
+- **Economía:** solo Esencia, sin energía con tiempo de espera.
+- **Primera fase:** pantalla, zoom y pausa con pestañas.
+
 ## Preguntas abiertas
 - ❓ 3 armas desde el principio o desbloqueables. Recomendado: desde el principio.
 - ❓ 2 activas + definitiva con carga, o 3 activas. Recomendado: 2 + definitiva.
