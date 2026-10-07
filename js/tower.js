@@ -13,7 +13,7 @@
 
 const TOWER = {
     floors: 10, cols: 220, rows: 150, // cada piso: campo del bioma + pueblo + laberinto (towerWorld.js); antes 160×110
-    heroSpeed: 1.4,       // el héroe camina 40% más rápido que en una arena (el mapa es mucho más grande)
+    heroSpeed: 1.75,      // el héroe camina 75% más rápido que en una arena (1,4 antes de los controles estilo Hades)
     rooms: { tries: 900, want: 24, minW: 6, maxW: 13, minH: 5, maxH: 10 },
     baseSight: 6,         // distancia de visión base del héroe (las paredes tapan la vista)
     visionPerPoint: 0.5,  // cada punto de Visión suma media casilla

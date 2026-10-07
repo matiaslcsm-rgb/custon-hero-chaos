@@ -140,6 +140,7 @@ function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     emit(target, 'onDamaged', { source, dealt: final, type });
     if (target.type && target.type.thorns) beastThorns(target, source, hpLost, opts); // criaturas con espinas (towerBestiary.js)
     if (target.pendingReaction) elementReactionAfter(source, target, final);
+    if (source && hpLost > 0) { hitFlinch(source, target); skillKnockback(source, target); } // sacudida y empujón (fxSkills.js)
     if (source && hpLost > 0) emit(source, 'onDealDamage', { target, dealt: hpLost, type });
     if (!target.isAlive()) onUnitDeath(target, source);
     return { dealt: hpLost, evaded: false };

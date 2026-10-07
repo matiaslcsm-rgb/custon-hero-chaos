@@ -62,7 +62,10 @@ function mouseToTile(e) {
 
 function canControlPlayer() { return player && inCombat() && !autopilot && player.arena && !player.inRest && player.isAlive(); }
 
-canvas.addEventListener('mousemove', e => { Object.assign(mouse, mouseToTile(e), { over: true }); });
+canvas.addEventListener('mousemove', e => {
+    const rect = canvas.getBoundingClientRect();
+    Object.assign(mouse, mouseToTile(e), { over: true, fx: (e.clientX - rect.left) / rect.width, fy: (e.clientY - rect.top) / rect.height }); // fx, fy: posición en pantalla (ver cursorWorld)
+});
 canvas.addEventListener('mouseleave', () => { mouse.over = false; });
 canvas.addEventListener('contextmenu', e => e.preventDefault());
 canvas.addEventListener('mousedown', e => {

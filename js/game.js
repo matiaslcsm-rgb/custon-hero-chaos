@@ -43,6 +43,7 @@ window.addEventListener('keydown', e => {
     if (k === 'i' && gameMode === 'tower') { toggleInventory(); return; }
     if (k === 'k' && gameMode === 'tower') { toggleBestiary(); return; }
     if (k === 'escape') { handleEscape(); return; }
+    if (k === ' ') { e.preventDefault(); if (!paused) playerDash(); return; } // esquive (fxSkills.js)
     if (paused) return; // en pausa no responden las demás teclas
     if (inCombat() && !autopilot) handleSkillKeypress(k);
 });
@@ -323,8 +324,9 @@ function handleSkillKeypress(k) {
     const skill = player.skillForKey(k);
     if (!skill || skill.kind !== 'active') return;
     if (skillLevel(player, skill) === 0) { log(`🔒 ${skill.name} está en nivel 0: invertile un punto para usarla.`); return; }
-    // Las que eligen un enemigo se apuntan con el mouse (ver mouse.js); el resto se lanza al toque
-    if (isAimedSkill(skill)) { if (targeting && targeting.skill === skill) cancelTargeting(); else startTargeting(skill); return; }
+    // Lanzamiento al instante (estilo Hades): las que apuntan salen hacia el cursor sin el paso extra del clic
+    const c = cursorWorld();
+    if (isAimedSkill(skill) && c) { castAt(player, skill, c.x, c.y); return; }
     tryCastSkill(player, skill);
 }
 
@@ -415,8 +417,12 @@ function updateHero(hero, arena, dt) {
     // Movimiento: del teclado o de la IA (la velocidad la modifican los efectos: Masacre, Visión de Cazador...)
     hero.moveTimer = (hero.moveTimer || 0) + dt;
     const stepTime = heroStepTime(hero);
-    if (!stunned && hero.moveTimer > stepTime) {
-        let dir = aiControlled ? aiMoveDirection(hero) : keyboardDirection();
+    // Giro rápido: si el jugador cambia de dirección con el teclado, el paso sale con el 55% del tiempo
+    const kb = aiControlled ? null : keyboardDirection(), last = hero.lastStepDir;
+    const turning = kb && (kb.dx || kb.dy) && last && (kb.dx !== last.dx || kb.dy !== last.dy);
+    const need = turning ? stepTime * 0.55 : stepTime; // tiempo que pide este paso
+    if (!stunned && hero.moveTimer > need) {
+        let dir = aiControlled ? aiMoveDirection(hero) : kb;
         if (!aiControlled) {
             if (dir.dx || dir.dy) { hero.moveTarget = null; hero.focusChase = false; } // el teclado manda sobre el mouse
             else dir = moveTargetDirection(hero) || focusChaseDirection(hero) || dir;
@@ -429,13 +435,14 @@ function updateHero(hero, arena, dt) {
         }
         // Cuerpos físicos (bodies.js): entrar a una casilla ocupada tarda más; mientras tanto, sigue empujando
         const penalty = (nx !== x || ny !== y) ? bodyPenalty(hero, nx, ny) : 0;
-        const pushing = hero.moveTimer < stepTime * (1 + penalty);
+        const pushing = hero.moveTimer < need * (1 + penalty);
         if (!pushing) {
             // Se guarda el tiempo que sobró del paso (así caminar seguido no pierde un pedacito en cada casilla)
-            const carry = hero.moveTimer - stepTime;
+            const carry = hero.moveTimer - need;
             hero.x = nx; hero.y = ny; hero.moveTimer = penalty === 0 && carry < stepTime ? carry : 0;
         }
         if (hero.x !== x || hero.y !== y) {
+            hero.lastStepDir = { dx: Math.sign(hero.x - x), dy: Math.sign(hero.y - y) };
             emit(hero, 'onMove', { steps: 1 });
             if (MOVE_ATTACK_RULE === 'reset' || (MOVE_ATTACK_RULE === 'reset-ranged' && isRanged(hero))) hero.attackTimer = 0;
             // "está caminando" hasta que le tocaría dar el próximo paso

@@ -75,7 +75,8 @@ function fxSkill(hero, skill, from) {
     const target = hero.aimPoint && skill.pointTarget ? hero.aimPoint : nearestEnemy(hero, range);
     const radius = (typeof val === 'function' && val(skill, hero, 'radius')) || 2;
     const tx = target ? target.x : hero.x, ty = target ? target.y : hero.y;
-    hero.fxAttack = { kind: 'cast', dx: hero.facing || 1, dy: 0, at: fxClock, color: el.c1 };
+    { const d = Math.hypot(tx - hero.x, ty - hero.y) || 1; hero.fxAttack = { kind: CAST_POSE[v.shape] || 'cast', dx: target ? (tx - hero.x) / d : hero.facing || 1, dy: target ? (ty - hero.y) / d : 0, at: fxClock, color: el.c1 }; if (target && tx !== hero.x) hero.facing = Math.sign(tx - hero.x); }
+    sfx('el_' + k); // sonido del elemento (audio.js)
     switch (v.shape) {
         case 'strike':
             pushFxAt(arena, { kind: 'slash', x: tx, y: ty, angle: Math.atan2(ty - hero.y, tx - hero.x), flip: true, color: el.c2, width: 7, life: 0.28 });
@@ -375,4 +376,93 @@ function reactionChain(src, t, dmg, n) {
         if (arena) pushFxAt(arena, { kind: 'zigzag', x: t.x, y: t.y, tx: c.x, ty: c.y, color: ELEMENTS.lightning.c2, color2: ELEMENTS.lightning.c1, life: 0.25 });
         dealDamage(src, c, Math.max(1, Math.round(dmg)), 'magical');
     });
+}
+
+// --- SENSACIÓN DE JUEGO (pedido del usuario, 2026-10-07: "los hechizos se sienten planos y los controles raros") ---
+// Controles estilo Hades: WASD mueve, el mouse apunta, las habilidades salen al instante hacia el cursor, Espacio es
+// el esquive. Cada habilidad mueve el cuerpo del héroe según su forma, los enemigos se sacuden y retroceden.
+
+// Pose del héroe al lanzar, según la forma de la habilidad
+const CAST_POSE = {
+    strike: 'lunge', claw: 'lunge', reap: 'lunge', whirl: 'spin', dash: 'dashpose', blink: 'dashpose',
+    proj: 'recoil', shot: 'recoil', beam: 'recoil', cone: 'recoil', chain: 'recoil',
+    nova: 'slam', shout: 'slam', zone: 'slam', aura: 'power', shield: 'power', heal: 'power', meteor: 'raise', sky: 'raise'
+};
+Object.assign(ATTACK_ANIM, { lunge: 0.32, spin: 0.38, recoil: 0.26, slam: 0.42, power: 0.5, raise: 0.55, dashpose: 0.28 });
+// Pose de las animaciones nuevas (la llama attackPose en fx.js). t: 0 → 1, k = sin(t·π)
+function castPose(a, t, k, pose) {
+    switch (a.kind) {
+        case 'lunge': pose.ox += a.dx * 0.62 * k; pose.oy += a.dy * 0.62 * k; pose.rot += 0.5 * k; pose.sx += 0.22 * k; pose.sy -= 0.1 * k; break;
+        case 'spin': pose.rot += t * Math.PI * 2; pose.sy -= 0.08 * k; pose.oy -= 0.1 * k; break;
+        case 'recoil': pose.ox -= a.dx * 0.32 * k; pose.oy -= a.dy * 0.32 * k; pose.rot -= 0.18 * k * (a.dx || 1); pose.flash = t < 0.3 ? 1 - t / 0.3 : 0; break;
+        case 'slam': // se agacha, salta y cae aplastado
+            if (t < 0.35) { const c = t / 0.35; pose.sy -= 0.25 * c; pose.sx += 0.18 * c; }
+            else if (t < 0.75) { const j = Math.sin((t - 0.35) / 0.4 * Math.PI); pose.oy -= 0.45 * j; pose.sy += 0.15 * j; pose.sx -= 0.08 * j; }
+            else { const c = 1 - (t - 0.75) / 0.25; pose.sy -= 0.2 * c; pose.sx += 0.2 * c; }
+            pose.glow = a.color; break;
+        case 'power': pose.oy -= 0.18 * k; pose.sx += 0.1 * Math.sin(t * 20) * k; pose.sy += 0.12 * k; pose.glow = a.color; break;
+        case 'raise': pose.oy -= 0.38 * k; pose.sy += 0.2 * k; pose.sx -= 0.06 * k; pose.glow = a.color; break;
+        case 'dashpose': pose.sx += 0.4 * k; pose.sy -= 0.18 * k; pose.ox += a.dx * 0.2 * k; break;
+    }
+    return pose;
+}
+// Los golpeados se sacuden hacia atrás (solo visual) y, con habilidades de impacto en la Torre, retroceden una casilla
+const KNOCK_SHAPES = new Set(['strike', 'claw', 'reap', 'whirl', 'nova', 'shout', 'meteor', 'sky', 'cone', 'dash']);
+function hitFlinch(source, target) {
+    if (!source || !fxArena(target)) return;
+    const d = Math.hypot(target.x - source.x, target.y - source.y) || 1;
+    target.fxKnock = { dx: (target.x - source.x) / d, dy: (target.y - source.y) / d, at: fxClock };
+}
+function skillKnockback(source, target) {
+    if (gameMode !== 'tower' || source !== player || !fxCastingSkill || !target.isAlive() || target.isHero) return;
+    if (target.isGuardian || target.isCaveBoss || target.isBoss || !KNOCK_SHAPES.has(skillVfx(fxCastingSkill).shape)) return;
+    const dx = Math.sign(target.x - source.x), dy = Math.sign(target.y - source.y);
+    if ((dx || dy) && walkable(target.arena, target.x + dx, target.y + dy)) { target.x += dx; target.y += dy; }
+}
+function flinchOffset(u) {
+    const f = u.fxKnock;
+    if (!f) return null;
+    const t = (fxClock - f.at) / 0.16;
+    if (t >= 1) { u.fxKnock = null; return null; }
+    const k = Math.sin(t * Math.PI) * 0.18;
+    return { ox: f.dx * k, oy: f.dy * k };
+}
+
+// --- ESQUIVE (Espacio) ---
+const DASH = { tiles: 3, cooldown: 1.1, iframes: 0.3 };
+// Hacia donde apunta el cursor, en casillas del mundo (se recalcula con la cámara)
+function cursorWorld() { return mouse.over && mouse.fx !== undefined ? { x: mouse.fx * VIEW_COLS - 0.5 + camera.x, y: mouse.fy * VIEW_ROWS - 0.5 + camera.y } : null; }
+function playerDash() {
+    if (!canControlPlayer() || hasFlag(player, 'stun') || gameClock < (player.dashReadyAt || 0)) return false;
+    let d = keyboardDirection();
+    if (!d.dx && !d.dy) { const c = cursorWorld(); d = c ? { dx: Math.sign(Math.round(c.x - player.x)), dy: Math.sign(Math.round(c.y - player.y)) } : { dx: player.facing || 1, dy: 0 }; }
+    if (!d.dx && !d.dy) d = { dx: player.facing || 1, dy: 0 };
+    const arena = player.arena, from = { x: player.x, y: player.y };
+    let moved = 0;
+    for (let i = 0; i < DASH.tiles; i++) {
+        const nx = player.x + d.dx, ny = player.y + d.dy;
+        if (!walkable(arena, nx, ny) || (d.dx && d.dy && (!walkable(arena, nx, player.y) || !walkable(arena, player.x, ny)))) break;
+        player.x = nx; player.y = ny; moved++;
+    }
+    if (!moved) return false;
+    player.dashReadyAt = gameClock + DASH.cooldown;
+    player.moveTarget = null; player.moveTimer = 0;
+    addEffect(player, { id: 'DASH', name: 'Esquive', duration: DASH.iframes, flags: ['invulnerable', 'phasing'], tags: ['MEJORA'] });
+    if (d.dx) player.facing = d.dx;
+    const fa = fxArena(player);
+    if (fa) {
+        pushFxAt(fa, { kind: 'afterimage', x: from.x, y: from.y, tx: player.x, ty: player.y, color: '#f3e7c9', life: 0.3 });
+        fxParticles(fa, from.x, from.y, 'steel', 8, 2, { style: 'smoke', size: 3.5, life: 0.5 });
+        player.fxAttack = { kind: 'dashpose', dx: d.dx, dy: d.dy, at: fxClock };
+        sfx('dash');
+    }
+    emit(player, 'onMove', { steps: moved });
+    return true;
+}
+// Recarga del esquive: arquito a los pies del héroe mientras se recarga
+function drawDashMeter(u, cx, cy) {
+    if (u !== player || !u.dashReadyAt || gameClock >= u.dashReadyAt) return;
+    const left = (u.dashReadyAt - gameClock) / DASH.cooldown;
+    ctx.save(); ctx.strokeStyle = 'rgba(243,231,201,0.9)'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.arc(cx, cy + TILE * 0.38, TILE * 0.32, Math.PI * 0.15, Math.PI * 0.15 + Math.PI * 1.7 * (1 - left)); ctx.stroke(); ctx.restore();
 }

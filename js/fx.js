@@ -99,7 +99,8 @@ function attackPose(u) {
     const k = Math.sin(t * Math.PI);
     if (a.kind === 'melee') { pose.ox += a.dx * 0.42 * k; pose.oy += a.dy * 0.42 * k; pose.rot += 0.35 * k; pose.sx += 0.14 * k; pose.sy -= 0.06 * k; }
     else if (a.kind === 'ranged') { pose.ox -= a.dx * 0.16 * k; pose.oy -= a.dy * 0.16 * k; pose.flash = t < 0.35 ? 1 - t / 0.35 : 0; }
-    else { pose.oy -= 0.22 * k; pose.sy += 0.1 * k; pose.glow = a.color || '#c77dff'; }
+    else if (a.kind === 'cast') { pose.oy -= 0.22 * k; pose.sy += 0.1 * k; pose.glow = a.color || '#c77dff'; }
+    else castPose(a, t, k, pose); // poses de las habilidades (fxSkills.js)
     return pose;
 }
 
@@ -120,7 +121,7 @@ function fxShake(amount) {
 }
 
 function fxCast(hero, skill, from) {
-    if (fxArena(hero)) sfx(skill.isUltimate ? 'ult' : 'cast');
+    if (fxArena(hero) && skill.isUltimate) sfx('ult'); // el resto suena según su elemento (fxSkills.js)
     fxSkill(hero, skill, from); // cada habilidad con su forma y su elemento (fxSkills.js)
 }
 
@@ -200,6 +201,9 @@ function drawPos(u, dt) {
     const toward = (from, to) => { const d = to - from, m = speed * dt; return Math.abs(d) <= m ? to : from + Math.sign(d) * m; };
     u.rx = toward(u.rx, u.x); u.ry = toward(u.ry, u.y);
     const pose = attackPose(u);
+    const fl = u.fxKnock && flinchOffset(u); // sacudida al recibir un golpe (fxSkills.js)
+    if (fl) { pose.ox += fl.ox; pose.oy += fl.oy; }
+    if (u === player && !autopilot && mouse.over && Math.abs(u.x - u.rx) < 0.05 && !u.fxAttack) { const c = cursorWorld(); if (c && Math.abs(c.x - u.x) > 0.3) u.facing = Math.sign(c.x - u.x); } // quieto: mira al cursor
     return { x: u.rx + pose.ox, y: u.ry + pose.oy, pose };
 }
 

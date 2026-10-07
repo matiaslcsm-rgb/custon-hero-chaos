@@ -879,6 +879,7 @@ function drawUnit(u, color, symbol, pos = u, opts = {}) {
         ctx.shadowBlur = 0;
     }
     if ((u.effects && u.effects.length) || u.elMark) drawStatusFx(u, cx, cy, halfHeight); // estados y marca de elemento (fxSkills.js)
+    if (u === player) drawDashMeter(u, cx, cy);
     if (u.maxHp) {
         const pct = Math.max(0, u.hp / u.maxHp), w = Math.max(TILE - 4, opts.big ? 40 : 0), top = cy - halfHeight - 3;
         const ink = gameMode === 'tower'; // en la Torre: barra roja con borde de tinta

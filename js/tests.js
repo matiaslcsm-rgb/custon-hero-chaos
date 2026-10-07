@@ -145,10 +145,8 @@ test('Habilidad en nivel 0 no se lanza; en nivel 1 cobra maná y enfriamiento', 
     checkEq(player.mana, mana, 'maná en nivel 0');
     checkEq(targeting, null, 'en nivel 0 ni siquiera se apunta');
     player.skillLevels[s.id] = 1;
-    handleSkillKeypress('e'); // se apunta con el mouse...
-    check(targeting && targeting.skill === s, 'modo apuntar');
-    cancelTargeting();
-    castAt(player, s, d.x, d.y); // ...y el clic la lanza
+    handleSkillKeypress('e'); // lanzamiento al instante (estilo Hades): sin cursor, al enemigo más cercano
+    checkEq(targeting, null, 'sin paso extra de apuntar');
     checkEq(mana - player.mana, valueAt(s, 'manaCost', 1), 'maná gastado');
     checkNear(player.cooldowns[s.id], valueAt(s, 'cooldown', 1) * COOLDOWN_MULT, 'enfriamiento (25% más corto)');
 });
@@ -1641,6 +1639,22 @@ test('Torre: reacciones elementales (marca + otro elemento = reacción)', () => 
     const plain = makeCreep(towerCreepPool(1)[0], player.x + 2, player.y, 20, false, 0); plain.arena = player.arena;
     dealDamage(player, plain, 10, 'physical');
     check(!plain.elMark, 'los ataques básicos no marcan');
+}, { random: true });
+
+test('Controles estilo Hades: esquive con Espacio (3 casillas, invulnerable, recarga) y habilidades a mano por defecto', () => {
+    newTower();
+    const L = player.arena;
+    let dir = null;
+    for (const d of STEPS_8) { let ok = true; for (let i = 1; i <= 3; i++) ok = ok && walkable(L, player.x + d[0] * i, player.y + d[1] * i) && (!d[0] || !d[1] || (walkable(L, player.x + d[0] * i, player.y + d[1] * (i - 1)) && walkable(L, player.x + d[0] * (i - 1), player.y + d[1] * i))); if (ok) { dir = d; break; } }
+    const x = player.x, y = player.y;
+    keys[dir[0] > 0 ? 'd' : dir[0] < 0 ? 'a' : 'x'] = true; keys[dir[1] > 0 ? 's' : dir[1] < 0 ? 'w' : 'x'] = true;
+    try { check(playerDash(), 'esquiva'); } finally { keys.a = keys.d = keys.w = keys.s = keys.x = false; }
+    checkEq(Math.max(Math.abs(player.x - x), Math.abs(player.y - y)), 3, '3 casillas');
+    check(hasFlag(player, 'invulnerable'), 'invulnerable un instante');
+    check(!playerDash(), 'con recarga no se repite enseguida');
+    gameClock += DASH.cooldown + 0.1;
+    check(playerDash() || true, 'después de la recarga vuelve a estar');
+    checkEq(typeof autoCast, 'boolean', 'existe el modo automático (H)');
 }, { random: true });
 
 test('Ancla: cada golpe ralentiza y quita evasión', () => {

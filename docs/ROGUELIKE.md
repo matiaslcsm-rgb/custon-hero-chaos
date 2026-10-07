@@ -282,6 +282,28 @@ elementales de Magicka / Divinity / Genshin. Código: `js/fxSkills.js`.
 - Medido (2 runs con piloto automático): ganó las 2, en 83 y 128 min con 6 muertes cada una; produjo 140 y 213
   reacciones. Queda dentro de la franja buscada (antes: 122-145 min con 0-6 muertes), así que no se tocó el balance.
 
+## 4 sexies. Sensación de juego y controles (2026-10-07)
+Pedido del usuario: "los hechizos se sienten planos y sosos; el movimiento y los controles son raros e incómodos".
+Diagnóstico: las habilidades se lanzaban solas (automático prendido por defecto); todas sonaban igual; los enemigos no
+reaccionaban al golpe; el movimiento por casillas hacía esperar el paso entero para girar; el esquema mezclaba WASD,
+clic derecho para caminar y "tecla + clic" para apuntar; no había esquive; la velocidad era baja. Decidido con el
+usuario: controles estilo Hades, habilidades a mano al instante y con movimiento, movimiento ágil sobre la grilla.
+- **Controles estilo Hades**: WASD mueve; las habilidades (E R T F Q V) salen al instante hacia el cursor, sin el paso
+  extra del clic (sin cursor, al enemigo más cercano); **Espacio = esquive** (3 casillas hacia donde vas o hacia el
+  cursor, invulnerable 0,3 s, recarga 1,1 s, con medidor bajo los pies); clic izquierdo marca objetivo; clic derecho
+  sigue sirviendo para caminar. Quieto, el héroe mira hacia el cursor.
+- **A mano por defecto**: el lanzamiento automático arranca apagado (la H lo prende; se guarda aparte).
+- **Movimiento ágil**: en la Torre +25% de velocidad (4,5 casillas/s medido); cambiar de dirección sale con el 55% del
+  paso (0,13 s en vez de 0,23).
+- **Habilidades con cuerpo**: el héroe se mueve según la forma de la habilidad: se lanza hacia adelante (golpes,
+  garras, guadaña), gira entero (torbellinos), retrocede (disparos, rayos, conos), se agacha, salta y cae aplastado
+  (novas, gritos, zonas), se eleva con brillo (auras, escudos, curas) o levanta los brazos (meteoros, rayos del cielo).
+- **Golpes con peso**: todo enemigo golpeado se sacude hacia atrás; en la Torre, las habilidades de impacto (golpes,
+  torbellinos, novas, gritos, meteoros…) lo empujan una casilla (no a jefes ni guardianes).
+- **Sonido por elemento**: fuego (soplido grave), hielo (campanitas), rayo (chasquidos), veneno (burbujeo), arcano
+  (barrido brillante), sombra (gruñido), sangre, acero (choque metálico), luz (acorde), vacío (succión); y el esquive.
+- Pendiente de medir con jugadores: la velocidad y la recarga del esquive (la IA no lo usa).
+
 ## 4 bis. Estética "tinta y pergamino" (en curso)
 Pedido del usuario con referencias de ilustraciones de caballeros en tinta (líneas negras gruesas, colores planos
 apagados, fondo crema, rayado; no se usan esas imágenes, solo el estilo). Decidido: dirección de arte + personajes
