@@ -374,6 +374,7 @@ function dropOnFloor(hero, item, x = hero.x, y = hero.y) {
 }
 function towerLootOnKill(level, c, killer) {
     if (!killer || !killer.isHero) return;
+    if (c.carrier) carrierDrops(level, c); // el portador suelta tu equipo (towerWorld.js)
     if (towerRun && killer === player) { const s = towerRun.stats; s.kills++; s.gold += c.gold || 0; if (c.champion) s.champions++; if (c.isGuardian) s.guardians++; }
     if (c.isGuardian) { for (let i = 0; i < LOOT.guardianDrops; i++) level.drops.push({ x: c.x, y: c.y, item: makeTowerItem(level.floor, undefined, i === 0 ? 'rare' : rollQuality(level.floor)) }); return; }
     if (c.champion) { if (Math.random() < CHAMPION.dropChance) level.drops.push({ x: c.x, y: c.y, item: makeTowerItem(level.floor, undefined, Math.random() < 0.3 ? 'rare' : 'magic') }); return; }

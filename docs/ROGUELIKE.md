@@ -200,7 +200,14 @@ Al morir no se pierde todo: **tu cadáver y tus cosas quedan en el mapa** y pued
      Cofres: 2 en claros del campo y 2 en el laberinto.
    - Medido al terminar la fase (2 runs con piloto automático): ~6-9 minutos por piso, 0 muertes y nivel 30 en el piso 5.
      Lo corrigió la revisión de diseño (§4 ter).
-5. **Muerte con consecuencias**: cadáver, criatura portadora, reparto y desgaste de ítems.
+5. **Muerte con consecuencias**: cadáver, criatura portadora, reparto y desgaste de ítems. **Hecho (2026-10-06)**:
+   - **Restos** (§4 ter): guardan la mitad de los puntos de stats que perdiste; pisarlos te los devuelve.
+   - **El portador**: al morir, una criatura del bestiario del piso se lleva 1 pieza de tu equipo (2 desde el piso 5;
+     nunca el arma) y deambula por el nivel donde caíste (también en cuevas). Tiene +30% de vida y +15% de daño por pieza,
+     aro dorado y una bolsa encima; aparece en el minimapa y el objetivo del piso te lleva a ella. Al cazarla suelta tus
+     piezas. Si morís otra vez antes, no perdés lo que tenía: aparece otro portador (decisión: que la muerte no frustre).
+     Demo: `index.html?demo=tower&floor=1&at=carrier`.
+   - Sin hacer (de la idea original): desgaste de ítems.
 6. **Élites y más contenido**: héroes de la IA como élites, más únicos, eventos.
 
 ## 4 quater. Mundo con profundidad (2026-10-06)

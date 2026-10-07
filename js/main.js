@@ -1,7 +1,7 @@
 // Punto de entrada: conecta los botones y arranca el bucle principal.
 
 // Versión visible en el menú: si no coincide con la última subida, el navegador muestra una copia vieja (Ctrl+F5).
-const GAME_VERSION = '2026-10-06 · mundo con profundidad';
+const GAME_VERSION = '2026-10-06 · el portador';
 document.getElementById('game-version').textContent = `Versión ${GAME_VERSION}`;
 
 document.getElementById('start-wave-btn').onclick = startWave;
@@ -196,6 +196,7 @@ if (location.search.includes('demo=tower')) setTimeout(() => {
     if (q.get('floor')) enterTowerFloor(+q.get('floor'), 'demo');
     if (q.get('at') === 'town') { player.x = player.arena.town.merchant.x + 2; player.y = player.arena.town.merchant.y + 2; }
     if (q.get('time') === 'night') towerRun.startedAt = gameClock - (DAYNIGHT.day + DAYNIGHT.dusk + 10); // &time=night
+    if (q.get('at') === 'carrier') { equipItem(player, makeTowerItem(1, cat.find(e => e.slot === 'helm'), 'rare')); const c = spawnItemCarrier(player.arena, player); c.x = player.x + 3; c.y = player.y; c.spawnX = c.x; c.spawnY = c.y; }
     if (q.get('at') === 'cave') { const L = player.arena; for (let d = 1; d <= +(q.get('depth') || 1); d++) enterCave(L.caves[0], d); }
     if (q.get('at') === 'plateau') { const L = player.arena, i = L.ramp.findIndex((v, j) => v && L.height[j] && L.zone[j] === ZONE.field && !L.ground[j]); if (i >= 0) { player.x = i % COLS; player.y = Math.floor(i / COLS); } }
     if (q.get('at') === 'boss') { const G = player.arena.guardian; player.x = G.x - 3; player.y = G.y; if (!walkable(player.arena, player.x, player.y)) { player.x = G.x; player.y = G.y + 2; } }

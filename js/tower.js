@@ -274,6 +274,7 @@ function updateTower(dt) {
             c.aggro = false;
         }
         if (c.regenPct) c.hp = Math.min(c.maxHp, c.hp + c.maxHp * c.regenPct * dt); // campeón Regenerador
+        if (c.isCarrier) carrierRoam(c); // el portador deambula (towerWorld.js)
         if (c.aggro) { if (!(player.isAlive() && towerCreepBrain(c, dt))) updateCreep(c, dt); }
         else if (c.x !== c.spawnX || c.y !== c.spawnY) stepCreepToward(c, c.spawnX, c.spawnY, dt); // vuelve a su lugar
     });
@@ -369,8 +370,10 @@ function towerHeroDeath(hero, killer) {
     const corpse = { x: hero.x, y: hero.y, killer: killer ? killer.label : null, at: gameClock, floor: level.floor, level, lost, points: Object.values(lost).reduce((a, b) => a + b, 0) };
     level.corpses.push(corpse);
     towerRun.corpse = corpse.points ? corpse : null;
+    const carrier = spawnItemCarrier(level, hero); // towerWorld.js
+    const carried = carrier ? `${carrier.label.replace(' (portador)', '')} se llevó ${carrier.carrier.map(i => i.name).join(' y ')}: cazalo para recuperarlo. ` : '';
     sfx('lose');
-    log(`💀 ${killer ? killer.label + ' te mató' : 'Moriste'} en el piso ${level.floor}. ${lostText.length ? 'Perdés ' + lostText.join(', ') + ': quedan en tus restos, volvé a buscarlos. ' : ''}` +
+    log(`💀 ${killer ? killer.label + ' te mató' : 'Moriste'} en el piso ${level.floor}. ${lostText.length ? 'Perdés ' + lostText.join(', ') + ': quedan en tus restos, volvé a buscarlos. ' : ''}${carried}` +
         `${old && old.faded && old.points ? `Tus restos anteriores (${old.points} puntos) se perdieron. ` : ''}Renacés en el círculo de piedra de la base en ${TOWER.respawnDelay}s.`);
 }
 
@@ -524,6 +527,11 @@ function renderTower(level, dt) {
     level.creeps.forEach(c => {
         if (!c.isAlive() || !visible(c)) return;
         const p = drawPos(c, dt);
+        if (c.isCarrier) { // portador: aro dorado y la bolsa con tu equipo
+            ctx.save(); ctx.strokeStyle = '#c9a227'; ctx.lineWidth = 3; ctx.setLineDash([5, 3]);
+            ctx.beginPath(); ctx.ellipse(p.x * TILE + TILE / 2, p.y * TILE + TILE - 4, 15, 6, 0, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+            ctx.font = '14px serif'; ctx.textAlign = 'center'; ctx.fillText('🎒', p.x * TILE + TILE / 2 + 14, p.y * TILE - 2);
+        }
         if (c.champion) { // campeón: aro azul de tinta a sus pies
             ctx.save(); ctx.strokeStyle = '#1d4e89'; ctx.lineWidth = 2.5; ctx.globalAlpha = 0.8;
             ctx.beginPath(); ctx.ellipse(p.x * TILE + TILE / 2, p.y * TILE + TILE - 4, 13, 5, 0, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
@@ -590,6 +598,7 @@ function renderTowerMinimap(level) {
     const g = level.guardian;
     if (g && g.isAlive() && level.explored[g.y][g.x]) dot(g.x, g.y, '#ff0055', 2.6);
     level.corpses.forEach(c => dot(c.x, c.y, c === towerRun.corpse ? '#c9a227' : '#8f8166', c === towerRun.corpse ? 3 : 1.4));
+    carriersOn(level).forEach(c => dot(c.x, c.y, '#c9a227', 3.2)); // portadores (sabés dónde anda tu equipo)
     (level.shrines || []).forEach(sh => { if (!sh.used && level.explored[sh.y][sh.x]) dot(sh.x, sh.y, SHRINES[sh.kind].color, 2.2); });
     if (player.isAlive()) dot(player.x, player.y, '#00f5d4', 2.4);
     ctx.strokeStyle = '#555'; ctx.lineWidth = 1;
@@ -618,6 +627,8 @@ function towerAutoDir(hero) {
     if (gameClock < (hero.autoWanderUntil || 0)) { hero.autoGoal = 'paseo'; return { dx: hero.autoWanderDir[0], dy: hero.autoWanderDir[1] }; }
     let target = null;
     const corpse = towerRun.corpse;
+    const carrier = carriersOn(level).find(c => !(c.autoSkipUntil > gameClock));
+    if (carrier) { const dir = towerPathDir(hero, carrier); hero.autoGoal = 'portador'; if (dir) return dir; carrier.autoSkipUntil = gameClock + 10; }
     if (corpse && corpse.level === level && !corpse.unreachable) { const dir = towerPathDir(hero, corpse); hero.autoGoal = 'restos'; if (dir) return dir; corpse.unreachable = true; }
     // Botín a la vista (si hay lugar) y cofres sin custodios
     const loot = (level.drops || []).filter(d => !d.unreachable && canSee(level, d.x, d.y) && bagSpotFor(hero, d.item))

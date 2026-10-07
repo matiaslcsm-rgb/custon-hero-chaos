@@ -621,6 +621,10 @@ function towerObjective(level) {
     const c = towerRun && towerRun.corpse;
     if (c && c.level === level) return { text: `Recuperá tus restos (+${c.points} puntos de stats)`, x: c.x, y: c.y };
     if (c && c.level && c.level.isCave && c.level.cave.surface === level) return { text: `Tus restos quedaron en una cueva (−${c.level.depth})`, x: c.level.cave.x, y: c.level.cave.y };
+    const carrier = carriersOn(level)[0];
+    if (carrier) return { text: `Cazá al portador: tiene ${carrier.carrier.length === 1 ? 'una pieza tuya' : carrier.carrier.length + ' piezas tuyas'}`, x: carrier.x, y: carrier.y };
+    const caveCarrier = (towerRun && towerRun.carriers || []).find(o => o.isAlive() && o.arena.isCave && o.arena.cave.surface === level);
+    if (caveCarrier) return { text: `Un portador con tu equipo está en una cueva (−${caveCarrier.arena.depth})`, x: caveCarrier.arena.cave.x, y: caveCarrier.arena.cave.y };
     if (level.isCave) {
         if (level.down) return { text: `Bajá más hondo (cueva −${level.depth} de −${level.cave.max}) o volvé por la soga`, x: level.down.x, y: level.down.y };
         if (level.caveBoss && level.caveBoss.isAlive()) return { text: `Vencé al señor de la cueva y abrí el tesoro`, x: level.caveBoss.x, y: level.caveBoss.y };
@@ -939,3 +943,43 @@ function caveTileFor(level, x, y) {
     if (!level.walls[y][x]) return t.floor[h & 1];
     return y + 1 < ROWS && !level.walls[y + 1][x] ? t.face[h & 1] : t.rock[h & 1];
 }
+
+// --- EL PORTADOR (fase 5: muerte con consecuencias) ---
+// Al morir, una criatura del bestiario del piso se lleva 1 pieza de tu equipo (2 desde el piso 5; nunca el arma) y
+// deambula por el nivel donde caíste. Con cada pieza tiene más vida y daño. Si la matás, suelta tus piezas. Si morís
+// otra vez antes, no se pierde nada: aparece otro portador (cada uno con lo suyo).
+const CARRIER = { items: floor => (floor >= 5 ? 2 : 1), hpPerItem: 0.3, atkPerItem: 0.15, statMult: 1.3, roam: 14, xpMult: 3 };
+function spawnItemCarrier(level, hero) {
+    const slots = EQUIP_SLOTS.filter(s => s !== 'weapon' && hero.gear[s]);
+    if (!slots.length) return null;
+    const taken = shuffle(slots.slice()).slice(0, CARRIER.items(level.floor)).map(s => unequipSlot(hero, s, false)).filter(Boolean);
+    const type = pickRandom(towerCreepPool(level.floor)), n = taken.length;
+    const p = arrivalNear(level, { x: hero.x, y: hero.y }), lvl = level.floor + (level.depth || 0) + 1;
+    const c = makeCreep(type, p.x, p.y, TOWER.creepMult(lvl) * CARRIER.statMult, false, 0);
+    c.hp = c.maxHp = Math.round(c.maxHp * (1 + CARRIER.hpPerItem * n));
+    c.atk = Math.round(c.atk * (1 + CARRIER.atkPerItem * n));
+    Object.assign(c, { arena: level, level: lvl, xp: Math.round(type.xp * TOWER.xpMult(lvl) * CARRIER.xpMult), spawnTime: -1e9, isCarrier: true, carrier: taken });
+    c.label = `${type.label} (portador)`;
+    level.creeps.push(c);
+    towerRun.carriers = (towerRun.carriers || []).concat(c);
+    return c;
+}
+// Sin agro, el portador no vuelve a un lugar fijo: elige otro punto cercano y camina hasta ahí
+function carrierRoam(c) {
+    if (c.aggro || c.x !== c.spawnX || c.y !== c.spawnY || gameClock < (c.roamAt || 0)) return;
+    c.roamAt = gameClock + 2 + Math.random() * 3;
+    for (let t = 0; t < 20; t++) {
+        const x = c.x + Math.round((Math.random() - 0.5) * 2 * CARRIER.roam), y = c.y + Math.round((Math.random() - 0.5) * 2 * CARRIER.roam);
+        if (walkable(c.arena, x, y) && towerZoneAt(c.arena, x, y) !== ZONE.town) { c.spawnX = x; c.spawnY = y; return; }
+    }
+}
+// Al morir suelta lo que llevaba
+function carrierDrops(level, c) {
+    if (!c.carrier) return;
+    c.carrier.forEach(item => level.drops.push({ x: c.x, y: c.y, item }));
+    towerRun.carriers = (towerRun.carriers || []).filter(o => o !== c);
+    if (fxArena(c)) { fxRing(c, '#c9a227', 2, 0.8); fxText(c, '¡Tu equipo!', '#c9a227', 13, 1.6); }
+    log(`🎒 ¡Cazaste al portador! Soltó ${c.carrier.map(i => i.name).join(' y ')}.`); sfx('levelup');
+    c.carrier = null;
+}
+function carriersOn(level) { return (towerRun && towerRun.carriers || []).filter(c => c.isAlive() && c.arena === level); }

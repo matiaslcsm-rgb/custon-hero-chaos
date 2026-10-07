@@ -1563,6 +1563,27 @@ test('Torre: tus restos guardan lo que perdiste; si volvés los recuperás, si m
     check(first.faded && towerRun.corpse !== first, 'al morir otra vez, los restos anteriores se pierden');
 }, { random: true });
 
+test('Torre: al morir, un portador se lleva piezas de tu equipo (nunca el arma) y al cazarlo las suelta', () => {
+    newTower();
+    const cat = towerCatalog();
+    const helm = makeTowerItem(1, cat.find(e => e.slot === 'helm'), 'magic'), weapon = makeTowerItem(1, cat.find(e => e.slot === 'weapon'), 'normal');
+    equipItem(player, helm); equipItem(player, weapon);
+    const killer = player.arena.creeps.find(c => !c.isGuardian);
+    dealDamage(killer, player, 99999, 'pure');
+    const carrier = towerRun.carriers[0];
+    check(carrier && carrier.carrier.includes(helm) && !player.gear.helm, 'el portador se llevó el casco');
+    check(player.gear.weapon === weapon, 'el arma no se la lleva');
+    check(towerObjective(player.arena).text.includes('portador'), 'el objetivo te manda a cazarlo');
+    const x = carrier.spawnX;
+    carrier.x = carrier.spawnX; carrier.y = carrier.spawnY; gameClock += 10;
+    carrierRoam(carrier);
+    check(carrier.spawnX !== x || carrier.spawnY !== carrier.y, 'deambula por el piso');
+    towerRespawn();
+    killCreep(carrier, player);
+    check(player.arena.drops.some(d => d.item === helm), 'al cazarlo suelta tu equipo');
+    checkEq(carriersOn(player.arena).length, 0, 'ya no queda portador');
+}, { random: true });
+
 test('Ancla: cada golpe ralentiza y quita evasión', () => {
     newGame('AXE');
     const ev = effEvasion(player);
