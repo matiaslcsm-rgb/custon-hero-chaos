@@ -73,6 +73,10 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   élites con nombre, eventos en el campo; más adelante, crafteo con materiales.
 - **Mundo con profundidad (2026-10-06):** pisos de 220×150 con mesetas, día y noche, cuevas con niveles de profundidad y
   bestiario generado por run (ROGUELIKE.md §4 quater).
+- **Códice, piezas sin alma y Herrero (2026-10-07):** ROGUELIKE.md §4 septies.
+- **Rework grande de Tower Chaos (plan 2026-10-07):** `docs/REWORK.md` — despertar con cuaderno y 3 armas, 3 ranuras de
+  habilidad, jefes estilo Hades, Esencia y crafteo con calidades, pantalla con zoom y pausa, Bitácora, música. Con orden
+  de fases y preguntas abiertas.
 - **Motor (decidido 2026-10-06):** seguimos en canvas + JavaScript puro. Pasar a un motor (Phaser para seguir en el
   navegador, Godot para publicar en PC/celular) se decide cuando el contenido de Tower Chaos esté más cerrado.
 - **Balance en curso (2026-09-28):** jefes más suaves desde la ronda 20 + Kaya y Cetro del Eclipse (ver DISEÑO.md §9 bis).
