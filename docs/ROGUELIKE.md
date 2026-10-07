@@ -207,6 +207,8 @@ Al morir no se pierde todo: **tu cadáver y tus cosas quedan en el mapa** y pued
      aro dorado y una bolsa encima; aparece en el minimapa y el objetivo del piso te lleva a ella. Al cazarla suelta tus
      piezas. Si morís otra vez antes, no perdés lo que tenía: aparece otro portador (decisión: que la muerte no frustre).
      Demo: `index.html?demo=tower&floor=1&at=carrier`.
+   - Medido (2 runs con piloto automático, que caza a sus portadores): ganó las 2, en 123 y 161 min con 5 muertes cada
+     una; aparecieron 5 y 4 portadores y los cazó a todos (recuperó todas las piezas). Sin trabones.
    - Sin hacer (de la idea original): desgaste de ítems.
 6. **Élites y más contenido**: héroes de la IA como élites, más únicos, eventos.
 
