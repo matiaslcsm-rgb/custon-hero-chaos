@@ -363,10 +363,26 @@ fuera de los fuertes). Como en Hades, ahora cada golpe común se **prepara**:
 | Espada | 93-185 min, 0-2 muertes (sin contar la espiral) | 117 min, 0 muertes |
 | Arco | 98 min, 0 | 108 min, 0 |
 | Bastón | 109-137 min, 1-3 | 155 min, 1 |
+| (segunda tanda) | | Espada 82/0 · Arco 93/0 · Bastón 90/0 |
 
 Daño recibido: comunes **50-56%** (antes 69-78%), balas y flechas 17-24% (antes 4-8%: ahora incluyen las flechas de los
 arqueros), anunciados 26%. La dificultad general queda parecida (es lo buscado: el mismo daño, pero ahora se puede
 evitar jugando bien); la diferencia la va a sentir el jugador, que el piloto esquiva poco cuerpo a cuerpo.
+
+**Ojo:** con las 6 partidas, 1 sola muerte en total y 5 de 6 entre 82 y 117 min (el diseño apunta a 120-160 con algunas
+muertes). Con el piloto humano el juego quedó más fácil que lo buscado: anotado como decisión pendiente (subir la
+dificultad o dejarlo así, ver ESTADO.md).
+
+## 13. Campeones legibles (2026-10-08, `js/towerChampions.js`)
+Los campeones fueron los que más mataron con reflejos humanos, y su nombre largo no se lee peleando. Como Diablo III y
+Path of Exile:
+- **Un ícono por afijo** sobre la barra de vida, siempre del mismo color y forma: » Veloz, ⚔ Feroz, ⛨ Blindado,
+  ♥ Vampírico, ♨ Ardiente, ❄ Gélido, ✚ Regenerador, ✹ Explosivo.
+- **Con el mouse encima**, un cartel con qué hace cada uno (en la pantalla, encima de la niebla, sin salirse del borde).
+- El Cuaderno lo explica la primera vez ("Los marcados").
+- **Combos más justos:** el Regenerador **deja de curarse 2,5 s con cada golpe** que recibe (como en Diablo: se le gana
+  pegándole sin parar; su ícono se apaga mientras está cortado) y ya no sale junto con Blindado ni con Vampírico (la
+  pared que se cura sola, de los que más mataban).
 
 ## Orden propuesto (cada fase jugable y medida)
 1. **Pantalla:** zoom, HUD más chico y menú de pausa con pestañas. Es barato y mejora todo lo que viene después.
@@ -437,6 +453,7 @@ el mismo paso; lo grande queda acá, ordenado por impacto.
   borde, del lado de donde viene una bala que va a pasar cerca en menos de 1,6 s (más opaco cuanto antes llega), y un aro
   rojo para un tirador fuera de vista que está por disparar. Una marca por dirección (16), para no llenar el borde.
 - ✅ **Opción para apagar el clima** (partículas) en la pausa, para quien prefiera la pantalla limpia (2026-10-08).
+- ✅ **Íconos de afijo de los campeones** y su cartel al pasar el mouse (2026-10-08, §13).
 - Lista al día. Próximas ideas de interfaz cuando aparezcan (se anotan acá).
 - ✅ (antes) Pantalla grande con zoom, mensajes flotantes, aviso de puntos para repartir y barra del jefe abajo.
 

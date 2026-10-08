@@ -136,6 +136,10 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   arena, hojas y luciérnagas por bioma, con opción para apagarlo (REWORK.md §11).
 - **Los golpes comunes avisan (2026-10-08):** preparación con arco rojo y "!" (cuerpo a cuerpo) o línea de puntería y
   flecha esquivable (a distancia), sin cambiar el ritmo de ataque (REWORK.md §12).
+- **Campeones legibles (2026-10-08):** íconos por afijo, cartel con el mouse, Regenerador que se corta con cada golpe y
+  sin los combos Regenerador+Blindado/Vampírico (REWORK.md §13).
+- **Decisión pendiente — dificultad:** con el piloto humano, 6 partidas tuvieron 1 muerte en total y 5 de 6 duraron
+  82-117 min (el diseño apunta a 120-160 con algunas muertes). ¿Subir la dificultad o dejarlo así?
 - **Motor (decidido 2026-10-06):** seguimos en canvas + JavaScript puro. Pasar a un motor (Phaser para seguir en el
   navegador, Godot para publicar en PC/celular) se decide cuando el contenido de Tower Chaos esté más cerrado.
 - **Balance en curso (2026-09-28):** jefes más suaves desde la ronda 20 + Kaya y Cetro del Eclipse (ver DISEÑO.md §9 bis).

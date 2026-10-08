@@ -258,7 +258,7 @@ function generateTowerLevel(floor) {
         if (packs.some(p => Math.max(Math.abs(p.x - x), Math.abs(p.y - y)) < WORLD.packSpacing)) continue;
         packs.push({ x, y });
         // Grupo campeón: 1 a 3 afijos según el piso (más chance en los pisos altos)
-        const champ = Math.random() < CHAMPION.baseChance + CHAMPION.perFloor * floor ? shuffle(Object.keys(CHAMPION_AFFIXES)).slice(0, championAffixCount(floor)) : null;
+        const champ = Math.random() < CHAMPION.baseChance + CHAMPION.perFloor * floor ? pickChampionAffixes(championAffixCount(floor)) : null;
         spawnPack(x, y, rint(TOWER.packSize[0], TOWER.packSize[1]), 0, WORLD.fieldXp, champ);
     }
     rooms.filter(r => r !== first && r !== guardRoom).forEach(r => spawnPack(r.cx, r.cy, rint(TOWER.packSize[0], TOWER.packSize[1]), 1, 1));
@@ -553,7 +553,7 @@ const CHAMPION_AFFIXES = {
     vampiric: { name: 'Vampírico', onAttack(c, t, r) { if (r.dealt > 0) c.hp = Math.min(c.maxHp, c.hp + r.dealt * 0.5); } },
     burning: { name: 'Ardiente', onAttack(c, t, r) { if (r.dealt > 0 && t.isAlive()) CREEP_TRAITS.burn.apply(c, t); } },
     frozen: { name: 'Gélido', onAttack(c, t, r) { if (r.dealt > 0 && t.isAlive()) CREEP_TRAITS.chill.apply(c, t); } },
-    regen: { name: 'Regenerador', regenPct: 0.012 }, // 3% se curaba más rápido de lo que pegaba un héroe recién muerto
+    regen: { name: 'Regenerador', regenPct: 0.012 }, // 3% se curaba más rápido de lo que pegaba un héroe recién muerto; se corta 2,5 s con cada golpe (towerChampions.js)
     explosive: { name: 'Explosivo', onDeath(c) {
         if (!player || !player.isAlive() || player.arena !== c.arena || Math.hypot(player.x - c.x, player.y - c.y) > 2) return;
         dealDamage(null, player, Math.round(c.atk * 2), 'magical');
@@ -832,7 +832,7 @@ function generateCaveLevel(cave, depth) {
         const lvl = floor + depth + 1, type = pickRandom(pool);
         const boss = makeCreep(type, far.x, far.y, TOWER.creepMult(lvl) * bonus * 2.4, false, 0);
         Object.assign(boss, { arena: level, level: lvl, xp: Math.round(type.xp * TOWER.xpMult(lvl) * 6), spawnTime: -1e9, isCaveBoss: true });
-        makeChampion(boss, shuffle(Object.keys(CHAMPION_AFFIXES)).slice(0, Math.min(3, 1 + Math.floor(depth / 2))));
+        makeChampion(boss, pickChampionAffixes(Math.min(3, 1 + Math.floor(depth / 2)))); // sin los combos excluidos (towerChampions.js)
         boss.label = `${type.label} Ancestral (señor de la cueva)`;
         level.creeps.push(boss); level.caveBoss = boss;
         const spot = arrivalNear(level, far);
@@ -844,7 +844,7 @@ function generateCaveLevel(cave, depth) {
         const x = rint(3, W - 4), y = rint(3, H - 4), i = at(x, y);
         if (walls[y][x] || dist[i] < 12 || packs.some(p => Math.max(Math.abs(p.x - x), Math.abs(p.y - y)) < 7)) continue;
         packs.push({ x, y });
-        const champ = Math.random() < CHAMPION.baseChance + CHAMPION.perFloor * floor + CAVE.champPerDepth * depth ? shuffle(Object.keys(CHAMPION_AFFIXES)).slice(0, championAffixCount(floor)) : null;
+        const champ = Math.random() < CHAMPION.baseChance + CHAMPION.perFloor * floor + CAVE.champPerDepth * depth ? pickChampionAffixes(championAffixCount(floor)) : null;
         for (let n = rint(2, 3); n > 0; n--) { const lvl = floor + depth + (Math.random() < 0.3 ? 1 : 0); spawn(x, y, lvl, TOWER.creepMult(lvl) * bonus, 1 + CAVE.xpPerDepth * depth, champ); }
     }
     const spots = [];

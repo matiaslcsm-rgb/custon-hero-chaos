@@ -1705,6 +1705,23 @@ test('Torre: los golpes comunes avisan — se preparan, pegan si seguís ahí, f
     check(!creepWindsUp(level.guardian), 'los jefes siguen con sus ataques anunciados');
 }, { random: true });
 
+test('Torre: campeones legibles — cada afijo con ícono y descripción, sin los combos excluidos, y el Regenerador se corta con cada golpe', () => {
+    check(Object.keys(CHAMPION_AFFIXES).every(k => CHAMPION_LOOK[k] && CHAMPION_LOOK[k].icon && CHAMPION_LOOK[k].desc), 'todos los afijos tienen ícono y descripción');
+    for (let i = 0; i < 300; i++) {
+        const a = pickChampionAffixes(3);
+        if (a.length !== 3 || new Set(a).size !== 3 || CHAMPION_RULES.exclude.some(([x, y]) => a.includes(x) && a.includes(y))) { check(false, 'combo excluido o repetido: ' + a.join(',')); break; }
+    }
+    const level = newTower();
+    const c = towerDummy(level, 3, 0); makeChampion(c, ['regen']); c.aggro = true;
+    c.hp = c.maxHp * 0.5; c.lastHitAt = -99; const h0 = c.hp;
+    check(championCanRegen(c), 'sin golpes, se regenera');
+    dealDamage(player, c, 5, 'pure');
+    check(!championCanRegen(c), 'recién golpeado, no');
+    gameClock += CHAMPION_RULES.regenPause + 0.1;
+    check(championCanRegen(c), 'después de la pausa, sí');
+    drawChampionBadges(c, { x: c.x, y: c.y }, level); // dibuja sin romper
+});
+
 test('Torre: el Cuaderno escribe una página sola la primera vez que hacés cada cosa, y no se repite', () => {
     notebookState = { seen: {} };
     newTower(); // startTowerRun() ya escribió WAKE al despertar
@@ -1727,7 +1744,7 @@ test('Torre: el Cuaderno escribe una página sola la primera vez que hacés cada
     writeNotebookPage('CHEST'); writeNotebookPage('TOWN');
     check(notebookState.seen.CHEST && notebookState.seen.TOWN, 'CHEST y TOWN');
 
-    ['TELEGRAPH', 'ESSENCE', 'SMITH', 'CRAFT', 'MASTERY', 'BULLETS', 'TRANSFER', 'CAMPFIRE'].forEach(id => writeNotebookPage(id)); // las de lo nuevo (fases 4 y 5, tiradores)
+    ['TELEGRAPH', 'ESSENCE', 'SMITH', 'CRAFT', 'MASTERY', 'BULLETS', 'TRANSFER', 'CAMPFIRE', 'CHAMPION'].forEach(id => writeNotebookPage(id)); // las de lo nuevo (fases 4 y 5, tiradores)
     checkEq(Object.keys(notebookState.seen).length, NOTEBOOK_PAGES.length, 'todas las páginas');
     const before = JSON.stringify(notebookState.seen);
     writeNotebookPage('WAKE'); // repetir no hace nada

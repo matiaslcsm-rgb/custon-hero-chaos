@@ -295,7 +295,7 @@ function updateTower(dt) {
         if (c.aggro && (!player.isAlive() || safe || Math.hypot(player.x - c.spawnX, player.y - c.spawnY) > TOWER.leash)) {
             c.aggro = false;
         }
-        if (c.regenPct) c.hp = Math.min(c.maxHp, c.hp + c.maxHp * c.regenPct * dt); // campeón Regenerador
+        if (c.regenPct && championCanRegen(c)) c.hp = Math.min(c.maxHp, c.hp + c.maxHp * c.regenPct * dt); // campeón Regenerador (se corta un rato con cada golpe)
         if (c.isCarrier) carrierRoam(c); // el portador deambula (towerWorld.js)
         if (c.aggro) { if (!(player.isAlive() && (towerCreepTelegraph(c) || towerCreepBrain(c, dt)))) updateCreep(c, dt); } // ataques anunciados (towerTelegraph.js)
         else if (c.x !== c.spawnX || c.y !== c.spawnY) stepCreepToward(c, c.spawnX, c.spawnY, dt); // vuelve a su lugar
@@ -582,6 +582,7 @@ function renderTower(level, dt) {
         drawUnit(c, c.color, c.symbol, p, { glow: c.isGuardian, big: c.isGuardian });
         if (a < 1) ctx.restore();
         drawGunnerTell(c, p); // el tirador avisa antes de disparar (towerBullets.js)
+        drawChampionBadges(c, p, level); // íconos de sus afijos (towerChampions.js)
     });
     level.projectiles.forEach(p => {
         const lk = projectileLook(p), x = p.x * TILE + TILE / 2, y = p.y * TILE + TILE / 2;
@@ -619,6 +620,7 @@ function renderTower(level, dt) {
     drawInkVignette();
     drawObjectiveArrow(level);
     drawOffscreenThreats(level); // balas y tiradores fuera de la vista (towerBullets.js)
+    drawChampionCard(level); // qué hace cada afijo del campeón bajo el mouse (towerChampions.js)
     renderTowerMinimap(level);
     drawFloorTitle(level);
     // Barra del jefe abajo al centro, con sus fases (towerTelegraph.js)
