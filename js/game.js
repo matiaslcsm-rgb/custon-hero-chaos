@@ -36,7 +36,7 @@ window.addEventListener('keydown', e => {
     keys[k] = true;
     if (k === 'p') { setAutopilot(!autopilot); return; }
     if (k === 'b') { if (gameMode === 'tower') towerShopKey(); else toggleShop(); return; }
-    if (k === 'm') { toggleBigMap(); return; }
+    if (k === 'm') { if (gameMode === 'tower') toggleTowerMap(); else toggleBigMap(); return; } // en la Torre, el mapa del piso (towerMap.js)
     if (k === 'h') { setAutoCast(!autoCast); return; }
     if (k === 'g') { setSprites(!spritesOn); return; }
     if (k === 'c' && gameMode === 'tower') { toggleStatsWindow(); return; }
@@ -312,6 +312,7 @@ function resetGame() {
     if (statsOpen) toggleStatsWindow(false);
     if (invOpen) toggleInventory(false);
     if (forgeOpen) { forgeOpen = false; showPanel('forge-container', false); }
+    if (typeof towerMapOpen !== 'undefined' && towerMapOpen) toggleTowerMap(false);
     gameMode = 'normal'; towerRun = null; document.body.classList.remove('ink-theme'); if (towerLayout) setTowerLayout(false); COLS = VIEW_COLS; ROWS = VIEW_ROWS; camera.x = 0; camera.y = 0;
     gameState = 'MENU'; waveNumber = 1; gameClock = 0; heroOffers = null;
     currentDraft = null; savedPrepTime = null; nextWave = null; logMuted = false;

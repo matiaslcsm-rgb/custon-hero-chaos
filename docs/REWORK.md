@@ -241,18 +241,22 @@ el mismo paso; lo grande queda acá, ordenado por impacto.
 - ✅ **Comparar con lo equipado** (como Diablo): el detalle de cada pieza que no tenés puesta (bolsa, tienda,
   herrero) muestra qué ganás (▲ verde) y qué perdés (▼ rojo) respecto de la que reemplazaría: stats, daño, velocidad y
   alcance del arma, si pasás a pelear a distancia, y el cambio de habilidad. Con dos anillos, contra el peor.
+- ✅ **Mapa del piso (M)** a pantalla completa, con lo descubierto y referencias: vos, pueblo, mercader, herrero,
+  laberinto, escalera, guardián, santuarios, cuevas, eventos, cofres, tus restos y el portador, más el objetivo. No
+  frena la partida (como Diablo); M o Esc lo cierran. También desde la pausa.
+- ✅ **Botas y anillos salen en el botín** como piezas de stats (20% de las piezas). Desde la fase 3 ninguna habilidad
+  iba a esas ranuras y solo aparecían sin alma, que el Herrero no podía imbuir. Ahora sin alma solo en casco, coraza,
+  guantes y amuleto; se funden las 6.
 - ✅ (antes) Pantalla grande con zoom, mensajes flotantes, aviso de puntos para repartir y barra del jefe abajo.
 
 **Pendiente (de más a menos impacto):**
-1. **Mapa del piso a pantalla completa (M)** en la Torre, con leyenda: pueblo, herrero, santuarios, cuevas, eventos,
-   tus restos y el portador.
-2. **Elegir a mano las 5 piezas a fundir** en el Herrero (hoy las elige él).
-3. **Reasignar teclas** desde la pausa.
-4. **Accesibilidad:** otros colores para las zonas de ataque (para daltonismo), tamaño de los números de daño y escala
+1. **Elegir a mano las 5 piezas a fundir** en el Herrero (hoy las elige él).
+2. **Reasignar teclas** desde la pausa.
+3. **Accesibilidad:** otros colores para las zonas de ataque (para daltonismo), tamaño de los números de daño y escala
    de la interfaz.
-5. **Filtro de botín**: no levantar piezas normales, o marcarlas para vender.
-6. **El Cuaderno explica lo nuevo** la primera vez: el Herrero, la Esencia, la fundición y los ataques anunciados.
-7. **Música en el menú y en Custom Hero Chaos.**
+4. **Filtro de botín**: no levantar piezas normales, o marcarlas para vender.
+5. **El Cuaderno explica lo nuevo** la primera vez: el Herrero, la Esencia, la fundición y los ataques anunciados.
+6. **Música en el menú y en Custom Hero Chaos.**
 
 ## Decisiones tomadas (2026-10-07)
 - **Estilo ASCII descartado:** se probó un filtro que convertía el mundo en caracteres (referencia: el MMORPG ASCII de

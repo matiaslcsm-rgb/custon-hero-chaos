@@ -76,7 +76,7 @@ function rollCraftTier(pieces) {
 }
 function makePureItem(floor, slot, tier) {
     const q = CRAFT_QUALITY[tier];
-    const item = { id: ++towerItemSeq, heroKey: null, slot, skillId: null, innateId: null, blank: true, crafted: true, craftTier: tier, craftMult: q.statMult,
+    const item = { id: ++towerItemSeq, heroKey: null, slot, skillId: null, innateId: null, blank: true, plain: CODEX.statSlots.includes(slot), crafted: true, craftTier: tier, craftMult: q.statMult,
         masterwork: !!q.master, quality: q.quality, level: 1, xp: 0, floor, affixes: [], boosts: {}, skillLevel: 1, pendingChoices: 0 };
     shuffle(AFFIXES.slice()).slice(0, q.affixes).forEach(a => item.affixes.push({ key: a.key, name: a.name, value: round1(a.roll(floor)) }));
     nameTowerItem(item);
@@ -91,7 +91,8 @@ function craftPick(hero, slot) {
     const rest = pool.filter(i => !first.includes(i)).sort((a, b) => (QUALITY_RANK[a.quality] + (a.craftTier ?? -1)) - (QUALITY_RANK[b.quality] + (b.craftTier ?? -1)));
     return first.concat(rest).slice(0, CRAFT.pieces);
 }
-function craftableSlots(hero) { return CODEX.blankSlots.filter(s => craftPick(hero, s)); }
+const CRAFT_SLOTS = () => CODEX.blankSlots.concat(CODEX.statSlots); // se funden las 6 ranuras
+function craftableSlots(hero) { return CRAFT_SLOTS().filter(s => craftPick(hero, s)); }
 function craftPure(hero, slot, floor = towerRun ? towerRun.floor : 1) {
     const pieces = craftPick(hero, slot);
     if (!pieces) return null;
@@ -138,7 +139,7 @@ function renderCraft() {
     const box = document.getElementById('smith-craft');
     if (!box) return;
     box.innerHTML = '';
-    const slots = CODEX.blankSlots.map(s => ({ s, n: player.bag.filter(b => slotKind(b.item.slot) === s).length })).filter(o => o.n > 0);
+    const slots = CRAFT_SLOTS().map(s => ({ s, n: player.bag.filter(b => slotKind(b.item.slot) === s).length })).filter(o => o.n > 0);
     if (!slots.some(o => o.n >= CRAFT.pieces)) box.innerHTML = `<p class="subtitle">Juntá ${CRAFT.pieces} piezas de la misma ranura en la bolsa (casco, coraza, guantes, botas, amuleto o anillo).</p>`;
     slots.forEach(({ s, n }) => {
         const pick = craftPick(player, s), row = document.createElement('div'); row.className = 'tshop-row';

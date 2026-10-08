@@ -598,6 +598,7 @@ function renderTower(level, dt) {
     // Barra del jefe abajo al centro, con sus fases (towerTelegraph.js)
     const g = level.guardian || level.caveBoss;
     if (g && g.isAlive() && visible(g)) drawBossBar(g);
+    drawTowerBigMap(level); // mapa del piso a pantalla completa (M, towerMap.js)
     if (paused) {
         ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(0, 0, screenW(), screenH());
         ctx.font = 'bold 30px monospace'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffb703';

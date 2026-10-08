@@ -1785,8 +1785,8 @@ test('Torre: Códice (dominar al máximo), piezas sin alma y Herrero (imbuir y v
     check(blank.blank && !player.hasSkill('ZEUS_WRATH') && blank.affixes.length >= 2, 'pierde la habilidad, conserva los afijos');
     check(!purgeItem(player, makeTowerItem(1, towerCatalog().find(e => e.slot === 'weapon'))), 'las armas no se vacían');
     // El botín a veces trae piezas sin alma
-    let blanks = 0; for (let i = 0; i < 400; i++) if (lootItem(2).blank) blanks++;
-    check(blanks > 25 && blanks < 110, `~15% del botín sale sin alma (${blanks}/400)`);
+    let blanks = 0; for (let i = 0; i < 400; i++) { const it = lootItem(2); if (it.blank && !it.plain) blanks++; }
+    check(blanks > 20 && blanks < 90, `~12% del botín sale sin alma (15% de lo que no es bota ni anillo: ${blanks}/400)`);
     // Herrero en el pueblo: nunca dos pisos seguidos sin
     let miss = 0, run = 0; for (let f = 2; f <= 9; f++) { const has = !!towerLevel(f).town.smith; run = has ? 0 : run + 1; miss = Math.max(miss, run); }
     check(miss <= 1, 'nunca dos pisos seguidos sin herrero');
@@ -1957,10 +1957,30 @@ test('Torre: el detalle de una pieza la compara con lo equipado (gana en verde, 
     check(/Si la equipás/.test(html) && /▲/.test(html), 'muestra lo que gana');
     check(/Habilidad:/.test(html), 'avisa el cambio de habilidad');
     checkEq(itemCompareHtml(worn), '', 'la equipada no se compara consigo misma');
-    check(/Ranura vacía/.test(itemCompareHtml(makeTowerItem(1, cat.find(e => e.slot === 'boots'), 'normal'))), 'ranura vacía');
+    check(/Ranura vacía/.test(itemCompareHtml(makeBlankItem(1, 'boots', 'normal'))), 'ranura vacía');
     worn.level = 4; // el equipado tiene más nivel: más vida de base
     const worse = makeBlankItem(1, 'helm', 'normal'); worse.affixes = [];
     check(/class="down">▼ −\d+ vida/.test(itemCompareHtml(worse)), 'lo que pierde, en rojo');
+}, { random: true });
+
+test('Torre: mapa del piso a pantalla completa (M) con lo descubierto y la leyenda', () => {
+    newTower();
+    const L = player.arena;
+    toggleTowerMap(); check(towerMapOpen, 'M lo abre');
+    L.explored.forEach(row => row.fill(true));
+    drawTowerBigMap(L); // no rompe con todo a la vista (pueblo, laberinto, santuarios, cuevas, cofres)
+    check(MAP_MARKS.some(m => m.key === 'smith') && MAP_MARKS.some(m => m.key === 'carrier'), 'la leyenda incluye herrero y portador');
+    toggleTowerMap(); check(!towerMapOpen, 'M lo cierra');
+    resetGame(); toggleTowerMap(); check(!towerMapOpen, 'fuera de la Torre no se abre');
+}, { random: true });
+
+test('Torre: botas y anillos salen en el botín como piezas de stats (no se imbuyen)', () => {
+    let boots = 0, rings = 0;
+    for (let i = 0; i < 400; i++) { const it = lootItem(3); if (it.slot === 'boots') boots++; if (it.slot === 'ring') rings++; }
+    check(boots > 15 && rings > 15, `salen botas (${boots}) y anillos (${rings})`);
+    const b = makeBlankItem(3, 'boots', 'magic');
+    check(b.plain && !/sin alma/.test(b.name) && /Pieza de stats/.test(itemTooltipHtml(b)), 'pieza de stats, sin "sin alma"');
+    check(!CODEX.blankSlots.includes('boots') && CRAFT_SLOTS().includes('ring'), 'no se imbuyen, pero se funden');
 }, { random: true });
 
 test('Ancla: cada golpe ralentiza y quita evasión', () => {

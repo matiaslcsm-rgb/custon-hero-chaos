@@ -100,7 +100,8 @@ function itemTooltipHtml(item) {
     }
     if (forged.length) html += `<div class="tt-forged">⚒ Forjado: ${forged.join(' · ')}</div>`;
     if (item.crafted) html += `<div class="tt-forged">⚒ Fabricada: calidad ${CRAFT_QUALITY[item.craftTier].name} (stats base ×${item.craftMult})${item.masterwork ? ' · <b>Maestría</b>: la habilidad que le imbuyas arranca en nivel 2' : ''}.</div>`;
-    if (item.blank) html += `<div class="tt-forged">Sin alma: no trae habilidad (por eso tiene un afijo de más). Un Herrero puede imbuirle un poder de tu Códice (J).</div>`;
+    if (item.plain) html += `<div class="tt-forged">Pieza de stats: botas y anillos no traen habilidad; suman por sus stats y afijos.</div>`;
+    else if (item.blank) html += `<div class="tt-forged">Sin alma: no trae habilidad (por eso tiene un afijo de más). Un Herrero puede imbuirle un poder de tu Códice (J).</div>`;
     if (item.infused) html += `<div class="tt-forged">✦ Imbuida por el Herrero.</div>`;
     html += itemCompareHtml(item); // qué ganás y qué perdés respecto de lo equipado
     return html;

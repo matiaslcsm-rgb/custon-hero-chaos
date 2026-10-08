@@ -86,6 +86,7 @@ function handleEscape() {
     if (codexOpen) { toggleCodex(false); return; }
     if (smithOpen) { toggleSmith(false); return; }
     if (towerLogOpen) { toggleTowerLog(false); return; }
+    if (towerMapOpen) { toggleTowerMap(false); return; }
     if (notebookOpen) { toggleNotebook(false); return; }
     if (document.getElementById('hero-any-drawer').classList.contains('open')) { closeHeroDrawer(); return; }
     if (document.getElementById('shop-container').style.display === 'block') { closeShop(); return; }

@@ -773,3 +773,4 @@ body.tower-layout #hb-effects .fx-chip { background: rgba(241,231,208,0.9); bord
 .tt-compare ul { list-style: none; margin: 3px 0 0 4px; }
 .tt-compare li.up { color: #2d6a4f; font-weight: bold; }
 .tt-compare li.down { color: #9b2226; font-weight: bold; }
+body.map-open #hero-bar, body.map-open #float-log, body.map-open #tower-badges { visibility: hidden; }

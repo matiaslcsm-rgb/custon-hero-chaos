@@ -13,7 +13,10 @@ const CODEX = {
     innateLevel: 5,                         // los innatos no tienen nivel de habilidad: se dominan con la pieza a nivel 5
     smithChance: 0.5,                       // herrero en el pueblo (si el piso anterior no tuvo, aparece seguro)
     blankDropShare: 0.15,                   // de cada pieza del botín, 15% sale sin alma
-    blankSlots: ['helm', 'armor', 'gloves', 'boots', 'amulet', 'ring'], // las armas definen el ataque: siempre traen héroe
+    blankSlots: ['helm', 'armor', 'gloves', 'amulet'], // las que se pueden imbuir (las armas definen el ataque: siempre traen héroe)
+    // Botas y anillos no traen habilidad en el catálogo (desde la fase 3): son piezas de STATS, salen en el botín y se funden.
+    // (2026-10-07: antes no salían nunca salvo sin alma, y el Herrero no les podía imbuir nada.)
+    statSlots: ['boots', 'ring'], statShare: 0.2,
     infuseCost: { base: 150, perFloor: 0.5 },
     purgeCost: { base: 40 },
     smithStock: ['magic', 'magic', 'rare']
@@ -63,7 +66,7 @@ function codexCheckItem(hero, item) {
 
 // --- PIEZAS SIN ALMA ---
 function makeBlankItem(floor = 1, slot = pickRandom(CODEX.blankSlots), quality = rollQuality(floor)) {
-    const item = { id: ++towerItemSeq, heroKey: null, slot, skillId: null, innateId: null, blank: true,
+    const item = { id: ++towerItemSeq, heroKey: null, slot, skillId: null, innateId: null, blank: true, plain: CODEX.statSlots.includes(slot),
         quality, level: 1, xp: 0, floor, affixes: [], boosts: {}, skillLevel: 1, pendingChoices: 0 };
     const q = ITEM_QUALITY[quality];
     const n = 1 + (Array.isArray(q.affixes) ? q.affixes[0] + Math.floor(Math.random() * (q.affixes[1] - q.affixes[0] + 1)) : q.affixes); // +1 afijo: compensa no traer habilidad
@@ -77,11 +80,14 @@ function nameTowerItem(item) {
     const s = slotKind(item.slot);
     const base = item.crafted ? `${SLOT_NOUNS[s]} ${CRAFT_QUALITY[item.craftTier].adj[SLOT_GENDER[s]]}` // fabricada: Guantes Romos (towerCraft.js)
         : `${SLOT_NOUNS[s]}${prefix && item.quality !== 'normal' ? ' ' + prefix.name : ''}`;
-    item.name = item.blank ? (item.crafted ? base : `${base} sin alma`) : `${base} ✦ ${itemSkill(item).name}`;
+    const suffix = item.affixes.find(a => a.name.startsWith('del '));
+    item.name = item.plain ? `${base}${!item.crafted && suffix && item.quality !== 'normal' ? ' ' + suffix.name : ''}` // botas y anillos: de stats
+        : item.blank ? (item.crafted ? base : `${base} sin alma`) : `${base} ✦ ${itemSkill(item).name}`;
     return item;
 }
 // Botín: a veces sale una pieza sin alma en vez de una con habilidad
 function lootItem(floor, quality = rollQuality(floor)) {
+    if (Math.random() < CODEX.statShare) return makeBlankItem(floor, pickRandom(CODEX.statSlots), quality); // botas o anillo
     return Math.random() < CODEX.blankDropShare ? makeBlankItem(floor, undefined, quality) : makeTowerItem(floor, undefined, quality);
 }
 
@@ -183,7 +189,7 @@ function renderSmith() {
     };
     // 1. Imbuir: pieza sin alma → poder
     const inf = document.getElementById('smith-infuse'); inf.innerHTML = '';
-    const blanks = heroPieces(player).filter(i => i.blank);
+    const blanks = heroPieces(player).filter(i => i.blank && !i.plain);
     if (!blanks.length) inf.innerHTML = '<p class="subtitle">No tenés piezas sin alma. Salen en el botín, se compran acá o se hacen vaciando una pieza.</p>';
     blanks.forEach(item => inf.appendChild(row(item, smithPick === item ? 'Elegida' : 'Elegir', null, true, () => { smithPick = smithPick === item ? null : item; }, smithPick === item)));
     const pw = document.getElementById('smith-powers'); pw.innerHTML = '';
@@ -261,7 +267,7 @@ function aiSmith(hero) {
     if (!s || !heroInTown(hero) || s.aiVisited) return;
     s.aiVisited = true;
     const owned = new Set(heroPieces(hero).map(i => i.skillId || i.innateId).filter(Boolean));
-    heroPieces(hero).filter(i => i.blank).forEach(item => {
+    heroPieces(hero).filter(i => i.blank && !i.plain).forEach(item => {
         const e = shuffle(codexUnlockedEntries().filter(x => !owned.has(x.id) && !x.skill.isInnateItem && x.slot === slotKind(item.slot)))[0];
         if (e && hero.gold >= infuseCost(level.floor) + 100 && infuseItem(hero, item, e.id)) owned.add(e.id);
     });
