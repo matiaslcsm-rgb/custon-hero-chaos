@@ -246,7 +246,8 @@ el mismo paso; lo grande queda acá, ordenado por impacto.
   frena la partida (como Diablo); M o Esc lo cierran. También desde la pausa.
 - ✅ **Botas y anillos salen en el botín** como piezas de stats (20% de las piezas). Desde la fase 3 ninguna habilidad
   iba a esas ranuras y solo aparecían sin alma, que el Herrero no podía imbuir. Ahora sin alma solo en casco, coraza,
-  guantes y amuleto; se funden las 6.
+  guantes y amuleto; se funden las 6. Medido: Espada 88 min/1 muerte, Bastón 120/4 (antes 100-168): quizás algo más
+  fácil, dentro del ruido de una run por arma; vigilar si se suma más poder.
 - ✅ (antes) Pantalla grande con zoom, mensajes flotantes, aviso de puntos para repartir y barra del jefe abajo.
 
 **Pendiente (de más a menos impacto):**
