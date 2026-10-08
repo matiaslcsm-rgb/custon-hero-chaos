@@ -158,3 +158,45 @@ function drawGunnerTell(c, p) {
     ctx.save(); ctx.strokeStyle = A11Y.colorblind ? '#f59e0b' : '#9b2226'; ctx.lineWidth = 2 + 2 * k; ctx.globalAlpha = 0.5 + 0.5 * k;
     ctx.beginPath(); ctx.arc(x, y, TILE * (1.3 - 0.7 * k), 0, Math.PI * 2); ctx.stroke(); ctx.restore();
 }
+
+// --- AVISOS EN EL BORDE: lo que te va a pegar desde fuera de la vista (con zoom cerca, un tirador puede estar lejos) ---
+// Por cada dirección (16 sectores), un chevrón rojo en el borde de la pantalla: más opaco cuanto antes llega. Los
+// tiradores fuera de vista que están por disparar (avisando) también se marcan, con un aro.
+const OFFSCREEN = { horizon: 1.6, sectors: 16, margin: 24 };
+function screenPos(x, y) { return { x: (x - camera.x + 0.5) * TILE * viewScale(), y: (y - camera.y + 0.5) * TILE * viewScale() }; }
+function onScreen(p, pad = 0) { return p.x > -pad && p.y > -pad && p.x < screenW() + pad && p.y < screenH() + pad; }
+function offscreenThreats(level) {
+    const h = player, out = new Map();
+    if (!h || !h.isAlive()) return [];
+    const add = (x, y, urgency, kind) => {
+        const a = Math.atan2(y - h.y, x - h.x), k = Math.round((a + Math.PI) / (Math.PI * 2) * OFFSCREEN.sectors) % OFFSCREEN.sectors;
+        const cur = out.get(k);
+        if (!cur || urgency > cur.urgency) out.set(k, { a, urgency, kind });
+    };
+    (level.bullets || []).forEach(b => {
+        if (onScreen(screenPos(b.x, b.y))) return;
+        const v2 = b.vx * b.vx + b.vy * b.vy || 1, t = ((h.x - b.x) * b.vx + (h.y - b.y) * b.vy) / v2;
+        if (t < 0 || t > OFFSCREEN.horizon) return; // se aleja o tarda mucho
+        if (Math.hypot(b.x + b.vx * t - h.x, b.y + b.vy * t - h.y) > 1.2) return; // no pasa cerca
+        add(b.x, b.y, 1 - t / OFFSCREEN.horizon, 'bullet');
+    });
+    level.creeps.forEach(c => {
+        if (!c.isAlive() || !c.tellUntil || gameClock >= c.tellUntil || Math.hypot(c.x - h.x, c.y - h.y) > 11 || onScreen(screenPos(c.x, c.y))) return;
+        add(c.x, c.y, 0.6, 'tell');
+    });
+    return [...out.values()];
+}
+function drawOffscreenThreats(level) {
+    const list = offscreenThreats(level);
+    if (!list.length) return;
+    const cx = screenW() / 2, cy = screenH() / 2, m = OFFSCREEN.margin, col = A11Y.colorblind ? '#f59e0b' : '#c1121f';
+    list.forEach(({ a, urgency, kind }) => {
+        const r = Math.min((cx - m) / Math.max(1e-6, Math.abs(Math.cos(a))), (cy - m) / Math.max(1e-6, Math.abs(Math.sin(a))));
+        ctx.save(); ctx.translate(cx + Math.cos(a) * r, cy + Math.sin(a) * r); ctx.rotate(a + Math.PI); // apunta hacia vos
+        ctx.globalAlpha = 0.45 + 0.55 * urgency; ctx.fillStyle = col; ctx.strokeStyle = '#f3e7c9'; ctx.lineWidth = 2;
+        if (kind === 'tell') { ctx.beginPath(); ctx.arc(0, 0, 9 + 3 * Math.sin(fxClock * 12), 0, Math.PI * 2); ctx.stroke(); ctx.fill(); }
+        else { const s = 1 + 0.35 * urgency; ctx.beginPath(); ctx.moveTo(14 * s, 0); ctx.lineTo(-6 * s, -10 * s); ctx.lineTo(-1 * s, 0); ctx.lineTo(-6 * s, 10 * s); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+        ctx.fillStyle = '#f3e7c9'; ctx.font = 'bold 11px Georgia, serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.rotate(-(a + Math.PI)); ctx.fillText('!', 0, 0);
+        ctx.restore();
+    });
+}

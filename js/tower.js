@@ -606,6 +606,7 @@ function renderTower(level, dt) {
     drawUltBanner(screenW() / 2, screenH() * 0.72); // cartel de la definitiva, encima de la niebla (fxSkills.js)
     drawInkVignette();
     drawObjectiveArrow(level);
+    drawOffscreenThreats(level); // balas y tiradores fuera de la vista (towerBullets.js)
     renderTowerMinimap(level);
     drawFloorTitle(level);
     // Barra del jefe abajo al centro, con sus fases (towerTelegraph.js)

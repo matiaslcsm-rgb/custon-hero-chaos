@@ -793,3 +793,18 @@ body.ink-theme .tt-forged { color: #8a5a00; }
 :root { --ui-scale: 1; }
 body.tower-layout #hero-bar, .modal-box, body.tower-layout #float-log, body.tower-layout #tower-badges, #map-hud, #center-timer { zoom: var(--ui-scale); }
 @media (max-width: 1150px) { body.tower-layout #float-log { bottom: calc(96px * var(--ui-scale)); max-width: 45%; } } /* angosto: arriba de la placa del héroe */
+
+/* Ranura Q de las armas iniciales: carga del arco y combo de la espada (towerFeel.js) */
+.skill-slot .charge { position: absolute; left: 3px; right: 3px; bottom: 3px; height: 6px; background: rgba(29,23,18,0.18); border: 1px solid #2b2118; opacity: 0; z-index: 2; }
+.skill-slot .charge.on { opacity: 1; }
+.skill-slot.charging .pips { visibility: hidden; } /* mientras tensás, la barra va en lugar de los puntitos de nivel */
+.skill-slot .charge i { display: block; height: 100%; width: 0; background: #6b2a1f; }
+.skill-slot .charge.full i { background: #c9a227; }
+.skill-slot .charge.perfect i { background: #ffd166; box-shadow: 0 0 6px #ffd166; }
+.skill-slot .charge.perfect { border-color: #6b2a1f; }
+.skill-slot.perfect-now { box-shadow: 0 0 0 2px #ffd166, 0 0 10px #ffd166; }
+.skill-slot .combo { position: absolute; right: 4px; bottom: 4px; display: flex; gap: 2px; z-index: 2; }
+.skill-slot .combo b { width: 6px; height: 6px; border-radius: 50%; border: 1px solid #2b2118; background: rgba(241,231,208,0.6); }
+.skill-slot .combo b:last-child { width: 8px; height: 8px; margin-top: -1px; }
+.skill-slot .combo b.on { background: #c9a227; }
+.skill-slot .combo.next-finisher b:last-child { background: #fff8e1; box-shadow: 0 0 5px #c9a227; }

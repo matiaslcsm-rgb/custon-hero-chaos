@@ -1,7 +1,7 @@
 // Punto de entrada: conecta los botones y arranca el bucle principal.
 
 // Versión visible en el menú: si no coincide con la última subida, el navegador muestra una copia vieja (Ctrl+F5).
-const GAME_VERSION = '2026-10-08 · raíces y jefes';
+const GAME_VERSION = '2026-10-08 · interfaz de combate';
 document.getElementById('game-version').textContent = `Versión ${GAME_VERSION}`;
 
 document.getElementById('start-wave-btn').onclick = startWave;
@@ -237,6 +237,7 @@ if (location.search.includes('demo=tower')) setTimeout(() => {
         player.mana = player.maxMana; player.cooldowns[sk.id] = 0;
         if (kind === 'bow') startCharge(player, sk, 'q'), player.charging.start = gameClock - BOW_SHOT.chargeTime - 0.05;
         else { if (kind === 'sword') { player.comboStep = 2; player.comboAt = gameClock; } castAt(player, sk, e.x, e.y); }
+        if (q.get('threat')) { const g = makeCreep(CREEP_TYPES.ARCHER, player.x, player.y, 1, false, 0); g.arena = level; [[-26, 0, 18, 0], [0, -20, 0, 14]].forEach(([dx, dy, vx, vy]) => { spawnBullet(g, 0, 1, 0.5); Object.assign(level.bullets[level.bullets.length - 1], { x: player.x + dx, y: player.y + dy, vx, vy }); }); } // &threat=1: balas que vienen de fuera de la vista
         setTimeout(() => { tickFx = () => 0; hitStopUntil = 1e12; }, kind === 'staff' ? 160 : 50);
     }, 800);
     if (location.search.includes('inv')) { // demo del inventario con piezas variadas

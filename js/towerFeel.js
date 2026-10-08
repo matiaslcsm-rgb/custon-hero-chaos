@@ -36,7 +36,7 @@ function inArc(c, e, dir, reach, halfArc) {
 // --- ESPADA: Combo de Tajos ---
 const SWORD_SKILL = {
     id: 'ADVENTURER_GOLPE', name: 'Combo de Tajos', kind: 'active', heroKey: 'ADVENTURER', tags: ['FÍSICO'],
-    pointTarget: true, ownFx: true, castXp: 0.25,
+    pointTarget: true, ownFx: true, castXp: 0.25, comboHits: 3,
     values: { cooldown: 0.5, recovery: [1.8, 1.7, 1.6, 1.5], manaCost: 0, dmgMult: [0.7, 0.8, 0.9, 1], radius: 1.9 },
     description: 'Tres tajos en arco hacia el cursor: {dmgMult%} de tu daño al más cercano (60% al resto del arco), después ×1.15 y el remate ×2, que empuja. Sin maná. Mantené la tecla para encadenarlos.',
     cooldownAfter(h) { return (h.comboStep || 0) === 0 ? val(this, h, 'recovery') * COOLDOWN_MULT : skillCooldown(this, h); },
@@ -212,4 +212,25 @@ function drawTowerFeel(level) {
             ctx.beginPath(); ctx.arc(p.x - 8 + i * 8, p.y + TILE * 0.62, i === 2 ? 3.5 : 2.6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
         }
     }
+}
+
+// --- EN LA BARRA DEL HÉROE (ui.js, cada cuadro) ---
+// Ranura del arco: barra que se llena al tensar (dorada tensada, blanca en el momento perfecto)
+function feelSlotCharge(slot, h, s) {
+    const bar = slot.querySelector('.charge');
+    if (!bar) return;
+    const ch = h.charging && h.charging.skill === s, k = ch ? chargeOf(h) : 0, over = ch ? gameClock - h.charging.start - BOW_SHOT.chargeTime : -1;
+    bar.firstChild.style.width = `${k * 100}%`;
+    bar.classList.toggle('on', ch); slot.classList.toggle('charging', ch);
+    bar.classList.toggle('full', k >= 1);
+    const perfect = k >= 1 && over <= BOW_SHOT.perfect;
+    bar.classList.toggle('perfect', perfect); slot.classList.toggle('perfect-now', perfect);
+}
+// Ranura de la espada: los 3 puntitos del combo (cuántos tajos van mientras el ritmo sigue vivo)
+function feelSlotCombo(slot, h) {
+    const box = slot.querySelector('.combo');
+    if (!box) return;
+    const live = (h.comboStep || 0) && gameClock - (h.comboAt ?? -99) < SWORD_COMBO.window + 0.4, step = live ? h.comboStep : 0;
+    [...box.children].forEach((b, i) => b.classList.toggle('on', i < step));
+    box.classList.toggle('next-finisher', step === 2); // el próximo es el remate
 }

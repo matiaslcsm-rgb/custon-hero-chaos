@@ -361,13 +361,16 @@ el mismo paso; lo grande queda acá, ordenado por impacto.
   forma de flecha, puntitos del combo, el remate frena el tiempo; los tiradores avisan con un aro rojo y sus balas son
   siempre del mismo color de peligro.
 - ✅ **Tecla para agarrar (F)**, configurable, con el cartel del arma al acercarte (2026-10-08).
+- ✅ **La ranura Q muestra el arma** (2026-10-08): el arco, una barra que se llena al tensar (dorada tensado del todo; la
+  ranura brilla en el momento del tiro perfecto); la espada, 3 puntitos con el paso del combo (el del remate se ilumina
+  cuando toca). Así se juega mirando la barra, no solo al héroe.
+- ✅ **Avisos de balas fuera de la vista** (2026-10-08, `drawOffscreenThreats` en towerBullets.js): un chevrón rojo en el
+  borde, del lado de donde viene una bala que va a pasar cerca en menos de 1,6 s (más opaco cuanto antes llega), y un aro
+  rojo para un tirador fuera de vista que está por disparar. Una marca por dirección (16), para no llenar el borde.
 - Lista al día. Próximas ideas de interfaz cuando aparezcan (se anotan acá).
 - ✅ (antes) Pantalla grande con zoom, mensajes flotantes, aviso de puntos para repartir y barra del jefe abajo.
 
 **Pendiente (de más a menos impacto):**
-- **Barra del héroe:** mostrar la carga del arco y el paso del combo también en la ranura Q (hoy solo se ven sobre el
-  héroe).
-- **Indicador de balas fuera de pantalla:** con el zoom muy cerca, un tirador que dispara desde fuera de la vista.
 
 ## Decisiones tomadas (2026-10-07)
 - **Estilo ASCII descartado:** se probó un filtro que convertía el mundo en caracteres (referencia: el MMORPG ASCII de

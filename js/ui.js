@@ -558,6 +558,8 @@ function renderHeroBar() {
         cd.style.height = `${Math.min(100, left / total * 100)}%`;
         cd.textContent = left > 0 ? left.toFixed(left < 10 ? 1 : 0) : '';
         slot.classList.toggle('no-mana', skillLevel(p, s) > 0 && p.mana < (val(s, p, 'manaCost') || 0));
+        if (s.chargeable) feelSlotCharge(slot, p, s); // la barra de tensar y el destello del tiro perfecto (towerFeel.js)
+        if (s.comboHits) feelSlotCombo(slot, p);
     });
     const dash = document.getElementById('hb-dash');
     if (dash) { const left = Math.max(0, (p.dashReadyAt || 0) - gameClock), cd = dash.querySelector('.cd'); cd.style.height = `${Math.min(100, left / DASH.cooldown * 100)}%`; cd.textContent = left > 0 ? left.toFixed(1) : ''; }
@@ -605,7 +607,9 @@ function renderHeroBar() {
         const keyLabel = keyName(p.keyBindings[s.id]); // keymap.js
         slot.innerHTML = (gameMode === 'tower' ? `<img class="ink-skill-icon" src="${inkSkillIcon(s)}">` : '') +
             `<span class="key">${keyLabel}</span><span class="nm">${s.name}</span>` +
-            `<span class="pips">${Array.from({ length: max }, (_, j) => `<i class="${j < lvl ? 'on' : ''}"></i>`).join('')}</span><div class="cd"></div>`;
+            `<span class="pips">${Array.from({ length: max }, (_, j) => `<i class="${j < lvl ? 'on' : ''}"></i>`).join('')}</span><div class="cd"></div>` +
+            (gameMode === 'tower' && s.chargeable ? '<div class="charge"><i></i></div>' : '') + // carga del arco (towerFeel.js)
+            (gameMode === 'tower' && s.comboHits ? '<span class="combo"><b></b><b></b><b></b></span>' : ''); // paso del combo de la espada
         const btn = gameMode === 'tower' ? null : levelButton(s); if (btn) slot.appendChild(btn); // en la Torre las habilidades suben forjando
         skills.appendChild(slot);
     }

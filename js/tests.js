@@ -1573,6 +1573,36 @@ test('Torre: traspasar — la pieza vieja se consume, la nueva hereda la mitad d
     checkEq(itemTotalXp(neu) - xp0, Math.floor(itemTotalXp(old) * TRANSFER.share), 'exactamente la mitad de la experiencia');
 });
 
+test('Torre: interfaz de combate — la ranura Q muestra la carga del arco y el combo; avisos de balas fuera de la vista', () => {
+    const level = newTower('AXE', { weapon: 'ADVENTURER_BOW' });
+    const sk = SKILL_INDEX.ADVENTURER_VOLLEY, slot = document.createElement('div');
+    slot.innerHTML = '<div class="charge"><i></i></div>';
+    player.mana = player.maxMana; startCharge(player, sk, 'q'); player.charging.start = gameClock - BOW_SHOT.chargeTime * 0.5;
+    feelSlotCharge(slot, player, sk);
+    check(Math.abs(parseFloat(slot.querySelector('.charge i').style.width) - 50) < 1, 'a mitad de tensar, barra a la mitad');
+    player.charging.start = gameClock - BOW_SHOT.chargeTime - 0.05; feelSlotCharge(slot, player, sk);
+    check(slot.querySelector('.charge').classList.contains('perfect') && slot.classList.contains('perfect-now'), 'en el momento perfecto, destella');
+    releaseCharge(player);
+    // combo
+    newTower('AXE', { weapon: 'ADVENTURER_SWORD' });
+    const box = document.createElement('div'); box.innerHTML = '<span class="combo"><b></b><b></b><b></b></span>';
+    player.comboStep = 2; player.comboAt = gameClock; feelSlotCombo(box, player);
+    checkEq(box.querySelectorAll('.combo b.on').length, 2, 'dos tajos');
+    check(box.querySelector('.combo').classList.contains('next-finisher'), 'el próximo es el remate');
+    gameClock += 5; feelSlotCombo(box, player);
+    checkEq(box.querySelectorAll('.combo b.on').length, 0, 'se cortó el ritmo');
+    // avisos fuera de la vista
+    const L = player.arena; updateCamera(L, player, 0);
+    const g = makeCreep(CREEP_TYPES.ARCHER, player.x, player.y, 1, false, 0); g.arena = L;
+    L.bullets = [];
+    spawnBullet(g, 0, 30, 1); Object.assign(L.bullets[0], { x: player.x - 40, y: player.y, vx: 30, vy: 0 }); // viene hacia vos desde lejos
+    spawnBullet(g, 0, 30, 1); Object.assign(L.bullets[1], { x: player.x + 40, y: player.y, vx: 30, vy: 0 }); // se aleja
+    const th = offscreenThreats(L);
+    checkEq(th.length, 1, 'solo la que viene');
+    check(Math.abs(Math.abs(th[0].a) - Math.PI) < 0.01, 'del lado izquierdo');
+    L.bullets = [];
+}, { random: true });
+
 test('Torre: el Cuaderno escribe una página sola la primera vez que hacés cada cosa, y no se repite', () => {
     notebookState = { seen: {} };
     newTower(); // startTowerRun() ya escribió WAKE al despertar
