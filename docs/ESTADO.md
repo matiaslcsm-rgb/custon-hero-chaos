@@ -122,8 +122,9 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **Sensación de las armas, tiradores y traspaso (2026-10-08):** la Q de las 3 armas iniciales se rehízo (combo de tajos
   de la espada que desvía balas, tiro tensado del arco con tiro perfecto, orbe del bastón que explota), enemigos que
   disparan patrones esquivables estilo Enter the Gungeon (roles Tirador y Rociador, anillos y espirales en los jefes) y
-  traspasar el 50% del crecimiento de una pieza a otra en el Herrero (REWORK.md §8, con las mediciones). Pendiente:
-  el jefe del piso 3 (Bruja del Fango) tarda 250-500 s con el piloto.
+  traspasar el 50% del crecimiento de una pieza a otra en el Herrero (REWORK.md §8, con las mediciones). Partidas con
+  el piloto: Espada 105 min, Arco 137, Bastón 133, sin muertes. Pendiente: jefes lentos con el piloto (Bruja del Fango
+  250-500 s; Gran Raíz Madre 1366 s con bastón porque no corta las raíces).
 - **Motor (decidido 2026-10-06):** seguimos en canvas + JavaScript puro. Pasar a un motor (Phaser para seguir en el
   navegador, Godot para publicar en PC/celular) se decide cuando el contenido de Tower Chaos esté más cerrado.
 - **Balance en curso (2026-09-28):** jefes más suaves desde la ronda 20 + Kaya y Cetro del Eclipse (ver DISEÑO.md §9 bis).

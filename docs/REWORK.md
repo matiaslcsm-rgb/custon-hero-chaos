@@ -265,8 +265,9 @@ menos una pieza mágica). Nunca conviene más que seguir con la vieja: perdés l
 sobra oro. Vista previa con los niveles que sube. Página nueva del Cuaderno: "Nada se pierde".
 
 **Partidas completas con el piloto** (con tiradores y balas de jefes): Espada 105 min, 0 muertes; Arco 137 min, 0
-muertes; Bastón: ver ESTADO.md. El primer jefe con espada pasó de 436 s a 66 s. El jefe del piso 3 (Bruja del Fango)
-sigue siendo el más lento (251-493 s): anotado para revisar. Nota: el piloto cambia el arma inicial por la primera
+muertes; Bastón 133 min, 0 muertes. El primer jefe con espada pasó de 436 s a 66 s. Jefes lentos para revisar: la Bruja
+del Fango (piso 3, 251-493 s con espada y arco) y la Gran Raíz Madre con bastón (piso 2, **1366 s**: el piloto a distancia
+no corta las raíces que la curan). Sin muertes en las 3: el piloto esquiva bien las balas; un jugador va a recibir más. Nota: el piloto cambia el arma inicial por la primera
 mejor que encuentra (en el piso 1), así que las partidas completas miden más el equipo que el arma inicial; por eso
 la medición de arriba contra muñecos.
 
