@@ -134,6 +134,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   antes de buscarlos (se corta la espiral de muertes).
 - **Luz y clima (2026-10-08):** antorchas, fogatas (de noche curan), fragua, balas que brillan; lluvia, nieve, ceniza,
   arena, hojas y luciérnagas por bioma, con opción para apagarlo (REWORK.md §11).
+- **Los golpes comunes avisan (2026-10-08):** preparación con arco rojo y "!" (cuerpo a cuerpo) o línea de puntería y
+  flecha esquivable (a distancia), sin cambiar el ritmo de ataque (REWORK.md §12).
 - **Motor (decidido 2026-10-06):** seguimos en canvas + JavaScript puro. Pasar a un motor (Phaser para seguir en el
   navegador, Godot para publicar en PC/celular) se decide cuando el contenido de Tower Chaos esté más cerrado.
 - **Balance en curso (2026-09-28):** jefes más suaves desde la ronda 20 + Kaya y Cetro del Eclipse (ver DISEÑO.md §9 bis).

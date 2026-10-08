@@ -344,6 +344,30 @@ clima de Hyper Light Drifter, pura atmósfera que no tapa la pelea).
   La intensidad va y viene. De noche se ve menos, salvo lo que brilla. **Se apaga en la pausa** (Opciones → 🌧 Clima).
 - No se mide balance: la fogata es chica y está lejos del camino; el resto es visual.
 
+## 12. Los golpes comunes avisan (2026-10-08, `js/towerWindup.js`)
+Medido en §10: el 70-77% del daño recibido eran golpes comunes, que pegaban al instante (no había nada que esquivar
+fuera de los fuertes). Como en Hades, ahora cada golpe común se **prepara**:
+- **Cuerpo a cuerpo:** 0,4 s (0,5 los grandes), con un arco rojo en el piso hacia vos y un **"!" rojo** sobre la cabeza que
+  crece. Si salís de su alcance o esquivás, falla ("¡esquivado!" la primera vez). Si lo aturdís mientras se prepara, se
+  cancela.
+- **A distancia:** 0,35 s con una línea roja punteada de puntería y después **una flecha** (más rápida que las balas de los
+  tiradores, 9 casillas/s) que se esquiva y que las paredes frenan; si pega, aplica los rasgos del bicho (veneno, fuego…).
+- **Mismo ritmo:** la preparación se descuenta del tiempo entre ataques. Los jefes y guardianes siguen con lo suyo.
+- **El piloto:** con arma a distancia se corre de los tajos que le apuntan; con cuerpo a cuerpo los aguanta (como haría
+  una persona con espada). Las flechas las lee como cualquier bala.
+
+**Medido** (piloto con reflejos humanos, igual que en §10):
+
+| Arma | Antes (§10) | Ahora |
+|---|---|---|
+| Espada | 93-185 min, 0-2 muertes (sin contar la espiral) | 117 min, 0 muertes |
+| Arco | 98 min, 0 | 108 min, 0 |
+| Bastón | 109-137 min, 1-3 | 155 min, 1 |
+
+Daño recibido: comunes **50-56%** (antes 69-78%), balas y flechas 17-24% (antes 4-8%: ahora incluyen las flechas de los
+arqueros), anunciados 26%. La dificultad general queda parecida (es lo buscado: el mismo daño, pero ahora se puede
+evitar jugando bien); la diferencia la va a sentir el jugador, que el piloto esquiva poco cuerpo a cuerpo.
+
 ## Orden propuesto (cada fase jugable y medida)
 1. **Pantalla:** zoom, HUD más chico y menú de pausa con pestañas. Es barato y mejora todo lo que viene después.
 2. **Despertar y tutorial:** cuaderno y las 3 armas (espada, arco y bastón, con su habilidad). ✅ — las 3 armas

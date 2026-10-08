@@ -539,6 +539,7 @@ function renderTower(level, dt) {
     drawTowerLoot(level);
     drawTowerZones(level); // lo que dejan los jefes en el piso (towerBosses.js)
     drawTowerTelegraphs(level); // zonas de los ataques anunciados, debajo de las unidades
+    drawCreepWindups(level); // los golpes comunes que se están preparando (towerWindup.js)
     drawBossExtras(level); // lazos de las raíces
     drawTowerMerchant(level);
     drawTowerSmith(level);
@@ -601,6 +602,7 @@ function renderTower(level, dt) {
         drawUnit(player, heroColor(player), player.symbol, pos, { glow: true });
     }
     drawTowerBullets(level); // proyectiles enemigos, encima de todo lo del piso (towerBullets.js)
+    drawCreepWindupMarks(level); // "!" sobre los que preparan un golpe (towerWindup.js)
     drawTowerFeel(level); // línea de tiro del arco y el combo de la espada (towerFeel.js)
     drawArenaFx(level);
     drawMouseOverlay(level);

@@ -105,6 +105,7 @@ function updateCreep(c, dt) {
     if (!c.isAlive()) return;
     // Si el héroe murió (o quedó eliminado) en este mismo frame, el resto de los creeps no sigue pegando
     if (!inCombat() || c.arena.done) return;
+    if (c.windup && creepWindupTick(c)) return; // preparando un golpe (Torre, towerWindup.js)
     if (hasFlag(c, 'stun')) return;
     const target = creepTarget(c);
     if (!target.isAlive()) { stepCreepToward(c, c.spawnX, c.spawnY, dt); return; } // perdió el agro
@@ -122,8 +123,13 @@ function updateCreep(c, dt) {
     if (dTarget > c.range) { stepCreepToward(c, target.x, target.y, dt); return; }
 
     c.attackTimer += dt;
-    if (c.attackTimer < 1 / (effAtkSpeed(c) * enrage)) return;
+    if (c.attackTimer < creepAttackGap(c, 1 / (effAtkSpeed(c) * enrage))) return;
     c.attackTimer = 0;
+    if (creepWindsUp(c)) { startCreepWindup(c, target, effAtk); return; } // en la Torre, cada golpe se prepara y se puede esquivar
+    creepStrike(c, target, effAtk);
+}
+// El golpe en sí (al instante, o al terminar la preparación en la Torre)
+function creepStrike(c, target, effAtk) {
     // dealDamage resuelve la muerte del héroe (revivir, Condenado o eliminación) a través de onHeroDeath
     // Animación según cómo ataca: golpe (con tajo), disparo o hechizo
     if (c.range <= 2) { fxAttack(c, target, 'melee'); if (fxArena(c)) fxSlash(c, target, c.color, false); }

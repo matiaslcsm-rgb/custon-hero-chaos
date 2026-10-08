@@ -1668,6 +1668,43 @@ test('Torre: luz y clima — antorchas y fogatas por nivel, la fogata cura de no
     const was = weatherOn; setWeather(false); drawTowerWeather(level, 0.05); checkEq(weatherParts.length, 0, 'apagado en la pausa'); setWeather(was);
 }, { random: true });
 
+test('Torre: los golpes comunes avisan — se preparan, pegan si seguís ahí, fallan si te corrés o esquivás, el aturdido cancela, los de lejos tiran una flecha esquivable', () => {
+    const level = newTower();
+    level.creeps.forEach(c => { c.hp = 0; });
+    for (let x = -3; x <= 6; x++) for (let y = -2; y <= 2; y++) if (level.walls[player.y + y]) level.walls[player.y + y][player.x + x] = 0;
+    const c = makeCreep(CREEP_TYPES.GRUNT, player.x + 1, player.y, 1, false, 0); Object.assign(c, { arena: level, spawnTime: -1e9, aggro: true }); level.creeps.push(c);
+    player.hp = player.maxHp; player.evasion = -1000;
+    c.attackTimer = 99; updateCreep(c, 0.05);
+    check(c.windup, 'se prepara');
+    checkEq(player.hp, player.maxHp, 'todavía no pegó');
+    gameClock += windupTime(c) + 0.01; updateCreep(c, 0.05);
+    check(player.hp < player.maxHp, 'si seguís ahí, pega');
+    // te corrés: falla
+    player.hp = player.maxHp; c.attackTimer = 99; updateCreep(c, 0.05); player.x -= 3;
+    gameClock += windupTime(c) + 0.01; updateCreep(c, 0.05);
+    checkEq(player.hp, player.maxHp, 'te corriste: al aire'); player.x += 3;
+    // esquive (invulnerable): falla
+    c.attackTimer = 99; updateCreep(c, 0.05); addEffect(player, { id: 'DASH', name: 'Esquive', duration: 5, flags: ['invulnerable'] });
+    gameClock += windupTime(c) + 0.01; updateCreep(c, 0.05);
+    checkEq(player.hp, player.maxHp, 'con el esquive, falla'); removeEffect(player, 'DASH');
+    // aturdido mientras se prepara: se cancela
+    c.attackTimer = 99; updateCreep(c, 0.05); addEffect(c, { id: 'STUN', name: 'Aturdido', duration: 0.1, flags: ['stun'] });
+    updateCreep(c, 0.05);
+    check(!c.windup, 'aturdido: el golpe se cancela');
+    // mismo ritmo que antes: la preparación se descuenta
+    checkNear(creepAttackGap(c, 1) + windupTime(c), 1, 'el intervalo total no cambia');
+    // a distancia: flecha esquivable
+    c.hp = 0;
+    const a = makeCreep(CREEP_TYPES.ARCHER, player.x + 4, player.y, 1, false, 0); Object.assign(a, { arena: level, spawnTime: -1e9, aggro: true }); level.creeps.push(a);
+    level.bullets = []; a.attackTimer = 99; updateCreep(a, 0.05);
+    check(a.windup && a.windup.ranged, 'el arquero apunta');
+    gameClock += windupTime(a) + 0.01; updateCreep(a, 0.05);
+    check(level.bullets.length === 1 && level.bullets[0].arrow, 'tira una flecha (no pega al instante)');
+    const hp = player.hp; for (let i = 0; i < 20; i++) { gameClock += 0.05; towerBulletsTick(level, 0.05); }
+    check(player.hp < hp, 'si no te movés, la flecha pega');
+    check(!creepWindsUp(level.guardian), 'los jefes siguen con sus ataques anunciados');
+}, { random: true });
+
 test('Torre: el Cuaderno escribe una página sola la primera vez que hacés cada cosa, y no se repite', () => {
     notebookState = { seen: {} };
     newTower(); // startTowerRun() ya escribió WAKE al despertar

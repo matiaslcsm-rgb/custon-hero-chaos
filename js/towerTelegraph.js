@@ -206,14 +206,15 @@ function telegraphsOn(hero, x = hero.x, y = hero.y) {
 function towerDodgeDir(hero) {
     const threats = telegraphsOn(hero);
     const bullets = bulletDanger(hero, hero.x, hero.y); // proyectiles que van a pasar por acá (towerBullets.js)
-    if (!threats.length && !bullets) return null;
+    const swings = windupThreatsOn(hero, hero.x, hero.y); // tajos que se preparan contra un héroe a distancia (towerWindup.js)
+    if (!threats.length && !bullets && !swings) return null;
     let best = null, bestScore = Infinity;
     STEPS_8.forEach(([dx, dy]) => {
         const nx = hero.x + dx, ny = hero.y + dy;
         if (!walkable(hero.arena, nx, ny) || (dx && dy && (!walkable(hero.arena, nx, hero.y) || !walkable(hero.arena, hero.x, ny)))) return;
         const inside = telegraphsOn(hero, nx, ny).length;
         const away = -threats.reduce((a, t) => a + Math.hypot(nx - t.x, ny - t.y), 0);
-        const score = inside * 100 + bulletDanger(hero, nx, ny, 1.6) * 30 + away; // más lejos en el tiempo: retroceder en la misma línea no sirve
+        const score = inside * 100 + bulletDanger(hero, nx, ny, 1.6) * 30 + windupThreatsOn(hero, nx, ny) * 60 + away; // más lejos en el tiempo: retroceder en la misma línea no sirve
         if (score < bestScore) { bestScore = score; best = { dx, dy }; }
     });
     hero.autoGoal = 'esquivar';

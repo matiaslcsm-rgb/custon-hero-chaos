@@ -76,12 +76,12 @@ function bulletBurstTick(c) {
     }
     if (b.left <= 0) c.burst = null;
 }
-function spawnBullet(c, angle, speed, dmgMult, life) {
+function spawnBullet(c, angle, speed, dmgMult, life, extra = null) {
     const L = c.arena;
     L.bullets = L.bullets || [];
     if (L.bullets.length >= BULLET.cap) return;
     L.bullets.push({ x: c.x, y: c.y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, r: BULLET.r, born: gameClock, life: life || BULLET.maxLife,
-        dmg: Math.max(1, Math.round(effAttack(c) * dmgMult)), type: c.attackType || 'physical', owner: c, color: c.color || '#9b2226' });
+        dmg: Math.max(1, Math.round(effAttack(c) * dmgMult)), type: c.attackType || 'physical', owner: c, color: c.color || '#9b2226', ...(extra || {}) });
     if (player && player.arena === L && Math.hypot(c.x - player.x, c.y - player.y) < 9) writeNotebookPage('BULLETS'); // el Cuaderno lo explica
 }
 
@@ -95,8 +95,9 @@ function towerBulletsTick(level, dt) {
         b.x += b.vx * dt; b.y += b.vy * dt;
         let gone = gameClock - b.born > b.life || !walkable(level, Math.round(b.x), Math.round(b.y));
         if (!gone && !ghost && h.arena === level && Math.hypot(b.x - h.x, b.y - h.y) < b.r + BULLET.hitR) {
-            const { dealt } = dealDamage(b.owner, h, b.dmg, b.type);
-            if (dealt > 0 && fxArena(h)) fxShake(1.2);
+            const result = dealDamage(b.owner, h, b.dmg, b.type);
+            if (result.dealt > 0 && fxArena(h)) fxShake(1.2);
+            if (b.onHit) b.onHit(result); // rasgos de quien la tiró (veneno, fuego…), towerWindup.js
             gone = true;
         }
         if (gone) { if (fxArena(h) && level === h.arena) fxParticles(level, b.x, b.y, 'steel', 3, 1.5, { style: 'smoke', size: 2.5, life: 0.25 }); B.splice(i, 1); }
@@ -144,6 +145,12 @@ function drawTowerBullets(level) {
         if (!canSee(level, Math.round(b.x), Math.round(b.y))) return;
         const x = b.x * TILE + TILE / 2, y = b.y * TILE + TILE / 2, r = b.r * TILE;
         const danger = A11Y.colorblind ? '#f59e0b' : '#c1121f'; // siempre el mismo color de peligro: se leen en cualquier bioma
+        if (b.arrow) { // flecha de un arquero común: roja, con la punta hacia donde va
+            ctx.save(); ctx.translate(x, y); ctx.rotate(Math.atan2(b.vy, b.vx));
+            ctx.strokeStyle = danger; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(-11, 0); ctx.lineTo(7, 0); ctx.stroke();
+            ctx.fillStyle = danger; ctx.beginPath(); ctx.moveTo(11, 0); ctx.lineTo(4, -4); ctx.lineTo(4, 4); ctx.closePath(); ctx.fill();
+            ctx.restore(); return;
+        }
         ctx.save();
         ctx.globalAlpha = 0.4; ctx.fillStyle = danger; ctx.beginPath(); ctx.arc(x, y, r * 1.8, 0, Math.PI * 2); ctx.fill();
         ctx.globalAlpha = 1; ctx.fillStyle = '#fff3d6'; ctx.strokeStyle = danger; ctx.lineWidth = 3;
