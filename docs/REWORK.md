@@ -225,6 +225,20 @@ volcán CC BY 4.0, créditos en docs/CREDITOS.md y en el menú), ~21 MB que se b
 Las fases 3 y 4 son las más grandes: hay que rehacer pruebas y volver a medir el balance con el piloto (el piloto
 también tiene que aprender a esquivar los ataques anunciados).
 
+## Estilo ASCII (prueba, 2026-10-07, `js/towerAscii.js`)
+Referencia del usuario: el MMORPG ASCII de **ansenjeo** (Instagram): todo hecho de caracteres monoespaciados (Q, 0, 8, &,
+$, @) sobre azul noche, colores apagados por material (follaje verde azulado, piedra gris azulada), el fuego como único
+color saturado y con brillo, luz puntual de antorchas, lluvia en trazos `/` y pasto de trazos que se mueve.
+- **Hecho (prueba, apagada por defecto):** filtro en la placa de video (WebGL) sobre lo que ya dibuja la Torre. Cada celda
+  de 6×10 px elige un carácter según cuánta tinta tiene: el pergamino queda casi vacío (algún carácter suelto) y lo
+  oscuro o de color se llena. Las líneas de tinta pasan a gris azulado, y lo cálido y saturado brilla alrededor. La niebla y
+  la noche llegan como "menos luz", no como manchas. La interfaz (minimapa, barra del jefe, carteles, mensajes) se dibuja
+  encima, sin filtro. Se prende en la pausa (🔤 Estilo ASCII) o con `?ascii=1`. Capturas en `docs/capturas/ascii-*.png`.
+- **Si se aprueba, falta:** lluvia y nieve de caracteres por bioma; pasto de trazos que se dobla al pasar; antorchas
+  y fogatas con luz propia en el pueblo y el laberinto; nombres flotando sobre los personajes; paleta del mundo pensada
+  para el filtro (por ejemplo, árboles más grandes y oscuros para que llenen más); probar el rendimiento en una
+  máquina común.
+
 ## Interfaz y calidad de vida (lista viva)
 Pedido del usuario (2026-10-07): en cada paso, pensar la interfaz y la calidad de vida como diseñador. Lo chico se hace en
 el mismo paso; lo grande queda acá, ordenado por impacto.

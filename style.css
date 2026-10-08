@@ -737,3 +737,8 @@ body.ink-theme .pm-toggle.on { border-color: #2d6a4f; }
 body.ink-theme .pm-toggle.on span { color: #2d6a4f; }
 body.ink-theme .pm-toggle:hover { border-color: #6b2a1f; }
 body.paused #center-timer { display: none !important; }
+
+/* Estilo ASCII (prueba): la capa de caracteres va debajo del canvas, que queda transparente con la interfaz */
+#ascii-gl { position: absolute; display: none; z-index: 0; pointer-events: none; }
+#ascii-canvas { position: relative; z-index: 1; }
+body.ascii-on #ascii-canvas { background: transparent !important; }

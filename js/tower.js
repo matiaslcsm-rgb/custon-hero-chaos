@@ -583,15 +583,18 @@ function renderTower(level, dt) {
     drawArenaFx(level);
     drawMouseOverlay(level);
     // Niebla: lo no descubierto, negro; lo descubierto fuera de la vista, oscurecido
+    // En el estilo ASCII la niebla va a una máscara de luz aparte (towerAscii.js): oscuro = vacío, no caracteres densos
+    const ascii = asciiOn(), fog = ascii ? asciiShadeBegin() : ctx;
     const x0 = Math.floor(camera.x), y0 = Math.floor(camera.y);
     for (let y = y0; y <= Math.min(ROWS - 1, y0 + viewRows()); y++) for (let x = x0; x <= Math.min(COLS - 1, x0 + viewCols()); x++) {
-        if (!level.explored[y][x]) { ctx.fillStyle = INK.shadow; ctx.fillRect(x * TILE, y * TILE, TILE + 1, TILE + 1); }
-        else if (!canSee(level, x, y)) { ctx.fillStyle = 'rgba(43,33,24,0.5)'; ctx.fillRect(x * TILE, y * TILE, TILE + 1, TILE + 1); }
+        if (!level.explored[y][x]) { fog.fillStyle = ascii ? '#000' : INK.shadow; fog.fillRect(x * TILE, y * TILE, TILE + 1, TILE + 1); }
+        else if (!canSee(level, x, y)) { fog.fillStyle = ascii ? 'rgba(0,0,0,0.55)' : 'rgba(43,33,24,0.5)'; fog.fillRect(x * TILE, y * TILE, TILE + 1, TILE + 1); }
     }
     ctx.restore();
     drawTowerNight(level); // día y noche (towerWorld.js)
+    if (ascii) asciiRender(); else asciiHide(); // de acá en adelante, la interfaz (encima y sin filtro)
     drawUltBanner(screenW() / 2, screenH() * 0.72); // cartel de la definitiva, encima de la niebla (fxSkills.js)
-    drawInkVignette();
+    if (!ascii) drawInkVignette();
     drawObjectiveArrow(level);
     renderTowerMinimap(level);
     drawFloorTitle(level);
