@@ -31,6 +31,7 @@
                     <span class="mh-spacer"></span>
                     <span class="mh-item" id="lives-text" title="Vidas"></span>
                     <span class="mh-item mh-gold" title="Oro">💰 <span id="player-gold">0</span>g</span>
+                    <span class="mh-item mh-essence" id="essence-text" title="Esencia: moneda permanente (no se pierde al morir)"></span>
                     <span class="mh-item" id="points-text" title="Puntos y puesto en el ranking"></span>
                     <button id="map-toggle" title="Agrandar o achicar el mapa (tecla M)">⤢</button>
                     <button id="pause-btn" title="Pausa, tutorial, glosario y opciones (Esc)">⏸</button>
@@ -207,6 +208,7 @@
                 <button class="modal-close" id="codex-close" title="Cerrar (J o Esc)">✕</button>
             </div>
             <p class="subtitle">Llevá la habilidad de una pieza a su nivel máximo y queda dominada para siempre, aunque mueras. Un Herrero la puede imbuir en una pieza sin alma.</p>
+            <div id="codex-upgrades"></div>
             <div class="codex-layout"><div id="codex-list"></div><div id="codex-tooltip"></div></div>
         </div>
     </div>
@@ -221,7 +223,7 @@
             </div>
             <div class="tshop-layout">
                 <div><h4>1. Pieza sin alma</h4><div id="smith-infuse"></div><h4>2. Poder del Códice</h4><div id="smith-powers"></div></div>
-                <div><h4>Vaciar una pieza</h4><p class="subtitle">Pierde su habilidad, conserva nivel y afijos.</p><div id="smith-purge"></div><h4>A la venta</h4><div id="smith-stock"></div></div>
+                <div><h4>Fundir 5 piezas → pieza pura</h4><div id="smith-craft"></div><h4>Vaciar una pieza</h4><p class="subtitle">Pierde su habilidad, conserva nivel y afijos.</p><div id="smith-purge"></div><h4>A la venta</h4><div id="smith-stock"></div></div>
                 <div id="smith-tooltip"></div>
             </div>
         </div>
@@ -421,6 +423,7 @@
     <script src="js/towerBestiary.js"></script>
     <script src="js/towerCodex.js"></script>
     <script src="js/towerTelegraph.js"></script>
+    <script src="js/towerCraft.js"></script>
     <script src="js/towerNotebook.js"></script>
     <script src="js/inkart.js"></script>
     <script src="js/ui.js"></script>

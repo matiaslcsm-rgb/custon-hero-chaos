@@ -1867,6 +1867,49 @@ test('Torre: los jefes tienen 3 fases (rugido, ayudantes y definitiva)', () => {
     check(towerCreepTelegraph(g) && L.telegraphs.length >= before + 8, 'tira su definitiva (lluvia de zonas)');
 }, { random: true });
 
+test('Torre: Esencia, fundir 5 piezas en una pura con calidad y la garantía de subir de calidad', () => {
+    newTower();
+    codex = { unlocked: {}, best: {} };
+    const L = player.arena;
+    gainEssence(50);
+    checkEq(essence(), 50, 'la Esencia se acumula');
+    // 4 guantes no alcanzan
+    player.bag = [];
+    for (let i = 0; i < 4; i++) addToBag(player, makeBlankItem(1, 'gloves', 'normal'));
+    check(!craftPure(player, 'gloves'), 'con 4 no se funde');
+    addToBag(player, makeBlankItem(1, 'gloves', 'normal'));
+    const pure = craftPure(player, 'gloves');
+    check(pure && pure.crafted && pure.blank && pure.slot === 'gloves', 'con 5 sale una pieza pura de esa ranura');
+    checkEq(essence(), 50 - CRAFT.cost, 'cobra la Esencia');
+    checkEq(player.bag.length, 1, 'se funden las 5');
+    check(pure.affixes.length === CRAFT_QUALITY[pure.craftTier].affixes, 'afijos según la calidad');
+    // La garantía (idea del usuario): con una fabricada entre las 5, sale una calidad más arriba
+    for (let k = 0; k < 20; k++) {
+        player.bag = []; gainEssence(CRAFT.cost);
+        const roma = makePureItem(1, 'boots', 0); addToBag(player, roma);
+        for (let i = 0; i < 4; i++) addToBag(player, makeBlankItem(1, 'boots', 'normal'));
+        check(craftPure(player, 'boots').craftTier >= 1, 'roma + 4 → al menos usada');
+    }
+    const master = makePureItem(1, 'armor', 3);
+    check(master.masterwork && /Obra Maestra/.test(master.name), 'obra maestra');
+    check(itemMods(master).maxHp > itemMods(makePureItem(1, 'armor', 0)).maxHp, 'mejor calidad, más stats base');
+    checkEq(makePureItem(1, 'gloves', 0).name.split(' ')[1], 'Romos', 'el adjetivo concuerda (Guantes Romos)');
+    // Obra maestra: lo imbuido arranca en nivel 2
+    codex.unlocked.AXE_GIRO = { floor: 1 }; player.gold = 9999;
+    const e = codexEntry('AXE_GIRO'), mw = makePureItem(1, e.slot, 3); addToBag(player, mw);
+    check(infuseItem(player, mw, 'AXE_GIRO') && mw.skillLevel === 2, 'obra maestra: la habilidad imbuida arranca en nivel 2');
+    // Esencia de los jefes
+    const before = essence(); essenceOnKill(L, L.guardian);
+    checkEq(essence() - before, ESSENCE.guardian(L.floor), 'el guardián da Esencia');
+    // Mejoras permanentes
+    codex.essence = 300;
+    check(buyUpgrade('bag') && upgradeLevel('bag') === 1, 'compra una mejora');
+    check(!buyUpgrade('bag'), 'no se compra dos veces');
+    newTower();
+    checkEq(BAG.rows, BASE_BAG_ROWS + 1, 'la run nueva arranca con la bolsa más grande');
+    codex = { unlocked: {}, best: {} }; BAG.rows = BASE_BAG_ROWS;
+}, { random: true });
+
 test('Ancla: cada golpe ralentiza y quita evasión', () => {
     newGame('AXE');
     const ev = effEvasion(player);

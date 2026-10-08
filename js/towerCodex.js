@@ -23,7 +23,7 @@ const CODEX_KEY = 'chc-codex';
 
 // --- EL CÓDICE (persistente) ---
 function codexLoad() {
-    try { const raw = localStorage.getItem(CODEX_KEY); if (raw) { const c = JSON.parse(raw); if (c && c.unlocked) return { unlocked: c.unlocked, best: c.best || {} }; } } catch (e) { /* sin almacenamiento */ }
+    try { const raw = localStorage.getItem(CODEX_KEY); if (raw) { const c = JSON.parse(raw); if (c && c.unlocked) return { unlocked: c.unlocked, best: c.best || {}, essence: c.essence || 0, upgrades: c.upgrades || {} }; } } catch (e) { /* sin almacenamiento */ }
     return { unlocked: {}, best: {} };
 }
 let codex = codexLoad();
@@ -57,6 +57,7 @@ function codexCheckItem(hero, item) {
     if (towerRun) towerRun.stats.codex = (towerRun.stats.codex || 0) + 1;
     log(`📜 ¡Dominaste ${e.skill.name}! Queda en tu Códice para siempre (J): un Herrero puede imbuirlo en una pieza sin alma.`);
     if (fxArena(hero)) fxText(hero, '¡PODER DOMINADO!', '#c9a227', 15, 1.6);
+    gainEssence(ESSENCE.mastery, 'poder dominado'); // towerCraft.js
     sfx('levelup');
 }
 
@@ -73,8 +74,10 @@ function makeBlankItem(floor = 1, slot = pickRandom(CODEX.blankSlots), quality =
 // Nombre según su estado: "Coraza Feroz sin alma" / "Coraza Feroz ✦ Rayo Relámpago"
 function nameTowerItem(item) {
     const prefix = item.affixes.find(a => !a.name.startsWith('del '));
-    const base = `${SLOT_NOUNS[slotKind(item.slot)]}${prefix && item.quality !== 'normal' ? ' ' + prefix.name : ''}`;
-    item.name = item.blank ? `${base} sin alma` : `${base} ✦ ${itemSkill(item).name}`;
+    const s = slotKind(item.slot);
+    const base = item.crafted ? `${SLOT_NOUNS[s]} ${CRAFT_QUALITY[item.craftTier].adj[SLOT_GENDER[s]]}` // fabricada: Guantes Romos (towerCraft.js)
+        : `${SLOT_NOUNS[s]}${prefix && item.quality !== 'normal' ? ' ' + prefix.name : ''}`;
+    item.name = item.blank ? (item.crafted ? base : `${base} sin alma`) : `${base} ✦ ${itemSkill(item).name}`;
     return item;
 }
 // Botín: a veces sale una pieza sin alma en vez de una con habilidad
@@ -83,7 +86,7 @@ function lootItem(floor, quality = rollQuality(floor)) {
 }
 
 // --- EL HERRERO ---
-function infuseCost(floor) { return Math.round(CODEX.infuseCost.base * (1 + CODEX.infuseCost.perFloor * (floor - 1))); }
+function infuseCost(floor) { return Math.round(CODEX.infuseCost.base * (1 + CODEX.infuseCost.perFloor * (floor - 1)) * (1 - 0.25 * upgradeLevel('infuse'))); } // mejora permanente (towerCraft.js)
 function purgeCost(floor) { return CODEX.purgeCost.base * floor; }
 function heroPieces(hero) { return EQUIP_SLOTS.map(s => hero.gear[s]).filter(Boolean).concat(hero.bag.map(b => b.item)); }
 function equippedSlotOf(hero, item) { return EQUIP_SLOTS.find(s => hero.gear[s] === item) || null; }
@@ -95,7 +98,7 @@ function infuseItem(hero, item, entryId, floor = towerRun ? towerRun.floor : 1) 
     const slot = equippedSlotOf(hero, item);
     if (slot) unequipSlot(hero, slot, false);
     hero.gold -= cost;
-    Object.assign(item, { blank: false, infused: true, heroKey: e.heroKey, skillId: e.skillId, innateId: e.innateId, skillLevel: 1, boosts: {} });
+    Object.assign(item, { blank: false, infused: true, heroKey: e.heroKey, skillId: e.skillId, innateId: e.innateId, skillLevel: item.masterwork && !e.innateId ? 2 : 1, boosts: {} }); // obra maestra: arranca en nivel 2
     nameTowerItem(item);
     if (slot) { hero.bag = hero.bag.filter(b => b.item !== item); hero.gear[slot] = null; equipItem(hero, item, slot); }
     log(`⚒️ El Herrero imbuyó ${e.skill.name} en ${item.name} (-${cost}g).`); sfx('levelup');
@@ -119,7 +122,7 @@ function purgeItem(hero, item, floor = towerRun ? towerRun.floor : 1) {
 // Herrero del pueblo: posición y mercadería (lo decide la generación del piso)
 function placeTownSmith(level) {
     const miss = towerRun ? towerRun.smithless || 0 : 0;
-    const has = miss >= 1 || Math.random() < CODEX.smithChance;
+    const has = miss >= 1 || Math.random() < CODEX.smithChance || (level.floor === 1 && upgradeLevel('smith1')); // mejora permanente
     if (towerRun) towerRun.smithless = has ? 0 : miss + 1;
     if (has) openTownSmith(level);
 }
@@ -167,7 +170,8 @@ function toggleSmith(open = !smithOpen) {
 function renderSmith() {
     if (!smithOpen) return;
     const level = player.arena, s = level.town.smith, tip = document.getElementById('smith-tooltip'), floor = level.floor;
-    document.getElementById('smith-gold').textContent = `💰 ${player.gold}g`;
+    document.getElementById('smith-gold').textContent = `💰 ${player.gold}g · ✦ ${essence()}`;
+    renderCraft(); // fundir 5 piezas (towerCraft.js)
     const hover = item => { tip.innerHTML = item ? itemTooltipHtml(item) : '<span class="subtitle">Elegí una pieza sin alma y después el poder del Códice que querés imbuirle.</span>'; };
     const row = (item, label, price, can, act, picked = false) => {
         const el = document.createElement('div'); el.className = 'tshop-row' + (picked ? ' picked' : '');
@@ -228,6 +232,7 @@ function toggleCodex(open = !codexOpen) {
     if (open) renderCodex();
 }
 function renderCodex() {
+    renderUpgrades(); // Esencia y mejoras permanentes (towerCraft.js)
     const all = codexEntries(), n = all.filter(e => codexUnlocked(e.id)).length;
     document.getElementById('codex-count').textContent = `${n}/${all.length} dominados`;
     const box = document.getElementById('codex-list'), tip = document.getElementById('codex-tooltip');

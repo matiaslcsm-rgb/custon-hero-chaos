@@ -676,6 +676,7 @@ function updateHud() {
     if (!player) return;
     renderHeroStats();
     document.getElementById('player-gold').textContent = player.gold;
+    document.getElementById('essence-text').textContent = gameMode === 'tower' ? `✦ ${essence()}` : '';
     document.getElementById('round-num').textContent = `${waveNumber}${isRoundBossRound() ? ' 👹' : ''}`; // sin límite fijo: hasta que quede uno
     document.getElementById('pause-btn').style.visibility = canPause() ? 'visible' : 'hidden';
     document.getElementById('lives-text').innerHTML = `<span class="hearts">${'♥'.repeat(Math.max(0, player.lives))}${'♡'.repeat(Math.max(0, 2 - player.lives))}</span>` +

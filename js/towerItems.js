@@ -143,7 +143,7 @@ function itemSkill(item) {
 function itemMods(item) {
     const mods = {};
     const add = (k, v) => { mods[k] = round1((mods[k] || 0) + v); };
-    if (SLOT_STATS[slotKind(item.slot)]) Object.entries(SLOT_STATS[slotKind(item.slot)](item.level)).forEach(([k, v]) => add(k, v));
+    if (SLOT_STATS[slotKind(item.slot)]) Object.entries(SLOT_STATS[slotKind(item.slot)](item.level)).forEach(([k, v]) => add(k, v * (item.craftMult || 1))); // craftMult: calidad de fabricación (towerCraft.js)
     item.affixes.forEach(a => add(a.key, a.value));
     if (item.innateId && INNATE_STATS[item.innateId]) Object.entries(INNATE_STATS[item.innateId]).forEach(([k, v]) => add(k, v));
     Object.entries(item.statBoosts || {}).forEach(([k, v]) => { if (k !== 'weaponAtk') add(k, v); }); // el daño del arma va al ataque
@@ -444,7 +444,7 @@ function dropOnFloor(hero, item, x = hero.x, y = hero.y) {
 function towerLootOnKill(level, c, killer) {
     if (!killer || !killer.isHero) return;
     if (c.carrier) carrierDrops(level, c); // el portador suelta tu equipo (towerWorld.js)
-    if (towerRun && killer === player) { const s = towerRun.stats; s.kills++; s.gold += c.gold || 0; if (c.champion) s.champions++; if (c.isGuardian) s.guardians++; }
+    if (towerRun && killer === player) { const s = towerRun.stats; s.kills++; s.gold += c.gold || 0; if (c.champion) s.champions++; if (c.isGuardian) s.guardians++; essenceOnKill(level, c); } // Esencia (towerCraft.js)
     if (c.isGuardian) { for (let i = 0; i < LOOT.guardianDrops; i++) level.drops.push({ x: c.x, y: c.y, item: makeTowerItem(level.floor, undefined, i === 0 ? 'rare' : rollQuality(level.floor)) }); return; }
     if (c.champion) { if (Math.random() < CHAMPION.dropChance) level.drops.push({ x: c.x, y: c.y, item: lootItem(level.floor, Math.random() < 0.3 ? 'rare' : 'magic') }); return; }
     if (Math.random() < LOOT.creepChance * (c.isChestGuard ? 0 : 1) * (towerIsNight() ? DAYNIGHT.nightLoot : 1) * (1 + CAVE.lootPerDepth * (level.depth || 0))) level.drops.push({ x: c.x, y: c.y, item: lootItem(level.floor + (level.depth || 0)) }); // a veces sin alma (towerCodex.js)

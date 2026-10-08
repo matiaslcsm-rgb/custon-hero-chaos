@@ -41,6 +41,7 @@ function startTowerRun() {
     gameMode = 'tower';
     player = new Hero(ADVENTURER);
     giveTowerGear(player);
+    applyMetaUpgrades(player); // mejoras permanentes compradas con Esencia (towerCraft.js)
     applyGear(player);
     player.ownerName = playerName();
     player.displayName = `${player.name} (${player.ownerName})`;
@@ -446,7 +447,7 @@ function towerInfoHtml() {
 function towerChronicleHtml() {
     const s = towerRun.stats, min = Math.floor((gameClock - towerRun.startedAt) / 60);
     return `<p class="subtitle tower-chronicle">📜 <b>Crónica</b> · ${min} min · mejor piso ${s.bestFloor} · ${towerRun.deaths} muerte${towerRun.deaths === 1 ? '' : 's'} · ` +
-        `${s.kills} bajas (${s.champions} campeones, ${s.guardians} guardianes) · ${s.shrines} santuarios${s.events ? ` · ${s.events} eventos` : ''}${s.codex ? ` · 📜 ${s.codex} poderes dominados` : ''}${towerRun.reactions ? ` · ${Object.values(towerRun.reactions).reduce((a, b) => a + b, 0)} reacciones` : ''}${s.deepest ? ` · cueva más honda −${s.deepest}` : ''} · ${s.gold}g ganados</p>`;
+        `${s.kills} bajas (${s.champions} campeones, ${s.guardians} guardianes) · ${s.shrines} santuarios${s.events ? ` · ${s.events} eventos` : ''}${s.essence ? ` · ✦ ${s.essence} de Esencia` : ''}${s.crafted ? ` · ${s.crafted} piezas fundidas` : ''}${s.codex ? ` · 📜 ${s.codex} poderes dominados` : ''}${towerRun.reactions ? ` · ${Object.values(towerRun.reactions).reduce((a, b) => a + b, 0)} reacciones` : ''}${s.deepest ? ` · cueva más honda −${s.deepest}` : ''} · ${s.gold}g ganados</p>`;
 }
 
 // Baldosas del nivel (se dibujan una vez y se reutilizan): 4 pisos de piedra, pared de frente y pared de arriba.

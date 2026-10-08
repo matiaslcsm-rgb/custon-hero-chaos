@@ -719,3 +719,9 @@ body.tower-layout { align-items: flex-start; }
 body.tower-layout #app, body.tower-layout #view-game, body.tower-layout #game-container { width: 100%; box-sizing: border-box; }
 body.tower-layout #game-container { border: none; box-shadow: none; }
 body.tower-layout #map-hud .mh-item:first-child, body.tower-layout #lives-text, body.tower-layout #points-text, body.tower-layout #map-toggle { display: none; }
+
+/* Esencia y fabricación (towerCraft.js) */
+.mh-essence { color: #7b2cbf; font-weight: bold; }
+#codex-upgrades { margin-bottom: 10px; }
+#codex-upgrades h4 { color: #7b2cbf; margin: 4px 0; }
+#codex-upgrades small, #smith-craft small { color: #5e5444; }

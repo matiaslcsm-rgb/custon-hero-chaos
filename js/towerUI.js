@@ -66,6 +66,7 @@ function itemTooltipHtml(item) {
             `<div>${skill.isInnateItem ? skill.description.replace(/^Innato:\s*/, '') : describeSkill(skill, lvl)}</div></div>`;
     }
     if (forged.length) html += `<div class="tt-forged">⚒ Forjado: ${forged.join(' · ')}</div>`;
+    if (item.crafted) html += `<div class="tt-forged">⚒ Fabricada: calidad ${CRAFT_QUALITY[item.craftTier].name} (stats base ×${item.craftMult})${item.masterwork ? ' · <b>Maestría</b>: la habilidad que le imbuyas arranca en nivel 2' : ''}.</div>`;
     if (item.blank) html += `<div class="tt-forged">Sin alma: no trae habilidad (por eso tiene un afijo de más). Un Herrero puede imbuirle un poder de tu Códice (J).</div>`;
     if (item.infused) html += `<div class="tt-forged">✦ Imbuida por el Herrero.</div>`;
     return html;
@@ -265,7 +266,8 @@ function renderTowerShop() {
 function aiTowerShop(hero) {
     const level = hero.arena;
     if (!level || !level.town || !heroInTown(hero)) return;
-    aiSmith(hero); // antes de vender: las piezas sin alma se imbuyen (towerCodex.js)
+    aiCraft(hero); // antes de vender: funde de a 5 (towerCraft.js)
+    aiSmith(hero); // y las piezas sin alma se imbuyen (towerCodex.js)
     if (level.town.aiShopped) return;
     level.town.aiShopped = true;
     const rank = { normal: 0, magic: 1, rare: 2 };

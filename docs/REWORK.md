@@ -132,6 +132,25 @@ manejar tanto.
 - **Planos:** algunas piezas (armaduras con nombre, sets) se desbloquean como plano en la Bitácora y después se
   fabrican. Así cada jugador va juntando las armaduras y habilidades que le interesan.
 
+**Hecho (fase 5, 2026-10-07, `js/towerCraft.js`):**
+- **Esencia ✦** (permanente, se guarda con el Códice y no se pierde al morir): guardián del piso 10 + 2×piso, señor de
+  la cueva 8 + 2×profundidad, guardián maldito 6, campeón 1 (25% de las veces) y 5 por cada poder dominado. Se ve en
+  la franja de arriba, al lado del oro.
+- **Fundir en el Herrero** (idea del usuario): 5 piezas de la misma ranura de la bolsa + 15 ✦ → una **pieza pura**
+  (sin alma) de esa ranura con calidad al azar: **Roma** (stats base ×0,8, 1 afijo), **Usada** (×1, 2), **Nueva**
+  (×1,2, 3) u **Obra maestra** (×1,4, 4 afijos y **Maestría**: la habilidad que le imbuyas arranca en nivel 2). Las
+  chances base son 45/35/17/3% y mejoran con la calidad de lo que entregás. **Garantía:** si entre las 5 va una
+  pieza ya fabricada, el resultado sale sí o sí una calidad por encima de la mejor fabricada (Roma + 4 → al menos
+  Usada), así se sube escalón por escalón. El Herrero muestra las chances y la garantía antes de fundir. Los
+  números están en la tabla `CRAFT_QUALITY` para ajustarlos después.
+- **Mejoras permanentes** (en el Códice, J): Herrero en el piso 1 (100 ✦), Imbuir −25% por nivel (80 y 160),
+  Arrancar con una pieza pura Usada (150) y +1 fila de bolsa (250).
+- **Medido:** Espada 120 min/2 muertes, Bastón 100/8 (el balance de la run no cambia). Con 1 ✦ por campeón una run
+  daba ~470-510 ✦ y se compraba todo en la primera; bajado a 25% de chance y mejoras más caras (total 740 ✦): medido
+  de nuevo, una run da ~290 ✦, así que se completan en 2-3 runs.
+- Decisión mía (reversible): las piezas a fundir salen de la bolsa, no de lo equipado, y el Herrero elige cuáles (la
+  mejor fabricada, para la garantía, y después las de menor calidad).
+
 ## 5. Pantalla, cámara y menús
 - **Más pantalla de juego:** el HUD pasa a los bordes y se achica. Abajo al centro: vida, maná, las 3 habilidades y el
   esquive. Arriba a la izquierda: piso, bioma y objetivo. El registro de mensajes se abre con una tecla (antes estaba

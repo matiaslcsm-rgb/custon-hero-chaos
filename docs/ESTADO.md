@@ -115,6 +115,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   (chocaba con el Proyectil Arcano del Arcanista).
 - **Fase 4 del rework (2026-10-07):** ataques anunciados, jefes con 3 fases y definitiva, barra de jefe abajo, piloto que
   esquiva y freno a la espiral de muertes. La Torre volvió a ~105-168 min (REWORK.md §3).
+- **Fase 5 del rework (2026-10-07):** Esencia permanente, fundir 5 piezas en una pura con calidad (roma, usada, nueva,
+  obra maestra) y la garantía de subir de calidad (idea del usuario), y mejoras permanentes en el Códice (REWORK.md §4).
 - **Motor (decidido 2026-10-06):** seguimos en canvas + JavaScript puro. Pasar a un motor (Phaser para seguir en el
   navegador, Godot para publicar en PC/celular) se decide cuando el contenido de Tower Chaos esté más cerrado.
 - **Balance en curso (2026-09-28):** jefes más suaves desde la ronda 20 + Kaya y Cetro del Eclipse (ver DISEÑO.md §9 bis).
