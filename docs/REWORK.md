@@ -234,21 +234,23 @@ el mismo paso; lo grande queda acá, ordenado por impacto.
 - ✅ La forja ya no corta una pelea: si una pieza sube de nivel peleando aparece un aviso arriba a la izquierda, y la
   ventana se abre sola cuando nadie te persigue.
 - ✅ Pausa en tinta: los interruptores pasaron al estilo pergamino y el cartel del piso no tapa la ventana.
+- ✅ **Barra del héroe compacta** (estilo Hades): placa de pergamino abajo al centro, encima del mapa, con retrato y
+  nivel, vida y maná finitas, Q/E/R con ícono grande y el **esquive (ESP) con su recarga** (antes no se veía); los
+  estados activos van en chips arriba de la placa. Pasivas y equipo, en sus ventanas. El mapa ganó ~150 px de alto y
+  la barra del jefe sube para no chocar.
 - ✅ (antes) Pantalla grande con zoom, mensajes flotantes, aviso de puntos para repartir y barra del jefe abajo.
 
 **Pendiente (de más a menos impacto):**
-1. **Barra del héroe más compacta en la Torre**: retrato chico, vida y maná finitas, las 3 habilidades y el esquive con
-   su enfriamiento sobre el mapa (estilo Hades), y la Esencia ahí. Libera ~120 px de mapa.
-2. **Comparar con lo equipado** en el detalle de cada pieza: lo que gana o pierde, en verde y rojo (como Diablo).
-3. **Mapa del piso a pantalla completa (M)** en la Torre, con leyenda: pueblo, herrero, santuarios, cuevas, eventos,
+1. **Comparar con lo equipado** en el detalle de cada pieza: lo que gana o pierde, en verde y rojo (como Diablo).
+2. **Mapa del piso a pantalla completa (M)** en la Torre, con leyenda: pueblo, herrero, santuarios, cuevas, eventos,
    tus restos y el portador.
-4. **Elegir a mano las 5 piezas a fundir** en el Herrero (hoy las elige él).
-5. **Reasignar teclas** desde la pausa.
-6. **Accesibilidad:** otros colores para las zonas de ataque (para daltonismo), tamaño de los números de daño y escala
+3. **Elegir a mano las 5 piezas a fundir** en el Herrero (hoy las elige él).
+4. **Reasignar teclas** desde la pausa.
+5. **Accesibilidad:** otros colores para las zonas de ataque (para daltonismo), tamaño de los números de daño y escala
    de la interfaz.
-7. **Filtro de botín**: no levantar piezas normales, o marcarlas para vender.
-8. **El Cuaderno explica lo nuevo** la primera vez: el Herrero, la Esencia, la fundición y los ataques anunciados.
-9. **Música en el menú y en Custom Hero Chaos.**
+6. **Filtro de botín**: no levantar piezas normales, o marcarlas para vender.
+7. **El Cuaderno explica lo nuevo** la primera vez: el Herrero, la Esencia, la fundición y los ataques anunciados.
+8. **Música en el menú y en Custom Hero Chaos.**
 
 ## Decisiones tomadas (2026-10-07)
 - **Estilo ASCII descartado:** se probó un filtro que convertía el mundo en caracteres (referencia: el MMORPG ASCII de

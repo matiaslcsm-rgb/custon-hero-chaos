@@ -559,6 +559,8 @@ function renderHeroBar() {
         cd.textContent = left > 0 ? left.toFixed(left < 10 ? 1 : 0) : '';
         slot.classList.toggle('no-mana', skillLevel(p, s) > 0 && p.mana < (val(s, p, 'manaCost') || 0));
     });
+    const dash = document.getElementById('hb-dash');
+    if (dash) { const left = Math.max(0, (p.dashReadyAt || 0) - gameClock), cd = dash.querySelector('.cd'); cd.style.height = `${Math.min(100, left / DASH.cooldown * 100)}%`; cd.textContent = left > 0 ? left.toFixed(1) : ''; }
     const effects = activeEffects(p).filter(e => !e.flags.includes('item') && !e.flags.includes('passive'));
     const effSig = effects.map(e => e.id + (isFinite(e.until) ? Math.ceil(e.until - gameClock) : '')).join('|');
     const effBox = document.getElementById('hb-effects');
@@ -606,6 +608,14 @@ function renderHeroBar() {
             `<span class="pips">${Array.from({ length: max }, (_, j) => `<i class="${j < lvl ? 'on' : ''}"></i>`).join('')}</span><div class="cd"></div>`;
         const btn = gameMode === 'tower' ? null : levelButton(s); if (btn) slot.appendChild(btn); // en la Torre las habilidades suben forjando
         skills.appendChild(slot);
+    }
+    if (gameMode === 'tower') { // el esquive también se ve, con su recarga (fxSkills.js)
+        const d = document.createElement('div');
+        d.className = 'skill-slot dash-slot'; d.id = 'hb-dash';
+        d.title = `Esquive (Espacio)
+${DASH.tiles} casillas, invulnerable ${DASH.iframes}s, recarga ${DASH.cooldown}s. Si tenés una habilidad de movilidad en el espacio, sale esa primero.`;
+        d.innerHTML = `<img class="ink-skill-icon" src="${inkIcon('mobility', '#2b2118')}"><span class="key">ESP</span><span class="nm">Esquive</span><div class="cd"></div>`;
+        skills.appendChild(d);
     }
 
     // Innato y pasivas: chips (las pasivas drafteadas también se suben con [+])

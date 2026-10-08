@@ -162,7 +162,8 @@ function drawTowerTelegraphs(level) {
 
 // Barra del jefe abajo al centro (estilo Hades): nombre, vida y las marcas de las fases
 function drawBossBar(g) {
-    const W = screenW(), bw = Math.min(620, W * 0.55), bx = (W - bw) / 2, by = screenH() - 40;
+    const hud = document.getElementById('hero-bar'), lift = towerLayout && hud && hud.offsetHeight ? hud.offsetHeight + 18 : 0; // arriba de la barra del héroe
+    const W = screenW(), bw = Math.min(620, W * 0.55), bx = (W - bw) / 2, by = screenH() - 40 - lift;
     ctx.fillStyle = 'rgba(233,220,192,0.94)'; ctx.fillRect(bx - 10, by - 22, bw + 20, 38);
     ctx.strokeStyle = INK.line; ctx.lineWidth = 2; ctx.strokeRect(bx - 10, by - 22, bw + 20, 38);
     ctx.font = 'bold 13px Georgia, serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#6b2a1f';

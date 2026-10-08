@@ -737,3 +737,33 @@ body.ink-theme .pm-toggle.on { border-color: #2d6a4f; }
 body.ink-theme .pm-toggle.on span { color: #2d6a4f; }
 body.ink-theme .pm-toggle:hover { border-color: #6b2a1f; }
 body.paused #center-timer { display: none !important; }
+
+/* Tower Chaos: barra del héroe compacta encima del mapa, abajo al centro (estilo Hades; REWORK.md, interfaz) */
+body.tower-layout #center-col { position: relative; }
+body.tower-layout #hero-bar { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); z-index: 6;
+    grid-template-columns: 50px 210px auto; grid-template-areas: "portrait name skills" "portrait hp skills" "portrait mana skills";
+    column-gap: 10px; row-gap: 2px; align-items: center; padding: 6px 10px; width: auto;
+    background: rgba(241,231,208,0.93); border: 2px solid #2b2118; box-shadow: 0 4px 0 #1d1712, 0 8px 18px rgba(0,0,0,0.45); }
+body.tower-layout #hb-main, body.tower-layout #hb-side { display: contents; }
+body.tower-layout #hb-portrait { grid-area: portrait; gap: 1px; }
+body.tower-layout #hb-symbol { width: 44px; height: 44px; }
+body.tower-layout #hb-symbol img.ink-portrait { width: 40px; height: 40px; }
+body.tower-layout #hb-xp { width: 44px; }
+body.tower-layout #hb-level { font-size: 0.68rem; }
+body.tower-layout #hb-name-line { grid-area: name; font-size: 0.72rem; }
+body.tower-layout #hb-stats, body.tower-layout #hb-passives, body.tower-layout #hb-side .hb-title, body.tower-layout #hb-slots { display: none; }
+body.tower-layout .hb-bar.hp { grid-area: hp; height: 12px; }
+body.tower-layout .hb-bar.hp span { line-height: 12px; }
+body.tower-layout .hb-bar.mana { grid-area: mana; height: 8px; }
+body.tower-layout .hb-bar.mana span { line-height: 8px; font-size: 0.55rem; }
+body.tower-layout #hb-skills { grid-area: skills; grid-template-columns: repeat(4, 54px); gap: 6px; margin: 0; }
+body.tower-layout .skill-slot { height: 54px; padding: 0; align-items: center; justify-content: center; }
+body.tower-layout .skill-slot .ink-skill-icon { left: 50%; top: 46%; transform: translate(-50%, -50%); width: 34px; height: 34px; }
+body.tower-layout .skill-slot .nm { display: none; }
+body.tower-layout .skill-slot .key { position: absolute; left: 3px; top: 1px; font-size: 0.7rem; background: rgba(241,231,208,0.85); padding: 0 2px; }
+body.tower-layout .skill-slot .pips { position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%); }
+body.tower-layout .skill-slot .pips i { width: 6px; }
+body.tower-layout .skill-slot.empty { font-size: 0.6rem; }
+body.tower-layout .dash-slot { border-style: double; border-width: 3px; }
+body.tower-layout #hb-effects { position: absolute; left: 0; right: 0; bottom: calc(100% + 6px); display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; pointer-events: none; }
+body.tower-layout #hb-effects .fx-chip { background: rgba(241,231,208,0.9); border: 1px solid #2b2118; color: #2b2118; font-size: 0.62rem; padding: 0 4px; }

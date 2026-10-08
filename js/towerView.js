@@ -28,7 +28,8 @@ function fitTowerCanvas() {
     if (!towerLayout) { applyMapSize(); return; }
     const col = document.getElementById('center-col'), hud = document.getElementById('map-hud'), bar = document.getElementById('hero-bar');
     const w = Math.max(480, Math.floor(col.clientWidth - 6));
-    const h = Math.max(320, Math.floor(window.innerHeight - hud.offsetHeight - (bar.style.display === 'none' ? 0 : bar.offsetHeight) - 46));
+    const overlay = getComputedStyle(bar).position === 'absolute'; // la barra compacta va encima del mapa (style.css)
+    const h = Math.max(320, Math.floor(window.innerHeight - hud.offsetHeight - (bar.style.display === 'none' || overlay ? 0 : bar.offsetHeight) - 46));
     VIEW.w = w; VIEW.h = h;
     const k = window.devicePixelRatio || 1;
     canvas.width = Math.round(w * k); canvas.height = Math.round(h * k);
