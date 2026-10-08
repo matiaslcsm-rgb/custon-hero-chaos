@@ -27,7 +27,14 @@ const TOWER = {
     // Stats fijos por nivel de creep (vida y daño ×) y experiencia (×)
     creepMult: level => 1 + 0.78 * (level - 1), // con el mapa de 220×150 y el bestiario generado, 0,7 quedaba fácil (0-6 muertes) // 0,4 → 0,7 en la revisión de diseño (medido: 0,4-0,55 ganaba en ~60 min con 0-2 muertes; 0,8 llegaba a 15-24 muertes)
     xpMult: level => 1 + 0.3 * (level - 1),
-    guardianMult: floor => 0.35 * (1 + 0.75 * (floor - 1))
+    guardianMult: floor => 0.35 * (1 + 0.75 * (floor - 1)),
+    // Daño extra de los enemigos (no jefes) desde el piso 4 (2026-10-08): con los avisos, los campeones más justos y los
+    // restos que se suman, el piloto con reflejos humanos terminaba en 82-117 min con 1 muerte cada 6 partidas.
+    // Medido: +12% de daño desde el piso 4 no alcanzaba (106 min, 0 muertes), ni +22% daño/+15% vida (73-81 min): el héroe
+    // crece mucho más rápido que los enemigos (del piso 1 al 5, su ataque ×14 y su vida ×9; la vida de un creep, ×5).
+    // Ahora crece parejo con cada piso: piso 10, +54% de vida y el doble de daño (con +90% de vida: 209 min, 5 muertes; con +36% o +63% de daño: 80-160 min pero 0 muertes y la vida del héroe casi nunca bajaba del 50%). El piso 1 no cambia.
+    danger: floor => 1 + 0.12 * (floor - 1),
+    dangerHp: floor => 1 + 0.06 * (floor - 1)
 };
 
 let gameMode = 'normal'; // 'normal' | 'tower'
@@ -289,6 +296,11 @@ function updateTower(dt) {
     // Creeps: solo se mueven los que te vieron (radio de alerta); te sueltan si te alejás mucho de su lugar
     level.creeps.forEach(c => {
         if (!c.isAlive()) return;
+        if (c.dangerMult === undefined) { // daño (effAttack, effects.js) y vida extra por piso, una sola vez
+            const boss = c.isGuardian || c.isCaveBoss || c.isRoot;
+            c.dangerMult = boss ? 1 : TOWER.danger(level.floor);
+            if (!boss) { const k = TOWER.dangerHp(level.floor); c.maxHp = Math.round(c.maxHp * k); c.hp = Math.round(c.hp * k); }
+        }
         unstickFromWall(c);
         const d = Math.hypot(c.x - player.x, c.y - player.y);
         if (!c.aggro && !safe && player.isAlive() && d <= TOWER.aggroRadius && canSee(level, c.x, c.y)) { c.aggro = true; alertPack(level, c); noteBeastSeen(c.type); } // te tienen que ver

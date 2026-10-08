@@ -384,6 +384,28 @@ Path of Exile:
   pegándole sin parar; su ícono se apaga mientras está cortado) y ya no sale junto con Blindado ni con Vampírico (la
   pared que se cura sola, de los que más mataban).
 
+## 14. Dificultad: los enemigos crecen con cada piso (2026-10-08)
+Decisión del usuario: subir la dificultad (con el piloto humano, 1 muerte cada 6 partidas y 82-117 min). Medido con el
+piloto de reflejos humanos, 3 partidas por variante (espada, arco, bastón):
+
+| Variante (enemigos comunes; jefes sin cambios) | Minutos | Muertes | Vida mínima del héroe |
+|---|---|---|---|
+| +12% de daño desde el piso 4 | 106 (espada) | 0 | — |
+| +22% de daño y +15% de vida desde el piso 4 | 73-81 | 0 | ≥ 87% en los pisos 7-10 |
+| +4%/piso de daño y +10%/piso de vida | 209 (espada) | 5 (piso 9, campeones) | — |
+| +4%/piso de daño y +6%/piso de vida | 80 · 152 · ~160 | 0 | — |
+| +7%/piso de daño y +6%/piso de vida | 153 · 105 · 115 | 0 | 45% |
+| **+12%/piso de daño y +6%/piso de vida (queda)** | 58 · 93 · 93 | 0 | **6% y 1%** (al borde) |
+
+**Queda:** daño de los enemigos comunes ×(1 + 0,12 × (piso − 1)) (piso 10: ×2,08) y vida ×(1 + 0,06 × (piso − 1))
+(piso 10: ×1,54), en `TOWER.danger`/`TOWER.dangerHp` (tower.js). El piso 1 no cambia; jefes, guardianes y raíces tampoco.
+
+**Lo que aprendimos:** el héroe crece mucho más rápido que los enemigos (del piso 1 al 5, su ataque ×14 y su vida ×9;
+la vida de un creep, ×5) y **la suerte con el botín pesa más que cualquier número de los enemigos**: con los mismos
+valores, una partida dura 58 min y otra 153. Las partidas rápidas suelen terminar con armas de mago raras. El piloto
+ahora queda al borde de morir (1-6% de vida) pero pelea ordenado (de a uno, se aleja a tiempo); una persona va a morir
+más. Próximo paso sugerido: achicar la diferencia entre una partida con suerte y una sin suerte (cuánto suma el botín).
+
 ## Orden propuesto (cada fase jugable y medida)
 1. **Pantalla:** zoom, HUD más chico y menú de pausa con pestañas. Es barato y mejora todo lo que viene después.
 2. **Despertar y tutorial:** cuaderno y las 3 armas (espada, arco y bastón, con su habilidad). ✅ — las 3 armas

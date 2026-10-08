@@ -124,7 +124,7 @@ function everyInterval(unit, key, dt, interval = 1) {
 }
 
 // --- STATS EFECTIVOS (stats base de la unidad + efectos activos) ---
-function effAttack(u) { return u.atk * prodMod(u, 'atkPct') + sumMod(u, 'flatAtk'); }
+function effAttack(u) { return (u.atk * prodMod(u, 'atkPct') + sumMod(u, 'flatAtk')) * (u.dangerMult || 1); } // dangerMult: daño extra de los enemigos de la Torre por piso (tower.js)
 function effAtkSpeed(u) { return u.atkSpeed * (1 + sumMod(u, 'atkSpeedPct')); }
 function effMoveMult(u) { return prodMod(u, 'moveSpeedPct'); }
 function effRange(u) { return u.attackRange * (1 + sumMod(u, 'rangePct')); }

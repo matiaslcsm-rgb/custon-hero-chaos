@@ -1722,6 +1722,16 @@ test('Torre: campeones legibles — cada afijo con ícono y descripción, sin lo
     drawChampionBadges(c, { x: c.x, y: c.y }, level); // dibuja sin romper
 });
 
+test('Torre: los enemigos comunes pegan más y aguantan más con cada piso (no los jefes)', () => {
+    checkEq(TOWER.danger(1), 1, 'piso 1 igual'); checkEq(TOWER.dangerHp(1), 1, 'piso 1 igual');
+    check(TOWER.danger(10) > TOWER.danger(4) && TOWER.dangerHp(10) > TOWER.dangerHp(4), 'crece con cada piso');
+    newTower(); enterTowerFloor(5);
+    const L = player.arena, c = L.creeps.find(o => o.isAlive() && !o.isGuardian);
+    const base = effAttack(c); updateTower(0.01);
+    checkNear(effAttack(c), base * TOWER.danger(5), 'el común pega más');
+    checkEq(L.guardian.dangerMult || 1, 1, 'el jefe no');
+});
+
 test('Torre: el Cuaderno escribe una página sola la primera vez que hacés cada cosa, y no se repite', () => {
     notebookState = { seen: {} };
     newTower(); // startTowerRun() ya escribió WAKE al despertar
