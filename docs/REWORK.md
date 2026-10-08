@@ -45,9 +45,16 @@ real crasheaban en un par de lugares).
 **Hecho (2026-10-07, el Cuaderno, `js/towerNotebook.js`):** tutorial jugado mínimo — 7 páginas (despertar, caminar,
 esquivar, lanzar, primera baja, un cofre, el pueblo) que se escriben solas la primera vez que hacés esa acción, en
 la voz del Aventurero, y quedan guardadas para siempre (no se repiten en runs siguientes, como el Códice). Ventana
-con tecla N o desde la pausa, con las páginas que faltan mostradas como "???". **Falta de esta fase:** la escena
-del despertar en el mundo (hoy es una ventana modal con 3 cartas, no 3 armas clavadas en el piso que camines a
-buscar). La unión del Cuaderno con el Códice y el Bestiario en una sola Bitácora (§6) queda para más adelante.
+con tecla N o desde la pausa, con las páginas que faltan mostradas como "???". La unión del Cuaderno con el Códice y
+el Bestiario en una sola Bitácora (§6) queda para más adelante.
+
+**Hecho (2026-10-08, el despertar en el mundo, `js/towerAwaken.js`):** a pedido ("el inicio es feo"), ya no hay
+ventana: las 3 armas están **clavadas en el borde del círculo de piedra** (izquierda, arriba y derecha, a 2 casillas,
+así desde el centro ninguna queda "a mano" por accidente), brillando, con su nombre encima. Al acercarte aparece un
+cartel de pergamino con el arma, su habilidad y qué hace; **F** (tecla nueva, configurable: "Agarrar") o **clic** la
+agarra, y las otras dos se hunden en la piedra. Sin arma no salís del círculo: el personaje se frena y lo dice. La
+partida ya no espera (se puede pausar, abrir el Cuaderno, caminar): el primer acto del juego es moverse por el mundo,
+como el comienzo de Hades o Death's Door. El piloto agarra la espada solo. Demo: `?demo=tower&at=awaken&near=bow`.
 
 ## 2. Habilidades: menos, más claras y con más identidad
 **Problema:** hoy podés tener hasta 6 activas más pasivas de 8 piezas. Es confuso, y a mano (estilo Hades) no se puede
@@ -274,8 +281,8 @@ la medición de arriba contra muñecos.
 ## Orden propuesto (cada fase jugable y medida)
 1. **Pantalla:** zoom, HUD más chico y menú de pausa con pestañas. Es barato y mejora todo lo que viene después.
 2. **Despertar y tutorial:** cuaderno y las 3 armas (espada, arco y bastón, con su habilidad). ✅ — las 3 armas
-   como pedestal obligatorio y el Cuaderno con sus 7 páginas, ver más arriba. Falta solo la escena en el mundo
-   (hoy el despertar es una ventana, no 3 armas clavadas en el piso).
+   como pedestal obligatorio y el Cuaderno con sus 7 páginas, ver más arriba. ✅ La escena en el mundo (2026-10-08):
+   las 3 armas clavadas en el círculo, se camina hasta una y se agarra con F o clic.
 3. **Habilidades:** 3 ranuras (arma/guantes/armadura, sin carga) y el catálogo rediseñado, con control y áreas.
    ✅ **completa (2026-10-07)**: catálogo solo arma/guantes/armadura dan activas, teclas fijas Q/E/R, las
    11 definitivas rebalanceadas como activas comunes vía `towerValues`, el Herrero ya no deja imbuir un poder
@@ -332,6 +339,7 @@ el mismo paso; lo grande queda acá, ordenado por impacto.
 - ✅ **La Q de las armas iniciales se ve y se siente** (2026-10-08): tajos en arco, línea de tiro que se tensa, flechas con
   forma de flecha, puntitos del combo, el remate frena el tiempo; los tiradores avisan con un aro rojo y sus balas son
   siempre del mismo color de peligro.
+- ✅ **Tecla para agarrar (F)**, configurable, con el cartel del arma al acercarte (2026-10-08).
 - Lista al día. Próximas ideas de interfaz cuando aparezcan (se anotan acá).
 - ✅ (antes) Pantalla grande con zoom, mensajes flotantes, aviso de puntos para repartir y barra del jefe abajo.
 

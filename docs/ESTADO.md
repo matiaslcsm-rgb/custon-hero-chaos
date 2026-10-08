@@ -125,6 +125,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   traspasar el 50% del crecimiento de una pieza a otra en el Herrero (REWORK.md §8, con las mediciones). Partidas con
   el piloto: Espada 105 min, Arco 137, Bastón 133, sin muertes. Pendiente: jefes lentos con el piloto (Bruja del Fango
   250-500 s; Gran Raíz Madre 1366 s con bastón porque no corta las raíces).
+- **El despertar en el mundo (2026-10-08):** las 3 armas iniciales clavadas en el círculo de piedra en vez de una
+  ventana; se camina hasta una y se agarra con F (configurable) o clic. Cierra la fase 2 del rework (REWORK.md §1).
 - **Motor (decidido 2026-10-06):** seguimos en canvas + JavaScript puro. Pasar a un motor (Phaser para seguir en el
   navegador, Godot para publicar en PC/celular) se decide cuando el contenido de Tower Chaos esté más cerrado.
 - **Balance en curso (2026-09-28):** jefes más suaves desde la ronda 20 + Kaya y Cetro del Eclipse (ver DISEÑO.md §9 bis).

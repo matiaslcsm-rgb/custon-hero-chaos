@@ -89,6 +89,7 @@ canvas.addEventListener('mousedown', e => {
         return;
     }
     if (e.button === 0 && canControlPlayer()) { // clic izquierdo: marcar un enemigo como objetivo (o desmarcar)
+        if (gameMode === 'tower' && towerClickWeapon(p)) return; // o agarrar un arma del círculo (towerAwaken.js)
         const enemy = enemyUnderCursor(p.x, p.y);
         player.focus = enemy;
         player.focusChase = !!enemy;

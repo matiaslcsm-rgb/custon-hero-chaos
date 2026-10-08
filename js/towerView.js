@@ -91,7 +91,7 @@ function towerControlsText() {
     const K = a => keyName(KEYMAP[a]);
     return `Mover: ${K('up')} ${K('left')} ${K('down')} ${K('right')} (o clic derecho) · Esquive: ${K('dash')} · Habilidades: ${K('skill1')} ${K('skill2')} ${K('skill3')} (salen hacia el cursor) · ` +
         `Objetivo: clic izquierdo · Zoom: rueda o + − · Equipo: ${K('inventory')} · Stats: ${K('stats')} · Códice: ${K('codex')} · Bestiario: ${K('bestiary')} · ` +
-        `Diario del piso: ${K('log')} · Cuaderno: ${K('notebook')} · Tienda o Herrero: ${K('shop')} · Mapa del piso: ${K('map')} · Automáticas: ${K('autocast')} · Piloto: ${K('autopilot')}`;
+        `Diario del piso: ${K('log')} · Cuaderno: ${K('notebook')} · Agarrar: ${K('interact')} · Tienda o Herrero: ${K('shop')} · Mapa del piso: ${K('map')} · Automáticas: ${K('autocast')} · Piloto: ${K('autopilot')}`;
 }
 function towerPauseHtml() {
     const b = (fn, label) => `<button class="secondary-btn" onclick="setPaused(false); ${fn}">${label}</button>`;

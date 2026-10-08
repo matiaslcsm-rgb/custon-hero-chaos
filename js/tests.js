@@ -1390,17 +1390,36 @@ test('Torre: arrancás como aventurero; cada habilidad e innato de cada héroe e
     check(cat.every(e => TOWER_SLOTS[e.slot]), 'ranuras válidas');
 }, { random: true });
 
-test('Torre: al despertar hay que elegir una de las 3 armas; la partida espera y Esc no la cierra', () => {
+test('Torre: al despertar, las 3 armas están clavadas en el círculo; sin arma no salís; F o clic la agarra y las otras se hunden', () => {
     newTower('AXE', { weapon: null });
-    check(weaponPickOpen, 'el panel queda abierto');
-    check(towerModalOpen(), 'la partida espera (como con el inventario o la forja)');
-    handleEscape();
-    check(weaponPickOpen, 'Esc no lo cierra: es obligatorio');
-    setPaused(true);
-    check(!paused, 'tampoco se puede pausar por arriba mientras tanto');
-    chooseStarterWeapon('ADVENTURER_STAFF');
-    check(!weaponPickOpen, 'elegir una cierra el panel');
-    check(!towerModalOpen(), 'la partida sigue');
+    const L = player.arena;
+    check(awaitingWeapon(), 'esperando que agarres una');
+    checkEq(L.starterWeapons.length, 3, 'las 3 clavadas');
+    check(L.starterWeapons.every(w => walkable(L, w.x, w.y) && Math.hypot(w.x - L.start.x, w.y - L.start.y) <= AWAKEN.gate), 'en el círculo, en casillas que se pisan');
+    check(!towerModalOpen(), 'la partida no espera: se camina');
+    // sin arma no se sale del círculo
+    const from = { x: player.x, y: player.y }; player.x = L.start.x + 4; towerAwakenTick(L, from);
+    check(player.x === from.x && player.y === from.y, 'te frena en el borde del círculo');
+    // lejos de todas, F no hace nada
+    player.x = L.start.x; player.y = L.start.y;
+    const bow = L.starterWeapons.find(w => w.key === 'ADVENTURER_BOW');
+    L.starterWeapons.forEach(w => { if (w !== bow) { w.x = L.start.x - 2; w.y = L.start.y - 2; } });
+    bow.x = L.start.x + 2; bow.y = L.start.y + 2; player.x = L.start.x - 2; player.y = L.start.y + 2; // lejos de todas
+    if (!starterWeaponNear()) check(!towerInteract(), 'lejos: nada');
+    player.x = bow.x; player.y = bow.y - 1;
+    checkEq(starterWeaponNear(), bow, 'al lado del arco: lo tenés a mano');
+    check(towerInteract(), 'F lo agarra');
+    check(player.hasSkill('ADVENTURER_VOLLEY') && !awaitingWeapon(), 'con el arco y su habilidad; ya no espera');
+    check(!starterWeaponNear(), 'las otras se hundieron');
+    from.x = player.x; from.y = player.y; player.x = L.start.x + 4; towerAwakenTick(L, from);
+    checkEq(player.x, L.start.x + 4, 'armado, salís');
+    // el clic también, y el piloto agarra la espada solo
+    newTower('AXE', { weapon: null });
+    const st = player.arena.starterWeapons.find(w => w.key === 'ADVENTURER_STAFF'); player.x = st.x; player.y = st.y;
+    check(towerClickWeapon({ x: st.x, y: st.y }) && player.hasSkill('ADVENTURER_BOLT'), 'clic en el bastón');
+    newTower('AXE', { weapon: null });
+    const saved = autopilot; autopilot = true;
+    try { towerAwakenTick(player.arena, { x: player.x, y: player.y }); check(player.hasSkill('ADVENTURER_GOLPE'), 'el piloto agarra la espada'); } finally { autopilot = saved; }
 });
 
 test('Torre: cada arma inicial da su propia habilidad y atributo; cambiar de arma te la saca', () => {

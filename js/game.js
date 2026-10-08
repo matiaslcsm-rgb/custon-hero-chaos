@@ -47,6 +47,7 @@ window.addEventListener('keydown', e => {
     if (tower && act === 'codex') { toggleCodex(); return; }
     if (tower && act === 'log') { toggleTowerLog(); return; }
     if (tower && act === 'notebook') { toggleNotebook(); return; }
+    if (tower && act === 'interact' && !paused && towerInteract()) return; // agarrar un arma del círculo (towerAwaken.js)
     if ((k === '+' || k === '=') && towerLayout) { towerZoom(1); return; }
     if ((k === '-' || k === '_') && towerLayout) { towerZoom(-1); return; }
     if (k === 'escape') { handleEscape(); return; }

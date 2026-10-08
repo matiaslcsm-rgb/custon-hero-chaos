@@ -59,10 +59,10 @@ function startTowerRun() {
     gameState = 'TOWER';
     document.body.classList.add('ink-theme');
     setTowerLayout(true); // mapa a toda la ventana, zoom (towerView.js)
-    log(`🪨 Despertaste en el círculo de piedra de la base, sin nada. No recordás nada, salvo escribir: cada pieza de equipo que encuentres trae la habilidad de un héroe (buscala en cofres y en lo que sueltan los creeps; I: inventario, C: stats). Hay ${TOWER.floors} pisos, cada uno con su bioma, su pueblo y su laberinto.`);
+    log(`🪨 Despertaste en el círculo de piedra de la base, sin nada. No recordás nada, salvo escribir. Hay tres armas clavadas en el piso del círculo: acercate a una y apretá ${keyName(KEYMAP.interact)} (o hacé clic) para agarrarla. Cada pieza de equipo que encuentres después trae la habilidad de un héroe (I: inventario, C: stats). Hay ${TOWER.floors} pisos, cada uno con su bioma, su pueblo y su laberinto.`);
     writeNotebookPage('WAKE'); // el cuaderno (REWORK.md §1, towerNotebook.js)
     enterTowerFloor(1, 'start');
-    openWeaponPick(); // elegís una de las 3 armas antes de poder moverte (REWORK.md §1, towerUI.js)
+    placeStarterWeapons(player.arena); towerRun.starterPending = true; // las 3 armas clavadas en el círculo (towerAwaken.js)
 }
 
 // Elegís una de las 3 armas iniciales al despertar (pedestal); la partida esperaba hasta este momento.
@@ -70,7 +70,7 @@ function chooseStarterWeapon(weaponKey) {
     const w = STARTER_WEAPONS[weaponKey];
     if (!w || !player) return;
     giveStarterWeapon(player, weaponKey);
-    closeWeaponPick();
+    if (towerRun) towerRun.starterPending = false; // las otras dos se hunden (towerAwaken.js)
     log(`🗡️ Elegiste ${w.noun}: tenés ${SKILL_INDEX[w.skillId].name} en la ${player.keyBindings[w.skillId].toUpperCase()}.`);
 }
 
@@ -268,11 +268,12 @@ function updateTower(dt) {
     level.creeps.forEach(c => { if (c.isAlive()) tickEffects(c, dt); });
     // Renacer en el círculo de piedra (nivel 1)
     if (!player.isAlive() && player.respawnAt && gameClock >= player.respawnAt) { towerRespawn(); return; }
-    if (weaponPickOpen && autopilot) chooseStarterWeapon('ADVENTURER_SWORD'); // el piloto no clickea: elige y sigue
     if (towerModalOpen()) return; // con stats, inventario, forja o la elección de arma abiertos, la partida espera
     if (autopilot) { if (player.statPoints) aiSpendStatPoints(player); aiManageGear(player); aiTowerShop(player); if (player.isAlive()) aiTelegraphDash(player); }
     else if (pendingForge(player) && !towerInFight(level)) { openForge(pendingForge(player)); return; } // en plena pelea, solo el aviso (towerView.js)
+    const from = { x: player.x, y: player.y };
     updateHero(player, level, dt);
+    towerAwakenTick(level, from); // sin arma no salís del círculo; el piloto agarra la espada (towerAwaken.js)
     towerFeelTick(player); // tensar el arco (towerFeel.js)
     unstickFromWall(player);
     // Cuaderno (REWORK.md §1): moverse y esquivar se detectan leyendo el estado, sin tocar el código compartido.
@@ -535,6 +536,7 @@ function renderTower(level, dt) {
     drawTowerSmith(level);
     drawTowerShrines(level);
     drawTowerEvents(level);
+    drawStarterWeapons(level); // las 3 armas clavadas al despertar (towerAwaken.js)
     // Escalera (cerrada hasta vencer al guardián)
     drawCavePortals(level);
     const st = level.stairs || { x: 0, y: 0 }, sx = st.x * TILE, sy = st.y * TILE;

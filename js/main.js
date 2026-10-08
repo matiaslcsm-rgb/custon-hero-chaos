@@ -1,7 +1,7 @@
 // Punto de entrada: conecta los botones y arranca el bucle principal.
 
 // Versión visible en el menú: si no coincide con la última subida, el navegador muestra una copia vieja (Ctrl+F5).
-const GAME_VERSION = '2026-10-08 · armas, tiradores y traspaso';
+const GAME_VERSION = '2026-10-08 · el despertar en el mundo';
 document.getElementById('game-version').textContent = `Versión ${GAME_VERSION}`;
 
 document.getElementById('start-wave-btn').onclick = startWave;
@@ -193,9 +193,10 @@ if (location.search.includes('demo=bestiary')) setTimeout(() => {
 if (location.search.includes('demo=tower')) setTimeout(() => {
     startTowerRun();
     const wq = new URLSearchParams(location.search).get('weapon'); // &weapon=sword|bow|staff: con un arma inicial (sin el Hacha)
-    if (weaponPickOpen) chooseStarterWeapon('ADVENTURER_' + (wq || 'sword').toUpperCase()); // sin el pedestal (el demo arranca jugando)
+    const awaken = new URLSearchParams(location.search).get('at') === 'awaken';
+    if (!awaken && awaitingWeapon()) chooseStarterWeapon('ADVENTURER_' + (wq || 'sword').toUpperCase()); // el demo arranca armado (&at=awaken: con las 3 clavadas)
     const cat = towerCatalog();
-    if (!wq) equipItem(player, makeTowerItem(1, cat.find(e => e.heroKey === 'AXE' && e.slot === 'weapon'), 'rare'));
+    if (!wq && !awaken) equipItem(player, makeTowerItem(1, cat.find(e => e.heroKey === 'AXE' && e.slot === 'weapon'), 'rare'));
     // &floor=N: otro piso (bioma); &at=town|lab: parado en el pueblo o en la puerta del laberinto
     const q = new URLSearchParams(location.search);
     if (q.get('floor')) enterTowerFloor(+q.get('floor'), 'demo');
@@ -216,7 +217,8 @@ if (location.search.includes('demo=tower')) setTimeout(() => {
     if (q.get('at') === 'lab') { player.x = player.arena.gate.x - 2; player.y = player.arena.gate.y; }
     if (q.get('at') === 'field') { const L = player.arena; const h = L.creeps.find(c => !c.isGuardian && L.zone[c.y * COLS + c.x] === ZONE.field); player.x = h.x - 3; player.y = h.y; if (!walkable(L, player.x, player.y)) { player.x = h.x; player.y = h.y + 1; } }
     const level = player.arena;
-    ['GRUNT', 'ARCHER', 'SHAMAN', 'BRUTE'].forEach((k, i) => {
+    if (awaken && q.get('near')) { const w = level.starterWeapons.find(o => o.key === 'ADVENTURER_' + q.get('near').toUpperCase()); player.x = w.x; player.y = w.y + (walkable(level, w.x, w.y + 1) ? 1 : -1); } // &near=bow: al lado de un arma (su cartel)
+    if (!awaken) ['GRUNT', 'ARCHER', 'SHAMAN', 'BRUTE'].forEach((k, i) => {
         const x = player.x + 2 + i, y = player.y + (i % 2 ? 1 : -1);
         if (!walkable(level, x, y)) return;
         const c = makeCreep(CREEP_TYPES[k], x, y, 1, false, 0); c.arena = level; c.spawnTime = -1e9; level.creeps.push(c);

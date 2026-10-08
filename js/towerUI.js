@@ -4,30 +4,9 @@
 //   clic derecho equipa o desequipa. Mientras está abierto (o la forja, o los stats), la partida espera.
 
 let invOpen = false, forgeOpen = false, invHeld = null, tshopOpen = false, tshopVendor = null;
-function towerModalOpen() { return statsOpen || invOpen || forgeOpen || tshopOpen || bestiaryOpen || codexOpen || smithOpen || weaponPickOpen || notebookOpen; }
+function towerModalOpen() { return statsOpen || invOpen || forgeOpen || tshopOpen || bestiaryOpen || codexOpen || smithOpen || notebookOpen; }
 
-// --- ELEGIR ARMA AL DESPERTAR (REWORK.md §1): obligatorio, sin botón de cerrar, bloquea la partida ---
-let weaponPickOpen = false;
-function openWeaponPick() {
-    weaponPickOpen = true;
-    renderWeaponPick();
-    showPanel('weapon-pick-container', true);
-}
-function closeWeaponPick() {
-    weaponPickOpen = false;
-    showPanel('weapon-pick-container', false);
-}
-function renderWeaponPick() {
-    const box = document.getElementById('weapon-pick-options');
-    box.innerHTML = '';
-    Object.entries(STARTER_WEAPONS).forEach(([key, w]) => {
-        const card = document.createElement('div');
-        card.className = 'skill-card';
-        card.innerHTML = `<h4><img src="${inkIcon(w.shape, '#5a4632')}" class="pixel-img unit-icon md"> ${w.noun}</h4><p>${w.why}</p>`;
-        card.onclick = () => chooseStarterWeapon(key);
-        box.appendChild(card);
-    });
-}
+// (Elegir el arma al despertar ya no es una ventana: las 3 están clavadas en el círculo, ver towerAwaken.js)
 
 // Ícono de una pieza en estilo tinta (inkart.js): forma según el arma o la ranura, color del atributo del héroe de origen.
 // Color de la calidad: sobre el pergamino de la Torre, en tinta oscura (los claros no se leen)
