@@ -278,7 +278,28 @@ no corta las raíces que la curan). Sin muertes en las 3: el piloto esquiva bien
 mejor que encuentra (en el piso 1), así que las partidas completas miden más el equipo que el arma inicial; por eso
 la medición de arriba contra muñecos.
 
-## Orden propuesto (cada fase jugable y medida)
+## 9. Jefes lentos: las raíces y el piloto (2026-10-08)
+Pedido: arreglar los jefes que tardaban (Gran Raíz Madre 1366 s con bastón, Bruja del Fango 250-500 s).
+
+**Medido** (partidas del piloto hasta el piso 4, registrando cada pelea):
+- **El reloj mentía en parte:** contaba desde que el jefe te veía, aunque el piloto se fuera a limpiar el resto del mapa
+  y volviera mucho después (una "pelea" de 592 s tenía 566 s lejos del jefe). La medición nueva cuenta solo el tiempo a
+  9 casillas o menos del jefe. Con eso, la Bruja del Fango ya estaba bien: 64-106 s, 10-28 s escondida.
+- **Las raíces sí eran un problema real:** curaban 0,6%/s cada una, sin techo, y si las cortabas todas rebrotaban a los
+  5-6 s. Con un personaje flojo se curaba más rápido de lo que recibía: **hasta 291% de su vida** en una pelea, y el
+  piloto, al ver que la vida no bajaba en 25 s, abandonaba la pelea 30 s y se iba.
+
+**Cambios (`js/towerBosses.js`, `js/tower.js`):**
+- Las raíces curan 0,45%/s, **se secan solas a los 16 s** (un aro muestra cuánto les queda) y **brotan solo al empezar
+  cada fase** (2, 3 y 4). Curación total acotada: ~22% por fase si no cortás ninguna.
+- Son de madera: armadura 4 (eran Acorazados, 12) y **el ataque automático les pega primero** si están a tiro.
+- Se ve la curación: savia (puntitos verdes) que corre por el lazo hacia el jefe, ✚ arriba de cada raíz y "+N" en el
+  jefe. Su descripción lo dice ("cortalas, o se secan solas").
+- El piloto **ya no abandona al guardián** por "pelea que no avanza" (escondido o curándose, igual hay que matarlo).
+
+**Después:** Raíz Madre 21-58 s y 10-24% curado; Bruja del Fango 64-106 s; Reina Escorpión 31-85 s. Sin muertes.
+
+
 1. **Pantalla:** zoom, HUD más chico y menú de pausa con pestañas. Es barato y mejora todo lo que viene después.
 2. **Despertar y tutorial:** cuaderno y las 3 armas (espada, arco y bastón, con su habilidad). ✅ — las 3 armas
    como pedestal obligatorio y el Cuaderno con sus 7 páginas, ver más arriba. ✅ La escena en el mundo (2026-10-08):

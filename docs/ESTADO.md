@@ -124,7 +124,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   disparan patrones esquivables estilo Enter the Gungeon (roles Tirador y Rociador, anillos y espirales en los jefes) y
   traspasar el 50% del crecimiento de una pieza a otra en el Herrero (REWORK.md §8, con las mediciones). Partidas con
   el piloto: Espada 105 min, Arco 137, Bastón 133, sin muertes. Pendiente: jefes lentos con el piloto (Bruja del Fango
-  250-500 s; Gran Raíz Madre 1366 s con bastón porque no corta las raíces).
+  250-500 s; Gran Raíz Madre 1366 s con bastón porque no corta las raíces). ✅ Resuelto (REWORK.md §9): raíces con
+  techo de curación y el piloto no abandona al guardián; además, el reloj contaba tiempo lejos del jefe.
 - **El despertar en el mundo (2026-10-08):** las 3 armas iniciales clavadas en el círculo de piedra en vez de una
   ventana; se camina hasta una y se agarra con F (configurable) o clic. Cierra la fase 2 del rework (REWORK.md §1).
 - **Motor (decidido 2026-10-06):** seguimos en canvas + JavaScript puro. Pasar a un motor (Phaser para seguir en el

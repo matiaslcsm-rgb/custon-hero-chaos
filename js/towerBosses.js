@@ -11,7 +11,7 @@
 
 const BIOME_BOSSES = {
     forest: { base: 'GOLEM', name: 'Raíz Madre', color: '#2d6a4f', signature: 'roots',
-        mechanic: 'Planta raíces que la curan mientras sigan vivas: cortalas. Hace brotar raíces del piso en línea.' },
+        mechanic: 'Al empezar cada fase planta raíces que la curan mientras vivan (✚ y un lazo verde): cortalas, o se secan solas. Hace brotar raíces del piso en línea.' },
     swamp: { base: 'LICH', name: 'Bruja del Fango', color: '#606c38', signature: 'mire',
         mechanic: 'Deja charcos de veneno que duran. Desde la fase 2 se esconde en la niebla: un rato no se la puede golpear.' },
     desert: { base: 'HIVE_QUEEN', name: 'Reina Escorpión', color: '#bc6c25', signature: 'burrow',
@@ -23,7 +23,10 @@ const BIOME_BOSSES = {
 };
 // hp/atk: iguales para los 5 (antes, con los jefes de Custom Hero Chaos, 1400-2000 de vida: medido 2026-10-07, morían en
 // 5-60 s, antes de mostrar sus fases; la idea es ~1-1,5 minutos con el piloto, que esquiva casi todo)
-const BOSS_SIG = { every: [7, 6, 5], rootRegen: 0.006, roots: 2, zoneTick: 0.5, hp: 4500, atk: 40 };
+// Raíces (medido 2026-10-08: con 0,6%/s por raíz, sin techo y rebrotando 5 s después de cortarlas, curaban hasta el 113% de la
+// vida del jefe y la pelea podía durar 23 min): ahora curan 0,45%/s, se secan solas a los 16 s y brotan solo al empezar
+// cada fase → la curación total queda acotada (~3 × 16 × 0,45% ≈ 22% por fase si no cortás ninguna).
+const BOSS_SIG = { every: [7, 6, 5], rootRegen: 0.0045, rootLife: 16, rootArmor: 4, roots: 2, zoneTick: 0.5, hp: 4500, atk: 40 };
 const bossTypeCache = {};
 // Tipo del guardián de un piso: el jefe de su bioma (copia del jefe base, sin su mecánica de Custom Hero Chaos)
 function biomeBossType(floor) {
@@ -79,7 +82,7 @@ function bossSignatureTick(c, ph) {
     if (t.signature === 'roots') {
         [-0.6, 0, 0.6].forEach((a, i) => { const ca = Math.cos(a), sa = Math.sin(a);
             startTelegraph(c, { shape: 'line', x: c.x, y: c.y, dx: v.dx * ca - v.dy * sa, dy: v.dx * sa + v.dy * ca, len: 8, w: 1 }, 'boss', { delay: i * 0.15 }); });
-        if (ph >= 1 && !(L.creeps.some(o => o.isRoot && o.isAlive()))) plantRoots(c); // vuelven a crecer
+        if (ph > (c.rootsPhase || 0)) { c.rootsPhase = ph; plantRoots(c, ph); } // brotan de nuevo solo al empezar cada fase (no cada vez que las cortás)
     } else if (t.signature === 'mire') {
         const z = { shape: 'circle', x: player.x, y: player.y, r: 1.6 };
         startTelegraph(c, z, 'boss', { onFire: () => addZone(L, Object.assign({ owner: c, until: gameClock + 8, mult: 0.18, slow: 0.25, kind: 'poison' }, z)) });
@@ -108,21 +111,28 @@ function bossSignatureTick(c, ph) {
     return true;
 }
 // Raíz Madre: raíces quietas alrededor que la curan mientras vivan
-function plantRoots(c) {
-    const L = c.arena, n = BOSS_SIG.roots + (c.bossPhase || 0);
+function plantRoots(c, ph = c.bossPhase || 0) {
+    const L = c.arena, n = BOSS_SIG.roots + ph;
     for (let i = 0, made = 0; i < 24 && made < n; i++) {
         const a = Math.random() * Math.PI * 2, x = Math.round(c.x + Math.cos(a) * 3.5), y = Math.round(c.y + Math.sin(a) * 3.5);
         if (!walkable(L, x, y) || L.creeps.some(o => o.isAlive() && o.x === x && o.y === y)) continue;
         const r = makeCreep(CREEP_TYPES.ARMORED, x, y, TOWER.creepMult(L.floor), false, 0);
-        Object.assign(r, { arena: L, label: 'Raíz', isRoot: true, atk: 0, moveInterval: 1e9, aggro: true, spawnTime: -1e9, xp: 0, gold: 0, level: L.floor, color: '#40916c' });
+        Object.assign(r, { arena: L, label: 'Raíz (cura al jefe)', isRoot: true, atk: 0, armor: BOSS_SIG.rootArmor, priority: 2, witherAt: gameClock + BOSS_SIG.rootLife, // madera: se corta fácil; el ataque automático le pega primero
+            moveInterval: 1e9, aggro: true, spawnTime: -1e9, xp: 0, gold: 0, level: L.floor, color: '#40916c' });
         r.hp = r.maxHp = Math.round(c.maxHp * 0.05);
         L.creeps.push(r); made++;
     }
     log('🌱 Brotan raíces alrededor de la Raíz Madre: mientras vivan, la curan.');
 }
 function rootsHeal(c) {
-    const n = c.arena.creeps.filter(o => o.isRoot && o.isAlive()).length;
-    if (n && gameClock >= (c.rootHealAt || 0)) { c.rootHealAt = gameClock + 1; c.hp = Math.min(c.maxHp, c.hp + c.maxHp * BOSS_SIG.rootRegen * n); }
+    const roots = c.arena.creeps.filter(o => o.isRoot && o.isAlive());
+    roots.forEach(r => { if (gameClock >= r.witherAt) { r.hp = 0; if (fxArena(r)) fxParticles(c.arena, r.x, r.y, 'poison', 8, 1.5, { style: 'smoke', size: 3, life: 0.6 }); } }); // se secan solas
+    const n = roots.filter(o => o.isAlive()).length;
+    if (n && gameClock >= (c.rootHealAt || 0)) {
+        c.rootHealAt = gameClock + 1;
+        const before = c.hp; c.hp = Math.min(c.maxHp, c.hp + c.maxHp * BOSS_SIG.rootRegen * n);
+        if (fxArena(c)) fxHeal(c, Math.round(c.hp - before)); // se ve cuánto la curan
+    }
 }
 // Bruja del Fango: se esconde en la niebla y reaparece en otro lado
 function hideInFog(c) {
@@ -144,9 +154,15 @@ function sandstormPull(c) {
 function drawBossExtras(level) {
     const g = level.guardian;
     if (!g || !g.isAlive()) return;
-    level.creeps.filter(o => o.isRoot && o.isAlive()).forEach(r => {
-        ctx.save(); ctx.strokeStyle = 'rgba(45,106,79,0.7)'; ctx.lineWidth = 3; ctx.setLineDash([6, 4]);
-        ctx.beginPath(); ctx.moveTo(r.x * TILE + TILE / 2, r.y * TILE + TILE / 2); ctx.lineTo(g.x * TILE + TILE / 2, g.y * TILE + TILE / 2); ctx.stroke(); ctx.restore();
+    level.creeps.filter(o => o.isRoot && o.isAlive()).forEach((r, i) => {
+        const x0 = r.x * TILE + TILE / 2, y0 = r.y * TILE + TILE / 2, x1 = g.x * TILE + TILE / 2, y1 = g.y * TILE + TILE / 2;
+        ctx.save(); ctx.strokeStyle = 'rgba(45,106,79,0.75)'; ctx.lineWidth = 3; ctx.setLineDash([6, 4]); ctx.lineDashOffset = -fxClock * 24; // la savia corre hacia el jefe
+        ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke(); ctx.setLineDash([]);
+        for (let k = 0; k < 3; k++) { const t = (fxClock * 0.8 + k / 3 + i * 0.17) % 1; ctx.fillStyle = '#95d5b2'; ctx.beginPath(); ctx.arc(x0 + (x1 - x0) * t, y0 + (y1 - y0) * t, 3.5, 0, Math.PI * 2); ctx.fill(); }
+        const left = Math.max(0, (r.witherAt - gameClock) / BOSS_SIG.rootLife); // aro: cuánto le falta para secarse
+        ctx.strokeStyle = '#2d6a4f'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(x0, y0, TILE * 0.55, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * left); ctx.stroke();
+        ctx.font = 'bold 13px Georgia, serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#2d6a4f'; ctx.fillText('✚', x0, y0 - TILE * 0.7);
+        ctx.restore();
     });
 }
 function bossAlpha(c) { return c.hiddenUntil && gameClock < c.hiddenUntil ? 0.22 : 1; }

@@ -656,7 +656,7 @@ function towerAutoDir(hero) {
     if (inRange) {
         // Pelea que no avanza (se cura más rápido de lo que le pega): la deja un rato, como haría una persona
         if (hero.autoFight !== inRange) { hero.autoFight = inRange; hero.autoFightHp = inRange.hp; hero.autoFightAt = gameClock; }
-        else if (gameClock - hero.autoFightAt > 25) { if (inRange.hp >= hero.autoFightHp) inRange.autoSkipUntil = gameClock + 30; hero.autoFightHp = inRange.hp; hero.autoFightAt = gameClock; }
+        else if (gameClock - hero.autoFightAt > 25) { if (inRange.hp >= hero.autoFightHp && !inRange.isGuardian) inRange.autoSkipUntil = gameClock + 30; hero.autoFightHp = inRange.hp; hero.autoFightAt = gameClock; } // al guardián no se lo abandona (escondido o curándose, igual hay que matarlo)
         hero.autoGoal = 'pelea: ' + inRange.label;
         return movesToFight(hero) ? circleStep(hero, inRange) : { dx: 0, dy: 0 };
     }

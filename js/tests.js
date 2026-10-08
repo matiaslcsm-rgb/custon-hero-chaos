@@ -1475,6 +1475,7 @@ test('Torre: Combo de Tajos (espada) — arco a todos, remate ×2 que empuja, re
 test('Torre: Tiro Tensado (arco) — al toque no atraviesa, tensado del todo atraviesa, perfecto suma, tensar frena', () => {
     const level = newTower('AXE', { weapon: 'ADVENTURER_BOW' });
     level.creeps.forEach(c => { c.hp = 0; });
+    player.critChance = -1000; // sin críticos: se comparan los multiplicadores
     const sk = SKILL_INDEX.ADVENTURER_VOLLEY;
     // un pasillo libre a la derecha
     for (let x = 1; x <= 6; x++) level.walls[player.y][player.x + x] = 0;
@@ -2200,6 +2201,26 @@ test('Torre: un jefe con nombre por bioma, cada uno con su mecánica (raíces, v
     g.introduced = true; g.sigNext = 0; bossSignatureTick(g, 0);
     const sec = L.telegraphs[L.telegraphs.length - 1]; gameClock += sec.windup + 0.05; towerTelegraphTick(L);
     check(L.zones.some(z => z.kind === 'lava' && z.shape === 'cone'), 'un sector se llena de lava');
+}, { random: true });
+
+test('Torre: las raíces de la Raíz Madre se cortan fácil, son el blanco primero, se secan solas y solo rebrotan con cada fase', () => {
+    newTower();
+    enterTowerFloor(1); const L = player.arena, g = L.guardian;
+    player.x = g.x - 3; player.y = g.y; if (!walkable(L, player.x, player.y)) { player.x = g.x; player.y = g.y + 2; }
+    bossSignatureTick(g, 0);
+    const roots = () => L.creeps.filter(o => o.isRoot && o.isAlive());
+    check(roots().length >= 2, 'brotan al empezar');
+    const r = roots()[0];
+    checkEq(r.armor, BOSS_SIG.rootArmor, 'madera: poca armadura');
+    player.x = r.x - 1; player.y = r.y; L.creeps.filter(o => o !== r && !o.isRoot && o.isAlive() && o !== g).forEach(o => { o.hp = 0; });
+    checkEq(pickAttackTarget(player, 5), r, 'el ataque automático le pega primero a la raíz');
+    roots().forEach(o => { o.hp = 0; });
+    g.sigNext = 0; bossSignatureTick(g, 0);
+    checkEq(roots().length, 0, 'cortadas, no rebrotan en la misma fase');
+    g.sigNext = 0; bossSignatureTick(g, 1);
+    check(roots().length >= 3, 'con la fase 2, brotan de nuevo (más)');
+    gameClock += BOSS_SIG.rootLife + 0.5; rootsHeal(g);
+    checkEq(roots().length, 0, 'se secan solas');
 }, { random: true });
 
 test('Ancla: cada golpe ralentiza y quita evasión', () => {
