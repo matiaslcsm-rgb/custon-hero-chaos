@@ -378,7 +378,7 @@ function renderStatsWindow() {
 // lose: parte de los puntos de stats que quedan en tus restos · stack: si morís otra vez antes de buscarlos, los restos
 // viejos se suman a los nuevos (en vez de perderse). Medido con el piloto de reflejos humanos (2026-10-08): con 0,5 y
 // sin sumar, cada muerte te deja más débil para el mismo piso y se arma una espiral (30 muertes en el piso 6).
-const DEATH = { lose: 0.5, stack: false };
+const DEATH = { lose: 0.5, stack: true }; // decisión del usuario (2026-10-08): los restos se suman, nunca se pierde nada para siempre
 function towerHeroDeath(hero, killer) {
     const level = hero.arena;
     hero.hp = 0;

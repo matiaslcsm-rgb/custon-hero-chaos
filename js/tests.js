@@ -1626,6 +1626,22 @@ test('Piloto con reflejos humanos: tarda en ver los avisos, a veces no los ve y 
     } finally { aiReflex = saved; }
 }, { random: true });
 
+test('Torre: al morir los stats quedan en tus restos; si morís otra vez antes de buscarlos, los restos se suman (no se pierden)', () => {
+    newTower();
+    player.statPoints = 20; for (let i = 0; i < 20; i++) spendStatPoint(player, 'vit');
+    checkEq(player.towerStats.vit, 20, '20 en Vitalidad');
+    towerHeroDeath(player, null);
+    checkEq(player.towerStats.vit, 10, 'la mitad queda en los restos');
+    checkEq(towerRun.corpse.points, 10, 'restos con 10');
+    towerRespawn();
+    towerHeroDeath(player, null); // muere de nuevo sin buscarlos
+    checkEq(player.towerStats.vit, 5, 'pierde la mitad de lo que le quedaba');
+    checkEq(towerRun.corpse.points, 15, 'los restos nuevos traen también los viejos (10 + 5)');
+    towerRespawn();
+    const c = towerRun.corpse; enterTowerLevel(c.level, { x: c.x, y: c.y }); player.x = c.x; player.y = c.y; recoverCorpse(c.level, player);
+    checkEq(player.towerStats.vit, 20, 'al buscarlos vuelve todo');
+});
+
 test('Torre: el Cuaderno escribe una página sola la primera vez que hacés cada cosa, y no se repite', () => {
     notebookState = { seen: {} };
     newTower(); // startTowerRun() ya escribió WAKE al despertar
@@ -1792,7 +1808,7 @@ test('Torre: al morir perdés la mitad de lo ganado y renacés en el círculo de
     check(player.str >= base, 'nunca baja de la base');
 }, { random: true });
 
-test('Torre: tus restos guardan lo que perdiste; si volvés los recuperás, si morís antes se pierden', () => {
+test('Torre: tus restos guardan lo que perdiste; si volvés los recuperás, si morís antes se suman a los nuevos', () => {
     newTower();
     enterTowerFloor(2);
     const base = towerRun.base.str;
@@ -1813,7 +1829,7 @@ test('Torre: tus restos guardan lo que perdiste; si volvés los recuperás, si m
     const first = towerRun.corpse;
     towerRespawn();
     dealDamage(killer, player, 99999, 'pure');
-    check(first.faded && towerRun.corpse !== first, 'al morir otra vez, los restos anteriores se pierden');
+    check(first.merged && towerRun.corpse !== first && towerRun.corpse.points >= first.points, 'al morir otra vez, los restos anteriores se suman a los nuevos');
 }, { random: true });
 
 test('Torre: al morir, un portador se lleva piezas de tu equipo (nunca el arma) y al cazarlo las suelta', () => {

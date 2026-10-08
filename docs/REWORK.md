@@ -320,7 +320,9 @@ de cerca sacaba 35 de 215 por descarga, más que un arquero común). → Escopet
 **La espiral de muertes:** al morir perdés la mitad de los puntos de stats; quedan en tus restos, pero si morís otra vez
 antes de buscarlos, los viejos se pierden para siempre. Cada muerte te deja más débil para el mismo piso. Con mala suerte
 de equipo, el piloto humano murió 29 veces seguidas en el piso 6. Queda configurable (`DEATH = { lose, stack }` en
-tower.js) para la decisión del usuario.
+tower.js). **Decisión del usuario: los restos se suman** (`stack: true`): si morís otra vez antes de buscarlos, los
+restos viejos se juntan con los nuevos. Se sigue perdiendo la mitad al morir (hay que volver a buscarla), pero nunca se
+pierde nada para siempre: se corta la espiral.
 
 ## Orden propuesto (cada fase jugable y medida)
 1. **Pantalla:** zoom, HUD más chico y menú de pausa con pestañas. Es barato y mejora todo lo que viene después.
@@ -396,6 +398,7 @@ el mismo paso; lo grande queda acá, ordenado por impacto.
 **Pendiente (de más a menos impacto):**
 
 ## Decisiones tomadas (2026-10-07)
+- **Al morir (2026-10-08):** los restos se suman si morís otra vez antes de buscarlos (nada se pierde para siempre).
 - **Estilo ASCII descartado:** se probó un filtro que convertía el mundo en caracteres (referencia: el MMORPG ASCII de
   ansenjeo) y al usuario no le gustó cómo quedaba. Se sacó entero; la Torre sigue en tinta y pergamino.
 - **Ranuras:** 3 activas (arma, guantes y armadura), todas con maná y enfriamiento normal. Sin sistema de carga:

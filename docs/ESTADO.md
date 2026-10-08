@@ -130,8 +130,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   ventana; se camina hasta una y se agarra con F (configurable) o clic. Cierra la fase 2 del rework (REWORK.md §1).
 - **Interfaz de combate (2026-10-08):** la ranura Q muestra la carga del arco y el combo de la espada; chevrones rojos en
   el borde para balas y tiradores fuera de la vista (REWORK.md, lista de interfaz).
-- **Dificultad medida con reflejos humanos (2026-10-08):** REWORK.md §10. Pendiente de decisión: la espiral de muertes
-  (perder la mitad de los stats al morir, sin recuperarlos si morís de nuevo).
+- **Dificultad medida con reflejos humanos (2026-10-08):** REWORK.md §10. Decidido: los restos se suman si morís de nuevo
+  antes de buscarlos (se corta la espiral de muertes).
 - **Motor (decidido 2026-10-06):** seguimos en canvas + JavaScript puro. Pasar a un motor (Phaser para seguir en el
   navegador, Godot para publicar en PC/celular) se decide cuando el contenido de Tower Chaos esté más cerrado.
 - **Balance en curso (2026-09-28):** jefes más suaves desde la ronda 20 + Kaya y Cetro del Eclipse (ver DISEÑO.md §9 bis).
