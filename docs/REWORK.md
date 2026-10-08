@@ -324,6 +324,12 @@ tower.js). **Decisión del usuario: los restos se suman** (`stack: true`): si mo
 restos viejos se juntan con los nuevos. Se sigue perdiendo la mitad al morir (hay que volver a buscarla), pero nunca se
 pierde nada para siempre: se corta la espiral.
 
+**Confirmado con datos** (3 partidas más con Espada y reflejos humanos, ya con los restos que se suman): 98 min/1
+muerte, 185/2 y 93/2. Las tres terminan la torre; nunca más de 2 muertes ni restos de más de 83 puntos. Quién mata ahora:
+sobre todo **campeones** con afijos de resistencia y velocidad (Acorazado, Blindado, Veloz, Regenerador) en los pisos
+6-10, y lo del jefe final. Daño recibido: comunes 69-78%, anunciados 15-23%, balas 4-7%. La de 185 min es lenta (el
+diseño apunta a 120-160): vigilar a los campeones de los pisos 6-8 si se repite.
+
 ## Orden propuesto (cada fase jugable y medida)
 1. **Pantalla:** zoom, HUD más chico y menú de pausa con pestañas. Es barato y mejora todo lo que viene después.
 2. **Despertar y tutorial:** cuaderno y las 3 armas (espada, arco y bastón, con su habilidad). ✅ — las 3 armas
