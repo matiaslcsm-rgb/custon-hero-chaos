@@ -54,9 +54,17 @@ function musicTargets(level) {
     return out;
 }
 // Cada frame (renderTower): fundidos hacia el volumen objetivo; lo que queda en silencio un rato se pausa
-function towerMusicTick(level, dt) {
-    if (!musicOn || !soundOn || !audioCtx || gameMode !== 'tower') { if (Object.keys(musicLayers).length) stopMusic(); return; }
-    const targets = musicTargets(level), night = level && !level.isCave && level.town && towerIsNight();
+// Fuera de la Torre: el menú y las fases tranquilas de Custom Hero Chaos con la del pueblo; oleadas y duelos con la de
+// combate; los jefes de ronda con la de jefe.
+function normalMusicTargets() {
+    if (gameState === 'BOSS') return { boss: 1 };
+    if (inCombat() && player && !player.inRest) return { combat: 0.85 };
+    return { town: gameState === 'MENU' || gameState === 'HERO_SELECT' ? 0.7 : 0.6 };
+}
+function musicTick(dt) { if (gameMode !== 'tower' || gameState !== 'TOWER') towerMusicTick(null, dt, normalMusicTargets()); }
+function towerMusicTick(level, dt, override = null) {
+    if (!musicOn || !soundOn || !audioCtx) { if (Object.keys(musicLayers).length) stopMusic(); return; }
+    const targets = override || musicTargets(level), night = !override && level && !level.isCave && level.town && towerIsNight();
     Object.keys(MUSIC_TRACKS).forEach(k => { if (targets[k] || musicLayers[k]) musicLayer(k).target = targets[k] || 0; });
     const step = dt / MUSIC.fade;
     Object.entries(musicLayers).forEach(([k, l]) => {

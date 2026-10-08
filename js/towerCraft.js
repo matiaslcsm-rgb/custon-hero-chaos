@@ -38,6 +38,7 @@ function essence() { return codex.essence || 0; }
 function gainEssence(n, why) {
     if (!n) return;
     codex.essence = essence() + n; codexSave();
+    writeNotebookPage('ESSENCE');
     if (towerRun) towerRun.stats.essence = (towerRun.stats.essence || 0) + n;
     if (why) log(`✦ +${n} de Esencia (${why}). Tenés ${essence()}.`);
     if (fxArena(player)) fxText(player, `+${n} ✦`, '#7b2cbf', 12, 1.2);
@@ -105,6 +106,7 @@ function craftPure(hero, slot, floor = towerRun ? towerRun.floor : 1, chosen = n
     const item = makePureItem(floor, slot, tier);
     addToBag(hero, item);
     log(`⚒️ El Herrero fundió 5 piezas: ${item.name} (${CRAFT_QUALITY[tier].name}). −${CRAFT.cost} ✦`); sfx('levelup');
+    writeNotebookPage('CRAFT');
     if (towerRun) towerRun.stats.crafted = (towerRun.stats.crafted || 0) + 1;
     return item;
 }

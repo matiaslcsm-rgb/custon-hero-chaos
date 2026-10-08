@@ -1468,7 +1468,8 @@ test('Torre: el Cuaderno escribe una página sola la primera vez que hacés cada
     writeNotebookPage('CHEST'); writeNotebookPage('TOWN');
     check(notebookState.seen.CHEST && notebookState.seen.TOWN, 'CHEST y TOWN');
 
-    checkEq(Object.keys(notebookState.seen).length, NOTEBOOK_PAGES.length, 'las 7 páginas');
+    ['TELEGRAPH', 'ESSENCE', 'SMITH', 'CRAFT', 'MASTERY'].forEach(id => writeNotebookPage(id)); // las de lo nuevo (fases 4 y 5)
+    checkEq(Object.keys(notebookState.seen).length, NOTEBOOK_PAGES.length, 'todas las páginas');
     const before = JSON.stringify(notebookState.seen);
     writeNotebookPage('WAKE'); // repetir no hace nada
     checkEq(JSON.stringify(notebookState.seen), before, 'repetir no cambia nada');
@@ -2024,6 +2025,26 @@ test('Accesibilidad: daltonismo, tamaño de textos de combate y escala de la int
         startTelegraph(c, { shape: 'circle', x: player.x, y: player.y, r: 1.5 }, 'champion');
         drawTowerTelegraphs(player.arena); // dibuja con la otra paleta sin romper
     } finally { Object.keys(saved).forEach(k => setA11y(k, saved[k])); }
+}, { random: true });
+
+test('Filtro de botín, páginas nuevas del Cuaderno y música fuera de la Torre', () => {
+    const savedF = lootFilter;
+    try {
+        newTower();
+        const L = player.arena;
+        setLootFilter('magic');
+        const normal = makeBlankItem(1, 'helm', 'normal'), rare = makeBlankItem(1, 'helm', 'rare');
+        L.drops.push({ x: player.x, y: player.y, item: normal }, { x: player.x, y: player.y, item: rare });
+        player.bag = []; towerPickup(player);
+        check(player.bag.some(b => b.item === rare) && !player.bag.some(b => b.item === normal), 'levanta la rara y deja la normal');
+        check(L.drops.some(d => d.item === normal), 'la filtrada queda en el piso');
+        cycleLootFilter(); checkEq(lootFilter, 'rare', 'el botón pasa por los filtros');
+        ['TELEGRAPH', 'ESSENCE', 'SMITH', 'CRAFT', 'MASTERY'].forEach(id => check(NOTEBOOK_PAGES.some(p => p.id === id), 'página ' + id));
+        resetGame();
+        gameState = 'MENU'; check(normalMusicTargets().town > 0, 'en el menú suena la del pueblo');
+        gameState = 'BOSS'; check(normalMusicTargets().boss === 1, 'jefe de ronda');
+        gameState = 'MENU';
+    } finally { setLootFilter(savedF); }
 }, { random: true });
 
 test('Ancla: cada golpe ralentiza y quita evasión', () => {

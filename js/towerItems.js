@@ -463,6 +463,7 @@ function towerPickup(hero) {
     });
     level.drops = level.drops.filter(d => {
         if (d.x !== hero.x || d.y !== hero.y) return true;
+        if (hero === player && !lootAllowed(d.item)) return true; // filtro de botín (towerUI.js)
         if (!addToBag(hero, d.item)) { if (!d.warned) { d.warned = true; log(`🎒 Inventario lleno: no podés levantar ${d.item.name}.`); } return true; }
         log(`🎒 Levantaste ${d.item.name} (${ITEM_QUALITY[d.item.quality].name}).`); sfx('coin');
         return false;

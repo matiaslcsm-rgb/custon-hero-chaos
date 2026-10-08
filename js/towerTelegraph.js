@@ -36,6 +36,7 @@ function startTelegraph(owner, shape, kind, extra = {}) {
     const level = owner.arena;
     level.telegraphs = level.telegraphs || [];
     const t = Object.assign({ owner, kind, at: gameClock, windup: TELE.windup[kind], mult: TELE.dmg[kind] }, shape, extra);
+    if (player && owner.arena === player.arena && Math.hypot(owner.x - player.x, owner.y - player.y) < 10) writeNotebookPage('TELEGRAPH'); // el Cuaderno lo explica
     level.telegraphs.push(t);
     if (!extra.free) owner.castingUntil = Math.max(owner.castingUntil || 0, gameClock + t.windup + (extra.delay || 0)); // se queda cargando
     return t;

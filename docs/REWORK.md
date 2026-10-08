@@ -256,12 +256,16 @@ el mismo paso; lo grande queda acá, ordenado por impacto.
   y las habilidades equipadas siguen a su tecla. Flechas y Esc fijos. La barra del héroe y la ayuda muestran las elegidas.
 - ✅ **Accesibilidad** (pausa → Opciones): zonas de ataque en azul y naranja para daltonismo, tamaño de los textos de
   combate (80-160%) y escala de la interfaz (80-140%: barra del héroe, ventanas, mensajes y franja de arriba). Se guardan.
+- ✅ **Filtro de botín** (pausa): levantar todo, mágico o mejor, o solo raro. Lo filtrado queda en el piso, apagado. El
+  piloto automático levanta todo.
+- ✅ **El Cuaderno explica lo nuevo** con 5 páginas más, la primera vez que pasa: el suelo que avisa (ataques anunciados),
+  la Esencia, el Herrero, fundir y dominar un poder.
+- ✅ **Música en el menú y en Custom Hero Chaos:** el pueblo en el menú y las fases tranquilas, combate en oleadas y
+  duelos, jefe en los jefes de ronda. Volumen y opción de música en la pausa de los dos modos.
+- Lista al día. Próximas ideas de interfaz cuando aparezcan (se anotan acá).
 - ✅ (antes) Pantalla grande con zoom, mensajes flotantes, aviso de puntos para repartir y barra del jefe abajo.
 
 **Pendiente (de más a menos impacto):**
-1. **Filtro de botín**: no levantar piezas normales, o marcarlas para vender.
-2. **El Cuaderno explica lo nuevo** la primera vez: el Herrero, la Esencia, la fundición y los ataques anunciados.
-3. **Música en el menú y en Custom Hero Chaos.**
 
 ## Decisiones tomadas (2026-10-07)
 - **Estilo ASCII descartado:** se probó un filtro que convertía el mundo en caracteres (referencia: el MMORPG ASCII de

@@ -56,6 +56,7 @@ function codexCheckItem(hero, item) {
     if (p > (codex.best[e.id] || 0)) { codex.best[e.id] = p; codexSave(); }
     if (p < e.max || codexUnlocked(e.id)) return;
     codex.unlocked[e.id] = { floor: towerRun ? towerRun.floor : 0 };
+    writeNotebookPage('MASTERY');
     codexSave();
     if (towerRun) towerRun.stats.codex = (towerRun.stats.codex || 0) + 1;
     log(`📜 ¡Dominaste ${e.skill.name}! Queda en tu Códice para siempre (J): un Herrero puede imbuirlo en una pieza sin alma.`);
@@ -171,6 +172,7 @@ function toggleSmith(open = !smithOpen) {
     if (gameMode !== 'tower' || !player || !player.arena || !player.arena.town || !player.arena.town.smith) return;
     smithOpen = open; smithPick = null; craftSel = null;
     showPanel('smith-container', open);
+    if (open) writeNotebookPage('SMITH');
     if (open) { document.getElementById('smith-tooltip').innerHTML = ''; renderSmith(); }
 }
 function renderSmith() {

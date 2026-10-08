@@ -43,6 +43,15 @@ function towerItemIcon(item) {
     return inkIcon(kind, color);
 }
 
+// --- FILTRO DE BOTÍN (pausa): qué se levanta solo al pasar. Lo filtrado queda en el piso, apagado. El piloto
+// automático levanta todo (si no, iría a buscar algo que no levanta y quedaría dando vueltas).
+const LOOT_FILTERS = { all: { name: 'todo', min: 0 }, magic: { name: 'mágico o mejor', min: 1 }, rare: { name: 'solo raro', min: 2 } };
+let lootFilter = 'all';
+try { const f = localStorage.getItem('chc-loot'); if (LOOT_FILTERS[f]) lootFilter = f; } catch (e) { /* por defecto */ }
+function setLootFilter(f) { lootFilter = LOOT_FILTERS[f] ? f : 'all'; try { localStorage.setItem('chc-loot', lootFilter); } catch (e) { /* no se guarda */ } }
+function cycleLootFilter() { const k = Object.keys(LOOT_FILTERS); setLootFilter(k[(k.indexOf(lootFilter) + 1) % k.length]); }
+function lootAllowed(item) { return autopilot || { normal: 0, magic: 1, rare: 2 }[item.quality] >= LOOT_FILTERS[lootFilter].min; }
+
 // --- COMPARAR CON LO EQUIPADO (como Diablo): qué ganás y qué perdés si te ponés esta pieza ---
 function weaponAtkOf(item) { const w = HERO_WEAPONS[item.heroKey]; return Math.round(w.atk + 1.5 * (item.level - 1) + ((item.statBoosts && item.statBoosts.weaponAtk) || 0)); }
 // La pieza equipada que reemplazaría (con dos anillos, el peor de los dos)
@@ -195,10 +204,11 @@ function drawTowerLoot(level) {
     (level.drops || []).forEach(d => {
         if (!canSee(level, d.x, d.y)) return;
         const px = d.x * TILE + TILE / 2, py = d.y * TILE + TILE / 2, color = ITEM_QUALITY[d.item.quality].color;
-        ctx.save(); ctx.shadowColor = color; ctx.shadowBlur = 10 + 4 * Math.sin(fxClock * 4);
+        ctx.save(); if (!lootAllowed(d.item)) ctx.globalAlpha = 0.35; // filtrada: apagada (no se levanta)
+        ctx.shadowColor = color; ctx.shadowBlur = 10 + 4 * Math.sin(fxClock * 4);
         ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.strokeRect(px - 11, py - 11, 22, 22); ctx.restore();
         const img = towerIconImage(d.item);
-        if (img.complete) ctx.drawImage(img, px - 10, py - 10, 20, 20);
+        if (img.complete) { ctx.save(); if (!lootAllowed(d.item)) ctx.globalAlpha = 0.35; ctx.drawImage(img, px - 10, py - 10, 20, 20); ctx.restore(); }
     });
 }
 const towerIconImages = {};

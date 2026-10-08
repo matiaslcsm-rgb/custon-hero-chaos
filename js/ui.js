@@ -999,6 +999,7 @@ function renderTitle() {
 
 function render() {
     const dt = tickFx();
+    musicTick(dt); // música del menú y de Custom Hero Chaos (en la Torre la maneja renderTower, towerMusic.js)
     const k = (towerLayout ? 1 : mapScale) * (window.devicePixelRatio || 1);
     ctx.setTransform(k, 0, 0, k, 0, 0);
     const hero = viewedHero || player;

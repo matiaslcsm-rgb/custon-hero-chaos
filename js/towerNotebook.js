@@ -13,7 +13,13 @@ const NOTEBOOK_PAGES = [
     { id: 'CAST', title: 'Lo que sé hacer', text: 'Probé lo que sea que trae esta arma. Algo salió de mis manos y el golpe se sintió distinto a cualquier otro. Así que esto es lo mío.' },
     { id: 'KILL', title: 'Primera baja', text: 'Maté a mi primer bicho de esta torre. No sentí nada en particular. Supongo que me voy a acostumbrar.' },
     { id: 'CHEST', title: 'El cofre', text: 'Encontré un cofre cerrado, con algo adentro. Lo que sea que guarde, ahora es mío.' },
-    { id: 'TOWN', title: 'El pueblo', text: 'Llegué a un pueblo. Hay gente acá, viviendo a la sombra de esta torre que sube y sube. Acá adentro, al menos, nadie me va a atacar.' }
+    { id: 'TOWN', title: 'El pueblo', text: 'Llegué a un pueblo. Hay gente acá, viviendo a la sombra de esta torre que sube y sube. Acá adentro, al menos, nadie me va a atacar.' },
+    // Lo nuevo de las fases 4 y 5 del rework (la lista de interfaz: "que el Cuaderno explique lo nuevo")
+    { id: 'TELEGRAPH', title: 'El suelo avisa', text: 'Antes de un golpe fuerte, el piso se marca y se va llenando. Si salgo de la marca a tiempo, o me tiro con el esquive justo cuando brilla, no me toca. Los grandes y los jefes lo hacen seguido.' },
+    { id: 'ESSENCE', title: 'Esencia', text: 'Del guardián salió una luz violeta que se me quedó adentro. Esencia, la llaman. No se va cuando muero: la junto run tras run y con ella compro cosas que duran (J, en el Códice).' },
+    { id: 'SMITH', title: 'El Herrero', text: 'Hay un herrero en este pueblo. Si le doy una pieza sin alma y un poder que domino, me la imbuye. También funde cinco piezas iguales en una pura, mejor cuanto mejor lo que le doy.' },
+    { id: 'CRAFT', title: 'Fundir', text: 'El herrero fundió cinco piezas en una. Si entre las cinco va una que ya fundió antes, la nueva sale sí o sí un escalón mejor: roma, usada, nueva, obra maestra.' },
+    { id: 'MASTERY', title: 'Dominar', text: 'Usé tanto un poder que ya lo sé de memoria. Quedó en el Códice para siempre: aunque muera, un herrero me lo puede volver a poner en una pieza.' }
 ];
 
 let notebookPersist = true; // las pruebas lo apagan para no tocar el cuaderno guardado del navegador (como el Códice)
