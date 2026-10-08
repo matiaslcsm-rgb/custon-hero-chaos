@@ -280,6 +280,7 @@ function updateTower(dt) {
     if (keys[KEYMAP.up] || keys[KEYMAP.left] || keys[KEYMAP.down] || keys[KEYMAP.right]) writeNotebookPage('MOVE');
     if (player.dashReadyAt > gameClock) writeNotebookPage('DODGE');
     towerTerrainTick(level, player, dt); // terreno, clima, pueblo y mercader (towerWorld.js)
+    towerCampTick(level, dt); // descansar junto a una fogata de noche (towerAtmos.js)
     const safe = heroInTown(player);     // en el pueblo los creeps no te persiguen
     if (safe) writeNotebookPage('TOWN');
     if (player.isAlive()) { computeFov(level, player); towerPickup(player); recoverCorpse(level, player); }
@@ -544,6 +545,7 @@ function renderTower(level, dt) {
     drawTowerShrines(level);
     drawTowerEvents(level);
     drawStarterWeapons(level); // las 3 armas clavadas al despertar (towerAwaken.js)
+    drawTowerLights(level); // antorchas y fogatas (towerAtmos.js)
     // Escalera (cerrada hasta vencer al guardián)
     drawCavePortals(level);
     const st = level.stairs || { x: 0, y: 0 }, sx = st.x * TILE, sy = st.y * TILE;
@@ -610,6 +612,7 @@ function renderTower(level, dt) {
     }
     ctx.restore();
     drawTowerNight(level); // día y noche (towerWorld.js)
+    drawTowerWeather(level, dt); // lluvia, nieve, ceniza, hojas… por bioma (towerAtmos.js)
     drawUltBanner(screenW() / 2, screenH() * 0.72); // cartel de la definitiva, encima de la niebla (fxSkills.js)
     drawInkVignette();
     drawObjectiveArrow(level);

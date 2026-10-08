@@ -1642,6 +1642,32 @@ test('Torre: al morir los stats quedan en tus restos; si morís otra vez antes d
     checkEq(player.towerStats.vit, 20, 'al buscarlos vuelve todo');
 });
 
+test('Torre: luz y clima — antorchas y fogatas por nivel, la fogata cura de noche (no de día ni peleando) y el clima se dibuja', () => {
+    const level = newTower();
+    const L = towerLights(level);
+    check(L.some(o => o.kind === 'fire' && o.town), 'fogata en la plaza del pueblo');
+    check(L.filter(o => o.kind === 'torch').length >= 4, 'antorchas');
+    const camps = L.filter(o => o.camp);
+    check(camps.length >= 2, `campamentos en el campo (${camps.length})`);
+    check(camps.every(o => towerZoneAt(level, o.x, o.y) === ZONE.field && walkable(level, o.x, o.y)), 'en el campo, en casillas que se pisan');
+    checkEq(towerLights(level), L, 'se arman una sola vez');
+    // la fogata
+    level.creeps.forEach(c => { c.hp = 0; });
+    const camp = camps[0]; player.x = camp.x; player.y = camp.y; player.hp = Math.round(player.maxHp * 0.5);
+    const day = player.hp; towerRun.startedAt = gameClock; towerCampTick(level, 1.1);
+    checkEq(player.hp, day, 'de día no cura');
+    towerRun.startedAt = gameClock - (DAYNIGHT.day + DAYNIGHT.dusk + 10); // de noche
+    const hp0 = player.hp; towerCampTick(level, 1.1);
+    check(player.hp > hp0, 'de noche, al lado de la fogata, cura');
+    const c = towerDummy(level, 2, 0); c.aggro = true; const hp1 = player.hp; towerCampTick(level, 1.1);
+    checkEq(player.hp, hp1, 'con alguien persiguiéndote, no');
+    // cuevas con antorchas, y el clima no rompe en ningún bioma
+    check(towerLights({ isCave: true, explored: level.explored, walls: level.walls, zone: null }).length >= 1, 'antorchas en la cueva');
+    ['forest', 'swamp', 'desert', 'snow', 'volcano'].forEach(b => { const f = { ...level, biome: b }; drawTowerWeather(f, 0.05); drawTowerWeather(f, 0.05); });
+    check(weatherParts.length > 0, 'hay partículas de clima');
+    const was = weatherOn; setWeather(false); drawTowerWeather(level, 0.05); checkEq(weatherParts.length, 0, 'apagado en la pausa'); setWeather(was);
+}, { random: true });
+
 test('Torre: el Cuaderno escribe una página sola la primera vez que hacés cada cosa, y no se repite', () => {
     notebookState = { seen: {} };
     newTower(); // startTowerRun() ya escribió WAKE al despertar
@@ -1664,7 +1690,7 @@ test('Torre: el Cuaderno escribe una página sola la primera vez que hacés cada
     writeNotebookPage('CHEST'); writeNotebookPage('TOWN');
     check(notebookState.seen.CHEST && notebookState.seen.TOWN, 'CHEST y TOWN');
 
-    ['TELEGRAPH', 'ESSENCE', 'SMITH', 'CRAFT', 'MASTERY', 'BULLETS', 'TRANSFER'].forEach(id => writeNotebookPage(id)); // las de lo nuevo (fases 4 y 5, tiradores)
+    ['TELEGRAPH', 'ESSENCE', 'SMITH', 'CRAFT', 'MASTERY', 'BULLETS', 'TRANSFER', 'CAMPFIRE'].forEach(id => writeNotebookPage(id)); // las de lo nuevo (fases 4 y 5, tiradores)
     checkEq(Object.keys(notebookState.seen).length, NOTEBOOK_PAGES.length, 'todas las páginas');
     const before = JSON.stringify(notebookState.seen);
     writeNotebookPage('WAKE'); // repetir no hace nada

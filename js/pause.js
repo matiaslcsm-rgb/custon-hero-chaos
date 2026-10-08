@@ -30,6 +30,7 @@ function renderPauseMenu() {
         opt('music', '🎵 Música', musicOn) +
         opt('sprites', '🎨 Pixel art (G)', spritesOn) +
         opt('colorblind', '🎨 Zonas de ataque para daltonismo (azul y naranja)', A11Y.colorblind) +
+        opt('weather', '🌧 Clima (lluvia, nieve, ceniza…)', weatherOn) +
         (gameMode === 'tower' ? `<button class="pm-toggle on" data-opt="loot">🎒 Levantar botín<span>${LOOT_FILTERS[lootFilter].name.toUpperCase()}</span></button>` : '') +
         opt('autocast', '✨ Habilidades automáticas (H)', autoCast) +
         opt('autopilot', '🤖 Piloto automático (P)', autopilot) +
@@ -50,7 +51,7 @@ function renderPauseMenu() {
     });
     document.querySelectorAll('#pause-options .pm-toggle').forEach(btn => {
         btn.onclick = () => {
-            ({ sound: () => setSound(!soundOn), music: () => setMusic(!musicOn), colorblind: () => setA11y('colorblind', !A11Y.colorblind), loot: cycleLootFilter, sprites: () => setSprites(!spritesOn), autocast: () => setAutoCast(!autoCast),
+            ({ sound: () => setSound(!soundOn), music: () => setMusic(!musicOn), colorblind: () => setA11y('colorblind', !A11Y.colorblind), weather: () => setWeather(!weatherOn), loot: cycleLootFilter, sprites: () => setSprites(!spritesOn), autocast: () => setAutoCast(!autoCast),
                autopilot: () => setAutopilot(!autopilot), bigmap: toggleBigMap })[btn.dataset.opt]();
             renderPauseMenu();
         };

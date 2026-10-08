@@ -132,6 +132,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   el borde para balas y tiradores fuera de la vista (REWORK.md, lista de interfaz).
 - **Dificultad medida con reflejos humanos (2026-10-08):** REWORK.md §10. Decidido: los restos se suman si morís de nuevo
   antes de buscarlos (se corta la espiral de muertes).
+- **Luz y clima (2026-10-08):** antorchas, fogatas (de noche curan), fragua, balas que brillan; lluvia, nieve, ceniza,
+  arena, hojas y luciérnagas por bioma, con opción para apagarlo (REWORK.md §11).
 - **Motor (decidido 2026-10-06):** seguimos en canvas + JavaScript puro. Pasar a un motor (Phaser para seguir en el
   navegador, Godot para publicar en PC/celular) se decide cuando el contenido de Tower Chaos esté más cerrado.
 - **Balance en curso (2026-09-28):** jefes más suaves desde la ronda 20 + Kaya y Cetro del Eclipse (ver DISEÑO.md §9 bis).

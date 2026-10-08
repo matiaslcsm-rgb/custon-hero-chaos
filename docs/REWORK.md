@@ -330,6 +330,20 @@ sobre todo **campeones** con afijos de resistencia y velocidad (Acorazado, Blind
 6-10, y lo del jefe final. Daño recibido: comunes 69-78%, anunciados 15-23%, balas 4-7%. La de 185 min es lenta (el
 diseño apunta a 120-160): vigilar a los campeones de los pisos 6-8 si se repite.
 
+## 11. Luz y clima (2026-10-08, `js/towerAtmos.js`)
+Para que el mundo se sienta vivo (referencias: las fogatas de Don't Starve y Valheim, que son luz y refugio a la vez; el
+clima de Hyper Light Drifter, pura atmósfera que no tapa la pelea).
+- **Luces:** el pueblo tiene una fogata en la plaza y ~8 antorchas; la puerta del laberinto, dos antorchas; el herrero,
+  su fragua; en el campo hay ~4 **campamentos abandonados** con fogata; las cuevas, antorchas en las paredes. De noche
+  abren un hueco en la oscuridad y tiñen de naranja con parpadeo. Las **balas enemigas brillan de noche** (se leen) y la
+  lava del volcán también.
+- **Fogata:** de noche, al lado de una y sin nadie persiguiéndote, recuperás 1,2% de vida por segundo (un respiro en la
+  parte más peligrosa del día). De día es solo un campamento. Página nueva del Cuaderno: "Una fogata".
+- **Clima por bioma, solo visual** (los efectos de clima ya existían en BIOMES): bosque, hojas y luciérnagas de noche;
+  ciénaga, llovizna y bancos de niebla; desierto, ráfagas de arena; nieve, nevada; volcán, ceniza y brasas que suben.
+  La intensidad va y viene. De noche se ve menos, salvo lo que brilla. **Se apaga en la pausa** (Opciones → 🌧 Clima).
+- No se mide balance: la fogata es chica y está lejos del camino; el resto es visual.
+
 ## Orden propuesto (cada fase jugable y medida)
 1. **Pantalla:** zoom, HUD más chico y menú de pausa con pestañas. Es barato y mejora todo lo que viene después.
 2. **Despertar y tutorial:** cuaderno y las 3 armas (espada, arco y bastón, con su habilidad). ✅ — las 3 armas
@@ -398,6 +412,7 @@ el mismo paso; lo grande queda acá, ordenado por impacto.
 - ✅ **Avisos de balas fuera de la vista** (2026-10-08, `drawOffscreenThreats` en towerBullets.js): un chevrón rojo en el
   borde, del lado de donde viene una bala que va a pasar cerca en menos de 1,6 s (más opaco cuanto antes llega), y un aro
   rojo para un tirador fuera de vista que está por disparar. Una marca por dirección (16), para no llenar el borde.
+- ✅ **Opción para apagar el clima** (partículas) en la pausa, para quien prefiera la pantalla limpia (2026-10-08).
 - Lista al día. Próximas ideas de interfaz cuando aparezcan (se anotan acá).
 - ✅ (antes) Pantalla grande con zoom, mensajes flotantes, aviso de puntos para repartir y barra del jefe abajo.
 
