@@ -299,7 +299,30 @@ Pedido: arreglar los jefes que tardaban (Gran Raíz Madre 1366 s con bastón, Br
 
 **Después:** Raíz Madre 21-58 s y 10-24% curado; Bruja del Fango 64-106 s; Reina Escorpión 31-85 s. Sin muertes.
 
+## 10. Dificultad medida con reflejos humanos (2026-10-08)
+El piloto esquivaba casi todo y no moría nunca: servía para medir tiempos, no dificultad. Nuevo modo **`aiReflex =
+'human'`** (`js/towerTelegraph.js`): reacciona 0,35 s tarde a cada aviso o bala (reacción visual con la pantalla
+cargada), no ve 1 de cada 5 y el esquive le sale 6 de cada 10 veces. Se registra de dónde viene el daño y quién mata.
 
+| Arma | Minutos | Muertes | Notas |
+|---|---|---|---|
+| Espada | 240+ (no terminó) | 30 | 29 en el piso 6: **espiral de muertes** (ver abajo) |
+| Espada | 116 | 0 | |
+| Espada | 121 | 1 | |
+| Arco | 98 | 0 | |
+| Bastón | 109 | 1 | en el piso 1, un tirador |
+| Bastón | 137 | 3 | las 3 en el piso 1, tiradores con escopeta |
+
+**De dónde viene el daño recibido:** golpes comunes 70-77%, ataques anunciados 18-24%, balas 4-8%, zonas 0-1%. Las
+balas no son lo que mata en general; **la escopeta en el piso 1 sí** (6 perdigones × 45% del ataque: un tirador "Gran"
+de cerca sacaba 35 de 215 por descarga, más que un arquero común). → Escopeta: 5 × 33% (21 por descarga).
+
+**La espiral de muertes:** al morir perdés la mitad de los puntos de stats; quedan en tus restos, pero si morís otra vez
+antes de buscarlos, los viejos se pierden para siempre. Cada muerte te deja más débil para el mismo piso. Con mala suerte
+de equipo, el piloto humano murió 29 veces seguidas en el piso 6. Queda configurable (`DEATH = { lose, stack }` en
+tower.js) para la decisión del usuario.
+
+## Orden propuesto (cada fase jugable y medida)
 1. **Pantalla:** zoom, HUD más chico y menú de pausa con pestañas. Es barato y mejora todo lo que viene después.
 2. **Despertar y tutorial:** cuaderno y las 3 armas (espada, arco y bastón, con su habilidad). ✅ — las 3 armas
    como pedestal obligatorio y el Cuaderno con sus 7 páginas, ver más arriba. ✅ La escena en el mundo (2026-10-08):

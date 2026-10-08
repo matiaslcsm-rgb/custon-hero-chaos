@@ -1603,6 +1603,29 @@ test('Torre: interfaz de combate — la ranura Q muestra la carga del arco y el 
     L.bullets = [];
 }, { random: true });
 
+test('Piloto con reflejos humanos: tarda en ver los avisos, a veces no los ve y a veces el esquive le falla', () => {
+    const saved = aiReflex;
+    try {
+        const level = newTower('AXE', { weapon: 'ADVENTURER_SWORD' });
+        level.creeps.forEach(c => { c.hp = 0; });
+        const c = towerDummy(level, 3, 0);
+        aiReflex = 'perfect';
+        startTelegraph(c, { shape: 'circle', x: player.x, y: player.y, r: 1.5 }, 'champion');
+        check(telegraphsOn(player).length === 1, 'el perfecto lo ve al instante');
+        aiReflex = 'human';
+        const t = level.telegraphs[level.telegraphs.length - 1]; t.aiRoll = 0.9; // de los que sí ve
+        checkEq(telegraphsOn(player).length, 0, 'el humano todavía no reaccionó');
+        gameClock += AI_REFLEX.human.reaction + 0.01;
+        checkEq(telegraphsOn(player).length, 1, 'ahora sí');
+        t.aiRoll = 0.01; checkEq(telegraphsOn(player).length, 0, 'este no lo vio (pantalla llena)');
+        level.telegraphs = [];
+        // el esquive: con dashOk 0 nunca le sale
+        const keep = AI_REFLEX.human.dashOk; AI_REFLEX.human.dashOk = 0;
+        try { player.aiDashFumbleUntil = 0; check(!aiDashWorks(player), 'le falló'); check(player.aiDashFumbleUntil > gameClock, 'y no reintenta enseguida'); }
+        finally { AI_REFLEX.human.dashOk = keep; }
+    } finally { aiReflex = saved; }
+}, { random: true });
+
 test('Torre: el Cuaderno escribe una página sola la primera vez que hacés cada cosa, y no se repite', () => {
     notebookState = { seen: {} };
     newTower(); // startTowerRun() ya escribió WAKE al despertar

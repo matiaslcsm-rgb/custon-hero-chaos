@@ -375,6 +375,10 @@ function renderStatsWindow() {
 }
 
 // --- MUERTE ---
+// lose: parte de los puntos de stats que quedan en tus restos · stack: si morís otra vez antes de buscarlos, los restos
+// viejos se suman a los nuevos (en vez de perderse). Medido con el piloto de reflejos humanos (2026-10-08): con 0,5 y
+// sin sumar, cada muerte te deja más débil para el mismo piso y se arma una espiral (30 muertes en el piso 6).
+const DEATH = { lose: 0.5, stack: false };
 function towerHeroDeath(hero, killer) {
     const level = hero.arena;
     hero.hp = 0;
@@ -386,11 +390,14 @@ function towerHeroDeath(hero, killer) {
     // si volvés hasta ellos los recuperás (como en Dark Souls). Si morís otra vez antes, los anteriores se pierden.
     const lost = {}, lostText = [];
     Object.keys(hero.towerStats).forEach(k => {
-        const n = Math.ceil(hero.towerStats[k] / 2);
+        const n = Math.ceil(hero.towerStats[k] * DEATH.lose);
         if (n > 0) { changeTowerStat(hero, k, -n); lost[k] = n; lostText.push(`${n} de ${TOWER_STATS[k].name}`); }
     });
     const old = towerRun.corpse;
-    if (old && !old.recovered) { old.recovered = true; old.faded = true; }
+    if (old && !old.recovered && DEATH.stack) { // los restos viejos viajan con los nuevos: no se pierde nada para siempre
+        Object.entries(old.lost).forEach(([k, n]) => { lost[k] = (lost[k] || 0) + n; });
+        old.recovered = true; old.merged = true;
+    } else if (old && !old.recovered) { old.recovered = true; old.faded = true; }
     const corpse = { x: hero.x, y: hero.y, killer: killer ? killer.label : null, at: gameClock, floor: level.floor, level, lost, points: Object.values(lost).reduce((a, b) => a + b, 0) };
     level.corpses.push(corpse);
     towerRun.corpse = corpse.points ? corpse : null;
@@ -398,7 +405,7 @@ function towerHeroDeath(hero, killer) {
     const carried = carrier ? `${carrier.label.replace(' (portador)', '')} se llevó ${carrier.carrier.map(i => i.name).join(' y ')}: cazalo para recuperarlo. ` : '';
     sfx('lose');
     log(`💀 ${killer ? killer.label + ' te mató' : 'Moriste'} en el piso ${level.floor}. ${lostText.length ? 'Perdés ' + lostText.join(', ') + ': quedan en tus restos, volvé a buscarlos. ' : ''}${carried}` +
-        `${old && old.faded && old.points ? `Tus restos anteriores (${old.points} puntos) se perdieron. ` : ''}Renacés en el círculo de piedra de la base en ${TOWER.respawnDelay}s.`);
+        `${old && old.faded && old.points ? `Tus restos anteriores (${old.points} puntos) se perdieron. ` : ''}${old && old.merged ? 'Tus restos anteriores se juntaron con estos. ' : ''}Renacés en el círculo de piedra de la base en ${TOWER.respawnDelay}s.`);
 }
 
 // Pisar tus restos (los de la última muerte) te devuelve los puntos de stats que perdiste.

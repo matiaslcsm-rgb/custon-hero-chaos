@@ -180,8 +180,27 @@ function drawBossBar(g) {
 }
 
 // --- PILOTO AUTOMÁTICO: salir de las zonas y esquivar a último momento ---
+// Reflejos del piloto (para medir la dificultad, 2026-10-08): el 'perfecto' ve cada aviso al instante y nunca falla el
+// esquive, así que no moría nunca y no servía para saber cuánto pegan las balas y los jefes. El 'humano' imita a una
+// persona: tarda en reaccionar, a veces no ve un aviso (pasa en pantalla llena) y a veces el esquive le sale tarde.
+// Referencias: el tiempo de reacción visual simple ronda 0,25 s; con varias cosas en pantalla, 0,35-0,45 s.
+const AI_REFLEX = { perfect: { reaction: 0, miss: 0, dashOk: 1 }, human: { reaction: 0.35, miss: 0.2, dashOk: 0.6 } };
+let aiReflex = 'perfect';
+function aiNotices(o, born) {
+    const R = AI_REFLEX[aiReflex];
+    if (!R.miss && !R.reaction) return true;
+    if (o.aiRoll === undefined) o.aiRoll = Math.random(); // cada aviso o bala: lo ve o no, una sola vez
+    return o.aiRoll >= R.miss && gameClock >= born + R.reaction;
+}
+// ¿Le sale el esquive? (una tirada por intento; si falla, no lo vuelve a intentar enseguida)
+function aiDashWorks(hero) {
+    if (gameClock < (hero.aiDashFumbleUntil || 0)) return false;
+    if (Math.random() < AI_REFLEX[aiReflex].dashOk) return true;
+    hero.aiDashFumbleUntil = gameClock + 0.6;
+    return false;
+}
 function telegraphsOn(hero, x = hero.x, y = hero.y) {
-    return (hero.arena.telegraphs || []).filter(t => gameClock >= t.at + (t.delay || 0) - 0.2 && teleContains(t, x, y))
+    return (hero.arena.telegraphs || []).filter(t => gameClock >= t.at + (t.delay || 0) - (aiReflex === 'perfect' ? 0.2 : 0) && teleContains(t, x, y) && aiNotices(t, t.at + (t.delay || 0)))
         .concat((hero.arena.zones || []).filter(z => (z.mult || z.slow) && teleContains(z, x, y)).map(z => Object.assign({ at: -1e9, windup: 1e9 }, z))); // las zonas que duran también se evitan (sin apuro de esquive)
 }
 function towerDodgeDir(hero) {
@@ -201,11 +220,11 @@ function towerDodgeDir(hero) {
     return best;
 }
 function aiTelegraphDash(hero) {
-    if (bulletImminent(hero) && gameClock >= (hero.dashReadyAt || 0)) { const d = towerDodgeDir(hero); if (d) { playerDash(d); return; } } // una bala encima: se tira (towerBullets.js)
+    if (bulletImminent(hero) && gameClock >= (hero.dashReadyAt || 0) && aiDashWorks(hero)) { const d = towerDodgeDir(hero); if (d) { playerDash(d); return; } } // una bala encima: se tira (towerBullets.js)
     const threats = telegraphsOn(hero);
     if (!threats.length || gameClock < (hero.dashReadyAt || 0)) return;
     const left = Math.min(...threats.map(t => t.at + (t.delay || 0) + t.windup - gameClock));
-    if (left > 0.35) return;
+    if (left > 0.35 || !aiDashWorks(hero)) return;
     const d = towerDodgeDir(hero);
     if (d) playerDash(d);
 }

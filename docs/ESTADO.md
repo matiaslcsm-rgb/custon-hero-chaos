@@ -130,6 +130,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   ventana; se camina hasta una y se agarra con F (configurable) o clic. Cierra la fase 2 del rework (REWORK.md §1).
 - **Interfaz de combate (2026-10-08):** la ranura Q muestra la carga del arco y el combo de la espada; chevrones rojos en
   el borde para balas y tiradores fuera de la vista (REWORK.md, lista de interfaz).
+- **Dificultad medida con reflejos humanos (2026-10-08):** REWORK.md §10. Pendiente de decisión: la espiral de muertes
+  (perder la mitad de los stats al morir, sin recuperarlos si morís de nuevo).
 - **Motor (decidido 2026-10-06):** seguimos en canvas + JavaScript puro. Pasar a un motor (Phaser para seguir en el
   navegador, Godot para publicar en PC/celular) se decide cuando el contenido de Tower Chaos esté más cerrado.
 - **Balance en curso (2026-09-28):** jefes más suaves desde la ronda 20 + Kaya y Cetro del Eclipse (ver DISEÑO.md §9 bis).
@@ -165,3 +167,9 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **Medir balance:** `simulateGame(índiceDeHéroe, godMode, rondas)` (en tests.js) juega partidas completas con la IA.
   Para diagnosticar, se registran muertes/duelos envolviendo funciones (`resolveDuel`, `handlePlayerDeath`, `endRound`) y se
   prueba **cambiando una cosa por vez** (ablación). Con 8-16 partidas por variante hay bastante ruido: repetir antes de concluir.
+- **Medir la Torre con el piloto (2026-10-08):** `startTowerRun(); chooseStarterWeapon('ADVENTURER_SWORD'); setAutopilot(true)` y
+  avanzar con `gameClock += 0.05; tickAutopilot(0.05); updateTower(0.05)` en tandas de 4000 con `setTimeout` (si no, el panel
+  se cuelga). **`aiReflex = 'human'`** pone al piloto con reflejos de persona (reacciona 0,35 s tarde, no ve 1 de cada 5
+  avisos o balas y el esquive le sale 6 de cada 10); el `'perfect'` de siempre esquiva casi todo y casi no muere, sirve para
+  medir tiempos pero no dificultad. Para pelear contra jefes, medir solo el tiempo a ≤ 9 casillas del jefe (el piloto a
+  veces lo despierta y se va a limpiar el mapa).

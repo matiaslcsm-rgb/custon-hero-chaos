@@ -15,7 +15,7 @@ const BULLET = { r: 0.26, hitR: 0.3, maxLife: 4, cap: 220, tell: 0.45, firstShot
 const BULLET_PATTERNS = {
     burst: { name: 'ráfaga', count: 1, spread: 0, shots: 3, gap: 0.16, speed: 6.5, dmg: 0.55, every: [2.4, 3.2] },
     fan: { name: 'abanico', count: 3, spread: 0.6, shots: 1, speed: 6, dmg: 0.6, every: [2.2, 3] },
-    shotgun: { name: 'escopeta', count: 6, spread: 0.9, shots: 1, speed: [4.5, 7.5], dmg: 0.45, life: 1.1, every: [2.6, 3.4] },
+    shotgun: { name: 'escopeta', count: 5, spread: 0.9, shots: 1, speed: [4.5, 7.5], dmg: 0.33, life: 1.1, every: [2.6, 3.4] }, // medido con reflejos humanos (2026-10-08): con 6 × 0,45 mataba en el piso 1
     ring: { name: 'anillo', count: 10, spread: Math.PI * 2, shots: 1, speed: 4.5, dmg: 0.5, every: [3.2, 4.2] },
     spiral: { name: 'espiral', count: 2, spread: Math.PI, shots: 12, gap: 0.12, rotate: 0.36, speed: 4.5, dmg: 0.4, every: [4.5, 5.5] }
 };
@@ -128,6 +128,7 @@ function bulletDanger(hero, x, y, horizon = 0.7) {
     if (!B || !B.length) return 0;
     let danger = 0;
     B.forEach(b => {
+        if (!aiNotices(b, b.born)) return; // el piloto 'humano' tarda en verla, o no la ve (towerTelegraph.js)
         const v2 = b.vx * b.vx + b.vy * b.vy || 1;
         const t = Math.max(0, Math.min(horizon, ((x - b.x) * b.vx + (y - b.y) * b.vy) / v2));
         if (Math.hypot(b.x + b.vx * t - x, b.y + b.vy * t - y) < b.r + BULLET.hitR + 0.25) danger += 1 / (t + 0.15);
