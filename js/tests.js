@@ -1948,6 +1948,21 @@ test('Opciones: volumen general, música, efectos y temblor (se guardan); la for
     check(!towerInFight(L), 'sin perseguidores, no');
 }, { random: true });
 
+test('Torre: el detalle de una pieza la compara con lo equipado (gana en verde, pierde en rojo)', () => {
+    newTower();
+    const cat = towerCatalog();
+    const worn = makeTowerItem(1, cat.find(e => e.slot === 'helm'), 'normal'); equipItem(player, worn);
+    const better = makeTowerItem(5, cat.find(e => e.slot === 'helm' && e.skillId !== worn.skillId), 'normal'); better.level = 6;
+    const html = itemCompareHtml(better);
+    check(/Si la equipás/.test(html) && /▲/.test(html), 'muestra lo que gana');
+    check(/Habilidad:/.test(html), 'avisa el cambio de habilidad');
+    checkEq(itemCompareHtml(worn), '', 'la equipada no se compara consigo misma');
+    check(/Ranura vacía/.test(itemCompareHtml(makeTowerItem(1, cat.find(e => e.slot === 'boots'), 'normal'))), 'ranura vacía');
+    worn.level = 4; // el equipado tiene más nivel: más vida de base
+    const worse = makeBlankItem(1, 'helm', 'normal'); worse.affixes = [];
+    check(/class="down">▼ −\d+ vida/.test(itemCompareHtml(worse)), 'lo que pierde, en rojo');
+}, { random: true });
+
 test('Ancla: cada golpe ralentiza y quita evasión', () => {
     newGame('AXE');
     const ev = effEvasion(player);

@@ -43,6 +43,39 @@ function towerItemIcon(item) {
     return inkIcon(kind, color);
 }
 
+// --- COMPARAR CON LO EQUIPADO (como Diablo): qué ganás y qué perdés si te ponés esta pieza ---
+function weaponAtkOf(item) { const w = HERO_WEAPONS[item.heroKey]; return Math.round(w.atk + 1.5 * (item.level - 1) + ((item.statBoosts && item.statBoosts.weaponAtk) || 0)); }
+// La pieza equipada que reemplazaría (con dos anillos, el peor de los dos)
+function comparedPiece(hero, item) {
+    if (item.slot !== 'ring') return { slot: item.slot, cur: hero.gear[item.slot] };
+    const rank = i => (i ? { normal: 0, magic: 1, rare: 2 }[i.quality] * 100 + i.level : -1);
+    const slot = rank(hero.gear.ring1) <= rank(hero.gear.ring2) ? 'ring1' : 'ring2';
+    return { slot, cur: hero.gear[slot] };
+}
+function itemCompareHtml(item) {
+    if (gameMode !== 'tower' || !player || !player.gear || EQUIP_SLOTS.some(s => player.gear[s] === item)) return '';
+    const { cur } = comparedPiece(player, item);
+    if (!cur) return `<div class="tt-compare"><b>Ranura vacía:</b> todo lo de esta pieza suma.</div>`;
+    const rows = [], line = (d, txt) => rows.push(`<li class="${d > 0 ? 'up' : 'down'}">${d > 0 ? '▲' : '▼'} ${txt}</li>`);
+    if (item.slot === 'weapon') {
+        const wa = HERO_WEAPONS[item.heroKey], wb = HERO_WEAPONS[cur.heroKey], da = weaponAtkOf(item) - weaponAtkOf(cur);
+        if (da) line(da, `${da > 0 ? '+' : '−'}${Math.abs(da)} daño del ataque`);
+        const ds = round1(wa.atkSpeed - wb.atkSpeed); if (ds) line(ds, `${ds > 0 ? '+' : '−'}${Math.abs(ds)} ataques/s`);
+        const dr = round1(wa.range - wb.range); if (dr) line(dr, `${dr > 0 ? '+' : '−'}${Math.abs(dr)} de alcance`);
+        if (!!wa.projectile !== !!wb.projectile) rows.push(`<li>↔ Pasás a pelear ${wa.projectile ? 'a distancia' : 'cuerpo a cuerpo'}</li>`);
+    }
+    const a = itemMods(item), b = itemMods(cur);
+    [...new Set(Object.keys(a).concat(Object.keys(b)))].forEach(k => {
+        const d = round1((a[k] || 0) - (b[k] || 0));
+        if (!d) return;
+        const txt = MOD_LABELS[k] ? MOD_LABELS[k](round1(Math.abs(d))).replace(/^\+/, '') : `${k} ${Math.abs(d)}`;
+        line(d, `${d > 0 ? '+' : '−'}${txt}`);
+    });
+    const sa = itemSkill(item), sb = itemSkill(cur);
+    if (sa !== sb) rows.push(`<li>↔ Habilidad: ${sb ? `<s>${sb.name}</s>` : 'ninguna'} → <b>${sa ? sa.name : 'ninguna'}</b></li>`);
+    return `<div class="tt-compare"><b>Si la equipás</b> (en lugar de ${cur.name}):<ul>${rows.join('') || '<li>Mismos números.</li>'}</ul></div>`;
+}
+
 function itemTooltipHtml(item) {
     const q = { ...ITEM_QUALITY[item.quality], color: qColor(item) }, t = item.heroKey ? heroOf(item.heroKey) : null, skill = itemSkill(item);
     const mods = Object.entries(itemMods(item)).map(([k, v]) => `<li>${MOD_LABELS[k] ? MOD_LABELS[k](v) : `${k} ${v}`}</li>`).join('');
@@ -69,6 +102,7 @@ function itemTooltipHtml(item) {
     if (item.crafted) html += `<div class="tt-forged">⚒ Fabricada: calidad ${CRAFT_QUALITY[item.craftTier].name} (stats base ×${item.craftMult})${item.masterwork ? ' · <b>Maestría</b>: la habilidad que le imbuyas arranca en nivel 2' : ''}.</div>`;
     if (item.blank) html += `<div class="tt-forged">Sin alma: no trae habilidad (por eso tiene un afijo de más). Un Herrero puede imbuirle un poder de tu Códice (J).</div>`;
     if (item.infused) html += `<div class="tt-forged">✦ Imbuida por el Herrero.</div>`;
+    html += itemCompareHtml(item); // qué ganás y qué perdés respecto de lo equipado
     return html;
 }
 

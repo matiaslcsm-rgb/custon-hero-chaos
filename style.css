@@ -767,3 +767,9 @@ body.tower-layout .skill-slot.empty { font-size: 0.6rem; }
 body.tower-layout .dash-slot { border-style: double; border-width: 3px; }
 body.tower-layout #hb-effects { position: absolute; left: 0; right: 0; bottom: calc(100% + 6px); display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; pointer-events: none; }
 body.tower-layout #hb-effects .fx-chip { background: rgba(241,231,208,0.9); border: 1px solid #2b2118; color: #2b2118; font-size: 0.62rem; padding: 0 4px; }
+
+/* Comparar con lo equipado */
+.tt-compare { margin-top: 8px; padding-top: 6px; border-top: 1px dashed #8f8166; font-size: 0.78rem; }
+.tt-compare ul { list-style: none; margin: 3px 0 0 4px; }
+.tt-compare li.up { color: #2d6a4f; font-weight: bold; }
+.tt-compare li.down { color: #9b2226; font-weight: bold; }

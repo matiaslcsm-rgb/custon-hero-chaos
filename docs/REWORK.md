@@ -238,19 +238,21 @@ el mismo paso; lo grande queda acá, ordenado por impacto.
   nivel, vida y maná finitas, Q/E/R con ícono grande y el **esquive (ESP) con su recarga** (antes no se veía); los
   estados activos van en chips arriba de la placa. Pasivas y equipo, en sus ventanas. El mapa ganó ~150 px de alto y
   la barra del jefe sube para no chocar.
+- ✅ **Comparar con lo equipado** (como Diablo): el detalle de cada pieza que no tenés puesta (bolsa, tienda,
+  herrero) muestra qué ganás (▲ verde) y qué perdés (▼ rojo) respecto de la que reemplazaría: stats, daño, velocidad y
+  alcance del arma, si pasás a pelear a distancia, y el cambio de habilidad. Con dos anillos, contra el peor.
 - ✅ (antes) Pantalla grande con zoom, mensajes flotantes, aviso de puntos para repartir y barra del jefe abajo.
 
 **Pendiente (de más a menos impacto):**
-1. **Comparar con lo equipado** en el detalle de cada pieza: lo que gana o pierde, en verde y rojo (como Diablo).
-2. **Mapa del piso a pantalla completa (M)** en la Torre, con leyenda: pueblo, herrero, santuarios, cuevas, eventos,
+1. **Mapa del piso a pantalla completa (M)** en la Torre, con leyenda: pueblo, herrero, santuarios, cuevas, eventos,
    tus restos y el portador.
-3. **Elegir a mano las 5 piezas a fundir** en el Herrero (hoy las elige él).
-4. **Reasignar teclas** desde la pausa.
-5. **Accesibilidad:** otros colores para las zonas de ataque (para daltonismo), tamaño de los números de daño y escala
+2. **Elegir a mano las 5 piezas a fundir** en el Herrero (hoy las elige él).
+3. **Reasignar teclas** desde la pausa.
+4. **Accesibilidad:** otros colores para las zonas de ataque (para daltonismo), tamaño de los números de daño y escala
    de la interfaz.
-6. **Filtro de botín**: no levantar piezas normales, o marcarlas para vender.
-7. **El Cuaderno explica lo nuevo** la primera vez: el Herrero, la Esencia, la fundición y los ataques anunciados.
-8. **Música en el menú y en Custom Hero Chaos.**
+5. **Filtro de botín**: no levantar piezas normales, o marcarlas para vender.
+6. **El Cuaderno explica lo nuevo** la primera vez: el Herrero, la Esencia, la fundición y los ataques anunciados.
+7. **Música en el menú y en Custom Hero Chaos.**
 
 ## Decisiones tomadas (2026-10-07)
 - **Estilo ASCII descartado:** se probó un filtro que convertía el mundo en caracteres (referencia: el MMORPG ASCII de
