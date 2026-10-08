@@ -251,15 +251,17 @@ el mismo paso; lo grande queda acá, ordenado por impacto.
 - ✅ **Elegir a mano las 5 piezas a fundir:** "Elegir" abre las piezas de esa ranura, ya marcadas las que elegiría el
   Herrero; cada clic marca o desmarca, y las chances y la garantía se actualizan al instante.
 - ✅ Las notas en amarillo de los detalles (chances, garantía, forjado) no se leían sobre el pergamino: pasaron a ocre.
+- ✅ **Teclas configurables** (pausa → ⌨️ Teclas, `js/keymap.js`): moverse, esquive, las 3 habilidades, las ventanas, la
+  tienda, el mapa, las automáticas y el piloto. Clic en la acción y apretás la tecla; si otra la usaba se intercambian
+  y las habilidades equipadas siguen a su tecla. Flechas y Esc fijos. La barra del héroe y la ayuda muestran las elegidas.
 - ✅ (antes) Pantalla grande con zoom, mensajes flotantes, aviso de puntos para repartir y barra del jefe abajo.
 
 **Pendiente (de más a menos impacto):**
-1. **Reasignar teclas** desde la pausa.
-2. **Accesibilidad:** otros colores para las zonas de ataque (para daltonismo), tamaño de los números de daño y escala
+1. **Accesibilidad:** otros colores para las zonas de ataque (para daltonismo), tamaño de los números de daño y escala
    de la interfaz.
-3. **Filtro de botín**: no levantar piezas normales, o marcarlas para vender.
-4. **El Cuaderno explica lo nuevo** la primera vez: el Herrero, la Esencia, la fundición y los ataques anunciados.
-5. **Música en el menú y en Custom Hero Chaos.**
+2. **Filtro de botín**: no levantar piezas normales, o marcarlas para vender.
+3. **El Cuaderno explica lo nuevo** la primera vez: el Herrero, la Esencia, la fundición y los ataques anunciados.
+4. **Música en el menú y en Custom Hero Chaos.**
 
 ## Decisiones tomadas (2026-10-07)
 - **Estilo ASCII descartado:** se probó un filtro que convertía el mundo en caracteres (referencia: el MMORPG ASCII de

@@ -278,7 +278,7 @@ function applyGear(hero) {
 
 // Teclas fijas por ranura (REWORK.md §2, fase 3): el arma siempre en Q, los guantes en E, la armadura en R —
 // no importa en qué orden equipás, así los controles son siempre los mismos.
-const TOWER_SLOT_KEY = { weapon: 'q', gloves: 'e', armor: 'r' };
+// (las teclas salen de keymap.js: se pueden cambiar en la pausa)
 function equipItem(hero, item, slot = null) {
     slot = slot || (item.slot === 'ring' ? (hero.gear.ring1 ? 'ring2' : 'ring1') : item.slot);
     if (slotKind(slot) !== item.slot) return false;
@@ -294,8 +294,8 @@ function equipItem(hero, item, slot = null) {
             // ya se piensa el movimiento); si el espacio ya lo tiene otra equipada, cae a la tecla fija de su
             // ranura como cualquier otra activa.
             const mobility = skill.tags && skill.tags.includes('MOVILIDAD');
-            if (mobility && !Object.values(hero.keyBindings).includes(' ')) hero.keyBindings[skill.id] = ' ';
-            else if (TOWER_SLOT_KEY[slot]) hero.keyBindings[skill.id] = TOWER_SLOT_KEY[slot];
+            if (mobility && !Object.values(hero.keyBindings).includes(KEYMAP.dash)) hero.keyBindings[skill.id] = KEYMAP.dash;
+            else if (towerSlotKey(slot)) hero.keyBindings[skill.id] = towerSlotKey(slot);
         }
     }
     applyGear(hero);

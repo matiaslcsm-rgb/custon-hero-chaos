@@ -602,7 +602,7 @@ function renderHeroBar() {
         slot.dataset.id = s.id;
         slot.title = `${s.name}${s.isUltimate ? ' (definitiva)' : ''}\n${stripHtml(skillCostLine(s, lvl))}\n${stripHtml(describeSkill(s, lvl))}` +
             (p.skillPoints > 0 && levelUpBlocker(p, s) ? `\n🔒 ${levelUpBlocker(p, s)}` : '');
-        const keyLabel = p.keyBindings[s.id] === ' ' ? 'ESP' : (p.keyBindings[s.id] || '—').toUpperCase();
+        const keyLabel = keyName(p.keyBindings[s.id]); // keymap.js
         slot.innerHTML = (gameMode === 'tower' ? `<img class="ink-skill-icon" src="${inkSkillIcon(s)}">` : '') +
             `<span class="key">${keyLabel}</span><span class="nm">${s.name}</span>` +
             `<span class="pips">${Array.from({ length: max }, (_, j) => `<i class="${j < lvl ? 'on' : ''}"></i>`).join('')}</span><div class="cd"></div>`;
@@ -614,7 +614,7 @@ function renderHeroBar() {
         d.className = 'skill-slot dash-slot'; d.id = 'hb-dash';
         d.title = `Esquive (Espacio)
 ${DASH.tiles} casillas, invulnerable ${DASH.iframes}s, recarga ${DASH.cooldown}s. Si tenés una habilidad de movilidad en el espacio, sale esa primero.`;
-        d.innerHTML = `<img class="ink-skill-icon" src="${inkIcon('mobility', '#2b2118')}"><span class="key">ESP</span><span class="nm">Esquive</span><div class="cd"></div>`;
+        d.innerHTML = `<img class="ink-skill-icon" src="${inkIcon('mobility', '#2b2118')}"><span class="key">${keyName(KEYMAP.dash)}</span><span class="nm">Esquive</span><div class="cd"></div>`;
         skills.appendChild(d);
     }
 

@@ -275,7 +275,7 @@ function updateTower(dt) {
     updateHero(player, level, dt);
     unstickFromWall(player);
     // Cuaderno (REWORK.md §1): moverse y esquivar se detectan leyendo el estado, sin tocar el código compartido.
-    if (keys.w || keys.a || keys.s || keys.d) writeNotebookPage('MOVE');
+    if (keys[KEYMAP.up] || keys[KEYMAP.left] || keys[KEYMAP.down] || keys[KEYMAP.right]) writeNotebookPage('MOVE');
     if (player.dashReadyAt > gameClock) writeNotebookPage('DODGE');
     towerTerrainTick(level, player, dt); // terreno, clima, pueblo y mercader (towerWorld.js)
     const safe = heroInTown(player);     // en el pueblo los creeps no te persiguen

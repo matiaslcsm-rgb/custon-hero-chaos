@@ -86,9 +86,13 @@ function renderTowerBadges() {
 }
 
 // --- PAUSA DE LA TORRE: accesos a las ventanas, zoom y controles ---
-const TOWER_CONTROLS = 'Mover: W A S D (o clic derecho) · Esquive: Espacio · Habilidades: E R T F Q V (salen hacia el cursor) · ' +
-    'Objetivo: clic izquierdo · Zoom: rueda o + − · Inventario: I · Stats: C · Códice: J · Bestiario: K · Diario del piso: L · ' +
-    'Tienda o Herrero: B · Mapa del piso: M · Automáticas: H · Piloto: P';
+// Ayuda de controles con las teclas elegidas (keymap.js)
+function towerControlsText() {
+    const K = a => keyName(KEYMAP[a]);
+    return `Mover: ${K('up')} ${K('left')} ${K('down')} ${K('right')} (o clic derecho) · Esquive: ${K('dash')} · Habilidades: ${K('skill1')} ${K('skill2')} ${K('skill3')} (salen hacia el cursor) · ` +
+        `Objetivo: clic izquierdo · Zoom: rueda o + − · Equipo: ${K('inventory')} · Stats: ${K('stats')} · Códice: ${K('codex')} · Bestiario: ${K('bestiary')} · ` +
+        `Diario del piso: ${K('log')} · Cuaderno: ${K('notebook')} · Tienda o Herrero: ${K('shop')} · Mapa del piso: ${K('map')} · Automáticas: ${K('autocast')} · Piloto: ${K('autopilot')}`;
+}
 function towerPauseHtml() {
     const b = (fn, label) => `<button class="secondary-btn" onclick="setPaused(false); ${fn}">${label}</button>`;
     return `<div class="pause-section">🗼 Torre</div><div class="pause-row tower-pause">` +
@@ -96,5 +100,5 @@ function towerPauseHtml() {
         b('toggleBestiary(true)', '📖 Bestiario (K)') + b('toggleTowerLog(true)', '📓 Diario del piso (L)') + b('toggleTowerMap(true)', '🗺️ Mapa del piso (M)') + b('toggleNotebook(true)', '✏️ Cuaderno (N)') + `</div>` +
         `<div class="pause-zoom">🔍 Zoom <button class="secondary-btn" onclick="towerZoom(-1); renderPauseMenu()">−</button>` +
         `<span>${Math.round(VIEW.across)} casillas a lo ancho</span><button class="secondary-btn" onclick="towerZoom(1); renderPauseMenu()">+</button></div>` +
-        `<p class="subtitle pause-controls">${TOWER_CONTROLS}</p>`;
+        `<p class="subtitle pause-controls">${towerControlsText()}</p>`;
 }

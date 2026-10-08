@@ -34,21 +34,23 @@ window.addEventListener('keydown', e => {
     if (e.target && e.target.tagName === 'INPUT') return; // escribiendo (tu nombre, el monto de la apuesta): no son teclas del juego
     const k = e.key.toLowerCase();
     keys[k] = true;
-    if (k === 'p') { setAutopilot(!autopilot); return; }
-    if (k === 'b') { if (gameMode === 'tower') towerShopKey(); else toggleShop(); return; }
-    if (k === 'm') { if (gameMode === 'tower') toggleTowerMap(); else toggleBigMap(); return; } // en la Torre, el mapa del piso (towerMap.js)
-    if (k === 'h') { setAutoCast(!autoCast); return; }
+    if (keysOpen) { if (k === 'escape') toggleKeys(false); return; } // con la ventana de teclas abierta no se juega (keymap.js)
+    const act = actionForKey(k), tower = gameMode === 'tower'; // teclas configurables (keymap.js)
+    if (act === 'autopilot') { setAutopilot(!autopilot); return; }
+    if (act === 'shop') { if (tower) towerShopKey(); else toggleShop(); return; }
+    if (act === 'map') { if (tower) toggleTowerMap(); else toggleBigMap(); return; } // en la Torre, el mapa del piso (towerMap.js)
+    if (act === 'autocast') { setAutoCast(!autoCast); return; }
     if (k === 'g') { setSprites(!spritesOn); return; }
-    if (k === 'c' && gameMode === 'tower') { toggleStatsWindow(); return; }
-    if (k === 'i' && gameMode === 'tower') { toggleInventory(); return; }
-    if (k === 'k' && gameMode === 'tower') { toggleBestiary(); return; }
-    if (k === 'j' && gameMode === 'tower') { toggleCodex(); return; }
-    if (k === 'l' && gameMode === 'tower') { toggleTowerLog(); return; }
-    if (k === 'n' && gameMode === 'tower') { toggleNotebook(); return; }
+    if (tower && act === 'stats') { toggleStatsWindow(); return; }
+    if (tower && act === 'inventory') { toggleInventory(); return; }
+    if (tower && act === 'bestiary') { toggleBestiary(); return; }
+    if (tower && act === 'codex') { toggleCodex(); return; }
+    if (tower && act === 'log') { toggleTowerLog(); return; }
+    if (tower && act === 'notebook') { toggleNotebook(); return; }
     if ((k === '+' || k === '=') && towerLayout) { towerZoom(1); return; }
     if ((k === '-' || k === '_') && towerLayout) { towerZoom(-1); return; }
     if (k === 'escape') { handleEscape(); return; }
-    if (k === ' ') { e.preventDefault(); if (!paused) spaceAction(); return; } // esquive o habilidad de movilidad (ver spaceAction)
+    if (act === 'dash') { e.preventDefault(); if (!paused) spaceAction(); return; } // esquive o habilidad de movilidad (ver spaceAction)
     if (paused) return; // en pausa no responden las demás teclas
     if (inCombat() && !autopilot) handleSkillKeypress(k);
 });
@@ -329,7 +331,7 @@ function resetGame() {
 // towerItems.js) en vez de a Q/E/R — probá lanzarla primero y, si no se pudo (enfriamiento, maná, nivel 0,
 // o directamente no tenés ninguna equipada), caé al esquive de siempre para que la tecla nunca quede "pegada".
 function spaceAction() {
-    const skill = canControlPlayer() && player.skillForKey(' ');
+    const skill = canControlPlayer() && player.skillForKey(KEYMAP.dash);
     if (skill && skillLevel(player, skill) > 0 && tryCastSkill(player, skill, { quiet: true })) return;
     playerDash();
 }
@@ -487,8 +489,8 @@ function updateHero(hero, arena, dt) {
 
 function keyboardDirection() {
     return {
-        dx: (keys['d'] || keys['arrowright'] ? 1 : 0) - (keys['a'] || keys['arrowleft'] ? 1 : 0),
-        dy: (keys['s'] || keys['arrowdown'] ? 1 : 0) - (keys['w'] || keys['arrowup'] ? 1 : 0)
+        dx: (keys[KEYMAP.right] || keys['arrowright'] ? 1 : 0) - (keys[KEYMAP.left] || keys['arrowleft'] ? 1 : 0),
+        dy: (keys[KEYMAP.down] || keys['arrowdown'] ? 1 : 0) - (keys[KEYMAP.up] || keys['arrowup'] ? 1 : 0)
     };
 }
 

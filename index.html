@@ -199,6 +199,19 @@
         </div>
     </div>
 
+    <!-- Teclas configurables (keymap.js) -->
+    <div id="keys-container" class="modal" style="display: none;">
+        <div class="modal-box">
+            <div class="modal-head">
+                <h3>⌨️ Teclas</h3>
+                <button class="modal-close" onclick="toggleKeys(false)" title="Cerrar (Esc)">✕</button>
+            </div>
+            <p class="subtitle">Clic en una acción y apretá la tecla nueva. Si otra acción la usaba, se intercambian. Las flechas siempre mueven y Esc siempre pausa.</p>
+            <div id="keys-list"></div>
+            <button class="secondary-btn" onclick="resetKeymap(); renderKeys()">Volver a las de fábrica</button>
+        </div>
+    </div>
+
     <!-- Tower Chaos: Códice de poderes (tecla J), persiste entre runs -->
     <div id="codex-container" class="modal" style="display: none;">
         <div class="modal-box wide">
@@ -309,6 +322,7 @@
             </div>
             <div class="pause-section">⚙ Opciones</div>
             <div id="pause-options"></div>
+            <button class="secondary-btn" onclick="toggleKeys(true)">⌨️ Teclas</button>
             <button id="pause-quit" class="secondary-btn danger">🏠 Salir al menú</button>
         </div>
     </div>
@@ -373,6 +387,7 @@
 
     <!-- Orden de carga: utilidades → datos → entidades/combate → flujo → interfaz → arranque -->
     <script src="js/utils.js"></script>
+    <script src="js/keymap.js"></script>
     <script src="js/data/tags.js"></script>
     <script src="js/data/registry.js"></script>
     <script src="js/data/heroes/axe.js"></script>

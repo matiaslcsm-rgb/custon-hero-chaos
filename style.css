@@ -782,3 +782,9 @@ body.map-open #hero-bar, body.map-open #float-log, body.map-open #tower-badges {
 .craft-choose { margin-right: 4px; }
 /* Sobre el pergamino el amarillo no se leía (chances, garantía, forjado, notas de las piezas) */
 body.ink-theme .tt-forged { color: #8a5a00; }
+
+/* Teclas configurables */
+#keys-list { display: flex; flex-direction: column; gap: 3px; margin: 8px 0; max-height: 60vh; overflow-y: auto; }
+.key-row { display: flex; justify-content: space-between; align-items: center; padding: 2px 6px; }
+.key-row.waiting { background: rgba(201,162,39,0.25); }
+.key-cap { min-width: 90px; font-family: Consolas, monospace; font-weight: bold; padding: 3px 8px; background: #f1e7d0; border: 2px solid #2b2118; box-shadow: 0 2px 0 #2b2118; cursor: pointer; }

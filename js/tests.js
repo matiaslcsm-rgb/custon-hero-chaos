@@ -1998,6 +1998,20 @@ test('Torre: fundir con las 5 piezas elegidas a mano (y la garantía también va
     codex = { unlocked: {}, best: {} };
 }, { random: true });
 
+test('Teclas configurables: cambiar, intercambiar, reservadas y las habilidades siguen a su tecla', () => {
+    const saved = Object.assign({}, KEYMAP);
+    try {
+        newTower();
+        const s = player.skills.find(x => player.keyBindings[x.id] === KEYMAP.skill1);
+        check(setKey('skill1', 'z') && KEYMAP.skill1 === 'z', 'la habilidad del arma pasa a la Z');
+        if (s) checkEq(player.keyBindings[s.id], 'z', 'la habilidad equipada sigue a su tecla');
+        setKey('inventory', 'z');
+        check(KEYMAP.inventory === 'z' && KEYMAP.skill1 === KEY_DEFAULTS.inventory, 'se intercambian');
+        check(!setKey('map', 'escape'), 'Esc no se puede usar');
+        setKey('up', 'u'); keys = { u: true }; checkEq(keyboardDirection().dy, -1, 'moverse con la tecla nueva'); keys = {};
+    } finally { resetKeymap(); Object.assign(KEYMAP, saved); saveKeymap(); keys = {}; }
+}, { random: true });
+
 test('Ancla: cada golpe ralentiza y quita evasión', () => {
     newGame('AXE');
     const ev = effEvasion(player);
