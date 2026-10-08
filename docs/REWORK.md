@@ -254,14 +254,14 @@ el mismo paso; lo grande queda acá, ordenado por impacto.
 - ✅ **Teclas configurables** (pausa → ⌨️ Teclas, `js/keymap.js`): moverse, esquive, las 3 habilidades, las ventanas, la
   tienda, el mapa, las automáticas y el piloto. Clic en la acción y apretás la tecla; si otra la usaba se intercambian
   y las habilidades equipadas siguen a su tecla. Flechas y Esc fijos. La barra del héroe y la ayuda muestran las elegidas.
+- ✅ **Accesibilidad** (pausa → Opciones): zonas de ataque en azul y naranja para daltonismo, tamaño de los textos de
+  combate (80-160%) y escala de la interfaz (80-140%: barra del héroe, ventanas, mensajes y franja de arriba). Se guardan.
 - ✅ (antes) Pantalla grande con zoom, mensajes flotantes, aviso de puntos para repartir y barra del jefe abajo.
 
 **Pendiente (de más a menos impacto):**
-1. **Accesibilidad:** otros colores para las zonas de ataque (para daltonismo), tamaño de los números de daño y escala
-   de la interfaz.
-2. **Filtro de botín**: no levantar piezas normales, o marcarlas para vender.
-3. **El Cuaderno explica lo nuevo** la primera vez: el Herrero, la Esencia, la fundición y los ataques anunciados.
-4. **Música en el menú y en Custom Hero Chaos.**
+1. **Filtro de botín**: no levantar piezas normales, o marcarlas para vender.
+2. **El Cuaderno explica lo nuevo** la primera vez: el Herrero, la Esencia, la fundición y los ataques anunciados.
+3. **Música en el menú y en Custom Hero Chaos.**
 
 ## Decisiones tomadas (2026-10-07)
 - **Estilo ASCII descartado:** se probó un filtro que convertía el mundo en caracteres (referencia: el MMORPG ASCII de

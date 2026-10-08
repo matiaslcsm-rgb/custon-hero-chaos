@@ -25,3 +25,16 @@ function shuffle(arr) {
 }
 
 function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+// --- ACCESIBILIDAD (pausa → Opciones; REWORK.md, lista de interfaz, 2026-10-07) ---
+// colorblind: zonas de ataque en azul y naranja en vez de rojo y dorado · combatText: tamaño de los números de daño y
+// carteles · uiScale: escala de la barra del héroe, las ventanas, los mensajes y la franja de arriba.
+const A11Y = { colorblind: false, combatText: 1, uiScale: 1 };
+try { Object.assign(A11Y, JSON.parse(localStorage.getItem('chc-a11y') || '{}')); } catch (e) { /* por defecto */ }
+function setA11y(key, v) {
+    A11Y[key] = key === 'colorblind' ? !!v : Math.max(key === 'uiScale' ? 0.8 : 0.8, Math.min(key === 'uiScale' ? 1.4 : 1.6, v));
+    try { localStorage.setItem('chc-a11y', JSON.stringify(A11Y)); } catch (e) { /* no se guarda */ }
+    applyA11y();
+}
+function applyA11y() { document.documentElement.style.setProperty('--ui-scale', A11Y.uiScale); }
+applyA11y();

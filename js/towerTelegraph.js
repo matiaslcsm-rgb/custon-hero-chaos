@@ -153,16 +153,17 @@ function drawTowerTelegraphs(level) {
         };
         ctx.save();
         const ult = t.kind === 'ult' || t.kind === 'boss';
-        ctx.fillStyle = `rgba(155,34,38,${0.1 + 0.12 * p})`; path(1); ctx.fill();
-        ctx.fillStyle = `rgba(155,34,38,${ult ? 0.38 : 0.3})`; path(p); ctx.fill(); // se va llenando
-        ctx.strokeStyle = p > 0.8 ? '#ffd166' : '#6b2a1f'; ctx.lineWidth = p > 0.8 ? 2.5 : 1.8; ctx.setLineDash(p > 0.8 ? [] : [6, 4]); path(1); ctx.stroke();
+        const rgb = A11Y.colorblind ? '29,78,216' : '155,34,38'; // daltonismo: azul y naranja (utils.js)
+        ctx.fillStyle = `rgba(${rgb},${0.1 + 0.12 * p})`; path(1); ctx.fill();
+        ctx.fillStyle = `rgba(${rgb},${ult ? 0.38 : 0.3})`; path(p); ctx.fill(); // se va llenando
+        ctx.strokeStyle = p > 0.8 ? (A11Y.colorblind ? '#f59e0b' : '#ffd166') : (A11Y.colorblind ? '#1e3a8a' : '#6b2a1f'); ctx.lineWidth = p > 0.8 ? 2.5 : 1.8; ctx.setLineDash(p > 0.8 ? [] : [6, 4]); path(1); ctx.stroke();
         ctx.restore();
     });
 }
 
 // Barra del jefe abajo al centro (estilo Hades): nombre, vida y las marcas de las fases
 function drawBossBar(g) {
-    const hud = document.getElementById('hero-bar'), lift = towerLayout && hud && hud.offsetHeight ? hud.offsetHeight + 18 : 0; // arriba de la barra del héroe
+    const hud = document.getElementById('hero-bar'), lift = towerLayout && hud && hud.offsetHeight ? hud.getBoundingClientRect().height + 18 : 0; // con la escala de la interfaz // arriba de la barra del héroe
     const W = screenW(), bw = Math.min(620, W * 0.55), bx = (W - bw) / 2, by = screenH() - 40 - lift;
     ctx.fillStyle = 'rgba(233,220,192,0.94)'; ctx.fillRect(bx - 10, by - 22, bw + 20, 38);
     ctx.strokeStyle = INK.line; ctx.lineWidth = 2; ctx.strokeRect(bx - 10, by - 22, bw + 20, 38);

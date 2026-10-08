@@ -153,7 +153,7 @@ function drawArenaFx(arena) {
         const px = f.x * TILE + TILE / 2, py = f.y * TILE + TILE / 2;
         ctx.globalAlpha = Math.max(0, 1 - t * t);
         if (f.kind === 'text') {
-            ctx.font = `bold ${Math.round(f.size * (t < 0.15 ? 1 + (0.15 - t) * 3 : 1))}px ${gameMode === 'tower' ? 'Georgia, serif' : 'monospace'}`;
+            ctx.font = `bold ${Math.round(f.size * A11Y.combatText * (t < 0.15 ? 1 + (0.15 - t) * 3 : 1))}px ${gameMode === 'tower' ? 'Georgia, serif' : 'monospace'}`;
             ctx.lineWidth = 3; ctx.strokeStyle = gameMode === 'tower' ? '#1d1712' : 'rgba(0,0,0,0.8)'; ctx.strokeText(f.text, px, py);
             ctx.fillStyle = f.color; ctx.fillText(f.text, px, py);
         } else if (f.kind === 'particle') {

@@ -2012,6 +2012,20 @@ test('Teclas configurables: cambiar, intercambiar, reservadas y las habilidades 
     } finally { resetKeymap(); Object.assign(KEYMAP, saved); saveKeymap(); keys = {}; }
 }, { random: true });
 
+test('Accesibilidad: daltonismo, tamaño de textos de combate y escala de la interfaz (con topes, se guardan)', () => {
+    const saved = Object.assign({}, A11Y);
+    try {
+        setA11y('combatText', 9); checkEq(A11Y.combatText, 1.6, 'tope de los textos');
+        setA11y('uiScale', 0.1); checkEq(A11Y.uiScale, 0.8, 'mínimo de la escala');
+        checkEq(getComputedStyle(document.documentElement).getPropertyValue('--ui-scale').trim(), '0.8', 'la escala llega a la interfaz');
+        setA11y('colorblind', true); check(A11Y.colorblind === true, 'modo daltonismo');
+        newTower();
+        const c = makeCreep(towerCreepPool(1)[0], player.x + 1, player.y, 1, false, 0); c.arena = player.arena; player.arena.creeps.push(c);
+        startTelegraph(c, { shape: 'circle', x: player.x, y: player.y, r: 1.5 }, 'champion');
+        drawTowerTelegraphs(player.arena); // dibuja con la otra paleta sin romper
+    } finally { Object.keys(saved).forEach(k => setA11y(k, saved[k])); }
+}, { random: true });
+
 test('Ancla: cada golpe ralentiza y quita evasión', () => {
     newGame('AXE');
     const ev = effEvasion(player);

@@ -788,3 +788,8 @@ body.ink-theme .tt-forged { color: #8a5a00; }
 .key-row { display: flex; justify-content: space-between; align-items: center; padding: 2px 6px; }
 .key-row.waiting { background: rgba(201,162,39,0.25); }
 .key-cap { min-width: 90px; font-family: Consolas, monospace; font-weight: bold; padding: 3px 8px; background: #f1e7d0; border: 2px solid #2b2118; box-shadow: 0 2px 0 #2b2118; cursor: pointer; }
+
+/* Escala de la interfaz (accesibilidad, utils.js) */
+:root { --ui-scale: 1; }
+body.tower-layout #hero-bar, .modal-box, body.tower-layout #float-log, body.tower-layout #tower-badges, #map-hud, #center-timer { zoom: var(--ui-scale); }
+@media (max-width: 1150px) { body.tower-layout #float-log { bottom: calc(96px * var(--ui-scale)); max-width: 45%; } } /* angosto: arriba de la placa del héroe */

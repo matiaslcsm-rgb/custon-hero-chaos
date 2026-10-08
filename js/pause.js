@@ -19,26 +19,37 @@ function setPaused(on) {
 }
 function togglePause() { setPaused(!paused); }
 
+// Deslizador de accesibilidad (utils.js)
+function a11ySlider(key, label, min, max) {
+    return `<label class="pm-slider">${label}<input type="range" min="${min * 100}" max="${max * 100}" step="10" value="${Math.round(A11Y[key] * 100)}" data-a11y="${key}"><b>${Math.round(A11Y[key] * 100)}%</b></label>`;
+}
 function renderPauseMenu() {
     const opt = (id, label, on, fn) => `<button class="pm-toggle${on ? ' on' : ''}" data-opt="${id}">${label}<span>${on ? 'SÍ' : 'NO'}</span></button>`;
     document.getElementById('pause-options').innerHTML =
         opt('sound', '🔊 Sonido', soundOn) +
         (gameMode === 'tower' ? opt('music', '🎵 Música', musicOn) : '') +
         opt('sprites', '🎨 Pixel art (G)', spritesOn) +
+        opt('colorblind', '🎨 Zonas de ataque para daltonismo (azul y naranja)', A11Y.colorblind) +
         opt('autocast', '✨ Habilidades automáticas (H)', autoCast) +
         opt('autopilot', '🤖 Piloto automático (P)', autopilot) +
         (gameMode === 'tower' ? '' : opt('bigmap', '⤢ Mapa grande (M)', mapScale > 1)); // en la Torre el mapa ya ocupa la ventana
     // Deslizadores: volumen general, música, efectos y temblor de pantalla
     const slider = (key, label, max = 1) => `<label class="pm-slider">${label}<input type="range" min="0" max="${max * 100}" step="5" value="${Math.round(VOLUME[key] * 100)}" data-vol="${key}"><b>${Math.round(VOLUME[key] * 100)}%</b></label>`;
     document.getElementById('pause-options').insertAdjacentHTML('afterbegin',
-        slider('master', '🔈 Volumen general') + (gameMode === 'tower' ? slider('music', '🎵 Música') : '') + slider('sfx', '💥 Efectos') + slider('shake', '📳 Temblor de pantalla', 1.5));
+        slider('master', '🔈 Volumen general') + (gameMode === 'tower' ? slider('music', '🎵 Música') : '') + slider('sfx', '💥 Efectos') + slider('shake', '📳 Temblor de pantalla', 1.5) +
+        `<div class="pause-section">♿ Accesibilidad</div>` +
+        a11ySlider('combatText', '🔠 Textos de combate', 0.8, 1.6) + a11ySlider('uiScale', '🖥 Escala de la interfaz', 0.8, 1.4));
     document.querySelectorAll('#pause-options input[data-vol]').forEach(inp => {
         inp.oninput = () => { VOLUME[inp.dataset.vol] = inp.value / 100; inp.nextElementSibling.textContent = inp.value + '%'; if (inp.dataset.vol !== 'sfx' && inp.dataset.vol !== 'master') setVolume(inp.dataset.vol, inp.value / 100); else applyVolume(); };
         inp.onchange = () => { setVolume(inp.dataset.vol, inp.value / 100); inp.blur(); }; // al soltar: se guarda y suena una muestra
     });
+    document.querySelectorAll('#pause-options input[data-a11y]').forEach(inp => {
+        inp.oninput = () => { inp.nextElementSibling.textContent = inp.value + '%'; setA11y(inp.dataset.a11y, inp.value / 100); };
+        inp.onchange = () => inp.blur();
+    });
     document.querySelectorAll('#pause-options .pm-toggle').forEach(btn => {
         btn.onclick = () => {
-            ({ sound: () => setSound(!soundOn), music: () => setMusic(!musicOn), sprites: () => setSprites(!spritesOn), autocast: () => setAutoCast(!autoCast),
+            ({ sound: () => setSound(!soundOn), music: () => setMusic(!musicOn), colorblind: () => setA11y('colorblind', !A11Y.colorblind), sprites: () => setSprites(!spritesOn), autocast: () => setAutoCast(!autoCast),
                autopilot: () => setAutopilot(!autopilot), bigmap: toggleBigMap })[btn.dataset.opt]();
             renderPauseMenu();
         };
