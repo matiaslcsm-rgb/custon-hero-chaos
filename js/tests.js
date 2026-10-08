@@ -1428,22 +1428,129 @@ function towerDummy(level, dx = 1, dy = 0) {
     level.creeps.push(c);
     return c;
 }
-test('Torre: Ráfaga del Arco pega a varios enemigos; Saeta Arcana marca el elemento para las reacciones', () => {
+// Vuela los proyectiles hasta que no quede ninguno (o se acabe el tiempo)
+function flyProjectiles(level, max = 3) { for (let t = 0; t < max && level.projectiles.length; t += 0.02) updateProjectiles(level, 0.02); }
+test('Torre: Combo de Tajos (espada) — arco a todos, remate ×2 que empuja, recuperación y el ritmo se corta', () => {
+    const level = newTower('AXE', { weapon: 'ADVENTURER_SWORD' });
+    level.creeps.forEach(c => { c.hp = 0; });
+    const sk = SKILL_INDEX.ADVENTURER_GOLPE;
+    const a = towerDummy(level, 1, 0), b = towerDummy(level, 1, 1), back = towerDummy(level, -2, 0);
+    player.aimPoint = { x: player.x + 3, y: player.y };
+    check(tryCastSkill(player, sk), 'primer tajo');
+    check(a.hp < 9999 && b.hp < 9999, 'el arco agarra a los dos de adelante');
+    checkEq(back.hp, 9999, 'no al de atrás (fuera del arco)');
+    const d1 = 9999 - a.hp;
+    checkEq(player.comboStep, 1, 'va un tajo');
+    check(player.cooldowns[sk.id] < 0.5, 'entre tajo y tajo, casi nada');
+    player.cooldowns[sk.id] = 0; tryCastSkill(player, sk);
+    player.cooldowns[sk.id] = 0; const ax = a.x, hpBefore = a.hp; tryCastSkill(player, sk);
+    check(hpBefore - a.hp > d1 * 1.5, 'el remate pega mucho más');
+    check(a.x !== ax, 'y empuja');
+    checkEq(player.comboStep, 0, 'vuelve a empezar');
+    check(player.cooldowns[sk.id] > 1, 'después del remate, recuperación');
+    player.cooldowns[sk.id] = 0; tryCastSkill(player, sk); gameClock += 5; player.cooldowns[sk.id] = 0; tryCastSkill(player, sk);
+    checkEq(player.comboStep, 1, 'si tardás, el ritmo se corta y arranca de nuevo');
+    player.aimPoint = null;
+    checkEq(sk.manaCost, undefined); checkEq(val(sk, player, 'manaCost'), 0, 'sin maná');
+});
+test('Torre: Tiro Tensado (arco) — al toque no atraviesa, tensado del todo atraviesa, perfecto suma, tensar frena', () => {
     const level = newTower('AXE', { weapon: 'ADVENTURER_BOW' });
     level.creeps.forEach(c => { c.hp = 0; });
-    const volley = SKILL_INDEX.ADVENTURER_VOLLEY;
-    const a = towerDummy(level, 1, 0), b = towerDummy(level, 1, 1), far = towerDummy(level, 15, 0);
-    volley.cast(player);
-    check(a.hp < 9999 && b.hp < 9999, 'pegó a los dos cercanos');
+    const sk = SKILL_INDEX.ADVENTURER_VOLLEY;
+    // un pasillo libre a la derecha
+    for (let x = 1; x <= 6; x++) level.walls[player.y][player.x + x] = 0;
+    const a = towerDummy(level, 2, 0), b = towerDummy(level, 4, 0);
+    const shoot = held => { player.cooldowns[sk.id] = 0; player.mana = player.maxMana; startCharge(player, sk, 'q'); player.charging.start = gameClock - held; player.aimPoint = null; releaseCharge(player); flyProjectiles(level); };
+    shoot(0.05);
+    check(a.hp < 9999 && b.hp === 9999, 'al toque: se queda en el primero');
+    const tap = 9999 - a.hp; a.hp = b.hp = 9999;
+    shoot(BOW_SHOT.chargeTime + 0.5);
+    check(a.hp < 9999 && b.hp < 9999, 'tensado del todo: atraviesa');
+    const full = 9999 - a.hp; a.hp = b.hp = 9999;
+    check(full > tap * 2.5, `tensado pega mucho más (${tap} → ${full})`);
+    shoot(BOW_SHOT.chargeTime + 0.05);
+    check(9999 - a.hp > full * 1.15, 'soltar justo: tiro perfecto');
+    player.cooldowns[sk.id] = 0; startCharge(player, sk, 'q'); towerFeelTick(player);
+    check(effMoveMult(player) < 0.7, 'tensando camina más lento');
+    releaseCharge(player); towerFeelTick(player);
+    check(!getEffect(player, 'CHARGING'), 'al soltar, vuelve a caminar normal');
+    // una pared frena la flecha
+    a.hp = 9999; level.walls[player.y][player.x + 1] = WALL.stone; shoot(BOW_SHOT.chargeTime + 0.5);
+    checkEq(a.hp, 9999, 'la pared la frena');
+}, { random: true });
+test('Torre: Saeta Arcana (bastón) — orbe que explota en el primero, salpica y marca arcano', () => {
+    const level = newTower('AXE', { weapon: 'ADVENTURER_STAFF' });
+    level.creeps.forEach(c => { c.hp = 0; });
+    for (let x = 1; x <= 4; x++) for (let y = -1; y <= 1; y++) level.walls[player.y + y][player.x + x] = 0;
+    const sk = SKILL_INDEX.ADVENTURER_BOLT;
+    const c = towerDummy(level, 2, 0), side = towerDummy(level, 2, 1), far = towerDummy(level, 9, 5);
+    player.mana = player.maxMana;
+    check(tryCastSkill(player, sk), 'sale el orbe');
+    flyProjectiles(level);
+    check(c.hp < 9999, 'le pega al primero');
+    check(side.hp < 9999 && 9999 - side.hp < 9999 - c.hp, 'salpica al de al lado, menos');
     checkEq(far.hp, 9999, 'no al de lejos');
-
-    const level2 = newTower('AXE', { weapon: 'ADVENTURER_STAFF' });
-    level2.creeps.forEach(c => { c.hp = 0; });
-    const bolt = SKILL_INDEX.ADVENTURER_BOLT;
-    const c = towerDummy(level2);
-    fxCastingSkill = bolt; bolt.cast(player); fxCastingSkill = null; // así currentDamageElement() resuelve el elemento (fxSkills.js)
-    check(c.hp < 9999, 'daño mágico');
     check(c.elMark && c.elMark.el === 'arcane', 'marcado con arcano para las reacciones (fxSkills.js)');
+}, { random: true });
+
+test('Torre: tiradores — avisan, disparan su patrón, la bala pega, el esquive la atraviesa, la pared la frena y la espada la desvía', () => {
+    const level = newTower('AXE', { weapon: 'ADVENTURER_SWORD' });
+    level.creeps.forEach(c => { c.hp = 0; });
+    for (let x = -1; x <= 6; x++) for (let y = -2; y <= 2; y++) if (level.walls[player.y + y] && level.walls[player.y + y][player.x + x] !== undefined) level.walls[player.y + y][player.x + x] = 0;
+    check(towerBestiary('forest').some(t => t.genome.role === 'gunner' && BULLET_PATTERNS[t.bulletPattern]), 'cada bioma tiene un tirador con su patrón');
+    const type = makeGunnerType(generateBeast('forest', 'gunner', 0), 'gunner'); type.bulletPattern = 'fan';
+    const g = makeCreep(type, player.x + 5, player.y, 1, false, 0); Object.assign(g, { arena: level, spawnTime: -1e9, aggro: true }); level.creeps.push(g);
+    g.shotAt = gameClock; gunnerTick(g, 0.05);
+    check(g.tellUntil > gameClock, 'primero avisa');
+    checkEq((level.bullets || []).length, 0, 'todavía no disparó');
+    gameClock += BULLET.tell + 0.01; gunnerTick(g, 0.05);
+    checkEq(level.bullets.length, 3, 'abanico: 3 balas');
+    const hp = player.hp;
+    for (let i = 0; i < 40; i++) { gameClock += 0.05; towerBulletsTick(level, 0.05); }
+    check(player.hp < hp, 'la del medio le pega al que se queda quieto');
+    // el esquive la atraviesa
+    level.bullets = []; g.shotAt = gameClock; g.tellUntil = 0; gunnerTick(g, 0.05); gameClock += BULLET.tell + 0.01; gunnerTick(g, 0.05);
+    const hp2 = player.hp; addEffect(player, { id: 'DASH', name: 'Esquive', duration: 99, flags: ['invulnerable'] });
+    for (let i = 0; i < 40; i++) { gameClock += 0.05; towerBulletsTick(level, 0.05); }
+    checkEq(player.hp, hp2, 'con el esquive no le pega'); removeEffect(player, 'DASH');
+    // la pared la frena
+    level.bullets = []; spawnBullet(g, Math.PI, 6, 1); level.walls[player.y][player.x + 2] = WALL.stone;
+    const hp3 = player.hp; for (let i = 0; i < 40; i++) { gameClock += 0.05; towerBulletsTick(level, 0.05); }
+    checkEq(player.hp, hp3, 'la pared la frena'); level.walls[player.y][player.x + 2] = 0;
+    // el piloto la ve venir y se corre
+    level.bullets = []; spawnBullet(g, Math.PI, 6, 1);
+    check(bulletDanger(player, player.x, player.y) > 0, 've que viene');
+    const d = towerDodgeDir(player);
+    check(d && d.dy !== 0, 'se corre de la línea');
+    // la espada la desvía
+    level.bullets = []; spawnBullet(g, Math.PI, 6, 1); level.bullets[0].x = player.x + 1.2;
+    player.aimPoint = { x: player.x + 3, y: player.y }; player.cooldowns.ADVENTURER_GOLPE = 0; tryCastSkill(player, SKILL_INDEX.ADVENTURER_GOLPE); player.aimPoint = null;
+    checkEq(level.bullets.length, 0, 'el tajo la desvía');
+}, { random: true });
+
+test('Torre: traspasar — la pieza vieja se consume, la nueva hereda la mitad de su experiencia y de sus stats, y cuesta oro', () => {
+    newTower('AXE', { weapon: 'ADVENTURER_SWORD' });
+    const old = player.gear.weapon;
+    giveItemXp(player, old, itemTotalXp(Object.assign({}, old, { level: 7, xp: 0 })));
+    old.statBoosts = { weaponAtk: 8 };
+    checkEq(old.level, 7, 'la vieja llegó a nivel 7');
+    const neu = makeTowerItem(2, towerCatalog().find(e => e.slot === 'weapon' && e.heroKey === 'AXE'), 'magic');
+    equipItem(player, neu);
+    check(player.bag.some(b => b.item === old), 'la vieja quedó en la bolsa');
+    const p = transferPreview(old, neu), cost = transferCost(old);
+    check(p.levels >= 2, `sube varios niveles (${p.levels})`);
+    checkEq(p.stats.weaponAtk, 4, 'la mitad del daño forjado');
+    player.gold = cost - 1;
+    check(!transferItem(player, old, neu), 'sin oro, no');
+    player.gold = cost + 5; const lvl = neu.level, atk = player.baseAtk, xp0 = itemTotalXp(neu);
+    check(transferItem(player, old, neu), 'traspasa');
+    checkEq(player.gold, 5, 'cobró');
+    check(!player.bag.some(b => b.item === old), 'la vieja desapareció');
+    checkEq(neu.level, lvl + p.levels, 'subió lo que decía la vista previa');
+    check(neu.pendingChoices >= p.levels, 'con sus elecciones de forja');
+    check(player.baseAtk > atk, 'pega más');
+    check(!canTransfer(neu, makeBlankItem(1, 'helm', 'normal')), 'solo entre piezas de la misma ranura');
+    checkEq(itemTotalXp(neu) - xp0, Math.floor(itemTotalXp(old) * TRANSFER.share), 'exactamente la mitad de la experiencia');
 });
 
 test('Torre: el Cuaderno escribe una página sola la primera vez que hacés cada cosa, y no se repite', () => {
@@ -1468,7 +1575,7 @@ test('Torre: el Cuaderno escribe una página sola la primera vez que hacés cada
     writeNotebookPage('CHEST'); writeNotebookPage('TOWN');
     check(notebookState.seen.CHEST && notebookState.seen.TOWN, 'CHEST y TOWN');
 
-    ['TELEGRAPH', 'ESSENCE', 'SMITH', 'CRAFT', 'MASTERY'].forEach(id => writeNotebookPage(id)); // las de lo nuevo (fases 4 y 5)
+    ['TELEGRAPH', 'ESSENCE', 'SMITH', 'CRAFT', 'MASTERY', 'BULLETS', 'TRANSFER'].forEach(id => writeNotebookPage(id)); // las de lo nuevo (fases 4 y 5, tiradores)
     checkEq(Object.keys(notebookState.seen).length, NOTEBOOK_PAGES.length, 'todas las páginas');
     const before = JSON.stringify(notebookState.seen);
     writeNotebookPage('WAKE'); // repetir no hace nada

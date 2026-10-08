@@ -217,6 +217,59 @@ volcán CC BY 4.0, créditos en docs/CREDITOS.md y en el menú), ~21 MB que se b
 
 ---
 
+## 8. Sensación de las armas, tiradores y traspaso (2026-10-08)
+Pedido del usuario: "mejorar el gamefeel de las clases: sin animación de combate se siente tosco y esperar a que se
+cargue la Q es tosco; enemigos que disparen tipo Enter the Gungeon; mejorar cómo se siente la espada; el arco, poder
+apuntar y cargar la flecha; las armas que suban de nivel y después aparezca una mejor, que se puedan fundir para pasar
+un porcentaje de sus stats a otro objeto, con un costo. Todo con balance."
+
+**Lo que encontramos:** las 3 armas iniciales no tenían efecto propio: la espada se dibujaba como un **puñetazo**. Y la Q
+tardaba 6-7 s en volver (~4,5 s con el −25% general), así que casi siempre no había nada que apretar.
+
+**Las 3 armas (`js/towerFeel.js`):**
+- **Espada · Combo de Tajos:** cada Q es un tajo en arco hacia el cursor (paso adelante, como Hades). Tercer tajo =
+  remate ×2 que empuja y frena el tiempo un instante. Entre tajos 0,375 s; después del remate, 1,35-1,1 s. Sin maná.
+  Mantener la Q encadena solo. Pega entero al más cercano y 60% al resto del arco. **Desvía los proyectiles** que agarra.
+  El ataque automático también es un tajo en arco (antes, puñetazo). Puntitos bajo el héroe: cuántos tajos van.
+- **Arco · Tiro Tensado:** mantener Q tensa (0,9 s; caminás 45% más lento y no disparás solo) con la línea de tiro
+  hacia el cursor que se afina y se pone dorada; al soltar, de ×0,5 (al toque) a ×2,3 tensado, que **atraviesa** a
+  todos. Soltar dentro de 0,2 s de tensarse: **tiro perfecto** +30% (la "recarga activa" de Gears of War). 6 de maná.
+  Las flechas se dibujan como flechas y las paredes las frenan.
+- **Bastón · Saeta Arcana:** orbe apuntado que explota al tocar al primero (mitad del daño a los de alrededor) y marca
+  arcano. 14 de maná, 2,2-1,7 s.
+- Las Q que se tiran seguido dan menos experiencia por tiro a su pieza (`castXp`), para que el arma no suba volando.
+
+**Medido** (60 s contra muñecos, daño por segundo sin Q → con Q, el piloto usándola):
+
+| Arma | Solo | Grupo de 4 | Límite |
+|---|---|---|---|
+| Espada | 23 → 34 (+48%) | 23 → 65 | el ritmo (sin maná), pero hay que estar cuerpo a cuerpo |
+| Arco | 19 → 24 (+26%; con tiros perfectos ~+50%) | 18 → 51 (atraviesa) | maná: ~75 s seguidos |
+| Bastón | 17 → 26 (+53%) | 17 → 39 | maná: se vacía en ~60 s |
+
+**Tiradores (`js/towerBullets.js`):** lo que el usuario recordaba de Enter the Gungeon se llama *bullet hell*
+(danmaku): proyectiles lentos con formas que se leen. Patrones: **ráfaga** (3 seguidas que corrigen la puntería),
+**abanico** (3), **escopeta** (6 de corto alcance), **anillo** (10) y **espiral**. Reglas copiadas de Gungeon: cada
+tirador **avisa** (aro rojo que se cierra, 0,45 s), las balas son lentas y se esquivan caminando, **el esquive las
+atraviesa** y las paredes las frenan. Siempre el mismo color de peligro (rojo; naranja en modo daltonismo).
+- Rol nuevo **Tirador** (siempre uno por bioma, en el primer piso) con ráfaga, abanico o escopeta; se mueve de costado
+  entre disparos y no te deja acercarte. Rol nuevo **Rociador** (segundo piso de cada bioma) con anillo o espiral.
+- **Jefes:** desde la fase 2 tiran un anillo cada 7 s; en la 3, además, una espiral cada 10 s (35% de su ataque por bala).
+- El piloto lee las balas (predice por dónde pasan) y se corre o se tira con el esquive.
+- Página nueva del Cuaderno: "Lluvia de proyectiles".
+
+**Traspaso (`js/towerTransfer.js`, en el Herrero):** la pieza vieja se consume y la nueva (misma ranura) hereda **el 50%
+de su experiencia** (sube niveles y elige cómo crece en la forja) y el 50% de sus mejoras de stats forjadas. La
+habilidad no pasa (para eso está imbuir). Costo: 30g × piso + 25g por nivel de la vieja (piso 3, nivel 6: 215g, más o
+menos una pieza mágica). Nunca conviene más que seguir con la vieja: perdés la mitad y pagás. El piloto lo usa si le
+sobra oro. Vista previa con los niveles que sube. Página nueva del Cuaderno: "Nada se pierde".
+
+**Partidas completas con el piloto** (con tiradores y balas de jefes): Espada 105 min, 0 muertes; Arco 137 min, 0
+muertes; Bastón: ver ESTADO.md. El primer jefe con espada pasó de 436 s a 66 s. El jefe del piso 3 (Bruja del Fango)
+sigue siendo el más lento (251-493 s): anotado para revisar. Nota: el piloto cambia el arma inicial por la primera
+mejor que encuentra (en el piso 1), así que las partidas completas miden más el equipo que el arma inicial; por eso
+la medición de arriba contra muñecos.
+
 ## Orden propuesto (cada fase jugable y medida)
 1. **Pantalla:** zoom, HUD más chico y menú de pausa con pestañas. Es barato y mejora todo lo que viene después.
 2. **Despertar y tutorial:** cuaderno y las 3 armas (espada, arco y bastón, con su habilidad). ✅ — las 3 armas
@@ -275,10 +328,16 @@ el mismo paso; lo grande queda acá, ordenado por impacto.
   la Esencia, el Herrero, fundir y dominar un poder.
 - ✅ **Música en el menú y en Custom Hero Chaos:** el pueblo en el menú y las fases tranquilas, combate en oleadas y
   duelos, jefe en los jefes de ronda. Volumen y opción de música en la pausa de los dos modos.
+- ✅ **La Q de las armas iniciales se ve y se siente** (2026-10-08): tajos en arco, línea de tiro que se tensa, flechas con
+  forma de flecha, puntitos del combo, el remate frena el tiempo; los tiradores avisan con un aro rojo y sus balas son
+  siempre del mismo color de peligro.
 - Lista al día. Próximas ideas de interfaz cuando aparezcan (se anotan acá).
 - ✅ (antes) Pantalla grande con zoom, mensajes flotantes, aviso de puntos para repartir y barra del jefe abajo.
 
 **Pendiente (de más a menos impacto):**
+- **Barra del héroe:** mostrar la carga del arco y el paso del combo también en la ranura Q (hoy solo se ven sobre el
+  héroe).
+- **Indicador de balas fuera de pantalla:** con el zoom muy cerca, un tirador que dispara desde fuera de la vista.
 
 ## Decisiones tomadas (2026-10-07)
 - **Estilo ASCII descartado:** se probó un filtro que convertía el mundo en caracteres (referencia: el MMORPG ASCII de

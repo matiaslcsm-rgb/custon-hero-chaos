@@ -19,6 +19,8 @@ const NOTEBOOK_PAGES = [
     { id: 'ESSENCE', title: 'Esencia', text: 'Del guardián salió una luz violeta que se me quedó adentro. Esencia, la llaman. No se va cuando muero: la junto run tras run y con ella compro cosas que duran (J, en el Códice).' },
     { id: 'SMITH', title: 'El Herrero', text: 'Hay un herrero en este pueblo. Si le doy una pieza sin alma y un poder que domino, me la imbuye. También funde cinco piezas iguales en una pura, mejor cuanto mejor lo que le doy.' },
     { id: 'CRAFT', title: 'Fundir', text: 'El herrero fundió cinco piezas en una. Si entre las cinco va una que ya fundió antes, la nueva sale sí o sí un escalón mejor: roma, usada, nueva, obra maestra.' },
+    { id: 'BULLETS', title: 'Lluvia de proyectiles', text: 'Hay bichos que escupen proyectiles en ráfagas, abanicos, anillos. Antes de tirar brillan. Son lentos: se pasa entre ellos caminando, o atravesándolos con el esquive. Las paredes los frenan, y la espada los desvía.' },
+    { id: 'TRANSFER', title: 'Nada se pierde', text: 'El herrero agarró mi arma vieja, la que tanto usé, y le pasó a la nueva la mitad de lo que había crecido. La vieja se fue; algo de ella quedó.' },
     { id: 'MASTERY', title: 'Dominar', text: 'Usé tanto un poder que ya lo sé de memoria. Quedó en el Códice para siempre: aunque muera, un herrero me lo puede volver a poner en una pieza.' }
 ];
 

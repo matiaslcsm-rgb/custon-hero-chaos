@@ -170,7 +170,7 @@ function drawTowerSmith(level) {
 let smithOpen = false, smithPick = null;
 function toggleSmith(open = !smithOpen) {
     if (gameMode !== 'tower' || !player || !player.arena || !player.arena.town || !player.arena.town.smith) return;
-    smithOpen = open; smithPick = null; craftSel = null;
+    smithOpen = open; smithPick = null; craftSel = null; transferSel = null;
     showPanel('smith-container', open);
     if (open) writeNotebookPage('SMITH');
     if (open) { document.getElementById('smith-tooltip').innerHTML = ''; renderSmith(); }
@@ -180,6 +180,7 @@ function renderSmith() {
     const level = player.arena, s = level.town.smith, tip = document.getElementById('smith-tooltip'), floor = level.floor;
     document.getElementById('smith-gold').textContent = `💰 ${player.gold}g · ✦ ${essence()}`;
     renderCraft(); // fundir 5 piezas (towerCraft.js)
+    renderTransfer(); // traspasar el crecimiento de una pieza a otra (towerTransfer.js)
     const hover = item => { tip.innerHTML = item ? itemTooltipHtml(item) : '<span class="subtitle">Elegí una pieza sin alma y después el poder del Códice que querés imbuirle.</span>'; };
     const row = (item, label, price, can, act, picked = false) => {
         const el = document.createElement('div'); el.className = 'tshop-row' + (picked ? ' picked' : '');
@@ -268,6 +269,7 @@ function aiSmith(hero) {
     const level = hero.arena, s = level && level.town && level.town.smith;
     if (!s || !heroInTown(hero) || s.aiVisited) return;
     s.aiVisited = true;
+    aiTransfer(hero); // lo que creció una pieza que ya reemplazó (towerTransfer.js)
     const owned = new Set(heroPieces(hero).map(i => i.skillId || i.innateId).filter(Boolean));
     heroPieces(hero).filter(i => i.blank && !i.plain).forEach(item => {
         const e = shuffle(codexUnlockedEntries().filter(x => !owned.has(x.id) && !x.skill.isInnateItem && x.slot === slotKind(item.slot)))[0];

@@ -68,6 +68,7 @@ function retreatStep(hero, enemies) {
 
 // --- HABILIDADES ---
 function aiWantsToCast(hero, skill, nearCount, bossNear, nearestDist = Infinity, nearest = null) {
+    if (skill.aiWants) return skill.aiWants(hero, nearest, nearestDist); // las que saben cuándo conviene (towerFeel.js)
     // En la Torre, la movilidad solo para alcanzar a un enemigo a la vista y cerca (si no, se teletransportaba hacia
     // creeps del otro lado de una pared y quedaba yendo y viniendo para siempre)
     if (skill.tags.includes('MOVILIDAD') && hero.arena && hero.arena.kind === 'tower')

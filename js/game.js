@@ -341,6 +341,7 @@ function handleSkillKeypress(k) {
     if (!skill || skill.kind !== 'active') return;
     if (skillLevel(player, skill) === 0) { log(`🔒 ${skill.name} está en nivel 0: invertile un punto para usarla.`); return; }
     // Lanzamiento al instante (estilo Hades): las que apuntan salen hacia el cursor sin el paso extra del clic
+    if (skill.chargeable) { startCharge(player, skill, k); return; } // se tensa mientras está apretada (towerFeel.js)
     const c = cursorWorld();
     if (isAimedSkill(skill) && c) { castAt(player, skill, c.x, c.y); return; }
     tryCastSkill(player, skill);
@@ -370,7 +371,8 @@ function tryCastSkill(hero, skill, opts = {}) {
     }
     if (!ok) return false;
     hero.mana -= manaCost;
-    hero.cooldowns[skill.id] = skillCooldown(skill, hero);
+    hero.cooldowns[skill.id] = skill.cooldownAfter ? skill.cooldownAfter(hero) : skillCooldown(skill, hero); // el combo de la espada varía (towerFeel.js)
+    (hero.cooldownTotals = hero.cooldownTotals || {})[skill.id] = hero.cooldowns[skill.id];
     fxCast(hero, skill, from);
     emit(hero, 'onCast', { skill });
     return true;

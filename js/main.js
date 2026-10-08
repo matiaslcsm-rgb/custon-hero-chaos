@@ -1,7 +1,7 @@
 // Punto de entrada: conecta los botones y arranca el bucle principal.
 
 // Versión visible en el menú: si no coincide con la última subida, el navegador muestra una copia vieja (Ctrl+F5).
-const GAME_VERSION = '2026-10-07 · jefes de bioma';
+const GAME_VERSION = '2026-10-08 · armas, tiradores y traspaso';
 document.getElementById('game-version').textContent = `Versión ${GAME_VERSION}`;
 
 document.getElementById('start-wave-btn').onclick = startWave;
@@ -192,9 +192,10 @@ if (location.search.includes('demo=bestiary')) setTimeout(() => {
 // Demo para capturas de pantalla (index.html?demo=tower): arranca Tower Chaos con equipo y creeps a la vista.
 if (location.search.includes('demo=tower')) setTimeout(() => {
     startTowerRun();
-    if (weaponPickOpen) chooseStarterWeapon('ADVENTURER_SWORD'); // sin el pedestal (el demo arranca jugando)
+    const wq = new URLSearchParams(location.search).get('weapon'); // &weapon=sword|bow|staff: con un arma inicial (sin el Hacha)
+    if (weaponPickOpen) chooseStarterWeapon('ADVENTURER_' + (wq || 'sword').toUpperCase()); // sin el pedestal (el demo arranca jugando)
     const cat = towerCatalog();
-    equipItem(player, makeTowerItem(1, cat.find(e => e.heroKey === 'AXE' && e.slot === 'weapon'), 'rare'));
+    if (!wq) equipItem(player, makeTowerItem(1, cat.find(e => e.heroKey === 'AXE' && e.slot === 'weapon'), 'rare'));
     // &floor=N: otro piso (bioma); &at=town|lab: parado en el pueblo o en la puerta del laberinto
     const q = new URLSearchParams(location.search);
     if (q.get('floor')) enterTowerFloor(+q.get('floor'), 'demo');
@@ -221,6 +222,21 @@ if (location.search.includes('demo=tower')) setTimeout(() => {
         const c = makeCreep(CREEP_TYPES[k], x, y, 1, false, 0); c.arena = level; c.spawnTime = -1e9; level.creeps.push(c);
     });
     level.fovKey = null; computeFov(level, player);
+    if (q.get('gunner')) { // &gunner=burst|fan|shotgun|ring|spiral: un tirador cerca que dispara y la imagen se congela (capturas)
+        const t = makeGunnerType(generateBeast(level.biome, 'gunner', 0), 'gunner'); t.bulletPattern = q.get('gunner');
+        const spot = [[4, -1], [4, 0], [-4, 0], [0, 4], [0, -4], [3, 3], [-3, -3], [3, -3], [-3, 3]].map(([dx, dy]) => ({ x: player.x + dx, y: player.y + dy }))
+            .find(o => walkable(level, o.x, o.y) && lineClear(level, player.x, player.y, o.x, o.y)) || { x: player.x + 3, y: player.y };
+        const g = makeCreep(t, spot.x, spot.y, 1, false, 0); Object.assign(g, { arena: level, spawnTime: -1e9, aggro: true, shotAt: gameClock + 0.3 }); level.creeps.push(g);
+        level.creeps.forEach(c => { if (c !== g && !c.isGuardian && Math.hypot(c.x - player.x, c.y - player.y) < 6) c.hp = 0; });
+        setTimeout(() => { tickFx = () => 0; hitStopUntil = 1e12; }, +(q.get('at_ms') || 1150));
+    }
+    if (q.get('shot')) setTimeout(() => { // &shot=sword|bow|staff: congela el golpe de la Q en pleno movimiento (capturas)
+        const kind = q.get('shot'), e = nearestEnemy(player, 8), sk = player.skills.find(s => s.kind === 'active');
+        player.mana = player.maxMana; player.cooldowns[sk.id] = 0;
+        if (kind === 'bow') startCharge(player, sk, 'q'), player.charging.start = gameClock - BOW_SHOT.chargeTime - 0.05;
+        else { if (kind === 'sword') { player.comboStep = 2; player.comboAt = gameClock; } castAt(player, sk, e.x, e.y); }
+        setTimeout(() => { tickFx = () => 0; hitStopUntil = 1e12; }, kind === 'staff' ? 160 : 50);
+    }, 800);
     if (location.search.includes('inv')) { // demo del inventario con piezas variadas
         [['SNIPER', 'helm', 'rare'], ['VAMPIRE', 'boots', 'magic'], ['FROSTWITCH', 'armor', 'magic'], ['ZEUS', 'weapon', 'rare'], ['DANCER', 'gloves', 'normal']]
             .forEach(([h, slot, q]) => addToBag(player, makeTowerItem(2, cat.find(e => e.heroKey === h && e.slot === slot), q)));

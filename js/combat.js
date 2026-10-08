@@ -200,7 +200,8 @@ function resolveBasicHit(attacker, target, dmg, isCrit) {
 // --- PROYECTILES (ataques básicos a distancia con velocidad de proyectil) ---
 function fireProjectile(attacker, target, dmg, isCrit) {
     if (attacker.isHero && fxArena(attacker)) sfx('shoot');
-    attacker.arena.projectiles.push({ attacker, x: attacker.x, y: attacker.y, target, dmg, isCrit, speed: attacker.projectileSpeed || 10 });
+    attacker.arena.projectiles.push({ attacker, x: attacker.x, y: attacker.y, target, dmg, isCrit, speed: attacker.projectileSpeed || 10,
+        arrow: attacker.isHero && gameMode === 'tower' && weaponFx(attacker).kind === 'arrow' ? 'arrow' : null }); // el arco tira flechas (towerFeel.js)
 }
 
 // Proyectil de habilidad: a diferencia del de arriba, no persigue a un enemigo — viaja en línea recta hacia
@@ -217,7 +218,8 @@ function fireSkillProjectile(attacker, opts) {
         attacker, kind: 'skill', x: attacker.x, y: attacker.y, tx: opts.tx, ty: opts.ty,
         dx: dx / dist, dy: dy / dist, dist, traveled: 0, speed: opts.speed, radius: opts.radius,
         dmg: opts.dmg, dmgType: opts.dmgType || 'magical', vfx: opts.vfx, skillName: opts.skillName,
-        onHit: opts.onHit, onArrive: opts.onArrive, hitSet: new Set(), fxEl: fxCastingSkill ? skillVfx(fxCastingSkill).el : null
+        onHit: opts.onHit, onArrive: opts.onArrive, hitSet: new Set(), fxEl: fxCastingSkill ? skillVfx(fxCastingSkill).el : null,
+        stopOnHit: opts.stopOnHit, solid: opts.solid, arrow: opts.arrow, isCrit: opts.isCrit, quietMiss: opts.quietMiss // (towerFeel.js)
     });
 }
 
@@ -229,18 +231,23 @@ function updateProjectiles(arena, dt) {
             const step = p.speed * dt;
             p.traveled += step;
             p.x += p.dx * step; p.y += p.dy * step;
+            // Sólidos (flechas y orbes de la Torre): una pared los frena
+            if (p.solid && !walkable(arena, Math.round(p.x), Math.round(p.y))) { fxProjectileHit(p, p.x, p.y); projectiles.splice(i, 1); continue; }
+            let stopped = false;
             enemiesOf(p.attacker).forEach(c => {
-                if (!c.isAlive() || p.hitSet.has(c) || Math.hypot(c.x - p.x, c.y - p.y) > p.radius) return;
+                if (stopped || !c.isAlive() || p.hitSet.has(c) || Math.hypot(c.x - p.x, c.y - p.y) > p.radius) return;
                 p.hitSet.add(c);
                 projectileElement = p.fxEl; // el proyectil de habilidad marca con su elemento
                 let dealt;
-                try { dealt = dealDamage(p.attacker, c, p.dmg, p.dmgType).dealt; } finally { projectileElement = null; }
+                try { dealt = dealDamage(p.attacker, c, p.dmg, p.dmgType, { isCrit: p.isCrit }).dealt; } finally { projectileElement = null; }
                 if (p.onHit) p.onHit(c, dealt);
+                if (p.stopOnHit) stopped = true; // no atraviesa: se queda en el primero
             });
+            if (stopped) { fxProjectileHit(p, p.x, p.y); projectiles.splice(i, 1); continue; }
             if (p.traveled >= p.dist) {
                 fxProjectileHit(p, p.tx, p.ty);
                 if (p.onArrive) p.onArrive(p.tx, p.ty);
-                if (!p.hitSet.size && p.attacker.isHero && fxArena(p.attacker)) log(`${p.skillName}: no le pegó a nadie.`);
+                if (!p.hitSet.size && !p.quietMiss && p.attacker.isHero && fxArena(p.attacker)) log(`${p.skillName}: no le pegó a nadie.`);
                 projectiles.splice(i, 1);
             }
             continue;

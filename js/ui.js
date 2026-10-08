@@ -553,7 +553,7 @@ function renderHeroBar() {
     document.querySelectorAll('#hb-skills .skill-slot[data-id]').forEach(slot => {
         const s = p.skills.find(x => x.id === slot.dataset.id);
         if (!s) return;
-        const total = skillCooldown(s, p) || 1, left = Math.max(0, p.cooldowns[s.id] || 0);
+        const total = (p.cooldownTotals && p.cooldownTotals[s.id]) || skillCooldown(s, p) || 1, left = Math.max(0, p.cooldowns[s.id] || 0);
         const cd = slot.querySelector('.cd');
         cd.style.height = `${Math.min(100, left / total * 100)}%`;
         cd.textContent = left > 0 ? left.toFixed(left < 10 ? 1 : 0) : '';

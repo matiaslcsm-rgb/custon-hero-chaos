@@ -69,7 +69,7 @@ function fxUltBanner(skill, hero) { fxBanner = { text: skill.name, at: fxClock, 
 // --- Lanzar una habilidad: forma + elemento ---
 function fxSkill(hero, skill, from) {
     const arena = fxArena(hero);
-    if (!arena) return;
+    if (!arena || skill.ownFx) return; // las que dibujan lo suyo (towerFeel.js)
     const v = skillVfx(skill), el = ELEMENTS[v.el] || ELEMENTS.steel, k = v.el;
     const range = Math.max(effRange(hero) + 3, 5);
     const target = hero.aimPoint && skill.pointTarget ? hero.aimPoint : nearestEnemy(hero, range);
@@ -157,7 +157,8 @@ function fxSkill(hero, skill, from) {
 const WEAPON_FX = {
     AXE: { el: 'steel', kind: 'heavy' }, VAMPIRE: { el: 'blood', kind: 'slash' }, SNIPER: { el: 'steel', kind: 'shot' }, ASSASSIN: { el: 'shadow', kind: 'twin' },
     DANCER: { el: 'steel', kind: 'twin' }, ARCANIST: { el: 'arcane', kind: 'orb' }, FROSTWITCH: { el: 'ice', kind: 'orb' }, NECROMANCER: { el: 'shadow', kind: 'scythe' },
-    VOIDSAGE: { el: 'void', kind: 'orb' }, ALCHEMIST: { el: 'poison', kind: 'orb' }, ZEUS: { el: 'lightning', kind: 'zap' }, FISTS: { el: 'steel', kind: 'punch' }
+    VOIDSAGE: { el: 'void', kind: 'orb' }, ALCHEMIST: { el: 'poison', kind: 'orb' }, ZEUS: { el: 'lightning', kind: 'zap' }, FISTS: { el: 'steel', kind: 'punch' },
+    ADVENTURER_SWORD: { el: 'steel', kind: 'blade' }, ADVENTURER_BOW: { el: 'steel', kind: 'arrow' }, ADVENTURER_STAFF: { el: 'arcane', kind: 'orb' } // las 3 iniciales (antes salían como puños)
 };
 function weaponFx(hero) {
     const key = gameMode === 'tower' ? (hero.gear && hero.gear.weapon ? hero.gear.weapon.heroKey : 'FISTS') : hero.key;
@@ -169,6 +170,12 @@ function fxHeroAttack(hero, target, isCrit) {
     const w = weaponFx(hero), el = ELEMENTS[w.el], color = isCrit ? '#ffd166' : el.c2;
     const angle = Math.atan2(target.y - hero.y, target.x - hero.x);
     sfx('swing');
+    if (w.kind === 'blade') { // espada: un tajo corto en arco desde el héroe (el de la Q es más grande, towerFeel.js)
+        const d = Math.hypot(target.x - hero.x, target.y - hero.y) || 1;
+        pushFxAt(arena, { kind: 'sweep', unit: hero, x: hero.x, y: hero.y, angle, reach: 1.5, half: 0.8, flip: (hero.fxSlashFlip = !hero.fxSlashFlip), color: isCrit ? '#ffd166' : '#f3e7c9', color2: '#8a7a5c', life: 0.18 });
+        fxParticles(arena, target.x, target.y, 'steel', 3, 2.5, { life: 0.25 }); fxHitStop(isCrit ? 0.05 : 0.02);
+        return;
+    }
     if (w.kind === 'heavy') { pushFxAt(arena, { kind: 'slash', x: target.x, y: target.y, angle, flip: true, color, width: isCrit ? 8 : 6, life: 0.28, scale: 1.3 }); fxParticles(arena, target.x, target.y, w.el, 5, 3); fxShake(isCrit ? 3 : 1); }
     else if (w.kind === 'twin') { [0, 0.07].forEach((d, i) => pushFxAt(arena, { kind: 'slash', x: target.x, y: target.y, angle: angle + (i ? 0.5 : -0.5), flip: i === 0, color: i ? el.c1 : color, width: 3, life: 0.18 }, d)); }
     else if (w.kind === 'scythe') { pushFxAt(arena, { kind: 'crescent', x: target.x, y: target.y, color, color2: el.c1, life: 0.3, small: true }); }
@@ -199,6 +206,7 @@ function projectileLook(p) {
 
 // --- Dibujo de las formas (lo llama drawArenaFx) ---
 function drawSkillFx(f, t, px, py) {
+    if (f.kind === 'sweep') { if (f.unit) { px = (f.unit.rx ?? f.unit.x) * TILE + TILE / 2; py = (f.unit.ry ?? f.unit.y) * TILE + TILE / 2; } drawSweepFx(f, t, px, py); return; } // towerFeel.js
     const T = TILE, ex = (f.tx ?? f.x) * T + T / 2, ey = (f.ty ?? f.y) * T + T / 2;
     if (f.unit) { px = (f.unit.rx ?? f.unit.x) * T + T / 2; py = (f.unit.ry ?? f.unit.y) * T + T / 2; }
     ctx.lineCap = 'round';

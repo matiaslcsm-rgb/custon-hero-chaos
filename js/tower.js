@@ -273,6 +273,7 @@ function updateTower(dt) {
     if (autopilot) { if (player.statPoints) aiSpendStatPoints(player); aiManageGear(player); aiTowerShop(player); if (player.isAlive()) aiTelegraphDash(player); }
     else if (pendingForge(player) && !towerInFight(level)) { openForge(pendingForge(player)); return; } // en plena pelea, solo el aviso (towerView.js)
     updateHero(player, level, dt);
+    towerFeelTick(player); // tensar el arco (towerFeel.js)
     unstickFromWall(player);
     // Cuaderno (REWORK.md §1): moverse y esquivar se detectan leyendo el estado, sin tocar el código compartido.
     if (keys[KEYMAP.up] || keys[KEYMAP.left] || keys[KEYMAP.down] || keys[KEYMAP.right]) writeNotebookPage('MOVE');
@@ -282,6 +283,7 @@ function updateTower(dt) {
     if (safe) writeNotebookPage('TOWN');
     if (player.isAlive()) { computeFov(level, player); towerPickup(player); recoverCorpse(level, player); }
     updateProjectiles(level, dt);
+    towerBulletsTick(level, dt); // lluvias de proyectiles de los tiradores (towerBullets.js)
     // Creeps: solo se mueven los que te vieron (radio de alerta); te sueltan si te alejás mucho de su lugar
     level.creeps.forEach(c => {
         if (!c.isAlive()) return;
@@ -378,7 +380,7 @@ function towerHeroDeath(hero, killer) {
     hero.effects = hero.effects.filter(e => e.flags.includes('persistent'));
     hero.respawnAt = gameClock + TOWER.respawnDelay;
     towerRun.deaths++;
-    level.telegraphs = []; level.zones = []; // lo que estaba cargando no le pega al que renace
+    level.telegraphs = []; level.zones = []; level.bullets = []; // lo que estaba cargando no le pega al que renace
     // Perdés la mitad de los puntos puestos en cada stat (lo de base nunca se pierde), pero quedan en tus restos:
     // si volvés hasta ellos los recuperás (como en Dark Souls). Si morís otra vez antes, los anteriores se pierden.
     const lost = {}, lostText = [];
@@ -567,9 +569,11 @@ function renderTower(level, dt) {
         const a = c.isGuardian ? bossAlpha(c) : 1; if (a < 1) { ctx.save(); ctx.globalAlpha = a; } // escondido o enterrado
         drawUnit(c, c.color, c.symbol, p, { glow: c.isGuardian, big: c.isGuardian });
         if (a < 1) ctx.restore();
+        drawGunnerTell(c, p); // el tirador avisa antes de disparar (towerBullets.js)
     });
     level.projectiles.forEach(p => {
         const lk = projectileLook(p), x = p.x * TILE + TILE / 2, y = p.y * TILE + TILE / 2;
+        if (p.arrow) { drawArrowProjectile(p, x, y); return; } // flechas del arco (towerFeel.js)
         if (lk) { // orbe con halo del elemento (fxSkills.js)
             ctx.globalAlpha = 0.45; ctx.fillStyle = lk.c2; ctx.beginPath(); ctx.arc(x, y, p.kind === 'skill' ? 9 : 6, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
             ctx.fillStyle = p.isCrit ? '#ffd166' : lk.c1; ctx.beginPath(); ctx.arc(x, y, p.kind === 'skill' ? 5 : 3.5, 0, Math.PI * 2); ctx.fill();
@@ -585,6 +589,8 @@ function renderTower(level, dt) {
         ctx.beginPath(); ctx.arc(pos.x * TILE + TILE / 2, pos.y * TILE + TILE / 2, effRange(player) * TILE, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
         drawUnit(player, heroColor(player), player.symbol, pos, { glow: true });
     }
+    drawTowerBullets(level); // proyectiles enemigos, encima de todo lo del piso (towerBullets.js)
+    drawTowerFeel(level); // línea de tiro del arco y el combo de la espada (towerFeel.js)
     drawArenaFx(level);
     drawMouseOverlay(level);
     // Niebla: lo no descubierto, negro; lo descubierto fuera de la vista, oscurecido

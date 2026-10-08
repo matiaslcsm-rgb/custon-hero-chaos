@@ -176,9 +176,9 @@ const STARTER_WEAPON_IDENTITY = {
 function heroOf(heroKey) { return STARTER_WEAPON_IDENTITY[heroKey] || HERO_TEMPLATES[heroKey]; }
 
 const STARTER_WEAPONS = {
-    ADVENTURER_SWORD: { noun: 'Espada', shape: 'sword', range: 1.4, atkSpeed: 1.0, atk: 10, projectile: 0, skillId: 'ADVENTURER_GOLPE', why: 'Golpe fuerte cuerpo a cuerpo.' },
-    ADVENTURER_BOW: { noun: 'Arco', shape: 'spear', range: 4.5, atkSpeed: 0.9, atk: 8, projectile: 11, skillId: 'ADVENTURER_VOLLEY', why: 'Ráfaga de flechas a distancia.' },
-    ADVENTURER_STAFF: { noun: 'Bastón', shape: 'staff', range: 4, atkSpeed: 0.8, atk: 7, projectile: 10, skillId: 'ADVENTURER_BOLT', why: 'Hechizo elemental que marca para reacciones.' }
+    ADVENTURER_SWORD: { noun: 'Espada', shape: 'sword', range: 1.4, atkSpeed: 1.0, atk: 10, projectile: 0, skillId: 'ADVENTURER_GOLPE', why: 'Combo de tres tajos en arco (Q): el remate empuja, y el tajo desvía proyectiles.' },
+    ADVENTURER_BOW: { noun: 'Arco', shape: 'spear', range: 4.5, atkSpeed: 0.9, atk: 8, projectile: 11, skillId: 'ADVENTURER_VOLLEY', why: 'Mantené Q para tensar y soltá hacia el cursor; tensada atraviesa. Soltá justo: tiro perfecto.' },
+    ADVENTURER_STAFF: { noun: 'Bastón', shape: 'staff', range: 4, atkSpeed: 0.8, atk: 7, projectile: 10, skillId: 'ADVENTURER_BOLT', why: 'Orbe arcano apuntado (Q) que explota en área y marca para las reacciones. Gasta maná.' }
 };
 Object.assign(HERO_WEAPONS, STARTER_WEAPONS);
 
@@ -194,61 +194,7 @@ function giveStarterWeapon(hero, weaponKey) {
     return item;
 }
 
-// Golpe Certero: la habilidad de la Espada (antes era fija en el Aventurero; ahora sale del arma, como Ráfaga
-// del Arco y Saeta Arcana, y se pierde si cambiás de arma — igual que cualquier otra pieza).
-const ADVENTURER_STRIKE = {
-    id: 'ADVENTURER_GOLPE', name: 'Golpe Certero', kind: 'active', heroKey: 'ADVENTURER',
-    tags: ['FÍSICO'],
-    values: { cooldown: [7, 6.5, 6, 5.5], manaCost: 15, dmgMult: [1.5, 1.8, 2.1, 2.4] },
-    description: 'Golpe fuerte en arco con tu espada: {dmgMult%} de tu daño físico al enemigo más cercano en tu alcance.',
-    cast(caster) {
-        const target = nearestEnemy(caster, caster.attackRange + 1);
-        if (!target) { log('Golpe Certero: sin objetivo en alcance.'); return false; }
-        const dmg = Math.round(caster.atk * val(this, caster, 'dmgMult'));
-        const { dealt } = dealDamage(caster, target, dmg, 'physical');
-        if (fxArena(caster)) fxText(target, '¡CERTERO!', '#c9a227', 11, 0.8);
-        log(`🗡️ ¡Golpe Certero a ${target.label}! (-${dealt} HP)`);
-        return true;
-    }
-};
-SKILL_INDEX[ADVENTURER_STRIKE.id] = ADVENTURER_STRIKE;
-
-// Ráfaga del Arco: la habilidad del Arco — pega a varios objetivos distintos en vez de a uno solo más fuerte.
-const ADVENTURER_VOLLEY = {
-    id: 'ADVENTURER_VOLLEY', name: 'Ráfaga del Arco', kind: 'active', heroKey: 'ADVENTURER',
-    tags: ['FÍSICO'],
-    values: { cooldown: [7, 6.5, 6, 5.5], manaCost: 18, dmgMult: [0.9, 1.05, 1.2, 1.35], targets: 3 },
-    description: 'Dispara una ráfaga: {dmgMult%} de tu daño físico a hasta {targets} enemigos distintos en tu alcance.',
-    cast(caster) {
-        const range = caster.attackRange + 1;
-        const near = enemiesOf(caster).filter(c => c.isAlive() && Math.hypot(c.x - caster.x, c.y - caster.y) <= range)
-            .sort((a, b) => Math.hypot(a.x - caster.x, a.y - caster.y) - Math.hypot(b.x - caster.x, b.y - caster.y))
-            .slice(0, val(this, caster, 'targets'));
-        if (!near.length) { log('Ráfaga del Arco: sin objetivos en alcance.'); return false; }
-        const dmg = Math.round(caster.atk * val(this, caster, 'dmgMult'));
-        near.forEach(t => dealDamage(caster, t, dmg, 'physical'));
-        log(`🏹 ¡Ráfaga del Arco! ${near.length} objetivo(s) alcanzados.`);
-        return true;
-    }
-};
-SKILL_INDEX[ADVENTURER_VOLLEY.id] = ADVENTURER_VOLLEY;
-
-// Saeta Arcana: la habilidad del Bastón — daño mágico, marca con su elemento para las reacciones (fxSkills.js).
-const ADVENTURER_BOLT = {
-    id: 'ADVENTURER_BOLT', name: 'Saeta Arcana', kind: 'active', heroKey: 'ADVENTURER',
-    tags: ['MÁGICO'],
-    values: { cooldown: [6, 5.5, 5, 4.5], manaCost: 20, dmgMult: [1.1, 1.3, 1.5, 1.7] },
-    description: 'Un proyectil arcano: {dmgMult%} de tu daño como daño mágico al enemigo más cercano en tu alcance. Marca con su elemento para las reacciones.',
-    cast(caster) {
-        const target = nearestEnemy(caster, caster.attackRange + 1);
-        if (!target) { log('Saeta Arcana: sin objetivo en alcance.'); return false; }
-        const dmg = Math.round(caster.atk * val(this, caster, 'dmgMult'));
-        const { dealt } = dealDamage(caster, target, dmg, 'magical');
-        log(`✨ ¡Saeta Arcana a ${target.label}! (-${dealt} HP)`);
-        return true;
-    }
-};
-SKILL_INDEX[ADVENTURER_BOLT.id] = ADVENTURER_BOLT;
+// Las habilidades de las 3 armas (Combo de Tajos, Tiro Tensado y Saeta Arcana) están en towerFeel.js.
 
 function giveTowerGear(hero) {
     hero.gear = Object.fromEntries(EQUIP_SLOTS.map(s => [s, null]));
@@ -357,7 +303,7 @@ const BOOSTABLE = {
     atkPerStep: { label: 'daño por tramo', dir: 1 }, farBonus: { label: 'bonus a distancia', dir: 1 },
     maxStacks: { label: 'cargas máximas', dir: 1, int: true }, stackCap: { label: 'tope de cargas', dir: 1 }, jumps: { label: 'saltos', dir: 1, int: true },
     hitsNeeded: { label: 'golpes necesarios', dir: -1, int: true, min: 2 }, waveEvery: { label: 'ataques por onda', dir: -1, int: true, min: 1 },
-    cooldown: { label: 'enfriamiento', dir: -1 }, manaCost: { label: 'costo de maná', dir: -1 }, internalCooldown: { label: 'tiempo entre activaciones', dir: -1 },
+    cooldown: { label: 'enfriamiento', dir: -1 }, recovery: { label: 'recuperación del remate', dir: -1 }, manaCost: { label: 'costo de maná', dir: -1 }, internalCooldown: { label: 'tiempo entre activaciones', dir: -1 },
     payback: { label: 'daño devuelto al terminar', dir: -1 }
 };
 const BOOST_PCT = 0.15; // cada mejora: +15% (o −12% en lo que conviene bajar), o ±1 en los enteros
@@ -424,7 +370,7 @@ function gearEvent(hero, event, payload) {
     if (event === 'onHit') giveItemXp(hero, g.weapon, ITEM_XP.weaponHit);
     if (event === 'onKill') { giveItemXp(hero, g.weapon, ITEM_XP.weaponKill); ['amulet', 'ring1', 'ring2'].forEach(s => giveItemXp(hero, g[s], ITEM_XP.gearKill)); }
     if (event === 'onDamaged' && payload.dealt > 0) ['helm', 'armor', 'gloves', 'boots'].forEach(s => giveItemXp(hero, g[s], payload.dealt * ITEM_XP.damageTaken));
-    if (event === 'onCast') EQUIP_SLOTS.forEach(s => { if (g[s] && itemSkill(g[s]) === payload.skill) giveItemXp(hero, g[s], ITEM_XP.skillCast * (s === 'weapon' ? 1 : 0.5)); });
+    if (event === 'onCast') EQUIP_SLOTS.forEach(s => { if (g[s] && itemSkill(g[s]) === payload.skill) giveItemXp(hero, g[s], ITEM_XP.skillCast * (s === 'weapon' ? 1 : 0.5) * (payload.skill.castXp ?? 1)); }); // castXp: las que se tiran seguido dan menos por tiro (towerFeel.js)
 }
 ADVENTURER.innate.hooks = {
     onHit(owner, p) { gearEvent(owner, 'onHit', p); },

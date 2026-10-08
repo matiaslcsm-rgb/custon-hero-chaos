@@ -869,7 +869,7 @@ function arrivalNear(level, p) {
 // Entrar a un nivel cualquiera (piso o cueva): cambia el tamaño del mundo, la arena y la posición del héroe
 function enterTowerLevel(level, pos) {
     COLS = level.W || TOWER.cols; ROWS = level.H || TOWER.rows;
-    level.telegraphs = []; level.zones = []; // ataques anunciados a medio cargar y zonas del piso (towerTelegraph.js, towerBosses.js)
+    level.telegraphs = []; level.zones = []; level.bullets = []; // ataques anunciados a medio cargar y zonas del piso (towerTelegraph.js, towerBosses.js)
     arenas = [level];
     level.heroes = [player];
     player.arena = level;

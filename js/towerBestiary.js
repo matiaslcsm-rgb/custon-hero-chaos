@@ -93,14 +93,14 @@ function generateBeast(biome, roleKey, from) {
         xp: Math.round(base.xp * size.xp * (1 + 0.15 * traits.length)), onAttack,
         mechanic: `${role.desc[0].toUpperCase()}${role.desc.slice(1)}.` + (traits.length ? ' ' + traits.map(k => CREEP_TRAITS[k].label).join('; ') + '.' : '')
     };
-    return t;
+    return makeGunnerType(t, roleKey); // los tiradores salen con su patrón de disparo (towerBullets.js)
 }
 // Bestiario de un bioma: 6 criaturas del primer piso (cuerpo a cuerpo, rápida, a distancia, hechicera y 2 más) y 3 más
 // difíciles para el segundo.
 function generateBestiary(biome) {
     const t0 = Object.keys(BEAST_ROLES).filter(k => !BEAST_ROLES[k].tier);
     const t1 = Object.keys(BEAST_ROLES).filter(k => BEAST_ROLES[k].tier);
-    const roles0 = ['brawler', 'skirmisher', 'archer', 'caster'].concat(shuffle(t0.slice()).slice(0, 2)); // 4 fijos + 2 distintos al azar
+    const roles0 = ['brawler', 'skirmisher', 'gunner', 'caster'].concat(shuffle(t0.slice()).slice(0, 2)); // 4 fijos (uno que dispara ráfagas, towerBullets.js) + 2 al azar
     const roles1 = shuffle(t1.slice()).slice(0, 3);
     const list = roles0.map(r => generateBeast(biome, r, 0)).concat(roles1.map(r => generateBeast(biome, r, 1)));
     const seen = new Set(); // sin nombres repetidos
