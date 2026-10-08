@@ -101,8 +101,21 @@ manejar tanto.
 - **Medido** (piloto, run completa): Espada 116 min/5 muertes y 104/6, Arco 105/1, Bastón 168/8. Antes de esta fase:
   91-120 min con 1-6 muertes (y una espiral de 30). Volvió al rango de diseño (122-161). El piloto esquiva el 90-97%
   de los ataques anunciados; una persona va a recibir más, así que en la práctica es algo más difícil que la medición.
-- **Falta:** un jefe con nombre y mecánica propia por bioma (por ahora todos comparten el repertorio), y que los
-  jefes suelten Esencia (fase 5).
+- **Jefes con nombre por bioma (2026-10-07, `js/towerBosses.js`):** el guardián de cada piso es el jefe de su bioma
+  (en el segundo piso del bioma, "Gran …"), con una mecánica propia sobre las fases:
+  | Bioma | Jefe | Mecánica |
+  |---|---|---|
+  | Bosque | Raíz Madre | Planta 2-4 raíces quietas que la curan 0,6%/s cada una (lazo visible): hay que cortarlas. Raíces en 3 líneas. |
+  | Ciénaga | Bruja del Fango | Charcos de veneno que duran 8 s (lastiman y frenan). Desde la fase 2 se esconde en la niebla 3,5 s (invulnerable, casi invisible) y reaparece en otro lado. |
+  | Desierto | Reina Escorpión | Se entierra y sale debajo tuyo, y barre con la cola en cono. Desde la fase 2 la tormenta te arrastra una casilla hacia ella cada 1,3 s. |
+  | Nieve | Wyrm de Escarcha | Aliento en cono que congela 1 s y deja el piso helado 10 s (−45% de velocidad). Desde la fase 2, lluvia de carámbanos. |
+  | Volcán | Señor de la Ceniza | Un sector (un cuarto alrededor suyo) se marca y arde 6 s: hay que cambiar de sector. Desde la fase 2, meteoritos. |
+  **Zonas que duran en el piso** (veneno, hielo, lava): sistema nuevo, reutilizable; el piloto las evita.
+  **Medido** (piloto): con la vida de los jefes de Custom Hero Chaos (1400-2000) morían en 5-60 s, antes de mostrar sus
+  fases, y las runs salieron sin muertes (Espada 75 min, Bastón 112). Igualados a 4500 de vida y 40 de ataque: Espada
+  137 min y 5 muertes (jefes de 32 s a 3 min; la Bruja del Fango era la más dura para el cuerpo a cuerpo, por eso su
+  niebla bajó a 2,5 s y reaparece a 3-5 casillas), Bastón 92 min sin muertes (jefes en 13-33 s). **Queda abierto:** el
+  Bastón quedó bastante más fuerte que la Espada contra los jefes.
 
 ## 4. Economía: monedas, energía y crafteo
 **Dos monedas** (separar lo de la run de lo permanente, como Hades u Oscuridad):

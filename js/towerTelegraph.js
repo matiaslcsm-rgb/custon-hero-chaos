@@ -94,9 +94,10 @@ function bossTick(c) {
     c.bossPhase = c.bossPhase || 0;
     if (ph > c.bossPhase) { c.bossPhase = ph; bossPhaseChange(c, ph); return true; }
     if (ph === 2 && gameClock >= (c.ultNext || 0)) { bossUlt(c); return true; }
+    const d = Math.hypot(c.x - player.x, c.y - player.y);
+    if (d <= 9 && canSee(c.arena, c.x, c.y) && bossSignatureTick(c, ph)) return true; // la mecánica propia de su bioma (towerBosses.js)
     if (c.teleNext === undefined) c.teleNext = gameClock + 2;
     if (gameClock < c.teleNext) return false;
-    const d = Math.hypot(c.x - player.x, c.y - player.y);
     if (d > 9 || !canSee(c.arena, c.x, c.y)) return false;
     c.teleNext = gameClock + TELE.bossEvery[ph];
     const moves = ['slam', 'cone', 'charge'].concat(ph >= 1 ? ['barrage', 'barrage'] : []);
@@ -178,7 +179,10 @@ function drawBossBar(g) {
 }
 
 // --- PILOTO AUTOMÁTICO: salir de las zonas y esquivar a último momento ---
-function telegraphsOn(hero, x = hero.x, y = hero.y) { return (hero.arena.telegraphs || []).filter(t => gameClock >= t.at + (t.delay || 0) - 0.2 && teleContains(t, x, y)); }
+function telegraphsOn(hero, x = hero.x, y = hero.y) {
+    return (hero.arena.telegraphs || []).filter(t => gameClock >= t.at + (t.delay || 0) - 0.2 && teleContains(t, x, y))
+        .concat((hero.arena.zones || []).filter(z => (z.mult || z.slow) && teleContains(z, x, y)).map(z => Object.assign({ at: -1e9, windup: 1e9 }, z))); // las zonas que duran también se evitan (sin apuro de esquive)
+}
 function towerDodgeDir(hero) {
     const threats = telegraphsOn(hero);
     if (!threats.length) return null;

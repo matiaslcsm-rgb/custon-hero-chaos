@@ -297,6 +297,7 @@ function updateTower(dt) {
         else if (c.x !== c.spawnX || c.y !== c.spawnY) stepCreepToward(c, c.spawnX, c.spawnY, dt); // vuelve a su lugar
     });
     towerTelegraphTick(level); // los ataques anunciados que se completaron pegan (towerTelegraph.js)
+    towerZonesTick(level, dt); // veneno, hielo y lava que dejan los jefes (towerBosses.js)
     if (towerPortals(level, player)) return; // entradas, bajadas y salidas de cueva (towerWorld.js)
     if (!level.stairs) return;               // en una cueva no hay escalera de la torre
     // El guardián muerto abre la escalera; pisarla te sube
@@ -377,7 +378,7 @@ function towerHeroDeath(hero, killer) {
     hero.effects = hero.effects.filter(e => e.flags.includes('persistent'));
     hero.respawnAt = gameClock + TOWER.respawnDelay;
     towerRun.deaths++;
-    level.telegraphs = []; // lo que estaba cargando no le pega al que renace
+    level.telegraphs = []; level.zones = []; // lo que estaba cargando no le pega al que renace
     // Perdés la mitad de los puntos puestos en cada stat (lo de base nunca se pierde), pero quedan en tus restos:
     // si volvés hasta ellos los recuperás (como en Dark Souls). Si morís otra vez antes, los anteriores se pierden.
     const lost = {}, lostText = [];
@@ -525,7 +526,9 @@ function renderTower(level, dt) {
     ctx.translate(-camera.x * TILE, -camera.y * TILE);
     drawTowerTiles(level);
     drawTowerLoot(level);
+    drawTowerZones(level); // lo que dejan los jefes en el piso (towerBosses.js)
     drawTowerTelegraphs(level); // zonas de los ataques anunciados, debajo de las unidades
+    drawBossExtras(level); // lazos de las raíces
     drawTowerMerchant(level);
     drawTowerSmith(level);
     drawTowerShrines(level);
@@ -561,7 +564,9 @@ function renderTower(level, dt) {
             ctx.save(); ctx.strokeStyle = '#1d4e89'; ctx.lineWidth = 2.5; ctx.globalAlpha = 0.8;
             ctx.beginPath(); ctx.ellipse(p.x * TILE + TILE / 2, p.y * TILE + TILE - 4, 13, 5, 0, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
         }
+        const a = c.isGuardian ? bossAlpha(c) : 1; if (a < 1) { ctx.save(); ctx.globalAlpha = a; } // escondido o enterrado
         drawUnit(c, c.color, c.symbol, p, { glow: c.isGuardian, big: c.isGuardian });
+        if (a < 1) ctx.restore();
     });
     level.projectiles.forEach(p => {
         const lk = projectileLook(p), x = p.x * TILE + TILE / 2, y = p.y * TILE + TILE / 2;

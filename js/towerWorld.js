@@ -227,7 +227,7 @@ function generateTowerLevel(floor) {
     // 8. Guardián y escalera: en la sala del laberinto más lejana caminando
     const guardRoom = rooms.filter(r => r !== first).reduce((best, r) => (dist[at(r.cx, r.cy)] > dist[at(best.cx, best.cy)] ? r : best), rooms.find(r => r !== first) || first);
     level.stairs = { x: guardRoom.cx + Math.min(2, Math.floor(guardRoom.w / 2) - 1), y: guardRoom.cy };
-    const g = makeCreep(pickRandom(ROUND_BOSSES), guardRoom.cx - 1, guardRoom.cy, TOWER.guardianMult(floor), false, 0);
+    const g = makeCreep(biomeBossType(floor), guardRoom.cx - 1, guardRoom.cy, TOWER.guardianMult(floor), false, 0); // el jefe de su bioma (towerBosses.js)
     Object.assign(g, { isRoundBoss: true, isGuardian: true, arena: level, level: floor + 1, xp: Math.round(120 * TOWER.xpMult(floor + 1)), gold: 50 * floor });
     level.creeps.push(g);
     level.boss = g; level.guardian = g;
@@ -869,7 +869,7 @@ function arrivalNear(level, p) {
 // Entrar a un nivel cualquiera (piso o cueva): cambia el tamaño del mundo, la arena y la posición del héroe
 function enterTowerLevel(level, pos) {
     COLS = level.W || TOWER.cols; ROWS = level.H || TOWER.rows;
-    level.telegraphs = []; // ataques anunciados que quedaron a medio cargar (towerTelegraph.js)
+    level.telegraphs = []; level.zones = []; // ataques anunciados a medio cargar y zonas del piso (towerTelegraph.js, towerBosses.js)
     arenas = [level];
     level.heroes = [player];
     player.arena = level;

@@ -445,6 +445,7 @@ function towerLootOnKill(level, c, killer) {
     if (!killer || !killer.isHero) return;
     if (c.carrier) carrierDrops(level, c); // el portador suelta tu equipo (towerWorld.js)
     if (towerRun && killer === player) { const s = towerRun.stats; s.kills++; s.gold += c.gold || 0; if (c.champion) s.champions++; if (c.isGuardian) s.guardians++; essenceOnKill(level, c); } // Esencia (towerCraft.js)
+    if (c.isGuardian) level.creeps.forEach(o => { if (o.isRoot) o.hp = 0; }); // muerta la Raíz Madre, se secan sus raíces
     if (c.isGuardian) { for (let i = 0; i < LOOT.guardianDrops; i++) level.drops.push({ x: c.x, y: c.y, item: makeTowerItem(level.floor, undefined, i === 0 ? 'rare' : rollQuality(level.floor)) }); return; }
     if (c.champion) { if (Math.random() < CHAMPION.dropChance) level.drops.push({ x: c.x, y: c.y, item: lootItem(level.floor, Math.random() < 0.3 ? 'rare' : 'magic') }); return; }
     if (Math.random() < LOOT.creepChance * (c.isChestGuard ? 0 : 1) * (towerIsNight() ? DAYNIGHT.nightLoot : 1) * (1 + CAVE.lootPerDepth * (level.depth || 0))) level.drops.push({ x: c.x, y: c.y, item: lootItem(level.floor + (level.depth || 0)) }); // a veces sin alma (towerCodex.js)

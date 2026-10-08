@@ -2047,6 +2047,35 @@ test('Filtro de botín, páginas nuevas del Cuaderno y música fuera de la Torre
     } finally { setLootFilter(savedF); }
 }, { random: true });
 
+test('Torre: un jefe con nombre por bioma, cada uno con su mecánica (raíces, veneno, entierro, hielo, lava)', () => {
+    newTower();
+    [[1, 'Raíz Madre'], [2, 'Gran Raíz Madre'], [3, 'Bruja del Fango'], [5, 'Reina Escorpión'], [7, 'Wyrm de Escarcha'], [9, 'Señor de la Ceniza']]
+        .forEach(([f, name]) => checkEq(towerLevel(f).guardian.label, name, `jefe del piso ${f}`));
+    const prep = f => { enterTowerFloor(f); const L = player.arena, g = L.guardian; player.x = g.x - 3; player.y = g.y; if (!walkable(L, player.x, player.y)) { player.x = g.x; player.y = g.y + 2; } computeFov(L, player); g.castingUntil = 0; return { L, g }; };
+    // Bosque: raíces que curan
+    let { L, g } = prep(1);
+    bossSignatureTick(g, 0);
+    const roots = L.creeps.filter(o => o.isRoot && o.isAlive());
+    check(roots.length >= 2, 'la Raíz Madre planta raíces');
+    g.hp = g.maxHp * 0.5; const hp = g.hp; gameClock += 1.1; rootsHeal(g);
+    check(g.hp > hp, 'las raíces la curan');
+    roots.forEach(r => { r.hp = 0; }); const hp2 = g.hp; gameClock += 1.1; rootsHeal(g);
+    checkEq(g.hp, hp2, 'cortadas, ya no la curan');
+    // Ciénaga: charco de veneno que dura
+    ({ L, g } = prep(3));
+    g.introduced = true; g.sigNext = 0; bossSignatureTick(g, 0);
+    const tele = L.telegraphs[L.telegraphs.length - 1]; gameClock += tele.windup + 0.05; towerTelegraphTick(L);
+    check(L.zones && L.zones.some(z => z.kind === 'poison'), 'deja un charco de veneno');
+    const before = player.hp; towerZonesTick(L, 0.6);
+    check(player.hp < before || !teleContains(L.zones[0], player.x, player.y), 'el charco lastima al que está adentro');
+    check(towerDodgeDir(player) || !teleContains(L.zones[0], player.x, player.y), 'el piloto sale del charco');
+    // Volcán: un sector de lava
+    ({ L, g } = prep(9));
+    g.introduced = true; g.sigNext = 0; bossSignatureTick(g, 0);
+    const sec = L.telegraphs[L.telegraphs.length - 1]; gameClock += sec.windup + 0.05; towerTelegraphTick(L);
+    check(L.zones.some(z => z.kind === 'lava' && z.shape === 'cone'), 'un sector se llena de lava');
+}, { random: true });
+
 test('Ancla: cada golpe ralentiza y quita evasión', () => {
     newGame('AXE');
     const ev = effEvasion(player);
