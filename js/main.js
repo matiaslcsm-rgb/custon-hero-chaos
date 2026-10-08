@@ -1,7 +1,7 @@
 // Punto de entrada: conecta los botones y arranca el bucle principal.
 
 // Versión visible en el menú: si no coincide con la última subida, el navegador muestra una copia vieja (Ctrl+F5).
-const GAME_VERSION = '2026-10-07 · Esencia y fundición';
+const GAME_VERSION = '2026-10-07 · música';
 document.getElementById('game-version').textContent = `Versión ${GAME_VERSION}`;
 
 document.getElementById('start-wave-btn').onclick = startWave;

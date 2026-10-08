@@ -22,13 +22,14 @@ function renderPauseMenu() {
     const opt = (id, label, on, fn) => `<button class="pm-toggle${on ? ' on' : ''}" data-opt="${id}">${label}<span>${on ? 'SÍ' : 'NO'}</span></button>`;
     document.getElementById('pause-options').innerHTML =
         opt('sound', '🔊 Sonido', soundOn) +
+        (gameMode === 'tower' ? opt('music', '🎵 Música', musicOn) : '') +
         opt('sprites', '🎨 Pixel art (G)', spritesOn) +
         opt('autocast', '✨ Habilidades automáticas (H)', autoCast) +
         opt('autopilot', '🤖 Piloto automático (P)', autopilot) +
         (gameMode === 'tower' ? '' : opt('bigmap', '⤢ Mapa grande (M)', mapScale > 1)); // en la Torre el mapa ya ocupa la ventana
     document.querySelectorAll('#pause-options .pm-toggle').forEach(btn => {
         btn.onclick = () => {
-            ({ sound: () => setSound(!soundOn), sprites: () => setSprites(!spritesOn), autocast: () => setAutoCast(!autoCast),
+            ({ sound: () => setSound(!soundOn), music: () => setMusic(!musicOn), sprites: () => setSprites(!spritesOn), autocast: () => setAutoCast(!autoCast),
                autopilot: () => setAutopilot(!autopilot), bigmap: toggleBigMap })[btn.dataset.opt]();
             renderPauseMenu();
         };

@@ -192,6 +192,16 @@ de Cazador de Hollow Knight):
   docs/CREDITOS.md, como se hizo con los íconos. La alternativa es generarla con código (WebAudio), como los efectos
   actuales: sale gratis y liviana, pero suena más pobre.
 
+**Hecho (fase 7, 2026-10-07, `js/towerMusic.js`, carpeta `music/`):** 11 pistas libres de OpenGameArt (10 CC0 y la del
+volcán CC BY 4.0, créditos en docs/CREDITOS.md y en el menú), ~21 MB que se bajan recién cuando hacen falta.
+- **Capa base** por lugar: una pista por bioma en el campo (la nieve suma viento; la ciénaga es ambiente de bichos y
+  burbujas), el pueblo, el laberinto y las cuevas.
+- **Capa de combate:** entra con fundido (1,6 s) cuando te persigue algo a 10 casillas o menos, y la base baja al
+  30%. Contra un guardián o un señor de cueva suena el tema de jefe en vez del combate. En el pueblo no hay combate.
+- **Noche:** la base baja al 75% y pasa por un filtro de graves (más oscura), sin pista aparte.
+- Opción **🎵 Música** en la pausa (se guarda); el 🔊 Sonido también la apaga. En pausa baja al 40%.
+- Falta: música del menú y del Custom Hero Chaos (por ahora solo suena en la Torre).
+
 ---
 
 ## Orden propuesto (cada fase jugable y medida)

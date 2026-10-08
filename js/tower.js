@@ -513,6 +513,7 @@ function updateCamera(level, hero, dt) {
 }
 
 function renderTower(level, dt) {
+    towerMusicTick(level, dt); // música por capas (towerMusic.js)
     updateArenaFx(level, dt);
     updateCamera(level, player, dt);
     ctx.save();

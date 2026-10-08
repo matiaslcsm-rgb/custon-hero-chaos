@@ -19,7 +19,7 @@ function screenH() { return towerLayout ? VIEW.h : MAP_H; }
 function setTowerLayout(on) {
     towerLayout = on;
     document.body.classList.toggle('tower-layout', on);
-    if (!on) { towerLogOpen = false; document.body.classList.remove('log-open'); }
+    if (!on) { towerLogOpen = false; document.body.classList.remove('log-open'); stopMusic(); }
     mapScale = 1;
     fitTowerCanvas();
 }

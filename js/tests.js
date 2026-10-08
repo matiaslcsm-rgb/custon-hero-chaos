@@ -1910,6 +1910,26 @@ test('Torre: Esencia, fundir 5 piezas en una pura con calidad y la garantía de 
     codex = { unlocked: {}, best: {} }; BAG.rows = BASE_BAG_ROWS;
 }, { random: true });
 
+test('Torre: música por capas (bioma, pueblo, laberinto, combate y jefe)', () => {
+    newTower();
+    const L = player.arena;
+    L.creeps.forEach(c => { c.aggro = false; });
+    let t = musicTargets(L);
+    check(t[L.biome] > 0 && !t.combat, 'en el campo suena el bioma');
+    player.x = L.town.merchant.x; player.y = L.town.merchant.y + 2;
+    check(musicTargets(L).town > 0, 'en el pueblo, la del pueblo');
+    player.x = L.start.x; player.y = L.start.y;
+    const c = L.creeps.find(o => !o.isGuardian); c.x = player.x + 2; c.y = player.y; c.aggro = true;
+    t = musicTargets(L);
+    check(t.combat === 1 && t[L.biome] < 1, 'si te persiguen entra el combate y baja la base');
+    c.aggro = false;
+    const g = L.guardian; const gx = g.x, gy = g.y; g.x = player.x + 3; g.y = player.y; g.aggro = true;
+    t = musicTargets(L);
+    check(t.boss === 1 && !t.combat, 'contra un jefe suena su tema');
+    g.x = gx; g.y = gy; g.aggro = false;
+    Object.values(MUSIC_TRACKS).forEach(p => check(/^music\/[a-z-]+\.(ogg|mp3)$/.test(p), 'pista ' + p));
+}, { random: true });
+
 test('Ancla: cada golpe ralentiza y quita evasión', () => {
     newGame('AXE');
     const ev = effEvasion(player);
