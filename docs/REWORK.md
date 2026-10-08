@@ -248,16 +248,18 @@ el mismo paso; lo grande queda acá, ordenado por impacto.
   iba a esas ranuras y solo aparecían sin alma, que el Herrero no podía imbuir. Ahora sin alma solo en casco, coraza,
   guantes y amuleto; se funden las 6. Medido: Espada 88 min/1 muerte, Bastón 120/4 (antes 100-168): quizás algo más
   fácil, dentro del ruido de una run por arma; vigilar si se suma más poder.
+- ✅ **Elegir a mano las 5 piezas a fundir:** "Elegir" abre las piezas de esa ranura, ya marcadas las que elegiría el
+  Herrero; cada clic marca o desmarca, y las chances y la garantía se actualizan al instante.
+- ✅ Las notas en amarillo de los detalles (chances, garantía, forjado) no se leían sobre el pergamino: pasaron a ocre.
 - ✅ (antes) Pantalla grande con zoom, mensajes flotantes, aviso de puntos para repartir y barra del jefe abajo.
 
 **Pendiente (de más a menos impacto):**
-1. **Elegir a mano las 5 piezas a fundir** en el Herrero (hoy las elige él).
-2. **Reasignar teclas** desde la pausa.
-3. **Accesibilidad:** otros colores para las zonas de ataque (para daltonismo), tamaño de los números de daño y escala
+1. **Reasignar teclas** desde la pausa.
+2. **Accesibilidad:** otros colores para las zonas de ataque (para daltonismo), tamaño de los números de daño y escala
    de la interfaz.
-4. **Filtro de botín**: no levantar piezas normales, o marcarlas para vender.
-5. **El Cuaderno explica lo nuevo** la primera vez: el Herrero, la Esencia, la fundición y los ataques anunciados.
-6. **Música en el menú y en Custom Hero Chaos.**
+3. **Filtro de botín**: no levantar piezas normales, o marcarlas para vender.
+4. **El Cuaderno explica lo nuevo** la primera vez: el Herrero, la Esencia, la fundición y los ataques anunciados.
+5. **Música en el menú y en Custom Hero Chaos.**
 
 ## Decisiones tomadas (2026-10-07)
 - **Estilo ASCII descartado:** se probó un filtro que convertía el mundo en caracteres (referencia: el MMORPG ASCII de

@@ -1983,6 +1983,21 @@ test('Torre: botas y anillos salen en el botín como piezas de stats (no se imbu
     check(!CODEX.blankSlots.includes('boots') && CRAFT_SLOTS().includes('ring'), 'no se imbuyen, pero se funden');
 }, { random: true });
 
+test('Torre: fundir con las 5 piezas elegidas a mano (y la garantía también vale)', () => {
+    newTower();
+    codex = { unlocked: {}, best: {} }; gainEssence(100);
+    player.bag = [];
+    const keep = makeBlankItem(4, 'gloves', 'rare'); addToBag(player, keep);
+    const roma = makePureItem(1, 'gloves', 0); addToBag(player, roma);
+    const junk = []; for (let i = 0; i < 4; i++) { const it = makeBlankItem(1, 'gloves', 'normal'); junk.push(it); addToBag(player, it); }
+    check(!craftPure(player, 'gloves', 1, junk), 'con 4 elegidas no funde');
+    check(!craftPure(player, 'gloves', 1, junk.concat([makeBlankItem(1, 'boots', 'normal')])), 'no mezcla ranuras ni piezas de afuera de la bolsa');
+    const out = craftPure(player, 'gloves', 1, junk.concat([roma]));
+    check(out && out.craftTier >= 1, 'funde las elegidas y la garantía de la roma vale');
+    check(player.bag.some(b => b.item === keep), 'la que no elegiste queda en la bolsa');
+    codex = { unlocked: {}, best: {} };
+}, { random: true });
+
 test('Ancla: cada golpe ralentiza y quita evasión', () => {
     newGame('AXE');
     const ev = effEvasion(player);

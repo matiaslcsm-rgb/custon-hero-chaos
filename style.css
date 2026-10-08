@@ -774,3 +774,11 @@ body.tower-layout #hb-effects .fx-chip { background: rgba(241,231,208,0.9); bord
 .tt-compare li.up { color: #2d6a4f; font-weight: bold; }
 .tt-compare li.down { color: #9b2226; font-weight: bold; }
 body.map-open #hero-bar, body.map-open #float-log, body.map-open #tower-badges { visibility: hidden; }
+
+/* Elegir a mano las piezas a fundir */
+.craft-pick-list { display: flex; flex-direction: column; gap: 2px; margin: 2px 0 8px 12px; }
+.craft-pick { text-align: left; background: #f1e7d0; border: 1px solid #b7a888; color: #2b2118; font-family: Georgia, serif; font-size: 0.78rem; padding: 2px 6px; cursor: pointer; }
+.craft-pick.on { border-color: #6b2a1f; background: #e9dcc0; font-weight: bold; }
+.craft-choose { margin-right: 4px; }
+/* Sobre el pergamino el amarillo no se leía (chances, garantía, forjado, notas de las piezas) */
+body.ink-theme .tt-forged { color: #8a5a00; }

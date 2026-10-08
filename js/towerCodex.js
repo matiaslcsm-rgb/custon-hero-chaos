@@ -169,7 +169,7 @@ function drawTowerSmith(level) {
 let smithOpen = false, smithPick = null;
 function toggleSmith(open = !smithOpen) {
     if (gameMode !== 'tower' || !player || !player.arena || !player.arena.town || !player.arena.town.smith) return;
-    smithOpen = open; smithPick = null;
+    smithOpen = open; smithPick = null; craftSel = null;
     showPanel('smith-container', open);
     if (open) { document.getElementById('smith-tooltip').innerHTML = ''; renderSmith(); }
 }

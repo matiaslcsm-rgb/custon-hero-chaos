@@ -93,8 +93,10 @@ function craftPick(hero, slot) {
 }
 const CRAFT_SLOTS = () => CODEX.blankSlots.concat(CODEX.statSlots); // se funden las 6 ranuras
 function craftableSlots(hero) { return CRAFT_SLOTS().filter(s => craftPick(hero, s)); }
-function craftPure(hero, slot, floor = towerRun ? towerRun.floor : 1) {
-    const pieces = craftPick(hero, slot);
+// chosen: las 5 que eligió el jugador (si no, las elige el Herrero con craftPick)
+function craftPure(hero, slot, floor = towerRun ? towerRun.floor : 1, chosen = null) {
+    const inBag = new Set(hero.bag.map(b => b.item));
+    const pieces = chosen ? (chosen.length === CRAFT.pieces && chosen.every(i => inBag.has(i) && slotKind(i.slot) === slot) ? chosen : null) : craftPick(hero, slot);
     if (!pieces) return null;
     if (essence() < CRAFT.cost) { log(`⚒️ Te falta Esencia: fabricar cuesta ${CRAFT.cost} ✦ (tenés ${essence()}).`); return null; }
     spendEssence(CRAFT.cost);
@@ -135,20 +137,50 @@ function renderUpgrades() {
     });
 }
 // Desguace en la ventana del Herrero
+// Elegir a mano (pedido de la lista de interfaz): clic en "Elegir" abre las piezas de esa ranura; arrancan marcadas
+// las que elegiría el Herrero, y cada clic marca o desmarca. Las chances y la garantía se actualizan al instante.
+let craftSel = null; // { slot, items: [] }
 function renderCraft() {
     const box = document.getElementById('smith-craft');
     if (!box) return;
     box.innerHTML = '';
+    const tip = html => { document.getElementById('smith-tooltip').innerHTML = html; };
     const slots = CRAFT_SLOTS().map(s => ({ s, n: player.bag.filter(b => slotKind(b.item.slot) === s).length })).filter(o => o.n > 0);
     if (!slots.some(o => o.n >= CRAFT.pieces)) box.innerHTML = `<p class="subtitle">Juntá ${CRAFT.pieces} piezas de la misma ranura en la bolsa (casco, coraza, guantes, botas, amuleto o anillo).</p>`;
+    if (craftSel && !slots.some(o => o.s === craftSel.slot && o.n >= CRAFT.pieces)) craftSel = null;
     slots.forEach(({ s, n }) => {
-        const pick = craftPick(player, s), row = document.createElement('div'); row.className = 'tshop-row';
-        const floorTier = pick ? craftFloor(pick) : 0, can = pick && essence() >= CRAFT.cost;
-        row.innerHTML = `<span class="tshop-name"><b>${SLOT_NOUNS[s]}</b> <small>${n}/${CRAFT.pieces} en la bolsa${pick && floorTier ? ` · mínimo ${CRAFT_QUALITY[floorTier].name}` : ''}</small></span>` +
-            `<button class="${can ? 'primary-btn' : 'secondary-btn'}" ${can ? '' : 'disabled'}>Fundir · ${CRAFT.cost} ✦</button>`;
-        if (pick) row.onmouseenter = () => { document.getElementById('smith-tooltip').innerHTML = craftPreviewHtml(pick); };
-        row.querySelector('button').onclick = () => { const it = craftPure(player, s); renderSmith(); if (it) document.getElementById('smith-tooltip').innerHTML = itemTooltipHtml(it); };
+        const open = craftSel && craftSel.slot === s, pick = open ? craftSel.items : craftPick(player, s);
+        const ready = pick && pick.length === CRAFT.pieces, can = ready && essence() >= CRAFT.cost, floorTier = ready ? craftFloor(pick) : 0;
+        const row = document.createElement('div'); row.className = 'tshop-row' + (open ? ' picked' : '');
+        row.innerHTML = `<span class="tshop-name"><b>${SLOT_NOUNS[s]}</b> <small>${open ? `${pick.length}/${CRAFT.pieces} elegidas` : `${n}/${CRAFT.pieces} en la bolsa`}${ready && floorTier ? ` · mínimo ${CRAFT_QUALITY[floorTier].name}` : ''}</small></span>` +
+            (n >= CRAFT.pieces ? `<button class="secondary-btn craft-choose">${open ? 'Listo' : 'Elegir'}</button>` : '') +
+            `<button class="${can ? 'primary-btn' : 'secondary-btn'} craft-go" ${can ? '' : 'disabled'}>Fundir · ${CRAFT.cost} ✦</button>`;
+        if (ready) row.onmouseenter = () => tip(craftPreviewHtml(pick));
+        const choose = row.querySelector('.craft-choose');
+        if (choose) choose.onclick = () => { craftSel = open ? null : { slot: s, items: craftPick(player, s) }; renderSmith(); if (craftSel) tip(craftPreviewHtml(craftSel.items)); };
+        row.querySelector('.craft-go').onclick = () => {
+            const it = craftPure(player, s, undefined, open ? craftSel.items : null);
+            craftSel = null; renderSmith(); if (it) tip(itemTooltipHtml(it));
+        };
         box.appendChild(row);
+        if (!open) return;
+        // Las piezas de esa ranura, para marcar o desmarcar
+        const list = document.createElement('div'); list.className = 'craft-pick-list';
+        player.bag.map(b => b.item).filter(i => slotKind(i.slot) === s).forEach(item => {
+            const on = craftSel.items.includes(item), el = document.createElement('button');
+            el.className = 'craft-pick' + (on ? ' on' : '');
+            el.innerHTML = `${on ? '☑' : '☐'} <span style="color:${qColor(item)}">${item.name}</span>${item.craftTier !== undefined ? ' <small>(fabricada)</small>' : ''}`;
+            el.onmouseenter = () => tip(itemTooltipHtml(item));
+            el.onclick = () => {
+                if (on) craftSel.items = craftSel.items.filter(i => i !== item);
+                else if (craftSel.items.length < CRAFT.pieces) craftSel.items.push(item);
+                else { log(`⚒️ Ya elegiste ${CRAFT.pieces}: desmarcá una para cambiarla.`); return; }
+                renderSmith();
+                tip(craftSel.items.length === CRAFT.pieces ? craftPreviewHtml(craftSel.items) : `<span class="subtitle">Elegí ${CRAFT.pieces - craftSel.items.length} más.</span>`);
+            };
+            list.appendChild(el);
+        });
+        box.appendChild(list);
     });
 }
 function craftPreviewHtml(pieces) {
