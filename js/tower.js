@@ -257,6 +257,9 @@ function computeFov(level, hero) {
 }
 function canSee(level, x, y) { return !!(level.visible && level.visible[y * COLS + x]); }
 
+// ¿Te persigue algo cerca? (la forja no interrumpe una pelea: espera a que termine)
+function towerInFight(level) { return player.isAlive() && level.creeps.some(c => c.isAlive() && c.aggro && Math.hypot(c.x - player.x, c.y - player.y) <= 10); }
+
 // --- CADA FRAME ---
 function updateTower(dt) {
     const level = player.arena;
@@ -268,7 +271,7 @@ function updateTower(dt) {
     if (weaponPickOpen && autopilot) chooseStarterWeapon('ADVENTURER_SWORD'); // el piloto no clickea: elige y sigue
     if (towerModalOpen()) return; // con stats, inventario, forja o la elección de arma abiertos, la partida espera
     if (autopilot) { if (player.statPoints) aiSpendStatPoints(player); aiManageGear(player); aiTowerShop(player); if (player.isAlive()) aiTelegraphDash(player); }
-    else if (pendingForge(player)) { openForge(pendingForge(player)); return; }
+    else if (pendingForge(player) && !towerInFight(level)) { openForge(pendingForge(player)); return; } // en plena pelea, solo el aviso (towerView.js)
     updateHero(player, level, dt);
     unstickFromWall(player);
     // Cuaderno (REWORK.md §1): moverse y esquivar se detectan leyendo el estado, sin tocar el código compartido.

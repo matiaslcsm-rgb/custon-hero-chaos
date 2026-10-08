@@ -1892,7 +1892,8 @@ test('Torre: Esencia, fundir 5 piezas en una pura con calidad y la garantía de 
     }
     const master = makePureItem(1, 'armor', 3);
     check(master.masterwork && /Obra Maestra/.test(master.name), 'obra maestra');
-    check(itemMods(master).maxHp > itemMods(makePureItem(1, 'armor', 0)).maxHp, 'mejor calidad, más stats base');
+    const bare = t => Object.assign(makePureItem(1, 'armor', t), { affixes: [] }); // sin afijos: solo la base
+    check(itemMods(bare(3)).maxHp > itemMods(bare(0)).maxHp, 'mejor calidad, más stats base');
     checkEq(makePureItem(1, 'gloves', 0).name.split(' ')[1], 'Romos', 'el adjetivo concuerda (Guantes Romos)');
     // Obra maestra: lo imbuido arranca en nivel 2
     codex.unlocked.AXE_GIRO = { floor: 1 }; player.gold = 9999;
@@ -1928,6 +1929,23 @@ test('Torre: música por capas (bioma, pueblo, laberinto, combate y jefe)', () =
     check(t.boss === 1 && !t.combat, 'contra un jefe suena su tema');
     g.x = gx; g.y = gy; g.aggro = false;
     Object.values(MUSIC_TRACKS).forEach(p => check(/^music\/[a-z-]+\.(ogg|mp3)$/.test(p), 'pista ' + p));
+}, { random: true });
+
+test('Opciones: volumen general, música, efectos y temblor (se guardan); la forja no corta una pelea', () => {
+    const saved = Object.assign({}, VOLUME);
+    try {
+        setVolume('music', 0.3); setVolume('shake', 0);
+        checkEq(VOLUME.music, 0.3, 'volumen de la música');
+        shakeAmount = 0; fxShake(6); checkEq(shakeAmount, 0, 'sin temblor si se apaga');
+        setVolume('shake', 9); checkEq(VOLUME.shake, 1.5, 'tope del temblor');
+        setVolume('sfx', -1); checkEq(VOLUME.sfx, 0, 'mínimo del volumen');
+    } finally { Object.keys(saved).forEach(k => setVolume(k, saved[k])); shakeAmount = 0; }
+    newTower();
+    const L = player.arena, c = L.creeps.find(o => !o.isGuardian);
+    c.x = player.x + 2; c.y = player.y; c.aggro = true;
+    check(towerInFight(L), 'con un creep encima, estás en pelea');
+    c.aggro = false;
+    check(!towerInFight(L), 'sin perseguidores, no');
 }, { random: true });
 
 test('Ancla: cada golpe ralentiza y quita evasión', () => {

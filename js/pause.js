@@ -14,6 +14,7 @@ function setPaused(on) {
     if (on && (!canPause() || weaponPickOpen)) return; // elegir arma es obligatorio: no se puede pausar por arriba
     paused = on;
     showPanel('pause-menu', on);
+    document.body.classList.toggle('paused', on); // esconde el cartel del piso (style.css)
     if (on) { cancelTargeting(); renderPauseMenu(); sfx('click'); }
 }
 function togglePause() { setPaused(!paused); }
@@ -27,6 +28,14 @@ function renderPauseMenu() {
         opt('autocast', '✨ Habilidades automáticas (H)', autoCast) +
         opt('autopilot', '🤖 Piloto automático (P)', autopilot) +
         (gameMode === 'tower' ? '' : opt('bigmap', '⤢ Mapa grande (M)', mapScale > 1)); // en la Torre el mapa ya ocupa la ventana
+    // Deslizadores: volumen general, música, efectos y temblor de pantalla
+    const slider = (key, label, max = 1) => `<label class="pm-slider">${label}<input type="range" min="0" max="${max * 100}" step="5" value="${Math.round(VOLUME[key] * 100)}" data-vol="${key}"><b>${Math.round(VOLUME[key] * 100)}%</b></label>`;
+    document.getElementById('pause-options').insertAdjacentHTML('afterbegin',
+        slider('master', '🔈 Volumen general') + (gameMode === 'tower' ? slider('music', '🎵 Música') : '') + slider('sfx', '💥 Efectos') + slider('shake', '📳 Temblor de pantalla', 1.5));
+    document.querySelectorAll('#pause-options input[data-vol]').forEach(inp => {
+        inp.oninput = () => { VOLUME[inp.dataset.vol] = inp.value / 100; inp.nextElementSibling.textContent = inp.value + '%'; if (inp.dataset.vol !== 'sfx' && inp.dataset.vol !== 'master') setVolume(inp.dataset.vol, inp.value / 100); else applyVolume(); };
+        inp.onchange = () => { setVolume(inp.dataset.vol, inp.value / 100); inp.blur(); }; // al soltar: se guarda y suena una muestra
+    });
     document.querySelectorAll('#pause-options .pm-toggle').forEach(btn => {
         btn.onclick = () => {
             ({ sound: () => setSound(!soundOn), music: () => setMusic(!musicOn), sprites: () => setSprites(!spritesOn), autocast: () => setAutoCast(!autoCast),

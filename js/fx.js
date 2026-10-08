@@ -116,7 +116,7 @@ function fxSlash(attacker, target, color, isCrit) {
 }
 
 function fxShake(amount) {
-    shakeAmount = Math.max(shakeAmount, amount);
+    shakeAmount = Math.max(shakeAmount, amount * VOLUME.shake); // intensidad elegida en la pausa (audio.js)
     if (amount >= 4) sfx('boom');
 }
 

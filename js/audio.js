@@ -9,13 +9,23 @@ const AUDIO = { volume: 0.35, minGap: { hit: 0.05, heroHit: 0.08, coin: 0.08, sw
 let audioCtx = null, masterGain = null, soundOn = true;
 const lastSfx = {};
 try { soundOn = localStorage.getItem('chc-sound') !== 'off'; } catch (e) { /* sin almacenamiento: queda prendido */ }
+// Volúmenes (0 a 1) y temblor de pantalla, ajustables en la pausa (se guardan). La música los lee en towerMusic.js.
+const VOLUME = { master: 1, music: 1, sfx: 1, shake: 1 };
+try { Object.assign(VOLUME, JSON.parse(localStorage.getItem('chc-volume') || '{}')); } catch (e) { /* valores por defecto */ }
+function applyVolume() { if (masterGain) masterGain.gain.value = soundOn ? AUDIO.volume * VOLUME.master * VOLUME.sfx : 0; }
+function setVolume(key, v) {
+    VOLUME[key] = Math.max(0, Math.min(key === 'shake' ? 1.5 : 1, v));
+    try { localStorage.setItem('chc-volume', JSON.stringify(VOLUME)); } catch (e) { /* no se guarda */ }
+    applyVolume();
+    if (key === 'sfx' || key === 'master') sfx('coin'); // para escuchar cómo queda
+}
 
 function initAudio() {
     if (audioCtx || !window.AudioContext) return;
     try {
         audioCtx = new AudioContext();
         masterGain = audioCtx.createGain();
-        masterGain.gain.value = soundOn ? AUDIO.volume : 0;
+        applyVolume();
         masterGain.connect(audioCtx.destination);
     } catch (e) { audioCtx = null; }
 }
@@ -24,7 +34,7 @@ function initAudio() {
 function setSound(on) {
     soundOn = on;
     try { localStorage.setItem('chc-sound', on ? 'on' : 'off'); } catch (e) { /* no se guarda */ }
-    if (masterGain) masterGain.gain.value = on ? AUDIO.volume : 0;
+    applyVolume();
     const btn = document.getElementById('sound-btn');
     if (btn) btn.textContent = on ? '🔊' : '🔇';
 }

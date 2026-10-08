@@ -725,3 +725,15 @@ body.tower-layout #map-hud .mh-item:first-child, body.tower-layout #lives-text, 
 #codex-upgrades { margin-bottom: 10px; }
 #codex-upgrades h4 { color: #7b2cbf; margin: 4px 0; }
 #codex-upgrades small, #smith-craft small { color: #5e5444; }
+
+/* Volumen y temblor en la pausa */
+.pm-slider { display: grid; grid-template-columns: 1fr 1.2fr 46px; align-items: center; gap: 8px; padding: 4px 10px; font-size: 0.85rem; }
+.pm-slider input { width: 100%; accent-color: #c9a227; }
+.pm-slider b { text-align: right; font-variant-numeric: tabular-nums; }
+/* Pausa en tinta: los interruptores del pergamino (antes quedaban oscuros) y el cartel del piso no tapa la ventana */
+body.ink-theme .pm-toggle { background: #f1e7d0; color: #2b2118; border: 1.5px solid #8f8166; }
+body.ink-theme .pm-toggle span { color: #8f8166; }
+body.ink-theme .pm-toggle.on { border-color: #2d6a4f; }
+body.ink-theme .pm-toggle.on span { color: #2d6a4f; }
+body.ink-theme .pm-toggle:hover { border-color: #6b2a1f; }
+body.paused #center-timer { display: none !important; }

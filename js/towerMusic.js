@@ -61,7 +61,7 @@ function towerMusicTick(level, dt) {
     const step = dt / MUSIC.fade;
     Object.entries(musicLayers).forEach(([k, l]) => {
         l.vol += Math.max(-step, Math.min(step, l.target - l.vol));
-        const v = Math.max(0, Math.min(1, l.vol * MUSIC_GAIN[k] * MUSIC.volume * (paused ? 0.4 : 1)));
+        const v = Math.max(0, Math.min(1, l.vol * MUSIC_GAIN[k] * MUSIC.volume * VOLUME.master * VOLUME.music * (paused ? 0.4 : 1))); // VOLUME: audio.js
         l.el.volume = v;
         if (l.filter) l.filter.frequency.value = night && k !== 'combat' && k !== 'boss' ? MUSIC.nightCutoff : 20000;
         if (l.target > 0 && l.el.paused) { const p = l.el.play(); if (p && p.catch) p.catch(() => { /* el navegador espera una interacción */ }); }

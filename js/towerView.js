@@ -78,6 +78,8 @@ function renderTowerBadges() {
     let html = '';
     if (towerLayout && player && player.gear) {
         if (player.statPoints) html += `<button onclick="toggleStatsWindow(true)">📊 ${player.statPoints} punto${player.statPoints === 1 ? '' : 's'} para repartir (C)</button>`;
+        const f = pendingForge(player);
+        if (f) html += `<button onclick="openForge(pendingForge(player))">⚒ ${f.name} subió de nivel: elegí cómo crece</button>`; // la ventana se abre sola al terminar la pelea
     }
     if (box.dataset.html !== html) { box.dataset.html = html; box.innerHTML = html; }
 }

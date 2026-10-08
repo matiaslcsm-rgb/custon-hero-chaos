@@ -225,6 +225,31 @@ volcán CC BY 4.0, créditos en docs/CREDITOS.md y en el menú), ~21 MB que se b
 Las fases 3 y 4 son las más grandes: hay que rehacer pruebas y volver a medir el balance con el piloto (el piloto
 también tiene que aprender a esquivar los ataques anunciados).
 
+## Interfaz y calidad de vida (lista viva)
+Pedido del usuario (2026-10-07): en cada paso, pensar la interfaz y la calidad de vida como diseñador. Lo chico se hace en
+el mismo paso; lo grande queda acá, ordenado por impacto.
+
+**Hecho:**
+- ✅ Volumen general, música y efectos, y temblor de pantalla (0-150%), con deslizadores en la pausa que se guardan.
+- ✅ La forja ya no corta una pelea: si una pieza sube de nivel peleando aparece un aviso arriba a la izquierda, y la
+  ventana se abre sola cuando nadie te persigue.
+- ✅ Pausa en tinta: los interruptores pasaron al estilo pergamino y el cartel del piso no tapa la ventana.
+- ✅ (antes) Pantalla grande con zoom, mensajes flotantes, aviso de puntos para repartir y barra del jefe abajo.
+
+**Pendiente (de más a menos impacto):**
+1. **Barra del héroe más compacta en la Torre**: retrato chico, vida y maná finitas, las 3 habilidades y el esquive con
+   su enfriamiento sobre el mapa (estilo Hades), y la Esencia ahí. Libera ~120 px de mapa.
+2. **Comparar con lo equipado** en el detalle de cada pieza: lo que gana o pierde, en verde y rojo (como Diablo).
+3. **Mapa del piso a pantalla completa (M)** en la Torre, con leyenda: pueblo, herrero, santuarios, cuevas, eventos,
+   tus restos y el portador.
+4. **Elegir a mano las 5 piezas a fundir** en el Herrero (hoy las elige él).
+5. **Reasignar teclas** desde la pausa.
+6. **Accesibilidad:** otros colores para las zonas de ataque (para daltonismo), tamaño de los números de daño y escala
+   de la interfaz.
+7. **Filtro de botín**: no levantar piezas normales, o marcarlas para vender.
+8. **El Cuaderno explica lo nuevo** la primera vez: el Herrero, la Esencia, la fundición y los ataques anunciados.
+9. **Música en el menú y en Custom Hero Chaos.**
+
 ## Decisiones tomadas (2026-10-07)
 - **Ranuras:** 3 activas (arma, guantes y armadura), todas con maná y enfriamiento normal. Sin sistema de carga:
   las ex-definitivas se rebalancean para andar como una activa común (pedido explícito del usuario, pisa la
