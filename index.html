@@ -175,6 +175,18 @@
         </div>
     </div>
 
+    <!-- Tower Chaos: la piedra de regreso del círculo de la base (towerWaystone.js) -->
+    <div id="waystone-container" class="modal" style="display: none;">
+        <div class="modal-box">
+            <div class="modal-head">
+                <h3>🪨 Piedra de regreso</h3>
+                <button class="modal-close" onclick="toggleWaystone(false)" title="Cerrar (Esc)">✕</button>
+            </div>
+            <p class="subtitle">Tocás la piedra y la torre te devuelve a la entrada de un piso al que ya llegaste. Tus restos siguen donde los dejaste.</p>
+            <div id="waystone-list" class="waystone-list"></div>
+        </div>
+    </div>
+
     <!-- Teclas configurables (keymap.js) -->
     <div id="keys-container" class="modal" style="display: none;">
         <div class="modal-box">
@@ -411,6 +423,7 @@
     <script src="js/towerItems.js"></script>
     <script src="js/towerFeel.js"></script>
     <script src="js/towerAwaken.js"></script>
+    <script src="js/towerWaystone.js"></script>
     <script src="js/towerUI.js"></script>
     <script src="js/towerWorld.js"></script>
     <script src="js/towerBestiary.js"></script>

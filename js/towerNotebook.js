@@ -23,6 +23,7 @@ const NOTEBOOK_PAGES = [
     { id: 'TRANSFER', title: 'Nada se pierde', text: 'El herrero agarró mi arma vieja, la que tanto usé, y le pasó a la nueva la mitad de lo que había crecido. La vieja se fue; algo de ella quedó.' },
     { id: 'CAMPFIRE', title: 'Una fogata', text: 'Alguien acampó acá y se fue. El fuego todavía prende. De noche, sentado a su lado, las heridas cierran más rápido. Afuera del círculo de luz se mueven cosas.' },
     { id: 'CHAMPION', title: 'Los marcados', text: 'Algunos llevan un aro azul y unos signos sobre la cabeza: son más duros y cada signo es un don. Si paro el mouse encima, me doy cuenta de cuáles. Al que se cura solo hay que pegarle sin pausa.' },
+    { id: 'WAYSTONE', title: 'La piedra que recuerda', text: 'En el círculo hay una piedra con marcas que no estaban. Cuando la toco, siento los pisos que ya subí, como escalones dentro de la cabeza. Me puede llevar de nuevo.' },
     { id: 'MASTERY', title: 'Dominar', text: 'Usé tanto un poder que ya lo sé de memoria. Quedó en el Códice para siempre: aunque muera, un herrero me lo puede volver a poner en una pieza.' }
 ];
 

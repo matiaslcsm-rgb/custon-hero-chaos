@@ -1769,6 +1769,27 @@ test('Torre: lo que suman las habilidades "por baja" tiene tope por run (el esca
     checkEq(player.bonus.maxHp - hp0, 1500, 'el escalado propio (vida por bajas) sigue igual');
 });
 
+test('Torre: la piedra de regreso del círculo lleva a la entrada de cualquier piso ya alcanzado; el piloto la usa al renacer', () => {
+    newTower();
+    const L1 = player.arena, ws = waystoneSpot(L1);
+    check(ws && walkable(L1, ws.x, ws.y), 'hay una piedra en el círculo');
+    checkEq(waystoneFloors().length, 0, 'al empezar no hay adónde ir');
+    player.x = ws.x; player.y = ws.y - 1;
+    check(!nearWaystone(), 'sin pisos alcanzados, no se usa');
+    enterTowerFloor(5); towerRun.stats.bestFloor = 5;
+    enterTowerFloor(1, 'respawn'); player.x = ws.x; player.y = ws.y - 1;
+    checkEq(waystoneFloors().join(), '2,3,4,5', 'los pisos 2 a 5');
+    check(towerInteract() && waystoneOpen, 'F la abre');
+    check(towerModalOpen(), 'la partida espera mientras elegís');
+    check(waystoneTravel(4) && player.arena.floor === 4 && !waystoneOpen, 'te lleva a la entrada del piso 4');
+    check(!waystoneTravel(8), 'no a un piso que no alcanzaste');
+    // el piloto, al renacer
+    towerRun.corpse = { floor: 3, points: 5, lost: {}, level: towerLevel(3), x: 0, y: 0 };
+    towerRun.deaths = 1; enterTowerFloor(1, 'respawn');
+    const saved = autopilot; autopilot = true;
+    try { aiWaystone(); checkEq(player.arena.floor, 3, 'el piloto vuelve al piso de sus restos'); } finally { autopilot = saved; }
+});
+
 test('Torre: el Cuaderno escribe una página sola la primera vez que hacés cada cosa, y no se repite', () => {
     notebookState = { seen: {} };
     newTower(); // startTowerRun() ya escribió WAKE al despertar
@@ -1791,7 +1812,7 @@ test('Torre: el Cuaderno escribe una página sola la primera vez que hacés cada
     writeNotebookPage('CHEST'); writeNotebookPage('TOWN');
     check(notebookState.seen.CHEST && notebookState.seen.TOWN, 'CHEST y TOWN');
 
-    ['TELEGRAPH', 'ESSENCE', 'SMITH', 'CRAFT', 'MASTERY', 'BULLETS', 'TRANSFER', 'CAMPFIRE', 'CHAMPION'].forEach(id => writeNotebookPage(id)); // las de lo nuevo (fases 4 y 5, tiradores)
+    ['TELEGRAPH', 'ESSENCE', 'SMITH', 'CRAFT', 'MASTERY', 'BULLETS', 'TRANSFER', 'CAMPFIRE', 'CHAMPION', 'WAYSTONE'].forEach(id => writeNotebookPage(id)); // las de lo nuevo (fases 4 y 5, tiradores)
     checkEq(Object.keys(notebookState.seen).length, NOTEBOOK_PAGES.length, 'todas las páginas');
     const before = JSON.stringify(notebookState.seen);
     writeNotebookPage('WAKE'); // repetir no hace nada

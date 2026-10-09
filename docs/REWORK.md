@@ -432,6 +432,11 @@ humanos, registrando en cada piso nivel, ataque, vida, arma, piezas raras y de d
    **Arreglado:** tope por habilidad y por run (`TOWER_PERM_CAP`, progression.js): daño +40, vida +300, atributos +15,
    armadura +8, crítico +15%, vel. de ataque +20%, robo de vida +10%, regeneración +10/+5. Al llegar al tope, un mensaje
    lo avisa. El escalado propio del Aventurero (vida por bajas, +1150-1235 por run) no tiene tope: es igual para todos.
+4. **Decisión del usuario: piedras de regreso** (`js/towerWaystone.js`). Seguís renaciendo en el círculo de la base, pero
+   ahí hay una piedra rúnica: con F o clic aparecés en la entrada de cualquier piso al que ya llegaste (como las hogueras
+   de Dark Souls o los waypoints de Diablo). La lista marca dónde están tus restos y cuál es el piso más alto. Morir pasa
+   a costar ~1 minuto en vez de ~8. El piloto la usa solo al renacer (va al piso de sus restos). Página del Cuaderno: "La
+   piedra que recuerda".
 
 ## 15. Más armas y el caos de cada run (propuesta, 2026-10-08)
 Pedido del usuario: "agregar más armas y que el gameplay se base en esas armas (ballesta, mazo, guantes de casteo,
@@ -578,6 +583,7 @@ el mismo paso; lo grande queda acá, ordenado por impacto.
 **Pendiente (de más a menos impacto):**
 
 ## Decisiones tomadas (2026-10-07)
+- **Al renacer (2026-10-08):** piedras de regreso en el círculo de la base hacia cualquier piso ya alcanzado (§16).
 - **Armas nuevas (2026-10-08):** solo como botín; primero las armas y después las runas (§15). Todavía sin elegir la primera.
 - **Al morir (2026-10-08):** los restos se suman si morís otra vez antes de buscarlos (nada se pierde para siempre).
 - **Estilo ASCII descartado:** se probó un filtro que convertía el mundo en caracteres (referencia: el MMORPG ASCII de

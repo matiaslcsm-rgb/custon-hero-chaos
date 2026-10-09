@@ -89,6 +89,7 @@ function quitToMenu() {
 // Esc: cierra lo que esté abierto (apuntado, tienda, tutorial, glosario) y si no hay nada, pausa o reanuda.
 function handleEscape() {
     if (targeting) { cancelTargeting(); return; }
+    if (typeof waystoneOpen !== 'undefined' && waystoneOpen) { toggleWaystone(false); return; }
     if (document.getElementById('tutorial').style.display === 'flex') { closeTutorial(); return; }
     if (closeGlossary()) return;
     if (statsOpen) { toggleStatsWindow(false); return; }

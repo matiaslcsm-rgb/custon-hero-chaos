@@ -35,9 +35,12 @@ function starterWeaponNear(h = player) {
 function towerInteract() {
     const w = starterWeaponNear();
     if (w) { takeStarterWeapon(w); return true; }
+    if (nearWaystone()) { toggleWaystone(true); return true; } // la piedra de regreso (towerWaystone.js)
     return false;
 }
 function towerClickWeapon(p) {
+    const ws = player && player.arena && waystoneSpot(player.arena); // clic en la piedra de regreso (towerWaystone.js)
+    if (ws && Math.hypot(ws.x - p.x, ws.y - p.y) < 0.8 && waystoneFloors().length) { if (nearWaystone()) toggleWaystone(true); else player.moveTarget = { x: ws.x, y: ws.y - 1, arena: player.arena, at: fxClock }; return true; }
     if (!awaitingWeapon()) return false;
     const w = player.arena.starterWeapons.find(o => Math.hypot(o.x - p.x, o.y - p.y) < 0.7);
     if (!w) return false;

@@ -818,3 +818,8 @@ body.tower-layout #hero-bar, .modal-box, body.tower-layout #float-log, body.towe
 .bestiary-views button { border-bottom: 1.5px solid #2b2118; padding: 3px 10px; font-size: 0.85rem; }
 .bestiary-views button.on { background: #2b2118; color: #f1e7d0; }
 .logbook .logbook-pane { max-height: 64vh; overflow-y: auto; }
+
+/* Piedra de regreso (towerWaystone.js) */
+.waystone-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.waystone-btn { text-align: left; font-family: Georgia, serif; }
+.waystone-btn small { color: #8a5a00; }

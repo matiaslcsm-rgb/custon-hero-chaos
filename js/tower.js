@@ -276,6 +276,7 @@ function updateTower(dt) {
     // Renacer en el círculo de piedra (nivel 1)
     if (!player.isAlive() && player.respawnAt && gameClock >= player.respawnAt) { towerRespawn(); return; }
     if (towerModalOpen()) return; // con stats, inventario, forja o la elección de arma abiertos, la partida espera
+    aiWaystone(); // el piloto, al renacer, vuelve con la piedra (towerWaystone.js)
     if (autopilot) { if (player.statPoints) aiSpendStatPoints(player); aiManageGear(player); aiTowerShop(player); if (player.isAlive()) aiTelegraphDash(player); }
     else if (pendingForge(player) && !towerInFight(level)) { openForge(pendingForge(player)); return; } // en plena pelea, solo el aviso (towerView.js)
     const from = { x: player.x, y: player.y };
@@ -435,7 +436,7 @@ function towerRespawn() {
     player.respawnAt = 0;
     player.hp = player.maxHp; player.mana = player.maxMana;
     enterTowerFloor(1, 'respawn');
-    log('🪨 Renacés en el círculo de piedra. Los pisos siguen como los dejaste: hay que subir de nuevo.');
+    log(waystoneFloors().length ? `🪨 Renacés en el círculo de piedra. Tocá la piedra de regreso (${keyName(KEYMAP.interact)}) para volver a la entrada de un piso al que ya llegaste.` : '🪨 Renacés en el círculo de piedra. Los pisos siguen como los dejaste.');
 }
 
 function towerVictory() {
@@ -558,6 +559,7 @@ function renderTower(level, dt) {
     drawTowerShrines(level);
     drawTowerEvents(level);
     drawStarterWeapons(level); // las 3 armas clavadas al despertar (towerAwaken.js)
+    drawWaystone(level); // la piedra de regreso del círculo (towerWaystone.js)
     drawTowerLights(level); // antorchas y fogatas (towerAtmos.js)
     // Escalera (cerrada hasta vencer al guardián)
     drawCavePortals(level);

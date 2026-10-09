@@ -4,7 +4,7 @@
 //   clic derecho equipa o desequipa. Mientras está abierto (o la forja, o los stats), la partida espera.
 
 let invOpen = false, forgeOpen = false, invHeld = null, tshopOpen = false, tshopVendor = null;
-function towerModalOpen() { return statsOpen || invOpen || forgeOpen || tshopOpen || bestiaryOpen || codexOpen || smithOpen || notebookOpen; }
+function towerModalOpen() { return statsOpen || invOpen || forgeOpen || tshopOpen || bestiaryOpen || codexOpen || smithOpen || notebookOpen || waystoneOpen; }
 
 // (Elegir el arma al despertar ya no es una ventana: las 3 están clavadas en el círculo, ver towerAwaken.js)
 
