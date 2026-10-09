@@ -9,11 +9,11 @@
 //   · Esquive con Espacio (invulnerable un instante), pociones, escalera al piso siguiente.
 
 import * as THREE from 'three';
+import { PS1, ps1, lambert, makeTex, shade, noise, rint, pick, setupPost } from './ps1.js';
+import { buildEnemy, animateEnemy } from './models.js';
 
-const CFG = { cell: 2, wallH: 3.2, grid: 41, renderW: 320, snap: 110, eye: 1.55, radius: 0.3, maxLights: 6 };
+const CFG = { cell: 2, wallH: 3.2, grid: 41, renderW: 320, eye: 1.55, radius: 0.3, maxLights: 6 };
 const Q = new URLSearchParams(location.search);
-const rint = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
-const pick = a => a[Math.floor(Math.random() * a.length)];
 
 // --- RENDER (baja resolución, sin suavizar) ---
 const canvas = document.getElementById('view');
@@ -23,36 +23,15 @@ const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(72, 16 / 9, 0.05, 60);
 camera.rotation.order = 'YXZ';
 scene.add(camera);
+const post = setupPost(renderer); // colores a 15 bits con tramado (ps1.js)
 function resize() {
     const w = CFG.renderW, h = Math.round(w * innerHeight / innerWidth);
-    renderer.setSize(w, h, false);
+    renderer.setSize(w, h, false); post.resize(w, h);
     camera.aspect = w / h; camera.updateProjectionMatrix();
 }
 addEventListener('resize', resize); resize();
 
-// El temblor de PS1: los vértices se redondean a una grilla de pantalla
-function ps1(mat) {
-    mat.onBeforeCompile = sh => {
-        sh.vertexShader = sh.vertexShader.replace('#include <project_vertex>', `#include <project_vertex>
-            vec4 ps1p = gl_Position; ps1p.xyz /= ps1p.w;
-            ps1p.xy = floor(ps1p.xy * ${CFG.snap.toFixed(1)}) / ${CFG.snap.toFixed(1)};
-            ps1p.xyz *= ps1p.w; gl_Position = ps1p;`);
-    };
-    return mat;
-}
-const lambert = (opts) => ps1(new THREE.MeshLambertMaterial(opts));
-
-// --- TEXTURAS PIXELADAS HECHAS CON CÓDIGO ---
-function makeTex(draw, size = 32) {
-    const c = document.createElement('canvas'); c.width = c.height = size;
-    const g = c.getContext('2d'); draw(g, size);
-    const t = new THREE.CanvasTexture(c);
-    t.magFilter = t.minFilter = THREE.NearestFilter; t.generateMipmaps = false;
-    t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace;
-    return t;
-}
-const shade = (hex, k) => { const n = parseInt(hex.slice(1), 16), f = v => Math.max(0, Math.min(255, Math.round(v * k))); return `rgb(${f(n >> 16)},${f((n >> 8) & 255)},${f(n & 255)})`; };
-function noise(g, s, base, amt, n) { for (let i = 0; i < n; i++) { g.fillStyle = shade(base, 1 + (Math.random() - 0.5) * amt); g.fillRect(rint(0, s - 1), rint(0, s - 1), 1, 1); } }
+// (el look PS1 — vértices, texturas afines, pixelado y tramado — está en ps1.js)
 const PALETTES = [ // por piso: piedra, piso, musgo/acento, niebla
     { wall: '#5b544c', floor: '#47423c', accent: '#4f6b3a', fog: 0x0c0f0c, name: 'LAS RAÍCES' },
     { wall: '#4e5458', floor: '#3c4246', accent: '#3d5d6e', fog: 0x0a0d12, name: 'LOS POZOS' },
@@ -149,16 +128,16 @@ function buildLevel() {
         if (grid[z][x]) continue;
         if ([[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dz]) => grid[z + dz] && grid[z + dz][x + dx])) walls.push([x, z]);
     }
-    const wallGeo = new THREE.BoxGeometry(C, CFG.wallH, C);
+    const wallGeo = new THREE.BoxGeometry(C, CFG.wallH, C, 2, 3, 2); // partidas, como en PS1, para que la textura afín no se deforme tanto
     const wallMesh = new THREE.InstancedMesh(wallGeo, lambert({ map: wallTex(pal) }), walls.length);
     const m = new THREE.Matrix4();
     walls.forEach(([x, z], i) => { m.makeTranslation((x + 0.5) * C, CFG.wallH / 2, (z + 0.5) * C); wallMesh.setMatrixAt(i, m); });
     group.add(wallMesh);
     const ft = floorTex(pal); ft.repeat.set(N, N);
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(N * C, N * C, N, N), lambert({ map: ft }));
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(N * C, N * C, N * 2, N * 2), lambert({ map: ft }));
     floor.rotation.x = -Math.PI / 2; floor.position.set(N * C / 2, 0, N * C / 2); group.add(floor);
     const ct = ceilTex(pal); ct.repeat.set(N, N);
-    const ceil = new THREE.Mesh(new THREE.PlaneGeometry(N * C, N * C, N, N), lambert({ map: ct }));
+    const ceil = new THREE.Mesh(new THREE.PlaneGeometry(N * C, N * C, N * 2, N * 2), lambert({ map: ct }));
     ceil.rotation.x = Math.PI / 2; ceil.position.set(N * C / 2, CFG.wallH, N * C / 2); group.add(ceil);
     // Antorchas en las paredes de cada sala
     const torches = [];
@@ -356,43 +335,20 @@ function updateParts(dt) {
 }
 
 // --- ENEMIGOS (avisan antes de pegar) ---
-const ENEMY_TYPES = {
-    skeleton: { name: 'Esqueleto', hp: 42, speed: 1.9, dmg: 12, reach: 1.7, windup: 0.55, h: 1.7 },
-    slime: { name: 'Limo', hp: 30, speed: 1.4, dmg: 8, reach: 1.3, windup: 0.45, h: 0.7 },
-    brute: { name: 'Bruto de piedra', hp: 90, speed: 1.3, dmg: 22, reach: 2.0, windup: 0.85, h: 2.2 }
+const ENEMY_TYPES = { // los modelos y su animación están en models.js
+    skeleton: { name: 'Esqueleto', hp: 42, speed: 1.9, dmg: 12, reach: 1.7, windup: 0.55, h: 1.6, eye: [0x440000, 0xa01810] },
+    slime: { name: 'Limo', hp: 30, speed: 1.4, dmg: 8, reach: 1.3, windup: 0.45, h: 0.7, eye: [0x102008, 0x102008] },
+    knight: { name: 'Caballero hueco', hp: 75, speed: 1.6, dmg: 17, reach: 2.0, windup: 0.7, h: 2.0, eye: [0x000000, 0x000000] },
+    automaton: { name: 'Autómata', hp: 110, speed: 1.15, dmg: 24, reach: 2.2, windup: 0.9, h: 2.4, eye: [0xff4f9a, 0xff4f9a] }
 };
 let enemies = [];
-function buildEnemyMesh(type) {
-    const g = new THREE.Group(), mats = [];
-    const box = (w, h, d, color, x, y, z) => { const mat = lambert({ color }); mats.push(mat); const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(x, y, z); g.add(m); return m; };
-    if (type === 'skeleton') {
-        box(0.32, 0.55, 0.2, 0xd8d0b8, 0, 1.05, 0); box(0.26, 0.26, 0.26, 0xe8e0c8, 0, 1.5, 0);
-        box(0.1, 0.65, 0.1, 0xd0c8b0, -0.1, 0.4, 0); box(0.1, 0.65, 0.1, 0xd0c8b0, 0.1, 0.4, 0);
-        const arm = box(0.09, 0.55, 0.09, 0xd0c8b0, 0.24, 1.0, 0); g.userData.arm = arm;
-        box(0.09, 0.5, 0.09, 0xc8c0a8, -0.24, 1.02, 0); // el otro brazo
-        [1.18, 1.04, 0.9].forEach(y => box(0.36, 0.04, 0.22, 0x8a8270, 0, y, 0)); // costillas
-        box(0.2, 0.06, 0.22, 0xc8c0a8, 0, 1.36, -0.02); // mandíbula
-        const eye = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.05, 0.02), new THREE.MeshBasicMaterial({ color: 0x440000 })); eye.position.set(0, 1.52, -0.14); g.add(eye); g.userData.eye = eye;
-    } else if (type === 'slime') {
-        const mat = lambert({ color: 0x5f9a3a, transparent: true, opacity: 0.9 }); mats.push(mat);
-        const m = new THREE.Mesh(new THREE.IcosahedronGeometry(0.42, 0), mat); m.position.y = 0.35; m.scale.y = 0.75; g.add(m); g.userData.body = m;
-        const eye = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.05, 0.02), new THREE.MeshBasicMaterial({ color: 0x102008 })); eye.position.set(0, 0.45, -0.38); g.add(eye); g.userData.eye = eye;
-    } else {
-        box(0.7, 0.8, 0.45, 0x6a6460, 0, 1.3, 0); box(0.4, 0.35, 0.35, 0x5a5450, 0, 1.9, 0);
-        box(0.22, 0.85, 0.22, 0x5e5854, -0.22, 0.45, 0); box(0.22, 0.85, 0.22, 0x5e5854, 0.22, 0.45, 0);
-        const arm = box(0.24, 0.8, 0.24, 0x6e6864, 0.5, 1.25, 0); g.userData.arm = arm;
-        const eye = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.06, 0.02), new THREE.MeshBasicMaterial({ color: 0x441800 })); eye.position.set(0, 1.93, -0.18); g.add(eye); g.userData.eye = eye;
-    }
-    g.userData.mats = mats;
-    return g;
-}
 function spawnEnemies(exitRoom) {
     enemies.forEach(e => scene.remove(e.mesh)); enemies = [];
-    const n = 6 + depth * 3, pool = depth >= 2 ? ['skeleton', 'skeleton', 'slime', 'brute'] : ['skeleton', 'slime', 'slime'];
+    const n = 6 + depth * 3, pool = depth >= 2 ? ['skeleton', 'knight', 'slime', 'automaton'] : ['skeleton', 'skeleton', 'slime', 'knight'];
     for (let i = 0; i < n; i++) {
         const r = pick(rooms.slice(1)); if (!r) break;
         const t = pick(pool), T = ENEMY_TYPES[t], p = cellCenter(rint(r.x, r.x + r.w - 1), rint(r.y, r.y + r.h - 1));
-        const hpMult = 1 + 0.25 * (depth - 1), mesh = buildEnemyMesh(t);
+        const hpMult = 1 + 0.25 * (depth - 1), mesh = buildEnemy(t);
         mesh.position.set(p.x, 0, p.z); scene.add(mesh);
         enemies.push({ type: t, T, x: p.x, z: p.z, hp: Math.round(T.hp * hpMult), maxHp: Math.round(T.hp * hpMult), alive: true, mesh, h: T.h, state: 'idle', wind: 0, cd: 0, flash: 0, kx: 0, kz: 0, hop: Math.random() * 6 });
     }
@@ -428,11 +384,10 @@ function updateEnemies(dt) {
         }
         // Dibujo: mira al jugador; el aviso lo pone rojo, lo agranda y le prende los ojos
         const m = e.mesh; m.position.set(e.x, 0, e.z); m.rotation.y = Math.atan2(-dx, -dz);
-        const w = e.state === 'wind' ? 1 - e.wind / T.windup : 0;
-        if (e.type === 'slime') { e.hop += dt * (e.state === 'chase' ? 7 : 2); m.userData.body.position.y = 0.35 + Math.abs(Math.sin(e.hop)) * 0.12; m.userData.body.scale.set(1 + w * 0.3, 0.75 + w * 0.35, 1 + w * 0.3); }
-        if (m.userData.arm) m.userData.arm.rotation.x = -2.4 * w;
-        m.userData.eye.material.color.setHex(w > 0 ? 0xff2a1a : (e.state === 'chase' ? 0xa01810 : 0x440000));
-        const glow = w * w * 0.45; // el aviso se enciende de a poco: rojo fuerte recién al final
+        const w = e.state === 'wind' ? 1 - e.wind / T.windup : 0, moving = e.state === 'chase' && d > T.reach * 0.8;
+        e.hop += dt;
+        animateEnemy(m, e.hop, moving, w, w > 0 ? 0xff2a1a : T.eye[e.state === 'chase' ? 1 : 0]); // caminar, respirar, levantar el arma (models.js)
+        const glow = w * w * 0.28 * (0.75 + 0.25 * Math.sin(clock * 30)); // el aviso se enciende de a poco y titila al final
         m.userData.mats.forEach(mat => mat.emissive.setRGB(e.flash > 0 ? 0.9 : glow, e.flash > 0 ? 0.9 : 0, e.flash > 0 ? 0.9 : 0));
         m.scale.setScalar(1 + w * 0.08);
     });
@@ -537,13 +492,19 @@ function loop(now) {
         clock += dt; P.yaw += dt * 0.15; updatePlayer(0); updateEnemies(dt);
     }
     updateHand(); updateParts(dt); updateLights(clock);
-    renderer.render(scene, camera);
+    post.render(scene, camera); // con la pasada de 15 bits (ps1.js)
     requestAnimationFrame(loop);
 }
 
 setWeapon('sword');
+if (Q.get('depth')) depth = Math.max(1, +Q.get('depth')); // &depth=N: arrancar más abajo (pruebas)
 newFloor();
 showOverlay('TOWER CHAOS', 'Despertás en el fondo de la torre. Solo tenés una espada, un bastón y la oscuridad.', 'Entrar');
 if (Q.get('demo')) { overlay.style.display = 'none'; if (Q.get('weapon') === 'staff') setWeapon('staff'); }
-window.__game = { P, enemies: () => enemies, attack, setWeapon, castOrb, newFloor, scene, camera, get depth() { return depth; } }; // para depurar
+function spawnAt(type, x, z) { // para pruebas y capturas
+    const T = ENEMY_TYPES[type], mesh = buildEnemy(type); mesh.position.set(x, 0, z); scene.add(mesh);
+    const e = { type, T, x, z, hp: T.hp, maxHp: T.hp, alive: true, mesh, h: T.h, state: 'idle', wind: 0, cd: 0, flash: 0, kx: 0, kz: 0, hop: Math.random() * 6 };
+    enemies.push(e); return e;
+}
+window.__game = { P, enemies: () => enemies, attack, setWeapon, castOrb, newFloor, spawnAt, scene, camera, get depth() { return depth; } }; // para depurar
 requestAnimationFrame(loop);

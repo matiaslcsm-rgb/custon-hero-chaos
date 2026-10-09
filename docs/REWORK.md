@@ -533,6 +533,15 @@ Se abre desde el menú ("🧊 Prototipo 3D") o en `3d/`. Usa Three.js (cargado d
 - Música de la cueva del juego y sonidos sintetizados. Demo para capturas: `3d/?demo=1` (y `&weapon=staff`).
 - **Para decidir después:** si convence, el camino sería pasar la lógica de la Torre (equipo, Códice, bestiario generado,
   jefes) a este motor; si no, queda como experimento.
+- **Segunda vuelta con referencias del usuario** (un caballero con armadura y textura pintada, armaduras low poly en Blender
+  con texturas de píxeles, un mecha y un robot de bloques con ojos rosas), `3d/ps1.js` y `3d/models.js`:
+  - **Modelos con forma y pivotes:** piezas en cuña (pecho, muslos, antebrazos), hombreras, yelmo con visor, articulaciones
+    de cadera y hombro; caminan, respiran y levantan el arma en el aviso.
+  - **Texturas pintadas en pixel art** por código: placas (brillo arriba, sombra abajo, biseles, remaches, rayones), cota de
+    malla, tela con pliegues y borde roto, cuero con costuras y hebilla, hueso con grietas, paneles de robot con marcas en X.
+  - **Enemigos nuevos:** Caballero hueco (espadón, tabardo) y Autómata (ojos y núcleo rosas, garras); el Bruto se fue.
+  - **Más PS1:** texturas afines (sin corrección de perspectiva, con las paredes y el piso partidos para que no se deformen
+    de más) y una pasada final con colores a 15 bits y tramado de Bayer 4×4 (los degradés granulados de las referencias).
 
 ## Orden propuesto (cada fase jugable y medida)
 1. **Pantalla:** zoom, HUD más chico y menú de pausa con pestañas. Es barato y mejora todo lo que viene después.
