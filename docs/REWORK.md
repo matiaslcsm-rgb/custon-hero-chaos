@@ -441,6 +441,11 @@ humanos, registrando en cada piso nivel, ataque, vida, arma, piezas raras y de d
    queda con el arma de mejor calidad y algunas de mago pegaban la mitad por segundo (Vara Helada 6,3 contra Hacha 12,6;
    la velocidad de ataque multiplica todo). Medido: espada→hacha 56 min, arco→Vara Helada 145 min, sin muertes. → Báculo,
    Vara Helada, Matraz y Rayo pasan a velocidad 0,85 y daño 10 (~8,5 por segundo); cuerpo a cuerpo 10,5-12,6, rifle 9,4.
+6. **Después de los tres arreglos** (tope por baja, piedra, armas parejas): 112, 63 y 128 min, **0 muertes** en las tres.
+   La diferencia que queda **es del piloto, no del botín**: el 53% del tiempo está caminando hacia el próximo bicho (limpia
+   el mapa entero antes de ir al guardián) y solo el 40% pelea, así que la duración depende sobre todo del mapa y de su
+   recorrido. Una persona va del pueblo al laberinto sin matar todo. Para medir la dificultad conviene, más adelante, un
+   piloto que juegue "como persona" también en el recorrido (objetivo del piso primero, explorar solo un rato).
 
 ## 15. Más armas y el caos de cada run (propuesta, 2026-10-08)
 Pedido del usuario: "agregar más armas y que el gameplay se base en esas armas (ballesta, mazo, guantes de casteo,

@@ -147,6 +147,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **La suerte entre runs (2026-10-08, REWORK.md §16):** lo que más diferencia las runs son las muertes (renacer en el
   piso 1 y volver a subir: ~8 min cada una). Arreglado: las habilidades "+X por baja" tienen tope en la Torre, y
   la piedra de regreso del círculo lleva a cualquier piso ya alcanzado (decisión del usuario).
+  Las armas de mago quedaron parejas. Lo que sigue variando entre runs es el recorrido del piloto (limpia todo el mapa).
 - **Motor (decidido 2026-10-06):** seguimos en canvas + JavaScript puro. Pasar a un motor (Phaser para seguir en el
   navegador, Godot para publicar en PC/celular) se decide cuando el contenido de Tower Chaos esté más cerrado.
 - **Balance en curso (2026-09-28):** jefes más suaves desde la ronda 20 + Kaya y Cetro del Eclipse (ver DISEÑO.md §9 bis).
