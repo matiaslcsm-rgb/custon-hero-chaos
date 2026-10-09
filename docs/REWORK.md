@@ -542,6 +542,40 @@ Se abre desde el menú ("🧊 Prototipo 3D") o en `3d/`. Usa Three.js (cargado d
   - **Enemigos nuevos:** Caballero hueco (espadón, tabardo) y Autómata (ojos y núcleo rosas, garras); el Bruto se fue.
   - **Más PS1:** texturas afines (sin corrección de perspectiva, con las paredes y el piso partidos para que no se deformen
     de más) y una pasada final con colores a 15 bits y tramado de Bayer 4×4 (los degradés granulados de las referencias).
+- **Tercera vuelta: la isla y la tercera persona** (pedido: "que el jugador arranque en el exterior, en una isla con
+  océano y playa; de la playa un bosque frondoso y a la distancia una torre; cielo nublado y la torre se pierde en las
+  nubes; animales como enemigos entre la playa y la torre; que arranque con un palo; que se vea en tercera persona"),
+  `3d/island.js`:
+  - **La isla:** terreno con una función de altura (ruido fijo: siempre la misma isla, se aprende el camino) que sirve
+    para dibujar y para caminar. Colores por vértice (arena mojada y seca, pasto, suelo de bosque, tierra del sendero,
+    roca en las pendientes, piedra en la explanada) por una textura de detalle pixelada. Océano con olas que se mueve
+    con la cámara; no se puede entrar más allá de las rodillas.
+  - **Recorrido:** sur, la playa del naufragio (casco roto, mástil, tablas, barril, palmeras, gaviotas). Centro, el
+    bosque: ~1.400 árboles (abetos y robles), arbustos y ~3.800 matas de pasto, todo instanciado (2-6 ms por cuadro).
+    Un sendero serpentea hacia el norte y en el borde del bosque los árboles son más bajos, así **desde la playa ya se
+    ve la torre**. Norte, la explanada de la torre con columnas rotas y una puerta con dos antorchas (la única luz cálida
+    de afuera: te llama). Al oeste, fuera del sendero, **un claro en ruinas** con un altar y un haz violeta que se ve por
+    encima de los árboles (premio por explorar). El nombre del lugar aparece al entrar en cada zona.
+  - **El cielo:** gris de nubes bajas, niebla lineal que se come el horizonte y tres capas de nubes (55, 63 y 72 m).
+    La torre mide 300 m y es más oscura que la niebla: se recorta contra el cielo y **desaparece en las nubes**.
+  - **Animales** (con aviso, como todos): **Cangrejo** en la arena (lento, camina de costado). **Lobos** en manadas de 3:
+    si uno te ve, aúlla y vienen todos; muerden y se alejan. **Jabalí:** de lejos **embiste**. Bufa, baja la cabeza y
+    marca una franja roja en el piso por donde va a pasar (la dirección queda fija: correte de costado). Si se la da
+    contra un árbol o una columna queda atontado y recibe +50% de daño. De cerca, colmillazo normal. Pasean cerca de
+    su lugar cuando no te vieron.
+  - **Armas:** se arranca con un **Palo** (8-11 de daño, el tercer golpe ×1,6 y empuja). La **Espada** (16-22, el
+    tercero ×2) está clavada junto a la puerta de la torre: hay que cruzar la isla para tenerla. El **Bastón** está en el
+    altar del claro. Teclas 1/2/3 o la ruedita del mouse; al morir se conservan.
+  - **Tercera persona:** cámara sobre el hombro derecho que gira con el mouse. Se acorta si hay una pared, un tronco o
+    una copa en el medio, para no meterse en los árboles. El héroe tiene capucha, capa, túnica de cuero y botas, y gira
+    el torso en los tajos: derecha a izquierda, izquierda a derecha y el remate de arriba. **Apuntado suave:** el golpe
+    va hacia donde mirás y se gira solo hacia el enemigo más cercano si está más o menos adelante. Mientras pegás casi
+    no te movés (el golpe compromete). Barritas de vida sobre los bichos que golpeaste.
+  - **La torre por dentro:** los pisos de antes, ahora numerados hacia arriba (PISO 1, 2…) con una escalera que sube. Al
+    morir despertás otra vez en la playa.
+  - Sonido: la música del bosque afuera y la de la cueva adentro; el mar es ruido filtrado que sube y baja (más fuerte
+    cerca de la playa); el jabalí bufa y los lobos aúllan. Demo para capturas: `3d/?demo=1&spin=0`, con
+    `&at=forest|tower|altar`, `&calm=1` (los bichos no te ven), `&weapon=sword|staff` y `&depth=N`.
 
 ## Orden propuesto (cada fase jugable y medida)
 1. **Pantalla:** zoom, HUD más chico y menú de pausa con pestañas. Es barato y mejora todo lo que viene después.

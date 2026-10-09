@@ -150,6 +150,9 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   Las armas de mago quedaron parejas. Lo que sigue variando entre runs es el recorrido del piloto (limpia todo el mapa).
 - **Prototipo 3D estilo PS1 (2026-10-08, `3d/`, REWORK.md §17):** primera persona como Lunacid, Three.js, mazmorra
   generada, espada/bastón, enemigos que avisan. Experimento para decidir si el juego pasa a 3D.
+  Tercera vuelta: **tercera persona** y se arranca **afuera, en una isla** (playa del naufragio → bosque → torre entre las
+  nubes), con un **palo**; animales en el camino (cangrejo, lobos en manada, jabalí que embiste). La espada está en la
+  puerta de la torre y el bastón en un claro con ruinas. Adentro, los pisos de antes (ahora se sube).
 - **Motor (decidido 2026-10-06):** seguimos en canvas + JavaScript puro. Pasar a un motor (Phaser para seguir en el
   navegador, Godot para publicar en PC/celular) se decide cuando el contenido de Tower Chaos esté más cerrado.
 - **Balance en curso (2026-09-28):** jefes más suaves desde la ronda 20 + Kaya y Cetro del Eclipse (ver DISEÑO.md §9 bis).

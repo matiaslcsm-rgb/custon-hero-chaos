@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Tower Chaos 3D (prototipo)</title>
+    <title>Tower Chaos 3D</title>
     <link rel="stylesheet" href="style.css">
     <script type="importmap">
         { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
@@ -21,6 +21,7 @@
         </div>
         <div id="weapon-name"></div>
         <div id="floor-name"></div>
+        <div id="prompt"></div>
         <div id="log"></div>
         <div id="hurt"></div>
     </div>
@@ -29,12 +30,12 @@
     <div id="overlay">
         <h1>TOWER CHAOS</h1>
         <h2 id="ov-sub">prototipo en 3D · estética PS1</h2>
-        <p id="ov-text">Despertás en el fondo de la torre. Solo tenés una espada, un bastón y la oscuridad.</p>
-        <button id="ov-btn">Entrar</button>
+        <p id="ov-text">Despertás en la arena, entre los restos de un barco. Tenés un palo.</p>
+        <button id="ov-btn">Levantarse</button>
         <div class="controls">
-            <b>W A S D</b> moverse · <b>mouse</b> mirar · <b>Shift</b> correr<br>
-            <b>clic izquierdo</b> atacar · <b>1</b> espada · <b>2</b> bastón (gasta maná)<br>
-            <b>E</b> agarrar / bajar la escalera · <b>Esc</b> pausa
+            <b>W A S D</b> moverse · <b>mouse</b> girar la cámara · <b>Shift</b> correr · <b>Espacio</b> esquivar<br>
+            <b>clic izquierdo</b> atacar (combo de 3) · <b>1 2 3</b> o <b>ruedita</b> cambiar de arma<br>
+            <b>E</b> agarrar / entrar / subir · <b>Esc</b> pausa
         </div>
     </div>
 

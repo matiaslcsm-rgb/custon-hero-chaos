@@ -9,7 +9,9 @@ html, body { margin: 0; height: 100%; background: #050507; overflow: hidden; fon
 .bar > div { height: 100%; width: 100%; background: linear-gradient(#b8332a, #6e1712); transition: width 0.15s; }
 .bar.mana > div { background: linear-gradient(#4a6fc0, #1f3473); }
 .bar span { position: absolute; inset: 0; font-size: 11px; line-height: 14px; text-align: center; color: #f1e7d0; text-shadow: 1px 1px 0 #000; }
-#weapon-name { position: absolute; right: 24px; bottom: 24px; font-size: 15px; letter-spacing: 2px; text-transform: uppercase; color: #c9b88a; text-shadow: 1px 1px 0 #000; }
+#weapon-name small { display: block; font-size: 11px; letter-spacing: 1px; text-transform: none; color: #9c8a66; text-align: right; margin-top: 3px; }
+#prompt { position: absolute; left: 50%; bottom: 22%; transform: translateX(-50%); font-size: 16px; letter-spacing: 3px; color: #f1e7d0; background: rgba(10, 8, 6, 0.6); border: 1px solid #6b5a44; padding: 5px 14px; opacity: 0; transition: opacity 0.2s; white-space: nowrap; }
+#weapon-name { position: absolute; right: 24px; bottom: 24px; text-align: right; font-size: 15px; letter-spacing: 2px; text-transform: uppercase; color: #c9b88a; text-shadow: 1px 1px 0 #000; }
 #floor-name { position: absolute; left: 50%; top: 18%; transform: translateX(-50%); font-size: 30px; letter-spacing: 6px; color: #e8dcc0; text-shadow: 2px 2px 0 #000; opacity: 0; transition: opacity 1s; text-align: center; }
 #log { position: absolute; left: 24px; top: 20px; font-size: 14px; line-height: 1.5; text-shadow: 1px 1px 0 #000; max-width: 46vw; }
 #log div { transition: opacity 1s; }

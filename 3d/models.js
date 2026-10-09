@@ -57,7 +57,23 @@ const PAINT = {
         for (let i = 0; i < 3; i++) { g.fillStyle = shade(b, 0.3); g.fillRect(20 + i * 3, 5, 2, 6); }
         g.fillStyle = a; g.fillRect(22, 22, 2, 2);
     },
-    dark(g, s) { g.fillStyle = '#0a0808'; g.fillRect(0, 0, s, s); }
+    dark(g, s) { g.fillStyle = '#0a0808'; g.fillRect(0, 0, s, s); },
+    fur(g, s, b) { // pelaje: mechones cortos, más oscuro abajo
+        g.fillStyle = shade(b, 0.85); g.fillRect(0, 0, s, s);
+        for (let i = 0; i < 120; i++) { const x = rint(0, s - 1), y = rint(0, s - 1); g.fillStyle = shade(b, 0.6 + Math.random() * 0.8); g.fillRect(x, y, 1, 2); g.fillRect(x + 1, y + 2, 1, 1); }
+        for (let y = 0; y < s; y++) { g.fillStyle = `rgba(0,0,0,${0.3 * y / s})`; g.fillRect(0, y, s, 1); }
+    },
+    shell(g, s, b) { // caparazón: manchas y borde claro
+        g.fillStyle = shade(b, 1); g.fillRect(0, 0, s, s); noise(g, s, b, 0.4, 120);
+        for (let i = 0; i < 10; i++) { g.fillStyle = shade(b, 0.6); g.fillRect(rint(2, 28), rint(2, 28), rint(2, 4), rint(1, 3)); }
+        g.fillStyle = shade(b, 1.5); g.fillRect(0, 0, s, 2); g.fillStyle = shade(b, 0.45); g.fillRect(0, s - 3, s, 3);
+    },
+    face(g, s, b) { // cara del héroe: piel, ojos, la sombra de la capucha arriba
+        g.fillStyle = shade(b, 1); g.fillRect(0, 0, s, s); noise(g, s, b, 0.15, 60);
+        g.fillStyle = 'rgba(0,0,0,0.45)'; g.fillRect(0, 0, s, 9);
+        g.fillStyle = '#1a1210'; g.fillRect(8, 13, 4, 3); g.fillRect(20, 13, 4, 3);
+        g.fillStyle = shade(b, 0.7); g.fillRect(15, 16, 2, 5); g.fillRect(12, 24, 8, 1);
+    }
 };
 // Material con su textura (repeat para las cuñas, que reparten la textura en 4 caras)
 function mat(kind, base, accent, rep = null) {
@@ -170,6 +186,88 @@ const BUILD = {
             return hp;
         });
     },
+    // --- ANIMALES DE LA ISLA (las patas se mueven en diagonal) ---
+    // Cangrejo: caparazón ancho, dos pinzas (se levantan en el aviso), seis patas, ojos en antenitas
+    crab(g, U) {
+        const sh = mat('shell', '#b8442a'), shW = mat('shell', '#b8442a', null, [4, 1]), pale = mat('shell', '#e0a070');
+        U.hips = pivot(g, 0, 0.32, 0);
+        const body = wedge(0.42, 0.34, 0.22, shW); body.scale.z = 0.75; U.hips.add(body);
+        U.head = pivot(U.hips, 0, 0.1, -0.22);
+        const eyeMat = new THREE.MeshBasicMaterial({ color: 0x101010 });
+        U.eyes = [-0.08, 0.08].map(x => { const st = box(0.03, 0.14, 0.03, pale); at(st, x, 0.07, 0); U.head.add(st); const e = box(0.06, 0.06, 0.06, eyeMat); at(e, x, 0.15, 0); U.head.add(e); return e; });
+        U.arms = [-1, 1].map(side => {
+            const s = pivot(U.hips, side * 0.3, 0.02, -0.18); s.rotation.y = side * 0.5;
+            const arm = box(0.08, 0.08, 0.28, sh); at(arm, 0, 0, -0.12); s.add(arm);
+            const claw = box(0.16, 0.12, 0.2, pale); at(claw, 0, 0.02, -0.34); s.add(claw);
+            const pin = box(0.05, 0.05, 0.16, sh); at(pin, side * 0.05, -0.07, -0.36); s.add(pin);
+            return s;
+        });
+        U.legs = [];
+        [-1, 1].forEach(side => [-0.12, 0.02, 0.16].forEach(z => { const l = pivot(U.hips, side * 0.3, -0.04, z); const seg = box(0.32, 0.04, 0.04, sh); at(seg, side * 0.16, -0.08, 0); seg.rotation.z = side * -0.6; l.add(seg); U.legs.push(l); }));
+        U.crab = true;
+    },
+    // Lobo: cuerpo largo, collar de pelo, hocico, orejas en punta, cola
+    wolf(g, U) {
+        const fur = mat('fur', '#7d7872'), furW = mat('fur', '#7d7872', null, [4, 1]), belly = mat('fur', '#a8a294');
+        U.hips = pivot(g, 0, 0.62, 0);
+        const torso = wedge(0.26, 0.2, 1.0, furW); torso.rotation.x = Math.PI / 2; torso.scale.set(0.9, 1, 1.1); U.hips.add(torso);
+        const ruff = box(0.42, 0.42, 0.3, fur); at(ruff, 0, 0.05, -0.38); U.hips.add(ruff);
+        U.head = pivot(U.hips, 0, 0.18, -0.55);
+        const skull = box(0.26, 0.24, 0.28, fur); at(skull, 0, 0, -0.06); U.head.add(skull);
+        const snout = wedge(0.07, 0.11, 0.26, belly); snout.rotation.x = Math.PI / 2; at(snout, 0, -0.05, -0.3); U.head.add(snout);
+        const nose = box(0.06, 0.05, 0.04, mat('dark', '#000')); at(nose, 0, -0.02, -0.44); U.head.add(nose);
+        [-1, 1].forEach(side => { const ear = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.16, 4), fur); at(ear, side * 0.09, 0.18, 0.02); U.head.add(ear); });
+        const eyeMat = new THREE.MeshBasicMaterial({ color: 0xc8a020 });
+        U.eyes = [-0.08, 0.08].map(x => { const e = box(0.04, 0.03, 0.02, eyeMat); at(e, x, 0.04, -0.2); U.head.add(e); return e; });
+        const tail = wedge(0.07, 0.03, 0.5, fur); tail.rotation.x = -2.3; at(tail, 0, 0.05, 0.62); U.hips.add(tail); U.tail = tail;
+        U.legs = [[-1, -0.32], [1, -0.32], [1, 0.34], [-1, 0.34]].map(([side, z]) => { const l = pivot(U.hips, side * 0.12, -0.1, z); const leg = wedge(0.06, 0.04, 0.5, fur); at(leg, 0, -0.25, 0); l.add(leg); const paw = box(0.08, 0.05, 0.12, belly); at(paw, 0, -0.5, -0.02); l.add(paw); return l; });
+        U.quad = true;
+    },
+    // Jabalí: cuerpo de barril, joroba, colmillos, patas cortas (embiste: baja la cabeza en el aviso)
+    boar(g, U) {
+        const fur = mat('fur', '#5a3e2a'), furW = mat('fur', '#5a3e2a', null, [4, 1]), tusk = mat('bone', '#e8dcc0'), snoutM = mat('leather', '#8a5a4a', '#8a5a4a');
+        U.hips = pivot(g, 0, 0.58, 0);
+        const torso = wedge(0.38, 0.3, 1.1, furW); torso.rotation.x = Math.PI / 2; U.hips.add(torso);
+        const hump = wedge(0.18, 0.3, 0.3, fur); at(hump, 0, 0.3, -0.25); U.hips.add(hump);
+        U.head = pivot(U.hips, 0, 0.05, -0.6);
+        const skull = wedge(0.18, 0.24, 0.4, fur); skull.rotation.x = Math.PI / 2; at(skull, 0, 0, -0.15); U.head.add(skull);
+        const snout = box(0.18, 0.14, 0.08, snoutM); at(snout, 0, -0.04, -0.38); U.head.add(snout);
+        [-1, 1].forEach(side => { const t = box(0.035, 0.16, 0.035, tusk); at(t, side * 0.1, 0.02, -0.32); t.rotation.set(-0.4, 0, side * 0.3); U.head.add(t); const ear = box(0.08, 0.1, 0.03, fur); at(ear, side * 0.14, 0.18, -0.02); ear.rotation.z = side * 0.5; U.head.add(ear); });
+        const eyeMat = new THREE.MeshBasicMaterial({ color: 0x200a04 });
+        U.eyes = [-0.12, 0.12].map(x => { const e = box(0.04, 0.04, 0.02, eyeMat); at(e, x, 0.08, -0.22); U.head.add(e); return e; });
+        U.legs = [[-1, -0.35], [1, -0.35], [1, 0.38], [-1, 0.38]].map(([side, z]) => { const l = pivot(U.hips, side * 0.2, -0.15, z); const leg = wedge(0.08, 0.06, 0.4, fur); at(leg, 0, -0.2, 0); l.add(leg); const hoof = box(0.1, 0.06, 0.1, mat('dark', '#000')); at(hoof, 0, -0.42, 0); l.add(hoof); return l; });
+        U.quad = true; U.headDown = true;
+    },
+    // El héroe (tercera persona): capucha, capa corta, túnica de cuero, botas. El torso gira aparte de la cadera (los tajos).
+    hero(g, U) {
+        const cloakC = '#3d4a5a', cloak = mat('cloth', cloakC), tunicW = mat('leather', '#6a4a30', '#6a4a30', [4, 1]), clothW = mat('cloth', '#4a3f34', null, [4, 1]), boot = mat('leather', '#3a2618', '#3a2618'), skin = '#c89a78';
+        U.hips = pivot(g, 0, 0.92, 0);
+        const belt = box(0.36, 0.08, 0.24, mat('leather', '#3a2618', '#c9a227')); U.hips.add(belt);
+        U.torso = pivot(U.hips, 0, 0.04, 0);
+        const chest = wedge(0.24, 0.19, 0.5, tunicW); at(chest, 0, 0.27, 0); chest.scale.z = 0.75; U.torso.add(chest);
+        const cape = box(0.4, 0.62, 0.04, cloak); at(cape, 0, 0.2, 0.17); U.torso.add(cape); U.cape = cape;
+        U.head = pivot(U.torso, 0, 0.6, 0);
+        const head = box(0.2, 0.22, 0.2, [cloak, cloak, cloak, cloak, cloak, mat('face', skin)]); at(head, 0, 0.08, 0); U.head.add(head);
+        const hood = box(0.27, 0.28, 0.22, cloak); at(hood, 0, 0.13, 0.06); U.head.add(hood); // la capucha va corrida atrás: la cara se ve
+        const brim = box(0.27, 0.06, 0.08, cloak); at(brim, 0, 0.25, -0.1); U.head.add(brim);
+        U.arms = [-1, 1].map(side => {
+            const s = pivot(U.torso, side * 0.27, 0.46, 0);
+            const pad = box(0.15, 0.1, 0.18, cloak); at(pad, 0, 0.02, 0); s.add(pad);
+            const up = wedge(0.06, 0.055, 0.3, tunicW); at(up, 0, -0.17, 0); s.add(up);
+            const fore = wedge(0.06, 0.05, 0.28, clothW); at(fore, 0, -0.45, 0); s.add(fore);
+            const hand = box(0.08, 0.09, 0.09, boot); at(hand, 0, -0.62, 0); s.add(hand);
+            return s;
+        });
+        U.grip = pivot(U.arms[1], 0, -0.64, 0); // acá va el arma
+        U.legs = [-1, 1].map(side => {
+            const l = pivot(U.hips, side * 0.1, -0.04, 0);
+            const th = wedge(0.08, 0.065, 0.42, clothW); at(th, 0, -0.22, 0); l.add(th);
+            const shin = wedge(0.07, 0.08, 0.4, mat('leather', '#3a2618', '#3a2618', [4, 1])); at(shin, 0, -0.62, 0); l.add(shin);
+            const toe = box(0.12, 0.08, 0.2, boot); at(toe, 0, -0.84, -0.05); l.add(toe);
+            return l;
+        });
+        U.eyes = [];
+    },
     // Limo: una gota translúcida que salta
     slime(g, U) {
         const m = lambert({ map: tex('cloth', '#5f9a3a'), transparent: true, opacity: 0.88 });
@@ -187,12 +285,70 @@ export function buildEnemy(type) {
     return g;
 }
 // Animación: caminar (piernas y brazos), respirar, levantar el arma mientras avisa (w: 0→1)
-export function animateEnemy(mesh, t, moving, w, eyeColor) {
-    const U = mesh.userData.U, sw = moving ? Math.sin(t * 7) : 0;
+export function animateEnemy(mesh, t, moving, w, eyeColor, speed = 7) {
+    const U = mesh.userData.U, sw = moving ? Math.sin(t * speed) : 0;
+    if (U.quad || U.crab) { // animales: patas en diagonal (el cangrejo las abre de costado)
+        U.legs.forEach((l, i) => { if (U.crab) l.rotation.z = (i % 2 ? 1 : -1) * sw * 0.35 * (i < 3 ? 1 : -1); else l.rotation.x = sw * 0.6 * (i % 2 ? -1 : 1); });
+        U.hips.position.y = (U.hips.userData.y0 ??= U.hips.position.y) + (moving ? Math.abs(Math.sin(t * speed)) * 0.03 : Math.sin(t * 2) * 0.008);
+        U.head.rotation.x = U.headDown ? 0.45 * w : -0.3 * w; // el jabalí baja la cabeza para embestir; el lobo la levanta
+        U.hips.rotation.x = U.headDown ? 0.08 * w : -0.12 * w;
+        if (U.tail) U.tail.rotation.y = Math.sin(t * (moving ? 10 : 3)) * 0.3;
+        if (U.arms) U.arms.forEach((a, i) => { a.rotation.x = 0.9 * w + (moving ? 0 : Math.sin(t * 2 + i) * 0.08); a.rotation.z = (i ? -1 : 1) * 0.3 * w; }); // pinzas arriba
+        (U.eyes || []).forEach(e => e.material.color.setHex(eyeColor));
+        return;
+    }
     if (U.legs) { U.legs[0].rotation.x = sw * 0.5; U.legs[1].rotation.x = -sw * 0.5; }
     if (U.hips) { U.hips.position.y = (U.hips.userData.y0 ??= U.hips.position.y) + (moving ? Math.abs(Math.sin(t * 7)) * 0.04 : Math.sin(t * 2) * 0.01); }
     if (U.arms) { U.arms[0].rotation.x = -sw * 0.4; U.arms[1].rotation.x = sw * 0.4 - 2.6 * w; U.arms[1].rotation.z = -0.3 * w; }
     if (U.head) U.head.rotation.x = -0.15 * w;
     if (U.body) { U.body.position.y = 0.35 + (moving ? Math.abs(Math.sin(t * 7)) * 0.12 : 0); U.body.scale.set(1 + w * 0.3, 0.75 + w * 0.35, 1 + w * 0.3); }
     (U.eyes || []).forEach(e => e.material.color.setHex(eyeColor));
+}
+
+// --- ARMAS DEL HÉROE (van en la mano: se extienden hacia -y desde el puño) ---
+export function buildWeapon(kind) {
+    const g = new THREE.Group();
+    if (kind === 'stick') { // un palo de la playa: rama torcida con una ramita
+        const wood = mat('leather', '#7a5a3a', '#7a5a3a', [1, 3]);
+        const a = wedge(0.035, 0.045, 0.55, wood); at(a, 0, -0.25, 0); g.add(a);
+        const b = wedge(0.03, 0.035, 0.45, wood); at(b, 0.03, -0.72, 0); b.rotation.z = 0.12; g.add(b);
+        const twig = wedge(0.012, 0.02, 0.18, wood); at(twig, -0.06, -0.55, 0); twig.rotation.z = 0.8; g.add(twig);
+    } else if (kind === 'sword') {
+        const steel = mat('plate', '#b8bcc4');
+        const blade = box(0.06, 0.8, 0.02, steel); at(blade, 0, -0.52, 0); g.add(blade);
+        const tip = new THREE.Mesh(new THREE.ConeGeometry(0.04, 0.12, 4), steel); tip.rotation.x = Math.PI; at(tip, 0, -0.98, 0); g.add(tip);
+        const guard = box(0.24, 0.04, 0.06, mat('plate', '#8a6a2a')); at(guard, 0, -0.1, 0); g.add(guard);
+        const grip = box(0.04, 0.16, 0.04, mat('leather', '#3a2214', '#3a2214')); at(grip, 0, 0.02, 0); g.add(grip);
+    } else { // bastón con el orbe
+        const pole = wedge(0.025, 0.03, 1.3, mat('leather', '#4a3220', '#4a3220', [1, 4])); at(pole, 0, -0.3, 0); g.add(pole);
+        const orb = new THREE.Mesh(new THREE.IcosahedronGeometry(0.09, 0), new THREE.MeshBasicMaterial({ color: 0xb48cff })); at(orb, 0, -1.02, 0); g.add(orb); g.userData.orb = orb;
+        const claw = new THREE.Mesh(new THREE.TorusGeometry(0.1, 0.015, 3, 6), mat('plate', '#6a5a3a')); at(claw, 0, -0.98, 0); claw.rotation.x = Math.PI / 2; g.add(claw);
+    }
+    return g;
+}
+// El héroe: caminar/correr, los tajos del combo (barre el torso), el remate de arriba, el empuje del bastón, el esquive.
+//   swing: { k: 0→1, step: 0 derecha→izquierda, 1 izquierda→derecha, 2 de arriba, -1 bastón }
+export function animateHero(mesh, t, moveAmt, swing, dashing) {
+    const U = mesh.userData.U, sw = Math.sin(t) * moveAmt;
+    U.legs[0].rotation.x = sw * 0.7; U.legs[1].rotation.x = -sw * 0.7;
+    U.hips.position.y = 0.92 + Math.abs(Math.cos(t)) * 0.05 * moveAmt - (dashing ? 0.25 : 0);
+    U.torso.rotation.set(dashing ? 0.6 : 0.08 * moveAmt, 0, 0);
+    U.arms[0].rotation.set(-sw * 0.6, 0, 0.12); U.arms[1].rotation.set(sw * 0.4 + 0.25, 0, -0.1);
+    U.grip.rotation.set(1.25, 0, 0); // en reposo el arma apunta adelante y abajo
+    U.cape.rotation.x = 0.12 + moveAmt * 0.35 + Math.sin(t * 0.5) * 0.03;
+    if (!swing) return;
+    const k = swing.k, ease = 1 - Math.pow(1 - Math.max(0, Math.min(1, (k - 0.15) / 0.5)), 3);
+    if (swing.step === 0 || swing.step === 1) { // tajo horizontal: el brazo adelante y el torso barre
+        const dir = swing.step === 0 ? 1 : -1, from = -1.2 * dir, to = 1.25 * dir;
+        U.torso.rotation.y = k < 0.15 ? from * (k / 0.15) : from + (to - from) * ease;
+        U.arms[1].rotation.set(1.45, 0, -0.25 * dir); U.grip.rotation.set(0.15, 0, 0);
+        U.arms[0].rotation.set(0.4, 0, 0.5);
+    } else if (swing.step === 2) { // remate: de arriba hacia abajo, con todo el cuerpo
+        const lift = k < 0.3 ? k / 0.3 : 1, down = ease;
+        U.arms[1].rotation.set(-2.7 * lift * (1 - down) + 1.1 * down, 0, -0.1); U.arms[0].rotation.set(-2.2 * lift * (1 - down) + 0.9 * down, 0, 0.2);
+        U.grip.rotation.set(0.3, 0, 0); U.torso.rotation.x = -0.2 * lift * (1 - down) + 0.45 * down; U.hips.position.y -= 0.12 * down;
+    } else { // bastón: empuje al frente
+        const p = Math.sin(Math.min(1, k) * Math.PI);
+        U.arms[1].rotation.set(0.6 + 0.9 * p, 0, -0.1); U.grip.rotation.set(1.6 - 0.9 * p, 0, 0); U.arms[0].rotation.set(0.9 * p, 0, 0.3);
+    }
 }
