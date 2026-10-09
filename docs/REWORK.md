@@ -412,6 +412,70 @@ valores, una partida dura 58 min y otra 153. Las partidas rápidas suelen termin
 ahora queda al borde de morir (1-6% de vida) pero pelea ordenado (de a uno, se aleja a tiempo); una persona va a morir
 más. Próximo paso sugerido: achicar la diferencia entre una partida con suerte y una sin suerte (cuánto suma el botín).
 
+## 15. Más armas y el caos de cada run (propuesta, 2026-10-08)
+Pedido del usuario: "agregar más armas y que el gameplay se base en esas armas (ballesta, mazo, guantes de casteo,
+libros de hechizos); después, cómo escalar las cosas y mezclarlas para inventar mecánicas al azar y darle ese toque
+caótico a cada run".
+
+### A. Familias de armas: cada una con un verbo propio
+La regla de diseño que ya funcionó con las 3 primeras (§8): **cada arma tiene un verbo** que se juega distinto con la
+misma tecla Q, y un **límite** propio (ritmo, maná, munición, carga). Así cambiar de arma cambia cómo pensás la pelea.
+
+| Arma | Verbo (Q) | Límite | Ataque básico | Identidad |
+|---|---|---|---|---|
+| Espada ✅ | combo de 3 tajos, el remate empuja y desvía balas | el ritmo | tajo en arco | cuerpo a cuerpo ágil |
+| Arco ✅ | tensar y soltar, tiro perfecto | maná | flecha | puntería |
+| Bastón ✅ | orbe que explota en área | maná | orbe | hechicero de área |
+| **Ballesta** | dispara un virote pesado que **atraviesa y empuja**; cargador de 3; se recarga sola o con **recarga activa** (tocar Q cuando la aguja pasa por la zona dorada: recarga al instante) | munición y recarga | virote lento y fuerte | ráfagas con pausa (Gears of War, Enter the Gungeon) |
+| **Mazo** | **mantener para cargar** un golpe al piso: onda que **aturde** en área; mientras carga, recibe menos daño. Golpe cargado contra un enemigo que se está preparando: lo **interrumpe** (sinergia con §12) | el tiempo de carga | golpes lentos que aturden un instante | control y peso (Monster Hunter, Hades: el escudo) |
+| **Guantes de casteo** | cada golpe cuerpo a cuerpo **carga una runa** (hasta 3); Q gasta las runas: 1 = chispa, 2 = onda, 3 = explosión. Las runas toman el **elemento** del último golpe | hay que pegar para cargar | puñetazos rápidos | mago cuerpo a cuerpo (combo → hechizo) |
+| **Libro de hechizos** | el libro trae **3 páginas** (hechizos al azar del catálogo, cada libro distinto); Q lanza la página abierta y **pasa a la siguiente**. Se consiguen páginas sueltas y se cambian en el Herrero | maná y el orden de las páginas | orbe débil | variedad: **el arma del caos** |
+
+Otras para después: **Lanza** (estocada en línea de 3, contraataque si esquivás justo), **Látigo** (agarra y tira hacia
+vos), **Escudo + espada corta** (bloquear a tiempo devuelve el golpe).
+
+### B. Cómo se mezcla todo: runas que se enganchan a eventos
+La clave de los juegos que inventan mecánicas cada run (Binding of Isaac, Noita, Risk of Rain, las bendiciones de Hades)
+es que los modificadores **no son de un arma**: se enganchan a **eventos** que cualquier arma produce. Así cada combinación
+es nueva y nadie las diseña una por una.
+
+- **Eventos:** golpe, proyectil disparado, impacto de área, crítico, muerte de un enemigo, esquive, aturdir, recibir daño.
+- **Runas** (botín, santuarios, jefes; **elegís 1 de 3** como en Hades → hay azar pero vos decidís). Ejemplos:
+  - *Rebote:* tus proyectiles rebotan a otro enemigo. *Fisión:* se dividen en 3 al impactar.
+  - *Tercer golpe:* cada 3er golpe cae un rayo. *Estela:* al esquivar dejás una mina.
+  - *Contagio:* los enemigos que matás explotan con tu elemento. *Eco:* tu Q se repite al 50% 1 s después.
+  - *Imán:* tus áreas atraen. *Escarcha:* los aturdidos se congelan. *Vampiro:* los críticos curan.
+- **Por qué sale caótico:** Rebote + Ballesta = virotes que atraviesan Y rebotan; Fisión + Bastón = el orbe explota en 3
+  orbes que explotan; Tercer golpe + Guantes = rayos que cargan runas que tiran explosiones; Eco + Libro = cada página
+  dos veces. Con ~25 runas y 7 armas hay cientos de combinaciones que nadie diseñó a mano.
+- **Elementos y reacciones** (ya existen: Derretir, Plasma, Sobrecarga, Plaga…): las runas pueden dar elemento a tu arma
+  (*Brasa*: tus golpes queman) y las reacciones aparecen solas al mezclar.
+
+### C. Cómo escala (sin romperse)
+Tres ejes, cada uno con su freno:
+1. **El arma** sube de nivel y se forja (ya existe). Freno: el traspaso pasa solo el 50%.
+2. **Las runas se apilan**: la 2ª copia de la misma suma menos (rendimiento decreciente: 100%, 60%, 40%…) y cada runa
+   tiene un "presupuesto de poder" (las que pegan más, salen menos seguido o cuestan algo: maná, vida).
+3. **Sinergias:** 2 runas con la misma etiqueta (PROYECTIL, ÁREA, GOLPE, ELEMENTO) prenden un bonus de familia, y algunas
+   parejas concretas tienen un **dúo** con nombre (como las bendiciones dobles de Hades): *Tormenta de Agujas* (Fisión +
+   Rebote), *Eclipse* (Eco + Contagio)…
+- Se mide como todo lo demás: piloto con reflejos humanos, que también elige runas. Hallazgo de §14: la suerte con el
+  botín ya pesa demasiado; por eso las runas se **eligen** (1 de 3) en vez de caer al azar, y el poder total por piso
+  queda acotado.
+
+### D. El toque de cada run: los Edictos de la Torre
+Al empezar una run se sortean **2 reglas globales** que se ven en el pergamino de arriba y en la Bitácora, por ejemplo:
+"los proyectiles rebotan en las paredes", "todo enemigo que muere explota", "de noche sos invisible para los lejanos",
+"cada cofre tiene un mímico", "las fogatas dan una runa". Una a favor y una en contra, para que cada run se sienta distinta
+aunque uses la misma arma (como los Pactos de Hades o las Variantes de Dead Cells, pero al azar).
+
+### Orden propuesto
+1. Las 4 armas nuevas, de a una y medidas (empezar por la que elijas).
+2. Las runas con eventos (10-12 para arrancar) + elegir 1 de 3.
+3. Sinergias y dúos.
+4. Edictos de la Torre.
+5. Pestaña "Armas y runas" en la Bitácora (lo descubierto, como el Códice).
+
 ## Orden propuesto (cada fase jugable y medida)
 1. **Pantalla:** zoom, HUD más chico y menú de pausa con pestañas. Es barato y mejora todo lo que viene después.
 2. **Despertar y tutorial:** cuaderno y las 3 armas (espada, arco y bastón, con su habilidad). ✅ — las 3 armas
