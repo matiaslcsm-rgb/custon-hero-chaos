@@ -469,6 +469,11 @@ Al empezar una run se sortean **2 reglas globales** que se ven en el pergamino d
 "cada cofre tiene un mímico", "las fogatas dan una runa". Una a favor y una en contra, para que cada run se sienta distinta
 aunque uses la misma arma (como los Pactos de Hades o las Variantes de Dead Cells, pero al azar).
 
+### Decisiones del usuario (2026-10-08)
+- **Todavía ninguna arma nueva:** queda la propuesta; se arranca cuando el usuario elija con cuál.
+- **Se consiguen solo como botín:** siempre se empieza con espada, arco o bastón; las nuevas aparecen durante la run.
+- **Orden:** primero las armas (de a una, medidas), después las runas, sinergias y Edictos.
+
 ### Orden propuesto
 1. Las 4 armas nuevas, de a una y medidas (empezar por la que elijas).
 2. Las runas con eventos (10-12 para arrancar) + elegir 1 de 3.
@@ -552,6 +557,7 @@ el mismo paso; lo grande queda acá, ordenado por impacto.
 **Pendiente (de más a menos impacto):**
 
 ## Decisiones tomadas (2026-10-07)
+- **Armas nuevas (2026-10-08):** solo como botín; primero las armas y después las runas (§15). Todavía sin elegir la primera.
 - **Al morir (2026-10-08):** los restos se suman si morís otra vez antes de buscarlos (nada se pierde para siempre).
 - **Estilo ASCII descartado:** se probó un filtro que convertía el mundo en caracteres (referencia: el MMORPG ASCII de
   ansenjeo) y al usuario no le gustó cómo quedaba. Se sacó entero; la Torre sigue en tinta y pergamino.

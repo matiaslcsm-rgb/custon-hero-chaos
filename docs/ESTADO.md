@@ -142,6 +142,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   Pendiente: la suerte con el botín decide más que eso (partidas de 58 a 153 min con los mismos valores).
 - **La Bitácora (2026-10-08):** Cuaderno, Códice y Bestiario en un solo libro con pestañas; el Bestiario se guarda entre
   runs como colección (REWORK.md §6).
+- **Armas nuevas y caos (propuesta 2026-10-08, REWORK.md §15):** ballesta, mazo, guantes de casteo y libro de hechizos,
+  solo como botín; después runas que se enganchan a eventos, sinergias y Edictos de la Torre. Falta elegir la primera arma.
 - **Motor (decidido 2026-10-06):** seguimos en canvas + JavaScript puro. Pasar a un motor (Phaser para seguir en el
   navegador, Godot para publicar en PC/celular) se decide cuando el contenido de Tower Chaos esté más cerrado.
 - **Balance en curso (2026-09-28):** jefes más suaves desde la ronda 20 + Kaya y Cetro del Eclipse (ver DISEÑO.md §9 bis).
