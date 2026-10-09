@@ -114,8 +114,20 @@ const PERMANENT_LABELS = {
     hpRegen: 'regen. de vida/s', manaRegen: 'regen. de maná/s', str: 'Fuerza', agi: 'Agilidad', int: 'Inteligencia'
 };
 
+// En la Torre, lo que suma cada habilidad "por baja" tiene un tope por run (2026-10-08). Medido: en una run se matan ~2400
+// bichos, y estas habilidades (pensadas para las rondas de Custom Hero Chaos) daban +240 de daño (Grieta del Vacío) o
+// +757% de crítico (Masacre): el poder dependía de la suerte de encontrar esa pieza. El escalado propio del Aventurero
+// (vida por bajas) no tiene tope: es igual para todos.
+const TOWER_PERM_CAP = { atk: 40, maxHp: 300, str: 15, agi: 15, int: 15, armor: 8, critChance: 15, atkSpeed: 20, lifesteal: 10, hpRegen: 10, manaRegen: 5 };
 // stat: armor | atk | atkSpeed (en %) | critChance | lifesteal | maxHp (bonus directo) o str | agi | int (suma al atributo).
 function grantPermanent(hero, stat, amount, sourceName) {
+    if (gameMode === 'tower' && sourceName && TOWER_PERM_CAP[stat] !== undefined) { // tope por habilidad en la Torre
+        const got = hero.permGains = hero.permGains || {}, key = sourceName + ':' + stat, now = got[key] || 0, cap = TOWER_PERM_CAP[stat];
+        amount = Math.min(amount, cap - now);
+        if (amount <= 0) return;
+        got[key] = now + amount;
+        if (got[key] >= cap && hero === player) log(`📈 ${sourceName} llegó a su tope en la Torre: +${cap} ${PERMANENT_LABELS[stat]}.`);
+    }
     if (stat === 'str' || stat === 'agi' || stat === 'int') hero[stat] += amount;
     else hero.bonus[stat] = (hero.bonus[stat] || 0) + amount;
     hero.recalculateStats();

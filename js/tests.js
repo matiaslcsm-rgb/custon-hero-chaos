@@ -1755,6 +1755,20 @@ test('La Bitácora: un libro con pestañas (N, J, K) y un Bestiario que se guard
     bestiaryView = 'run'; closeLogbook();
 });
 
+test('Torre: lo que suman las habilidades "por baja" tiene tope por run (el escalado del Aventurero no)', () => {
+    newTower();
+    const atk0 = player.bonus.atk;
+    for (let i = 0; i < 500; i++) grantPermanent(player, 'atk', 2, 'Grieta del Vacío');
+    checkEq(player.bonus.atk - atk0, TOWER_PERM_CAP.atk, 'el daño de la Grieta se frena en su tope');
+    for (let i = 0; i < 10; i++) grantPermanent(player, 'atk', 2, 'Disparo Mortal');
+    checkEq(player.bonus.atk - atk0, TOWER_PERM_CAP.atk + 20, 'cada habilidad tiene su propio tope');
+    const crit0 = player.bonus.critChance || 0;
+    for (let i = 0; i < 2000; i++) grantPermanent(player, 'critChance', 1, 'Masacre');
+    checkEq((player.bonus.critChance || 0) - crit0, TOWER_PERM_CAP.critChance, 'Masacre ya no da +757% de crítico');
+    const hp0 = player.bonus.maxHp; for (let i = 0; i < 300; i++) applyScalingBonus(player, 5);
+    checkEq(player.bonus.maxHp - hp0, 1500, 'el escalado propio (vida por bajas) sigue igual');
+});
+
 test('Torre: el Cuaderno escribe una página sola la primera vez que hacés cada cosa, y no se repite', () => {
     notebookState = { seen: {} };
     newTower(); // startTowerRun() ya escribió WAKE al despertar

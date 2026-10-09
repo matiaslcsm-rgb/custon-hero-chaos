@@ -412,6 +412,27 @@ valores, una partida dura 58 min y otra 153. Las partidas rápidas suelen termin
 ahora queda al borde de morir (1-6% de vida) pero pelea ordenado (de a uno, se aleja a tiempo); una persona va a morir
 más. Próximo paso sugerido: achicar la diferencia entre una partida con suerte y una sin suerte (cuánto suma el botín).
 
+## 16. ¿De dónde sale la diferencia entre runs? (2026-10-08)
+Pedido: achicar la suerte del botín (§14: con los mismos valores, runs de 58 a 153 min). Medido con el piloto de reflejos
+humanos, registrando en cada piso nivel, ataque, vida, arma, piezas raras y de dónde salen los bonus permanentes:
+
+| Run | Minutos | Muertes | Ataque en el piso 10 | Bonus permanente por bajas |
+|---|---|---|---|---|
+| Espada → Hacha | 185 | 6 (las 6 en el piso 10) | 363 | +240 de daño (Grieta del Vacío) |
+| Arco → Rifle | 98 | 0 | 164 | ninguno |
+| Bastón → Rayo | 107 | 0 | 163 | **+757% de crítico** (Masacre) |
+
+**Lo que encontramos:**
+1. **No es el botín común:** con ~13 piezas por piso, a partir del piso 3 todas las runs tienen el equipo lleno de raras.
+   El ataque tampoco decide la duración: la run con más del doble de ataque fue la más lenta.
+2. **Las muertes son las que más tiempo se comen:** al morir renacés en el piso 1 y volvés a subir. 6 muertes en el piso
+   10 = 47 minutos perdidos (~8 min cada una). Eso explica casi toda la diferencia. → Decisión pendiente (ver abajo).
+3. **Error de diseño heredado:** las habilidades de los héroes que suman "+X permanente por cada baja" (pensadas para las
+   rondas de Custom Hero Chaos) en la Torre, con ~2400 bajas por run, daban +240 de daño o +757% de crítico. →
+   **Arreglado:** tope por habilidad y por run (`TOWER_PERM_CAP`, progression.js): daño +40, vida +300, atributos +15,
+   armadura +8, crítico +15%, vel. de ataque +20%, robo de vida +10%, regeneración +10/+5. Al llegar al tope, un mensaje
+   lo avisa. El escalado propio del Aventurero (vida por bajas, +1150-1235 por run) no tiene tope: es igual para todos.
+
 ## 15. Más armas y el caos de cada run (propuesta, 2026-10-08)
 Pedido del usuario: "agregar más armas y que el gameplay se base en esas armas (ballesta, mazo, guantes de casteo,
 libros de hechizos); después, cómo escalar las cosas y mezclarlas para inventar mecánicas al azar y darle ese toque
