@@ -437,6 +437,10 @@ humanos, registrando en cada piso nivel, ataque, vida, arma, piezas raras y de d
    de Dark Souls o los waypoints de Diablo). La lista marca dónde están tus restos y cuál es el piso más alto. Morir pasa
    a costar ~1 minuto en vez de ~8. El piloto la usa solo al renacer (va al piso de sus restos). Página del Cuaderno: "La
    piedra que recuerda".
+5. **Las armas de los héroes, parejas:** con la piedra, la diferencia que quedaba era la velocidad de limpiar: el piloto se
+   queda con el arma de mejor calidad y algunas de mago pegaban la mitad por segundo (Vara Helada 6,3 contra Hacha 12,6;
+   la velocidad de ataque multiplica todo). Medido: espada→hacha 56 min, arco→Vara Helada 145 min, sin muertes. → Báculo,
+   Vara Helada, Matraz y Rayo pasan a velocidad 0,85 y daño 10 (~8,5 por segundo); cuerpo a cuerpo 10,5-12,6, rifle 9,4.
 
 ## 15. Más armas y el caos de cada run (propuesta, 2026-10-08)
 Pedido del usuario: "agregar más armas y que el gameplay se base en esas armas (ballesta, mazo, guantes de casteo,

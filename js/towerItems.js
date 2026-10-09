@@ -33,18 +33,21 @@ const SLOT_STATS = {
 };
 
 // Arma de cada héroe: cómo ataca quien la lleva (nombre, alcance, velocidad, proyectil y atributo principal)
+// Daño por segundo base (2026-10-08, REWORK.md §16): las de mago iban de 6,3 a 7,2 contra 10,5-12,6 de las de cuerpo a cuerpo,
+// y como la velocidad de ataque multiplica todo, una run con Vara Helada limpiaba los pisos mucho más lento (145 vs 56 min).
+// Ahora: cuerpo a cuerpo 10,5-12,6 · rifle 9,4 · mago ~8,5 (de lejos es más seguro).
 const HERO_WEAPONS = {
     AXE: { noun: 'Hacha', shape: 'hammer', range: 1.5, atkSpeed: 0.9, atk: 14, projectile: 0 },
     VAMPIRE: { noun: 'Espada', shape: 'sword', range: 1.4, atkSpeed: 0.95, atk: 13, projectile: 0 },
     SNIPER: { noun: 'Rifle', shape: 'spear', range: 5, atkSpeed: 0.85, atk: 11, projectile: 11 },
     ASSASSIN: { noun: 'Dagas', shape: 'dagger', range: 1.3, atkSpeed: 1.15, atk: 10, projectile: 0 },
     DANCER: { noun: 'Espadas Gemelas', shape: 'sword', range: 1.3, atkSpeed: 1.05, atk: 10, projectile: 0 },
-    ARCANIST: { noun: 'Báculo', shape: 'staff', range: 5, atkSpeed: 0.8, atk: 9, projectile: 10 },
-    FROSTWITCH: { noun: 'Vara Helada', shape: 'staff', range: 4, atkSpeed: 0.7, atk: 9, projectile: 10 },
+    ARCANIST: { noun: 'Báculo', shape: 'staff', range: 5, atkSpeed: 0.85, atk: 10, projectile: 10 },
+    FROSTWITCH: { noun: 'Vara Helada', shape: 'staff', range: 4, atkSpeed: 0.85, atk: 10, projectile: 10 },
     NECROMANCER: { noun: 'Guadaña', shape: 'spear', range: 3, atkSpeed: 0.85, atk: 10, projectile: 10 },
     VOIDSAGE: { noun: 'Cetro', shape: 'staff', range: 4, atkSpeed: 0.95, atk: 9, projectile: 10 },
-    ALCHEMIST: { noun: 'Matraz', shape: 'orb', range: 3, atkSpeed: 0.7, atk: 9, projectile: 9 },
-    ZEUS: { noun: 'Rayo', shape: 'crystal', range: 4.5, atkSpeed: 0.8, atk: 9, projectile: 12 }
+    ALCHEMIST: { noun: 'Matraz', shape: 'orb', range: 3, atkSpeed: 0.85, atk: 10, projectile: 9 },
+    ZEUS: { noun: 'Rayo', shape: 'crystal', range: 4.5, atkSpeed: 0.85, atk: 10, projectile: 12 }
 };
 const FISTS = { noun: 'Puños', range: 1.3, atkSpeed: 1.0, atk: 8, projectile: 0 };
 const SLOT_NOUNS = { helm: 'Casco', armor: 'Coraza', gloves: 'Guantes', boots: 'Botas', amulet: 'Amuleto', ring: 'Anillo' };
