@@ -38,6 +38,7 @@ una torre se pierde en las nubes. Hay que cruzar la isla entre animales y entrar
   maná) en el altar del claro.
 - **La torre por dentro:** pisos generados al azar (salas y pasillos) con esqueletos, limos, caballeros huecos y
   autómatas; cada piso más oscuro y con más enemigos.
+- **El héroe:** un náufrago de físico atlético en low poly, con la anatomía pintada en la textura (como en Tekken 3).
 - **Tercera persona** sobre el hombro, con apuntado suave hacia el enemigo cercano.
 - **Look PS1** (`ps1.js`): se dibuja a 320 px y se agranda sin suavizar, vértices que tiemblan, texturas afines, colores
   a 15 bits con tramado. Modelos y texturas pintadas por código (`models.js`).

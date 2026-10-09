@@ -626,6 +626,7 @@ function loop(now) {
         clock += dt; if (Q.get('spin') !== '0') P.yaw += dt * 0.12; updatePlayer(0); updateEnemies(dt); updatePickups(dt);
     }
     if (island && world.kind === 'island') island.update(clock, camera.position);
+    if (Number.isFinite(P.x + P.z + P.y)) P.safe = { x: P.x, y: P.y, z: P.z }; else if (P.safe) { Object.assign(P, P.safe); P.kx = P.kz = 0; } // red de seguridad: si algo deja la posición en NaN, vuelve a la última buena
     heroMesh.position.set(P.x, P.y, P.z); heroMesh.rotation.y = P.face;
     animateHero(heroMesh, P.walk, P.moveAmt, P.swing, clock < P.dashUntil);
     heroMesh.userData.mats.forEach(m => m.emissive.setRGB(P.flash > 0 ? 0.8 : 0, P.flash > 0 ? 0.1 : 0, P.flash > 0 ? 0.1 : 0));
@@ -647,5 +648,5 @@ if (Q.get('demo')) {
     if (Q.get('weapon')) { P.owned = ['stick', 'sword', 'staff']; setWeapon(Q.get('weapon')); }
 }
 function spawnAt(type, x, z) { return makeEnemy(type, x, z); } // para pruebas y capturas
-window.__game = { frameMs() { const t = performance.now(); post.render(scene, camera); renderer.getContext().finish(); return performance.now() - t; }, DEBUG, P, enemies: () => enemies, attack, setWeapon, castOrb, enterIsland, enterTower, spawnAt, scene, camera, island: () => island, world: () => world, get depth() { return depth; }, set depth(v) { depth = v; } };
+window.__game = { CFG, frameMs() { const t = performance.now(); post.render(scene, camera); renderer.getContext().finish(); return performance.now() - t; }, DEBUG, P, enemies: () => enemies, attack, setWeapon, castOrb, enterIsland, enterTower, spawnAt, scene, camera, island: () => island, world: () => world, get depth() { return depth; }, set depth(v) { depth = v; } };
 requestAnimationFrame(loop);

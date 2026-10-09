@@ -571,6 +571,11 @@ Se abre desde el menú ("🧊 Prototipo 3D") o en `3d/`. Usa Three.js (cargado d
     el torso en los tajos: derecha a izquierda, izquierda a derecha y el remate de arriba. **Apuntado suave:** el golpe
     va hacia donde mirás y se gira solo hacia el enemigo más cercano si está más o menos adelante. Mientras pegás casi
     no te movés (el golpe compromete). Barritas de vida sobre los bichos que golpeaste.
+  - **El héroe nuevo** (referencia del usuario: un físico atlético estilo escultura 3D; opción elegida: llevarlo a low poly
+    con la anatomía pintada, como en Tekken 3 / Soul Blade): hombros anchos y cintura angosta (la V), brazos y piernas
+    gruesos, cabeza chica. Pecho, abdominales, oblicuos, omóplatos y columna pintados en una textura de 4 paneles alrededor
+    del torso, más dos pectorales que sobresalen de perfil. Cara con cejas, mandíbula, barba de días y pelo corto. Es un
+    náufrago: torso descubierto, pantalón corto roto, vendas en antebrazos y canillas, descalzo. Respira en reposo.
   - **La torre por dentro:** los pisos de antes, ahora numerados hacia arriba (PISO 1, 2…) con una escalera que sube. Al
     morir despertás otra vez en la playa.
   - Sonido: la música del bosque afuera y la de la cueva adentro; el mar es ruido filtrado que sube y baja (más fuerte
