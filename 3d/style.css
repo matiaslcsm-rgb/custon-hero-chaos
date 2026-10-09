@@ -1,0 +1,25 @@
+/* Tower Chaos 3D (prototipo): imagen a baja resolución agrandada sin suavizar, interfaz austera como en los juegos de PS1 */
+html, body { margin: 0; height: 100%; background: #050507; overflow: hidden; font-family: Georgia, 'Times New Roman', serif; color: #d8cfb8; }
+#view { position: fixed; inset: 0; width: 100vw; height: 100vh; image-rendering: pixelated; image-rendering: crisp-edges; display: block; }
+
+#hud { position: fixed; inset: 0; pointer-events: none; }
+#crosshair { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -58%); font-size: 28px; color: #e8dcc0; text-shadow: 0 0 3px #000; }
+#bars { position: absolute; left: 24px; bottom: 24px; width: 260px; }
+.bar { position: relative; height: 14px; margin-top: 6px; background: #1a1210; border: 2px solid #6b5a44; box-shadow: 0 0 0 1px #000; }
+.bar > div { height: 100%; width: 100%; background: linear-gradient(#b8332a, #6e1712); transition: width 0.15s; }
+.bar.mana > div { background: linear-gradient(#4a6fc0, #1f3473); }
+.bar span { position: absolute; inset: 0; font-size: 11px; line-height: 14px; text-align: center; color: #f1e7d0; text-shadow: 1px 1px 0 #000; }
+#weapon-name { position: absolute; right: 24px; bottom: 24px; font-size: 15px; letter-spacing: 2px; text-transform: uppercase; color: #c9b88a; text-shadow: 1px 1px 0 #000; }
+#floor-name { position: absolute; left: 50%; top: 18%; transform: translateX(-50%); font-size: 30px; letter-spacing: 6px; color: #e8dcc0; text-shadow: 2px 2px 0 #000; opacity: 0; transition: opacity 1s; text-align: center; }
+#log { position: absolute; left: 24px; top: 20px; font-size: 14px; line-height: 1.5; text-shadow: 1px 1px 0 #000; max-width: 46vw; }
+#log div { transition: opacity 1s; }
+#hurt { position: absolute; inset: 0; box-shadow: inset 0 0 120px 40px rgba(160, 0, 0, 0.85); opacity: 0; transition: opacity 0.35s; }
+
+#overlay { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(5, 5, 7, 0.82); text-align: center; }
+#overlay h1 { margin: 0; font-size: 56px; letter-spacing: 14px; color: #e8dcc0; text-shadow: 3px 3px 0 #3a1f14; }
+#overlay h2 { margin: 6px 0 18px; font-weight: normal; font-size: 16px; letter-spacing: 4px; color: #9c8a66; }
+#overlay p { max-width: 520px; color: #c9bfa6; }
+#overlay button { margin: 16px 0 24px; padding: 10px 34px; font-family: inherit; font-size: 18px; letter-spacing: 4px; background: #2a1d16; color: #e8dcc0; border: 2px solid #8a6f4a; cursor: pointer; }
+#overlay button:hover { background: #3d2a1e; }
+.controls { font-size: 13px; color: #9c8a66; line-height: 1.8; }
+.controls b { color: #d8cfb8; font-weight: normal; }

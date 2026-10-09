@@ -516,6 +516,24 @@ aunque uses la misma arma (como los Pactos de Hades o las Variantes de Dead Cell
 4. Edictos de la Torre.
 5. Pestaña "Armas y runas" en la Bitácora (lo descubierto, como el Códice).
 
+## 17. Prototipo en 3D estilo PS1 (2026-10-08, carpeta `3d/`)
+Pedido: "¿podés hacer un juego 3D low poly? como el Lunacid". Prototipo aparte (no toca el juego en 2D) para ver cómo se
+siente Tower Chaos en primera persona con la estética de Lunacid / King's Field, antes de decidir nada sobre el juego entero.
+Se abre desde el menú ("🧊 Prototipo 3D") o en `3d/`. Usa Three.js (cargado de unpkg, sin instalar nada).
+- **Look PS1:** se dibuja a 320 px de ancho y se agranda sin suavizar; texturas pixeladas generadas con código (ladrillo con
+  musgo, baldosas, techo); los vértices se redondean a una grilla de pantalla (el temblor de PS1); niebla espesa; antorchas
+  que parpadean (6 luces reales que se asignan a las más cercanas); una luz cálida propia.
+- **Mazmorra** generada al azar en una grilla de 41×41 (salas + pasillos en L + algunos lazos); la escalera (runa violeta)
+  en la sala más lejana; cada piso más oscuro, con otra paleta (Las Raíces, Los Pozos, La Fragua Hundida, El Osario) y más
+  bichos.
+- **Espada:** combo de 3 tajos (el tercero pega doble, empuja e **interrumpe** un golpe que se está preparando). **Bastón:**
+  orbe que explota en área, 12 de maná. **Esquive** con Espacio (invulnerable un instante). Pociones (E o pasando encima).
+- **Enemigos que avisan** (Esqueleto, Limo, Bruto de piedra): se ponen rojos, levantan el brazo y prenden los ojos; si te
+  corrés o esquivás, el golpe va al aire.
+- Música de la cueva del juego y sonidos sintetizados. Demo para capturas: `3d/?demo=1` (y `&weapon=staff`).
+- **Para decidir después:** si convence, el camino sería pasar la lógica de la Torre (equipo, Códice, bestiario generado,
+  jefes) a este motor; si no, queda como experimento.
+
 ## Orden propuesto (cada fase jugable y medida)
 1. **Pantalla:** zoom, HUD más chico y menú de pausa con pestañas. Es barato y mejora todo lo que viene después.
 2. **Despertar y tutorial:** cuaderno y las 3 armas (espada, arco y bastón, con su habilidad). ✅ — las 3 armas
