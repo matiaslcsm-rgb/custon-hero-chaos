@@ -1,7 +1,7 @@
 // Punto de entrada: conecta los botones y arranca el bucle principal.
 
 // Versión visible en el menú: si no coincide con la última subida, el navegador muestra una copia vieja (Ctrl+F5).
-const GAME_VERSION = '2026-10-08 · dificultad por piso';
+const GAME_VERSION = '2026-10-08 · la Bitácora';
 document.getElementById('game-version').textContent = `Versión ${GAME_VERSION}`;
 
 document.getElementById('start-wave-btn').onclick = startWave;
@@ -17,10 +17,8 @@ document.getElementById('shop-close').onclick = closeShop;
 document.getElementById('stats-close').onclick = () => toggleStatsWindow(false);
 document.getElementById('inv-close').onclick = () => toggleInventory(false);
 document.getElementById('tshop-close').onclick = () => toggleTowerShop(false);
-document.getElementById('bestiary-close').onclick = () => toggleBestiary(false);
-document.getElementById('codex-close').onclick = () => toggleCodex(false);
+document.getElementById('logbook-close').onclick = () => closeLogbook(); // la Bitácora (towerLogbook.js)
 document.getElementById('smith-close').onclick = () => toggleSmith(false);
-document.getElementById('notebook-close').onclick = () => toggleNotebook(false);
 document.getElementById('map-toggle').onclick = toggleBigMap;
 document.getElementById('shop-container').onclick = e => { if (e.target.id === 'shop-container') closeShop(); };
 window.addEventListener('resize', applyMapSize);

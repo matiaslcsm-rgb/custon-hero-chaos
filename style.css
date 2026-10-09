@@ -808,3 +808,13 @@ body.tower-layout #hero-bar, .modal-box, body.tower-layout #float-log, body.towe
 .skill-slot .combo b:last-child { width: 8px; height: 8px; margin-top: -1px; }
 .skill-slot .combo b.on { background: #c9a227; }
 .skill-slot .combo.next-finisher b:last-child { background: #fff8e1; box-shadow: 0 0 5px #c9a227; }
+
+/* La Bitácora: un libro con pestañas (towerLogbook.js) */
+.logbook-tabs { display: flex; gap: 4px; margin: 4px 0 8px; border-bottom: 2px solid #2b2118; }
+.logbook-tabs button, .bestiary-views button { font-family: Georgia, serif; background: #e4d6b9; border: 1.5px solid #2b2118; border-bottom: none; padding: 5px 12px; cursor: pointer; color: #2b2118; }
+.logbook-tabs button.on { background: #f1e7d0; font-weight: bold; margin-bottom: -2px; padding-bottom: 7px; }
+.logbook-tabs button small { color: #8a5a00; margin-left: 4px; }
+.bestiary-views { display: flex; gap: 4px; margin-bottom: 6px; }
+.bestiary-views button { border-bottom: 1.5px solid #2b2118; padding: 3px 10px; font-size: 0.85rem; }
+.bestiary-views button.on { background: #2b2118; color: #f1e7d0; }
+.logbook .logbook-pane { max-height: 64vh; overflow-y: auto; }

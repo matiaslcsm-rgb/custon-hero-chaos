@@ -151,27 +151,25 @@ function inkPartsFront(g, plan, c, rnd) {
 
 // --- BESTIARIO (tecla K) ---
 let bestiaryOpen = false;
-function noteBeastSeen(type) { if (towerRun && type && type.genome) { towerRun.seen = towerRun.seen || {}; towerRun.seen[type.label] = type; } }
-function toggleBestiary(open = !bestiaryOpen) {
-    if (gameMode !== 'tower' || !towerRun) return;
-    bestiaryOpen = open;
-    showPanel('bestiary-container', open);
-    if (open) renderBestiary();
-}
+function noteBeastSeen(type) { if (towerRun && type && type.genome) { towerRun.seen = towerRun.seen || {}; if (!towerRun.seen[type.label]) rememberBeast(type); towerRun.seen[type.label] = type; } } // y en la colección (towerLogbook.js)
+function toggleBestiary(open) { toggleLogbookTab('bestiary', open); } // pestaña de la Bitácora (towerLogbook.js)
 function renderBestiary() {
     const box = document.getElementById('bestiary-list');
-    const seen = Object.values(towerRun.seen || {});
-    if (!seen.length) { box.innerHTML = '<p class="subtitle">Todavía no te cruzaste con ninguna criatura. Cada run trae su propio bestiario.</p>'; return; }
-    box.innerHTML = '';
+    document.querySelectorAll('.bestiary-views button').forEach(b => { b.classList.toggle('on', b.dataset.view === bestiaryView); b.onclick = () => { bestiaryView = b.dataset.view; renderBestiary(); }; });
+    const all = Object.values(bestiaryStore.beasts);
+    const seen = bestiaryView === 'all' ? all : Object.values((towerRun && towerRun.seen) || {}).map(t => Object.assign({}, bestiaryStore.beasts[t.label] || {}, t));
+    if (!seen.length) { box.innerHTML = `<p class="subtitle">${bestiaryView === 'all' ? 'La colección está vacía: cada criatura que veas queda acá para siempre.' : 'Todavía no te cruzaste con ninguna criatura. Cada run trae su propio bestiario.'}</p>`; return; }
+    box.innerHTML = `<p class="subtitle">${bestiaryView === 'all' ? `Colección: ${all.length} criaturas vistas en todas tus runs.` : 'Cada run genera sus propias criaturas combinando cuerpo, tamaño, forma de pelear y rasgos. Acá aparecen las que ya te cruzaste.'}</p>`;
     BIOME_ORDER.forEach(b => {
         const list = seen.filter(t => t.biome === b);
         if (!list.length) return;
-        const h = document.createElement('h4'); h.textContent = `${BIOMES[b].icon} ${BIOMES[b].name}`; box.appendChild(h);
+        const h = document.createElement('h4'); h.textContent = `${BIOMES[b].icon} ${BIOMES[b].name} (${list.length})`; box.appendChild(h);
         list.forEach(t => {
             const fig = inkFigure(t.plan, inkLookFor({ type: t, color: t.color }), 'idle', 0).img.toDataURL();
             const row = document.createElement('div'); row.className = 'beast-row';
             row.innerHTML = `<img src="${fig}" class="beast-fig"><div><b>${t.label}</b>${t.from ? ' <span class="subtitle">(difícil)</span>' : ''}<div class="subtitle">${t.mechanic}</div>` +
-                `<div class="beast-stats">❤ ${t.hp} · ⚔ ${t.atk} · ${t.attackType === 'magical' ? 'mágico' : 'físico'} · alcance ${t.range}${t.armor ? ` · armadura ${t.armor}` : ''}</div></div>`;
+                `<div class="beast-stats">❤ ${t.hp} · ⚔ ${t.atk} · ${t.attackType === 'magical' ? 'mágico' : 'físico'} · alcance ${t.range}${t.armor ? ` · armadura ${t.armor}` : ''}` +
+                `${t.runs ? ` · vista en ${t.runs} run${t.runs === 1 ? '' : 's'}` : ''}${t.kills ? ` · ${t.kills} bajas` : ''}</div></div>`;
             box.appendChild(row);
         });
     });

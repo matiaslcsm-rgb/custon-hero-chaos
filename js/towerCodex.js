@@ -234,12 +234,7 @@ function codexEntryHtml(e) {
         `<div>${s.isInnateItem ? s.description.replace(/^Innato:\s*/, '') : describeSkill(s, lvl)}</div>` +
         `<div class="tt-forged">${un ? 'Dominado: un Herrero puede imbuirlo en una pieza sin alma.' : `Para dominarlo: ${s.isInnateItem ? `subí su pieza (${TOWER_SLOTS[slotKind(e.slot)].name}) a nivel ${e.max}` : `llevá la habilidad a nivel ${e.max} forjando su pieza (${TOWER_SLOTS[slotKind(e.slot)].name})`}. Tu mejor marca: ${codex.best[e.id] || 0}/${e.max}.`}</div>`;
 }
-function toggleCodex(open = !codexOpen) {
-    if (gameMode !== 'tower') return;
-    codexOpen = open;
-    showPanel('codex-container', open);
-    if (open) renderCodex();
-}
+function toggleCodex(open) { toggleLogbookTab('codex', open); } // pestaña de la Bitácora (towerLogbook.js)
 function renderCodex() {
     renderUpgrades(); // Esencia y mejoras permanentes (towerCraft.js)
     const all = codexEntries(), n = all.filter(e => codexUnlocked(e.id)).length;

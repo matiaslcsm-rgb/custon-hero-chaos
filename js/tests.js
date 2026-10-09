@@ -1732,6 +1732,29 @@ test('Torre: los enemigos comunes pegan más y aguantan más con cada piso (no l
     checkEq(L.guardian.dangerMult || 1, 1, 'el jefe no');
 });
 
+test('La Bitácora: un libro con pestañas (N, J, K) y un Bestiario que se guarda entre runs', () => {
+    const level = newTower();
+    toggleNotebook(); checkEq(logbookTab, 'notebook', 'N abre el Cuaderno');
+    check(notebookOpen && towerModalOpen(), 'la partida espera');
+    toggleCodex(); checkEq(logbookTab, 'codex', 'J cambia a la pestaña del Códice');
+    check(codexOpen && !notebookOpen, 'una pestaña por vez');
+    toggleCodex(); checkEq(logbookTab, null, 'J otra vez lo cierra');
+    toggleBestiary(true); checkEq(logbookTab, 'bestiary', 'K abre el Bestiario');
+    handleEscape(); check(!bestiaryOpen && logbookTab === null, 'Esc lo cierra');
+    // el Bestiario guarda lo visto entre runs
+    const t = towerBestiary(level.biome)[0];
+    noteBeastSeen(t);
+    check(bestiaryStore.beasts[t.label], 'quedó en la colección');
+    checkEq(bestiaryStore.beasts[t.label].runs, 1, 'vista en 1 run');
+    rememberBeastKill(t); rememberBeastKill(t);
+    checkEq(bestiaryStore.beasts[t.label].kills, 2, 'cuenta las bajas');
+    newTower(); towerRun.startedAt += 1; noteBeastSeen(t);
+    checkEq(bestiaryStore.beasts[t.label].runs, 2, 'en otra run, suma');
+    bestiaryView = 'all'; toggleBestiary(true);
+    check(document.getElementById('bestiary-list').textContent.includes(t.label), 'la colección la muestra aunque no sea de esta run');
+    bestiaryView = 'run'; closeLogbook();
+});
+
 test('Torre: el Cuaderno escribe una página sola la primera vez que hacés cada cosa, y no se repite', () => {
     notebookState = { seen: {} };
     newTower(); // startTowerRun() ya escribió WAKE al despertar
@@ -3358,6 +3381,7 @@ test('Nueva Partida deja todo como al empezar', () => {
 function runTests() {
     codexPersist = false; codex = { unlocked: {}, best: {} }; // el Códice guardado no se toca
     notebookPersist = false; notebookState = { seen: {} }; // el cuaderno guardado tampoco
+    bestiaryPersist = false; bestiaryStore = { beasts: {} }; // ni la colección del Bestiario
     autoCast = false; // las pruebas controlan a mano cuándo se lanza cada habilidad (la de habilidades automáticas lo prende)
     const results = TESTS.map(t => {
         try {

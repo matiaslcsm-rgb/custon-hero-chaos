@@ -48,12 +48,7 @@ function writeNotebookPage(id) {
 
 // --- VENTANA (tecla N, o desde la pausa) ---
 let notebookOpen = false;
-function toggleNotebook(open = !notebookOpen) {
-    if (gameMode !== 'tower' || !towerRun) return;
-    notebookOpen = open;
-    showPanel('notebook-container', open);
-    if (open) renderNotebook();
-}
+function toggleNotebook(open) { toggleLogbookTab('notebook', open); } // pestaña de la Bitácora (towerLogbook.js)
 function renderNotebook() {
     const box = document.getElementById('notebook-pages');
     box.innerHTML = '';

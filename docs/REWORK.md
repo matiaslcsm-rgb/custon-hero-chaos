@@ -204,6 +204,12 @@ de Cazador de Hollow Knight):
   Reutiliza la crónica de la run.
 - Se abre con J (reemplaza al Códice suelto) y desde la pausa.
 
+**Hecho (2026-10-08, `js/towerLogbook.js`):** un solo libro con pestañas (✏️ Cuaderno · 📜 Códice · 🐾 Bestiario) en
+vez de tres ventanas. N, J y K abren el libro en su pestaña; la misma tecla lo cierra y otra cambia de pestaña (como el
+diario de Hades o el Compendio de Hollow Knight). El **Bestiario se guarda entre runs**: "Esta run" muestra las
+criaturas de ahora y "Colección" todas las que viste alguna vez (hasta 400), con en cuántas runs aparecieron y cuántas
+mataste. Queda para después: recetas y planos (cuando existan) y una pestaña de armas (ver §15).
+
 ## 7. Música y sonido
 - **Música ambiental por bioma**, de día y de noche, más una **capa de combate** que entra con fundido cuando hay
   enemigos cerca y se va al terminar la pelea (música dinámica en capas, como Hades o Zelda).

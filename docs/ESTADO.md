@@ -140,6 +140,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   sin los combos Regenerador+Blindado/Vampírico (REWORK.md §13).
 - **Dificultad (decidido 2026-10-08: subirla):** los enemigos comunes pegan +12% y aguantan +6% por piso (REWORK.md §14).
   Pendiente: la suerte con el botín decide más que eso (partidas de 58 a 153 min con los mismos valores).
+- **La Bitácora (2026-10-08):** Cuaderno, Códice y Bestiario en un solo libro con pestañas; el Bestiario se guarda entre
+  runs como colección (REWORK.md §6).
 - **Motor (decidido 2026-10-06):** seguimos en canvas + JavaScript puro. Pasar a un motor (Phaser para seguir en el
   navegador, Godot para publicar en PC/celular) se decide cuando el contenido de Tower Chaos esté más cerrado.
 - **Balance en curso (2026-09-28):** jefes más suaves desde la ronda 20 + Kaya y Cetro del Eclipse (ver DISEÑO.md §9 bis).

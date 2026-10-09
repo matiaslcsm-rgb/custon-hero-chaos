@@ -175,30 +175,6 @@
         </div>
     </div>
 
-    <!-- Tower Chaos: bestiario de la run (tecla K) -->
-    <div id="bestiary-container" class="modal" style="display: none;">
-        <div class="modal-box wide">
-            <div class="modal-head">
-                <h3>📖 Bestiario de esta run</h3>
-                <button class="modal-close" id="bestiary-close" title="Cerrar (K o Esc)">✕</button>
-            </div>
-            <p class="subtitle">Cada run genera sus propias criaturas combinando cuerpo, tamaño, forma de pelear y rasgos. Acá aparecen las que ya te cruzaste.</p>
-            <div id="bestiary-list"></div>
-        </div>
-    </div>
-
-    <!-- Tower Chaos: el Cuaderno (tecla N), páginas que se escriben con tus acciones, persiste entre runs -->
-    <div id="notebook-container" class="modal" style="display: none;">
-        <div class="modal-box wide">
-            <div class="modal-head">
-                <h3>✏️ Cuaderno</h3>
-                <button class="modal-close" id="notebook-close" title="Cerrar (N o Esc)">✕</button>
-            </div>
-            <p class="subtitle">No recordás nada, salvo escribir. Cada página se completa sola la primera vez que hacés esa acción, y queda para siempre.</p>
-            <div id="notebook-pages"></div>
-        </div>
-    </div>
-
     <!-- Teclas configurables (keymap.js) -->
     <div id="keys-container" class="modal" style="display: none;">
         <div class="modal-box">
@@ -212,17 +188,28 @@
         </div>
     </div>
 
-    <!-- Tower Chaos: Códice de poderes (tecla J), persiste entre runs -->
-    <div id="codex-container" class="modal" style="display: none;">
-        <div class="modal-box wide">
+    <!-- Tower Chaos: la Bitácora (N: Cuaderno · J: Códice · K: Bestiario), un solo libro con pestañas (towerLogbook.js) -->
+    <div id="logbook-container" class="modal" style="display: none;">
+        <div class="modal-box wide logbook">
             <div class="modal-head">
-                <h3>📜 Códice de poderes</h3>
+                <h3>📔 Bitácora</h3>
                 <span class="modal-gold" id="codex-count"></span>
-                <button class="modal-close" id="codex-close" title="Cerrar (J o Esc)">✕</button>
+                <button class="modal-close" id="logbook-close" title="Cerrar (Esc, o la tecla de la pestaña)">✕</button>
             </div>
-            <p class="subtitle">Llevá la habilidad de una pieza a su nivel máximo y queda dominada para siempre, aunque mueras. Un Herrero la puede imbuir en una pieza sin alma.</p>
-            <div id="codex-upgrades"></div>
-            <div class="codex-layout"><div id="codex-list"></div><div id="codex-tooltip"></div></div>
+            <div id="logbook-tabs" class="logbook-tabs"></div>
+            <div class="logbook-pane" data-pane="notebook">
+                <p class="subtitle">No recordás nada, salvo escribir. Cada página se completa sola la primera vez que hacés esa acción, y queda para siempre.</p>
+                <div id="notebook-pages"></div>
+            </div>
+            <div class="logbook-pane" data-pane="codex">
+                <p class="subtitle">Llevá la habilidad de una pieza a su nivel máximo y queda dominada para siempre, aunque mueras. Un Herrero la puede imbuir en una pieza sin alma.</p>
+                <div id="codex-upgrades"></div>
+                <div class="codex-layout"><div id="codex-list"></div><div id="codex-tooltip"></div></div>
+            </div>
+            <div class="logbook-pane" data-pane="bestiary">
+                <div class="bestiary-views"><button data-view="run">Esta run</button><button data-view="all">Colección</button></div>
+                <div id="bestiary-list"></div>
+            </div>
         </div>
     </div>
 
@@ -439,6 +426,7 @@
     <script src="js/towerMusic.js"></script>
     <script src="js/towerMap.js"></script>
     <script src="js/towerNotebook.js"></script>
+    <script src="js/towerLogbook.js"></script>
     <script src="js/inkart.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/towerView.js"></script>
