@@ -75,7 +75,7 @@ function swingArc(c, dir, step, reach, mult, basic = false) {
     });
     deflectBullets(c, dir, reach, SWORD_COMBO.halfArc); // el tajo desvía los proyectiles que agarra (towerBullets.js)
     c.attackTimer = 0; // el tajo reemplaza al ataque automático (no se suman)
-    c.comboAt = gameClock; c.comboStep = (step + 1) % 3;
+    c.comboAt = gameClock; c.comboStep = (step + 1) % 3; c.fxSwingStep = step; // fxSwingStep: qué tajo dibujar (towerPixelBeasts.js)
     fxSwordSwing(c, dir, step, reach, hit.length > 0);
     return hit;
 }
@@ -85,7 +85,7 @@ function fxSwordSwing(c, dir, step, reach, landed) {
     if (!arena) return;
     const angle = Math.atan2(dir.dy, dir.dx);
     if (Math.abs(dir.dx) > 0.2) c.facing = Math.sign(dir.dx);
-    c.fxAttack = { kind: 'melee', dx: dir.dx, dy: dir.dy, at: fxClock };
+    c.fxAttack = { kind: step === 2 ? 'finisher' : 'swing', dx: dir.dx, dy: dir.dy, at: fxClock };
     pushFx(arena, { kind: 'sweep', unit: c, x: c.x, y: c.y, angle, reach, half: SWORD_COMBO.halfArc, flip: step === 1, finisher: step === 2,
         color: step === 2 ? '#ffd166' : '#f3e7c9', color2: step === 2 ? '#c9a227' : '#8a7a5c', life: step === 2 ? 0.3 : 0.2 });
     sfx('swing');

@@ -70,7 +70,7 @@ function fxDeath(unit) {
 //   kind 'melee'  golpe: se estira y gira hacia el objetivo (y antes se echa atrás, ver attackPose)
 //   kind 'ranged' disparo: retroceso y fogonazo, y una estela hasta el objetivo
 //   kind 'cast'   hechizo: se eleva y brilla del color de su magia, y un rayo hasta el objetivo
-const ATTACK_ANIM = { melee: 0.26, ranged: 0.2, cast: 0.34 };
+const ATTACK_ANIM = { melee: 0.26, ranged: 0.2, cast: 0.34, swing: 0.3, finisher: 0.42 }; // swing/finisher: los tajos del combo de la espada
 function fxAttack(attacker, target, kind = 'melee', color) {
     const arena = fxArena(attacker);
     if (!arena) return;
@@ -98,7 +98,8 @@ function attackPose(u) {
     const t = (fxClock - a.at) / ATTACK_ANIM[a.kind];
     if (t >= 1) { u.fxAttack = null; return pose; }
     const k = Math.sin(t * Math.PI);
-    if (a.kind === 'melee') { pose.ox += a.dx * 0.42 * k; pose.oy += a.dy * 0.42 * k; pose.rot += 0.35 * k; pose.sx += 0.14 * k; pose.sy -= 0.06 * k; }
+    if (a.kind === 'swing' || a.kind === 'finisher') { const big = a.kind === 'finisher'; pose.ox += a.dx * (big ? 0.5 : 0.3) * k; pose.oy += a.dy * (big ? 0.5 : 0.3) * k; pose.sx += (big ? 0.1 : 0.05) * k; pose.sy -= (big ? 0.08 : 0.03) * k; } // el combo: el cuerpo acompaña sin girar (la pose la dibuja el cuadro)
+    else if (a.kind === 'melee') { pose.ox += a.dx * 0.42 * k; pose.oy += a.dy * 0.42 * k; pose.rot += 0.35 * k; pose.sx += 0.14 * k; pose.sy -= 0.06 * k; }
     else if (a.kind === 'ranged') { pose.ox -= a.dx * 0.16 * k; pose.oy -= a.dy * 0.16 * k; pose.flash = t < 0.35 ? 1 - t / 0.35 : 0; }
     else if (a.kind === 'cast') { pose.oy -= 0.22 * k; pose.sy += 0.1 * k; pose.glow = a.color || '#c77dff'; }
     else castPose(a, t, k, pose); // poses de las habilidades (fxSkills.js)

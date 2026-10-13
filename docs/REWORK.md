@@ -731,6 +731,14 @@ el mismo paso; lo grande queda acá, ordenado por impacto.
     Knight (la ventana justa), Enter the Gungeon y la Égida de Hades (devolver balas).
   - **Medido** (60 s contra muñecos, piloto en automático, sin críticos): antes (golpe + Q) 39,8 solo y 80,3 contra 4;
     ahora 39,4 y 78,4. Parejo; la parada suma aparte, según la mano del jugador.
+  - **Animación del combo y el encapuchado vivo** (2026-10-14, pedido: "mejorar la animación de ataque para que sea un
+    combo; dos ojos rojos al encapuchado y que se mueva y respire", `js/towerPixelBeasts.js`): cada tajo tiene su pose en
+    pixel art (preparación → tajo con estela de píxeles → seguimiento): 1) de arriba hacia adelante, 2) revés de abajo hacia
+    arriba, 3) remate con las dos manos arriba, paso largo, golpe al piso y chispas. Con el clic mantenido (o en
+    automático) se ve la preparación del próximo tajo. La parada se dibuja como el revés. El cuerpo acompaña sin girar
+    (la pose la hace el cuadro). Bajo la capucha, **dos ojos rojos** que se encienden en el tajo y parpadean cada ~3 s;
+    en reposo **respira** (4 cuadros: suben los hombros, baja el cuerpo, la capa se mece). En reposo la espada va
+    inclinada hacia adelante para no tapar la cara.
 - ✅ Volumen general, música y efectos, y temblor de pantalla (0-150%), con deslizadores en la pausa que se guardan.
 - ✅ La forja ya no corta una pelea: si una pieza sube de nivel peleando aparece un aviso arriba a la izquierda, y la
   ventana se abre sola cuando nadie te persigue.
