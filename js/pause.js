@@ -78,8 +78,6 @@ function closeGlossary() {
 }
 function isGlossaryOpen() { return ['heroes', 'creeps', 'items'].some(v => document.getElementById('view-' + v).style.display === 'block'); }
 
-// Compatibilidad: antes había pestañas arriba; ahora el glosario se abre como ventana.
-function showView(view) { if (view === 'game') closeGlossary(); else openGlossary(view); }
 
 function quitToMenu() {
     if (player && !confirm('¿Salir al menú? Se pierde la partida en curso.')) return; // eligiendo héroe no hay nada que perder

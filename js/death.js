@@ -43,14 +43,6 @@ function curseHero(hero) {
         : `☠️ ${hero.displayName} quedó maldito (Condenado).`);
 }
 
-// Primera vez: +10%. Si ya había estado Condenado (y se salvó comprando una vida), el % se duplica.
-function enterCondemned(hero) {
-    const pct = hero.condemnPct > 0 ? hero.condemnPct * 2 : CONDEMNED.initialPct;
-    setCondemned(hero, pct);
-    log(hero === player
-        ? `☠️ ¡Sin vidas! Quedás CONDENADO: recibís +${Math.round(pct * 100)}% de daño. Si un creep te mata, quedás eliminado.`
-        : `☠️ ${hero.displayName} quedó CONDENADO.`);
-}
 
 // Duelo perdido estando Condenado: +10% más de daño recibido (se usa con los duelos de la fase F).
 function registerDuelLoss(hero) {

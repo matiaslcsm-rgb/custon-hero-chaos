@@ -478,26 +478,6 @@ function towerChronicleHtml() {
         `${s.kills} bajas (${s.champions} campeones, ${s.guardians} guardianes) · ${s.shrines} santuarios${s.events ? ` · ${s.events} eventos` : ''}${s.essence ? ` · ✦ ${s.essence} de Esencia` : ''}${s.crafted ? ` · ${s.crafted} piezas fundidas` : ''}${s.codex ? ` · 📜 ${s.codex} poderes dominados` : ''}${towerRun.reactions ? ` · ${Object.values(towerRun.reactions).reduce((a, b) => a + b, 0)} reacciones` : ''}${s.deepest ? ` · cueva más honda −${s.deepest}` : ''} · ${s.gold}g ganados</p>`;
 }
 
-// Baldosas del nivel (se dibujan una vez y se reutilizan): 4 pisos de piedra, pared de frente y pared de arriba.
-// Se dibujan solo las casillas de la pantalla (un nivel de 90×60 entero serían ~25 MB de imagen).
-let towerTileCache = null;
-function towerTiles() {
-    if (towerTileCache) return towerTileCache;
-    let seed = 4242;
-    const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-    const tile = draw => { const c = document.createElement('canvas'); c.width = c.height = TILE; draw(c.getContext('2d')); return c; };
-    const floor = shade => tile(g => {
-        g.fillStyle = shade; g.fillRect(0, 0, TILE, TILE);
-        g.fillStyle = '#24212a'; g.fillRect(0, 0, TILE, 1); g.fillRect(0, 0, 1, TILE);
-        for (let i = 0; i < 6; i++) { g.fillStyle = rnd() < 0.5 ? '#38343e' : '#232028'; g.fillRect(Math.floor(rnd() * 15) * 2, Math.floor(rnd() * 15) * 2, 2, 2); }
-    });
-    const wall = face => tile(g => {
-        g.fillStyle = '#1b1820'; g.fillRect(0, 0, TILE, TILE);
-        g.fillStyle = face ? '#4a3f52' : '#2a2430';
-        for (let r = 0; r < 3; r++) for (let k = 0; k < 2; k++) g.fillRect(((r % 2) * 8) + k * 17, r * 11 + 1, 15, 9);
-    });
-    return (towerTileCache = { floors: ['#2e2b33', '#2a2730', '#322e37', '#29262d'].map(floor), face: wall(true), top: wall(false) });
-}
 function drawTowerTiles(level) {
     const t = inkTiles(); // estética tinta y pergamino (inkart.js)
     const px = pixelOn() && drawPixelGround(level); // o el suelo en pixel art (towerPixel.js)
@@ -559,7 +539,11 @@ function renderTower(level, dt) {
         drawCreepWindups(level); // los golpes comunes que se están preparando (towerWindup.js)
         drawBossExtras(level); // lazos de las raíces
     };
-    if (px) { pxDrawDebris(level, 'ground'); pxFxLayer('under', () => { underFx(); pxRangeRing(); }); } // efectos en pixel art (towerPixelFx.js)
+    if (px) { // efectos en pixel art (towerPixelFx.js); la capa de abajo solo se procesa si hay avisos, zonas o raíces
+        pxDrawDebris(level, 'ground');
+        if ((level.zones && level.zones.length) || (level.telegraphs && level.telegraphs.length) || level.creeps.some(c => c.isAlive() && (c.windup || c.isRoot))) pxFxLayer('under', underFx);
+        pxRangeRing(); // ya es de píxeles: va directo
+    }
     else underFx();
     drawTowerMerchant(level);
     drawTowerSmith(level);

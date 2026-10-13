@@ -80,8 +80,6 @@ function fxAttack(attacker, target, kind = 'melee', color) {
     // Estela hasta el objetivo (los héroes no: ya tienen su proyectil propio)
     if (kind !== 'melee' && !attacker.isHero) pushFx(arena, { kind: 'bolt', x: attacker.x, y: attacker.y, tx: target.x, ty: target.y, color: color || '#fefae0', cast: kind === 'cast', life: kind === 'cast' ? 0.24 : 0.14 });
 }
-// Compatibilidad: el "salto" de antes ahora es la animación de golpe.
-function fxLunge(attacker, target) { fxAttack(attacker, target, 'melee'); }
 
 // Pose del momento: desplazamiento (casillas), giro, estiramiento y brillo. Antes del golpe se echa atrás
 // según cuánto le falta al próximo ataque (attackTimer), así se anticipa.

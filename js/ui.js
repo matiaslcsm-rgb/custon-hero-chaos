@@ -123,11 +123,6 @@ function abilityLabel(name, kind) {
     if (kind === 'ult') return `<span class="ult-name">${name}</span> <span class="badge-ult">Definitiva</span>`;
     return name;
 }
-function abilityRow(a, fixed, kind = '') {
-    const desc = a.values ? describeSkill(a, 0) : a.description;
-    const meta = a.values ? `<p class="meta">${skillCostLine(a, 0)}</p>` : '';
-    return `<div class="ability-row${fixed ? ' fixed' : ''}"><h4>${abilityLabel(a.name, kind)}</h4><p>${desc}</p>${meta}<div class="tags">${tagChips(a.tags)}</div></div>`;
-}
 
 function stripHtml(html) { return html.replace(/<[^>]+>/g, ''); }
 

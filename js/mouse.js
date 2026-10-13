@@ -27,10 +27,6 @@ function skillRadius(skill, hero) {
     return r !== undefined ? r : 0.6;
 }
 
-function startTargeting(skill) {
-    targeting = { skill };
-    canvas.style.cursor = 'crosshair';
-}
 function cancelTargeting() {
     targeting = null;
     canvas.style.cursor = '';

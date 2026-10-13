@@ -11,7 +11,7 @@
 //     fuente y rampas.
 //   Viene prendido; en la pausa (🟫 Pixel art) se puede volver al estilo tinta, o con ?pixel=0 en la dirección.
 
-const PXG = { per: 17, scale: 2, chunk: 16, maxChunks: 90 };
+const PXG = { per: 17, scale: 2, chunk: 16, maxChunks: 40 }; // 40 trozos ≈ 12 MB (la pantalla usa ~12)
 // Estilo principal desde 2026-10-13: pixel art prendido salvo que el jugador elija la tinta en la pausa (o ?pixel=0).
 // Preferencia nueva (chc-style): la de la prueba (chc-pixel) se ignora, así arranca en pixel art aunque la hayas apagado.
 let pixelEnabled = !/[?&]pixel=0/.test(location.search);
@@ -147,7 +147,9 @@ function pxGroundChunk(level, cx, cy) {
     return c;
 }
 // Dibuja los trozos de suelo que se ven (y arma los que faltan). Devuelve true.
+let pxGroundLevel = null; // solo el piso donde estás guarda su suelo: al cambiar de piso o entrar a una cueva se libera el anterior
 function drawPixelGround(level) {
+    if (pxGroundLevel !== level) { if (pxGroundLevel) pxGroundLevel.pxGround = null; pxGroundLevel = level; }
     if (!level.pxGround || level.pxGround.biome !== level.biome) level.pxGround = { biome: level.biome, chunks: new Map() };
     const G = level.pxGround, N = PXG.chunk, size = N * TILE;
     const cx0 = Math.floor(camera.x / N), cy0 = Math.floor(camera.y / N), cx1 = Math.floor((camera.x + viewCols()) / N), cy1 = Math.floor((camera.y + viewRows()) / N);

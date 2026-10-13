@@ -22,26 +22,6 @@ const DUEL_STARTS = [{ x: 3, y: 6 }, { x: 16, y: 6 }];
 
 function inCombat() { return gameState === 'WAVE' || gameState === 'DUEL' || gameState === 'BOSS' || gameState === 'TOWER'; }
 
-// Parejas al azar evitando repetir el rival de la ronda anterior. Arma parejas de a una sobre un orden al azar;
-// como eso puede dejar al final justo a dos que ya pelearon, prueba varios órdenes y se queda con el que menos repite.
-function makeDuelPairs(list) {
-    const repeats = pairs => pairs.filter(([a, b]) => a.lastOpponent === b || b.lastOpponent === a).length;
-    let best = null;
-    for (let attempt = 0; attempt < 40; attempt++) {
-        const pool = shuffle(list.slice());
-        const pairs = [];
-        while (pool.length > 1) {
-            const a = pool.shift();
-            let idx = pool.findIndex(b => b !== a.lastOpponent && b.lastOpponent !== a);
-            if (idx < 0) idx = 0;
-            pairs.push([a, pool.splice(idx, 1)[0]]);
-        }
-        const result = { pairs, bye: pool[0] || null, repeats: repeats(pairs) };
-        if (!best || result.repeats < best.repeats) best = result;
-        if (best.repeats === 0) break;
-    }
-    return { pairs: best.pairs, bye: best.bye };
-}
 
 // plan: parejas ya sorteadas en la previa de apuestas (ver bets.js).
 // Un duelo por ronda: pelean los que menos duelos pelearon (al azar entre ellos), sin repetir la pareja anterior.

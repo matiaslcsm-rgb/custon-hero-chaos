@@ -28,8 +28,6 @@ function roundBossOf() {
     return nextRoundBoss;
 }
 
-// Héroes vivos a los que puede pegarle el jefe con sus mecánicas.
-function bossTargets(c) { return c.arena.heroes.filter(h => !h.eliminated && h.isAlive()); }
 
 // Crecimiento de los jefes: como los creeps (+10% por ronda) hasta la ronda 20; desde ahí, +4% por ronda. Medido: con el
 // +10% de siempre, desde la ronda 20 los que dependen de hechizos (magos, Zeus, Nigromante) o de aguantar (Axe) quedaban

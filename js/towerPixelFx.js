@@ -118,16 +118,22 @@ function pxDrawNumber(text, x, y, color, s) {
 // Lo no descubierto (negro) y lo descubierto fuera de la vista (oscurecido), con el borde suavizado entre casillas y
 // tramado: 8 píxeles por casilla, así el borde se ve de píxeles y no de baldosas.
 const PXFOG = { sub: 8, dark: [14, 11, 10], seen: 0.55 };
-let pxFogCanvas = null, pxFogCtx = null;
+let pxFogCanvas = null, pxFogCtx = null, pxFogImg = null, pxFogKey = '', pxFogVis = null;
 function pxDrawFog(level) {
     const S = PXFOG.sub, x0 = Math.max(0, Math.floor(camera.x) - 1), y0 = Math.max(0, Math.floor(camera.y) - 1);
     const x1 = Math.min(COLS - 1, Math.floor(camera.x + viewCols()) + 1), y1 = Math.min(ROWS - 1, Math.floor(camera.y + viewRows()) + 1);
     const nx = x1 - x0 + 1, ny = y1 - y0 + 1, W = nx * S, H = ny * S;
+    // Si no cambió lo que se ve (la visión se recalcula al moverte) ni el recorte, se reusa la de antes
+    const key = `${x0},${y0},${nx},${ny}`;
+    if (pxFogCanvas && key === pxFogKey && pxFogVis === level.visible) { pxFogBlit(x0, y0, nx, ny); return; }
+    pxFogKey = key; pxFogVis = level.visible;
     const v = new Float32Array(nx * ny); // 1 = sin descubrir, 0,55 = fuera de la vista, 0 = a la vista
     for (let y = 0; y < ny; y++) for (let x = 0; x < nx; x++) { const tx = x0 + x, ty = y0 + y; v[y * nx + x] = !level.explored[ty][tx] ? 1 : !canSee(level, tx, ty) ? PXFOG.seen : 0; }
     if (!pxFogCanvas) { pxFogCanvas = document.createElement('canvas'); pxFogCtx = pxFogCanvas.getContext('2d'); }
     if (pxFogCanvas.width !== W || pxFogCanvas.height !== H) { pxFogCanvas.width = W; pxFogCanvas.height = H; }
-    const img = pxFogCtx.createImageData(W, H), d = img.data, [r, g, b] = PXFOG.dark;
+    if (!pxFogImg || pxFogImg.width !== W || pxFogImg.height !== H) pxFogImg = pxFogCtx.createImageData(W, H); // se reusa (menos basura por cuadro)
+    const img = pxFogImg, d = img.data, [r, g, b] = PXFOG.dark;
+    d.fill(0);
     const at = (x, y) => v[Math.max(0, Math.min(ny - 1, y)) * nx + Math.max(0, Math.min(nx - 1, x))];
     for (let py = 0; py < H; py++) {
         const fy = (py + 0.5) / S - 0.5, iy = Math.floor(fy), ky = fy - iy;
@@ -142,6 +148,9 @@ function pxDrawFog(level) {
         }
     }
     pxFogCtx.putImageData(img, 0, 0);
+    pxFogBlit(x0, y0, nx, ny);
+}
+function pxFogBlit(x0, y0, nx, ny) {
     const sm = ctx.imageSmoothingEnabled; ctx.imageSmoothingEnabled = false;
     ctx.drawImage(pxFogCanvas, x0 * TILE, y0 * TILE, nx * TILE, ny * TILE);
     ctx.imageSmoothingEnabled = sm;
