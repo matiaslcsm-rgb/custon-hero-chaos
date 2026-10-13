@@ -150,11 +150,12 @@ function drawArenaFx(arena) {
     (arena.fx || []).forEach(f => {
         const t = (fxClock - f.born) / f.life; // 0 → 1
         if (t < 0) return; // todavía no empezó (efecto con retardo)
+        if (fxTextPass && (f.kind === 'text') !== (fxTextPass === 'only')) return; // estilo pixel: los números aparte (towerPixel.js)
         const px = f.x * TILE + TILE / 2, py = f.y * TILE + TILE / 2;
         ctx.globalAlpha = Math.max(0, 1 - t * t);
         if (f.kind === 'text') {
-            ctx.font = `bold ${Math.round(f.size * A11Y.combatText * (t < 0.15 ? 1 + (0.15 - t) * 3 : 1))}px ${gameMode === 'tower' ? 'Georgia, serif' : 'monospace'}`;
-            ctx.lineWidth = 3; ctx.strokeStyle = gameMode === 'tower' ? '#1d1712' : 'rgba(0,0,0,0.8)'; ctx.strokeText(f.text, px, py);
+            ctx.font = `bold ${Math.round(f.size * A11Y.combatText * (t < 0.15 ? 1 + (0.15 - t) * 3 : 1))}px ${gameMode === 'tower' && !pixelOn() ? 'Georgia, serif' : 'monospace'}`;
+            ctx.lineWidth = 3; ctx.strokeStyle = gameMode === 'tower' && !pixelOn() ? '#1d1712' : 'rgba(0,0,0,0.8)'; ctx.strokeText(f.text, px, py);
             ctx.fillStyle = f.color; ctx.fillText(f.text, px, py);
         } else if (f.kind === 'particle') {
             if (f.style) drawStyledParticle(f, t, px, py);

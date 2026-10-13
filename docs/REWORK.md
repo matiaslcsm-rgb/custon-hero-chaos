@@ -582,6 +582,21 @@ Se abre desde el menú ("🧊 Prototipo 3D") o en `3d/`. Usa Three.js (cargado d
     cerca de la playa); el jabalí bufa y los lobos aúllan. Demo para capturas: `3d/?demo=1&spin=0`, con
     `&at=forest|tower|altar`, `&calm=1` (los bichos no te ven), `&weapon=sword|staff` y `&depth=N`.
 
+## 18. Rework gráfico: pixel art con luz (prueba, 2026-10-13, `js/towerPixel.js`)
+Pedido: "¿podemos hacer un rework gráfico a todo?", estilo pixel art como **Noita** o **Risk of Rain 1**, manteniendo la
+vista desde arriba. Primer paso: una prueba que se prende y apaga (pausa → 🟫 Estilo pixel con luz, o `?pixel=1`), sin
+tocar las reglas ni el estilo tinta.
+- **Cómo funciona:** el mundo se dibuja como siempre y una pasada en WebGL lo baja a ~12 píxeles por casilla (escala
+  entera, la cámara se mueve de a un píxel grande), con colores más oscuros y saturados y tramado de 32 niveles.
+- **Luz (lo de Noita):** mapa de luz aparte. Ambiente alto de día, bajo de noche, penumbra en el laberinto y casi nada
+  en las cuevas. Alumbran: el héroe, antorchas, fogatas, la fragua, santuarios, lava, tus proyectiles, las balas
+  enemigas y los golpes. La noche ya no es una capa azul: es menos luz.
+- **Brillo:** lo saturado y luminoso (fuego, magia, balas, lava) se ve aunque esté oscuro y suelta un halo.
+- **Paleta del suelo** propia por bioma (más oscura); el laberinto usa la piedra oscura vieja en vez del pergamino.
+- **Encima, sin pixelar:** números de daño, minimapa, carteles y barra del jefe.
+- Pendiente si gusta: sprites pensados para pixel (hoy son las figuras de tinta pixeladas), partículas de a un píxel
+  (chispas, sangre, restos que quedan en el piso), interfaz HTML en el mismo estilo (hoy sigue en pergamino).
+
 ## Orden propuesto (cada fase jugable y medida)
 1. **Pantalla:** zoom, HUD más chico y menú de pausa con pestañas. Es barato y mejora todo lo que viene después.
 2. **Despertar y tutorial:** cuaderno y las 3 armas (espada, arco y bastón, con su habilidad). ✅ — las 3 armas

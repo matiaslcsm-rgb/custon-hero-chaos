@@ -382,8 +382,9 @@ function biomeSummary(level) {
 // Baldosas de cada bioma en estilo tinta (se dibujan una vez por bioma).
 const biomeTileCache = {};
 function biomeTiles(key) {
-    if (biomeTileCache[key]) return biomeTileCache[key];
-    const B = BIOMES[key], C = B.colors;
+    const ck = tileStyleKey(key); // tinta o pixel (towerPixel.js)
+    if (biomeTileCache[ck]) return biomeTileCache[ck];
+    const B = BIOMES[key], C = biomeColors(key), stone = pixelOn() ? '#4e4842' : '#d8cfc0';
     let seed = [...key].reduce((s, ch) => (s * 31 + ch.charCodeAt(0)) % 2147483647, 99);
     const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
     const tile = draw => { const c = document.createElement('canvas'); c.width = c.height = TILE; const g = c.getContext('2d'); g.lineCap = 'round'; g.lineJoin = 'round'; draw(g); return c; };
@@ -417,7 +418,7 @@ function biomeTiles(key) {
         for (let i = 0; i < 4; i++) { g.fillStyle = 'rgba(29,23,18,0.3)'; g.beginPath(); g.arc(rnd() * TILE, rnd() * TILE, 1 + rnd() * 1.5, 0, Math.PI * 2); g.fill(); }
     });
     const townTile = () => tile(g => {
-        g.fillStyle = '#d8cfc0'; g.fillRect(0, 0, TILE, TILE);
+        g.fillStyle = stone; g.fillRect(0, 0, TILE, TILE);
         g.strokeStyle = 'rgba(29,23,18,0.45)'; g.lineWidth = 1;
         for (let r = 0; r < 3; r++) for (let k = 0; k < 3; k++) { g.beginPath(); g.ellipse(6 + k * 11 + (r % 2) * 5 + (rnd() - 0.5), 6 + r * 11 + (rnd() - 0.5), 4.6, 4, 0, 0, Math.PI * 2); g.stroke(); }
     });
@@ -451,7 +452,7 @@ function biomeTiles(key) {
         }
     });
     const palisade = tile(g => {
-        g.fillStyle = '#d8cfc0'; g.fillRect(0, 0, TILE, TILE);
+        g.fillStyle = stone; g.fillRect(0, 0, TILE, TILE);
         for (let i = 0; i < 4; i++) {
             const x = 1 + i * 8.5;
             g.beginPath(); g.moveTo(x, 33); g.lineTo(x, 8); g.lineTo(x + 3.5, 2); g.lineTo(x + 7, 8); g.lineTo(x + 7, 33); g.closePath();
@@ -480,7 +481,7 @@ function biomeTiles(key) {
         g.strokeStyle = 'rgba(29,23,18,0.5)'; g.lineWidth = 1.4;
         for (let y = 5; y < TILE; y += 7) { g.beginPath(); g.moveTo(3, y); g.lineTo(TILE - 3, y); g.stroke(); }
     });
-    return (biomeTileCache[key] = { cliff: [cliff(0), cliff(1)], ramp: rampTile,
+    return (biomeTileCache[ck] = { cliff: [cliff(0), cliff(1)], ramp: rampTile,
         ground: [0, 1, 2, 3].map(groundTile), hazard: [hazardTile(), hazardTile()], deep: [deepTile(), deepTile()],
         road: [roadTile(), roadTile()], town: [townTile(), townTile()], obstacle: [0, 1, 2].map(obstacleTile), palisade, fountain
     });
@@ -930,8 +931,9 @@ function drawCavePortals(level) {
 // Baldosas de cueva: roca oscura con grietas y piso de tierra, con el color del bioma apagado
 const caveTileCache = {};
 function caveTiles(key) {
-    if (caveTileCache[key]) return caveTileCache[key];
-    const C = BIOMES[key].colors;
+    const ck = tileStyleKey(key);
+    if (caveTileCache[ck]) return caveTileCache[ck];
+    const C = biomeColors(key);
     let seed = 4711 + key.length; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
     const tile = draw => { const c = document.createElement('canvas'); c.width = c.height = TILE; draw(c.getContext('2d')); return c; };
     const floorT = v => tile(g => {
@@ -944,7 +946,7 @@ function caveTiles(key) {
         for (let i = 0; i < 3; i++) { const x = rnd() * TILE, y = rnd() * TILE; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (rnd() - 0.5) * 14, y + 6 + rnd() * 8); g.stroke(); }
         if (face) { g.strokeStyle = INK.line; g.lineWidth = 1.6; g.beginPath(); g.moveTo(0, TILE - 2); g.lineTo(TILE, TILE - 2); g.stroke(); inkHatch(g, 0, TILE - 12, TILE, TILE, 3); }
     });
-    return (caveTileCache[key] = { floor: [floorT(0), floorT(1)], rock: [rockT(0, false), rockT(1, false)], face: [rockT(0, true), rockT(1, true)] });
+    return (caveTileCache[ck] = { floor: [floorT(0), floorT(1)], rock: [rockT(0, false), rockT(1, false)], face: [rockT(0, true), rockT(1, true)] });
 }
 function caveTileFor(level, x, y) {
     const t = caveTiles(level.biome), h = ((x * 73856093) ^ (y * 19349663)) >>> 0;
