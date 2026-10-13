@@ -532,7 +532,7 @@ function renderTower(level, dt) {
     ctx.scale(viewScale(), viewScale()); // zoom (towerView.js)
     ctx.translate(-camera.x * TILE, -camera.y * TILE);
     drawTowerTiles(level);
-    drawTowerLoot(level);
+    pxDrawLoot(level); // cofres y botín (towerPixelProps.js)
     const underFx = () => {
         drawTowerZones(level); // lo que dejan los jefes en el piso (towerBosses.js)
         drawTowerTelegraphs(level); // zonas de los ataques anunciados, debajo de las unidades
@@ -545,15 +545,15 @@ function renderTower(level, dt) {
         pxRangeRing(); // ya es de píxeles: va directo
     }
     else underFx();
-    drawTowerMerchant(level);
-    drawTowerSmith(level);
-    drawTowerShrines(level);
-    drawTowerEvents(level);
-    drawStarterWeapons(level); // las 3 armas clavadas al despertar (towerAwaken.js)
-    drawWaystone(level); // la piedra de regreso del círculo (towerWaystone.js)
-    drawTowerLights(level); // antorchas y fogatas (towerAtmos.js)
+    pxDrawMerchant(level); // mercader, herrero, santuarios, eventos, armas del despertar, piedra de regreso y fuegos (towerPixelProps.js)
+    pxDrawSmith(level);
+    pxDrawShrines(level);
+    pxDrawEvents(level);
+    pxDrawStarterWeapons(level);
+    pxDrawWaystone(level);
+    pxDrawLights(level);
     // Escalera (cerrada hasta vencer al guardián)
-    drawCavePortals(level);
+    pxDrawPortals(level);
     const st = level.stairs || { x: 0, y: 0 }, sx = st.x * TILE, sy = st.y * TILE;
     if (px) { pxDrawStairs(level); pxDrawCorpses(level); } // en pixel art (towerPixelProps.js)
     else if (level.stairs && level.explored[st.y][st.x]) {

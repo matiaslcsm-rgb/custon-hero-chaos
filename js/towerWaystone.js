@@ -46,22 +46,6 @@ function toggleWaystone(open = !waystoneOpen) {
     });
 }
 
-// --- DIBUJO: piedra rúnica que brilla si hay adónde ir ---
-function drawWaystone(level) {
-    if (pixelOn()) { pxDrawWaystone(level); return; } // en pixel art (towerPixelProps.js)
-    const w = waystoneSpot(level);
-    if (!w || !level.explored[w.y] || !level.explored[w.y][w.x]) return;
-    const cx = w.x * TILE + TILE / 2, cy = w.y * TILE + TILE / 2, on = waystoneFloors().length > 0, pulse = 0.5 + 0.5 * Math.sin(fxClock * 2.5);
-    ctx.save();
-    if (on) { ctx.fillStyle = `rgba(123,108,246,${0.18 + 0.18 * pulse})`; ctx.beginPath(); ctx.ellipse(cx, cy + TILE * 0.3, TILE * 0.55, TILE * 0.2, 0, 0, Math.PI * 2); ctx.fill(); }
-    ctx.fillStyle = INK.stone; ctx.strokeStyle = INK.line; ctx.lineWidth = 2; // la piedra, más alta que los menhires
-    ctx.beginPath(); ctx.moveTo(cx - 8, cy + 10); ctx.lineTo(cx - 9, cy - 10); ctx.lineTo(cx - 2, cy - 18); ctx.lineTo(cx + 7, cy - 12); ctx.lineTo(cx + 8, cy + 10); ctx.closePath(); ctx.fill(); ctx.stroke();
-    ctx.strokeStyle = on ? `rgba(123,108,246,${0.6 + 0.4 * pulse})` : 'rgba(29,23,18,0.5)'; ctx.lineWidth = 1.8; // runas
-    if (on) { ctx.shadowColor = '#7b6cf6'; ctx.shadowBlur = 8; }
-    ctx.beginPath(); ctx.moveTo(cx - 3, cy - 9); ctx.lineTo(cx + 2, cy - 4); ctx.lineTo(cx - 3, cy + 1); ctx.moveTo(cx + 2, cy - 11); ctx.lineTo(cx + 2, cy + 4); ctx.stroke();
-    ctx.restore();
-    if (on && nearWaystone()) { ctx.font = 'bold 11px Georgia, serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#4a3f9a'; ctx.fillText(`${keyName(KEYMAP.interact)}: piedra de regreso`, cx, cy + TILE * 0.85); } // abajo: arriba lo tapa el héroe
-}
 
 // --- PILOTO: al renacer, vuelve al piso de sus restos (o al más alto) ---
 function aiWaystone() {

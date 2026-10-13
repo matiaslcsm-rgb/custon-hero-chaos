@@ -53,47 +53,7 @@ function towerNightLights(level, light) {
     if (level.biome === 'volcano') (level.zones || []).forEach(z => { if (z.kind === 'lava') light(z.x, z.y, 3 * TILE); });
 }
 function canSeeOrExplored(level, o) { return level.explored[o.y] && level.explored[o.y][o.x]; }
-function drawFireGlow(level, dark) {
-    if (dark <= 0.05) return;
-    const z = viewScale();
-    ctx.save(); ctx.globalCompositeOperation = 'lighter';
-    towerLights(level).forEach(o => {
-        if (!canSeeOrExplored(level, o)) return;
-        const sx = (o.x - camera.x + 0.5) * TILE * z, sy = (o.y - camera.y + 0.5) * TILE * z, r = LIGHT_KIND[o.kind].glow * TILE * z * flicker(o, 1.5);
-        if (sx < -r || sy < -r || sx > screenW() + r || sy > screenH() + r) return;
-        const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, r);
-        g.addColorStop(0, `rgba(255,150,60,${0.32 * dark})`); g.addColorStop(1, 'rgba(255,120,40,0)');
-        ctx.fillStyle = g; ctx.fillRect(sx - r, sy - r, r * 2, r * 2);
-    });
-    ctx.restore();
-}
 
-// --- LOS OBJETOS (en el mundo, de día y de noche) ---
-function drawTowerLights(level) {
-    if (pixelOn()) { pxDrawLights(level); return; } // en pixel art (towerPixelProps.js)
-    towerLights(level).forEach(o => {
-        if (o.noDraw || !canSeeOrExplored(level, o)) return;
-        const cx = o.x * TILE + TILE / 2, cy = o.y * TILE + TILE / 2, f = flicker(o, 2);
-        ctx.save();
-        if (o.kind === 'torch') {
-            ctx.strokeStyle = INK.line; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(cx, cy + TILE * 0.35); ctx.lineTo(cx, cy - TILE * 0.15); ctx.stroke(); // el palo
-            drawFlame(cx, cy - TILE * 0.22, 6 * f);
-        } else { // fogata: piedras, troncos cruzados y llama
-            ctx.fillStyle = '#8f8166'; ctx.strokeStyle = INK.line; ctx.lineWidth = 1.2;
-            for (let i = 0; i < 7; i++) { const a = i / 7 * Math.PI * 2; ctx.beginPath(); ctx.arc(cx + Math.cos(a) * 11, cy + 6 + Math.sin(a) * 5, 3.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }
-            ctx.strokeStyle = '#5a4632'; ctx.lineWidth = 3.5; ctx.beginPath(); ctx.moveTo(cx - 8, cy + 9); ctx.lineTo(cx + 8, cy + 3); ctx.moveTo(cx - 8, cy + 3); ctx.lineTo(cx + 8, cy + 9); ctx.stroke();
-            drawFlame(cx, cy + 2, 10 * f);
-            if (o.camp && level.explored[o.y][o.x] && towerDarkness() >= 0.5 && Math.hypot(player.x - o.x, player.y - o.y) <= ATMOS.campReach + 2) { // cartel de la fogata
-                ctx.font = 'bold 10px Georgia, serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#8a5a00'; ctx.fillText('fogata: descansá', cx, cy - TILE * 0.7);
-            }
-        }
-        ctx.restore();
-    });
-}
-function drawFlame(x, y, s) {
-    ctx.fillStyle = '#e85d04'; ctx.beginPath(); ctx.moveTo(x, y - s * 1.6); ctx.quadraticCurveTo(x + s, y - s * 0.2, x, y + s * 0.4); ctx.quadraticCurveTo(x - s, y - s * 0.2, x, y - s * 1.6); ctx.fill();
-    ctx.fillStyle = '#ffd166'; ctx.beginPath(); ctx.moveTo(x, y - s * 0.9); ctx.quadraticCurveTo(x + s * 0.5, y, x, y + s * 0.3); ctx.quadraticCurveTo(x - s * 0.5, y, x, y - s * 0.9); ctx.fill();
-}
 
 // --- FOGATA: descanso de noche ---
 function towerCampTick(level, dt) {

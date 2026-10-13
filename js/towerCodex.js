@@ -150,22 +150,6 @@ function towerSmithTick(level, hero) {
     if (near && !s.greeted) { s.greeted = true; toggleSmith(true); }
     else if (!near) s.greeted = false;
 }
-function drawTowerSmith(level) {
-    if (pixelOn()) { pxDrawSmith(level); return; } // en pixel art (towerPixelProps.js)
-    const s = level.town && level.town.smith;
-    if (!s || !level.explored[s.y][s.x]) return;
-    const k = Math.floor(((fxClock * 0.8 + 0.4) % 1) * INK_IDLE_FRAMES);
-    const fig = inkFigure('hoodedKnight', { main: '#5c4033', hood: '#3e2a1e', accent: '#e85d04', weapon: 'hammer' }, 'idle', k);
-    const sc = 1.1 * TILE / INK_W * 1.3, w = INK_W * sc, h = INK_H * sc;
-    const cx = s.x * TILE + TILE / 2, cy = s.y * TILE + TILE / 2 + TILE * 0.45;
-    // yunque con chispas
-    ctx.fillStyle = '#3d3d3d'; ctx.fillRect(cx + TILE * 0.55, cy - TILE * 0.3, TILE * 0.55, TILE * 0.18); ctx.fillRect(cx + TILE * 0.72, cy - TILE * 0.14, TILE * 0.2, TILE * 0.16);
-    if (Math.sin(fxClock * 5) > 0.6) { ctx.fillStyle = '#ffb703'; for (let i = 0; i < 3; i++) ctx.fillRect(cx + TILE * (0.7 + 0.2 * Math.random()), cy - TILE * (0.4 + 0.3 * Math.random()), 2, 2); }
-    ctx.fillStyle = 'rgba(29,23,18,0.28)'; ctx.beginPath(); ctx.ellipse(cx, cy - 2, w * 0.3, h * 0.04, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.drawImage(fig.img, cx - w / 2, cy - h * (FOOT + 2) / INK_H, w, h);
-    ctx.font = 'bold 11px Georgia, serif'; ctx.textAlign = 'center'; ctx.fillStyle = INK.line;
-    ctx.fillText('Herrero (B)', cx, s.y * TILE - TILE * 0.9);
-}
 
 // --- VENTANA DEL HERRERO ---
 let smithOpen = false, smithPick = null;

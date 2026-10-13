@@ -381,123 +381,7 @@ function biomeSummary(level) {
 // --- DIBUJO ---
 // Baldosas de cada bioma en estilo tinta (se dibujan una vez por bioma).
 const biomeTileCache = {};
-function biomeTiles(key) {
-    if (biomeTileCache[key]) return biomeTileCache[key];
-    const B = BIOMES[key], C = B.colors;
-    let seed = [...key].reduce((s, ch) => (s * 31 + ch.charCodeAt(0)) % 2147483647, 99);
-    const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-    const tile = draw => { const c = document.createElement('canvas'); c.width = c.height = TILE; const g = c.getContext('2d'); g.lineCap = 'round'; g.lineJoin = 'round'; draw(g); return c; };
-    const speckle = (g, color, n, a = 0.35) => { g.globalAlpha = a; g.fillStyle = color; for (let i = 0; i < n; i++) g.fillRect(rnd() * TILE, rnd() * TILE, 1 + rnd() * 2, 1 + rnd()); g.globalAlpha = 1; };
-    const base = (g, color) => { g.fillStyle = color; g.fillRect(0, 0, TILE, TILE); speckle(g, C.speck, 18, 0.25); };
-    const line = (g, pts, color = INK.line, w = 1.4) => { g.strokeStyle = color; g.lineWidth = w; g.beginPath(); g.moveTo(pts[0][0], pts[0][1]); pts.slice(1).forEach(p => g.lineTo(p[0] + (rnd() - 0.5) * 0.6, p[1] + (rnd() - 0.5) * 0.6)); g.stroke(); };
-    const blobShape = (g, cx, cy, r, fill, n = 9) => {
-        g.beginPath();
-        for (let i = 0; i <= n; i++) { const a = i / n * Math.PI * 2, rr = r * (0.85 + rnd() * 0.3); g[i ? 'lineTo' : 'moveTo'](cx + Math.cos(a) * rr, cy + Math.sin(a) * rr); }
-        g.closePath(); g.fillStyle = fill; g.fill(); g.strokeStyle = INK.line; g.lineWidth = 1.5; g.stroke();
-    };
-    const groundTile = v => tile(g => {
-        base(g, v % 2 ? C.ground2 : C.ground);
-        for (let i = 0; i < 2; i++) { const x = rnd() * TILE, y = rnd() * TILE; line(g, [[x, y], [x + 2 + rnd() * 3, y - 2 - rnd() * 2]], C.speck, 1); }
-    });
-    const hazardTile = () => tile(g => {
-        base(g, C.hazard);
-        const look = B.hazard.look;
-        if (look === 'brush') for (let i = 0; i < 5; i++) { const x = 3 + rnd() * 28, y = 8 + rnd() * 24; line(g, [[x, y], [x - 2, y - 7]], C.hazardInk, 1.3); line(g, [[x, y], [x + 1, y - 8]], C.hazardInk, 1.3); line(g, [[x, y], [x + 3, y - 6]], C.hazardInk, 1.3); }
-        if (look === 'mud') for (let i = 0; i < 4; i++) { g.strokeStyle = C.hazardInk; g.lineWidth = 1.2; g.beginPath(); g.arc(4 + rnd() * 26, 4 + rnd() * 26, 1.5 + rnd() * 2.5, 0, Math.PI * 2); g.stroke(); }
-        if (look === 'quicksand') { g.strokeStyle = C.hazardInk; g.lineWidth = 1.2; g.beginPath(); for (let a = 0; a < 12; a += 0.3) { const r = a * 1.3; g.lineTo(17 + Math.cos(a) * r, 17 + Math.sin(a) * r); } g.stroke(); }
-        if (look === 'drift') for (let i = 0; i < 3; i++) { const y = 8 + i * 9 + rnd() * 3; line(g, [[2, y], [10, y - 2], [18, y], [26, y - 2], [33, y]], C.hazardInk, 1.2); }
-        if (look === 'embers') for (let i = 0; i < 4; i++) { const x = rnd() * 30, y = rnd() * 30; line(g, [[x, y], [x + 4, y + 3], [x + 7, y + 1], [x + 10, y + 5]], C.hazardInk, 1.6); }
-    });
-    const deepTile = () => tile(g => {
-        g.fillStyle = C.deep; g.fillRect(0, 0, TILE, TILE);
-        for (let i = 0; i < 3; i++) { const x = rnd() * 22, y = 6 + rnd() * 24; line(g, [[x, y], [x + 4, y - 2], [x + 8, y], [x + 12, y - 2]], key === 'volcano' ? '#7a2a10' : 'rgba(29,23,18,0.55)', 1.2); }
-    });
-    const roadTile = () => tile(g => {
-        base(g, C.road);
-        for (let i = 0; i < 4; i++) { g.fillStyle = 'rgba(29,23,18,0.3)'; g.beginPath(); g.arc(rnd() * TILE, rnd() * TILE, 1 + rnd() * 1.5, 0, Math.PI * 2); g.fill(); }
-    });
-    const townTile = () => tile(g => {
-        g.fillStyle = '#d8cfc0'; g.fillRect(0, 0, TILE, TILE);
-        g.strokeStyle = 'rgba(29,23,18,0.45)'; g.lineWidth = 1;
-        for (let r = 0; r < 3; r++) for (let k = 0; k < 3; k++) { g.beginPath(); g.ellipse(6 + k * 11 + (r % 2) * 5 + (rnd() - 0.5), 6 + r * 11 + (rnd() - 0.5), 4.6, 4, 0, 0, Math.PI * 2); g.stroke(); }
-    });
-    const obstacleTile = v => tile(g => {
-        base(g, v % 2 ? C.ground2 : C.ground);
-        const o = B.obstacle, col = C.obstacle;
-        if (o === 'tree') {
-            g.fillStyle = '#6b4f33'; g.fillRect(15, 20, 5, 12); g.strokeStyle = INK.line; g.lineWidth = 1.4; g.strokeRect(15, 20, 5, 12);
-            blobShape(g, 11, 15, 8, col); blobShape(g, 22, 13, 8.5, shade(col, 0.08)); blobShape(g, 17, 8, 7.5, shade(col, 0.15));
-            g.strokeStyle = 'rgba(29,23,18,0.35)'; g.lineWidth = 1; for (let i = 0; i < 4; i++) { g.beginPath(); g.moveTo(20 + i * 2, 18); g.lineTo(24 + i * 2, 12); g.stroke(); }
-        } else if (o === 'pine') {
-            [[17, 2, 11, 14], [17, 9, 13, 21], [17, 16, 15, 28]].forEach(([cx, top, hw, bot]) => {
-                g.beginPath(); g.moveTo(cx, top); g.lineTo(cx + hw, bot); g.lineTo(cx - hw, bot); g.closePath(); g.fillStyle = col; g.fill(); g.strokeStyle = INK.line; g.lineWidth = 1.4; g.stroke();
-                line(g, [[cx - hw * 0.5, bot - 3], [cx, bot - 5], [cx + hw * 0.5, bot - 3]], '#f4f6f4', 2);
-            });
-            g.fillStyle = '#5a4030'; g.fillRect(15, 28, 4, 5);
-        } else if (o === 'deadTree') {
-            line(g, [[17, 33], [17, 18], [12, 8], [10, 3]], col, 3); line(g, [[17, 20], [24, 10], [27, 6]], col, 2.4); line(g, [[13, 11], [7, 9]], col, 1.8); line(g, [[23, 12], [28, 13]], col, 1.6);
-            line(g, [[17, 33], [17, 18], [12, 8]], INK.line, 0.8);
-        } else if (o === 'rock' || o === 'basalt') {
-            if (o === 'rock' && v === 2) { // cactus
-                g.fillStyle = '#7f9a5a'; g.strokeStyle = INK.line; g.lineWidth = 1.4;
-                [[14, 6, 7, 26], [6, 12, 5, 9], [23, 10, 5, 9]].forEach(([x, y, w, h]) => { g.beginPath(); g.roundRect(x, y, w, h, 2.5); g.fill(); g.stroke(); });
-                g.fillRect(9, 19, 6, 3); g.fillRect(20, 17, 4, 3);
-            } else {
-                const pts = [[5, 30], [3, 18], [9, 8], [19, 4], [29, 10], [31, 24], [26, 31]].map(([x, y]) => [x + (rnd() - 0.5) * 3, y + (rnd() - 0.5) * 3]);
-                g.beginPath(); pts.forEach((p, i) => g[i ? 'lineTo' : 'moveTo'](p[0], p[1])); g.closePath(); g.fillStyle = col; g.fill(); g.strokeStyle = INK.line; g.lineWidth = 1.6; g.stroke();
-                line(g, [[12, 12], [16, 18], [14, 24]], o === 'basalt' ? '#7a706a' : 'rgba(29,23,18,0.5)', 1);
-                line(g, [[21, 9], [24, 16]], o === 'basalt' ? '#e0702a' : 'rgba(29,23,18,0.4)', 1);
-            }
-        }
-    });
-    const palisade = tile(g => {
-        g.fillStyle = '#d8cfc0'; g.fillRect(0, 0, TILE, TILE);
-        for (let i = 0; i < 4; i++) {
-            const x = 1 + i * 8.5;
-            g.beginPath(); g.moveTo(x, 33); g.lineTo(x, 8); g.lineTo(x + 3.5, 2); g.lineTo(x + 7, 8); g.lineTo(x + 7, 33); g.closePath();
-            g.fillStyle = i % 2 ? '#8a6a46' : '#9a7a52'; g.fill(); g.strokeStyle = INK.line; g.lineWidth = 1.3; g.stroke();
-        }
-        line(g, [[0, 14], [34, 14]], '#5a4030', 2); line(g, [[0, 25], [34, 25]], '#5a4030', 2);
-    });
-    const fountain = tile(g => {
-        g.drawImage(townTile(), 0, 0);
-        g.beginPath(); g.arc(17, 18, 14, 0, Math.PI * 2); g.fillStyle = INK.stone; g.fill(); g.strokeStyle = INK.line; g.lineWidth = 1.6; g.stroke();
-        g.beginPath(); g.arc(17, 18, 10, 0, Math.PI * 2); g.fillStyle = '#7fa7c9'; g.fill(); g.stroke();
-        line(g, [[11, 18], [14, 16], [17, 18], [20, 16], [23, 18]], 'rgba(255,255,255,0.7)', 1.2);
-        g.fillStyle = INK.stone; g.fillRect(15, 9, 4, 9); g.strokeRect(15, 9, 4, 9);
-    });
-    const cliff = v => tile(g => {
-        g.fillStyle = shade(C.obstacle, -0.1); g.fillRect(0, 0, TILE, TILE);
-        g.fillStyle = shade(C.ground, -0.18); g.fillRect(0, 0, TILE, 9);
-        g.strokeStyle = INK.line; g.lineWidth = 1.4; g.beginPath(); g.moveTo(0, 9); g.lineTo(TILE, 9); g.stroke();
-        g.strokeStyle = 'rgba(29,23,18,0.55)'; g.lineWidth = 1;
-        for (let y = 15; y < TILE; y += 7) { g.beginPath(); g.moveTo(0, y + (rnd() - 0.5) * 2); g.lineTo(TILE, y + (rnd() - 0.5) * 2); g.stroke(); }
-        for (let i = 0; i < 3; i++) { const x = 4 + rnd() * 26; g.beginPath(); g.moveTo(x, 10); g.lineTo(x + (rnd() - 0.5) * 4, TILE); g.stroke(); }
-        if (v) inkHatch(g, 0, 20, TILE, TILE, 3);
-    });
-    const rampTile = tile(g => {
-        base(g, C.road);
-        g.strokeStyle = 'rgba(29,23,18,0.5)'; g.lineWidth = 1.4;
-        for (let y = 5; y < TILE; y += 7) { g.beginPath(); g.moveTo(3, y); g.lineTo(TILE - 3, y); g.stroke(); }
-    });
-    return (biomeTileCache[key] = { cliff: [cliff(0), cliff(1)], ramp: rampTile,
-        ground: [0, 1, 2, 3].map(groundTile), hazard: [hazardTile(), hazardTile()], deep: [deepTile(), deepTile()],
-        road: [roadTile(), roadTile()], town: [townTile(), townTile()], obstacle: [0, 1, 2].map(obstacleTile), palisade, fountain
-    });
-}
 
-// Imagen de una casilla del campo o del pueblo (las del laberinto las dibuja drawTowerTiles con inkTiles).
-function biomeTileFor(level, x, y) {
-    const bt = biomeTiles(level.biome), i = y * COLS + x, w = level.walls[y][x], h = ((x * 73856093) ^ (y * 19349663)) >>> 0;
-    if (w === WALL.obstacle || w === WALL.edge) return bt.obstacle[h % 3];
-    if (w === WALL.cliff) return bt.cliff[h & 1];
-    if (level.ramp && level.ramp[i]) return bt.ramp;
-    if (w === WALL.palisade) return bt.palisade;
-    if (w === WALL.fountain) return bt.fountain;
-    if (level.deep[i]) return bt.deep[h & 1];
-    const gr = level.ground[i];
-    return gr === GROUND.hazard ? bt.hazard[h & 1] : gr === GROUND.road ? bt.road[h & 1] : gr === GROUND.town ? bt.town[h & 1] : bt.ground[h & 3];
-}
 
 // Color de una casilla en el minimapa
 function towerMiniColor(level, x, y) {
@@ -516,20 +400,6 @@ function towerMiniColor(level, x, y) {
     return gr === GROUND.hazard ? C.hazard : gr === GROUND.road ? C.road : gr === GROUND.town ? '#d8cfc0' : gr === GROUND.lab ? '#e9dcc0' : C.ground;
 }
 
-// El mercader del pueblo (figura en tinta que respira) con su cartel
-function drawTowerMerchant(level) {
-    if (pixelOn()) { pxDrawMerchant(level); return; } // en pixel art (towerPixelProps.js)
-    const m = level.town && level.town.merchant;
-    if (!m || !level.explored[m.y][m.x]) return;
-    const k = Math.floor(((fxClock * 0.8) % 1) * INK_IDLE_FRAMES);
-    const fig = inkFigure('mage', { main: '#8a6a46', accent: '#c9a227' }, 'idle', k);
-    const s = 1.1 * TILE / INK_W * 1.3, w = INK_W * s, h = INK_H * s;
-    const cx = m.x * TILE + TILE / 2, cy = m.y * TILE + TILE / 2 + TILE * 0.45;
-    ctx.fillStyle = 'rgba(29,23,18,0.28)'; ctx.beginPath(); ctx.ellipse(cx, cy - 2, w * 0.3, h * 0.04, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.drawImage(fig.img, cx - w / 2, cy - h * (FOOT + 2) / INK_H, w, h);
-    ctx.font = 'bold 11px Georgia, serif'; ctx.textAlign = 'center'; ctx.fillStyle = INK.line;
-    ctx.fillText('Mercader (B)', cx, m.y * TILE - TILE * 0.9);
-}
 
 // --- RITMO DE LA RUN (revisión de diseño 2026-10-05, ver docs/ROGUELIKE.md §5) ---
 // Experiencia al estilo Diablo II: cada piso tiene un "nivel de zona" (el nivel esperado del héroe ahí). Si lo pasás,
@@ -606,19 +476,6 @@ function useShrines(level, hero) {
         else addEffect(hero, { id: S.effect.id || 'SHRINE_' + s.kind.toUpperCase(), name: S.name, duration: S.effect.duration || 60, tags: ['MEJORA'], mods: S.effect.mods || {} });
         if (fxArena(hero)) { fxRing(hero, S.color, 2.2, 0.8); fxText(hero, S.name, S.color, 12, 1.6); }
         log(`✨ ${S.name}: ${S.desc}.`); sfx('levelup');
-    });
-}
-function drawTowerShrines(level) {
-    if (pixelOn()) { pxDrawShrines(level); return; } // en pixel art (towerPixelProps.js)
-    (level.shrines || []).forEach(s => {
-        if (!level.explored[s.y][s.x]) return;
-        const S = SHRINES[s.kind], cx = s.x * TILE + TILE / 2, by = s.y * TILE + TILE - 3;
-        ctx.save();
-        if (!s.used) { ctx.globalAlpha = 0.35 + 0.2 * Math.sin(fxClock * 3); ctx.fillStyle = S.color; ctx.beginPath(); ctx.ellipse(cx, by - 2, 14, 5, 0, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1; }
-        ctx.fillStyle = s.used ? INK.stoneDark : INK.stone; ctx.strokeStyle = INK.line; ctx.lineWidth = 1.8; // obelisco en tinta
-        ctx.beginPath(); ctx.moveTo(cx - 7, by); ctx.lineTo(cx - 5, by - 22); ctx.lineTo(cx, by - 28); ctx.lineTo(cx + 5, by - 22); ctx.lineTo(cx + 7, by); ctx.closePath(); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = s.used ? '#6b6155' : S.color; ctx.beginPath(); ctx.arc(cx, by - 15, 3.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-        ctx.restore();
     });
 }
 
@@ -751,7 +608,7 @@ function drawTowerNight(level) {
     (level.shrines || []).forEach(s => { if (!s.used) light(s.x, s.y, 2.2 * TILE); });
     towerNightLights(level, light); // antorchas, fogatas, fragua y balas (towerAtmos.js)
     if (pixelOn()) pxDitherDraw(nightLayer); else ctx.drawImage(nightLayer, 0, 0); // en pixel art, con tramado (towerPixelFx.js)
-    drawFireGlow(level, dark); // el naranja que parpadea alrededor de cada fuego
+
     const dusk = level.isCave ? 0 : 1 - Math.abs(dark - 0.5) * 2; // tono naranja en el atardecer y el amanecer
     if (dusk > 0) { ctx.fillStyle = `rgba(255,140,60,${0.12 * dusk})`; ctx.fillRect(0, 0, screenW(), screenH()); }
 }
@@ -912,49 +769,8 @@ function towerPortals(level, hero) {
     if (level.down && hero.x === level.down.x && hero.y === level.down.y) { enterCave(level.cave, level.depth + 1); return true; }
     return false;
 }
-// Dibujo: bocas de cueva en el campo; en la cueva, la salida (soga) y la bajada (pozo)
-function drawCavePortals(level) {
-    if (pixelOn()) { pxDrawPortals(level); return; } // en pixel art (towerPixelProps.js)
-    const hole = (x, y, deep) => {
-        if (!level.explored[y][x]) return;
-        const cx = x * TILE + TILE / 2, cy = y * TILE + TILE / 2;
-        ctx.fillStyle = deep ? '#0d0a08' : '#1d1712'; ctx.strokeStyle = INK.line; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.ellipse(cx, cy + 4, 13, 9, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-        if (!deep) { ctx.fillStyle = INK.stoneDark; ctx.beginPath(); ctx.moveTo(cx - 15, cy + 6); ctx.quadraticCurveTo(cx, cy - 20, cx + 15, cy + 6); ctx.lineTo(cx + 11, cy + 6); ctx.quadraticCurveTo(cx, cy - 12, cx - 11, cy + 6); ctx.closePath(); ctx.fill(); ctx.stroke(); }
-    };
-    (level.caves || []).forEach(c => hole(c.x, c.y, false));
-    if (level.down) hole(level.down.x, level.down.y, true);
-    if (level.exitUp && level.explored[level.exitUp.y][level.exitUp.x]) {
-        const cx = level.exitUp.x * TILE + TILE / 2, cy = level.exitUp.y * TILE + TILE / 2;
-        ctx.strokeStyle = '#7a5c3c'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(cx - 5, cy - 16); ctx.lineTo(cx - 5, cy + 12); ctx.moveTo(cx + 5, cy - 16); ctx.lineTo(cx + 5, cy + 12); ctx.stroke();
-        ctx.lineWidth = 2; for (let y = -12; y < 12; y += 6) { ctx.beginPath(); ctx.moveTo(cx - 5, cy + y); ctx.lineTo(cx + 5, cy + y); ctx.stroke(); }
-        ctx.fillStyle = 'rgba(255,230,160,0.25)'; ctx.beginPath(); ctx.arc(cx, cy, 16, 0, Math.PI * 2); ctx.fill();
-    }
-}
 // Baldosas de cueva: roca oscura con grietas y piso de tierra, con el color del bioma apagado
 const caveTileCache = {};
-function caveTiles(key) {
-    if (caveTileCache[key]) return caveTileCache[key];
-    const C = BIOMES[key].colors;
-    let seed = 4711 + key.length; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-    const tile = draw => { const c = document.createElement('canvas'); c.width = c.height = TILE; draw(c.getContext('2d')); return c; };
-    const floorT = v => tile(g => {
-        g.fillStyle = shade(C.ground, v ? -0.56 : -0.5); g.fillRect(0, 0, TILE, TILE);
-        for (let i = 0; i < 6; i++) { g.fillStyle = 'rgba(29,23,18,0.35)'; g.beginPath(); g.arc(rnd() * TILE, rnd() * TILE, 0.8 + rnd() * 1.6, 0, Math.PI * 2); g.fill(); }
-    });
-    const rockT = (v, face) => tile(g => {
-        g.fillStyle = shade(C.obstacle, face ? -0.35 : -0.55); g.fillRect(0, 0, TILE, TILE);
-        g.strokeStyle = 'rgba(10,8,6,0.6)'; g.lineWidth = 1.2;
-        for (let i = 0; i < 3; i++) { const x = rnd() * TILE, y = rnd() * TILE; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (rnd() - 0.5) * 14, y + 6 + rnd() * 8); g.stroke(); }
-        if (face) { g.strokeStyle = INK.line; g.lineWidth = 1.6; g.beginPath(); g.moveTo(0, TILE - 2); g.lineTo(TILE, TILE - 2); g.stroke(); inkHatch(g, 0, TILE - 12, TILE, TILE, 3); }
-    });
-    return (caveTileCache[key] = { floor: [floorT(0), floorT(1)], rock: [rockT(0, false), rockT(1, false)], face: [rockT(0, true), rockT(1, true)] });
-}
-function caveTileFor(level, x, y) {
-    const t = caveTiles(level.biome), h = ((x * 73856093) ^ (y * 19349663)) >>> 0;
-    if (!level.walls[y][x]) return t.floor[h & 1];
-    return y + 1 < ROWS && !level.walls[y + 1][x] ? t.face[h & 1] : t.rock[h & 1];
-}
 
 // --- EL PORTADOR (fase 5: muerte con consecuencias) ---
 // Al morir, una criatura del bestiario del piso se lleva 1 pieza de tu equipo (2 desde el piso 5; nunca el arma) y
@@ -1107,38 +923,4 @@ function towerEventsTick(level, hero, dt) {
 function nearbyVendor(level, hero) {
     const e = (level.events || []).find(o => o.kind === 'peddler' && Math.max(Math.abs(hero.x - o.x), Math.abs(hero.y - o.y)) <= 2);
     return e ? e.vendor : null;
-}
-function drawTowerEvents(level) {
-    if (pixelOn()) { pxDrawEvents(level); return; } // en pixel art (towerPixelProps.js)
-    (level.events || []).forEach(e => {
-        if (e.kind === 'ambush' || !level.explored[e.y][e.x]) return;
-        const cx = e.x * TILE + TILE / 2, cy = e.y * TILE + TILE / 2;
-        ctx.save(); ctx.strokeStyle = INK.line; ctx.lineWidth = 1.8;
-        if (e.kind === 'caravan') { // carreta con toldo y ruedas
-            const broken = e.state === 'lost';
-            ctx.fillStyle = broken ? '#5a4030' : '#8a6a46'; ctx.fillRect(cx - 15, cy - 4, 30, 10); ctx.strokeRect(cx - 15, cy - 4, 30, 10);
-            if (!broken) { ctx.fillStyle = '#e9dcc0'; ctx.beginPath(); ctx.moveTo(cx - 14, cy - 4); ctx.quadraticCurveTo(cx, cy - 22, cx + 14, cy - 4); ctx.closePath(); ctx.fill(); ctx.stroke(); }
-            [[-9, 8], [9, 8]].forEach(([dx, dy]) => { ctx.fillStyle = '#5a4030'; ctx.beginPath(); ctx.arc(cx + dx, cy + dy, 5, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); });
-            if (e.state === 'attack') {
-                ctx.fillStyle = '#3a2d21'; ctx.fillRect(cx - 16, cy - 30, 32, 5);
-                ctx.fillStyle = '#e85d04'; ctx.fillRect(cx - 16, cy - 30, 32 * e.cart.hp / e.cart.maxHp, 5); ctx.strokeRect(cx - 16, cy - 30, 32, 5);
-            }
-        } else if (e.kind === 'cursed') { // cofre con aura violeta
-            if (e.state !== 'open') { ctx.globalAlpha = 0.35 + 0.2 * Math.sin(fxClock * 3); ctx.fillStyle = '#7b2cbf'; ctx.beginPath(); ctx.arc(cx, cy + 2, 16, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1; }
-            ctx.fillStyle = e.state === 'open' ? '#3e2a1e' : '#4a2f5e'; ctx.fillRect(cx - 11, cy - 4, 22, 14); ctx.strokeRect(cx - 11, cy - 4, 22, 14);
-            ctx.fillStyle = '#c9a3e6'; ctx.fillRect(cx - 2, cy, 4, 5);
-        } else if (e.kind === 'peddler') { // mercader con mochila enorme
-            const k = Math.floor(((fxClock * 0.8) % 1) * INK_IDLE_FRAMES), fig = inkFigure('plague', { main: '#a47148', accent: '#c9a227' }, 'idle', k);
-            const s = 1.1 * TILE / INK_W * 1.3, w = INK_W * s, h = INK_H * s, by = cy + TILE * 0.45;
-            ctx.fillStyle = '#7a5c3c'; ctx.fillRect(cx - 18, cy - 20, 12, 18); ctx.strokeRect(cx - 18, cy - 20, 12, 18);
-            ctx.drawImage(fig.img, cx - w / 2, by - h * (FOOT + 2) / INK_H, w, h);
-            ctx.font = 'bold 10px Georgia, serif'; ctx.textAlign = 'center'; ctx.fillStyle = INK.line; ctx.fillText('Mercader (B)', cx, e.y * TILE - TILE * 0.9);
-        } else if (e.kind === 'prisoner') { // jaula con barrotes
-            if (e.state !== 'freed') { const fig = inkFigure('footman', { main: '#9fb8a0', accent: '#5e5444' }, 'idle', 0), s = 0.9 * TILE / INK_W * 1.3; ctx.drawImage(fig.img, cx - INK_W * s / 2, cy + TILE * 0.45 - INK_H * s * 0.98, INK_W * s, INK_H * s); }
-            ctx.strokeStyle = '#3f3a36'; ctx.lineWidth = 2.4;
-            ctx.strokeRect(cx - 14, cy - 26, 28, 40);
-            if (e.state !== 'freed') for (let x = -9; x <= 9; x += 6) { ctx.beginPath(); ctx.moveTo(cx + x, cy - 26); ctx.lineTo(cx + x, cy + 14); ctx.stroke(); }
-        }
-        ctx.restore();
-    });
 }

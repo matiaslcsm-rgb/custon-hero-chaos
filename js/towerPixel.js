@@ -14,10 +14,9 @@
 const PXG = { per: 17, scale: 2, chunk: 16, maxChunks: 40 }; // 40 trozos ≈ 12 MB (la pantalla usa ~12)
 // Estilo principal desde 2026-10-13: pixel art prendido salvo que el jugador elija la tinta en la pausa (o ?pixel=0).
 // Preferencia nueva (chc-style): la de la prueba (chc-pixel) se ignora, así arranca en pixel art aunque la hayas apagado.
-let pixelEnabled = !/[?&]pixel=0/.test(location.search);
-try { if (!/[?&]pixel=/.test(location.search)) pixelEnabled = localStorage.getItem('chc-style') !== 'ink'; } catch (e) { /* sin almacenamiento */ }
+const pixelEnabled = true; // 2026-10-13: el pergamino se sacó; el pixel art es el único estilo
 function pixelOn() { return pixelEnabled && gameMode === 'tower'; }
-function setPixelStyle(on) {
+function setPixelStyle() {
     pixelEnabled = on;
     try { localStorage.setItem('chc-style', on ? 'pixel' : 'ink'); } catch (e) { /* no se guarda */ }
 }

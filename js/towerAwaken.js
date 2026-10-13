@@ -68,34 +68,6 @@ function towerAwakenTick(level, from) {
     }
 }
 
-// --- DIBUJO ---
-function drawStarterWeapons(level) {
-    if (pixelOn()) { pxDrawStarterWeapons(level); return; } // en pixel art (towerPixelProps.js)
-    if (!level.starterWeapons || !towerRun || !towerRun.starterPending) return;
-    const near = starterWeaponNear();
-    level.starterWeapons.forEach((w, i) => {
-        if (!level.explored[w.y][w.x]) return;
-        const cx = w.x * TILE + TILE / 2, cy = w.y * TILE + TILE / 2, pulse = 0.5 + 0.5 * Math.sin(fxClock * 3 + i * 2), on = w === near;
-        ctx.save();
-        ctx.fillStyle = `rgba(201,162,39,${0.18 + 0.2 * pulse + (on ? 0.2 : 0)})`; // halo en el piso
-        ctx.beginPath(); ctx.ellipse(cx, cy + TILE * 0.32, TILE * 0.48, TILE * 0.18, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = INK.line; ctx.lineWidth = 1.5; // grieta donde está clavada
-        ctx.beginPath(); ctx.moveTo(cx - 7, cy + TILE * 0.3); ctx.lineTo(cx - 2, cy + TILE * 0.26); ctx.lineTo(cx + 3, cy + TILE * 0.33); ctx.lineTo(cx + 8, cy + TILE * 0.28); ctx.stroke();
-        const img = towerIconImage({ heroKey: w.key, slot: 'weapon', skillId: STARTER_WEAPONS[w.key].skillId, quality: 'normal', level: 1 });
-        if (img.complete) { // grande y hundida en el piso (el borde de abajo lo tapa el montoncito de tierra)
-            const sz = TILE * (on ? 1.35 : 1.2), bob = Math.sin(fxClock * 2 + i) * 1.5;
-            ctx.shadowColor = '#c9a227'; ctx.shadowBlur = 8 + 10 * pulse;
-            ctx.drawImage(img, cx - sz / 2, cy - sz * 0.62 + bob, sz, sz);
-            ctx.shadowBlur = 0;
-        }
-        ctx.fillStyle = '#8f7a5a'; ctx.strokeStyle = INK.line; ctx.lineWidth = 1.5; // montoncito de tierra y piedra al pie
-        ctx.beginPath(); ctx.ellipse(cx, cy + TILE * 0.3, TILE * 0.3, TILE * 0.11, 0, Math.PI, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
-        ctx.restore();
-        ctx.font = 'bold 11px Georgia, serif'; ctx.textAlign = 'center'; ctx.fillStyle = INK.line;
-        ctx.fillText(STARTER_WEAPONS[w.key].noun, cx, cy - TILE * 0.78);
-    });
-    if (near) drawStarterCard(near);
-}
 // Cartel de pergamino arriba del arma que tenés a mano: nombre, qué hace y cómo agarrarla
 function drawStarterCard(w) {
     const W = STARTER_WEAPONS[w.key], sk = SKILL_INDEX[W.skillId], cx = w.x * TILE + TILE / 2, top = w.y * TILE - TILE * 2.3;

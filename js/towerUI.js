@@ -171,26 +171,6 @@ function openForge(item) {
     });
 }
 
-// Piezas y cofres en el piso del nivel (los dibuja renderTower dentro de la vista de la cámara).
-function drawTowerLoot(level) {
-    if (pixelOn()) { pxDrawLoot(level); return; } // en pixel art (towerPixelProps.js)
-    (level.chests || []).forEach(ch => {
-        if (!canSee(level, ch.x, ch.y) && !level.explored[ch.y][ch.x]) return;
-        const px = ch.x * TILE, py = ch.y * TILE;
-        ctx.fillStyle = ch.open ? '#5c4033' : '#8b5a2b'; ctx.fillRect(px + 6, py + 12, TILE - 12, TILE - 16);
-        ctx.fillStyle = ch.open ? '#3e2a1e' : '#ffd166'; ctx.fillRect(px + 6, py + 10, TILE - 12, 4);
-        if (!ch.open) { ctx.fillStyle = '#ffd166'; ctx.fillRect(px + TILE / 2 - 2, py + 16, 4, 5); }
-    });
-    (level.drops || []).forEach(d => {
-        if (!canSee(level, d.x, d.y)) return;
-        const px = d.x * TILE + TILE / 2, py = d.y * TILE + TILE / 2, color = ITEM_QUALITY[d.item.quality].color;
-        ctx.save(); if (!lootAllowed(d.item)) ctx.globalAlpha = 0.35; // filtrada: apagada (no se levanta)
-        ctx.shadowColor = color; ctx.shadowBlur = 10 + 4 * Math.sin(fxClock * 4);
-        ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.strokeRect(px - 11, py - 11, 22, 22); ctx.restore();
-        const img = towerIconImage(d.item);
-        if (img.complete) { ctx.save(); if (!lootAllowed(d.item)) ctx.globalAlpha = 0.35; ctx.drawImage(img, px - 10, py - 10, 20, 20); ctx.restore(); }
-    });
-}
 const towerIconImages = {};
 function towerIconImage(item) {
     const url = towerItemIcon(item);
