@@ -1,7 +1,7 @@
 // Interfaz: paneles de selección/draft/tienda, códice de héroes, HUD de stats y render del canvas.
 
 const canvas = document.getElementById('ascii-canvas');
-const ctx = canvas.getContext('2d');
+let ctx = canvas.getContext('2d'); // let: los efectos en pixel art lo cambian un momento por su capa (towerPixelFx.js)
 const TILE = 34; // más grande desde que se sacó la barra de arriba
 const MAP_W = VIEW_COLS * TILE, MAP_H = VIEW_ROWS * TILE; // tamaño lógico de la pantalla (se dibuja siempre en estas coordenadas)
 

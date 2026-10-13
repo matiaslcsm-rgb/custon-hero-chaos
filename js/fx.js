@@ -10,6 +10,7 @@ const DMG_COLORS = { physical: '#ff9f1c', magical: '#c77dff', pure: '#ffffff' };
 const SKILL_FX_COLORS = { 'MÁGICO': '#c77dff', 'FÍSICO': '#ff9f1c', 'PURO': '#ffffff', 'CURACIÓN': '#80ffdb' };
 
 let fxClock = 0, fxLastFrame = 0, shakeAmount = 0;
+let fxTextPass = null; // null: drawArenaFx dibuja todo · 'skip': todo menos los textos · 'only': solo los textos (efectos en pixel art, towerPixelFx.js)
 
 // Arena donde dibujar el efecto de esta unidad (null si no es la que se está mirando).
 function fxArena(unit) {
@@ -37,6 +38,7 @@ function fxDamage(target, amount, type, isCrit) {
     const color = target.isHero ? '#ff477e' : DMG_COLORS[type] || '#fff';
     pushFx(arena, { kind: 'text', x: target.x + (Math.random() - 0.5) * 0.6, y: target.y - 0.4, text: isCrit ? `${amount}!` : `${amount}`, color, size: isCrit ? 18 : 12, life: isCrit ? 1.1 : 0.8 });
     if (isCrit) { fxBurst(target, '#ffd166', 6, 3); fxShake(2.5); if (!target.isHero) fxHitStop(0.04); }
+    if (typeof pxBleed === 'function') pxBleed(target, isCrit ? 7 : 3, 'hit'); // salpicadura en pixel art (towerPixelFx.js)
 }
 
 function fxHeal(unit, amount) { if (amount >= 3) fxText(unit, `+${amount}`, '#72efdd', 11, 0.8); }
@@ -60,6 +62,7 @@ function fxRing(unit, color, radius = 1.6, life = 0.45) {
 function fxDeath(unit) {
     if (fxArena(unit)) sfx(unit.isHero ? 'death' : 'pop');
     fxBurst(unit, unit.color || '#ff477e', unit.isHero ? 22 : 12, unit.isHero ? 5 : 3.5);
+    if (typeof pxBleed === 'function') pxBleed(unit, unit.isHero ? 30 : unit.isGuardian ? 40 : 16, 'death'); // revienta en pedacitos (towerPixelFx.js)
     if (unit.isHero) fxShake(5);
 }
 
@@ -150,10 +153,14 @@ function drawArenaFx(arena) {
     (arena.fx || []).forEach(f => {
         const t = (fxClock - f.born) / f.life; // 0 → 1
         if (t < 0) return; // todavía no empezó (efecto con retardo)
+        if (fxTextPass && (f.kind === 'text') !== (fxTextPass === 'only')) return; // pixel art: los textos van aparte (towerPixelFx.js)
         const px = f.x * TILE + TILE / 2, py = f.y * TILE + TILE / 2;
         ctx.globalAlpha = Math.max(0, 1 - t * t);
-        if (f.kind === 'text') {
-            ctx.font = `bold ${Math.round(f.size * A11Y.combatText * (t < 0.15 ? 1 + (0.15 - t) * 3 : 1))}px ${gameMode === 'tower' ? 'Georgia, serif' : 'monospace'}`;
+        const pixel = gameMode === 'tower' && typeof pixelOn === 'function' && pixelOn();
+        if (f.kind === 'text' && pixel && pxNumberText(f.text)) { // número de daño con la fuente de píxeles
+            pxDrawNumber(f.text, px, py, f.color, Math.max(2, Math.round(2 * f.size / 12 * A11Y.combatText)) + (t < 0.12 ? 1 : 0));
+        } else if (f.kind === 'text') {
+            ctx.font = `bold ${Math.round(f.size * A11Y.combatText * (t < 0.15 ? 1 + (0.15 - t) * 3 : 1))}px ${gameMode === 'tower' && !pixel ? 'Georgia, serif' : 'monospace'}`;
             ctx.lineWidth = 3; ctx.strokeStyle = gameMode === 'tower' ? '#1d1712' : 'rgba(0,0,0,0.8)'; ctx.strokeText(f.text, px, py);
             ctx.fillStyle = f.color; ctx.fillText(f.text, px, py);
         } else if (f.kind === 'particle') {

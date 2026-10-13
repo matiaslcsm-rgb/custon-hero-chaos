@@ -626,6 +626,12 @@ las tres armas clavadas del despertar, la piedra de regreso con runas que brilla
 (con candado hasta vencer al guardián), boca de cueva, pozo y soga, tus restos (huesos; dorados los últimos), la carreta
 y el prisionero en su jaula. Los carteles van en letra clara con borde oscuro, para leerse sobre el suelo oscuro.
 
+**Efectos de combate (2026-10-13, `js/towerPixelFx.js`):** los tajos, aros, avisos de golpe, zonas, proyectiles y balas
+se dibujan en una capa con el mismo tamaño de píxel que los sprites y bordes duros (3 escalones de transparencia); solo
+los efectos, no el suelo ni las criaturas ni la interfaz. Sangre y restos que vuelan, caen y quedan en el piso ~10 s
+(roja, polvo de piedra en gólems, ectoplasma en espectros, icor verde en enjambres y sapos, brasas en el volcán), chispas
+en cada golpe, números de daño con fuente de 3×5 y el rango del héroe como aro de puntos.
+
 ### Ideas para las criaturas (propuesta externa revisada, 2026-10-13; para después, de a una)
 - ✅ **Alas que vuelan:** ignoran fango, lava y trampas; si las aturdís, caen y pierden eso.
 - ✅ **Dúos de rol + cuerpo** con nombre (pocos, no todas las combinaciones): escorpión maldiciente deja charcos

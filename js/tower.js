@@ -553,10 +553,14 @@ function renderTower(level, dt) {
     ctx.translate(-camera.x * TILE, -camera.y * TILE);
     drawTowerTiles(level);
     drawTowerLoot(level);
-    drawTowerZones(level); // lo que dejan los jefes en el piso (towerBosses.js)
-    drawTowerTelegraphs(level); // zonas de los ataques anunciados, debajo de las unidades
-    drawCreepWindups(level); // los golpes comunes que se están preparando (towerWindup.js)
-    drawBossExtras(level); // lazos de las raíces
+    const underFx = () => {
+        drawTowerZones(level); // lo que dejan los jefes en el piso (towerBosses.js)
+        drawTowerTelegraphs(level); // zonas de los ataques anunciados, debajo de las unidades
+        drawCreepWindups(level); // los golpes comunes que se están preparando (towerWindup.js)
+        drawBossExtras(level); // lazos de las raíces
+    };
+    if (px) { pxDrawDebris(level, 'ground'); pxFxLayer('under', () => { underFx(); pxRangeRing(); }); } // efectos en pixel art (towerPixelFx.js)
+    else underFx();
     drawTowerMerchant(level);
     drawTowerSmith(level);
     drawTowerShrines(level);
@@ -602,7 +606,7 @@ function renderTower(level, dt) {
         drawGunnerTell(c, p); // el tirador avisa antes de disparar (towerBullets.js)
         drawChampionBadges(c, p, level); // íconos de sus afijos (towerChampions.js)
     });
-    level.projectiles.forEach(p => {
+    const drawProjectiles = () => level.projectiles.forEach(p => {
         const lk = projectileLook(p), x = p.x * TILE + TILE / 2, y = p.y * TILE + TILE / 2;
         if (p.arrow) { drawArrowProjectile(p, x, y); return; } // flechas del arco (towerFeel.js)
         if (lk) { // orbe con halo del elemento (fxSkills.js)
@@ -614,16 +618,26 @@ function renderTower(level, dt) {
         ctx.fillStyle = p.isCrit ? '#ffd166' : (p.attacker.isHero ? heroColor(p.attacker) : p.attacker.color || '#fefae0');
         ctx.beginPath(); ctx.arc(x, y, p.isCrit ? 4 : 3, 0, Math.PI * 2); ctx.fill();
     });
+    if (!px) drawProjectiles();
     if (player.isAlive()) {
         const pos = drawPos(player, dt);
-        ctx.save(); ctx.strokeStyle = '#6b2a1f'; ctx.globalAlpha = 0.5; ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]);
-        ctx.beginPath(); ctx.arc(pos.x * TILE + TILE / 2, pos.y * TILE + TILE / 2, effRange(player) * TILE, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+        if (!px) { // (en pixel art, el aro de puntos va en la capa de efectos)
+            ctx.save(); ctx.strokeStyle = '#6b2a1f'; ctx.globalAlpha = 0.5; ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]);
+            ctx.beginPath(); ctx.arc(pos.x * TILE + TILE / 2, pos.y * TILE + TILE / 2, effRange(player) * TILE, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+        }
         drawUnit(player, heroColor(player), player.symbol, pos, { glow: true });
     }
+    if (px) { // efectos en pixel art (towerPixelFx.js): proyectiles, balas, tajos y hechizos en la capa de arriba; sangre y números aparte
+        pxFxLayer('over', () => { drawProjectiles(); drawTowerBullets(level); drawTowerFeel(level); fxTextPass = 'skip'; drawArenaFx(level); fxTextPass = null; });
+        pxDrawDebris(level, 'air');
+        drawCreepWindupMarks(level);
+        fxTextPass = 'only'; drawArenaFx(level); fxTextPass = null;
+    } else {
     drawTowerBullets(level); // proyectiles enemigos, encima de todo lo del piso (towerBullets.js)
     drawCreepWindupMarks(level); // "!" sobre los que preparan un golpe (towerWindup.js)
     drawTowerFeel(level); // línea de tiro del arco y el combo de la espada (towerFeel.js)
     drawArenaFx(level);
+    }
     drawMouseOverlay(level);
     // Niebla: lo no descubierto, negro; lo descubierto fuera de la vista, oscurecido
     const x0 = Math.floor(camera.x), y0 = Math.floor(camera.y);
