@@ -71,6 +71,9 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   medida (ritmo de niveles estilo Diablo II, campeones y santuarios, restos que guardan lo perdido, objetivo del piso,
   crónica, Tomo de Talento; ver ROGUELIKE.md §4 ter). Próximo: la criatura que carga tus ítems (resto de la fase 5),
   élites con nombre, eventos en el campo; más adelante, crafteo con materiales.
+- **Rework gráfico en pixel art (2026-10-13, estilo principal de la Torre):** suelo, criaturas, héroe, guardianes, objetos,
+  efectos de combate, niebla, clima e interfaz (`js/towerPixel*.js`). Se puede volver a la tinta en la pausa. Detalle y
+  pendientes en REWORK.md §18-19 (minimapa con colores de pergamino, ideas para las criaturas).
 - **Mundo con profundidad (2026-10-06):** pisos de 220×150 con mesetas, día y noche, cuevas con niveles de profundidad y
   bestiario generado por run (ROGUELIKE.md §4 quater).
 - **Códice, piezas sin alma y Herrero (2026-10-07):** ROGUELIKE.md §4 septies.

@@ -645,6 +645,10 @@ pasada de interfaz (título del piso, barra del jefe, campeones, mapa grande, ca
 se cambian por los del panel oscuro desde el contexto del canvas (sin tocar cada función). Sin la viñeta de papel.
 Pendiente menor: los colores del minimapa siguen siendo los del pergamino.
 
+**Estilo principal (2026-10-13):** el usuario decidió que el pixel art pasa a ser el estilo de la Torre. Viene prendido
+para todos (preferencia nueva `chc-style`; la de la prueba se ignora); en la pausa (🟫 Pixel art) se puede volver a la
+tinta, o con `?pixel=0`. El modo Custom Hero Chaos no cambia.
+
 ### Ideas para las criaturas (propuesta externa revisada, 2026-10-13; para después, de a una)
 - ✅ **Alas que vuelan:** ignoran fango, lava y trampas; si las aturdís, caen y pierden eso.
 - ✅ **Dúos de rol + cuerpo** con nombre (pocos, no todas las combinaciones): escorpión maldiciente deja charcos

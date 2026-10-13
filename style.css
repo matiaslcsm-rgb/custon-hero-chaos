@@ -824,7 +824,7 @@ body.tower-layout #hero-bar, .modal-box, body.tower-layout #float-log, body.towe
 .waystone-btn { text-align: left; font-family: Georgia, serif; }
 .waystone-btn small { color: #8a5a00; }
 
-/* ===== Tower Chaos: interfaz en pixel art (PRUEBA, 2026-10-13; va con el suelo en pixel art, towerPixel.js) =====
+/* ===== Tower Chaos: interfaz en pixel art (2026-10-13, estilo principal de la Torre; va con towerPixel.js) =====
    Con body.pixel-ui (se prende junto con el pixel art en la Torre): paneles oscuros con borde de píxeles (contorno
    negro, borde claro adentro, luz arriba a la izquierda), fuente pixel (Pixelify Sans) y texto claro. Pisa el tema de
    pergamino (body.ink-theme) sin borrarlo: apagado, todo queda como estaba. */

@@ -1,4 +1,4 @@
-// Tower Chaos: suelo en pixel art (PRUEBA, 2026-10-13). Referencias del usuario: Noita y Risk of Rain 1.
+// Tower Chaos: suelo en pixel art (2026-10-13, estilo principal de la Torre). Referencias del usuario: Noita y Risk of Rain 1.
 //
 //   Sin filtros: el suelo se dibuja de verdad en pixel art, a 17 píxeles por casilla (cada píxel ocupa 2×2 unidades).
 //   - SUELO CONTINUO: en vez de baldosas repetidas, el suelo se pinta píxel por píxel con ruido (manchas grandes de
@@ -9,15 +9,17 @@
 //   - ENCIMA: árboles, pinos, árboles secos, rocas, cactus y basalto como sprites con luz de arriba a la izquierda y
 //     contorno oscuro (los árboles asoman sobre la casilla de arriba); paredes de piedra, acantilados, empalizada,
 //     fuente y rampas.
-//   Se prende en la pausa (🟫 Suelo en pixel art) o con ?pixel=1 en la dirección. Apagado, todo queda en tinta.
+//   Viene prendido; en la pausa (🟫 Pixel art) se puede volver al estilo tinta, o con ?pixel=0 en la dirección.
 
 const PXG = { per: 17, scale: 2, chunk: 16, maxChunks: 90 };
-let pixelEnabled = /[?&]pixel=1/.test(location.search);
-try { if (!/[?&]pixel=/.test(location.search)) pixelEnabled = localStorage.getItem('chc-pixel') === 'on'; } catch (e) { /* sin almacenamiento */ }
+// Estilo principal desde 2026-10-13: pixel art prendido salvo que el jugador elija la tinta en la pausa (o ?pixel=0).
+// Preferencia nueva (chc-style): la de la prueba (chc-pixel) se ignora, así arranca en pixel art aunque la hayas apagado.
+let pixelEnabled = !/[?&]pixel=0/.test(location.search);
+try { if (!/[?&]pixel=/.test(location.search)) pixelEnabled = localStorage.getItem('chc-style') !== 'ink'; } catch (e) { /* sin almacenamiento */ }
 function pixelOn() { return pixelEnabled && gameMode === 'tower'; }
 function setPixelStyle(on) {
     pixelEnabled = on;
-    try { localStorage.setItem('chc-pixel', on ? 'on' : 'off'); } catch (e) { /* no se guarda */ }
+    try { localStorage.setItem('chc-style', on ? 'pixel' : 'ink'); } catch (e) { /* no se guarda */ }
 }
 
 // --- RUIDO (siempre el mismo para la misma posición) ---

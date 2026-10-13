@@ -1,4 +1,4 @@
-// Tower Chaos: criaturas en pixel art (PRUEBA, 2026-10-13; va con el suelo en pixel art, towerPixel.js).
+// Tower Chaos: criaturas en pixel art (2026-10-13, estilo principal de la Torre; va con el suelo en pixel art, towerPixel.js).
 //
 //   Las criaturas se generan por piezas (towerBestiary.js): rol, CUERPO, tamaño, color y PARTES. Acá cada uno de los 16
 //   cuerpos es un dibujo en pixel art hecho en código, mirando a la derecha, con 4 cuadros de caminata y 2 de reposo.
