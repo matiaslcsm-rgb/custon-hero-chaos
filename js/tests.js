@@ -225,6 +225,17 @@ test('Fragmento del Destino: quita una, devuelve puntos, ofrece 4 sin la quitada
     checkEq(player.keyBindings[player.skills[1].id], 'e', 'la nueva toma la tecla liberada');
 });
 
+// Antes, el botón de la tienda le pasaba el clic a startWave como si fuera el plan del duelo: la ronda se cortaba sin
+// oleada y volvía al draft (2026-10-13)
+test('El botón "Comenzar oleada" de la tienda arranca la oleada', () => {
+    newGame('AXE');
+    gameState = 'PREP'; waveNumber = 1;
+    document.getElementById('start-wave-btn').click();
+    checkEq(gameState, 'WAVE', 'empieza la oleada');
+    check(arenas.length > 0 && arenas.some(a => a.heroes.includes(player)), 'hay una arena con el jugador');
+    check(player.arena && player.arena.creeps.length > 0, 'hay creeps');
+});
+
 test('Libro del Destino: elegís cuál cambiar y ofrece 6', () => {
     newGame('SNIPER');
     learn('SNIPER_POTENTE', 1); learn('SNIPER_CONGELANTE', 3);

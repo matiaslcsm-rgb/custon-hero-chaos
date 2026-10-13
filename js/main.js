@@ -4,7 +4,7 @@
 const GAME_VERSION = '2026-10-13 · portada nueva y todo el juego en pixel art';
 document.getElementById('game-version').textContent = `Versión ${GAME_VERSION}`;
 
-document.getElementById('start-wave-btn').onclick = startWave;
+document.getElementById('start-wave-btn').onclick = () => startWave(); // sin argumentos: si recibe el clic, lo toma como plan de duelo y la oleada no arranca (arreglado 2026-10-13)
 document.getElementById('restart-btn').onclick = resetGame;
 document.getElementById('bet-done-btn').onclick = endBetting;
 document.getElementById('pause-btn').onclick = togglePause;
