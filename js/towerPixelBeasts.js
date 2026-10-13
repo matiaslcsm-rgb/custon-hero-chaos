@@ -172,6 +172,81 @@ const PXB = {
     } }
 };
 
+// --- LOS GUARDIANES: el jefe de cada bioma, con su sprite propio (towerBosses.js) ---
+const PXG_BARK = ['#2a1d14', '#3e2b1d', '#553c28', '#6d4f35', '#86643f'], PXG_LEAF = ['#1d3a1c', '#285024', '#33662c', '#448038', '#5c9c46'];
+const PXG_OBSID = ['#141012', '#1f191c', '#2b2327', '#3a3035', '#4a3e44'], PXG_FIRE = ['#a8300c', '#e0561a', '#ff7a1a', '#ffb347', '#fff0a0'];
+Object.assign(PXB, {
+    // Raíz Madre (bosque): árbol viejo que camina sobre sus raíces, con cara y copa
+    'boss:forest': { w: 34, h: 40, head: [17, 4], back: [17, 12], draw(S, P, f) {
+        const b = f.bob, ph = f.ph, br = f.br;
+        pxbShadow(S, 17, 39, 13);
+        [-1, 1].forEach(i => { S.line(17 + i * 4, 32, 17 + i * 10 + ph * i, 39, PXG_BARK[1]); S.line(17 + i * 4, 33, 17 + i * 10 + ph * i, 39 - 1, PXG_BARK[1]); S.line(17 + i * 2, 33, 17 + i * 5 - ph * i, 39, PXG_BARK[2]); });
+        S.line(10, 20 + b, 4, 27 + b + br, PXG_BARK[2], 2); S.line(5, 27 + b + br, 3, 30 + b + br, PXG_BARK[1]); S.line(5, 26 + b + br, 2, 25 + b + br, PXG_BARK[1]);
+        S.ball(17, 25 + b, 8.5, 9.5, PXG_BARK);
+        for (const x of [13, 17, 21]) for (let y = 18; y < 33; y++) if ((x + y) % 4) S.set(x + (y % 7 === 0 ? 1 : 0), y + b, PXG_BARK[0]);
+        S.rect(14, 21 + b, 2, 1, '#c8ff70'); S.rect(19, 21 + b, 2, 1, '#c8ff70'); S.rect(15, 26 + b, 5, 2, '#120c08'); S.set(16, 27 + b, '#2a1d14');
+        S.line(24, 20 + b, 31, 24 + b - br, PXG_BARK[2], 2); S.line(31, 24 + b - br, 33, 22 + b - br, PXG_BARK[3]); S.line(31, 25 + b - br, 33, 27 + b - br, PXG_BARK[3]);
+        S.ball(9, 13 + b + br, 5.5, 4.5, PXG_LEAF); S.ball(25, 12 + b + br, 6, 4.8, PXG_LEAF); S.ball(17, 9 + b + br, 10, 7.5, PXG_LEAF);
+        [[11, 8], [20, 5], [24, 10], [14, 12], [8, 14]].forEach(([x, y], i) => S.set(x, y + b + br, i % 2 ? '#f0a0c0' : '#fff0a0'));
+        for (const x of [10, 14, 22, 26]) S.line(x, 15 + b + br, x, 18 + b + br + (x % 3), shade(P[2], -0.1));
+    } },
+    // Bruja del Fango (ciénaga): vieja encorvada de sombrero caído, con un bastón de calavera
+    'boss:swamp': { w: 30, h: 42, head: [19, 10], back: [12, 18], draw(S, P, f) {
+        const b = f.bob, br = f.br, sk = ['#3e4a22', '#56642e', '#6e7e3c', '#879a4c', '#a0b45e'], sw = f.walk >= 0 ? f.walk % 2 : br;
+        pxbShadow(S, 15, 41, 10);
+        for (let y = 18; y <= 40; y++) { const half = 5 + (y - 18) * 0.32; for (let x = Math.round(14 - half); x <= Math.round(14 + half); x++) if (y < 39 || (x + sw) % 3) S.set(x, y + (y < 38 ? b : 0), x < 11 ? P[1] : x > 17 ? P[0] : P[2]); }
+        S.ball(12, 20 + b, 6.5, 5.5, P);
+        for (const x of [9, 13, 18]) S.set(x, 41, P[0]);
+        S.line(15, 14 + b + br, 12, 23 + b + br, '#9a9a90'); S.line(16, 14 + b + br, 14, 22 + b + br, '#bdbdb2');
+        S.ball(19, 16 + b + br, 3.6, 3.2, sk); S.line(22, 16 + b + br, 25, 19 + b + br, sk[2]); S.set(25, 19 + b + br, sk[1]); S.set(21, 15 + b + br, '#ffe14a'); S.set(20, 19 + b + br, '#1a1412');
+        S.rect(11, 12 + b + br, 14, 1, P[0]); S.tri([13, 12 + b + br], [23, 12 + b + br], [15, 2 + b + br], P[1]); S.line(15, 3 + b + br, 11, 5 + b + br, P[1]); S.set(10, 6 + b + br, P[2]);
+        S.rect(14, 10 + b + br, 9, 1, P[3]);
+        S.line(19, 22 + b, 24, 26 + b, sk[1]); S.line(25, 40, 25, 10 + br, PXB_WOOD[1]);
+        S.ball(25, 8 + br, 2.4, 2.2, ['#a89e88', '#c8bea6', '#ddd4bc', PXB_BONE, '#fffaf0']); S.set(24, 8 + br, '#1a1412'); S.set(26, 8 + br, '#1a1412');
+        S.set(25, 4 + br, (f.idle || f.walk % 2) ? '#b8ff60' : '#80e040'); S.set(25, 5 + br, '#80e040');
+    } },
+    // Reina Escorpión (desierto): escorpión gigante con cresta de reina y aguijón que gotea
+    'boss:desert': { w: 46, h: 34, head: [34, 17], back: [22, 19], draw(S, P, f) {
+        const ph = f.ph, t = f.br + (f.walk >= 0 ? f.walk % 2 : 0);
+        pxbShadow(S, 23, 33, 18);
+        for (let i = 0; i < 4; i++) { const x = 12 + i * 5, o = i % 2 ? ph : -ph; S.line(x, 25, x - 3 + o, 33, P[0]); S.line(x + 1, 25, x + 4 - o, 33, P[1]); }
+        S.ball(14, 24, 7, 4.5, P); S.ball(22, 23, 6, 4.8, P); S.ball(28, 22, 5, 4.2, P);
+        S.ball(33, 22, 5, 4, P); for (let x = 31; x <= 36; x++) S.set(x, 17 - (x % 2), '#e8c860'); S.set(35, 20, '#ff5040'); S.set(37, 21, '#ff5040');
+        S.line(36, 24, 40, 22, P[1], 2); S.ball(42, 20, 3.5, 2.8, P); S.set(45, 18, P[3]); S.set(45, 22, P[2]);
+        S.line(35, 26, 39, 28, P[1], 2); S.ball(41.5, 28, 3, 2.4, P); S.set(44, 27, P[3]);
+        [[7, 19, 3.2], [5, 14, 3], [7, 9, 2.7], [11, 5.5, 2.5], [15.5, 4, 2.2]].forEach(([x, y, r], i) => S.ball(x, y - t * (i > 1 ? 1 : 0), r, r, P));
+        S.tri([17, 4 - t], [19, 7 - t], [22, 2 - t], '#e8d080'); S.set(21, 5 - t, (f.idle || f.walk % 2) ? '#a6f04a' : '#e8d080');
+    } },
+    // Wyrm de Escarcha (nieve): serpiente dragón de hielo con púas de cristal y alas chicas
+    'boss:snow': { w: 46, h: 34, head: [41, 6], back: [24, 21], draw(S, P, f) {
+        const k = f.walk >= 0 ? f.walk : f.idle * 2, ice = ['#9fdcf0', '#dff6ff'];
+        pxbShadow(S, 23, 33, 18);
+        S.tri([30, 20], [24, 9 - (k % 2) * 2], [35, 14], P[3]); S.line(30, 20, 24, 9 - (k % 2) * 2, P[1]);
+        for (let i = 0; i <= 8; i++) {
+            const x = 4 + i * 4, y = 27 + Math.round(Math.sin(i * 0.9 + k * 0.8) * 2), r = 1.8 + Math.min(i, 6) * 0.3;
+            S.ball(x, y, r + 0.6, r, P); S.set(x, y + Math.round(r) - 1, P[4]);
+            if (i > 1) { S.set(x, y - Math.round(r) - 1, ice[0]); S.set(x, y - Math.round(r) - 2, ice[1]); }
+        }
+        S.ball(37, 21, 3.6, 3.2, P); S.ball(39, 15, 3.4, 3.2, P);
+        S.ball(41, 9, 4.6, 3.4, P); S.rect(43, 10, 3, 2, P[2]); S.set(45, 12, ice[1]); S.set(43, 8, '#e0ffff');
+        S.line(38, 7, 34, 3, PXB_BONE); S.line(39, 6, 36, 1, ice[1]);
+        if (k % 2) { S.set(46 - 1, 9, '#ffffff'); S.set(45, 7, '#e8f8ff'); }
+    } },
+    // Señor de la Ceniza (volcán): demonio de obsidiana con grietas de lava, cuernos y corona de fuego
+    'boss:volcano': { w: 38, h: 44, head: [20, 6], back: [19, 18], draw(S, P, f) {
+        const b = f.bob, ph = f.ph, br = f.br, k = f.walk >= 0 ? f.walk : f.idle;
+        pxbShadow(S, 19, 43, 13);
+        S.rect(12 - ph, 32 + b, 5, 11 - b, PXG_OBSID[1]); S.rect(21 + ph, 32 + b, 5, 11 - b, PXG_OBSID[2]); S.line(14 - ph, 34 + b, 15 - ph, 40, PXG_FIRE[2]); S.line(23 + ph, 35 + b, 22 + ph, 41, PXG_FIRE[2]);
+        S.rect(7, 19 + b + br, 4, 11, PXG_OBSID[1]); S.ball(8.5, 31 + b + br, 2.4, 2.2, PXG_FIRE);
+        S.ball(19, 24 + b + br, 10, 9, PXG_OBSID);
+        [[13, 18, 17, 23, 15, 28], [24, 19, 21, 24, 23, 30]].forEach(([a, c, d, e, g, h]) => { S.line(a, c + b + br, d, e + b + br, PXG_FIRE[2]); S.line(d, e + b + br, g, h + b + br, PXG_FIRE[3]); });
+        S.ball(20, 11 + b + br, 5, 4.6, PXG_OBSID); S.set(21, 11 + b + br, '#ffd166'); S.set(24, 11 + b + br, '#ffd166'); S.rect(21, 14 + b + br, 4, 1, PXG_FIRE[1]);
+        S.line(16, 8 + b + br, 11, 2 + b + br, PXG_OBSID[3], 2); S.set(10, 0 + b + br, PXG_FIRE[3]); S.line(24, 8 + b + br, 29, 2 + b + br, PXG_OBSID[3], 2); S.set(30, 0 + b + br, PXG_FIRE[3]);
+        for (let x = 16; x <= 24; x++) S.set(x, 5 + b + br - ((x + k) % 3 === 0 ? 1 : 0), (x + k) % 2 ? PXG_FIRE[2] : PXG_FIRE[3]);
+        S.rect(28, 19 + b + br, 4, 9, PXG_OBSID[2]); S.ball(32, 30 + b + br, 2.8 + (k % 2) * 0.5, 2.8 + (k % 2) * 0.5, PXG_FIRE);
+    } }
+});
+
 // Partes enganchadas en la cabeza (h) y el lomo (k) de cada cuerpo
 function pxbWings(S, P, a, f) {
     const [x, y] = a.back, flap = (f.walk >= 0 ? f.walk : f.idle) % 2 ? 2 : 0, c = shade(P[0], -0.2), m = shade(P[2], -0.25);
@@ -308,11 +383,13 @@ function pixelPortrait(u) {
 // Qué cuerpo de pixel art usa una unidad (null: sigue en tinta)
 function pixelBodyFor(u) {
     if (pixelOn() && u.isHero && gameMode === 'tower') return 'hero';
-    if (!pixelOn() || u.isHero || u.isGuardian || u.isBoss || u.isCaveBoss || !u.type) return null;
+    if (!pixelOn() || u.isHero || !u.type) return null;
+    if (u.isGuardian) return u.type.biomeBoss && PXB['boss:' + u.type.biomeBoss] ? 'boss:' + u.type.biomeBoss : null; // el jefe del bioma
+    // Jefes de cueva y guardianes de cofres malditos: el cuerpo de su criatura, más grande (pxbScale)
     const plan = inkPlanFor(u);
     return PXB[plan] ? plan : null;
 }
-function pxbScale(u) { return PXG.scale * ((u.type && u.type.scale) || 1); }
+function pxbScale(u) { return PXG.scale * (u.isGuardian ? 1.35 : ((u.type && u.type.scale) || 1) * (u.isCaveBoss ? 1.6 : u.isBoss ? 1.3 : 1)); }
 // Altura de la figura por encima del centro de la casilla (para la barra de vida)
 function pixelHalfHeight(u) { const B = PXB[pixelBodyFor(u)]; return B.h * pxbScale(u) - TILE * 0.45 + 2; }
 

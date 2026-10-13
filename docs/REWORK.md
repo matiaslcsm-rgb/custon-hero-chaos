@@ -605,12 +605,19 @@ curandero, trasgo, ogro, gólem, espectro, fantasma, enjambre, escarabajo bomba)
 ojos, manchas), y el resto sale solo: el color de la criatura da 5 tonos con luz de arriba a la izquierda, y las partes se
 enganchan en la cabeza y el lomo de cada cuerpo. 4 cuadros de caminata y 2 de reposo; el tamaño (pequeño, grande) agranda
 el píxel. Para que se lean en cualquier suelo: contorno oscuro, sombra y el color principal nunca muy oscuro.
-Vista de todos: `index.html?demo=pixelbeasts`. Siguen en tinta: los guardianes y los jefes de bioma y de cueva.
+Vista de todos: `index.html?demo=pixelbeasts`. Ya no queda ninguna unidad en tinta con el pixel art prendido.
 
 **El héroe (2026-10-13):** también en pixel art, como muñeco que se viste igual que la figura de tinta: capa y esclavina
 del color de la armadura (o del arma), capucha del casco, ribete y botas de las botas, y el arma con su forma (puños,
 espada, hacha, lanza, arco, rifle, guadaña, dagas, espadas gemelas, bastón y matraz con el color de su elemento, rayo).
 4 cuadros de caminata y 2 de reposo; el retrato de la barra del héroe sale del mismo dibujo.
+
+**Los guardianes (2026-10-13):** cada jefe de bioma con su sprite propio y grande (×1,35), con caminata y reposo:
+Raíz Madre (árbol viejo que camina sobre sus raíces, ojos verdes y copa con flores), Bruja del Fango (encorvada, sombrero
+caído, bastón de calavera con fuego fatuo), Reina Escorpión (cresta dorada y aguijón que gotea), Wyrm de Escarcha
+(serpiente de hielo con púas de cristal, alas chicas y aliento) y Señor de la Ceniza (obsidiana con grietas de lava,
+cuernos, corona de fuego y bolas de fuego en las manos). Los jefes de cueva y los guardianes de cofres malditos usan el
+cuerpo de su criatura, más grande (×1,6).
 
 ### Ideas para las criaturas (propuesta externa revisada, 2026-10-13; para después, de a una)
 - ✅ **Alas que vuelan:** ignoran fango, lava y trampas; si las aturdís, caen y pierden eso.
