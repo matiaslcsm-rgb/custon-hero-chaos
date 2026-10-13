@@ -151,6 +151,7 @@ function towerSmithTick(level, hero) {
     else if (!near) s.greeted = false;
 }
 function drawTowerSmith(level) {
+    if (pixelOn()) { pxDrawSmith(level); return; } // en pixel art (towerPixelProps.js)
     const s = level.town && level.town.smith;
     if (!s || !level.explored[s.y][s.x]) return;
     const k = Math.floor(((fxClock * 0.8 + 0.4) % 1) * INK_IDLE_FRAMES);

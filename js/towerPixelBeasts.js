@@ -47,6 +47,7 @@ function pxbHumanoid(S, P, f, o) {
     else if (o.weapon === 'bow') { for (let k = -5; k <= 5; k++) S.set(hx + 2 + Math.round(1.6 * Math.cos(k / 5 * 1.3)), hyy - 3 + k, PXB_WOOD[2]); S.line(hx + 2, hyy - 8, hx + 2, hyy + 2, '#d8d0c0'); }
     else if (o.weapon === 'staff') { S.line(hx + 1, 21, hx + 1, hyy - 11, PXB_WOOD[1]); S.ball(hx + 1, hyy - 12, 1.7, 1.7, o.orb); S.set(hx + 1, hyy - 13, '#ffffff'); }
     else if (o.weapon === 'dagger') { S.line(hx + 1, hyy, hx + 3, hyy - 3, PXB_STEEL[3]); }
+    else if (o.weapon === 'hammer') { S.line(hx + 1, hyy + 1, hx + 1, hyy - 6, PXB_WOOD[1]); S.rect(hx - 1, hyy - 9, 5, 3, PXB_STEEL[1]); S.rect(hx - 1, hyy - 9, 5, 1, PXB_STEEL[2]); }
     else if (o.weapon === 'lantern') { S.line(hx + 1, hyy, hx + 1, hyy + 2, '#2a2420'); S.rect(hx, hyy + 3, 3, 3, '#3a3028'); S.set(hx + 1, hyy + 4, f.idle ? '#ffd166' : '#ffe9a0'); }
 }
 

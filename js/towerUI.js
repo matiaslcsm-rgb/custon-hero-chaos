@@ -173,6 +173,7 @@ function openForge(item) {
 
 // Piezas y cofres en el piso del nivel (los dibuja renderTower dentro de la vista de la cámara).
 function drawTowerLoot(level) {
+    if (pixelOn()) { pxDrawLoot(level); return; } // en pixel art (towerPixelProps.js)
     (level.chests || []).forEach(ch => {
         if (!canSee(level, ch.x, ch.y) && !level.explored[ch.y][ch.x]) return;
         const px = ch.x * TILE, py = ch.y * TILE;

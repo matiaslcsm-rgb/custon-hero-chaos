@@ -619,6 +619,13 @@ caído, bastón de calavera con fuego fatuo), Reina Escorpión (cresta dorada y 
 cuernos, corona de fuego y bolas de fuego en las manos). Los jefes de cueva y los guardianes de cofres malditos usan el
 cuerpo de su criatura, más grande (×1,6).
 
+**Los objetos del mundo (2026-10-13, `js/towerPixelProps.js`):** cofres (y el maldito, violeta), botín con un haz de luz
+del color de su calidad, antorchas y fogatas con llama animada, mercader, mercader ambulante (con la mochila enorme),
+herrero con martillo y yunque que larga chispas, santuarios (obelisco con la gema de su color; apagada si ya se usó),
+las tres armas clavadas del despertar, la piedra de regreso con runas que brillan, los menhires del círculo, la escalera
+(con candado hasta vencer al guardián), boca de cueva, pozo y soga, tus restos (huesos; dorados los últimos), la carreta
+y el prisionero en su jaula. Los carteles van en letra clara con borde oscuro, para leerse sobre el suelo oscuro.
+
 ### Ideas para las criaturas (propuesta externa revisada, 2026-10-13; para después, de a una)
 - ✅ **Alas que vuelan:** ignoran fango, lava y trampas; si las aturdís, caen y pierden eso.
 - ✅ **Dúos de rol + cuerpo** con nombre (pocos, no todas las combinaciones): escorpión maldiciente deja charcos

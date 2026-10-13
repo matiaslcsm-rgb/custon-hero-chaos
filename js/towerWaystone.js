@@ -48,6 +48,7 @@ function toggleWaystone(open = !waystoneOpen) {
 
 // --- DIBUJO: piedra rúnica que brilla si hay adónde ir ---
 function drawWaystone(level) {
+    if (pixelOn()) { pxDrawWaystone(level); return; } // en pixel art (towerPixelProps.js)
     const w = waystoneSpot(level);
     if (!w || !level.explored[w.y] || !level.explored[w.y][w.x]) return;
     const cx = w.x * TILE + TILE / 2, cy = w.y * TILE + TILE / 2, on = waystoneFloors().length > 0, pulse = 0.5 + 0.5 * Math.sin(fxClock * 2.5);

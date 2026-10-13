@@ -515,7 +515,8 @@ function drawTowerTiles(level) {
         }
     }
     // Círculo de piedra en la entrada del nivel 1
-    if (level.floor === 1 && !level.isCave && level.explored[level.start.y][level.start.x]) {
+    if (px) pxDrawMenhirs(level); // en pixel art (towerPixelProps.js)
+    else if (level.floor === 1 && !level.isCave && level.explored[level.start.y][level.start.x]) {
         const cx = level.start.x * TILE + TILE / 2, cy = level.start.y * TILE + TILE / 2;
         for (let i = 0; i < 8; i++) {
             const a = i / 8 * Math.PI * 2, sx = cx + Math.cos(a) * TILE * 1.6, sy = cy + Math.sin(a) * TILE * 1.6;
@@ -545,6 +546,7 @@ function renderTower(level, dt) {
     towerMusicTick(level, dt); // música por capas (towerMusic.js)
     updateArenaFx(level, dt);
     updateCamera(level, player, dt);
+    const px = pixelOn(); // objetos en pixel art (towerPixelProps.js)
     ctx.save();
     if (shakeAmount) ctx.translate((Math.random() - 0.5) * shakeAmount * 2, (Math.random() - 0.5) * shakeAmount * 2);
     ctx.scale(viewScale(), viewScale()); // zoom (towerView.js)
@@ -565,14 +567,15 @@ function renderTower(level, dt) {
     // Escalera (cerrada hasta vencer al guardián)
     drawCavePortals(level);
     const st = level.stairs || { x: 0, y: 0 }, sx = st.x * TILE, sy = st.y * TILE;
-    if (level.stairs && level.explored[st.y][st.x]) {
+    if (px) { pxDrawStairs(level); pxDrawCorpses(level); } // en pixel art (towerPixelProps.js)
+    else if (level.stairs && level.explored[st.y][st.x]) {
         ctx.fillStyle = level.stairsOpen ? '#2dc653' : '#6c757d';
         for (let i = 0; i < 4; i++) ctx.fillRect(sx + 4 + i * 3, sy + TILE - 8 - i * 7, TILE - 8 - i * 6, 5);
         if (!level.stairsOpen) { ctx.font = '14px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('🔒', sx + TILE / 2, sy + TILE / 2); }
     }
     // Cadáveres
     ctx.font = '16px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    level.corpses.forEach(c => {
+    if (!px) level.corpses.forEach(c => {
         if (!level.explored[c.y][c.x]) return;
         const active = c === towerRun.corpse, cx = c.x * TILE + TILE / 2, cy = c.y * TILE + TILE / 2;
         if (active) { ctx.save(); ctx.globalAlpha = 0.4 + 0.25 * Math.sin(fxClock * 4); ctx.fillStyle = '#c9a227'; ctx.beginPath(); ctx.arc(cx, cy, 14, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }

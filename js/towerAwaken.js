@@ -70,6 +70,7 @@ function towerAwakenTick(level, from) {
 
 // --- DIBUJO ---
 function drawStarterWeapons(level) {
+    if (pixelOn()) { pxDrawStarterWeapons(level); return; } // en pixel art (towerPixelProps.js)
     if (!level.starterWeapons || !towerRun || !towerRun.starterPending) return;
     const near = starterWeaponNear();
     level.starterWeapons.forEach((w, i) => {

@@ -517,6 +517,7 @@ function towerMiniColor(level, x, y) {
 
 // El mercader del pueblo (figura en tinta que respira) con su cartel
 function drawTowerMerchant(level) {
+    if (pixelOn()) { pxDrawMerchant(level); return; } // en pixel art (towerPixelProps.js)
     const m = level.town && level.town.merchant;
     if (!m || !level.explored[m.y][m.x]) return;
     const k = Math.floor(((fxClock * 0.8) % 1) * INK_IDLE_FRAMES);
@@ -607,6 +608,7 @@ function useShrines(level, hero) {
     });
 }
 function drawTowerShrines(level) {
+    if (pixelOn()) { pxDrawShrines(level); return; } // en pixel art (towerPixelProps.js)
     (level.shrines || []).forEach(s => {
         if (!level.explored[s.y][s.x]) return;
         const S = SHRINES[s.kind], cx = s.x * TILE + TILE / 2, by = s.y * TILE + TILE - 3;
@@ -911,6 +913,7 @@ function towerPortals(level, hero) {
 }
 // Dibujo: bocas de cueva en el campo; en la cueva, la salida (soga) y la bajada (pozo)
 function drawCavePortals(level) {
+    if (pixelOn()) { pxDrawPortals(level); return; } // en pixel art (towerPixelProps.js)
     const hole = (x, y, deep) => {
         if (!level.explored[y][x]) return;
         const cx = x * TILE + TILE / 2, cy = y * TILE + TILE / 2;
@@ -1105,6 +1108,7 @@ function nearbyVendor(level, hero) {
     return e ? e.vendor : null;
 }
 function drawTowerEvents(level) {
+    if (pixelOn()) { pxDrawEvents(level); return; } // en pixel art (towerPixelProps.js)
     (level.events || []).forEach(e => {
         if (e.kind === 'ambush' || !level.explored[e.y][e.x]) return;
         const cx = e.x * TILE + TILE / 2, cy = e.y * TILE + TILE / 2;

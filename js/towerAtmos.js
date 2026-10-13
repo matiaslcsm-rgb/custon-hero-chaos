@@ -70,6 +70,7 @@ function drawFireGlow(level, dark) {
 
 // --- LOS OBJETOS (en el mundo, de día y de noche) ---
 function drawTowerLights(level) {
+    if (pixelOn()) { pxDrawLights(level); return; } // en pixel art (towerPixelProps.js)
     towerLights(level).forEach(o => {
         if (o.noDraw || !canSeeOrExplored(level, o)) return;
         const cx = o.x * TILE + TILE / 2, cy = o.y * TILE + TILE / 2, f = flicker(o, 2);
