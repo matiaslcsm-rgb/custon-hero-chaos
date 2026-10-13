@@ -33,6 +33,7 @@ function renderPauseMenu() {
         opt('weather', '🌧 Clima (lluvia, nieve, ceniza…)', weatherOn) +
 
         (gameMode === 'tower' ? `<button class="pm-toggle on" data-opt="loot">🎒 Levantar botín<span>${LOOT_FILTERS[lootFilter].name.toUpperCase()}</span></button>` : '') +
+        (gameMode === 'tower' ? opt('clickattack', '🖱️ Ataque con clic (si no, automático)', clickAttack) : '') +
         opt('autocast', '✨ Habilidades automáticas (H)', autoCast) +
         opt('autopilot', '🤖 Piloto automático (P)', autopilot) +
         (gameMode === 'tower' ? '' : opt('bigmap', '⤢ Mapa grande (M)', mapScale > 1)); // en la Torre el mapa ya ocupa la ventana
@@ -52,7 +53,7 @@ function renderPauseMenu() {
     });
     document.querySelectorAll('#pause-options .pm-toggle').forEach(btn => {
         btn.onclick = () => {
-            ({ sound: () => setSound(!soundOn), music: () => setMusic(!musicOn), colorblind: () => setA11y('colorblind', !A11Y.colorblind), weather: () => setWeather(!weatherOn), pixel: () => setPixelStyle(!pixelEnabled), loot: cycleLootFilter, sprites: () => setSprites(!spritesOn), autocast: () => setAutoCast(!autoCast),
+            ({ sound: () => setSound(!soundOn), music: () => setMusic(!musicOn), colorblind: () => setA11y('colorblind', !A11Y.colorblind), weather: () => setWeather(!weatherOn), pixel: () => setPixelStyle(!pixelEnabled), loot: cycleLootFilter, sprites: () => setSprites(!spritesOn), autocast: () => setAutoCast(!autoCast), clickattack: () => setClickAttack(!clickAttack),
                autopilot: () => setAutopilot(!autopilot), bigmap: toggleBigMap })[btn.dataset.opt]();
             renderPauseMenu();
         };

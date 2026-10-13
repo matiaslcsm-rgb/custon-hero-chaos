@@ -708,6 +708,14 @@ Pedido del usuario (2026-10-07): en cada paso, pensar la interfaz y la calidad d
 el mismo paso; lo grande queda acá, ordenado por impacto.
 
 **Hecho:**
+- ✅ **Ataque básico con el mouse** (2026-10-13, pedido: "quiero poder dar los golpes básicos con los clicks del mouse",
+  `js/towerClickAttack.js`): en la Torre el clic izquierdo es el golpe hacia el cursor y mantenerlo sigue pegando al ritmo
+  de la velocidad de ataque (como Hades o Diablo); ya no se pega solo. Cuerpo a cuerpo: al enemigo a tu alcance más
+  cercano al cursor dentro de un cono de ~57° hacia el cursor (el de al lado, ~77°); si no hay nadie, el golpe va al aire.
+  A distancia: el disparo sale en línea recta hacia el cursor y se frena en el primero (si apuntás mal, falla). Un clic
+  antes de tiempo queda guardado 0,3 s. Clic en un enemigo lejos: caminás hasta él. En la pausa (🖱️) se vuelve al ataque
+  automático; el piloto y Custom Hero Chaos no cambian. **Pendiente:** medir con el piloto cuánto pierde un jugador que
+  apunta mal con el arco (el piloto sigue con el automático).
 - ✅ Volumen general, música y efectos, y temblor de pantalla (0-150%), con deslizadores en la pausa que se guardan.
 - ✅ La forja ya no corta una pelea: si una pieza sube de nivel peleando aparece un aviso arriba a la izquierda, y la
   ventana se abre sola cuando nadie te persigue.

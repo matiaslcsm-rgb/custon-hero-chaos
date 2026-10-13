@@ -49,6 +49,9 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 | Duelo simultáneo con las oleadas de los demás; enfriamientos en el descanso; contador central con pitidos; cartel de apuestas; nombres de jugadores; sonidos propios (`sounds/`) | ✅ |
 
 ## Pendientes y temas abiertos
+- **Tower Chaos, ataque con clic (2026-10-13):** el golpe básico sale con el clic izquierdo hacia el cursor (mantener
+  repite); se vuelve al automático en la pausa. Ver REWORK.md, "Interfaz y calidad de vida". Falta medir cuánto pierde
+  quien apunta mal con el arco.
 - **En curso:** 3 héroes de Agilidad del usuario, de a uno y midiendo cada uno: Danzante ✅ → **Chakravin `Y`** (proyectiles
   de habilidad que vuelven + creep Guardián de Hierro) → **Trampero `P`** (zonas en el piso + creep Saltador).
 - **Proyectiles de habilidad:** convertidos los nukes de un solo objetivo de Zeus, Arcanista, Bruja del Hielo y

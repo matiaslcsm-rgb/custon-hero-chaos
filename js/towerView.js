@@ -90,7 +90,7 @@ function renderTowerBadges() {
 function towerControlsText() {
     const K = a => keyName(KEYMAP[a]);
     return `Mover: ${K('up')} ${K('left')} ${K('down')} ${K('right')} (o clic derecho) · Esquive: ${K('dash')} · Habilidades: ${K('skill1')} ${K('skill2')} ${K('skill3')} (salen hacia el cursor) · ` +
-        `Objetivo: clic izquierdo · Zoom: rueda o + − · Equipo: ${K('inventory')} · Stats: ${K('stats')} · Códice: ${K('codex')} · Bestiario: ${K('bestiary')} · ` +
+        `${clickAttack ? 'Atacar: clic izquierdo (mantenelo para seguir)' : 'Objetivo: clic izquierdo'} · Zoom: rueda o + − · Equipo: ${K('inventory')} · Stats: ${K('stats')} · Códice: ${K('codex')} · Bestiario: ${K('bestiary')} · ` +
         `Diario del piso: ${K('log')} · Cuaderno: ${K('notebook')} · Agarrar: ${K('interact')} · Tienda o Herrero: ${K('shop')} · Mapa del piso: ${K('map')} · Automáticas: ${K('autocast')} · Piloto: ${K('autopilot')}`;
 }
 function towerPauseHtml() {

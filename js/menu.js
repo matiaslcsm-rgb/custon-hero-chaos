@@ -211,7 +211,7 @@ const TOWER_TUTORIAL_PAGES = [
             ${tutKey([tutK('up'), tutK('left'), tutK('down'), tutK('right')], 'Moverte (o clic derecho en el mapa). Podés atacar caminando.')}
             ${tutKey([tutK('dash')], 'Esquive: un salto corto en el que no te pegan. Es tu mejor defensa.')}
             ${tutKey([tutK('skill1'), tutK('skill2'), tutK('skill3')], 'Habilidades del arma, los guantes y la armadura. Salen hacia el cursor.')}
-            ${tutKey(['Clic'], 'Clic izquierdo en un enemigo: lo marcás como objetivo.')}
+            ${tutKey(['Clic'], 'Clic izquierdo: golpe básico hacia el cursor. Mantenelo para seguir pegando; si el enemigo está lejos, caminás hasta él. (En la pausa se puede volver al ataque automático.)')}
             ${tutKey([tutK('interact')], 'Agarrar armas, abrir cofres, hablar.')}
             ${tutKey(['Rueda'], 'Zoom (también + y −).')}
             ${tutKey([tutK('autocast'), tutK('autopilot')], 'Habilidades automáticas · piloto automático.')}

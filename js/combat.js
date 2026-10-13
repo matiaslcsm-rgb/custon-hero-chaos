@@ -196,6 +196,7 @@ function resolveBasicHit(attacker, target, dmg, isCrit) {
     const { dealt } = dealDamage(attacker, target, dmg, 'physical', { isAttack: true, isCrit });
     applyLifesteal(attacker, dealt, target);
     emit(attacker, 'onHit', { target, dealt, isCrit });
+    return dealt;
 }
 
 // --- PROYECTILES (ataques básicos a distancia con velocidad de proyectil) ---
@@ -220,7 +221,7 @@ function fireSkillProjectile(attacker, opts) {
         dx: dx / dist, dy: dy / dist, dist, traveled: 0, speed: opts.speed, radius: opts.radius,
         dmg: opts.dmg, dmgType: opts.dmgType || 'magical', vfx: opts.vfx, skillName: opts.skillName,
         onHit: opts.onHit, onArrive: opts.onArrive, hitSet: new Set(), fxEl: fxCastingSkill ? skillVfx(fxCastingSkill).el : null,
-        stopOnHit: opts.stopOnHit, solid: opts.solid, arrow: opts.arrow, isCrit: opts.isCrit, quietMiss: opts.quietMiss // (towerFeel.js)
+        stopOnHit: opts.stopOnHit, solid: opts.solid, arrow: opts.arrow, isCrit: opts.isCrit, quietMiss: opts.quietMiss, basic: opts.basic // (towerFeel.js, towerClickAttack.js)
     });
 }
 
@@ -240,7 +241,7 @@ function updateProjectiles(arena, dt) {
                 p.hitSet.add(c);
                 projectileElement = p.fxEl; // el proyectil de habilidad marca con su elemento
                 let dealt;
-                try { dealt = dealDamage(p.attacker, c, p.dmg, p.dmgType, { isCrit: p.isCrit }).dealt; } finally { projectileElement = null; }
+                try { dealt = p.basic ? resolveBasicHit(p.attacker, c, p.dmg, p.isCrit) : dealDamage(p.attacker, c, p.dmg, p.dmgType, { isCrit: p.isCrit }).dealt; } finally { projectileElement = null; } // basic: el disparo con clic (towerClickAttack.js)
                 if (p.onHit) p.onHit(c, dealt);
                 if (p.stopOnHit) stopped = true; // no atraviesa: se queda en el primero
             });

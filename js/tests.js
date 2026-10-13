@@ -1483,6 +1483,41 @@ test('Torre: Combo de Tajos (espada) — arco a todos, remate ×2 que empuja, re
     player.aimPoint = null;
     checkEq(sk.manaCost, undefined); checkEq(val(sk, player, 'manaCost'), 0, 'sin maná');
 });
+test('Torre: ataque básico con clic — cono hacia el cursor, al aire si no hay nadie, mantener repite, disparo apuntado que falla', () => {
+    const saved = clickAttack; clickAttack = true;
+    try {
+        const level = newTower('AXE', { weapon: 'ADVENTURER_SWORD' });
+        level.creeps.forEach(c => { c.hp = 0; });
+        player.critChance = -1000;
+        const front = towerDummy(level, 1, 0), back = towerDummy(level, -1, 0);
+        const period = 1 / effAtkSpeed(player), step = dt => updateHero(player, level, dt);
+        Object.assign(mouse, { x: player.x + 3, y: player.y, over: true });
+        step(period); checkEq(front.hp, 9999, 'sin clic no pega solo');
+        attackButton.queuedAt = gameClock; step(0.01);
+        const oneHit = 9999 - front.hp; check(oneHit > 0, 'el clic pega al de adelante'); checkEq(back.hp, 9999, 'y no al de atrás');
+        attackButton.queuedAt = gameClock; step(0.01); const h1 = front.hp;
+        step(period * 0.5); checkEq(front.hp, h1, 'el clic de antes de tiempo espera…');
+        step(period * 0.6); check(front.hp < h1, '…y sale apenas está listo (no se pierde)');
+        attackButton.held = true; const h2 = front.hp; for (let i = 0; i < 4; i++) step(period * 1.01); attackButton.held = false;
+        check(h2 - front.hp >= oneHit * 3.5, 'mantener el clic sigue pegando (4 golpes en 4 tiempos)');
+        Object.assign(mouse, { x: player.x, y: player.y - 3 }); front.hp = back.hp = 9999;
+        attackButton.queuedAt = gameClock; step(period);
+        checkEq(front.hp + back.hp, 19998, 'apuntando a otro lado: al aire');
+        // A distancia: el disparo sale hacia el cursor; si apuntás mal, no le pega
+        const lv2 = newTower('AXE', { weapon: 'ADVENTURER_BOW' }); lv2.creeps.forEach(c => { c.hp = 0; });
+        for (let x = 1; x <= 6; x++) lv2.walls[player.y][player.x + x] = 0;
+        player.critChance = -1000;
+        const tgt = towerDummy(lv2, 3, 0), p2 = 1 / effAtkSpeed(player);
+        Object.assign(mouse, { x: player.x, y: player.y - 4, over: true });
+        attackButton.queuedAt = gameClock; updateHero(player, lv2, p2); for (let i = 0; i < 40; i++) updateProjectiles(lv2, 0.05);
+        checkEq(tgt.hp, 9999, 'disparo apuntado mal: falla');
+        Object.assign(mouse, { x: player.x + 4, y: player.y });
+        attackButton.queuedAt = gameClock; updateHero(player, lv2, p2); for (let i = 0; i < 40; i++) updateProjectiles(lv2, 0.05);
+        check(tgt.hp < 9999, 'apuntado bien: pega');
+        clickAttack = false; tgt.hp = 9999; player.attackTimer = 0; updateHero(player, lv2, p2 * 1.01); for (let i = 0; i < 40; i++) updateProjectiles(lv2, 0.05);
+        check(tgt.hp < 9999, 'con el clic apagado vuelve el ataque automático');
+    } finally { clickAttack = saved; attackButton.held = false; attackButton.queuedAt = -99; mouse.over = false; }
+});
 test('Torre: Tiro Tensado (arco) — al toque no atraviesa, tensado del todo atraviesa, perfecto suma, tensar frena', () => {
     const level = newTower('AXE', { weapon: 'ADVENTURER_BOW' });
     level.creeps.forEach(c => { c.hp = 0; });

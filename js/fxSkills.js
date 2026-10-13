@@ -168,12 +168,12 @@ function fxHeroAttack(hero, target, isCrit) {
     const arena = fxArena(hero);
     if (!arena) return;
     const w = weaponFx(hero), el = ELEMENTS[w.el], color = isCrit ? '#ffd166' : el.c2;
-    const angle = Math.atan2(target.y - hero.y, target.x - hero.x);
+    const angle = Math.atan2(target.y - hero.y, target.x - hero.x), air = !target.isAlive; // air: golpe al aire (ataque con clic)
     sfx('swing');
     if (w.kind === 'blade') { // espada: un tajo corto en arco desde el héroe (el de la Q es más grande, towerFeel.js)
         const d = Math.hypot(target.x - hero.x, target.y - hero.y) || 1;
         pushFxAt(arena, { kind: 'sweep', unit: hero, x: hero.x, y: hero.y, angle, reach: 1.5, half: 0.8, flip: (hero.fxSlashFlip = !hero.fxSlashFlip), color: isCrit ? '#ffd166' : '#f3e7c9', color2: '#8a7a5c', life: 0.18 });
-        fxParticles(arena, target.x, target.y, 'steel', 3, 2.5, { life: 0.25 }); fxHitStop(isCrit ? 0.05 : 0.02);
+        if (!air) { fxParticles(arena, target.x, target.y, 'steel', 3, 2.5, { life: 0.25 }); fxHitStop(isCrit ? 0.05 : 0.02); }
         return;
     }
     if (w.kind === 'heavy') { pushFxAt(arena, { kind: 'slash', x: target.x, y: target.y, angle, flip: true, color, width: isCrit ? 8 : 6, life: 0.28, scale: 1.3 }); fxParticles(arena, target.x, target.y, w.el, 5, 3); fxShake(isCrit ? 3 : 1); }

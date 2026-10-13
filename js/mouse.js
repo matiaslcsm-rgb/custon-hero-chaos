@@ -4,6 +4,7 @@
 //   modo apuntar: se ve el alcance y se marca el enemigo más cercano al cursor. Clic izquierdo la lanza sobre ese enemigo;
 //   clic derecho o Esc cancela. Las de área alrededor tuyo y las mejoras se lanzan al apretar la tecla, como antes.
 //   Clic derecho en el mapa (sin estar apuntando): tu héroe camina hasta ahí. Si tocás W A S D, manda el teclado.
+//   En la Torre, el clic izquierdo es el ataque básico hacia el cursor (towerClickAttack.js; se apaga en la pausa).
 //
 //   Para apuntar no hace falta tocar cada habilidad: mientras se lanza con el mouse, el héroe tiene aimPoint y
 //   nearestEnemy() (combat.js) elige, entre los enemigos a su alcance, el más cercano a ese punto.
@@ -86,6 +87,7 @@ canvas.addEventListener('mousedown', e => {
     }
     if (e.button === 0 && canControlPlayer()) { // clic izquierdo: marcar un enemigo como objetivo (o desmarcar)
         if (gameMode === 'tower' && towerClickWeapon(p)) return; // o agarrar un arma del círculo (towerAwaken.js)
+        if (clickAttackOn(player)) { clickAttackPress(p); return; } // Torre: el clic es el golpe (towerClickAttack.js)
         const enemy = enemyUnderCursor(p.x, p.y);
         player.focus = enemy;
         player.focusChase = !!enemy;
