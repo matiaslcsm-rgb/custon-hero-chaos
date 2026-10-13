@@ -5,7 +5,7 @@
 //   El color sale de la criatura (5 tonos, con luz de arriba a la izquierda) y las partes (cuernos, púas, alas, ojos,
 //   manchas) se enganchan en la cabeza y el lomo de cada cuerpo; así cualquier combinación sale sola.
 //   Para que se lean sobre cualquier suelo: contorno oscuro, sombra en el piso y el color principal nunca muy oscuro.
-//   Los jefes, los guardianes y el héroe siguen en tinta por ahora. Vista de todos: index.html?demo=pixelbeasts
+//   Vista de todos: index.html?demo=pixelbeasts
 
 const PXB_PAD = 4; // margen alrededor del cuerpo (cuernos, alas)
 const PXB_BONE = '#e6dcc4', PXB_STEEL = ['#4a4f57', '#6b727c', '#9aa2ab', '#d0d6dc'], PXB_WOOD = ['#3d2a1c', '#5a3f29', '#7a5a3c'];
@@ -295,6 +295,13 @@ function pxbFrame(body, color, parts, kind, k) {
 // Capa del color de la armadura (o del arma), capucha del casco, ribete y botas de las botas, y el arma con su forma.
 const PXH_WEAPON = { ADVENTURER_BOW: 'bow', SNIPER: 'rifle', NECROMANCER: 'scythe', DANCER: 'twin', ASSASSIN: 'daggers' };
 function pxHeroLook(u) {
+    // Caos de Héroes (2026-10-13): no hay equipo dinámico, así que la pinta sale de la identidad fija de cada
+    // héroe (la misma paleta de sprites.js) en vez del equipo puesto; el arma usa la misma tabla que la Torre.
+    if (!u.gear) {
+        const pal = (HERO_SPRITES[u.key] || [])[1] || {};
+        return { cape: pal.b || '#a33a3a', hood: pal.h || pal.b || '#a33a3a', trim: pal.a || '#c9a227', glow: pal.w || '#9ad1ff',
+            weapon: PXH_WEAPON[u.key] || (HERO_WEAPONS[u.key] && HERO_WEAPONS[u.key].shape) || 'fists' };
+    }
     const gear = u.gear || {}, col = item => item && item.heroKey && HERO_TEMPLATES[item.heroKey] ? shade(ATTR_INFO[HERO_TEMPLATES[item.heroKey].primaryAttr].color, -0.15) : null;
     const w = gear.weapon, el = typeof weaponFx === 'function' ? ELEMENTS[weaponFx(u).el] : null;
     const cape = col(gear.armor) || col(w) || '#a33a3a';
@@ -381,13 +388,15 @@ function pixelPortrait(u) {
     return (pxhPortraitCache[key] = c.toDataURL());
 }
 
-// Qué cuerpo de pixel art usa una unidad (null: sigue en tinta)
-// Custom Hero Chaos (2026-10-13): con el pixel art prendido, sus creeps y jefes también usan estos cuerpos (los héroes
-// conservan sus sprites de 12×12, que ya son pixel art y los identifican). Jefes de ronda → el cuerpo que más se parece.
+// Qué cuerpo de pixel art usa una unidad (null: sigue en el sprite estático)
+// Custom Hero Chaos (2026-10-13): con el pixel art prendido, sus creeps y jefes también usan estos cuerpos. Jefes de
+// ronda → el cuerpo que más se parece. Los héroes (2026-10-14) usan el mismo muñeco animado que la Torre, vestido con
+// la pinta fija de cada héroe en vez del equipo (pxHeroLook).
 const PXB_ROUND_BOSS = { GOLEM: 'golem', HIVE_QUEEN: 'boss:desert', FROST_DRAGON: 'boss:snow', ABYSS_LORD: 'boss:volcano', HYDRA: 'lizard', LICH: 'boss:swamp', BLOOD_TITAN: 'brute', PHANTOM: 'phantom' };
 function pixelBodyFor(u) {
-    if (typeof pixelEnabled === 'undefined' || !pixelEnabled || !u || (u.isHero && gameMode !== 'tower')) return null;
+    if (typeof pixelEnabled === 'undefined' || !pixelEnabled || !u) return null;
     if (gameMode !== 'tower') {
+        if (u.isHero) return 'hero';
         if (!u.type) return null;
         if (u.isRoundBoss || u.isBoss) { const b = PXB_ROUND_BOSS[u.type.key]; if (b) return b; }
         const plan = inkPlanFor(u);

@@ -74,6 +74,15 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **Rework gráfico en pixel art (2026-10-13, estilo principal de la Torre):** suelo, criaturas, héroe, guardianes, objetos,
   efectos de combate, niebla, clima e interfaz (`js/towerPixel*.js`). Se puede volver a la tinta en la pausa. Detalle y
   pendientes en REWORK.md §18-19 (minimapa con colores de pergamino, ideas para las criaturas).
+- **El mismo muñeco animado para Caos de Héroes (2026-10-14):** los 11 héroes pasan del sprite estático de 12×12
+  (sin ciclo de caminata, solo una pose al atacar) al muñeco en pixel art que ya tenía la Torre — 4 cuadros de
+  caminata y 2 de reposo. Como acá no hay equipo dinámico, `pxHeroLook()` (`js/towerPixelBeasts.js`) arma la
+  pinta (capa, capucha, ribete, arma) desde la identidad fija de cada héroe en vez del equipo puesto: color de
+  `HERO_SPRITES` (sprites.js) y forma de arma de `HERO_WEAPONS`/`PXH_WEAPON` (las mismas tablas de la Torre). El
+  retrato de la barra del héroe usa el mismo muñeco (antes, el sprite estático). Los íconos chicos (ranking,
+  elección de héroe, códice) siguen con el sprite estático de 12×12 a propósito, no hacía falta animarlos ahí;
+  ese sprite sigue existiendo para esos íconos y como respaldo técnico (tecla G / 🎨 apaga los dibujos del todo
+  y vuelve a las letras ASCII, no al sprite viejo).
 - **Mundo con profundidad (2026-10-06):** pisos de 220×150 con mesetas, día y noche, cuevas con niveles de profundidad y
   bestiario generado por run (ROGUELIKE.md §4 quater).
 - **Códice, piezas sin alma y Herrero (2026-10-07):** ROGUELIKE.md §4 septies.
