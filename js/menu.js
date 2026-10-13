@@ -181,39 +181,129 @@ const TUTORIAL_PAGES = [
             ${tutCard('🎁', 'Premio', 'Oro y un objeto neutral (elegís 1 de 3). Los 3 más rápidos cobran extra.')}
             ${tutCard('🤲', 'Ayuda a los de abajo', 'La mitad de abajo del ranking recibe un Fragmento del Destino por ronda; el último, además, un Libro.')}
         </div>
-        <p class="tut-note">¡Listo! Tocá <b>Iniciar partida</b> cuando quieras. En partida, <kbd>Esc</kbd> abre este tutorial.</p>` }
+        <p class="tut-note">¡Listo! Tocá <b>¡A jugar!</b>. En partida, <kbd>Esc</kbd> abre este tutorial.</p>` }
 ];
-let tutorialPage = 0;
+// --- TUTORIAL DE TOWER CHAOS (2026-10-13) ---
+// Mismo formato que el de Custom Hero Chaos. El cuerpo puede ser una función (así las teclas salen como las tenga
+// configuradas el jugador) y art: una tira de dibujos en pixel art arriba de la página.
+const tutK = a => keyName(KEYMAP[a]);
+const tutArt = list => () => `<div class="tut-art">${list.map(([fr, s]) => { const c = fr(); return `<img src="${c.toDataURL()}" style="width:${c.width * s}px;height:${c.height * s}px">`; }).join('')}</div>`;
+const TUT_HERO = { cape: '#a33a3a', hood: '#7a2a2a', trim: '#c9a227', glow: '#9ad1ff', weapon: 'sword' };
+const TOWER_TUTORIAL_PAGES = [
+    { icon: '🗼', color: '#8ab8ff', title: 'El objetivo', art: tutArt([[() => pxbHeroFrame(TUT_HERO, 'idle', 0).img, 3], [() => pxbFrame('wolf', '#8d8d8d', [], 'idle', 0).img, 3], [() => pxbFrame('boss:forest', '#2d6a4f', [], 'idle', 0).img, 2]]), body: `
+        <p class="tut-lead">Despertás en un <b>círculo de piedra</b> al pie de una torre, sin nada. Hay que subir los <b>10 pisos</b>.</p>
+        <div class="tut-cards">
+            ${tutCard('🌲', 'Un bioma cada dos pisos', 'Bosque, Ciénaga, Desierto, Nieve y Volcán. Cada uno con sus criaturas, su clima y su terreno que molesta.')}
+            ${tutCard('🏘', 'El pueblo', 'Zona segura: los bichos no entran y recuperás vida y maná. Hay un mercader y, en algunos, un herrero.')}
+            ${tutCard('🌀', 'El laberinto', 'El guardián del piso (el jefe del bioma) cuida la escalera. Vencelo para subir.')}
+            ${tutCard('🎲', 'Cada run es distinta', 'El mapa, las criaturas (se arman por piezas: cuerpo, rasgos, tamaño) y el botín cambian cada vez.')}
+        </div>` },
+    { icon: '⚔️', color: '#e8c060', title: 'Las tres armas', art: tutArt([['sword', 'bow', 'staff'].map(w => [() => pxbHeroFrame({ ...TUT_HERO, weapon: w }, 'idle', 0).img, 3])].flat()), body: () => `
+        <p class="tut-lead">Al despertar elegís una de las tres armas clavadas en el círculo (acercate y <kbd>${tutK('interact')}</kbd> o clic). Cada una se juega distinto con <kbd>${tutK('skill1')}</kbd>.</p>
+        <div class="tut-cards">
+            ${tutCard('🗡', 'Espada', 'Combo de tres tajos en arco. El remate empuja y el tajo desvía proyectiles. Cuerpo a cuerpo y ágil.')}
+            ${tutCard('🏹', 'Arco', 'Mantené la tecla para tensar y soltá hacia el cursor: tensada atraviesa. Si soltás justo, es un tiro perfecto.')}
+            ${tutCard('🔮', 'Bastón', 'Orbe arcano apuntado que explota en área y marca a los enemigos para las reacciones. Gasta maná.')}
+            ${tutCard('🎁', 'Después', 'Otras armas aparecen como botín: cada pieza de equipo viene de un héroe y trae su habilidad.')}
+        </div>` },
+    { icon: '⌨️', color: '#2dc653', title: 'Controles', body: () => `
+        <div class="tut-keys">
+            ${tutKey([tutK('up'), tutK('left'), tutK('down'), tutK('right')], 'Moverte (o clic derecho en el mapa). Podés atacar caminando.')}
+            ${tutKey([tutK('dash')], 'Esquive: un salto corto en el que no te pegan. Es tu mejor defensa.')}
+            ${tutKey([tutK('skill1'), tutK('skill2'), tutK('skill3')], 'Habilidades del arma, los guantes y la armadura. Salen hacia el cursor.')}
+            ${tutKey(['Clic'], 'Clic izquierdo en un enemigo: lo marcás como objetivo.')}
+            ${tutKey([tutK('interact')], 'Agarrar armas, abrir cofres, hablar.')}
+            ${tutKey(['Rueda'], 'Zoom (también + y −).')}
+            ${tutKey([tutK('autocast'), tutK('autopilot')], 'Habilidades automáticas · piloto automático.')}
+            ${tutKey(['Esc'], 'Pausa: opciones, teclas, este tutorial y las ventanas.')}
+        </div>
+        <p class="tut-note">Las teclas se cambian en la pausa → ⌨️ Teclas.</p>` },
+    { icon: '🎒', color: '#c77dff', title: 'Tu equipo es tu clase', body: () => `
+        <div class="tut-cards">
+            ${tutCard('✋', 'Tres habilidades', `El arma (<kbd>${tutK('skill1')}</kbd>), los guantes (<kbd>${tutK('skill2')}</kbd>) y la armadura (<kbd>${tutK('skill3')}</kbd>) traen una habilidad cada uno. Casco, botas, amuleto y anillo dan stats.`)}
+            ${tutCard('🧩', 'Piezas de héroes', 'Cada pieza viene de un héroe de Custom Hero Chaos: su color, su habilidad y su estilo. Mezclalas.')}
+            ${tutCard('📊', 'Niveles y stats', `Al subir de nivel ganás puntos para repartir (<kbd>${tutK('stats')}</kbd>). El equipo y el inventario, con <kbd>${tutK('inventory')}</kbd>.`)}
+            ${tutCard('⚒', 'Forjar', 'Cuando un arma sube de nivel elegís cómo crece (más daño, menos costo, menos recarga…). Queda en la pieza.')}
+        </div>` },
+    { icon: '🏘', color: '#ff9f1c', title: 'El pueblo', body: () => `
+        <div class="tut-cards">
+            ${tutCard('🛒', 'Mercader', `Vende piezas del piso y compra lo que te sobra (<kbd>${tutK('shop')}</kbd>). Siempre tiene el Tomo de Talento: +1 punto de stats.`)}
+            ${tutCard('⚒', 'Herrero', `Imbuye en piezas sin alma los poderes que juntaste en tu Códice (<kbd>${tutK('codex')}</kbd>), y funde 5 piezas de la misma ranura en una pura con calidad: roma, usada, nueva u obra maestra.`)}
+            ${tutCard('✦', 'Esencia', 'No se pierde nunca, ni al morir ni al terminar la run. La sueltan jefes y campeones; se gasta en fundir y en mejoras permanentes (desde el Códice).')}
+            ${tutCard('🔥', 'Fogata', 'De noche, al lado de una fogata (y sin nadie persiguiéndote) recuperás vida.')}
+        </div>` },
+    { icon: '⚠️', color: '#e63946', title: 'Leer la pelea', body: () => `
+        <div class="tut-cards">
+            ${tutCard('🟥', 'Golpes que avisan', `Antes de un golpe fuerte se marca la zona en el piso y se va llenando; un "!" sale sobre el que se prepara. Salí o esquivá con <kbd>${tutK('dash')}</kbd>.`)}
+            ${tutCard('🎯', 'Tiradores', 'Un aro que se cierra sobre el tirador avisa la ráfaga. Las balas se ven también fuera de la pantalla.')}
+            ${tutCard('🔵', 'Campeones', 'Aro azul y un ícono por afijo (veloz, blindado, explosivo…). Pasá el mouse encima para leerlos.')}
+            ${tutCard('👑', 'Guardianes', 'Tres fases y una definitiva, y una mecánica propia: raíces que lo curan, charcos de veneno, se entierra, piso helado, lava.')}
+        </div>` },
+    { icon: '🌙', color: '#7b6cf6', title: 'El mundo', body: () => `
+        <div class="tut-cards">
+            ${tutCard('☀', 'Día y noche', 'Cada ocho minutos cae la noche: ves menos y salen criaturas nocturnas, pero todo da +50% de experiencia y botín.')}
+            ${tutCard('🕳', 'Cuevas', 'Opcionales. Cuanto más hondo, más oscuro y peligroso, y mejor el botín; al fondo, un jefe con su tesoro.')}
+            ${tutCard('✨', 'Santuarios y cofres', 'Los santuarios dan una bendición por un rato. Los cofres, piezas (algunos tienen guardianes).')}
+            ${tutCard('🎪', 'Eventos', 'Caravanas que defender, prisioneros que liberar, cofres malditos, mercaderes ambulantes y emboscadas.')}
+        </div>
+        <p class="tut-note">🗺 <kbd>${tutK('map')}</kbd> abre el mapa del piso; la flecha del borde te marca a dónde ir.</p>` },
+    { icon: '💀', color: '#9d0208', title: 'Morir', body: `
+        <div class="tut-cards">
+            ${tutCard('⭕', 'Renacés en la base', 'Volvés al círculo de piedra del primer piso a los pocos segundos.')}
+            ${tutCard('🦴', 'Tus restos', 'Perdés la mitad de los puntos de stats que repartiste, pero quedan en tus restos: volvé y pisalos. Si morís de nuevo, los restos se suman: nunca se pierde nada para siempre.')}
+            ${tutCard('🎒', 'El portador', 'Una criatura se lleva alguna pieza de tu equipo (nunca el arma) y anda por el piso. Cazala para recuperarla.')}
+            ${tutCard('🪨', 'Piedra de regreso', 'En el círculo: te lleva a la entrada de cualquier piso que ya alcanzaste.')}
+        </div>` },
+    { icon: '📖', color: '#c9a227', title: 'La Bitácora', body: () => `
+        <div class="tut-keys">
+            ${tutKey([tutK('notebook')], 'Cuaderno: se escribe solo cuando encontrás algo nuevo. Leelo.')}
+            ${tutKey([tutK('codex')], 'Códice: los poderes que juntaste, para imbuir en el herrero.')}
+            ${tutKey([tutK('bestiary')], 'Bestiario: las criaturas que viste. Se guarda entre runs.')}
+            ${tutKey([tutK('log')], 'Diario del piso: todo lo que pasó.')}
+        </div>
+        <p class="tut-note">¡Listo! Tocá <b>¡A jugar!</b>. En partida, <kbd>Esc</kbd> abre este tutorial.</p>` }
+];
 
-function openTutorial(page = 0) {
-    tutorialPage = page;
+// Un tutorial por modo. openTutorial(página, modo, alTerminar): alTerminar corre si se llega al final con "¡A jugar!"
+// (el menú previo de cada modo lo usa para arrancar la partida, titleScreen.js).
+const TUTORIALS = { normal: { brand: 'CUSTOM HERO CHAOS', pages: TUTORIAL_PAGES }, tower: { brand: 'TOWER CHAOS', pages: TOWER_TUTORIAL_PAGES } };
+let tutorialPage = 0, tutorialMode = 'normal', tutorialDone = null;
+function tutorialPages() { return TUTORIALS[tutorialMode].pages; }
+function markTutorialSeen(mode) { if (/[?&]test/.test(location.search)) return; try { localStorage.setItem('chc-tut-' + mode, '1'); } catch (e) { /* no se guarda */ } } // (las pruebas no lo marcan)
+function tutorialSeen(mode) { try { return localStorage.getItem('chc-tut-' + mode) === '1'; } catch (e) { return false; } }
+
+function openTutorial(page = 0, mode = gameMode === 'tower' ? 'tower' : 'normal', onDone = null) {
+    tutorialMode = TUTORIALS[mode] ? mode : 'normal';
+    tutorialPage = page; tutorialDone = onDone;
     renderTutorial();
     document.getElementById('tutorial').style.display = 'flex';
 }
-function closeTutorial() { document.getElementById('tutorial').style.display = 'none'; }
+function closeTutorial() { document.getElementById('tutorial').style.display = 'none'; markTutorialSeen(tutorialMode); tutorialDone = null; }
 
 function renderTutorial() {
-    const p = TUTORIAL_PAGES[tutorialPage];
+    const pages = tutorialPages(), p = pages[tutorialPage];
     const box = document.getElementById('tutorial-box');
     box.style.setProperty('--tut-color', p.color);
     document.getElementById('tutorial-icon').textContent = p.icon;
+    document.getElementById('tutorial-brand').textContent = 'CÓMO SE JUEGA · ' + TUTORIALS[tutorialMode].brand;
     document.getElementById('tutorial-title').textContent = p.title;
     const heroes = p.heroes ? `<div class="tut-heroes">${Object.values(HERO_TEMPLATES).map(t => {
         const url = typeof heroSpriteUrl === 'function' ? heroSpriteUrl({ isHero: true, key: t.key }) : null;
         return `<div title="${t.name}">${url ? `<img src="${url}" class="pixel-img">` : `<b>${t.symbol}</b>`}<span>${t.name}</span></div>`;
     }).join('')}</div>` : '';
-    document.getElementById('tutorial-body').innerHTML = heroes + p.body;
-    document.getElementById('tutorial-step').textContent = `${tutorialPage + 1} / ${TUTORIAL_PAGES.length}`;
-    document.getElementById('tutorial-dots').innerHTML = TUTORIAL_PAGES.map((pg, i) =>
+    const art = p.art ? p.art() : '';
+    document.getElementById('tutorial-body').innerHTML = heroes + art + (typeof p.body === 'function' ? p.body() : p.body);
+    document.getElementById('tutorial-step').textContent = `${tutorialPage + 1} / ${pages.length}`;
+    document.getElementById('tutorial-dots').innerHTML = pages.map((pg, i) =>
         `<button class="${i === tutorialPage ? 'on' : ''}" data-page="${i}" title="${pg.title}">${pg.icon}</button>`).join('');
     document.querySelectorAll('#tutorial-dots button').forEach(b => { b.onclick = () => { tutorialPage = Number(b.dataset.page); renderTutorial(); }; });
     document.getElementById('tutorial-prev').disabled = tutorialPage === 0;
-    document.getElementById('tutorial-next').textContent = tutorialPage === TUTORIAL_PAGES.length - 1 ? '¡A jugar!' : 'Siguiente ▶';
+    document.getElementById('tutorial-next').textContent = tutorialPage === pages.length - 1 ? '¡A jugar!' : 'Siguiente ▶';
 }
 
 function tutorialStep(delta) {
     const next = tutorialPage + delta;
-    if (next >= TUTORIAL_PAGES.length) { closeTutorial(); return; }
+    if (next >= tutorialPages().length) { const done = tutorialDone; closeTutorial(); if (done) done(); return; }
     tutorialPage = Math.max(0, next);
     renderTutorial();
 }

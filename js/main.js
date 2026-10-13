@@ -30,7 +30,7 @@ document.getElementById('hero-any-btn').onclick = openHeroDrawer;
 document.getElementById('hero-back-btn').onclick = () => { closeHeroDrawer(); resetGame(); };
 document.getElementById('hero-any-close').onclick = closeHeroDrawer;
 document.getElementById('hero-any-backdrop').onclick = closeHeroDrawer;
-document.getElementById('menu-tutorial-btn').onclick = () => openTutorial();
+{ const b = document.getElementById('menu-tutorial-btn'); if (b) b.onclick = () => openTutorial(); } // (el tutorial de cada modo está en su menú previo, titleScreen.js)
 document.getElementById('tutorial-close').onclick = closeTutorial;
 document.getElementById('tutorial-prev').onclick = () => tutorialStep(-1);
 document.getElementById('tutorial-next').onclick = () => tutorialStep(1);

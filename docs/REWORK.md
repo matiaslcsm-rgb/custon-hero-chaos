@@ -662,6 +662,12 @@ tinta, o con `?pixel=0`. El modo Custom Hero Chaos no cambia.
   fantasma, Hidra → lagarto grande), efectos de combate en píxeles, sangre y restos, números con fuente de píxeles y la
   interfaz oscura con Pixelify Sans. Los héroes conservan sus sprites de 12×12 (ya son pixel art y los identifican).
 
+**Menú previo y tutorial de cada modo (2026-10-13):** tocar una tarjeta de la portada abre el menú de ese modo (de qué
+se trata, cómo es una partida, Jugar, su Tutorial y lo propio: glosario en Custom Hero Chaos; estilo visual y bestiario
+guardado en Tower Chaos). Tower Chaos tiene ahora su tutorial de 9 páginas (objetivo, las tres armas, controles con las
+teclas configuradas, equipo, pueblo, leer la pelea, el mundo, morir, la Bitácora). La primera vez viene marcado "ver el
+tutorial antes de jugar" y al terminarlo con "¡A jugar!" arranca la partida. En partida, Esc → Tutorial abre el del modo.
+
 ### Ideas para las criaturas (propuesta externa revisada, 2026-10-13; para después, de a una)
 - ✅ **Alas que vuelan:** ignoran fango, lava y trampas; si las aturdís, caen y pierden eso.
 - ✅ **Dúos de rol + cuerpo** con nombre (pocos, no todas las combinaciones): escorpión maldiciente deja charcos

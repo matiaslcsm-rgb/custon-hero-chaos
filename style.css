@@ -928,3 +928,32 @@ body.on-title { overflow: hidden; }
 .ts-foot { margin: 0; font-size: 0.68rem; color: #a898c0; text-align: center; text-shadow: 1px 1px 0 #000; }
 .ts-foot a { color: #e8c060; }
 @media (max-height: 640px) { .ts-card span:last-child { display: none; } .ts-card-art { height: 56px; } }
+
+/* Menú previo de cada modo, en la portada (titleScreen.js) */
+.ts-lobby { display: none; }
+#title-screen.lobby-open .ts-modes { display: none; }
+#title-screen.lobby-open .ts-lobby { display: flex; }
+.ts-lobby { flex-direction: column; align-items: center; gap: 8px; width: min(560px, 92vw); padding: 16px 20px 14px; text-align: center;
+    background: rgba(28,20,30,0.92); border: 3px solid #0b0908; box-shadow: inset 0 0 0 2px #e8c060, inset 4px 4px 0 2px rgba(255,255,255,0.06), 0 8px 0 rgba(0,0,0,0.6); }
+.ts-lobby.tower { box-shadow: inset 0 0 0 2px #8ab8ff, inset 4px 4px 0 2px rgba(255,255,255,0.06), 0 8px 0 rgba(0,0,0,0.6); }
+.ts-lobby-art { display: flex; align-items: flex-end; justify-content: center; gap: 10px; min-height: 70px; }
+.ts-lobby-art img { image-rendering: pixelated; }
+.ts-lobby h2 { margin: 2px 0 0; font-size: 1.6rem; color: #ffd27a; text-shadow: 2px 2px 0 #1a0c10; }
+.ts-lobby.tower h2 { color: #b8e0ff; }
+.ts-lobby em { font-style: normal; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; color: #b8a98f; }
+.ts-lobby-desc { margin: 4px 0; font-size: 0.9rem; line-height: 1.4; color: #e8dcc4; }
+.ts-facts { list-style: none; margin: 0; padding: 8px 12px; text-align: left; font-size: 0.82rem; line-height: 1.6; color: #d8ccb4; background: rgba(0,0,0,0.25); border: 2px solid #0b0908; width: 100%; box-sizing: border-box; }
+.ts-lobby-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 4px; }
+.ts-lobby button { border-radius: 0; cursor: pointer; font-size: 0.9rem; padding: 7px 14px; border: 2px solid #0b0908; color: #efe4cc; background: #3a3129;
+    box-shadow: inset 2px 2px 0 rgba(255,255,255,0.1), inset -2px -2px 0 rgba(0,0,0,0.35), 0 2px 0 #0b0908; width: auto; margin: 0; }
+.ts-lobby button:hover { background: #4a3f34; }
+.ts-lobby .ts-play { background: #8a2f22; color: #fff2dc; font-size: 1.1rem; padding: 9px 26px; }
+.ts-lobby .ts-play:hover { background: #a3392a; }
+.ts-lobby.tower .ts-play { background: #2a4a8a; }
+.ts-lobby.tower .ts-play:hover { background: #3558a0; }
+.ts-first { font-size: 0.8rem; color: #c8b8a0; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+.ts-lobby .ts-back { font-size: 0.8rem; padding: 4px 10px; }
+/* Tutorial: tira de dibujos en pixel art (tutorial de Tower Chaos) */
+.tut-art { display: flex; align-items: flex-end; justify-content: center; gap: 14px; margin-bottom: 10px; }
+.tut-art img { image-rendering: pixelated; }
+#tutorial, #tutorial * { font-family: 'Pixelify Sans', Consolas, monospace !important; }

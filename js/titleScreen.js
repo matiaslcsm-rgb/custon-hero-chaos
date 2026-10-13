@@ -193,3 +193,50 @@ function tsCardArt() {
 }
 tsCardArt();
 requestAnimationFrame(tsFrame);
+
+// --- MENÚ PREVIO DE CADA MODO (2026-10-13) ---
+// Tocar una tarjeta abre su menú: de qué se trata, cómo es una partida, Jugar, su Tutorial y lo propio del modo
+// (glosario en Custom Hero Chaos; estilo visual y bestiario guardado en Tower Chaos). La primera vez viene marcado
+// "ver el tutorial antes de jugar": al terminarlo con "¡A jugar!", arranca la partida.
+const tsImg = (c, s) => `<img src="${c.toDataURL()}" style="width:${c.width * s}px;height:${c.height * s}px">`;
+const TS_LOBBY = {
+    normal: { title: '⚔ Custom Hero Chaos', tag: 'arena · 8 héroes', cls: '',
+        desc: 'Sos uno de 8 héroes en un coliseo. Armás tu kit mezclando habilidades de cualquier héroe, peleás oleadas, duelos y jefes, y gana el último en pie.',
+        facts: () => ['🎲 Elegís entre 3 héroes (o cualquiera, arrancando sin oro)', '🃏 Rondas 1 a 4: draft de habilidad, tienda y oleada', '⚔ Desde la ronda 5: un duelo por ronda, con apuestas', '👑 Rondas 5, 10, 15 y 20: un jefe para cada uno', '♥ 2 vidas: se pierden contra creeps y jefes'],
+        art: () => ['AXE', 'VAMPIRE', 'SNIPER', 'ZEUS', 'NECROMANCER'].map(k => spriteFor({ isHero: true, key: k })).filter(Boolean).map(s => tsImg(s.img, 2.2)).join(''),
+        extra: () => [['🦸 Héroes', () => openGlossary('heroes')], ['👹 Creeps y jefes', () => openGlossary('creeps')], ['🎒 Ítems', () => openGlossary('items')]] },
+    tower: { title: '🗼 Tower Chaos', tag: 'roguelike · 10 pisos', cls: 'tower',
+        desc: 'Despertás al pie de una torre sin nada. Cada piso es un bioma con su pueblo, su laberinto y su guardián. Tu clase la arma el equipo que encontrás.',
+        facts: () => ['🗡 Arrancás eligiendo espada, arco o bastón', '🌲 5 biomas, dos pisos cada uno, con día y noche', '🎒 Cada pieza de equipo trae una habilidad', '🦴 Morir no es el final: tus restos te esperan', `📖 Bestiario guardado: ${typeof bestiaryStore !== 'undefined' ? Object.keys(bestiaryStore.beasts || {}).length : 0} criaturas vistas`],
+        art: () => tsImg(pxbHeroFrame(tsHero, 'idle', 0).img, 3) + tsImg(pxbFrame('wolf', '#8d8d8d', ['horns'], 'idle', 0).img, 3) + tsImg(pxbFrame('boss:volcano', '#d00000', [], 'idle', 0).img, 2),
+        extra: () => [[`🎨 Estilo: ${pixelEnabled ? 'pixel art' : 'tinta'}`, () => { setPixelStyle(!pixelEnabled); openLobby('tower'); }]] }
+};
+let tsLobbyMode = null;
+function openLobby(mode) {
+    const L = TS_LOBBY[mode], box = document.getElementById('ts-lobby'), first = !tutorialSeen(mode);
+    tsLobbyMode = mode;
+    box.className = 'ts-lobby ' + L.cls;
+    box.innerHTML = `<div class="ts-lobby-art">${L.art()}</div>
+        <h2>${L.title}</h2><em>${L.tag}</em><p class="ts-lobby-desc">${L.desc}</p>
+        <ul class="ts-facts">${L.facts().map(f => `<li>${f}</li>`).join('')}</ul>
+        <div class="ts-lobby-actions"><button class="ts-play">▶ Jugar</button><button class="ts-tut secondary-btn">📖 Tutorial</button>
+            ${L.extra().map((x, i) => `<button class="secondary-btn" data-extra="${i}">${x[0]}</button>`).join('')}</div>
+        <label class="ts-first"><input type="checkbox" id="ts-tut-first"${first ? ' checked' : ''}> Ver el tutorial antes de jugar</label>
+        <button class="ts-back secondary-btn">← Volver</button>`;
+    box.querySelector('.ts-play').onclick = () => lobbyPlay(mode);
+    box.querySelector('.ts-tut').onclick = () => openTutorial(0, mode);
+    box.querySelector('.ts-back').onclick = closeLobby;
+    const extras = L.extra();
+    box.querySelectorAll('[data-extra]').forEach(b => { b.onclick = () => extras[Number(b.dataset.extra)][1](); });
+    document.getElementById('title-screen').classList.add('lobby-open');
+}
+function closeLobby() { tsLobbyMode = null; document.getElementById('title-screen').classList.remove('lobby-open'); }
+function lobbyPlay(mode) {
+    const start = () => { closeLobby(); gameMode = mode; if (mode === 'tower') startTowerRun(); else startHeroPick(); };
+    const cb = document.getElementById('ts-tut-first');
+    if (cb && cb.checked) openTutorial(0, mode, start); else start();
+}
+document.querySelectorAll('[data-lobby]').forEach(card => { card.onclick = () => openLobby(card.dataset.lobby); });
+window.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && tsLobbyMode && document.body.classList.contains('on-title') && document.getElementById('tutorial').style.display !== 'flex') closeLobby();
+});

@@ -19,23 +19,23 @@
                 <div class="ts-logo-sub">elegí tu caos</div>
             </div>
             <div class="ts-modes">
-                <button class="mode-card ts-card" data-mode="normal">
+                <button class="ts-card" data-lobby="normal">
                     <span class="ts-card-art" id="ts-art-normal"></span>
                     <b>⚔ Custom Hero Chaos</b>
                     <em>arena · 8 héroes</em>
                     <span>Oleadas de creeps, duelos, apuestas y jefes. Armá tu kit mezclando habilidades de cualquier héroe y quedate último en pie.</span>
                 </button>
-                <button class="mode-card ts-card tower" data-mode="tower">
+                <button class="ts-card tower" data-lobby="tower">
                     <span class="ts-card-art" id="ts-art-tower"></span>
                     <b>🗼 Tower Chaos</b>
                     <em>roguelike · 10 pisos</em>
                     <span>Despertás en la base de una torre sin nada. Cada piso es un bioma con su pueblo, su laberinto y su guardián. Tu clase la arma el equipo.</span>
                 </button>
             </div>
+            <div class="ts-lobby" id="ts-lobby"></div>
             <div class="ts-bottom">
                 <label class="name-field ts-name">Tu nombre <input id="player-name" maxlength="14" placeholder="Vos" autocomplete="off"></label>
                 <div class="ts-buttons">
-                    <button id="menu-tutorial-btn" class="secondary-btn">📖 Tutorial</button>
                     <button class="secondary-btn" data-glossary="heroes">🦸 Héroes</button>
                     <button class="secondary-btn" data-glossary="creeps">👹 Creeps y jefes</button>
                     <button class="secondary-btn" data-glossary="items">🎒 Ítems</button>
