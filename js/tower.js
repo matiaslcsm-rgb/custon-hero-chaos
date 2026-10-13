@@ -641,7 +641,8 @@ function renderTower(level, dt) {
     drawMouseOverlay(level);
     // Niebla: lo no descubierto, negro; lo descubierto fuera de la vista, oscurecido
     const x0 = Math.floor(camera.x), y0 = Math.floor(camera.y);
-    for (let y = y0; y <= Math.min(ROWS - 1, y0 + viewRows()); y++) for (let x = x0; x <= Math.min(COLS - 1, x0 + viewCols()); x++) {
+    if (px) pxDrawFog(level); // niebla sin cuadraditos (towerPixelFx.js)
+    else for (let y = y0; y <= Math.min(ROWS - 1, y0 + viewRows()); y++) for (let x = x0; x <= Math.min(COLS - 1, x0 + viewCols()); x++) {
         if (!level.explored[y][x]) { ctx.fillStyle = INK.shadow; ctx.fillRect(x * TILE, y * TILE, TILE + 1, TILE + 1); }
         else if (!canSee(level, x, y)) { ctx.fillStyle = 'rgba(43,33,24,0.5)'; ctx.fillRect(x * TILE, y * TILE, TILE + 1, TILE + 1); }
     }

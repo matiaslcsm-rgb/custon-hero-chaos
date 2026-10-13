@@ -132,6 +132,7 @@ function drawTowerWeather(level, dt) {
         const fade = Math.min(1, p.t * 2, (p.life - p.t) * 2);
         ctx.globalAlpha = Math.max(0, fade) * (p.glow ? 1 : 1 - 0.55 * dark); // de noche se ve menos (salvo lo que brilla)
         ctx.fillStyle = ctx.strokeStyle = p.color;
+        if (pixelOn()) { pxWeatherPart(p, i); return; } // en píxeles (towerPixelFx.js)
         if (p.kind === 'rain') { ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - p.vx * 0.03, p.y - p.vy * 0.03); ctx.stroke(); }
         else if (p.kind === 'sand') { ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - 14, p.y + 1); ctx.stroke(); }
         else if (p.kind === 'leaf') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.t * 3 + i); ctx.beginPath(); ctx.ellipse(0, 0, 4, 2, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }

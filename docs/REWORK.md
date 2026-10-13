@@ -632,6 +632,11 @@ los efectos, no el suelo ni las criaturas ni la interfaz. Sangre y restos que vu
 (roja, polvo de piedra en gólems, ectoplasma en espectros, icor verde en enjambres y sapos, brasas en el volcán), chispas
 en cada golpe, números de daño con fuente de 3×5 y el rango del héroe como aro de puntos.
 
+**Detalles del mundo (2026-10-13):** la niebla de lo explorado ya no se ve en cuadraditos (borde suavizado entre casillas
+con tramado, 8 píxeles por casilla); la noche baja al tamaño del píxel de los sprites con escalones de tramado; el clima
+(lluvia, nieve, hojas, arena, ceniza, luciérnagas y brasas) cae en píxeles. En la capa de efectos, lo transparente pasa a
+tramado en vez de cortarse: el área tenue de los avisos de golpe y de las zonas de los jefes se sigue viendo entera.
+
 ### Ideas para las criaturas (propuesta externa revisada, 2026-10-13; para después, de a una)
 - ✅ **Alas que vuelan:** ignoran fango, lava y trampas; si las aturdís, caen y pierden eso.
 - ✅ **Dúos de rol + cuerpo** con nombre (pocos, no todas las combinaciones): escorpión maldiciente deja charcos

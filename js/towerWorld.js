@@ -749,7 +749,7 @@ function drawTowerNight(level) {
     if (level.exitUp) light(level.exitUp.x, level.exitUp.y, 3 * TILE);
     (level.shrines || []).forEach(s => { if (!s.used) light(s.x, s.y, 2.2 * TILE); });
     towerNightLights(level, light); // antorchas, fogatas, fragua y balas (towerAtmos.js)
-    ctx.drawImage(nightLayer, 0, 0);
+    if (pixelOn()) pxDitherDraw(nightLayer); else ctx.drawImage(nightLayer, 0, 0); // en pixel art, con tramado (towerPixelFx.js)
     drawFireGlow(level, dark); // el naranja que parpadea alrededor de cada fuego
     const dusk = level.isCave ? 0 : 1 - Math.abs(dark - 0.5) * 2; // tono naranja en el atardecer y el amanecer
     if (dusk > 0) { ctx.fillStyle = `rgba(255,140,60,${0.12 * dusk})`; ctx.fillRect(0, 0, screenW(), screenH()); }

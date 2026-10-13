@@ -10,6 +10,7 @@
 //   - NÚMEROS DE DAÑO con una fuente de píxeles de 3×5 (las palabras siguen en letra común).
 
 const PXF = { cut: [50, 120, 200], debrisMax: 500, gravity: 320 };
+const PX_BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map(v => (v + 0.5) / 16); // tramado ordenado 4×4
 const pxfLayers = {};
 // El canvas principal pasa a ser otro por un momento (todo lo que se dibuja usa la variable ctx)
 function withCtx(c, fn) { const old = ctx; ctx = c; try { fn(); } finally { ctx = old; } }
@@ -26,10 +27,14 @@ function pxFxLayer(name, draw) {
     g.setTransform(1 / PXG.scale, 0, 0, 1 / PXG.scale, -camera.x * TILE / PXG.scale, -camera.y * TILE / PXG.scale);
     g.textAlign = 'center'; g.textBaseline = 'middle';
     withCtx(g, draw);
-    // Bordes duros: la transparencia queda en 3 escalones (nada, media, llena)
-    const img = g.getImageData(0, 0, w, h), d = img.data, [c0, c1, c2] = PXF.cut;
+    // Bordes duros: lo casi opaco queda lleno; lo transparente pasa a tramado (píxeles salteados con la misma cobertura),
+    // así un relleno tenue (el área de un aviso) se sigue viendo entero, como en los juegos de 16 bits
+    const img = g.getImageData(0, 0, w, h), d = img.data;
     let any = false;
-    for (let i = 3; i < d.length; i += 4) { const a = d[i]; if (!a) continue; any = true; d[i] = a < c0 ? 0 : a < c1 ? 110 : a < c2 ? 180 : 255; }
+    for (let i = 3, p = 0; i < d.length; i += 4, p++) {
+        const a = d[i]; if (!a) continue; any = true;
+        d[i] = a >= PXF.cut[2] ? 255 : a / PXF.cut[2] > PX_BAYER[(Math.floor(p / w) & 3) * 4 + ((p % w) & 3)] ? PXF.cut[2] : 0;
+    }
     if (!any) return;
     g.putImageData(img, 0, 0);
     ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.imageSmoothingEnabled = false;
@@ -107,4 +112,75 @@ function pxDrawNumber(text, x, y, color, s) {
     const each = fn => chars.forEach((ch, i) => { const g = PX_DIGITS[ch]; if (g) for (let k = 0; k < 15; k++) if (g[k] === '1') fn(x0 + (i * 4 + k % 3) * s, y0 + Math.floor(k / 3) * s); });
     ctx.fillStyle = '#120c0a'; each((px, py) => ctx.fillRect(px - s, py - s, s * 3, s * 3)); // contorno
     ctx.fillStyle = color; each((px, py) => ctx.fillRect(px, py, s, s));
+}
+
+// --- NIEBLA SIN CUADRADITOS ---
+// Lo no descubierto (negro) y lo descubierto fuera de la vista (oscurecido), con el borde suavizado entre casillas y
+// tramado: 8 píxeles por casilla, así el borde se ve de píxeles y no de baldosas.
+const PXFOG = { sub: 8, dark: [14, 11, 10], seen: 0.55 };
+let pxFogCanvas = null, pxFogCtx = null;
+function pxDrawFog(level) {
+    const S = PXFOG.sub, x0 = Math.max(0, Math.floor(camera.x) - 1), y0 = Math.max(0, Math.floor(camera.y) - 1);
+    const x1 = Math.min(COLS - 1, Math.floor(camera.x + viewCols()) + 1), y1 = Math.min(ROWS - 1, Math.floor(camera.y + viewRows()) + 1);
+    const nx = x1 - x0 + 1, ny = y1 - y0 + 1, W = nx * S, H = ny * S;
+    const v = new Float32Array(nx * ny); // 1 = sin descubrir, 0,55 = fuera de la vista, 0 = a la vista
+    for (let y = 0; y < ny; y++) for (let x = 0; x < nx; x++) { const tx = x0 + x, ty = y0 + y; v[y * nx + x] = !level.explored[ty][tx] ? 1 : !canSee(level, tx, ty) ? PXFOG.seen : 0; }
+    if (!pxFogCanvas) { pxFogCanvas = document.createElement('canvas'); pxFogCtx = pxFogCanvas.getContext('2d'); }
+    if (pxFogCanvas.width !== W || pxFogCanvas.height !== H) { pxFogCanvas.width = W; pxFogCanvas.height = H; }
+    const img = pxFogCtx.createImageData(W, H), d = img.data, [r, g, b] = PXFOG.dark;
+    const at = (x, y) => v[Math.max(0, Math.min(ny - 1, y)) * nx + Math.max(0, Math.min(nx - 1, x))];
+    for (let py = 0; py < H; py++) {
+        const fy = (py + 0.5) / S - 0.5, iy = Math.floor(fy), ky = fy - iy;
+        for (let px = 0; px < W; px++) {
+            const fx = (px + 0.5) / S - 0.5, ix = Math.floor(fx), kx = fx - ix;
+            const a = at(ix, iy) * (1 - kx) * (1 - ky) + at(ix + 1, iy) * kx * (1 - ky) + at(ix, iy + 1) * (1 - kx) * ky + at(ix + 1, iy + 1) * kx * ky;
+            if (a <= 0.01) continue;
+            const t = PX_BAYER[(py & 3) * 4 + (px & 3)];
+            const alpha = a <= PXFOG.seen ? (a / PXFOG.seen > t ? PXFOG.seen : 0) : ((a - PXFOG.seen) / (1 - PXFOG.seen) > t ? 1 : PXFOG.seen);
+            if (!alpha) continue;
+            const o = (py * W + px) * 4; d[o] = r; d[o + 1] = g; d[o + 2] = b; d[o + 3] = Math.round(alpha * 255);
+        }
+    }
+    pxFogCtx.putImageData(img, 0, 0);
+    const sm = ctx.imageSmoothingEnabled; ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(pxFogCanvas, x0 * TILE, y0 * TILE, nx * TILE, ny * TILE);
+    ctx.imageSmoothingEnabled = sm;
+}
+
+// --- NOCHE CON TRAMADO ---
+// La capa de oscuridad (con los huecos de luz) se baja al tamaño del píxel de los sprites y su transparencia pasa a
+// escalones con tramado: los círculos de luz quedan con borde de píxeles en vez de un degradé liso.
+let pxNightLow = null, pxNightCtx = null;
+function pxDitherDraw(src) {
+    const q = PXG.scale * viewScale(), w = Math.ceil(src.width / q), h = Math.ceil(src.height / q);
+    if (!pxNightLow) { pxNightLow = document.createElement('canvas'); pxNightCtx = pxNightLow.getContext('2d', { willReadFrequently: true }); }
+    if (pxNightLow.width !== w || pxNightLow.height !== h) { pxNightLow.width = w; pxNightLow.height = h; }
+    pxNightCtx.clearRect(0, 0, w, h); pxNightCtx.imageSmoothingEnabled = true;
+    pxNightCtx.drawImage(src, 0, 0, w, h);
+    const img = pxNightCtx.getImageData(0, 0, w, h), d = img.data, steps = 4;
+    for (let i = 3, p = 0; i < d.length; i += 4, p++) {
+        const a = d[i] / 255 * steps, lo = Math.floor(a);
+        d[i] = Math.round(Math.min(steps, lo + (a - lo > PX_BAYER[(Math.floor(p / w) & 3) * 4 + ((p % w) & 3)] ? 1 : 0)) / steps * 255);
+    }
+    pxNightCtx.putImageData(img, 0, 0);
+    const sm = ctx.imageSmoothingEnabled; ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(pxNightLow, 0, 0, w * q, h * q);
+    ctx.imageSmoothingEnabled = sm;
+}
+
+// --- CLIMA EN PÍXELES ---
+// Mismas partículas de siempre (towerAtmos.js), dibujadas como píxeles del tamaño de los de los sprites.
+function pxWeatherPart(p, i) {
+    const q = PXG.scale * viewScale(), X = Math.round(p.x / q) * q, Y = Math.round(p.y / q) * q;
+    if (p.kind === 'rain') { ctx.fillRect(X, Y, q, q * 3); return; }
+    if (p.kind === 'sand') { ctx.fillRect(X, Y, q * 3, q); return; }
+    if (p.kind === 'leaf') { const up = Math.sin(p.t * 3 + i) > 0; ctx.fillRect(X, Y, up ? q * 2 : q, up ? q : q * 2); return; }
+    if (p.glow) { // luciérnagas y brasas: un píxel que brilla con un halo tenue
+        ctx.globalCompositeOperation = 'lighter';
+        const a = ctx.globalAlpha; ctx.globalAlpha = a * 0.25; ctx.fillRect(X - q, Y - q, q * 3, q * 3);
+        ctx.globalAlpha = a; ctx.fillRect(X, Y, q, q);
+        ctx.globalCompositeOperation = 'source-over'; return;
+    }
+    const s = p.kind === 'snow' && p.size > 2.6 ? 2 : 1;
+    ctx.fillRect(X, Y, q * s, q * s);
 }
