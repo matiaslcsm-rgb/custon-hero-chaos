@@ -649,8 +649,9 @@ function renderTower(level, dt) {
     ctx.restore();
     drawTowerNight(level); // día y noche (towerWorld.js)
     drawTowerWeather(level, dt); // lluvia, nieve, ceniza, hojas… por bioma (towerAtmos.js)
+    pxUiPass = px; // de acá en adelante, la interfaz: en pixel art, con colores de panel oscuro (towerPixelUi.js)
     drawUltBanner(screenW() / 2, screenH() * 0.72); // cartel de la definitiva, encima de la niebla (fxSkills.js)
-    drawInkVignette();
+    if (!px) drawInkVignette(); // (en pixel art, sin la viñeta de papel)
     drawObjectiveArrow(level);
     drawOffscreenThreats(level); // balas y tiradores fuera de la vista (towerBullets.js)
     drawChampionCard(level); // qué hace cada afijo del campeón bajo el mouse (towerChampions.js)

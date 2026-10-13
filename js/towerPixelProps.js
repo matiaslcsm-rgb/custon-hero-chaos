@@ -183,7 +183,7 @@ function pxDrawStarterWeapons(level) {
         pxPut(pxStuckWeapon(w.key), cx, by, PXG.scale * (on ? 1.15 : 1));
         pxLabel(STARTER_WEAPONS[w.key].noun, cx, by - TILE * 1.55, on ? '#ffd166' : '#f2e6c8');
     });
-    if (near) drawStarterCard(near);
+    if (near) { pxUiPass = true; drawStarterCard(near); pxUiPass = false; } // cartel con colores de panel oscuro (towerPixelUi.js)
 }
 
 // --- ESCALERA, CUEVAS Y RESTOS ---

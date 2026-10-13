@@ -823,3 +823,74 @@ body.tower-layout #hero-bar, .modal-box, body.tower-layout #float-log, body.towe
 .waystone-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
 .waystone-btn { text-align: left; font-family: Georgia, serif; }
 .waystone-btn small { color: #8a5a00; }
+
+/* ===== Tower Chaos: interfaz en pixel art (PRUEBA, 2026-10-13; va con el suelo en pixel art, towerPixel.js) =====
+   Con body.pixel-ui (se prende junto con el pixel art en la Torre): paneles oscuros con borde de píxeles (contorno
+   negro, borde claro adentro, luz arriba a la izquierda), fuente pixel (Pixelify Sans) y texto claro. Pisa el tema de
+   pergamino (body.ink-theme) sin borrarlo: apagado, todo queda como estaba. */
+body.pixel-ui {
+    --px-bg: #15120f; --px-panel: #241e19; --px-cell: #2f2822; --px-cell2: #3a3129; --px-line: #0b0908; --px-edge: #5d5043;
+    --px-hi: #8a7a64; --px-text: #efe4cc; --px-dim: #b8a98f; --px-title: #f0a060; --px-gold: #e8c060; --px-red: #c8402e; --px-blue: #3f78c8;
+    background: var(--px-bg); color: var(--px-text);
+}
+body.pixel-ui, body.pixel-ui *, body.pixel-ui button, body.pixel-ui input { font-family: 'Pixelify Sans', 'Consolas', monospace !important; }
+body.pixel-ui img { image-rendering: pixelated; }
+/* Paneles */
+body.pixel-ui .modal-box, body.pixel-ui #hero-bar, body.pixel-ui #map-hud, body.pixel-ui #center-timer, body.pixel-ui #log-panel,
+body.pixel-ui #inv-tooltip, body.pixel-ui #tshop-tooltip, body.pixel-ui #smith-tooltip, body.pixel-ui #inv-bag, body.pixel-ui #combat-log {
+    background: var(--px-panel) !important; color: var(--px-text) !important; border: 3px solid var(--px-line) !important; border-radius: 0 !important;
+    box-shadow: inset 0 0 0 2px var(--px-edge), inset 4px 4px 0 2px rgba(255,255,255,0.05), 0 4px 0 rgba(0,0,0,0.55) !important;
+}
+body.pixel-ui #map-wrap { border: 3px solid var(--px-line); box-shadow: 0 0 0 2px var(--px-edge), 0 8px 24px rgba(0,0,0,0.6); }
+body.pixel-ui #game-container { background: var(--px-bg); border-color: var(--px-edge); }
+/* Celdas, filas y botones */
+body.pixel-ui .bag-cell, body.pixel-ui .item-slot.empty, body.pixel-ui .skill-slot.empty { background: var(--px-bg) !important; border: 2px solid var(--px-cell2) !important; border-radius: 0 !important; color: var(--px-dim) !important; }
+body.pixel-ui .bag-item, body.pixel-ui .gear-slot, body.pixel-ui .skill-card, body.pixel-ui .skill-slot, body.pixel-ui .item-slot, body.pixel-ui .tshop-row,
+body.pixel-ui .beast-row, body.pixel-ui .notebook-page, body.pixel-ui .craft-pick, body.pixel-ui .key-cap, body.pixel-ui .pm-toggle, body.pixel-ui .forge-card,
+body.pixel-ui .score-row, body.pixel-ui .passive-chip, body.pixel-ui #hb-symbol, body.pixel-ui #hb-effects .fx-chip, body.pixel-ui #float-log p {
+    background: var(--px-cell) !important; color: var(--px-text) !important; border: 2px solid var(--px-line) !important; border-radius: 0 !important;
+    box-shadow: inset 2px 2px 0 rgba(255,255,255,0.06), inset -2px -2px 0 rgba(0,0,0,0.3) !important;
+}
+body.pixel-ui .craft-pick.on, body.pixel-ui .pm-toggle.on { border-color: var(--px-gold) !important; }
+body.pixel-ui .skill-slot.ult { border-color: var(--px-title) !important; }
+body.pixel-ui button.secondary-btn, body.pixel-ui .logbook-tabs button, body.pixel-ui .bestiary-views button, body.pixel-ui #tower-badges button,
+body.pixel-ui #map-hud button, body.pixel-ui .modal-close {
+    background: var(--px-cell2) !important; color: var(--px-text) !important; border: 2px solid var(--px-line) !important; border-radius: 0 !important;
+    box-shadow: inset 2px 2px 0 rgba(255,255,255,0.1), inset -2px -2px 0 rgba(0,0,0,0.35), 0 2px 0 var(--px-line) !important;
+}
+body.pixel-ui button.secondary-btn:hover, body.pixel-ui .logbook-tabs button:hover, body.pixel-ui #tower-badges button:hover { background: #4a3f34 !important; }
+body.pixel-ui button.primary-btn { background: #8a2f22 !important; color: #fff2dc !important; border: 2px solid var(--px-line) !important; border-radius: 0 !important;
+    box-shadow: inset 2px 2px 0 rgba(255,255,255,0.18), inset -2px -2px 0 rgba(0,0,0,0.35), 0 3px 0 var(--px-line) !important; }
+body.pixel-ui button.primary-btn:hover { background: #a3392a !important; }
+body.pixel-ui .logbook-tabs button.on, body.pixel-ui .bestiary-views button.on { background: var(--px-panel) !important; color: var(--px-gold) !important; }
+body.pixel-ui #tower-badges button { color: var(--px-gold) !important; }
+/* Barras de vida y maná, habilidades */
+body.pixel-ui .hb-bar { background: var(--px-line) !important; border: 2px solid var(--px-line) !important; border-radius: 0 !important; }
+body.pixel-ui #hb-hp-fill { background: linear-gradient(var(--px-red) 0 60%, #8a2a1e 60%) !important; }
+body.pixel-ui #hb-mana-fill { background: linear-gradient(var(--px-blue) 0 60%, #2a5290 60%) !important; }
+body.pixel-ui .hb-bar span, body.pixel-ui #hb-hp-text, body.pixel-ui #hb-mana-text { color: #fff2dc !important; text-shadow: 1px 1px 0 #000 !important; }
+body.pixel-ui .skill-slot .key { background: var(--px-line) !important; color: var(--px-gold) !important; }
+body.pixel-ui .skill-slot .cd { background: rgba(11,9,8,0.65) !important; }
+body.pixel-ui .skill-slot .pips i { border-color: var(--px-line) !important; border-radius: 0 !important; }
+body.pixel-ui .skill-slot .pips i.on { background: var(--px-gold) !important; }
+body.pixel-ui .skill-slot .combo b { border-radius: 0 !important; border-color: var(--px-line) !important; }
+/* Texto: el pergamino forzaba tinta oscura en todo */
+body.pixel-ui #left-col, body.pixel-ui #left-col *, body.pixel-ui #map-hud, body.pixel-ui #map-hud *, body.pixel-ui #hero-bar, body.pixel-ui #hero-bar *,
+body.pixel-ui #log-panel, body.pixel-ui #log-panel *, body.pixel-ui #phase-area, body.pixel-ui #phase-area *, body.pixel-ui .stat-value, body.pixel-ui #hero-stats,
+body.pixel-ui #hero-stats b, body.pixel-ui .tt-skill, body.pixel-ui #combat-log, body.pixel-ui .modal-box { color: var(--px-text); }
+body.pixel-ui .subtitle, body.pixel-ui .stat-gives, body.pixel-ui .stat-spent, body.pixel-ui .pm-toggle span, body.pixel-ui #center-timer .ct-label { color: var(--px-dim) !important; }
+body.pixel-ui h3, body.pixel-ui h4, body.pixel-ui .modal-head h3, body.pixel-ui .section-title, body.pixel-ui #game-state-text, body.pixel-ui #map-hud .mh-gold,
+body.pixel-ui #hb-name, body.pixel-ui .skill-card h4, body.pixel-ui .forge-card h4, body.pixel-ui #center-timer .ct-time { color: var(--px-title) !important; font-variant: normal !important; letter-spacing: 0.5px; }
+body.pixel-ui .st-str, body.pixel-ui #left-col .st-str { color: #ff7a6a !important; }
+body.pixel-ui .st-agi, body.pixel-ui #left-col .st-agi { color: #7ad08a !important; }
+body.pixel-ui .st-int, body.pixel-ui #left-col .st-int { color: #7fb0ff !important; }
+body.pixel-ui .tt-mods, body.pixel-ui .tt-kind, body.pixel-ui .tt-cost, body.pixel-ui .forge-card .meta, body.pixel-ui .passive-chip, body.pixel-ui .passive-chip * { color: #7fd0d8 !important; }
+body.pixel-ui .tt-weapon { color: #f0a050 !important; }
+body.pixel-ui .tt-forged { color: var(--px-gold) !important; }
+body.pixel-ui .passive-chip .badge-innate { background: #2f6a72 !important; color: #fff2dc !important; }
+body.pixel-ui .stat-row { border-bottom-color: var(--px-cell2) !important; }
+body.pixel-ui .tt-skill { border-top-color: var(--px-cell2) !important; }
+body.pixel-ui #combat-log p { border-bottom: 1px dotted var(--px-cell2) !important; }
+body.pixel-ui #float-log p { box-shadow: none !important; background: rgba(36,30,25,0.88) !important; }
+body.pixel-ui .pm-toggle.on span { color: #7ad08a !important; }
+body.pixel-ui a { color: var(--px-gold); }

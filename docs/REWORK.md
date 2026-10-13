@@ -637,6 +637,14 @@ con tramado, 8 píxeles por casilla); la noche baja al tamaño del píxel de los
 (lluvia, nieve, hojas, arena, ceniza, luciérnagas y brasas) cae en píxeles. En la capa de efectos, lo transparente pasa a
 tramado en vez de cortarse: el área tenue de los avisos de golpe y de las zonas de los jefes se sigue viendo entera.
 
+**La interfaz (2026-10-13, `js/towerPixelUi.js` y el final de `style.css`):** con el pixel art prendido, `body.pixel-ui`
+pone encima del pergamino un tema de paneles oscuros con borde de píxeles (contorno negro, borde claro adentro, luz
+arriba a la izquierda), botones gruesos, barras de vida y maná planas y la fuente Pixelify Sans (Google Fonts) en todas
+las ventanas, la barra del héroe y los avisos. En el canvas, la letra de los carteles pasa a la misma fuente y, en la
+pasada de interfaz (título del piso, barra del jefe, campeones, mapa grande, cartel del arma), los colores del pergamino
+se cambian por los del panel oscuro desde el contexto del canvas (sin tocar cada función). Sin la viñeta de papel.
+Pendiente menor: los colores del minimapa siguen siendo los del pergamino.
+
 ### Ideas para las criaturas (propuesta externa revisada, 2026-10-13; para después, de a una)
 - ✅ **Alas que vuelan:** ignoran fango, lava y trampas; si las aturdís, caen y pierden eso.
 - ✅ **Dúos de rol + cuerpo** con nombre (pocos, no todas las combinaciones): escorpión maldiciente deja charcos
