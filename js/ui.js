@@ -911,8 +911,8 @@ function drawUnit(u, color, symbol, pos = u, opts = {}) {
         ctx.shadowBlur = 0;
     }
     if ((u.effects && u.effects.length) || u.elMark) drawStatusFx(u, cx, cy, halfHeight); // estados y marca de elemento (fxSkills.js)
-    if (u === player) drawDashMeter(u, cx, cy);
-    if (u.maxHp) {
+    if (u === player && u.isAlive()) drawDashMeter(u, cx, cy);
+    if (u.maxHp && u.isAlive()) { // tendido (la caída del héroe, towerPixelHero.js): sin barra
         const pct = Math.max(0, u.hp / u.maxHp), w = Math.max(TILE - 4, opts.big ? 40 : 0), top = cy - halfHeight - 3;
         const ink = gameMode === 'tower'; // en la Torre: barra roja con borde de tinta
         ctx.fillStyle = ink ? '#1d1712' : 'rgba(0,0,0,0.7)'; ctx.fillRect(cx - w / 2 - 1, top - 1, w + 2, 5);

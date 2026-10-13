@@ -396,7 +396,7 @@ function renderStatsWindow() {
 const DEATH = { lose: 0.5, stack: true }; // decisión del usuario (2026-10-08): los restos se suman, nunca se pierde nada para siempre
 function towerHeroDeath(hero, killer) {
     const level = hero.arena;
-    hero.hp = 0;
+    hero.hp = 0; hero.diedAt = gameClock; // diedAt: la caída en pixel art (towerPixelHero.js)
     hero.effects = hero.effects.filter(e => e.flags.includes('persistent'));
     hero.respawnAt = gameClock + TOWER.respawnDelay;
     towerRun.deaths++;
@@ -604,6 +604,7 @@ function renderTower(level, dt) {
         ctx.beginPath(); ctx.arc(x, y, p.isCrit ? 4 : 3, 0, Math.PI * 2); ctx.fill();
     });
     if (!px) drawProjectiles();
+    if (!player.isAlive() && px && player.arena === level && player.diedAt !== undefined && gameClock - player.diedAt < TOWER.respawnDelay) drawUnit(player, heroColor(player), player.symbol, { x: player.x, y: player.y }, {}); // cae y queda tendido hasta renacer
     if (player.isAlive()) {
         const pos = drawPos(player, dt);
         if (!px) { // (en pixel art, el aro de puntos va en la capa de efectos)

@@ -353,15 +353,6 @@ function pxhWeapon(S, hx, hy, L, f) {
         default: S.rect(mx, my - 1, 3, 2, st[2]); S.set(mx + 2, my - 1, st[3]); // puños: guantelete
     }
 }
-// Combo de la espada (2026-10-14, pedido: "mejorar la animación de ataque para que sea un combo"): cada uno de los 3
-// tajos tiene su pose. Mirando a la derecha; ang en grados (0 = adelante, -90 = arriba, 90 = abajo); hand: corrimiento
-// de la mano desde su lugar; lean: cuánto se inclina el cuerpo. 0: tajo de arriba hacia adelante, 1: revés de abajo hacia
-// arriba, 2: el remate (las dos manos arriba y golpe al piso).
-const PXH_COMBO = [
-    { prep: { hand: [-1, -5], ang: -125, lean: -1 }, hit: { hand: [3, -1], ang: 25, lean: 1 } },
-    { prep: { hand: [-1, 1], ang: 160, lean: -1 }, hit: { hand: [3, -4], ang: -45, lean: 1 } },
-    { prep: { hand: [0, -7], ang: -95, lean: -1, both: true }, hit: { hand: [4, 1], ang: 40, lean: 2, both: true, impact: true } }
-];
 // La hoja desde la mano: filo claro, lomo oscuro, guarda dorada cruzada y la punta que brilla
 function pxhBlade(S, x, y, ang, len = 10) {
     const a = ang * Math.PI / 180, dx = Math.cos(a), dy = Math.sin(a), px = -dy, py = dx;
@@ -380,72 +371,7 @@ function pxhSmear(S, x, y, from, to, r = 9) {
         if (t > 0.4) S.set(x + Math.cos(a) * (r - 1), y + Math.sin(a) * (r - 1), col);
     }
 }
-function pxhDraw(S, L, f) {
-    const b = f.bob, ph = f.ph, br = f.br;
-    const C = pxbPalette(L.cape), H = pxbPalette(L.hood), T = pxbPalette(L.trim), cloth = ['#4f473c', '#665c4d', '#7f735f', '#978a72', '#ada087'];
-    const legs = ['#231d1a', '#352d29', '#4a403a'], st = PXB_STEEL, sway = f.walk >= 0 ? f.walk % 2 : (f.sway ?? br);
-    const sw = f.swing ? PXH_COMBO[f.swing.step][f.swing.ph === 0 ? 'prep' : 'hit'] : null, lean = sw ? sw.lean : 0; // tajo del combo
-    pxbShadow(S, 8, 23, 5.5);
-    // Capa (atrás, flamea al caminar)
-    for (let y = 8; y <= 21; y++) {
-        const left = 6 - Math.round((y - 8) * 0.32) - (y > 15 ? sway : 0), yy = y + (y < 16 ? b + br : 0);
-        for (let x = left; x <= 8; x++) S.set(x, yy, C[x === left ? 0 : x < left + 2 ? 1 : 2]);
-    }
-    // Pierna de atrás, brazo de atrás (guantelete; en el remate sube con la otra mano)
-    S.rect(6 - ph - (sw && sw.lean > 1 ? 1 : 0), 16 + b, 2, 7 - b, legs[0]); S.rect(6 - ph - (sw && sw.lean > 1 ? 1 : 0), 21, 2, 2, T[1]);
-    if (sw && sw.both) S.line(5 + lean, 10 + b + br, 10 + lean + sw.hand[0], 15 + b + br + sw.hand[1], st[1], 2);
-    else { S.rect(4 + lean, 10 + b + br, 2, 5, st[1]); S.set(4 + lean, 15 + b + br, st[0]); S.set(5 + lean, 15 + b + br, st[0]); }
-    // Torso: túnica con el tabardo del ribete y cinturón
-    const sh = f.inhale ? -1 : 0; // al inspirar suben los hombros
-    S.ball(8.5 + lean * 0.5, 12.5 + b + br, 3.6, 4, cloth);
-    S.rect(8 + lean, 10 + b + br, 2, 6, T[2]); S.rect(8 + lean, 10 + b + br, 1, 6, T[3]);
-    S.rect(5, 15 + b, 8, 1, '#3a2a1c'); S.set(9, 15 + b, '#e0b84a');
-    // Esclavina: la capa sobre los hombros (así se ve su color de frente)
-    S.rect(5 + lean, 8 + b + br + sh, 7, 3, C[2]); S.rect(5 + lean, 8 + b + br + sh, 7, 1, C[3]); S.set(11 + lean, 10 + b + br + sh, C[1]); S.set(5 + lean, 10 + b + br + sh, C[1]);
-    // Pierna de adelante (en el remate, el paso largo)
-    const lunge = sw && sw.lean > 1 ? 1 : 0;
-    S.rect(9 + ph + lunge, 16 + b, 2, 7 - b, legs[1]); S.set(9 + ph + lunge, 16 + b, legs[2]); S.rect(9 + ph + lunge, 21, 2, 2, T[2]); S.set(10 + ph + lunge, 21, T[3]);
-    // Capucha con la cara en sombra y dos ojos rojos que brillan (parpadean de vez en cuando)
-    const hy = 5.5 + b + br, hx = 8.5 + lean;
-    S.ball(hx, hy, 3.5, 3.4, H); S.set(hx - 3.5, hy - 2, H[1]); S.set(hx - 4.5, hy - 1, H[1]);
-    S.ball(hx + 1.7, hy + 0.6, 1.9, 1.8, ['#0c0a09', '#15110f', '#1d1815', '#241e1a', '#2b2420']);
-    const eye = f.blink ? '#2a0806' : '#ff2a1f', eye2 = f.blink ? '#2a0806' : '#e0180e';
-    S.set(hx + 1.5, hy + 0.4, eye2); S.set(hx + 3.5, hy + 0.4, eye);
-    if (!f.blink && f.swing && f.swing.ph === 1) { S.set(hx + 1.5, hy - 0.6, '#ff6a50'); S.set(hx + 3.5, hy - 0.6, '#ff6a50'); } // en el tajo, se encienden
-    // Brazo de adelante y el arma
-    if (sw) { // tajo del combo: el brazo va hacia la mano y la hoja sale con su ángulo
-        const sx = 11 + lean, sy = 10 + b + br, mx = 11 + sw.hand[0] + lean, my = 15 + b + br + sw.hand[1];
-        if (f.swing.ph === 1) pxhSmear(S, mx, my, PXH_COMBO[f.swing.step].prep.ang, sw.ang, 9 + (f.swing.step === 2 ? 1 : 0));
-        S.line(sx, sy, mx, my, st[2], 2); S.set(sx, sy, st[3]);
-        pxhBlade(S, mx, my, sw.ang, f.swing.step === 2 ? 11 : 10);
-        S.rect(mx, my, 2, 1, st[1]);
-        if (sw.impact && f.swing.ph === 1) { const a = sw.ang * Math.PI / 180; [[1, 0], [0, 1], [-1, 1], [2, 1]].forEach(([ox, oy]) => S.set(mx + Math.cos(a) * 12 + ox, my + Math.sin(a) * 12 + oy, ox % 2 ? '#ffd166' : '#ffffff')); } // chispas del remate
-        return;
-    }
-    S.rect(11, 10 + b + br, 2, 5, st[2]); S.set(11, 10 + b + br, st[3]);
-    pxhWeapon(S, 11, 15 + b + br, L, f);
-    S.rect(11, 15 + b + br, 2, 1, st[1]);
-}
-PXB.hero = { w: 18, h: 24, head: [8, 2], back: [8, 9], draw() {} };
-function pxbHeroFrame(L, kind, k) {
-    const key = ['hero', L.cape, L.hood, L.trim, L.glow, L.weapon, kind, k].join('|');
-    if (pxbCache[key]) return pxbCache[key];
-    // reposo (2026-10-14): 4 cuadros de respiración (inspira: suben los hombros; espira: baja el cuerpo) con la capa que se
-    // mece, y el parpadeo de los ojos (k + 4); swing: los cuadros del combo de la espada (k = tajo × 3 + fase)
-    const f = kind === 'walk' ? { walk: k, idle: 0, ph: [0, 1, 0, -1][k], bob: k % 2 ? -1 : 0, br: 0 }
-        : kind === 'attack' ? { walk: -1, idle: 0, ph: 0, bob: 0, br: 0, atk: 1 } // golpe de arma visible (pxhWeapon)
-        : kind === 'swing' ? { walk: -1, idle: 0, ph: 0, bob: 0, br: 0, swing: { step: Math.floor(k / 3), ph: k % 3 } }
-        : { walk: -1, idle: k % 4, ph: 0, bob: 0, br: [0, 0, 1, 1][k % 4], inhale: (k % 4) === 1, sway: [0, 1, 1, 0][k % 4], blink: k >= 4 };
-    const make = white => {
-        const ex = f.swing ? 8 : 0; // los tajos del combo salen del cuerpo: más lienzo a los lados y arriba (sigue centrado)
-        const c = pxSprite(PXB.hero.w + PXB_PAD * 2 + ex * 2, PXB.hero.h + PXB_PAD + ex, S => { S.tx = PXB_PAD + ex; S.ty = PXB_PAD + ex; pxhDraw(S, L, f); S.outline('#110d0b'); });
-        if (white) { const g = c.getContext('2d'); g.globalCompositeOperation = 'source-in'; g.fillStyle = '#ffffff'; g.fillRect(0, 0, c.width, c.height); }
-        return c;
-    };
-    const fr = { img: make(false), _white: null };
-    Object.defineProperty(fr, 'white', { get() { return this._white || (this._white = make(true)); } });
-    return (pxbCache[key] = fr);
-}
+// El dibujo del héroe por poses (pxhPose, pxbHeroFrame, pxhPick) está en towerPixelHero.js.
 // Retrato de la barra del héroe: busto en pixel art
 const pxhPortraitCache = {};
 function pixelPortrait(u) {
@@ -497,19 +423,7 @@ function drawPixelUnit(u, cx, cy, facing, flash, pose) {
     // Golpe de arma visible (2026-10-14): en el instante del golpe (ni al arrancar ni al terminar la animación
     // de ataque) el héroe pasa a su cuadro de ataque, donde el arma se extiende o brilla según su forma
     // (pxhWeapon) — aparte del giro/estirón de todo el cuerpo que ya hace attackPose() (fx.js).
-    if (body === 'hero' && !moving) { // respira (4 cuadros, ~1,6 s) y parpadea cada tanto
-        k = Math.floor(((fxClock / 1.6 + (u.bobSeed || 0)) % 1) * 4);
-        if ((fxClock + (u.bobSeed || 0) * 7) % 3.3 < 0.14) k += 4;
-    }
-    const combo = body === 'hero' && gameMode === 'tower' && typeof swordWielder === 'function' && swordWielder(u);
-    if (body === 'hero' && u.fxAttack) {
-        const t = (fxClock - u.fxAttack.at) / ATTACK_ANIM[u.fxAttack.kind];
-        if (combo && u.fxSwingStep !== undefined && t < 1) { kind = 'swing'; k = u.fxSwingStep * 3 + (t < 0.5 ? 1 : 2); } // el tajo con su estela, después el seguimiento
-        else if (t >= 0.15 && t < 0.85) { kind = 'attack'; k = 0; }
-    } else if (combo && u.attackTimer > 0 && inCombat()) { // preparando el próximo tajo (mantener el clic o automático)
-        const frac = u.attackTimer * effAtkSpeed(u);
-        if (frac > 0.6 && frac < 1) { kind = 'swing'; k = (u.comboStep || 0) * 3; }
-    }
+    if (body === 'hero') ({ kind, k } = pxhPick(u, moving)); // el héroe: su cuadro según lo que está haciendo (towerPixelHero.js)
     const fr = body === 'hero' ? pxbHeroFrame(pxHeroLook(u), kind, k) : pxbFrame(body, u.color, (u.type.parts || []), kind, k), img = flash ? fr.white : fr.img, s = pxbScale(u);
     ctx.save();
     ctx.translate(cx, cy + TILE * 0.45);

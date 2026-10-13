@@ -1559,6 +1559,26 @@ test('Torre: parada de la espada (clic derecho) — devuelve la bala a quien la 
     check(player.parryReadyAt - gameClock > 0.9, 'parada al aire: tarda en volver');
     check(!swordParry(player, { x: player.x + 3, y: player.y }), 'no se puede repetir enseguida');
 });
+test('Torre: el héroe en pixel art se anima por poses — cada movimiento elige su cuadro (correr, combo, esquive, golpe, caída)', () => {
+    newTower('AXE', { weapon: 'ADVENTURER_SWORD' });
+    const u = player, L = pxHeroLook(u);
+    // todos los cuadros se dibujan sin romperse
+    [['idle', 8], ['walk', 8], ['swing', 18], ['attack', 1], ['dash', 4], ['hurt', 2], ['death', 5]].forEach(([kind, n]) => {
+        for (let k = 0; k < n; k++) check(pxbHeroFrame(L, kind, k).img.width > 0, `${kind} ${k}`);
+    });
+    u.fxAttack = null; u.fxHitAt = undefined;
+    checkEq(pxhPick(u, false).kind, 'idle', 'quieto: respira');
+    checkEq(pxhPick(u, true).kind, 'walk', 'moviéndose: corre');
+    u.fxAttack = { kind: 'finisher', dx: 1, dy: 0, at: fxClock - 0.2 }; u.fxSwingStep = 2;
+    const p = pxhPick(u, false); check(p.kind === 'swing' && Math.floor(p.k / 6) === 2, 'el remate usa los cuadros del tercer tajo');
+    u.fxAttack = { kind: 'dashpose', dx: 1, dy: 0, at: fxClock - 0.1 };
+    checkEq(pxhPick(u, true).kind, 'dash', 'esquive: rueda');
+    u.fxAttack = null; u.fxHitAt = fxClock;
+    checkEq(pxhPick(u, false).kind, 'hurt', 'le pegaron: retrocede');
+    u.hp = 0; u.diedAt = gameClock - 5;
+    const d = pxhPick(u, false); check(d.kind === 'death' && d.k === 4, 'muerto: queda tendido');
+    u.hp = u.maxHp;
+});
 test('Torre: Tiro Tensado (arco) — al toque no atraviesa, tensado del todo atraviesa, perfecto suma, tensar frena', () => {
     const level = newTower('AXE', { weapon: 'ADVENTURER_BOW' });
     level.creeps.forEach(c => { c.hp = 0; });

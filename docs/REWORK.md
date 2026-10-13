@@ -739,6 +739,14 @@ el mismo paso; lo grande queda acá, ordenado por impacto.
     (la pose la hace el cuadro). Bajo la capucha, **dos ojos rojos** que se encienden en el tajo y parpadean cada ~3 s;
     en reposo **respira** (4 cuadros: suben los hombros, baja el cuerpo, la capa se mece). En reposo la espada va
     inclinada hacia adelante para no tapar la cara.
+  - **Animación por poses, como en Hades** (2026-10-14, pedido: "un cuadro diferente para cada movimiento",
+    `js/towerPixelHero.js`): el muñeco ya no se dibuja con cuadros fijos sino desde **poses clave** (cuerpo, pies, manos,
+    ángulo de la espada, capa, cabeza) y un solo dibujo que las lee. Correr: 8 cuadros (inclinado, brazos y piernas
+    cruzados, la capa flamea). Cada tajo del combo: 6 (preparación → golpe con estela → seguimiento → guardia; el remate
+    salta con las dos manos arriba, detrás de la capucha, y golpea el piso con chispas). Esquive: 4 (se agacha, rueda, se
+    levanta). Golpe recibido: 2 (la cabeza y el cuerpo atrás). Muerte: 5 (se tambalea, cae de rodillas, queda tendido con
+    los ojos apagados hasta renacer). Las otras armas usan el mismo cuerpo. **Pendiente** (decisión: segundo paso): mirar
+    hacia arriba y hacia abajo (dibujar al encapuchado de frente y de espalda) y agrandar al héroe en pantalla.
 - ✅ Volumen general, música y efectos, y temblor de pantalla (0-150%), con deslizadores en la pausa que se guardan.
 - ✅ La forja ya no corta una pelea: si una pieza sube de nivel peleando aparece un aviso arriba a la izquierda, y la
   ventana se abre sola cuando nadie te persigue.
