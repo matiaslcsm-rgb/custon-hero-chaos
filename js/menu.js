@@ -201,7 +201,7 @@ const TOWER_TUTORIAL_PAGES = [
     { icon: '⚔️', color: '#e8c060', title: 'Las tres armas', art: tutArt([['sword', 'bow', 'staff'].map(w => [() => pxbHeroFrame({ ...TUT_HERO, weapon: w }, 'idle', 0).img, 3])].flat()), body: () => `
         <p class="tut-lead">Al despertar elegís una de las tres armas clavadas en el círculo (acercate y <kbd>${tutK('interact')}</kbd> o clic). Cada una se juega distinto con <kbd>${tutK('skill1')}</kbd>.</p>
         <div class="tut-cards">
-            ${tutCard('🗡', 'Espada', 'Combo de tres tajos en arco. El remate empuja y el tajo desvía proyectiles. Cuerpo a cuerpo y ágil.')}
+            ${tutCard('🗡', 'Espada', 'Clic: combo de tres tajos en arco; el remate empuja y el tajo desvía proyectiles. Clic derecho: parada; si te tiran o te pegan justo, lo devolvés. Sin Q.')}
             ${tutCard('🏹', 'Arco', 'Mantené la tecla para tensar y soltá hacia el cursor: tensada atraviesa. Si soltás justo, es un tiro perfecto.')}
             ${tutCard('🔮', 'Bastón', 'Orbe arcano apuntado que explota en área y marca a los enemigos para las reacciones. Gasta maná.')}
             ${tutCard('🎁', 'Después', 'Otras armas aparecen como botín: cada pieza de equipo viene de un héroe y trae su habilidad.')}

@@ -1304,7 +1304,8 @@ test('Torre: el nivel se genera conectado, con guardián, escalera y creeps con 
     const level = newTower();
     checkEq(gameState, 'TOWER', 'fase de la Torre');
     checkEq(COLS + 'x' + ROWS, TOWER.cols + 'x' + TOWER.rows, 'mundo grande');
-    checkEq(player.skills.map(s => s.id).join(), 'ADVENTURER_GOLPE', 'arranca con la Espada puesta (Golpe Certero)');
+    checkEq(player.gear.weapon && player.gear.weapon.heroKey, 'ADVENTURER_SWORD', 'arranca con la Espada puesta');
+    checkEq(player.skills.filter(s => s.kind === 'active').length, 0, 'la espada no tiene Q (su combo es el ataque básico)');
     const dist = bfsFrom(level, level.start.x, level.start.y);
     check(level.rooms.every(r => dist[r.cy * COLS + r.cx] >= 0), 'todas las salas se alcanzan');
     check(dist[level.stairs.y * COLS + level.stairs.x] >= 0, 'la escalera se alcanza');
@@ -1430,23 +1431,23 @@ test('Torre: al despertar, las 3 armas están clavadas en el círculo; sin arma 
     check(towerClickWeapon({ x: st.x, y: st.y }) && player.hasSkill('ADVENTURER_BOLT'), 'clic en el bastón');
     newTower('AXE', { weapon: null });
     const saved = autopilot; autopilot = true;
-    try { towerAwakenTick(player.arena, { x: player.x, y: player.y }); check(player.hasSkill('ADVENTURER_GOLPE'), 'el piloto agarra la espada'); } finally { autopilot = saved; }
+    try { towerAwakenTick(player.arena, { x: player.x, y: player.y }); checkEq(player.gear.weapon && player.gear.weapon.heroKey, 'ADVENTURER_SWORD', 'el piloto agarra la espada'); } finally { autopilot = saved; }
 });
 
 test('Torre: cada arma inicial da su propia habilidad y atributo; cambiar de arma te la saca', () => {
     ['ADVENTURER_SWORD', 'ADVENTURER_BOW', 'ADVENTURER_STAFF'].forEach(key => {
         newTower('AXE', { weapon: key });
         const w = STARTER_WEAPONS[key];
-        check(player.hasSkill(w.skillId), `tiene ${w.skillId}`);
-        check(player.keyBindings[w.skillId], 'con tecla propia');
+        if (w.skillId) { check(player.hasSkill(w.skillId), `tiene ${w.skillId}`); check(player.keyBindings[w.skillId], 'con tecla propia'); }
+        else checkEq(player.skills.filter(s => s.kind === 'active').length, 0, 'la espada no da Q');
         checkEq(player.primaryAttr, heroOf(key).primaryAttr, 'el atributo principal sale del arma elegida');
     });
     // Cambiar de arma (como con cualquier otra pieza) saca la habilidad vieja y pone la nueva.
-    newTower('AXE', { weapon: 'ADVENTURER_SWORD' });
-    check(player.hasSkill('ADVENTURER_GOLPE'), 'arrancó con Golpe Certero');
+    newTower('AXE', { weapon: 'ADVENTURER_BOW' });
+    check(player.hasSkill('ADVENTURER_VOLLEY'), 'arrancó con Tiro Tensado');
     const entry = towerCatalog().find(e => e.heroKey === 'SNIPER' && e.slot === 'weapon');
     equipItem(player, makeTowerItem(1, entry, 'normal'));
-    check(!player.hasSkill('ADVENTURER_GOLPE'), 'perdió Golpe Certero al cambiar de arma');
+    check(!player.hasSkill('ADVENTURER_VOLLEY'), 'perdió Tiro Tensado al cambiar de arma');
     check(player.hasSkill(entry.skillId), 'tiene la del rifle en su lugar');
 });
 
@@ -1460,34 +1461,13 @@ function towerDummy(level, dx = 1, dy = 0) {
 }
 // Vuela los proyectiles hasta que no quede ninguno (o se acabe el tiempo)
 function flyProjectiles(level, max = 3) { for (let t = 0; t < max && level.projectiles.length; t += 0.02) updateProjectiles(level, 0.02); }
-test('Torre: Combo de Tajos (espada) — arco a todos, remate ×2 que empuja, recuperación y el ritmo se corta', () => {
-    const level = newTower('AXE', { weapon: 'ADVENTURER_SWORD' });
-    level.creeps.forEach(c => { c.hp = 0; });
-    const sk = SKILL_INDEX.ADVENTURER_GOLPE;
-    const a = towerDummy(level, 1, 0), b = towerDummy(level, 1, 1), back = towerDummy(level, -2, 0);
-    player.aimPoint = { x: player.x + 3, y: player.y };
-    check(tryCastSkill(player, sk), 'primer tajo');
-    check(a.hp < 9999 && b.hp < 9999, 'el arco agarra a los dos de adelante');
-    checkEq(back.hp, 9999, 'no al de atrás (fuera del arco)');
-    const d1 = 9999 - a.hp;
-    checkEq(player.comboStep, 1, 'va un tajo');
-    check(player.cooldowns[sk.id] < 0.5, 'entre tajo y tajo, casi nada');
-    player.cooldowns[sk.id] = 0; tryCastSkill(player, sk);
-    player.cooldowns[sk.id] = 0; const ax = a.x, hpBefore = a.hp; tryCastSkill(player, sk);
-    check(hpBefore - a.hp > d1 * 1.5, 'el remate pega mucho más');
-    check(a.x !== ax, 'y empuja');
-    checkEq(player.comboStep, 0, 'vuelve a empezar');
-    check(player.cooldowns[sk.id] > 1, 'después del remate, recuperación');
-    player.cooldowns[sk.id] = 0; tryCastSkill(player, sk); gameClock += 5; player.cooldowns[sk.id] = 0; tryCastSkill(player, sk);
-    checkEq(player.comboStep, 1, 'si tardás, el ritmo se corta y arranca de nuevo');
-    player.aimPoint = null;
-    checkEq(sk.manaCost, undefined); checkEq(val(sk, player, 'manaCost'), 0, 'sin maná');
-});
 test('Torre: ataque básico con clic — cono hacia el cursor, al aire si no hay nadie, mantener repite, disparo apuntado que falla', () => {
     const saved = clickAttack; clickAttack = true;
     try {
         const level = newTower('AXE', { weapon: 'ADVENTURER_SWORD' });
         level.creeps.forEach(c => { c.hp = 0; });
+        equipItem(player, makeTowerItem(1, towerCatalog().find(e => e.heroKey === 'AXE' && e.slot === 'weapon'), 'normal')); // hacha: golpe a uno
+        check(!swordWielder(player), 'el hacha no es espada');
         player.critChance = -1000;
         const front = towerDummy(level, 1, 0), back = towerDummy(level, -1, 0);
         const period = 1 / effAtkSpeed(player), step = dt => updateHero(player, level, dt);
@@ -1517,6 +1497,67 @@ test('Torre: ataque básico con clic — cono hacia el cursor, al aire si no hay
         clickAttack = false; tgt.hp = 9999; player.attackTimer = 0; updateHero(player, lv2, p2 * 1.01); for (let i = 0; i < 40; i++) updateProjectiles(lv2, 0.05);
         check(tgt.hp < 9999, 'con el clic apagado vuelve el ataque automático');
     } finally { clickAttack = saved; attackButton.held = false; attackButton.queuedAt = -99; mouse.over = false; }
+});
+test('Torre: espada sin Q — el clic es el combo de 3 tajos en arco (remate ×2 que empuja y tarda más), también en automático', () => {
+    const saved = clickAttack; clickAttack = true;
+    try {
+        const level = newTower('AXE', { weapon: 'ADVENTURER_SWORD' });
+        level.creeps.forEach(c => { c.hp = 0; });
+        player.critChance = -1000;
+        checkEq(player.skills.filter(s => s.kind === 'active').length, 0, 'sin Q');
+        const a = towerDummy(level, 1, 0), b = towerDummy(level, 1, 1), back = towerDummy(level, -1, 0);
+        const P = 1 / effAtkSpeed(player);
+        Object.assign(mouse, { x: player.x + 3, y: player.y, over: true });
+        attackButton.queuedAt = gameClock; updateHero(player, level, 0.01 + P);
+        check(a.hp < 9999 && b.hp < 9999, 'el tajo agarra a los dos de adelante'); checkEq(back.hp, 9999, 'no al de atrás');
+        checkEq(player.comboStep, 1, 'va un tajo');
+        const d1 = 9999 - a.hp;
+        attackButton.queuedAt = gameClock; updateHero(player, level, P);
+        const ax = a.x, before = a.hp; attackButton.queuedAt = gameClock; updateHero(player, level, P);
+        check(before - a.hp > d1 * 1.6, 'el remate pega mucho más'); check(a.x !== ax, 'y empuja');
+        checkEq(player.comboStep, 0, 'vuelve a empezar');
+        check(Math.abs(attackGap(player) - P * SWORD_BASIC.afterFinisher) < 1e-9, 'después del remate, el que sigue tarda un poco más');
+        gameClock += 5; check(Math.abs(attackGap(player) - P) < 1e-9, 'si cortás el ritmo, vuelve al de siempre');
+        // Al aire: sin nadie adelante igual tira el tajo (el ritmo es tuyo)
+        Object.assign(mouse, { x: player.x, y: player.y - 3 }); a.hp = b.hp = back.hp = 9999; player.comboStep = 0;
+        attackButton.queuedAt = gameClock; updateHero(player, level, P);
+        checkEq(player.comboStep, 1, 'tajo al aire: cuenta para el combo'); checkEq(a.hp + back.hp, 19998, 'no le pegó a nadie');
+        // Automático (pausa o piloto): el combo también
+        clickAttack = false; player.comboStep = 0; player.attackTimer = 0; level.creeps.forEach(c => { c.hp = 0; }); const near = towerDummy(level, 1, 0);
+        gameClock += 5; updateHero(player, level, P * 1.01); updateHero(player, level, P * 1.01);
+        check(near.hp < 9999 && player.comboStep === 2, 'en automático también encadena tajos');
+    } finally { clickAttack = saved; attackButton.held = false; attackButton.queuedAt = -99; mouse.over = false; }
+});
+test('Torre: parada de la espada (clic derecho) — devuelve la bala a quien la tiró, para el golpe y aturde, solo de ese lado', () => {
+    const level = newTower('AXE', { weapon: 'ADVENTURER_SWORD' });
+    level.creeps.forEach(c => { c.hp = 0; });
+    for (let x = -6; x <= 6; x++) level.walls[player.y][player.x + x] = 0;
+    // un tirador a la derecha
+    const g = makeCreep(CREEP_TYPES.ARCHER, player.x + 5, player.y, 1, false, 0); Object.assign(g, { arena: level, hp: 500, maxHp: 500, spawnTime: -1e9 }); level.creeps.push(g);
+    level.bullets = []; spawnBullet(g, Math.PI, 6, 1); level.bullets[0].x = player.x + 1.2;
+    const dmg0 = level.bullets[0].dmg, hp0 = player.hp;
+    check(swordParry(player, { x: player.x + 3, y: player.y }), 'abre la parada');
+    parryTick(player);
+    const b = level.bullets[0];
+    check(b.reflected && b.vx > 0, 'la bala vuelve para el otro lado'); check(b.dmg > dmg0 * 1.9, 'el doble de fuerte (o más)');
+    check(player.parryReadyAt - gameClock < 0.2, 'agarró algo: se recarga casi enseguida');
+    for (let i = 0; i < 40 && level.bullets.length; i++) towerBulletsTick(level, 0.05);
+    check(g.hp < 500, 'le pegó al que la tiró'); checkEq(player.hp, hp0, 'a vos no');
+    // golpe cuerpo a cuerpo desde el lado de la parada: no te toca y lo aturde
+    gameClock += 2; player.parry = null; player.parryReadyAt = 0;
+    const m = towerDummy(level, 1, 0); m.hp = 500;
+    swordParry(player, { x: player.x + 3, y: player.y });
+    creepStrike(m, player, 40);
+    checkEq(player.hp, hp0, 'parado: no te toca'); check(hasFlag(m, 'stun'), 'y queda aturdido');
+    // desde atrás no sirve
+    const behind = towerDummy(level, -1, 0);
+    creepStrike(behind, player, 40);
+    check(player.hp < hp0, 'el de atrás sí te pega');
+    // fallar la parada cuesta: 1 s sin poder repetirla
+    gameClock += 2; player.parry = null; player.parryReadyAt = 0; level.bullets = [];
+    swordParry(player, { x: player.x, y: player.y - 3 }); parryTick(player);
+    check(player.parryReadyAt - gameClock > 0.9, 'parada al aire: tarda en volver');
+    check(!swordParry(player, { x: player.x + 3, y: player.y }), 'no se puede repetir enseguida');
 });
 test('Torre: Tiro Tensado (arco) — al toque no atraviesa, tensado del todo atraviesa, perfecto suma, tensar frena', () => {
     const level = newTower('AXE', { weapon: 'ADVENTURER_BOW' });
@@ -1590,7 +1631,7 @@ test('Torre: tiradores — avisan, disparan su patrón, la bala pega, el esquive
     check(d && d.dy !== 0, 'se corre de la línea');
     // la espada la desvía
     level.bullets = []; spawnBullet(g, Math.PI, 6, 1); level.bullets[0].x = player.x + 1.2;
-    player.aimPoint = { x: player.x + 3, y: player.y }; player.cooldowns.ADVENTURER_GOLPE = 0; tryCastSkill(player, SKILL_INDEX.ADVENTURER_GOLPE); player.aimPoint = null;
+    towerSwordAttack(player, { x: player.x + 3, y: player.y });
     checkEq(level.bullets.length, 0, 'el tajo la desvía');
 }, { random: true });
 
@@ -1632,7 +1673,7 @@ test('Torre: interfaz de combate — la ranura Q muestra la carga del arco y el 
     // combo
     newTower('AXE', { weapon: 'ADVENTURER_SWORD' });
     const box = document.createElement('div'); box.innerHTML = '<span class="combo"><b></b><b></b><b></b></span>';
-    player.comboStep = 2; player.comboAt = gameClock; feelSlotCombo(box, player);
+    player.comboStep = 2; player.comboAt = gameClock; player.comboUntil = gameClock + 1; feelSlotCombo(box, player);
     checkEq(box.querySelectorAll('.combo b.on').length, 2, 'dos tajos');
     check(box.querySelector('.combo').classList.contains('next-finisher'), 'el próximo es el remate');
     gameClock += 5; feelSlotCombo(box, player);

@@ -479,8 +479,9 @@ function updateHero(hero, arena, dt) {
         // pausa: mientras camina el ataque no avanza, pero conserva lo que tenía cargado
     } else if (target) {
         hero.attackTimer += dt;
-        if (hero.attackTimer >= (1 / effAtkSpeed(hero))) {
+        if (hero.attackTimer >= (gameMode === 'tower' ? attackGap(hero) : 1 / effAtkSpeed(hero))) {
             hero.attackTimer = 0;
+            if (swordWielder(hero)) { towerSwordAttack(hero, target); hero.regenTick(dt); tickCooldowns(hero, dt); return; } // Torre, espada: el combo de 3 tajos (towerClickAttack.js)
             const { dmg, isCrit } = rollAttackDamage(hero, target);
             if (hero.projectileSpeed > 0) { fxAttack(hero, target, 'ranged', heroColor(hero)); fxHeroShot(hero, target); fireProjectile(hero, target, dmg, isCrit); }
             else { fxAttack(hero, target, 'melee'); fxHeroAttack(hero, target, isCrit); resolveBasicHit(hero, target, dmg, isCrit); } // según el arma (fxSkills.js)

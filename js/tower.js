@@ -78,7 +78,7 @@ function chooseStarterWeapon(weaponKey) {
     if (!w || !player) return;
     giveStarterWeapon(player, weaponKey);
     if (towerRun) towerRun.starterPending = false; // las otras dos se hunden (towerAwaken.js)
-    log(`🗡️ Elegiste ${w.noun}: tenés ${SKILL_INDEX[w.skillId].name} en la ${player.keyBindings[w.skillId].toUpperCase()}.`);
+    log(w.skillId ? `🗡️ Elegiste ${w.noun}: tenés ${SKILL_INDEX[w.skillId].name} en la ${player.keyBindings[w.skillId].toUpperCase()}.` : `🗡️ Elegiste ${w.noun}: ${w.why}`);
 }
 
 function towerLevel(floor) {
@@ -283,6 +283,7 @@ function updateTower(dt) {
     updateHero(player, level, dt);
     towerAwakenTick(level, from); // sin arma no salís del círculo; el piloto agarra la espada (towerAwaken.js)
     towerFeelTick(player); // tensar el arco (towerFeel.js)
+    parryTick(player); // la parada de la espada (towerParry.js)
     unstickFromWall(player);
     // Cuaderno (REWORK.md §1): moverse y esquivar se detectan leyendo el estado, sin tocar el código compartido.
     if (keys[KEYMAP.up] || keys[KEYMAP.left] || keys[KEYMAP.down] || keys[KEYMAP.right]) writeNotebookPage('MOVE');

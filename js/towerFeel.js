@@ -5,6 +5,8 @@
 //   con remate), el arco cargado de Hyper Light Drifter / Hades (mantener, apuntar, soltar) y la "recarga activa"
 //   de Gears of War (soltar justo en el momento da un plus).
 //
+//   (2026-10-13: la espada ya no tiene Q. El combo de 3 tajos es su ataque básico con el clic izquierdo y el clic derecho
+//   es la parada que refleja; ver towerClickAttack.js y towerParry.js. La Q de abajo queda para las pruebas viejas.)
 //   ESPADA · Combo de Tajos: cada toque de Q tira un tajo en arco hacia el cursor que agarra a TODOS los que están en
 //   el arco; el tercero es el remate (×2, empuja y frena el tiempo un instante). Enfriamiento corto entre tajos y una
 //   recuperación después del remate. Sin maná: el límite es el ritmo. Mantener la Q encadena solo.
@@ -26,10 +28,11 @@ function aimDirection(c, maxRange = 6) {
     const dx = t ? t.x - c.x : c.facing || 1, dy = t ? t.y - c.y : 0, d = Math.hypot(dx, dy) || 1;
     return { dx: dx / d, dy: dy / d, dist: t ? Math.hypot(t.x - c.x, t.y - c.y) : 0 };
 }
-function inArc(c, e, dir, reach, halfArc) {
+function inArc(c, e, dir, reach, halfArc, nearArc = null) {
     const vx = e.x - c.x, vy = e.y - c.y, d = Math.hypot(vx, vy);
     if (d > reach) return false;
-    if (d <= 1.01) return true; // pegado: siempre lo agarra (en casillas, el de al lado está a 1)
+    if (d <= 1.01 && nearArc === null) return true; // pegado: siempre lo agarra (en casillas, el de al lado está a 1)
+    if (d <= 1.01) return Math.acos(Math.max(-1, Math.min(1, (vx * dir.dx + vy * dir.dy) / (d || 1)))) <= nearArc; // el básico: cono más ancho
     return Math.acos(Math.max(-1, Math.min(1, (vx * dir.dx + vy * dir.dy) / d))) <= halfArc;
 }
 
@@ -46,15 +49,25 @@ const SWORD_SKILL = {
 function swordSwing(c, skill) {
     if (gameClock - (c.comboAt ?? -99) > SWORD_COMBO.window + skillCooldown(skill, c)) c.comboStep = 0; // se cortó el ritmo
     const step = c.comboStep || 0, dir = aimDirection(c, 4), reach = val(skill, c, 'radius');
+    swingArc(c, dir, step, reach, val(skill, c, 'dmgMult') * SWORD_COMBO.hits[step]);
+    c.comboUntil = gameClock + SWORD_COMBO.window + 0.4;
+    return true; // un tajo al aire también cuenta (el ritmo es tuyo)
+}
+// Un tajo en arco hacia dir: al más cercano entero y al resto del arco menos; el remate (step 2) empuja; desvía balas.
+// basic: es el ataque básico de la espada (towerClickAttack.js): al más cercano le pega como ataque (crítico, robo de vida
+// y efectos al golpear de tu equipo); al resto del arco, daño parejo sin esos efectos (como el barrido de Dota 2).
+function swingArc(c, dir, step, reach, mult, basic = false) {
     // Paso adelante (peso del golpe, como en Hades): si no hay nadie pegado en esa dirección, avanza una casilla
     const sx = Math.round(dir.dx), sy = Math.round(dir.dy);
     if (c.arena && (sx || sy) && dir.dist > 1.5 && canStep(c.arena, c.x, c.y, sx, sy) && !unitAt(c.arena, c.x + sx, c.y + sy)) { c.x += sx; c.y += sy; }
-    const mult = val(skill, c, 'dmgMult') * SWORD_COMBO.hits[step];
-    const hit = enemiesOf(c).filter(e => e.isAlive() && inArc(c, e, dir, reach, SWORD_COMBO.halfArc))
+    const hit = enemiesOf(c).filter(e => e.isAlive() && inArc(c, e, dir, reach, SWORD_COMBO.halfArc, basic ? CLICK_ATTACK.nearArc : null))
         .sort((a, b) => Math.hypot(a.x - c.x, a.y - c.y) - Math.hypot(b.x - c.x, b.y - c.y));
     hit.forEach((e, i) => {
-        const isCrit = Math.random() < effCritChance(c) / 100, falloff = i ? SWORD_COMBO.others : 1; // el más cercano entero, el resto menos
-        dealDamage(c, e, Math.round(effAttack(c) * mult * falloff * (isCrit ? 2 : 1)), 'physical', { isCrit });
+        if (basic && i === 0) { const r = rollAttackDamage(c, e); resolveBasicHit(c, e, Math.round(r.dmg * mult), r.isCrit); }
+        else {
+            const isCrit = Math.random() < effCritChance(c) / 100, falloff = i ? (basic ? SWORD_BASIC.others : SWORD_COMBO.others) : 1; // el más cercano entero, el resto menos
+            dealDamage(c, e, Math.round(effAttack(c) * mult * falloff * (isCrit ? 2 : 1)), 'physical', { isCrit });
+        }
         if (step === 2 && e.isAlive() && !(e.isGuardian || e.isCaveBoss || e.isBoss)) { // el remate empuja
             const kx = Math.sign(Math.round(e.x - c.x)), ky = Math.sign(Math.round(e.y - c.y));
             if ((kx || ky) && walkable(e.arena, e.x + kx, e.y + ky) && !unitAt(e.arena, e.x + kx, e.y + ky)) { e.x += kx; e.y += ky; }
@@ -64,7 +77,7 @@ function swordSwing(c, skill) {
     c.attackTimer = 0; // el tajo reemplaza al ataque automático (no se suman)
     c.comboAt = gameClock; c.comboStep = (step + 1) % 3;
     fxSwordSwing(c, dir, step, reach, hit.length > 0);
-    return true; // un tajo al aire también cuenta (el ritmo es tuyo)
+    return hit;
 }
 function unitAt(arena, x, y) { return (arena.creeps || []).some(o => o.isAlive() && o.x === x && o.y === y) || (arena.heroes || []).some(h => h.isAlive() && h.x === x && h.y === y); }
 function fxSwordSwing(c, dir, step, reach, landed) {
@@ -206,7 +219,7 @@ function drawTowerFeel(level) {
         ctx.restore();
     }
     const step = h.comboStep || 0;
-    if (step && gameClock - (h.comboAt ?? -99) < SWORD_COMBO.window + 0.4) { // el combo sigue vivo: cuántos tajos van
+    if (step && gameClock < (h.comboUntil ?? 0)) { // el combo sigue vivo: cuántos tajos van
         for (let i = 0; i < 3; i++) {
             ctx.fillStyle = i < step ? '#c9a227' : 'rgba(29,23,18,0.35)'; ctx.strokeStyle = INK.line; ctx.lineWidth = 1;
             ctx.beginPath(); ctx.arc(p.x - 8 + i * 8, p.y + TILE * 0.62, i === 2 ? 3.5 : 2.6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
@@ -230,7 +243,7 @@ function feelSlotCharge(slot, h, s) {
 function feelSlotCombo(slot, h) {
     const box = slot.querySelector('.combo');
     if (!box) return;
-    const live = (h.comboStep || 0) && gameClock - (h.comboAt ?? -99) < SWORD_COMBO.window + 0.4, step = live ? h.comboStep : 0;
+    const live = (h.comboStep || 0) && gameClock < (h.comboUntil ?? 0), step = live ? h.comboStep : 0;
     [...box.children].forEach((b, i) => b.classList.toggle('on', i < step));
     box.classList.toggle('next-finisher', step === 2); // el próximo es el remate
 }

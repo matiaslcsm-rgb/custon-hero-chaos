@@ -5,6 +5,7 @@
 //   clic derecho o Esc cancela. Las de área alrededor tuyo y las mejoras se lanzan al apretar la tecla, como antes.
 //   Clic derecho en el mapa (sin estar apuntando): tu héroe camina hasta ahí. Si tocás W A S D, manda el teclado.
 //   En la Torre, el clic izquierdo es el ataque básico hacia el cursor (towerClickAttack.js; se apaga en la pausa).
+//   Con espada, el clic derecho es la parada en vez de caminar (towerParry.js).
 //
 //   Para apuntar no hace falta tocar cada habilidad: mientras se lanza con el mouse, el héroe tiene aimPoint y
 //   nearestEnemy() (combat.js) elige, entre los enemigos a su alcance, el más cercano a ese punto.
@@ -71,6 +72,7 @@ canvas.addEventListener('mousedown', e => {
     Object.assign(mouse, p);
     if (e.button === 2) { // clic derecho: cancela el apuntado o camina
         if (targeting) { cancelTargeting(); return; }
+        if (canControlPlayer() && swordParryOn(player)) { swordParry(player, p); return; } // Torre con espada: la parada (towerParry.js)
         if (player && player.inRest && !player.eliminated && !autopilot) { // caminar por la sala de espera
             player.moveTarget = { x: Math.max(0, Math.min(COLS - 1, Math.round(p.x))), y: Math.max(0, Math.min(ROWS - 1, Math.round(p.y))), arena: null, at: fxClock };
             return;

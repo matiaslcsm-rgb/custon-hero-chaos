@@ -716,6 +716,21 @@ el mismo paso; lo grande queda acá, ordenado por impacto.
   antes de tiempo queda guardado 0,3 s. Clic en un enemigo lejos: caminás hasta él. En la pausa (🖱️) se vuelve al ataque
   automático; el piloto y Custom Hero Chaos no cambian. **Pendiente:** medir con el piloto cuánto pierde un jugador que
   apunta mal con el arco (el piloto sigue con el automático).
+- ✅ **La espada sin Q: combo con el clic y parada con el clic derecho** (2026-10-13, pedido: "sacá la Q y que haga un
+  combo de 3 golpes con el clic; usar la espada te da eso de base. El segundo clic es un golpe que rebota el disparo, un
+  parry reflectivo"). `js/towerClickAttack.js` y `js/towerParry.js`.
+  - **Combo como ataque básico** de toda espada (la inicial, la del Vampiro y las gemelas del Danzante): 3 tajos en arco
+    hacia el cursor (×1,35 · ×1,5 · ×2,6 al más cercano; 65% al resto del arco); el remate empuja y el que sigue tarda
+    ×1,35. El tajo al aire cuenta para el ritmo. Al más cercano le pega como ataque (crítico, robo de vida, efectos al
+    golpear). Vale con el clic, con el automático y con el piloto. La espada inicial ya no da Q (su ranura muestra la
+    parada y los puntitos del combo).
+  - **Parada (clic derecho):** tajo corto (50%) con ventana de 0,3 s. Los disparos que entran al arco (~77°) vuelven a
+    quien los tiró al doble de daño (+50% de tu ataque) y 1,5× más rápidos, y les pegan a los enemigos; los golpes cuerpo
+    a cuerpo de ese lado no te tocan y aturden 1 s. Si agarra algo se recarga en 0,15 s (se encadenan); si no, 1 s, y
+    mientras dura no atacás. Con espada, el clic derecho ya no camina. El piloto no la usa. Referencias: Sekiro / Hollow
+    Knight (la ventana justa), Enter the Gungeon y la Égida de Hades (devolver balas).
+  - **Medido** (60 s contra muñecos, piloto en automático, sin críticos): antes (golpe + Q) 39,8 solo y 80,3 contra 4;
+    ahora 39,4 y 78,4. Parejo; la parada suma aparte, según la mano del jugador.
 - ✅ Volumen general, música y efectos, y temblor de pantalla (0-150%), con deslizadores en la pausa que se guardan.
 - ✅ La forja ya no corta una pelea: si una pieza sube de nivel peleando aparece un aviso arriba a la izquierda, y la
   ventana se abre sola cuando nadie te persigue.

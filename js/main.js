@@ -1,7 +1,7 @@
 // Punto de entrada: conecta los botones y arranca el bucle principal.
 
 // Versión visible en el menú: si no coincide con la última subida, el navegador muestra una copia vieja (Ctrl+F5).
-const GAME_VERSION = '2026-10-13 · ataque con clic';
+const GAME_VERSION = '2026-10-13 · espada: combo y parada';
 document.getElementById('game-version').textContent = `Versión ${GAME_VERSION}`;
 
 document.getElementById('start-wave-btn').onclick = () => startWave(); // sin argumentos: si recibe el clic, lo toma como plan de duelo y la oleada no arranca (arreglado 2026-10-13)
@@ -232,6 +232,7 @@ if (location.search.includes('demo=tower')) setTimeout(() => {
     }
     if (q.get('shot')) setTimeout(() => { // &shot=sword|bow|staff: congela el golpe de la Q en pleno movimiento (capturas)
         const kind = q.get('shot'), e = nearestEnemy(player, 8), sk = player.skills.find(s => s.kind === 'active');
+        if (kind === 'sword') { player.comboStep = 2; player.comboAt = gameClock; towerSwordAttack(player, e); setTimeout(() => { tickFx = () => 0; hitStopUntil = 1e12; }, 50); return; } // la espada no tiene Q: el remate del combo
         player.mana = player.maxMana; player.cooldowns[sk.id] = 0;
         if (kind === 'bow') startCharge(player, sk, 'q'), player.charging.start = gameClock - BOW_SHOT.chargeTime - 0.05;
         else { if (kind === 'sword') { player.comboStep = 2; player.comboAt = gameClock; } castAt(player, sk, e.x, e.y); }

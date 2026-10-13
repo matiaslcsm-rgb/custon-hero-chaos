@@ -94,6 +94,13 @@ function towerBulletsTick(level, dt) {
         const b = B[i];
         b.x += b.vx * dt; b.y += b.vy * dt;
         let gone = gameClock - b.born > b.life || !walkable(level, Math.round(b.x), Math.round(b.y));
+        if (b.reflected) { // devuelta con la parada: ahora le pega a los enemigos (towerParry.js)
+            const e = !gone && level.creeps.find(c => c.isAlive() && Math.hypot(b.x - c.x, b.y - c.y) < b.r + 0.45);
+            if (e) { dealDamage(b.owner, e, b.dmg, 'physical', { isCrit: b.isCrit }); if (fxArena(b.owner)) fxParticles(level, b.x, b.y, 'lightning', 6, 3, { life: 0.3 }); gone = true; }
+            if (gone) B.splice(i, 1);
+            continue;
+        }
+        if (!gone && parryCatchesBullet(h, b)) { reflectBullet(h, b); continue; } // la parada de la espada (towerParry.js)
         if (!gone && !ghost && h.arena === level && Math.hypot(b.x - h.x, b.y - h.y) < b.r + BULLET.hitR) {
             const result = dealDamage(b.owner, h, b.dmg, b.type);
             if (result.dealt > 0 && fxArena(h)) fxShake(1.2);
@@ -129,7 +136,7 @@ function bulletDanger(hero, x, y, horizon = 0.7) {
     if (!B || !B.length) return 0;
     let danger = 0;
     B.forEach(b => {
-        if (!aiNotices(b, b.born)) return; // el piloto 'humano' tarda en verla, o no la ve (towerTelegraph.js)
+        if (b.reflected || !aiNotices(b, b.born)) return; // las devueltas no son peligro; el piloto 'humano' tarda en verla, o no la ve (towerTelegraph.js)
         const v2 = b.vx * b.vx + b.vy * b.vy || 1;
         const t = Math.max(0, Math.min(horizon, ((x - b.x) * b.vx + (y - b.y) * b.vy) / v2));
         if (Math.hypot(b.x + b.vx * t - x, b.y + b.vy * t - y) < b.r + BULLET.hitR + 0.25) danger += 1 / (t + 0.15);
@@ -144,7 +151,7 @@ function drawTowerBullets(level) {
     (level.bullets || []).forEach(b => {
         if (!canSee(level, Math.round(b.x), Math.round(b.y))) return;
         const x = b.x * TILE + TILE / 2, y = b.y * TILE + TILE / 2, r = b.r * TILE;
-        const danger = A11Y.colorblind ? '#f59e0b' : '#c1121f'; // siempre el mismo color de peligro: se leen en cualquier bioma
+        const danger = b.reflected ? PARRY.color : A11Y.colorblind ? '#f59e0b' : '#c1121f'; // siempre el mismo color de peligro; las devueltas, del color de la parada
         if (b.arrow) { // flecha de un arquero común: roja, con la punta hacia donde va
             ctx.save(); ctx.translate(x, y); ctx.rotate(Math.atan2(b.vy, b.vx));
             ctx.strokeStyle = danger; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(-11, 0); ctx.lineTo(7, 0); ctx.stroke();

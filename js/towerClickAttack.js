@@ -7,6 +7,26 @@
 //   · Un clic que llega antes de que el golpe esté listo queda guardado un momento (no se pierde).
 //   · Clic sobre un enemigo fuera de alcance: caminás hasta él (y si mantenés, le pegás al llegar).
 //   · Se vuelve al ataque automático en la pausa (🖱️). El piloto automático y Custom Hero Chaos siguen como antes.
+//   · ESPADA (2026-10-13, pedido: "sacá la Q y que haga un combo de 3 golpes con el clic; usar la espada te da eso de
+//     base"): con cualquier espada el ataque básico es el combo de 3 tajos en arco (al aire también cuenta, el ritmo es
+//     tuyo); el remate empuja y tarda un poco más. Vale con el clic, con el automático y con el piloto. La parada del clic
+//     derecho está en towerParry.js.
+
+// Combo de la espada como ataque básico: multiplicadores de los 3 tajos, alcance del arco, cuánto más tarda el que sigue al
+// remate, y cuánto aguanta el ritmo sin pegar antes de volver al primer tajo
+const SWORD_BASIC = { hits: [1.35, 1.5, 2.6], others: 0.65, reach: 1.9, afterFinisher: 1.35, keep: 0.7 }; // medido: REWORK.md, "Interfaz y calidad de vida"
+function swordWielder(hero) { const w = gameMode === 'tower' && hero.gear && hero.gear.weapon; return !!w && (HERO_WEAPONS[w.heroKey] || {}).shape === 'sword'; }
+function attackGap(hero) { const p = 1 / effAtkSpeed(hero); return swordWielder(hero) && (hero.comboStep || 0) === 0 && hero.comboAt > -1 && gameClock - hero.comboAt < p * 2 ? p * SWORD_BASIC.afterFinisher : p; }
+// Un tajo del combo hacia aim (un punto o un enemigo)
+function towerSwordAttack(hero, aim) {
+    const p = 1 / effAtkSpeed(hero);
+    if (gameClock - (hero.comboAt ?? -99) > p * SWORD_BASIC.afterFinisher + SWORD_BASIC.keep) hero.comboStep = 0; // se cortó el ritmo
+    const dx = aim ? aim.x - hero.x : hero.facing || 1, dy = aim ? aim.y - hero.y : 0, d = Math.hypot(dx, dy) || 1;
+    const step = hero.comboStep || 0;
+    const hit = swingArc(hero, { dx: dx / d, dy: dy / d, dist: aim ? d : 0 }, step, SWORD_BASIC.reach, SWORD_BASIC.hits[step], true);
+    hero.comboUntil = gameClock + p * SWORD_BASIC.afterFinisher + SWORD_BASIC.keep;
+    return hit;
+}
 
 const CLICK_ATTACK = { halfArc: 1.0, nearArc: 1.35, buffer: 0.3, shotSpeed: 16, shotRadius: 0.55, shotReach: 1.5 };
 let clickAttack = (() => { try { return localStorage.getItem('chc-click-attack') !== 'off'; } catch (e) { return true; } })();
@@ -43,10 +63,11 @@ function clickMeleeTarget(hero, range) {
 
 // Cada cuadro, en vez del ataque automático: el golpe se carga solo y sale cuando apretás (o mantenés) el clic
 function clickAttackStep(hero, dt, blocked) {
-    const period = 1 / effAtkSpeed(hero);
+    const period = attackGap(hero);
     hero.attackTimer = Math.min(period, (hero.attackTimer || 0) + dt);
-    if (blocked || hero.charging || !wantsClickAttack() || hero.attackTimer < period) return;
+    if (blocked || hero.charging || hero.parry || !wantsClickAttack() || hero.attackTimer < period) return;
     hero.attackTimer = 0; attackButton.queuedAt = -99;
+    if (swordWielder(hero)) { towerSwordAttack(hero, mouse.over ? { x: mouse.x, y: mouse.y } : null); return; } // espada: el combo
     const ranged = hero.projectileSpeed > 0, range = effRange(hero), dir = clickAimDir(hero);
     if (ranged) { // disparo apuntado: línea recta hacia el cursor, se frena en el primero
         const reach = range + CLICK_ATTACK.shotReach, aimAt = { x: hero.x + dir.dx * reach, y: hero.y + dir.dy * reach };

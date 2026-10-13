@@ -130,6 +130,7 @@ function updateCreep(c, dt) {
 }
 // El golpe en sí (al instante, o al terminar la preparación en la Torre)
 function creepStrike(c, target, effAtk) {
+    if (parryCatchesMelee(target, c)) { parryMelee(target, c); return; } // la parada de la espada: no te toca y lo aturde (towerParry.js)
     // dealDamage resuelve la muerte del héroe (revivir, Condenado o eliminación) a través de onHeroDeath
     // Animación según cómo ataca: golpe (con tajo), disparo o hechizo
     if (c.range <= 2) { fxAttack(c, target, 'melee'); if (fxArena(c)) fxSlash(c, target, c.color, false); }

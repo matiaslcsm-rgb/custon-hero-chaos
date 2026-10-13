@@ -70,7 +70,7 @@ function towerAwakenTick(level, from) {
 
 // Cartel de pergamino arriba del arma que tenés a mano: nombre, qué hace y cómo agarrarla
 function drawStarterCard(w) {
-    const W = STARTER_WEAPONS[w.key], sk = SKILL_INDEX[W.skillId], cx = w.x * TILE + TILE / 2, top = w.y * TILE - TILE * 2.3;
+    const W = STARTER_WEAPONS[w.key], sk = W.skillId ? SKILL_INDEX[W.skillId] : { name: 'Combo y parada' }, cx = w.x * TILE + TILE / 2, top = w.y * TILE - TILE * 2.3;
     const width = 230, lines = wrapCanvasText(W.why, width - 16, '11px Georgia, serif');
     const h = 40 + lines.length * 13 + 16;
     ctx.save();

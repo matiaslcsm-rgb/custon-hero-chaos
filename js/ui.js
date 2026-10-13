@@ -556,6 +556,9 @@ function renderHeroBar() {
         if (s.chargeable) feelSlotCharge(slot, p, s); // la barra de tensar y el destello del tiro perfecto (towerFeel.js)
         if (s.comboHits) feelSlotCombo(slot, p);
     });
+    const parry = document.getElementById('hb-sword'); // espada: los puntitos del combo y la recarga de la parada (towerParry.js)
+    if (parry) feelSlotCombo(parry, p);
+    if (parry) { const left = Math.max(0, (p.parryReadyAt || 0) - gameClock), cd = parry.querySelector('.cd'); cd.style.height = `${Math.min(100, left / PARRY.cooldown * 100)}%`; cd.textContent = left > 0.05 ? left.toFixed(1) : ''; parry.classList.toggle('perfect-now', parryActive(p)); }
     const dash = document.getElementById('hb-dash');
     if (dash) { const left = Math.max(0, (p.dashReadyAt || 0) - gameClock), cd = dash.querySelector('.cd'); cd.style.height = `${Math.min(100, left / DASH.cooldown * 100)}%`; cd.textContent = left > 0 ? left.toFixed(1) : ''; }
     const effects = activeEffects(p).filter(e => !e.flags.includes('item') && !e.flags.includes('passive'));
@@ -567,7 +570,7 @@ function renderHeroBar() {
     }
 
     // Estructura (solo si cambió algo)
-    const signature = [p.level, p.skillPoints, p.neutral, p.inventory.map(i => i.key).join(','), p.gear ? EQUIP_SLOTS.map(s => p.gear[s] && p.gear[s].id).join(',') : '', Math.floor(p.attr('str')), Math.floor(p.attr('agi')),
+    const signature = [p.level, p.skillPoints, clickAttack, p.neutral, p.inventory.map(i => i.key).join(','), p.gear ? EQUIP_SLOTS.map(s => p.gear[s] && p.gear[s].id).join(',') : '', Math.floor(p.attr('str')), Math.floor(p.attr('agi')),
         Math.floor(p.attr('int')), p.armor.toFixed(1), ...p.skills.map(s => s.id + ':' + skillLevel(p, s) + ':' + p.keyBindings[s.id] + ':' + !!levelUpBlocker(p, s))].join('|');
     if (signature === lastKitSignature) return;
     lastKitSignature = signature;
@@ -592,7 +595,16 @@ function renderHeroBar() {
     // 3 (arma/guantes/armadura, ver REWORK.md §2 fase 3), nunca 4, porque solo esas 3 ranuras dan activas.
     const skills = document.getElementById('hb-skills'); skills.innerHTML = '';
     const actives = p.skills.filter(s => s.kind === 'active');
-    const slotCount = gameMode === 'tower' ? 3 : Math.max(KIT_SIZE, actives.length);
+    const swordBar = gameMode === 'tower' && swordWielder(p) && clickAttack; // la espada no da Q: su casilla muestra el combo (clic) y la parada (clic derecho)
+    if (swordBar) {
+        const c = document.createElement('div'); c.className = 'skill-slot sword-slot'; c.id = 'hb-sword';
+        c.title = `Espada (sin Q)
+Clic: combo de tres tajos en arco hacia el cursor (mantenelo para seguir); el tercero es el remate: pega más, empuja y tarda un poco más. Los tajos desvían proyectiles.
+Clic derecho: parada. Tajo corto con una ventana de ${PARRY.window}s: los disparos que agarra vuelven a quien los tiró, el doble de fuertes; los golpes cuerpo a cuerpo de ese lado no te tocan y aturden ${PARRY.stun}s. Si agarra algo se recarga casi al instante; si no, tarda ${PARRY.cooldown}s.`;
+        c.innerHTML = `<span class="key">Der</span><span class="nm">Parada</span><span class="combo"><b></b><b></b><b></b></span><div class="cd"></div>`;
+        skills.appendChild(c);
+    }
+    const slotCount = gameMode === 'tower' ? (swordBar ? 2 : 3) : Math.max(KIT_SIZE, actives.length);
     for (let i = 0; i < slotCount; i++) {
         const s = actives[i];
         const slot = document.createElement('div');
