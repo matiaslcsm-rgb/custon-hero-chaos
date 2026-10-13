@@ -867,9 +867,11 @@ function drawUnit(u, color, symbol, pos = u, opts = {}) {
     if (sprite) {
         const size = spriteSize(u, opts);
         halfHeight = Math.max(TILE / 2, size / 2);
-        if (gameMode === 'tower' && inkPlanFor(u)) halfHeight = pixelBodyFor(u) ? pixelHalfHeight(u) : inkHalfHeight(u); // figuras de tinta (o pixel art): más altas
+        const pxBody = pixelBodyFor(u); // cuerpo en pixel art (towerPixelBeasts.js), también en Custom Hero Chaos
+        if (gameMode === 'tower' && inkPlanFor(u)) halfHeight = pxBody ? pixelHalfHeight(u) : inkHalfHeight(u); // figuras de tinta (o pixel art): más altas
+        else if (pxBody) halfHeight = pixelHalfHeight(u);
         // Sombra en el piso; en los héroes, un aro del color del bando (celeste vos, naranja los rivales)
-        if (gameMode !== 'tower') { // en la Torre la sombra la dibuja la figura de tinta
+        if (gameMode !== 'tower' && !pxBody) { // en la Torre la sombra la dibuja la figura de tinta (y los sprites de pixel art traen la suya)
         ctx.fillStyle = 'rgba(0,0,0,0.45)';
         ctx.beginPath(); ctx.ellipse(cx, cy + size * 0.42, size * 0.34, size * 0.12, 0, 0, Math.PI * 2); ctx.fill();
         }
@@ -879,14 +881,14 @@ function drawUnit(u, color, symbol, pos = u, opts = {}) {
         const pose = pos.pose;
         const look = !u.isHero && u.type ? CREEP_LOOKS[u.type.key] : null;
         if (look) drawCreepLook(u, look, cx, cy, size);
-        if (opts.glow && gameMode !== 'tower') { ctx.shadowColor = color; ctx.shadowBlur = 8; } // en la Torre, sin brillo (estética tinta)
+        if (opts.glow && gameMode !== 'tower' && !pxBody) { ctx.shadowColor = color; ctx.shadowBlur = 8; } // en la Torre, sin brillo (estética tinta)
         if (pose && pose.glow) { ctx.shadowColor = pose.glow; ctx.shadowBlur = 16; }
         const alpha = look && look.alpha ? look.alpha(u) : 1;
         if (alpha < 1) ctx.globalAlpha = alpha;
         const jitter = look && look.jitter ? (Math.random() - 0.5) * look.jitter : 0;
         const facing = u.facing || (u.isHero ? 1 : -1);
         if (gameMode === 'tower') { if (drawPixelUnit(u, cx + Math.round(jitter), cy, facing, hit, pose)) { /* criatura en pixel art (towerPixelBeasts.js) */ } else if (!drawInkUnit(u, cx + jitter, cy + bob, size, facing, hit, pose)) drawInkedSprite(sprite, cx + jitter, cy + bob, size, facing, hit, pose); }
-        else drawSprite(sprite, cx + jitter, cy + bob, size, facing, hit, pose);
+        else if (!(pxBody && drawPixelUnit(u, cx + Math.round(jitter), cy, facing, hit, pose))) drawSprite(sprite, cx + jitter, cy + bob, size, facing, hit, pose);
         ctx.globalAlpha = 1; ctx.shadowBlur = 0;
         if (pose && pose.flash > 0 && u.fxAttack) { // fogonazo del disparo
             const a = u.fxAttack; ctx.globalAlpha = pose.flash; ctx.fillStyle = '#fff3b0';
@@ -1004,6 +1006,7 @@ function renderTitle() {
 function render() {
     const dt = tickFx();
     if (typeof pxUiSync === 'function') pxUiSync(); // tema de interfaz en pixel art (towerPixelUi.js)
+    document.body.classList.toggle('on-title', gameState === 'MENU'); // portada (titleScreen.js)
     musicTick(dt); // música del menú y de Custom Hero Chaos (en la Torre la maneja renderTower, towerMusic.js)
     const k = (towerLayout ? 1 : mapScale) * (window.devicePixelRatio || 1);
     ctx.setTransform(k, 0, 0, k, 0, 0);
@@ -1043,10 +1046,12 @@ function render() {
         ctx.stroke();
     }
 
+    const px = typeof pixelEnabled !== 'undefined' && pixelEnabled; // pixel art de la Torre también acá (towerPixelFx.js)
+    if (px) pxDrawDebris(arena, 'ground'); // sangre y restos en el piso
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     arena.creeps.forEach(c => { if (c.isAlive()) drawUnit(c, c.color, c.symbol, drawPos(c, dt), { glow: c.isBoss || c.isRoundBoss, big: c.isRoundBoss }); });
     // Proyectiles con estela, del color de quien los disparó (o el propio de la habilidad, ver vfx en su definición)
-    arena.projectiles.forEach(p => {
+    const drawProjectiles = () => arena.projectiles.forEach(p => {
         const color = (p.vfx && p.vfx.color) || (p.attacker.isHero ? heroColor(p.attacker) : p.attacker.color || '#fefae0');
         p.trail = p.trail || [];
         p.trail.push([p.x, p.y]); if (p.trail.length > 6) p.trail.shift();
@@ -1062,6 +1067,7 @@ function render() {
             ctx.globalAlpha = 1;
         }
     });
+    if (!px) drawProjectiles();
     arena.heroes.forEach(h => {
         if (h.eliminated) return;
         // Muerto esperando revivir: una calavera en el lugar donde va a reaparecer
@@ -1074,7 +1080,11 @@ function render() {
         ctx.restore();
         drawUnit(h, hasFlag(h, 'invulnerable') ? '#ffffff' : heroColor(h), h.symbol, pos, { glow: true });
     });
-    drawArenaFx(arena);
+    if (px) { // proyectiles, tajos y hechizos con el píxel de los sprites; sangre que vuela; números aparte
+        pxFxLayer('over', () => { drawProjectiles(); fxTextPass = 'skip'; drawArenaFx(arena); fxTextPass = null; });
+        pxDrawDebris(arena, 'air');
+        fxTextPass = 'only'; drawArenaFx(arena); fxTextPass = null;
+    } else drawArenaFx(arena);
     if (targeting && !canControlPlayer()) cancelTargeting();
     drawMouseOverlay(arena);
     ctx.restore();

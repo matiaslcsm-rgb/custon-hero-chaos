@@ -670,6 +670,7 @@ function renderTower(level, dt) {
 
 // Minimapa (arriba a la derecha): lo descubierto, la escalera, el guardián si lo viste y vos.
 function renderTowerMinimap(level) {
+    pxMinimapSync(level); // si cambió el estilo, se repinta con la paleta que toca (towerPixel.js)
     const s = Math.min(1.7, Math.max(150, screenW() * 0.14) / COLS), w = COLS * s, h = ROWS * s, ox = screenW() - w - 8, oy = 8;
     ctx.fillStyle = 'rgba(43,33,24,0.85)'; ctx.fillRect(ox - 3, oy - 3, w + 6, h + 6);
     ctx.strokeStyle = INK.paperDark; ctx.lineWidth = 1; ctx.strokeRect(ox - 3, oy - 3, w + 6, h + 6);

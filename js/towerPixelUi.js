@@ -15,7 +15,7 @@ const PXUI_FILL = {
     '#1d1712': '#efe4cc', '#3d3226': '#c9bba0', '#5e5444': '#b8a98f', '#6b2a1f': '#f0a060', '#8a5a00': '#e8c060',
     '#1d4e89': '#7fb0ff', '#4a3f9a': '#b0a4ff', '#2f5d62': '#7fd0d8'
 };
-const PXUI_STROKE = { '#1d1712': '#5d5043', '#2b2118': '#5d5043', '#8f8166': '#5d5043', '#5e5444': '#5d5043' };
+const PXUI_STROKE = { '#1d1712': '#5d5043', '#2b2118': '#5d5043', '#8f8166': '#5d5043', '#5e5444': '#5d5043', '#d8c7a3': '#5d5043' };
 (function pxUiHookCanvas() {
     const P = CanvasRenderingContext2D.prototype, main = canvas.getContext('2d');
     const wrap = (prop, map) => {
@@ -34,4 +34,4 @@ const PXUI_STROKE = { '#1d1712': '#5d5043', '#2b2118': '#5d5043', '#8f8166': '#5
     wrap('strokeStyle', v => (pxUiPass && typeof v === 'string' && PXUI_STROKE[v.toLowerCase()] ? PXUI_STROKE[v.toLowerCase()] : v));
 })();
 // La clase del body (tema HTML) acompaña al pixel art en la Torre
-function pxUiSync() { document.body.classList.toggle('pixel-ui', gameMode === 'tower' && pixelOn()); pxUiPass = false; }
+function pxUiSync() { document.body.classList.toggle('pixel-ui', pixelEnabled && gameState !== 'MENU'); pxUiPass = false; } // en los dos modos

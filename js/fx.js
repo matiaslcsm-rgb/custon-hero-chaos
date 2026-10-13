@@ -156,7 +156,7 @@ function drawArenaFx(arena) {
         if (fxTextPass && (f.kind === 'text') !== (fxTextPass === 'only')) return; // pixel art: los textos van aparte (towerPixelFx.js)
         const px = f.x * TILE + TILE / 2, py = f.y * TILE + TILE / 2;
         ctx.globalAlpha = Math.max(0, 1 - t * t);
-        const pixel = gameMode === 'tower' && typeof pixelOn === 'function' && pixelOn();
+        const pixel = typeof pixelEnabled !== 'undefined' && pixelEnabled; // números con fuente de píxeles en los dos modos (towerPixelFx.js)
         if (f.kind === 'text' && pixel && pxNumberText(f.text)) { // número de daño con la fuente de píxeles
             pxDrawNumber(f.text, px, py, f.color, Math.max(2, Math.round(2 * f.size / 12 * A11Y.combatText)) + (t < 0.12 ? 1 : 0));
         } else if (f.kind === 'text') {
@@ -191,7 +191,7 @@ function drawArenaFx(arena) {
         } else drawSkillFx(f, t, px, py); // formas de habilidad (fxSkills.js)
     });
     ctx.globalAlpha = 1;
-    if (gameMode !== 'tower') drawUltBanner(MAP_W / 2, MAP_H * 0.72); // en la Torre va encima de la niebla (renderTower)
+    if (gameMode !== 'tower' && fxTextPass !== 'skip') drawUltBanner(MAP_W / 2, MAP_H * 0.72); // en la Torre va encima de la niebla (renderTower)
 }
 
 // Posición dibujada de una unidad: se desliza hacia su casilla (movimiento suave) + el salto del golpe.

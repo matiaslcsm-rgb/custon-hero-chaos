@@ -501,6 +501,7 @@ function biomeTileFor(level, x, y) {
 
 // Color de una casilla en el minimapa
 function towerMiniColor(level, x, y) {
+    if (pixelOn()) return pxMiniColor(level, x, y); // paleta del pixel art (towerPixel.js)
     const w = level.walls[y][x];
     if (!level.ground) return w ? '#5e5444' : '#e9dcc0';
     const C = BIOMES[level.biome].colors, i = y * COLS + x;

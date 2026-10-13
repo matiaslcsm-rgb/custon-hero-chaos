@@ -10,6 +10,41 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Portada: escena en pixel art animada (titleScreen.js), el nombre del juego y la elección de modo -->
+    <div id="title-screen">
+        <canvas id="title-canvas"></canvas>
+        <div class="ts-content">
+            <div class="ts-logo">
+                <div class="ts-logo-main">CUSTOM HERO <span>CHAOS</span></div>
+                <div class="ts-logo-sub">elegí tu caos</div>
+            </div>
+            <div class="ts-modes">
+                <button class="mode-card ts-card" data-mode="normal">
+                    <span class="ts-card-art" id="ts-art-normal"></span>
+                    <b>⚔ Custom Hero Chaos</b>
+                    <em>arena · 8 héroes</em>
+                    <span>Oleadas de creeps, duelos, apuestas y jefes. Armá tu kit mezclando habilidades de cualquier héroe y quedate último en pie.</span>
+                </button>
+                <button class="mode-card ts-card tower" data-mode="tower">
+                    <span class="ts-card-art" id="ts-art-tower"></span>
+                    <b>🗼 Tower Chaos</b>
+                    <em>roguelike · 10 pisos</em>
+                    <span>Despertás en la base de una torre sin nada. Cada piso es un bioma con su pueblo, su laberinto y su guardián. Tu clase la arma el equipo.</span>
+                </button>
+            </div>
+            <div class="ts-bottom">
+                <label class="name-field ts-name">Tu nombre <input id="player-name" maxlength="14" placeholder="Vos" autocomplete="off"></label>
+                <div class="ts-buttons">
+                    <button id="menu-tutorial-btn" class="secondary-btn">📖 Tutorial</button>
+                    <button class="secondary-btn" data-glossary="heroes">🦸 Héroes</button>
+                    <button class="secondary-btn" data-glossary="creeps">👹 Creeps y jefes</button>
+                    <button class="secondary-btn" data-glossary="items">🎒 Ítems</button>
+                    <a href="3d/" class="secondary-btn">🧊 Prototipo 3D</a>
+                </div>
+                <p class="ts-foot"><span id="game-version"></span> · Íconos: <a href="https://game-icons.net" target="_blank" rel="noopener">game-icons.net</a> (CC BY 3.0) · Música: <a href="https://opengameart.org" target="_blank" rel="noopener">opengameart.org</a> (CC0; volcán de Wolfgang_, CC BY 4.0) · <a href="docs/CREDITOS.md" target="_blank" rel="noopener">créditos</a></p>
+            </div>
+        </div>
+    </div>
     <div id="app">
     <div id="view-game" style="display:flex;">
     <div id="game-container">
@@ -76,28 +111,7 @@
                     <!-- Menú de inicio -->
                     <div id="menu-panel">
                         <h3>Elegí un modo</h3>
-                        <label class="name-field">Tu nombre <input id="player-name" maxlength="14" placeholder="Vos" autocomplete="off"></label>
-                        <button class="mode-card" data-mode="normal">
-                            <span class="mode-icon">⚔</span>
-                            <span class="mode-text"><b>Custom Hero Chaos</b>
-                                <span>8 héroes, oleadas de creeps, duelos, apuestas y jefes. Armá tu kit mezclando habilidades de cualquier héroe.</span></span>
-                        </button>
-                        <button class="mode-card tower" data-mode="tower">
-                            <span class="mode-icon">🗼</span>
-                            <span class="mode-text"><b>Tower Chaos</b> <em>roguelike</em>
-                                <span>Subí 10 pisos al estilo Aincrad: cada uno es un bioma con su pueblo y su laberinto. Tu clase la arma el equipo; si morís, volvés a la base.</span></span>
-                        </button>
-                        <button id="menu-tutorial-btn" class="secondary-btn">📖 Tutorial (cómo se juega)</button>
-                        <a href="3d/" class="secondary-btn" style="display:block;text-align:center;text-decoration:none">🧊 Prototipo 3D (estilo PS1)</a>
-                        <div class="menu-glossary">
-                            <p class="subtitle">Glosario</p>
-                            <button class="secondary-btn" data-glossary="heroes">🦸 Héroes</button>
-                            <button class="secondary-btn" data-glossary="creeps">👹 Creeps y Jefes</button>
-                            <button class="secondary-btn" data-glossary="items">🎒 Ítems</button>
-                        </div>
-                        <p class="subtitle menu-keys">En partida, <kbd>Esc</kbd> pausa y abre el tutorial, el glosario y las opciones.</p>
-                        <p class="subtitle menu-version" id="game-version"></p>
-                        <p class="subtitle menu-version">Íconos: <a href="https://game-icons.net" target="_blank" rel="noopener">game-icons.net</a> (CC BY 3.0) · Música: <a href="https://opengameart.org" target="_blank" rel="noopener">opengameart.org</a> (CC0; volcán de Wolfgang_, CC BY 4.0) · <a href="docs/CREDITOS.md" target="_blank" rel="noopener">créditos</a></p>
+                        <p class="subtitle">La elección de modo está en la portada.</p>
                     </div>
 
                     <!-- Elección de Héroe -->
@@ -452,6 +466,7 @@
     <script src="js/towerPixelProps.js"></script>
     <script src="js/towerPixelFx.js"></script>
     <script src="js/towerPixelUi.js"></script>
+    <script src="js/titleScreen.js"></script>
     <script src="js/mouse.js"></script>
     <script src="js/pause.js"></script>
     <script src="js/main.js"></script>

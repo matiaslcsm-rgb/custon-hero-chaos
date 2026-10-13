@@ -894,3 +894,37 @@ body.pixel-ui #combat-log p { border-bottom: 1px dotted var(--px-cell2) !importa
 body.pixel-ui #float-log p { box-shadow: none !important; background: rgba(36,30,25,0.88) !important; }
 body.pixel-ui .pm-toggle.on span { color: #7ad08a !important; }
 body.pixel-ui a { color: var(--px-gold); }
+
+/* ===== Portada (2026-10-13, titleScreen.js): escena en pixel art animada, el nombre y la elección de modo ===== */
+#title-screen { display: none; position: fixed; inset: 0; z-index: 800; background: #120c1c; overflow: hidden; color: #efe4cc; }
+body.on-title #title-screen { display: block; }
+body.on-title { overflow: hidden; }
+#title-canvas { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+#title-screen, #title-screen * { font-family: 'Pixelify Sans', Consolas, monospace !important; }
+.ts-content { position: relative; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 4vh 16px 2vh; box-sizing: border-box; }
+.ts-logo { text-align: center; user-select: none; }
+.ts-logo-main { font-size: clamp(2rem, 6.4vw, 5rem); font-weight: 700; line-height: 1; color: #ffe0a0; letter-spacing: 2px;
+    text-shadow: 0 4px 0 #b4501e, 0 8px 0 #5a1e14, 0 12px 0 #1a0c10, 4px 0 0 #1a0c10, -4px 0 0 #1a0c10, 0 -4px 0 #1a0c10; }
+.ts-logo-main span { color: #ff8a4a; }
+.ts-logo-sub { margin-top: 18px; font-size: clamp(0.9rem, 1.6vw, 1.25rem); color: #d8c8f0; letter-spacing: 6px; text-transform: uppercase; text-shadow: 2px 2px 0 #1a0c10; }
+.ts-modes { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; }
+.ts-card { width: min(340px, 86vw); display: flex !important; flex-direction: column; align-items: center; gap: 6px; text-align: center; cursor: pointer;
+    padding: 14px 16px 16px !important; background: rgba(28,20,30,0.88) !important; color: #efe4cc !important; border: 3px solid #0b0908 !important; border-radius: 0 !important;
+    box-shadow: inset 0 0 0 2px #5d5043, inset 4px 4px 0 2px rgba(255,255,255,0.06), 0 6px 0 rgba(0,0,0,0.6) !important; transition: transform 0.12s, box-shadow 0.12s; }
+.ts-card:hover, .ts-card:focus-visible { transform: translateY(-6px); box-shadow: inset 0 0 0 2px #e8c060, inset 4px 4px 0 2px rgba(255,255,255,0.08), 0 12px 0 rgba(0,0,0,0.6) !important; outline: none; }
+.ts-card b { font-size: 1.25rem; color: #ffd27a; }
+.ts-card.tower b { color: #b8e0ff; }
+.ts-card em { font-style: normal; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; color: #b8a98f; }
+.ts-card span:last-child { font-size: 0.85rem; line-height: 1.35; color: #d8ccb4; }
+.ts-card-art { height: 78px; display: flex; align-items: flex-end; justify-content: center; gap: 6px; }
+.ts-card-art img { image-rendering: pixelated; }
+.ts-bottom { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.ts-name { color: #efe4cc; display: flex; align-items: center; gap: 8px; text-shadow: 2px 2px 0 #1a0c10; }
+.ts-name input { background: #1c1612; color: #ffe0a0; border: 2px solid #0b0908; box-shadow: inset 0 0 0 2px #5d5043; padding: 5px 8px; border-radius: 0; }
+.ts-buttons { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.ts-buttons .secondary-btn { width: auto !important; display: inline-block !important; margin: 0 !important; background: #3a3129; color: #efe4cc; border: 2px solid #0b0908; border-radius: 0; padding: 6px 12px; text-decoration: none; font-size: 0.85rem;
+    box-shadow: inset 2px 2px 0 rgba(255,255,255,0.1), inset -2px -2px 0 rgba(0,0,0,0.35), 0 2px 0 #0b0908; cursor: pointer; }
+.ts-buttons .secondary-btn:hover { background: #4a3f34; }
+.ts-foot { margin: 0; font-size: 0.68rem; color: #a898c0; text-align: center; text-shadow: 1px 1px 0 #000; }
+.ts-foot a { color: #e8c060; }
+@media (max-height: 640px) { .ts-card span:last-child { display: none; } .ts-card-art { height: 56px; } }

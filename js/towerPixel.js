@@ -353,3 +353,27 @@ function drawPixelWall(level, x, y) {
     if (w === WALL.fountain) { put(pxWall('fountain', 0)); return; }
     if (w === WALL.stone) put(below ? pxWall('labFace', h & 1) : pxWall('labTop', h & 1));
 }
+
+// --- MINIMAPA Y MAPA GRANDE CON LA PALETA DEL PIXEL ART ---
+// Mismo color que el suelo de cada casilla (los del pergamino quedan para el estilo tinta). Si cambiás de estilo, el
+// minimapa del piso se vuelve a pintar con lo que ya descubriste.
+function pxMiniColor(level, x, y) {
+    const B = pxBiome(level), w = level.walls[y][x], i = y * COLS + x;
+    if (level.isCave) return w ? '#141110' : shade(B.ground[2], -0.4);
+    if (w === WALL.obstacle || w === WALL.edge) return level.biome === 'desert' ? '#5e4630' : level.biome === 'volcano' ? '#1a1615' : level.biome === 'snow' ? '#2f5a48' : '#1f3d20';
+    if (w === WALL.cliff) return shade(B.ground[0], -0.35);
+    if (w === WALL.palisade) return PXB_WOOD[1];
+    if (w === WALL.fountain) return '#2c6080';
+    if (w === WALL.stone || (w && pxKind(level, x, y) === 'lab')) return '#1d1a21';
+    const kind = pxKind(level, x, y), pal = pxPalette(level, kind);
+    const c = pal[2];
+    return level.height && level.height[i] && !(level.ramp && level.ramp[i]) ? shade(c, 0.14) : c;
+}
+function pxMinimapSync(level) {
+    const style = pixelOn() ? 'px' : 'ink';
+    if (!level.minimap || level.minimapStyle === style) { level.minimapStyle = style; return; }
+    level.minimapStyle = style;
+    const g = level.minimap.getContext('2d');
+    g.clearRect(0, 0, level.minimap.width, level.minimap.height);
+    for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) if (level.explored[y][x]) markMinimap(level, x, y);
+}

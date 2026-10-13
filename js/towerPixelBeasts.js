@@ -382,15 +382,28 @@ function pixelPortrait(u) {
 }
 
 // Qué cuerpo de pixel art usa una unidad (null: sigue en tinta)
+// Custom Hero Chaos (2026-10-13): con el pixel art prendido, sus creeps y jefes también usan estos cuerpos (los héroes
+// conservan sus sprites de 12×12, que ya son pixel art y los identifican). Jefes de ronda → el cuerpo que más se parece.
+const PXB_ROUND_BOSS = { GOLEM: 'golem', HIVE_QUEEN: 'boss:desert', FROST_DRAGON: 'boss:snow', ABYSS_LORD: 'boss:volcano', HYDRA: 'lizard', LICH: 'boss:swamp', BLOOD_TITAN: 'brute', PHANTOM: 'phantom' };
 function pixelBodyFor(u) {
-    if (pixelOn() && u.isHero && gameMode === 'tower') return 'hero';
+    if (typeof pixelEnabled === 'undefined' || !pixelEnabled || !u || (u.isHero && gameMode !== 'tower')) return null;
+    if (gameMode !== 'tower') {
+        if (!u.type) return null;
+        if (u.isRoundBoss || u.isBoss) { const b = PXB_ROUND_BOSS[u.type.key]; if (b) return b; }
+        const plan = inkPlanFor(u);
+        return PXB[plan] ? plan : null;
+    }
+    if (pixelOn() && u.isHero) return 'hero';
     if (!pixelOn() || u.isHero || !u.type) return null;
     if (u.isGuardian) return u.type.biomeBoss && PXB['boss:' + u.type.biomeBoss] ? 'boss:' + u.type.biomeBoss : null; // el jefe del bioma
     // Jefes de cueva y guardianes de cofres malditos: el cuerpo de su criatura, más grande (pxbScale)
     const plan = inkPlanFor(u);
     return PXB[plan] ? plan : null;
 }
-function pxbScale(u) { return PXG.scale * (u.isGuardian ? 1.35 : ((u.type && u.type.scale) || 1) * (u.isCaveBoss ? 1.6 : u.isBoss ? 1.3 : 1)); }
+function pxbScale(u) {
+    if (u.isRoundBoss) return PXG.scale * (String(pixelBodyFor(u)).startsWith('boss:') ? 1.15 : 1.6); // jefes de ronda de Custom Hero Chaos
+    return PXG.scale * (u.isGuardian ? 1.35 : ((u.type && u.type.scale) || 1) * (u.isCaveBoss ? 1.6 : u.isBoss ? 1.3 : 1));
+}
 // Altura de la figura por encima del centro de la casilla (para la barra de vida)
 function pixelHalfHeight(u) { const B = PXB[pixelBodyFor(u)]; return B.h * pxbScale(u) - TILE * 0.45 + 2; }
 

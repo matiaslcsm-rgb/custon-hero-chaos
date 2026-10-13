@@ -643,11 +643,24 @@ arriba a la izquierda), botones gruesos, barras de vida y maná planas y la fuen
 las ventanas, la barra del héroe y los avisos. En el canvas, la letra de los carteles pasa a la misma fuente y, en la
 pasada de interfaz (título del piso, barra del jefe, campeones, mapa grande, cartel del arma), los colores del pergamino
 se cambian por los del panel oscuro desde el contexto del canvas (sin tocar cada función). Sin la viñeta de papel.
-Pendiente menor: los colores del minimapa siguen siendo los del pergamino.
+
 
 **Estilo principal (2026-10-13):** el usuario decidió que el pixel art pasa a ser el estilo de la Torre. Viene prendido
 para todos (preferencia nueva `chc-style`; la de la prueba se ignora); en la pausa (🟫 Pixel art) se puede volver a la
 tinta, o con `?pixel=0`. El modo Custom Hero Chaos no cambia.
+
+**Minimapa, portada y Custom Hero Chaos (2026-10-13):**
+- El minimapa y el mapa grande pintan lo descubierto con la paleta del pixel art de cada bioma (si cambiás de estilo se
+  repintan con lo ya explorado).
+- **Portada** (`js/titleScreen.js`): escena en pixel art animada (atardecer con estrellas y luna, la torre que se pierde
+  en las nubes con ventanas que titilan, colinas con pinos, el camino, el aventurero junto a una fogata y criaturas del
+  bestiario que cruzan), el nombre del juego y dos tarjetas para elegir Custom Hero Chaos o Tower Chaos, con el nombre,
+  el tutorial, el glosario y el prototipo 3D abajo.
+- **Custom Hero Chaos** con lo que encaja de la Torre (sus escenarios ya eran pixel art con el mismo píxel): creeps con
+  los cuerpos del bestiario, jefes de ronda con el más parecido (Reina de la Colmena → Reina Escorpión, Dragón de
+  Escarcha → Wyrm, Señor del Abismo → Señor de la Ceniza, Liche → Bruja del Fango, Gólem, Titán → ogro, Espectro →
+  fantasma, Hidra → lagarto grande), efectos de combate en píxeles, sangre y restos, números con fuente de píxeles y la
+  interfaz oscura con Pixelify Sans. Los héroes conservan sus sprites de 12×12 (ya son pixel art y los identifican).
 
 ### Ideas para las criaturas (propuesta externa revisada, 2026-10-13; para después, de a una)
 - ✅ **Alas que vuelan:** ignoran fango, lava y trampas; si las aturdís, caen y pierden eso.

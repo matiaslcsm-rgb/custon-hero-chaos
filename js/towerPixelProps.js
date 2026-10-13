@@ -32,6 +32,14 @@ function pxFlame(k, big) {
         layer(w / 2, 0 + (k === 1 ? 1 : 0), '#c8401a'); layer(w / 2 - 1.2, 2, '#ff8a1a'); layer(w / 2 - 2.4, 4 + (k === 2 ? 1 : 0), '#ffd166'); S.set(cx, h - 3, '#fff0a0'); S.set(cx, h - 2, '#fff0a0');
     });
 }
+// Fogata: piedras en ronda y troncos cruzados (la llama va aparte); también la usa la portada (titleScreen.js)
+function pxCampfire() {
+    return pxProp('campfire', 18, 9, S => {
+        pxShadow(S, 9, 7, 8, 1.6);
+        for (let i = 0; i < 7; i++) { const a = i / 7 * Math.PI * 2; S.ball(9 + Math.cos(a) * 6.5, 5.5 + Math.sin(a) * 2.2, 1.5, 1.2, PXP_STONE); }
+        S.line(4, 7, 14, 3, PXB_WOOD[1], 1); S.line(4, 3, 14, 7, PXB_WOOD[2], 1); S.outline('#110d0b');
+    });
+}
 function pxDrawLights(level) {
     towerLights(level).forEach(o => {
         if (o.noDraw || !canSeeOrExplored(level, o)) return;
@@ -41,11 +49,7 @@ function pxDrawLights(level) {
             pxGlow(cx, by - 30, 9, 9, '#ff9a3a', 0.18 + 0.06 * k);
             pxPut(pxFlame(k, false), cx + 1, by - 24);
         } else {
-            pxPut(pxProp('campfire', 18, 9, S => {
-                pxShadow(S, 9, 7, 8, 1.6);
-                for (let i = 0; i < 7; i++) { const a = i / 7 * Math.PI * 2; S.ball(9 + Math.cos(a) * 6.5, 5.5 + Math.sin(a) * 2.2, 1.5, 1.2, PXP_STONE); }
-                S.line(4, 7, 14, 3, PXB_WOOD[1], 1); S.line(4, 3, 14, 7, PXB_WOOD[2], 1); S.outline('#110d0b');
-            }), cx, by);
+            pxPut(pxCampfire(), cx, by);
             pxGlow(cx, by - 14, 16, 12, '#ff9a3a', 0.16 + 0.06 * k);
             pxPut(pxFlame(k, true), cx, by - 6);
             if (o.camp && towerDarkness() >= 0.5 && Math.hypot(player.x - o.x, player.y - o.y) <= ATMOS.campReach + 2) pxLabel('fogata: descansá', cx, by - TILE * 1.1, '#ffcf6a');
