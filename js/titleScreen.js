@@ -1,14 +1,17 @@
 // Portada (2026-10-13): escena en pixel art animada detrás del nombre del juego y la elección de modo.
 //
-//   Atardecer violeta con estrellas y luna, montañas lejanas, la torre de Tower Chaos que se pierde entre las nubes (con
+//   Atardecer violeta con estrellas y luna, montañas lejanas, el coliseo de Custom Hero Chaos (público, antorchas y
+//   estandartes) y la torre de Tower Chaos, siniestra (ojo rojo que late, murciélagos, relámpagos), que se pierde entre las nubes (con
 //   ventanas que titilan), colinas con pinos y un camino de tierra hacia la torre. Adelante, el aventurero junto a una
 //   fogata, y cada tanto cruza una criatura del bestiario. Todo con los sprites de la Torre (towerPixel*.js).
 //   La escena se dibuja en una imagen chica (1 píxel = 2 a 5 píxeles de la pantalla, según el alto) que el CSS agranda
 //   sin suavizar. Lo fijo se arma una vez por tamaño; lo animado, en cada cuadro. Solo corre en el menú (body.on-title).
 
-const TS = { sky: ['#140a24', '#24123a', '#3a1a46', '#5a2448', '#8a3448', '#d0704a'], stone: ['#1a1426', '#2a2238', '#3a3048', '#4a3e5a', '#5e5272'] };
+const TS = { sky: ['#140a24', '#24123a', '#3a1a46', '#5a2448', '#8a3448', '#d0704a'], stone: ['#0c0912', '#16101e', '#20182a', '#2a2036', '#3a2e48'],
+    colo: ['#24181a', '#3a2826', '#54382e', '#6e4a3a', '#8c6048'] };
 const tsCanvas = document.getElementById('title-canvas'), tsg = tsCanvas.getContext('2d');
 let tsStatic = null, tsW = 0, tsH = 0, tsLast = 0, tsT = 0, tsWalkers = [], tsNextWalker = 2, tsParts = [], tsStars = [], tsClouds = [], tsWindows = [];
+let tsColo = null, tsTower = null, tsBolt = null, tsNextBolt = 4;
 const tsHero = { cape: '#a33a3a', hood: '#7a2a2a', trim: '#c9a227', glow: '#9ad1ff', weapon: 'sword' };
 
 function tsBayer(x, y) { return PX_BAYER[(y & 3) * 4 + (x & 3)]; }
@@ -28,12 +31,34 @@ function tsBuild(w, h) {
     for (let y = -mr; y <= mr; y++) for (let x = -mr; x <= mr; x++) { const r2 = x * x + y * y; if (r2 <= mr * mr) put(mx + x, my + y, tsRgb(r2 > (mr - 1) * (mr - 1) ? '#d8c8b0' : (pxHash(x, y, 9) < 0.08 || (x + 3) * (x + 3) + (y + 2) * (y + 2) < 6) ? '#d0c0a8' : '#f2e6c8')); }
     // Montañas lejanas
     for (let x = 0; x < w; x++) { const top = hy - Math.round(10 + pxNoise(x / 40, 0, 3) * h * 0.14 + pxNoise(x / 12, 0, 4) * 5); for (let y = top; y < hy + 4; y++) put(x, y, tsRgb(y === top ? '#4a2a52' : '#2a1838')); }
+    // El coliseo (Custom Hero Chaos): tres pisos de arcos, la punta derecha en ruinas, antorchas en los arcos de abajo
+    const ccx = Math.round(w * 0.2), ccw = Math.round(w * 0.25), cch = Math.round(h * 0.17), ccb = hy + 9, tierH = Math.max(6, Math.round(cch / 3));
+    const colo = TS.colo.map(tsRgb), crowd = [];
+    const coloTop = x => { const nx = x / (ccw / 2); let t = ccb - Math.round(cch * Math.min(1, Math.sqrt(Math.max(0, 1 - Math.pow(Math.abs(nx), 5))) * 1.04)); if (nx > 0.35) t += Math.round(tierH * 1.4 * pxNoise(x / 3, 1, 12) * Math.min(1, (nx - 0.35) * 3)); return t; };
+    for (let x = -Math.floor(ccw / 2); x <= Math.floor(ccw / 2); x++) {
+        const nx = x / (ccw / 2), top = coloTop(x);
+        for (let y = top; y < ccb; y++) {
+            const ty = ccb - 1 - y, tier = Math.floor(ty / tierH), local = ty % tierH, col = ((x % 5) + 5) % 5;
+            let c = colo[nx < -0.45 ? 3 : nx > 0.6 ? 1 : 2];
+            if (y === top) c = colo[4];
+            else if (local === tierH - 1) c = colo[4]; // cornisa de cada piso
+            else if (local === tierH - 2) c = colo[0];
+            else if (col >= 1 && col <= 3 && local >= 1 && local <= tierH - 3 && !(local === tierH - 3 && col !== 2) && Math.abs(nx) < 0.93) { // arco
+                const lit = tier === 0 && pxHash(Math.floor((x + 1000) / 5), 0, 21) < 0.45;
+                c = tsRgb(lit ? (local < 2 ? '#e0803a' : '#a04a26') : '#120a0c');
+                if (tier === 2 && local >= 1 && local <= 2) crowd.push([ccx + x, y]);
+            }
+            put(ccx + x, y, c);
+        }
+    }
+    tsColo = { cx: ccx, w: ccw, h: cch, base: ccb, top: coloTop, crowd };
     // La torre (se angosta hacia arriba; luz de la luna a la izquierda)
     const tx = Math.round(w * 0.66), base = hy + 8, top = -10;
-    tsWindows = [];
+    tsWindows = []; tsTower = { x: tx, base, eyeY: Math.round(h * 0.17) };
     for (let y = top; y < base; y++) {
         const k = (y - top) / (base - top), half = Math.round(7 + k * 6), band = (y - top) % 38 < 3;
-        for (let x = -half - (band ? 1 : 0); x <= half + (band ? 1 : 0); x++) {
+        if ((y - top) % 38 === 0) for (let s = -half - 3; s <= half + 3; s += 3) { put(tx + s, y - 1, tsRgb(TS.stone[1])); put(tx + s, y - 2, tsRgb(TS.stone[0])); } // púas en cada anillo
+        for (let x = -half - (band ? 2 : 0); x <= half + (band ? 2 : 0); x++) {
             const row = Math.floor((y - top) / 3), brick = (x + half + (row % 2) * 2) % 5 === 0 || (y - top) % 3 === 0;
             const shadeI = x < -half + 2 ? 4 : x > half - 3 ? 0 : x < 0 ? 3 : 2;
             put(tx + x, y, tsRgb(TS.stone[Math.max(0, shadeI - (brick ? 1 : 0))]));
@@ -60,13 +85,13 @@ function tsBuild(w, h) {
     // Estrellas, nubes
     tsStars = []; for (let i = 0; i < w * h / 220; i++) { const x = Math.round(pxHash(i, 1, 13) * w), y = Math.round(pxHash(i, 2, 13) * hy * 0.75); if (Math.hypot(x - mx, y - my) > mr + 3) tsStars.push({ x, y, ph: pxHash(i, 3, 13) * 6 }); }
     tsClouds = [0, 1, 2, 3, 4, 5].map(i => ({ img: tsCloud(28 + i * 7, 7 + (i % 3) * 3, i), x: pxHash(i, 5, 2) * w, y: Math.round(h * (0.04 + (i % 3) * 0.06)), v: 1.2 + (i % 3) * 0.9 }));
-    tsClouds.push({ img: tsCloud(Math.round(w * 0.36), 16, 9), x: tx - w * 0.18, y: Math.round(h * 0.07), v: 0.35, bank: true }); // el banco que tapa la punta de la torre
+    tsClouds.push({ img: tsCloud(Math.round(w * 0.36), 16, 9, ['#1a1020', '#2a1830', '#3a2040', '#4a2848', '#8a2a3a']), x: tx - w * 0.18, y: Math.round(h * 0.07), v: 0.35, bank: true }); // el banco que tapa la punta de la torre (con el rojo del ojo abajo)
     return c;
 }
-function tsCloud(cw, ch, seed) {
+function tsCloud(cw, ch, seed, pal = ['#3a2a4a', '#4a3a5e', '#5a4870', '#6e5a80', '#a0607a']) {
     return pxSprite(cw, ch, S => {
         const r = pxSeeded(77 + seed * 31), n = Math.max(3, Math.round(cw / 8));
-        for (let i = 0; i < n; i++) { const x = cw * (0.12 + 0.76 * i / (n - 1)), y = ch * (0.55 - 0.25 * Math.sin(i / (n - 1) * Math.PI)); S.ball(x, y, cw / n * 0.9 + r() * 2, ch * 0.42, ['#3a2a4a', '#4a3a5e', '#5a4870', '#6e5a80', '#a0607a'], () => 0.5); }
+        for (let i = 0; i < n; i++) { const x = cw * (0.12 + 0.76 * i / (n - 1)), y = ch * (0.55 - 0.25 * Math.sin(i / (n - 1) * Math.PI)); S.ball(x, y, cw / n * 0.9 + r() * 2, ch * 0.42, pal, () => 0.5); }
     });
 }
 // Lo animado
@@ -79,8 +104,10 @@ function tsFrame(now) {
     const g = tsg; g.imageSmoothingEnabled = false;
     g.drawImage(tsStatic, 0, 0);
     tsStars.forEach(st => { const a = 0.5 + 0.5 * Math.sin(tsT * 2 + st.ph); if (a > 0.35) { g.fillStyle = a > 0.85 ? '#ffffff' : '#c8b8e0'; g.fillRect(st.x, st.y, 1, 1); } });
-    tsWindows.forEach(wn => { const f = Math.sin(tsT * 3 + wn.ph) > -0.6; g.fillStyle = f ? '#ffd166' : '#a8602a'; g.fillRect(wn.x, wn.y, 1, 2); });
+    tsWindows.forEach(wn => { const f = Math.sin(tsT * 2.3 + wn.ph) + Math.sin(tsT * 7.1 + wn.ph * 3) * 0.4 > -0.5; g.fillStyle = f ? '#ff3a2a' : '#6a1010'; g.fillRect(wn.x, wn.y, 1, 2); if (f) { g.fillStyle = 'rgba(255,40,30,0.25)'; g.fillRect(wn.x - 1, wn.y - 1, 3, 4); } });
+    tsDrawColoseum(g);
     tsClouds.forEach(cl => { cl.x += cl.v * dt; if (!cl.bank && cl.x > w + 10) cl.x = -cl.img.width - 10; if (cl.bank && cl.x > w * 0.66 - w * 0.12) cl.v = -Math.abs(cl.v); if (cl.bank && cl.x < w * 0.66 - w * 0.24) cl.v = Math.abs(cl.v); g.drawImage(cl.img, Math.round(cl.x), cl.y); });
+    tsDrawSinister(g, w, h, dt);
     // Fogata, su luz con tramado y el héroe
     const gy = Math.round(h * 0.8) + 16, fx = Math.round(w * 0.17), hx = Math.round(w * 0.22);
     for (let y = -14; y <= 8; y++) for (let x = -22; x <= 22; x++) { const d = Math.hypot(x, y * 1.8) / 22; if (d < 1 && (1 - d) * 0.55 > tsBayer(fx + x, gy + y)) { g.fillStyle = 'rgba(255,150,70,0.22)'; g.fillRect(fx + x, gy + y - 2, 1, 1); } }
@@ -104,6 +131,58 @@ function tsFrame(now) {
         const fr = pxbFrame(c.body, c.color, [], 'walk', Math.floor(tsT * 7) % 4).img;
         g.save(); g.translate(Math.round(c.x), 0); g.scale(-1, 1); g.drawImage(fr, -fr.width / 2, c.y - fr.height); g.restore();
     });
+}
+// El coliseo vivo: resplandor de la arena por encima, el público que titila en el piso de arriba y estandartes al viento
+function tsDrawColoseum(g) {
+    const C = tsColo; if (!C) return;
+    const topY = C.top(0), fl = 0.8 + 0.2 * Math.sin(tsT * 5) * Math.sin(tsT * 1.7);
+    for (let y = -Math.round(C.h * 0.55); y <= 2; y++) for (let x = -Math.round(C.w * 0.42); x <= Math.round(C.w * 0.42); x++) {
+        const d = Math.hypot(x / (C.w * 0.42), y / (C.h * 0.55));
+        if (d < 1 && (1 - d) * 0.6 * fl > tsBayer(C.cx + x, topY + y)) { g.fillStyle = 'rgba(255,150,60,0.16)'; g.fillRect(C.cx + x, topY + y, 1, 1); }
+    }
+    C.crowd.forEach(([x, y], i) => { const k = pxHash(i, Math.floor(tsT * 4), 3); if (k < 0.35) { g.fillStyle = ['#e8c8a0', '#c8402e', '#e8c060', '#7fb0ff'][Math.floor(k * 11) % 4]; g.fillRect(x, y, 1, 1); } });
+    [-0.36, -0.12, 0.12].forEach((fx, i) => {
+        const x = C.cx + Math.round(fx * C.w), y = C.top(x - C.cx), wave = Math.floor(tsT * 4 + i) % 2;
+        g.fillStyle = '#2a1c18'; g.fillRect(x, y - 8, 1, 8);
+        g.fillStyle = i % 2 ? '#e8c060' : '#c8402e'; g.fillRect(x + 1, y - 8, 3, 3); g.fillRect(x + 1, y - 5, 2 + wave, 1);
+    });
+}
+// La torre siniestra: el ojo rojo que late y parpadea, murciélagos, la puerta encendida y relámpagos
+function tsDrawSinister(g, w, h, dt) {
+    const T = tsTower; if (!T) return;
+    // Puerta con luz roja
+    g.fillStyle = '#1a0606'; g.fillRect(T.x - 3, T.base - 9, 6, 9);
+    for (let y = -10; y <= 2; y++) for (let x = -10; x <= 10; x++) { const d = Math.hypot(x / 10, y / 10); if (d < 1 && (1 - d) * (0.6 + 0.2 * Math.sin(tsT * 3)) > tsBayer(T.x + x, T.base + y)) { g.fillStyle = 'rgba(255,40,30,0.3)'; g.fillRect(T.x + x, T.base - 4 + y, 1, 1); } }
+    g.fillStyle = '#ff3a2a'; g.fillRect(T.x - 1, T.base - 6, 2, 3);
+    // El ojo
+    const pulse = 0.5 + 0.5 * Math.sin(tsT * 2), blink = (tsT % 7) < 0.18, ey = T.eyeY;
+    for (let y = -9; y <= 9; y++) for (let x = -14; x <= 14; x++) { const d = Math.hypot(x / 14, y / 9); if (d < 1 && (1 - d) * (0.35 + 0.35 * pulse) > tsBayer(T.x + x, ey + y)) { g.fillStyle = 'rgba(255,30,30,0.35)'; g.fillRect(T.x + x, ey + y, 1, 1); } }
+    if (blink) { g.fillStyle = '#5a0a0a'; g.fillRect(T.x - 5, ey, 11, 1); }
+    else {
+        for (let y = -3; y <= 3; y++) for (let x = -6; x <= 6; x++) { const d = (x * x) / 36 + (y * y) / 9; if (d <= 1) { g.fillStyle = d > 0.6 ? '#7a0c0c' : d > 0.25 ? '#e0281e' : '#ff7a3a'; g.fillRect(T.x + x, ey + y, 1, 1); } }
+        const look = Math.round(Math.sin(tsT * 0.5) * 2);
+        g.fillStyle = '#100000'; g.fillRect(T.x + look, ey - 2, 1, 5); g.fillStyle = '#fff0c0'; g.fillRect(T.x + look - 2, ey - 2, 1, 1);
+    }
+    // Murciélagos dando vueltas
+    for (let i = 0; i < 7; i++) {
+        const a = tsT * (0.5 + i * 0.07) + i * 0.9, R = 14 + i * 3, bx = Math.round(T.x + Math.cos(a) * R), by = Math.round(T.eyeY + 12 + i * 5 + Math.sin(a) * R * 0.3), up = Math.floor(tsT * 9 + i) % 2;
+        g.fillStyle = '#07040a'; g.fillRect(bx, by, 1, 1); g.fillRect(bx - 1, by - 1 + up * 2, 1, 1); g.fillRect(bx + 1, by - 1 + up * 2, 1, 1); g.fillRect(bx - 2, by - 1, 1, 1); g.fillRect(bx + 2, by - 1, 1, 1);
+    }
+    // Relámpagos
+    if ((tsNextBolt -= dt) <= 0) {
+        tsNextBolt = 5 + Math.random() * 7;
+        const pts = [[T.x + Math.round((Math.random() - 0.5) * w * 0.2), 0]];
+        while (pts[pts.length - 1][1] < T.eyeY - 6) { const [px, py] = pts[pts.length - 1]; pts.push([px + Math.round((Math.random() - 0.5) * 8 + (T.x - px) * 0.25), py + 3 + Math.round(Math.random() * 4)]); }
+        tsBolt = { pts, until: tsT + 0.35 };
+    }
+    if (tsBolt && tsT < tsBolt.until) {
+        const k = tsBolt.until - tsT, on = k > 0.22 || (k > 0.08 && k < 0.14);
+        if (on) {
+            g.fillStyle = 'rgba(200,180,255,0.16)'; g.fillRect(0, 0, w, h);
+            g.fillStyle = '#efe8ff';
+            for (let i = 1; i < tsBolt.pts.length; i++) { const [x0, y0] = tsBolt.pts[i - 1], [x1, y1] = tsBolt.pts[i], n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)); for (let s = 0; s <= n; s++) g.fillRect(Math.round(x0 + (x1 - x0) * s / n), Math.round(y0 + (y1 - y0) * s / n), 1, 1); }
+        }
+    }
 }
 // Los dibujitos de las tarjetas de modo
 function tsCardArt() {
