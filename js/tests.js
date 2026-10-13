@@ -1578,6 +1578,11 @@ test('Torre: el héroe en pixel art se anima por poses — cada movimiento elige
     u.hp = 0; u.diedAt = gameClock - 5;
     const d = pxhPick(u, false); check(d.kind === 'death' && d.k === 4, 'muerto: queda tendido');
     u.hp = u.maxHp;
+    // para dónde mira: de frente, de espaldas o de costado (y todos los cuadros existen en las tres)
+    ['down', 'up'].forEach(dir => [['idle', 0], ['walk', 3], ['swing', 14], ['attack', 0], ['hurt', 0]].forEach(([kind, k]) => check(pxbHeroFrame(L, kind, k, dir).img.width > 0, `${kind} ${dir}`)));
+    u.fxAttack = { kind: 'swing', dx: 0, dy: -1, at: fxClock }; checkEq(pxhDir(u, false), 'up', 'pega hacia arriba: de espaldas');
+    u.fxAttack = { kind: 'swing', dx: 0, dy: 1, at: fxClock }; checkEq(pxhDir(u, false), 'down', 'hacia abajo: de frente');
+    u.fxAttack = null; u.lastStepDir = { dx: 1, dy: 1 }; checkEq(pxhDir(u, true), 'side', 'en diagonal: de costado');
 });
 test('Torre: Tiro Tensado (arco) — al toque no atraviesa, tensado del todo atraviesa, perfecto suma, tensar frena', () => {
     const level = newTower('AXE', { weapon: 'ADVENTURER_BOW' });

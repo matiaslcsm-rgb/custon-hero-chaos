@@ -752,6 +752,13 @@ el mismo paso; lo grande queda acá, ordenado por impacto.
     sigue cambiando con la rueda o + −; la preferencia pasó a `chc-zoom2`, así que todos arrancan una vez con la cámara
     nueva. Ojo: se ve menos alrededor; los avisos de balas fuera de la vista (flechas en el borde) cubren lo que queda
     afuera. **Pendiente:** medir si con la cámara más cerca el jugador recibe más golpes de lejos.
+  - **De frente y de espaldas** (2026-10-14, opción elegida): las mismas poses se dibujan en tres vistas. De costado
+    (espejado a la izquierda), de frente (mirando hacia abajo: la cara en sombra con los dos ojos rojos, el tabardo, la
+    capa que asoma a los costados, la espada en la mano derecha del héroe) y de espaldas (mirando hacia arriba: la capa
+    entera con pliegues, la costura de la capucha, la espada del otro lado). Lo "adelante" de cada pose pasa a ser hacia
+    la cámara o hacia el fondo en escorzo, así el combo, correr, el golpe recibido y las otras armas salen solos en las
+    tres. Para dónde mira: el golpe manda (hacia donde pega); si no, el paso (en diagonal, de costado); quieto, el
+    cursor. La rodada y la caída se ven de costado.
 - ✅ Volumen general, música y efectos, y temblor de pantalla (0-150%), con deslizadores en la pausa que se guardan.
 - ✅ La forja ya no corta una pelea: si una pieza sube de nivel peleando aparece un aviso arriba a la izquierda, y la
   ventana se abre sola cuando nadie te persigue.

@@ -87,6 +87,7 @@ function pxhPose(S, L, f) {
     const eyeOn = !(f.blink || P.closed), eye = eyeOn ? (P.dim ? '#8a1a14' : '#ff2a1f') : '#2a0806', eye2 = eyeOn ? (P.dim ? '#6a120e' : '#e0180e') : '#2a0806';
     if (P.lie !== undefined && P.lie > 0) { pxhLying(S, L, P, C, H, T, cloth, eye, eye2); return; }
     if (P.roll !== undefined) { pxhRoll(S, L, P, C, H, T, eye); return; }
+    if (f.dir === 'down' || f.dir === 'up') { pxhPoseFacing(S, L, f, P, f.dir === 'down' ? 1 : -1, C, H, T, cloth, eye, eye2); return; }
     const bx = P.bx, by = P.by, lean = P.lean;
     const shX = 8.5 + bx + lean, shY = 9.5 + by + (P.sh || 0), hipX = 8.5 + bx, hipY = 15.5 + by;
     pxbShadow(S, 8.5 + bx * 0.5, 23, 5.5);
@@ -135,6 +136,62 @@ function pxhPose(S, L, f) {
         S.rect(Math.round(mx), Math.round(my) + 1, 2, 1, st[1]);
     }
 }
+// --- DE FRENTE Y DE ESPALDA (2026-10-14, pedido: "mirar hacia arriba y hacia abajo", como en Hades) ---
+// Las mismas poses de costado, vistas desde adelante (mira hacia abajo, a la cámara) o desde atrás (mira hacia arriba).
+// "Adelante" de la pose pasa a ser hacia la cámara (un poco hacia abajo en pantalla) o hacia el fondo (hacia arriba):
+// se acorta (escorzo) y la espada abre un poco hacia afuera, así los tajos se leen igual. side: +1 de frente, −1 de espaldas.
+function pxhProject(fwd, up, side) { return [-0.4 * fwd * side, up + 0.8 * fwd * side]; } // [x, y] en pantalla
+function pxhPoseFacing(S, L, f, P, side, C, H, T, cloth, eye, eye2) {
+    const legs = ['#231d1a', '#352d29', '#4a403a'], st = PXB_STEEL, cx = 8.5 + P.bx * 0.3;
+    const by = P.by, shY = 9.5 + by + (P.sh || 0), hipY = 15.5 + by, eyeOn = eye !== '#2a0806';
+    const sword = L.weapon === 'sword' || L.weapon === 'twin';
+    pxbShadow(S, cx, 23, 5.5);
+    // el brazo del arma: de frente queda a la izquierda de la pantalla (es la derecha del héroe), de espaldas a la derecha
+    const ws = side > 0 ? -1 : 1, wsx = cx + ws * 3.5, wsy = shY + 1, osx = cx - ws * 3.5;
+    const [hfx, hfy] = pxhProject(P.fh[0], P.fh[1], side), mx = wsx + ws * 0.5 + hfx, my = wsy + hfy;
+    const a = P.blade * Math.PI / 180, [bdx, bdy] = pxhProject(Math.cos(a), Math.sin(a), side);
+    const bl = Math.max(4, 10 * Math.hypot(bdx, bdy)), bladeAng = Math.atan2(bdy, bdx) * 180 / Math.PI; // la hoja en escorzo
+    const drawWeapon = () => {
+        if (!sword) { S.line(wsx, wsy, mx, my, st[2], 2); pxhWeapon(S, Math.round(mx) - 1, Math.round(my) + 1, L, { atk: P.atk || 0, bob: by, br: 0, walk: -1, idle: f.idle || 0 }); return; }
+        if (P.smear) { const s0 = P.smear[0] * Math.PI / 180, s1 = P.smear[1] * Math.PI / 180, p0 = pxhProject(Math.cos(s0), Math.sin(s0), side), p1 = pxhProject(Math.cos(s1), Math.sin(s1), side);
+            pxhSmear(S, mx, my, Math.atan2(p0[1], p0[0]) * 180 / Math.PI, Math.atan2(p1[1], p1[0]) * 180 / Math.PI, P.impact ? 9 : 8); }
+        if (P.two) S.line(osx, wsy, mx, my + 0.5, st[1], 2);
+        S.line(wsx, wsy, mx, my, st[2], 2);
+        pxhBlade(S, mx, my, bladeAng, bl);
+        S.rect(Math.round(mx), Math.round(my), 2, 1, st[1]);
+        if (P.impact) [[1, 0], [0, 1], [-1, 1], [2, 1]].forEach(([ox, oy], i) => S.set(mx + Math.cos(bladeAng * Math.PI / 180) * bl + ox, my + Math.sin(bladeAng * Math.PI / 180) * bl + oy, i % 2 ? '#ffd166' : '#ffffff'));
+    };
+    // ¿la hoja va por detrás del cuerpo? (de espaldas, cuando apunta al fondo; de frente, cuando está arriba de la cabeza)
+    const behind = side < 0 ? Math.cos(a) > 0.25 : (P.two && P.fh[1] < -6);
+    if (behind) drawWeapon();
+    // Capa: de frente asoma a los costados; de espaldas tapa la espalda (más abajo se mece)
+    const bottom = 21 - P.lift * 3;
+    if (side > 0) for (let y = Math.floor(shY); y <= bottom; y++) { const w = 4.5 + (y - shY) * 0.18; S.set(cx - w, y, C[0]); S.set(cx - w + 1, y, C[1]); S.set(cx + w, y, C[1]); S.set(cx + w - 1, y, C[2]); }
+    // Piernas (al caminar, una sube y la otra baja: el pie de atrás de la pose es la pierna de la izquierda)
+    const legL = Math.min(22, P.rf[1]), legR = Math.min(22, P.ff[1]);
+    S.rect(Math.round(cx - 2.5), Math.round(hipY), 2, Math.round(legL - hipY), legs[0]); S.rect(Math.round(cx - 2.5), Math.round(legL) - 1, 2, 2, T[1]);
+    S.rect(Math.round(cx + 0.5), Math.round(hipY), 2, Math.round(legR - hipY), legs[1]); S.rect(Math.round(cx + 0.5), Math.round(legR) - 1, 2, 2, T[2]);
+    // Torso, tabardo (de frente) y cinturón
+    for (let y = shY + 0.5; y <= hipY; y++) for (let x = -3; x <= 3; x++) S.set(cx + x, y, cloth[x < -1 ? 1 : x > 1 ? 3 : 2]);
+    if (side > 0) { S.rect(Math.round(cx - 0.5), Math.round(shY + 1), 2, Math.round(hipY - shY), T[2]); S.rect(Math.round(cx - 0.5), Math.round(shY + 1), 1, Math.round(hipY - shY), T[3]); }
+    S.rect(Math.round(cx - 3.5), Math.round(hipY - 0.5), 8, 1, '#3a2a1c'); if (side > 0) S.set(cx + 0.5, hipY - 0.5, '#e0b84a');
+    if (side < 0) for (let y = Math.floor(shY); y <= bottom; y++) { // de espaldas: la capa entera, con pliegues
+        const w = 3.8 + (y - shY) * 0.22, sw = y > hipY ? P.sway * 0.5 : 0;
+        for (let x = Math.round(cx - w + sw); x <= Math.round(cx + w + sw); x++) S.set(x, y, C[(x + y) % 4 === 0 ? 1 : x < cx - 1 ? 2 : x > cx + 1 ? 2 : 3]);
+    }
+    // Esclavina sobre los hombros y el brazo libre
+    S.rect(Math.round(cx - 4), Math.round(shY - 1), 9, 3, C[2]); S.rect(Math.round(cx - 4), Math.round(shY - 1), 9, 1, C[3]);
+    if (!P.two) { const ohy = wsy + 4.5 - Math.abs(P.rh[0]) * 0.4; S.line(osx, wsy, osx - ws * 0.3, ohy, st[1], 2); S.rect(Math.round(osx - ws * 0.3), Math.round(ohy), 2, 1, st[0]); }
+    // Capucha: de frente, la cara en sombra con los dos ojos rojos; de espaldas, la punta de la capucha
+    const hx = cx + P.hd[0] * 0.3, hy = shY - 4 + P.hd[1];
+    S.ball(hx, hy, 3.6, 3.4, H);
+    if (side > 0) {
+        S.ball(hx, hy + 0.9, 2.3, 1.9, ['#0c0a09', '#15110f', '#1d1815', '#241e1a', '#2b2420']);
+        S.set(hx - 1, hy + 0.6, eye2); S.set(hx + 1, hy + 0.6, eye);
+        if (eyeOn && (P.glint || P.impact)) { S.set(hx - 1, hy - 0.4, '#ff6a50'); S.set(hx + 1, hy - 0.4, '#ff6a50'); }
+    } else { S.set(hx, hy - 3.5, H[3]); S.line(hx, hy - 2.5, hx, hy + 2.5, H[1]); } // la costura de atrás
+    if (!behind) drawWeapon();
+}
 // Rodando (esquive): un ovillo de capa con la capucha que gira
 function pxhRoll(S, L, P, C, H, T, eye) {
     pxbShadow(S, 9, 23, 5);
@@ -163,10 +220,10 @@ function pxhFramePose(kind, k) {
     return PXH_ANIM[kind][Math.min(k, PXH_ANIM[kind].length - 1)];
 }
 PXB.hero = { w: 18, h: 24, head: [8, 2], back: [8, 9], draw() {} };
-function pxbHeroFrame(L, kind, k) {
-    const key = ['hero', L.cape, L.hood, L.trim, L.glow, L.weapon, kind, k].join('|');
+function pxbHeroFrame(L, kind, k, dir = 'side') {
+    const key = ['hero', L.cape, L.hood, L.trim, L.glow, L.weapon, kind, k, dir].join('|');
     if (pxbCache[key]) return pxbCache[key];
-    const f = { pose: pxhFramePose(kind, k), blink: kind === 'idle' && k >= 4, idle: kind === 'idle' ? k % 4 : 0 };
+    const f = { pose: pxhFramePose(kind, k), blink: kind === 'idle' && k >= 4, idle: kind === 'idle' ? k % 4 : 0, dir };
     const ex = kind === 'idle' || kind === 'walk' ? 0 : 8; // los tajos, el esquive y la caída salen del cuerpo: más lienzo (sigue centrado)
     const make = white => {
         const c = pxSprite(PXB.hero.w + PXB_PAD * 2 + ex * 2, PXB.hero.h + PXB_PAD + ex, S => { S.tx = PXB_PAD + ex; S.ty = PXB_PAD + ex; pxhPose(S, L, f); S.outline('#110d0b'); });
@@ -178,6 +235,17 @@ function pxbHeroFrame(L, kind, k) {
     return (pxbCache[key] = fr);
 }
 
+// --- PARA DÓNDE MIRA: de costado, hacia abajo (de frente) o hacia arriba (de espaldas) ---
+// El golpe manda (hacia donde pega), después el paso (hacia donde camina; en diagonal, de costado) y, quieto, el cursor.
+function pxhDir(u, moving) {
+    let dx, dy;
+    const a = u.fxAttack;
+    if (a && a.dx !== undefined && fxClock - a.at < 0.5) { dx = a.dx; dy = a.dy; }
+    else if (moving && u.lastStepDir) { dx = u.lastStepDir.dx; dy = u.lastStepDir.dy; }
+    else if (u === player && !autopilot && gameMode === 'tower' && mouse.over && typeof cursorWorld === 'function') { const c = cursorWorld(); if (!c) return u.pxDir || 'side'; dx = c.x - u.x; dy = c.y - u.y; }
+    else return u.pxDir || 'side';
+    return (u.pxDir = Math.abs(dy) > Math.abs(dx) * 1.3 ? (dy > 0 ? 'down' : 'up') : 'side');
+}
 // --- QUÉ CUADRO TOCA AHORA ---
 const PXH_TIME = { dash: 0.28, hurt: 0.24, death: 1.1 };
 function pxhPick(u, moving) {

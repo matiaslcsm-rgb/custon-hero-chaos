@@ -425,12 +425,13 @@ function drawPixelUnit(u, cx, cy, facing, flash, pose) {
     // Golpe de arma visible (2026-10-14): en el instante del golpe (ni al arrancar ni al terminar la animación
     // de ataque) el héroe pasa a su cuadro de ataque, donde el arma se extiende o brilla según su forma
     // (pxhWeapon) — aparte del giro/estirón de todo el cuerpo que ya hace attackPose() (fx.js).
-    if (body === 'hero') ({ kind, k } = pxhPick(u, moving)); // el héroe: su cuadro según lo que está haciendo (towerPixelHero.js)
-    const fr = body === 'hero' ? pxbHeroFrame(pxHeroLook(u), kind, k) : pxbFrame(body, u.color, (u.type.parts || []), kind, k), img = flash ? fr.white : fr.img, s = pxbScale(u);
+    let dir = 'side';
+    if (body === 'hero') { ({ kind, k } = pxhPick(u, moving)); dir = kind === 'death' ? 'side' : pxhDir(u, moving); } // el héroe: su cuadro y para dónde mira (towerPixelHero.js)
+    const fr = body === 'hero' ? pxbHeroFrame(pxHeroLook(u), kind, k, dir) : pxbFrame(body, u.color, (u.type.parts || []), kind, k), img = flash ? fr.white : fr.img, s = pxbScale(u);
     ctx.save();
     ctx.translate(cx, cy + TILE * 0.45);
     if (pose) { ctx.rotate(pose.rot * (facing < 0 ? -1 : 1)); ctx.scale(pose.sx, pose.sy); }
-    if (facing < 0) ctx.scale(-1, 1);
+    if (facing < 0 && dir === 'side') ctx.scale(-1, 1); // de frente o de espaldas no se espeja (la espada queda en su mano)
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(img, -img.width * s / 2, -img.height * s, img.width * s, img.height * s);
     ctx.restore();
