@@ -31,7 +31,7 @@ function renderPauseMenu() {
         opt('sprites', '🎨 Pixel art (G)', spritesOn) +
         opt('colorblind', '🎨 Zonas de ataque para daltonismo (azul y naranja)', A11Y.colorblind) +
         opt('weather', '🌧 Clima (lluvia, nieve, ceniza…)', weatherOn) +
-        (gameMode === 'tower' ? opt('pixel', '🟫 Estilo pixel con luz (prueba)', pixelEnabled) : '') +
+        (gameMode === 'tower' ? opt('pixel', '🟫 Suelo en pixel art (prueba)', pixelEnabled) : '') +
         (gameMode === 'tower' ? `<button class="pm-toggle on" data-opt="loot">🎒 Levantar botín<span>${LOOT_FILTERS[lootFilter].name.toUpperCase()}</span></button>` : '') +
         opt('autocast', '✨ Habilidades automáticas (H)', autoCast) +
         opt('autopilot', '🤖 Piloto automático (P)', autopilot) +

@@ -1,202 +1,343 @@
-// Tower Chaos: estilo pixel art con luz (PRUEBA, 2026-10-13). Referencias del usuario: Noita y Risk of Rain 1.
+// Tower Chaos: suelo en pixel art (PRUEBA, 2026-10-13). Referencias del usuario: Noita y Risk of Rain 1.
 //
-//   El mundo se dibuja como siempre y una pasada en la placa de video (WebGL) lo convierte en pixel art:
-//   - RESOLUCIÓN BAJA: cada casilla queda en ~12 píxeles grandes (el héroe mide ~26), con escala entera para que los
-//     píxeles sean todos iguales, y la cámara se mueve de a un píxel grande (sin "temblor" de bordes).
-//   - LUZ (lo de Noita): el mundo está a oscuras y se ve por lo que alumbra: el héroe, antorchas, fogatas, la fragua,
-//     santuarios, la lava, tus proyectiles y las balas enemigas. De día la luz ambiente es alta; de noche y en las
-//     cuevas, baja. La luz se arma en una imagen chica aparte (mapa de luz) y el filtro la multiplica.
-//   - BRILLO: lo saturado y luminoso (fuego, magia, balas, lava) se ilumina solo aunque esté a oscuras y suelta un halo.
-//   - PALETA: colores más oscuros y saturados que el pergamino (el suelo de cada bioma tiene su paleta propia) y un
-//     tramado ordenado que deja ver los escalones de color, como en los juegos de 16 bits.
-//   La interfaz (minimapa, carteles, barra del jefe) y los números de daño van encima, sin filtro, para que se lean.
-//   Se prende en la pausa (🟫 Estilo pixel) o con ?pixel=1 en la dirección. Apagado, el juego queda como estaba.
+//   Sin filtros: el suelo se dibuja de verdad en pixel art, a 17 píxeles por casilla (cada píxel ocupa 2×2 unidades).
+//   - SUELO CONTINUO: en vez de baldosas repetidas, el suelo se pinta píxel por píxel con ruido (manchas grandes de
+//     pasto, tierra, barro…), así no se nota la grilla. Los bordes entre tipos de suelo (pasto y camino, agua y orilla)
+//     son irregulares. Se arma por trozos de 16×16 casillas, solo los que se ven, y se guardan.
+//   - DETALLES por bioma: matas de pasto y flores en el bosque, burbujas en el fango, ondas en la arena, brillos en la
+//     nieve, grietas encendidas en el volcán; piedritas en los caminos, adoquines en el pueblo, losas en el laberinto.
+//   - ENCIMA: árboles, pinos, árboles secos, rocas, cactus y basalto como sprites con luz de arriba a la izquierda y
+//     contorno oscuro (los árboles asoman sobre la casilla de arriba); paredes de piedra, acantilados, empalizada,
+//     fuente y rampas.
+//   Se prende en la pausa (🟫 Suelo en pixel art) o con ?pixel=1 en la dirección. Apagado, todo queda en tinta.
 
-const PIXEL = { perTile: 12, minPx: 2 };
+const PXG = { per: 17, scale: 2, chunk: 16, maxChunks: 90 };
 let pixelEnabled = /[?&]pixel=1/.test(location.search);
 try { if (!/[?&]pixel=/.test(location.search)) pixelEnabled = localStorage.getItem('chc-pixel') === 'on'; } catch (e) { /* sin almacenamiento */ }
-let pixelGL = null; // { canvas, gl, tex: {scene, light}, loc, failed }
-let pixelLight = null, pixelLightCtx = null, pixelPx = 3, pixelLowW = 0, pixelLowH = 0;
-let fxTextPass = null; // null: drawArenaFx dibuja todo · 'skip': todo menos los números · 'only': solo los números
-
-function pixelOn() { return pixelEnabled && gameMode === 'tower' && towerLayout && !(pixelGL && pixelGL.failed); }
+function pixelOn() { return pixelEnabled && gameMode === 'tower'; }
 function setPixelStyle(on) {
     pixelEnabled = on;
     try { localStorage.setItem('chc-pixel', on ? 'on' : 'off'); } catch (e) { /* no se guarda */ }
 }
 
-// Paleta del suelo de cada bioma en el estilo pixel: más oscura y saturada (el pergamino era pastel)
-const PIXEL_BIOME_COLORS = {
-    forest: { ground: '#34462a', ground2: '#2f4026', speck: '#5d7d34', hazard: '#41562a', hazardInk: '#8fb04a', obstacle: '#3f7a32', road: '#5a4632', deep: '#1f4a5e' },
-    swamp: { ground: '#30362a', ground2: '#2b3125', speck: '#55603c', hazard: '#3f4720', hazardInk: '#a4c23a', obstacle: '#4a3a2c', road: '#463c2c', deep: '#1d3d38' },
-    desert: { ground: '#8a6538', ground2: '#805d33', speck: '#a8824a', hazard: '#9a7038', hazardInk: '#d0a060', obstacle: '#7a5f40', road: '#6e5432', deep: '#1f4a5e' },
-    snow: { ground: '#a9b8c6', ground2: '#9eadbd', speck: '#dbe6ee', hazard: '#bccbd8', hazardInk: '#5f7d97', obstacle: '#2f5a48', road: '#78726a', deep: '#2d5f84' },
-    volcano: { ground: '#2e2422', ground2: '#28201e', speck: '#4e3c34', hazard: '#3f2016', hazardInk: '#ff7a1a', obstacle: '#221d1b', road: '#3e332c', deep: '#ff6418' }
+// --- RUIDO (siempre el mismo para la misma posición) ---
+function pxHash(x, y, s = 0) {
+    let h = Math.imul(x | 0, 374761393) + Math.imul(y | 0, 668265263) + Math.imul(s | 0, 982451653);
+    h = Math.imul(h ^ (h >>> 13), 1274126177);
+    return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+}
+function pxNoise(x, y, s = 0) {
+    const ix = Math.floor(x), iy = Math.floor(y), fx = x - ix, fy = y - iy;
+    const u = fx * fx * (3 - 2 * fx), v = fy * fy * (3 - 2 * fy);
+    const a = pxHash(ix, iy, s), b = pxHash(ix + 1, iy, s), c = pxHash(ix, iy + 1, s), d = pxHash(ix + 1, iy + 1, s);
+    return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
+}
+const hexRgb = h => { const n = parseInt(h.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; };
+
+// --- PALETAS (de oscuro a claro) ---
+const PX_TOWN = ['#4d4741', '#5b544d', '#686058', '#776e65'];
+const PX_LAB = ['#35313b', '#3e3945', '#47424f', '#524c5a'];
+const PX_BIOME = {
+    forest: { ground: ['#2b4528', '#33522d', '#3d6133', '#4a723a'], road: ['#574330', '#654e37', '#735a3f', '#826648'],
+        hazard: ['#35501f', '#3f5f24', '#4b6f2a', '#577f30'], deep: ['#1b3d50', '#224b63', '#2a5a76', '#356c8a'],
+        tuft: '#6a9a44', tuftDark: '#24401f', flowers: ['#e0cf5a', '#d77a9a', '#e8e8e0'], foam: '#8fc7dc' },
+    swamp: { ground: ['#2c3626', '#34402c', '#3d4a32', '#475538'], road: ['#463b2b', '#514533', '#5c4f3a', '#675942'],
+        hazard: ['#38371d', '#424122', '#4c4b27', '#57562d'], deep: ['#1c322f', '#223d39', '#294843', '#30544e'],
+        tuft: '#5c6e3a', tuftDark: '#20291b', flowers: ['#a8b84a', '#8a9a7a'], bubble: '#95a83c', foam: '#5f8a7a' },
+    desert: { ground: ['#9a7443', '#a8804b', '#b68d55', '#c39b61'], road: ['#80603a', '#8c6a41', '#987549', '#a48052'],
+        hazard: ['#8a6538', '#967040', '#a27b48', '#ad8651'], deep: ['#235a6e', '#2b6a80', '#357b92', '#438ea6'],
+        tuft: '#7f8a4a', tuftDark: '#6b5230', flowers: ['#c94f3a', '#e0b060'], ripple: '#d4ae72', foam: '#a8dbe0' },
+    snow: { ground: ['#a7b6c6', '#b5c3d1', '#c3d0dc', '#d2dde7'], road: ['#78736c', '#857f77', '#918b82', '#9d978d'],
+        hazard: ['#bccbd9', '#c8d6e2', '#d4e0ea', '#e2ebf3'], deep: ['#3a6b91', '#4479a1', '#5088b1', '#5e99c3'],
+        tuft: '#7f8f86', tuftDark: '#8797a8', flowers: ['#ffffff'], sparkle: '#ffffff', foam: '#e8f4fb' },
+    volcano: { ground: ['#2d2523', '#372e2b', '#423733', '#4d413c'], road: ['#463b34', '#51443c', '#5c4e45', '#67584e'],
+        hazard: ['#3a1e16', '#46241a', '#522b1e', '#5e3222'], deep: ['#b5350f', '#d34914', '#ec681b', '#ff9838'],
+        tuft: '#5a4a42', tuftDark: '#1c1615', flowers: ['#6b5a50'], ember: ['#ff7a1a', '#ffb347'], foam: '#ffd27a' }
 };
-function biomeColors(key) { return pixelOn() ? { ...BIOMES[key].colors, ...PIXEL_BIOME_COLORS[key] } : BIOMES[key].colors; }
-function tileStyleKey(key) { return pixelOn() ? key + ':px' : key; }
+function pxBiome(level) { return PX_BIOME[level.biome] || PX_BIOME.forest; }
 
-// --- TAMAÑO DEL PÍXEL Y CÁMARA ---
-// Píxel grande en píxeles reales del canvas (entero), según el zoom: siempre ~12 por casilla
-function pixelSize() {
-    const k = window.devicePixelRatio || 1;
-    return Math.max(PIXEL.minPx, Math.round(TILE * viewScale() * k / PIXEL.perTile));
+// --- QUÉ SUELO HAY EN CADA CASILLA ---
+// ground, road, hazard, deep, town (adoquines), lab (losas del laberinto), cave (tierra de cueva)
+function pxKind(level, x, y) {
+    x = Math.max(0, Math.min(COLS - 1, x)); y = Math.max(0, Math.min(ROWS - 1, y));
+    if (level.isCave) return 'cave';
+    const i = y * COLS + x, w = level.walls[y][x];
+    if (!level.zone) return 'lab';
+    if (level.zone[i] === ZONE.lab && (!w || w === WALL.stone)) return 'lab';
+    if (w === WALL.palisade || w === WALL.fountain) return 'town';
+    if (level.deep && level.deep[i]) return 'deep';
+    if (level.ramp && level.ramp[i]) return 'road';
+    const gr = level.ground ? level.ground[i] : GROUND.plain;
+    return gr === GROUND.hazard ? 'hazard' : gr === GROUND.road ? 'road' : gr === GROUND.town ? 'town' : gr === GROUND.lab ? 'lab' : 'ground';
 }
-// La cámara se mueve de a un píxel grande (si no, los bordes "bailan" al caminar)
-function pixelSnapCamera() {
-    if (!pixelOn()) return;
-    const step = pixelSize() / (TILE * viewScale() * (window.devicePixelRatio || 1));
-    camera.x = Math.round(camera.x / step) * step; camera.y = Math.round(camera.y / step) * step;
+function pxPalette(level, kind) {
+    const B = pxBiome(level);
+    if (kind === 'town') return PX_TOWN;
+    if (kind === 'lab') return PX_LAB;
+    if (kind === 'cave') return B.ground.map(c => shade(c, -0.45));
+    return B[kind] || B.ground;
 }
 
-// --- MAPA DE LUZ ---
-// Imagen chica (un píxel por píxel grande). El filtro lo multiplica ×2: 0,5 es la luz "normal" del día.
-function pixelAmbient(level) {
-    if (level.isCave) return Math.max(0.05, 0.16 - 0.03 * (level.depth || 1));
-    if (!level.zone || towerZoneAt(level, player.x, player.y) === ZONE.lab) return 0.2; // el laberinto de piedra: penumbra
-    return 0.42 - 0.32 * towerDarkness();
-}
-function pixelLightMap(level) {
-    if (!pixelLight) { pixelLight = document.createElement('canvas'); pixelLightCtx = pixelLight.getContext('2d'); }
-    if (pixelLight.width !== pixelLowW || pixelLight.height !== pixelLowH) { pixelLight.width = pixelLowW; pixelLight.height = pixelLowH; }
-    const g = pixelLightCtx, a = Math.round(pixelAmbient(level) * 255);
-    g.globalCompositeOperation = 'source-over';
-    g.fillStyle = `rgb(${a},${Math.round(a * 0.97)},${Math.round(a * 1.06)})`; g.fillRect(0, 0, pixelLowW, pixelLowH); // ambiente apenas frío
-    g.globalCompositeOperation = 'lighter';
-    const k = (window.devicePixelRatio || 1) / pixelPx, z = viewScale() * k; // casillas → píxeles grandes
-    const light = (x, y, r, rgb, power = 1) => {
-        const sx = (x - camera.x + 0.5) * TILE * z, sy = (y - camera.y + 0.5) * TILE * z, rr = r * TILE * z;
-        if (sx < -rr || sy < -rr || sx > pixelLowW + rr || sy > pixelLowH + rr) return;
-        const grd = g.createRadialGradient(sx, sy, 0, sx, sy, rr);
-        grd.addColorStop(0, `rgba(${rgb},${0.5 * power})`); grd.addColorStop(0.45, `rgba(${rgb},${0.22 * power})`); grd.addColorStop(1, `rgba(${rgb},0)`);
-        g.fillStyle = grd; g.fillRect(sx - rr, sy - rr, rr * 2, rr * 2);
+// --- UN TROZO DE SUELO (16×16 casillas), píxel por píxel ---
+function pxGroundChunk(level, cx, cy) {
+    const P = PXG.per, N = PXG.chunk, W = N * P;
+    const c = document.createElement('canvas'); c.width = c.height = W;
+    const g = c.getContext('2d'), img = g.createImageData(W, W), d = img.data;
+    const B = pxBiome(level), ox = cx * N * P, oy = cy * N * P;
+    const pal = {}, palOf = k => pal[k] || (pal[k] = pxPalette(level, k).map(hexRgb));
+    // Tipo de suelo con el borde corrido (bordes irregulares entre tipos)
+    const kindCache = new Map();
+    const kindAtTile = (tx, ty) => { const key = tx * 4096 + ty; let k = kindCache.get(key); if (!k) { k = pxKind(level, tx, ty); kindCache.set(key, k); } return k; };
+    const kindAtPx = (wx, wy) => {
+        const jx = (pxNoise(wx / 5, wy / 5, 7) - 0.5) * 8, jy = (pxNoise(wx / 5, wy / 5, 8) - 0.5) * 8;
+        return kindAtTile(Math.floor((wx + jx) / P), Math.floor((wy + jy) / P));
     };
-    const rgbOf = hex => { const n = parseInt(hex.slice(1, 7), 16); return `${n >> 16},${(n >> 8) & 255},${n & 255}`; };
-    if (player.isAlive()) { const p = drawPos(player, 0); light(p.x, p.y, Math.min(9, heroSight(player)) * 0.95, '255,236,205', 0.45); } // tu farol
-    towerLights(level).forEach(o => { // antorchas, fogatas y fragua (towerAtmos.js)
-        if (!canSeeOrExplored(level, o)) return;
-        const r = LIGHT_KIND[o.kind].r * (o.kind === 'fire' ? 1.1 : 1) * flicker(o, 1.6);
-        light(o.x, o.y, r * 1.2, '255,165,80', 2);
-    });
-    const tw = level.town; if (tw && !level.isCave) light(tw.merchant.x, tw.merchant.y + 3, 8, '255,190,120', 0.6);
-    (level.shrines || []).forEach(s => { if (!s.used && level.explored[s.y][s.x]) light(s.x, s.y, 2.6, rgbOf(SHRINES[s.kind].color || '#ffffff'), 0.9); });
-    if (level.exitUp) light(level.exitUp.x, level.exitUp.y, 3, '255,220,150', 0.8);
-    (level.zones || []).forEach(zn => { if (zn.kind === 'lava') light(zn.x, zn.y, 3, '255,90,20', 1); });
-    level.projectiles.forEach(p => { // tus proyectiles alumbran del color de su elemento
-        const lk = projectileLook(p), col = lk ? lk.c1 : '#ffe8a0';
-        light(p.x, p.y, p.kind === 'skill' ? 2.4 : 1.5, rgbOf(col), 1);
-    });
-    (level.bullets || []).forEach(b => light(b.x, b.y, 1.3, rgbOf(b.color || '#ff3020'), 1)); // las balas se ven en la oscuridad
-    (level.fx || []).forEach(f => { // golpes y hechizos: un destello breve
-        const t = (fxClock - f.born) / f.life;
-        if (t < 0 || t > 1 || f.kind === 'text' || !f.color || f.color[0] !== '#') return;
-        const r = f.kind === 'ring' ? (f.radius || 1.6) : f.kind === 'particle' ? 0.5 : 1.2;
-        light(f.x, f.y, r, rgbOf(f.color), (1 - t) * (f.kind === 'particle' ? 0.35 : 0.7));
-    });
-    return pixelLight;
-}
-
-// --- WEBGL ---
-const PIXEL_VS = 'attribute vec2 p; varying vec2 uv; void main(){ uv = p * 0.5 + 0.5; gl_Position = vec4(p, 0.0, 1.0); }';
-const PIXEL_FS = `precision mediump float;
-varying vec2 uv;
-uniform sampler2D uScene, uLight;
-uniform vec2 uLow, uCover; // tamaño en píxeles grandes; parte del canvas que cubre la imagen chica
-float lum(vec3 c) { return dot(c, vec3(0.299, 0.587, 0.114)); }
-vec3 scene(vec2 q) { return texture2D(uScene, q * uCover).rgb; } // la textura viene sin dar vuelta: y=0 es arriba
-// Promedio de la celda (2×2 muestras): el pixelado no "parpadea" con las líneas finas
-vec3 cell(vec2 c) { vec2 d = 0.25 / uLow; return (scene(c + d) + scene(c - d) + scene(c + vec2(d.x, -d.y)) + scene(c + vec2(-d.x, d.y))) * 0.25; }
-// Cuánto "brilla solo": saturado y luminoso (fuego, magia, balas, lava)
-float emissive(vec3 c) { float hi = max(c.r, max(c.g, c.b)), lo = min(c.r, min(c.g, c.b)); return smoothstep(0.42, 0.75, hi - lo) * smoothstep(0.55, 0.9, hi); }
-float bayer(vec2 p) { // tramado ordenado 4×4
-    vec2 q = mod(p, 4.0); float x = q.x, y = q.y;
-    float v = mod(x, 2.0) * 2.0 + mod(y, 2.0) * 3.0 - 2.0 * mod(x, 2.0) * mod(y, 2.0);
-    float w = mod(floor(x / 2.0), 2.0) * 2.0 + mod(floor(y / 2.0), 2.0) * 3.0 - 2.0 * mod(floor(x / 2.0), 2.0) * mod(floor(y / 2.0), 2.0);
-    return (v * 4.0 + w) / 16.0;
-}
-void main() {
-    vec2 px = floor(vec2(uv.x, 1.0 - uv.y) * uLow);       // píxel grande desde arriba a la izquierda
-    vec2 c0 = (px + 0.5) / uLow;
-    vec3 c = cell(c0);
-    // Paleta: más contraste y saturación, medios más oscuros
-    float L = lum(c);
-    vec3 g = clamp(mix(vec3(L), c, 1.35), 0.0, 1.0);
-    g = pow(g, vec3(1.25)) * 0.95;
-    float e = emissive(c);
-    vec3 light = min(texture2D(uLight, c0).rgb * 2.0, vec3(1.2)); // con tope: cerca de una luz no se "quema"
-    vec3 col = g * light + c * e * 0.85;                    // lo que brilla se ve aunque esté a oscuras
-    // Halo de lo que brilla (dos anillos de 8 muestras)
-    vec3 halo = vec3(0.0);
-    for (int i = 0; i < 8; i++) {
-        float a = float(i) * 0.785398 + 0.39;
-        vec2 dir = vec2(cos(a), sin(a)) / uLow;
-        vec3 s1 = scene(c0 + dir * 2.0), s2 = scene(c0 + dir * 4.5);
-        halo += s1 * emissive(s1) * 0.6 + s2 * emissive(s2) * 0.4;
+    const put = (x, y, rgb) => { if (x < 0 || y < 0 || x >= W || y >= W) return; const o = (y * W + x) * 4; d[o] = rgb[0]; d[o + 1] = rgb[1]; d[o + 2] = rgb[2]; d[o + 3] = 255; };
+    for (let y = 0; y < W; y++) for (let x = 0; x < W; x++) {
+        const wx = ox + x, wy = oy + y, kind = kindAtPx(wx, wy), p = palOf(kind);
+        let v;
+        if (kind === 'town') { // adoquines: celdas de 6×4 corridas por fila, junta oscura
+            const row = Math.floor(wy / 4), col = Math.floor((wx + (row % 2) * 3) / 6);
+            const edge = wy % 4 === 0 || (wx + (row % 2) * 3) % 6 === 0;
+            v = edge ? 0 : 1 + Math.floor(pxHash(col, row, 3) * 2.6);
+        } else if (kind === 'lab') { // losas grandes (una por casilla, corridas) con junta y desgaste
+            const lx = (wx + (Math.floor(wy / P) % 2) * 8) % P, ly = wy % P;
+            v = lx === 0 || ly === 0 ? 0 : 1 + Math.floor(pxHash(Math.floor((wx + (Math.floor(wy / P) % 2) * 8) / P), Math.floor(wy / P), 5) * 2.2 + pxNoise(wx / 3, wy / 3, 6) * 0.8);
+        } else {
+            const big = pxNoise(wx / 30, wy / 30, 1), mid = pxNoise(wx / 9, wy / 9, 2), fine = pxHash(wx, wy, 4);
+            v = Math.floor((big * 0.55 + mid * 0.45) * 3.3 + (fine - 0.5) * 0.9 + 0.35);
+            if (kind === 'deep') { // agua (o lava): ondas horizontales claras
+                const wave = Math.sin(wx / 4 + pxNoise(wx / 12, wy / 6, 9) * 6) > 0.92 && wy % 5 === 0;
+                if (wave) v = 3;
+            }
+        }
+        v = Math.max(0, Math.min(3, v));
+        let rgb = p[v];
+        // Orilla: espuma clara donde el agua toca tierra
+        if (kind === 'deep' && kindAtPx(wx, wy - 2) !== 'deep') rgb = hexRgb(B.foam);
+        // Sombra al pie de las paredes, acantilados y empalizadas (la pared "está arriba")
+        const ty = Math.floor(wy / P), tx = Math.floor(wx / P);
+        if (wy % P < 3 && ty > 0) { const wa = level.walls[ty - 1] && level.walls[ty - 1][tx]; if (wa && wa !== WALL.obstacle && wa !== WALL.edge && wa !== WALL.fountain) rgb = rgb.map(ch => ch * (wy % P === 0 ? 0.55 : wy % P === 1 ? 0.7 : 0.85)); }
+        put(x, y, rgb);
     }
-    col += halo * 0.11;
-    // Escalones de color con tramado (32 niveles por canal) y viñeta suave
-    col = floor(col * 31.0 + bayer(px)) / 31.0;
-    vec2 v = uv - 0.5; col *= 1.0 - dot(v, v) * 0.55;
-    gl_FragColor = vec4(col, 1.0);
-}`;
-function pixelInit() {
-    if (pixelGL) return pixelGL;
-    pixelGL = { failed: false };
-    try {
-        const c = document.createElement('canvas');
-        const gl = c.getContext('webgl', { premultipliedAlpha: false, antialias: false, preserveDrawingBuffer: true });
-        if (!gl) throw new Error('sin WebGL');
-        const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
-        const prog = gl.createProgram();
-        gl.attachShader(prog, sh(gl.VERTEX_SHADER, PIXEL_VS)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, PIXEL_FS));
-        gl.linkProgram(prog); if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
-        gl.useProgram(prog);
-        const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
-        const p = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(p); gl.vertexAttribPointer(p, 2, gl.FLOAT, false, 0, 0);
-        const tex = unit => { const t = gl.createTexture(); gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, t);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE); return t; };
-        Object.assign(pixelGL, { canvas: c, gl, tex: { scene: tex(0), light: tex(1) }, loc: n => gl.getUniformLocation(prog, n) });
-        gl.uniform1i(pixelGL.loc('uScene'), 0); gl.uniform1i(pixelGL.loc('uLight'), 1);
-    } catch (e) { pixelGL.failed = true; console.warn('Estilo pixel no disponible:', e.message); }
-    return pixelGL;
+    // Detalles por casilla (siempre los mismos para la misma casilla)
+    const tuft = hexRgb(B.tuft), tuftDark = hexRgb(B.tuftDark);
+    for (let ty = 0; ty < N; ty++) for (let tx = 0; tx < N; tx++) {
+        const gx = cx * N + tx, gy = cy * N + ty;
+        if (gx >= COLS || gy >= ROWS) continue;
+        const kind = pxKind(level, gx, gy), n = Math.floor(pxHash(gx, gy, 11) * 4);
+        for (let k = 0; k < n; k++) {
+            const r1 = pxHash(gx, gy, 20 + k), r2 = pxHash(gx, gy, 40 + k), r3 = pxHash(gx, gy, 60 + k);
+            const x = tx * P + 2 + Math.floor(r1 * (P - 4)), y = ty * P + 3 + Math.floor(r2 * (P - 5));
+            if (kind === 'ground' || kind === 'hazard') {
+                if (level.biome === 'desert' && r3 < 0.6) { const rp = hexRgb(B.ripple); for (let i = -2; i <= 2; i++) put(x + i, y + (i === -2 || i === 2 ? 1 : 0), rp); continue; }
+                if (level.biome === 'snow' && r3 < 0.5) { put(x, y, hexRgb(B.sparkle)); continue; }
+                if (level.biome === 'volcano' && kind === 'hazard') { const e = B.ember.map(hexRgb); let px = x, py = y; for (let i = 0; i < 6; i++) { put(px, py, e[i % 2]); px += pxHash(gx, gy, 80 + i) < 0.5 ? 1 : 0; py += 1; px += pxHash(gx, gy, 90 + i) < 0.3 ? -1 : 1; } continue; }
+                if (level.biome === 'swamp' && kind === 'hazard' && r3 < 0.6) { const b = hexRgb(B.bubble); put(x, y - 1, b); put(x - 1, y, b); put(x + 1, y, b); put(x, y + 1, b); continue; }
+                if (r3 < 0.72) { put(x, y, tuftDark); put(x - 1, y - 1, tuft); put(x + 1, y - 1, tuft); put(x, y - 2, tuft); put(x, y - 1, tuftDark); } // mata
+                else { const f = hexRgb(B.flowers[Math.floor(r1 * 97) % B.flowers.length]); put(x, y, f); put(x + 1, y, f); put(x, y + 1, f); put(x + 1, y + 1, tuftDark); } // flor o piedrita
+            } else if (kind === 'road' || kind === 'cave') { // piedritas
+                const s = palOf(kind); put(x, y, s[3]); put(x + 1, y, s[3]); put(x, y + 1, s[0]); put(x + 1, y + 1, s[0]);
+            }
+        }
+    }
+    g.putImageData(img, 0, 0);
+    return c;
 }
-
-// Antes de dibujar el mundo: tamaño del píxel grande y cámara alineada
-function pixelBegin() {
-    pixelPx = pixelSize();
-    pixelLowW = Math.ceil(canvas.width / pixelPx); pixelLowH = Math.ceil(canvas.height / pixelPx);
-    pixelSnapCamera();
-}
-// Convierte lo que hay en el canvas (el mundo) en pixel art con luz, y lo vuelve a poner en el canvas
-function pixelRender(level) {
-    const P = pixelInit();
-    if (P.failed) return false;
-    const gl = P.gl, c = P.canvas;
-    if (c.width !== pixelLowW || c.height !== pixelLowH) { c.width = pixelLowW; c.height = pixelLowH; }
-    gl.viewport(0, 0, pixelLowW, pixelLowH);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
-    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, P.tex.scene);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas);
-    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, P.tex.light);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, pixelLightMap(level));
-    gl.uniform2f(P.loc('uLow'), pixelLowW, pixelLowH);
-    gl.uniform2f(P.loc('uCover'), pixelLowW * pixelPx / canvas.width, pixelLowH * pixelPx / canvas.height);
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-    // De vuelta al canvas, agrandado sin suavizar (escala entera)
-    ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(c, 0, 0, pixelLowW * pixelPx, pixelLowH * pixelPx);
-    ctx.restore();
+// Dibuja los trozos de suelo que se ven (y arma los que faltan). Devuelve true.
+function drawPixelGround(level) {
+    if (!level.pxGround || level.pxGround.biome !== level.biome) level.pxGround = { biome: level.biome, chunks: new Map() };
+    const G = level.pxGround, N = PXG.chunk, size = N * TILE;
+    const cx0 = Math.floor(camera.x / N), cy0 = Math.floor(camera.y / N), cx1 = Math.floor((camera.x + viewCols()) / N), cy1 = Math.floor((camera.y + viewRows()) / N);
+    const smooth = ctx.imageSmoothingEnabled; ctx.imageSmoothingEnabled = false;
+    for (let cy = cy0; cy <= cy1; cy++) for (let cx = cx0; cx <= cx1; cx++) {
+        const key = cx * 1000 + cy;
+        let ch = G.chunks.get(key);
+        if (!ch) {
+            if (G.chunks.size >= PXG.maxChunks) G.chunks.delete(G.chunks.keys().next().value); // se olvida el más viejo
+            ch = pxGroundChunk(level, cx, cy); G.chunks.set(key, ch);
+        }
+        ctx.drawImage(ch, cx * size, cy * size, size, size);
+    }
+    ctx.imageSmoothingEnabled = smooth;
     return true;
 }
-// Los números de daño, encima del pixelado (se leen igual que siempre)
-function pixelFxTexts(level) {
-    ctx.save();
-    ctx.scale(viewScale(), viewScale());
-    ctx.translate(-camera.x * TILE, -camera.y * TILE);
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    fxTextPass = 'only'; drawArenaFx(level); fxTextPass = null;
-    ctx.restore();
+
+// --- SPRITES (árboles, rocas, paredes) ---
+// Grilla de píxeles con ayudas para pintar formas con luz de arriba a la izquierda y contorno oscuro.
+function pxSprite(w, h, paint) {
+    const grid = new Array(w * h).fill(null);
+    const S = {
+        w, h,
+        set(x, y, col) { x = Math.round(x); y = Math.round(y); if (x >= 0 && y >= 0 && x < w && y < h) grid[y * w + x] = col; },
+        get(x, y) { return x >= 0 && y >= 0 && x < w && y < h ? grid[y * w + x] : null; },
+        // Bola con sombreado (pal: de oscuro a claro)
+        ball(cx, cy, rx, ry, pal, rnd = Math.random) {
+            for (let y = Math.floor(cy - ry); y <= Math.ceil(cy + ry); y++) for (let x = Math.floor(cx - rx); x <= Math.ceil(cx + rx); x++) {
+                const nx = (x + 0.5 - cx) / rx, ny = (y + 0.5 - cy) / ry, r2 = nx * nx + ny * ny;
+                if (r2 > 1) continue;
+                const lit = -nx * 0.55 - ny * 0.75 + (1 - r2) * 0.35 + (rnd() - 0.5) * 0.35;
+                S.set(x, y, pal[Math.max(0, Math.min(pal.length - 1, Math.floor((lit + 0.75) * pal.length / 1.6)))]);
+            }
+        },
+        rect(x0, y0, ww, hh, col) { for (let y = y0; y < y0 + hh; y++) for (let x = x0; x < x0 + ww; x++) S.set(x, y, col); },
+        line(x0, y0, x1, y1, col, wdt = 1) {
+            const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0), 1);
+            for (let i = 0; i <= n; i++) { const x = x0 + (x1 - x0) * i / n, y = y0 + (y1 - y0) * i / n; for (let k = 0; k < wdt; k++) S.set(x + k, y, col); }
+        },
+        // Contorno: los vacíos que tocan algo pintado se vuelven del color oscuro
+        outline(col) {
+            const add = [];
+            for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (!grid[y * w + x] && (S.get(x - 1, y) || S.get(x + 1, y) || S.get(x, y - 1) || S.get(x, y + 1)) && [S.get(x - 1, y), S.get(x + 1, y), S.get(x, y - 1), S.get(x, y + 1)].some(c => c && c !== 'shadow')) add.push([x, y]);
+            add.forEach(([x, y]) => { grid[y * w + x] = col; });
+        }
+    };
+    paint(S);
+    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    const g = c.getContext('2d');
+    grid.forEach((col, i) => { if (!col) return; g.fillStyle = col === 'shadow' ? 'rgba(10,8,6,0.35)' : col; g.fillRect(i % w, Math.floor(i / w), 1, 1); });
+    return c;
+}
+const pxSeeded = seed => () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+// Sombra en el piso (antes de pintar lo demás, para que quede debajo)
+function pxShadow(S, cx, cy, rx, ry) { for (let y = Math.floor(cy - ry); y <= cy + ry; y++) for (let x = Math.floor(cx - rx); x <= cx + rx; x++) { const nx = (x + 0.5 - cx) / rx, ny = (y + 0.5 - cy) / ry; if (nx * nx + ny * ny <= 1) S.set(x, y, 'shadow'); } }
+
+const PX_OBST = {
+    tree(v, B, rnd) { // árbol frondoso: tronco y copa de tres bolas
+        const leaf = v % 2 ? ['#1d3a1c', '#285024', '#33662c', '#448038', '#5c9c46'] : ['#1f3d20', '#2a5428', '#376b31', '#4a873c', '#66a64c'];
+        return pxSprite(17, 25, S => {
+            pxShadow(S, 8.5, 22.5, 7, 2.2);
+            S.rect(7, 15, 3, 8, '#5a3d26'); S.rect(7, 15, 1, 8, '#3f2a1a'); S.set(9, 18, '#6e4c30');
+            S.ball(5.5, 12, 4.6, 4.2, leaf, rnd); S.ball(11.5, 12, 4.6, 4.2, leaf, rnd); S.ball(8.5, 7.5, 5.6, 5.2, leaf, rnd);
+            S.outline('#10200f');
+        });
+    },
+    pine(v, B, rnd, biome) { // pino en tres pisos; con nieve en las puntas en el bioma de nieve
+        const pal = ['#14301f', '#1d4229', '#285634', '#346a40'], snow = biome === 'snow';
+        return pxSprite(17, 25, S => {
+            pxShadow(S, 8.5, 22.5, 6, 2);
+            S.rect(7, 19, 3, 4, '#4a3324');
+            [[2, 9, 6], [7, 14, 7], [12, 20, 8]].forEach(([top, bot, hw]) => {
+                for (let y = top; y <= bot; y++) { const k = (y - top) / (bot - top), half = Math.round(1 + k * hw); for (let x = 8 - half; x <= 8 + half; x++) S.set(x, y, pal[Math.min(3, Math.max(0, Math.floor((x < 8 ? 1 : 2.4) + k - (rnd() < 0.15 ? 1 : 0))))]); }
+                if (snow) for (let x = 8 - Math.round(hw * 0.6); x <= 8 + Math.round(hw * 0.6); x++) if (rnd() < 0.7) S.set(x, bot - 1 - (x % 2), '#eef4f8');
+            });
+            S.set(8, 1, pal[3]);
+            S.outline('#0b1a12');
+        });
+    },
+    deadTree(v, B, rnd) { // árbol seco: ramas finas
+        const bark = ['#3a3028', '#4a3d32', '#5b4b3d'];
+        return pxSprite(17, 25, S => {
+            pxShadow(S, 8.5, 22.5, 5, 1.8);
+            S.line(8, 22, 8, 12, bark[1], 2); S.line(8, 13, 4, 6, bark[1], 1); S.line(8, 14, 13, 7, bark[2], 1);
+            S.line(5, 8, 2, 6, bark[0], 1); S.line(12, 8, 15, 7, bark[0], 1); S.line(4, 6, 4, 3, bark[2], 1); S.line(13, 7, 13, 4, bark[1], 1);
+            if (v === 1) S.line(8, 16, 11, 14, bark[0], 1);
+            S.outline('#14100c');
+        });
+    },
+    rock(v, B, rnd, biome) { // roca (o cactus en el desierto)
+        if (biome === 'desert' && v === 2) return pxSprite(17, 21, S => {
+            const pal = ['#3d5a2a', '#4f7134', '#63883f', '#7a9e4c'];
+            pxShadow(S, 8.5, 18.5, 5, 1.6);
+            S.rect(7, 5, 3, 14, pal[2]); S.rect(7, 5, 1, 14, pal[1]); S.rect(9, 5, 1, 14, pal[3]);
+            S.rect(3, 9, 2, 5, pal[2]); S.rect(3, 13, 4, 2, pal[1]); S.rect(12, 7, 2, 5, pal[2]); S.rect(10, 11, 3, 2, pal[1]);
+            for (let y = 6; y < 18; y += 3) S.set(8, y, '#d8e0a0');
+            S.set(4, 8, '#e06a8a'); S.outline('#18240f');
+        });
+        const pal = biome === 'snow' ? ['#4c5560', '#5f6a76', '#76828e', '#909ba6', '#c9d3dc'] : biome === 'desert' ? ['#5e4630', '#76593d', '#8e6d4b', '#a6825b', '#bf9a70'] : ['#3a3734', '#4b4743', '#5e5954', '#736d67', '#8c857e'];
+        return pxSprite(17, 19, S => {
+            pxShadow(S, 8.5, 16, 7.5, 2.2);
+            S.ball(8.5, 11, 7 - v * 0.6, 5.5, pal, rnd); if (v !== 1) S.ball(4.5, 13, 3.4, 2.8, pal, rnd);
+            if (biome === 'snow') for (let x = 4; x < 14; x++) if (rnd() < 0.8) { for (let y = 0; y < 19; y++) if (S.get(x, y) && S.get(x, y) !== 'shadow') { S.set(x, y, '#eef4f8'); break; } }
+            S.outline('#16130f');
+        });
+    },
+    basalt(v, B, rnd) { // basalto con grietas encendidas
+        const pal = ['#1a1615', '#252020', '#322b29', '#403735'];
+        return pxSprite(17, 19, S => {
+            pxShadow(S, 8.5, 16, 7.5, 2.2);
+            S.ball(8.5, 10.5, 6.6, 6, pal, rnd);
+            let x = 6 + v, y = 6; for (let i = 0; i < 7; i++) { S.set(x, y, i % 2 ? '#ff7a1a' : '#ffb347'); y++; x += rnd() < 0.5 ? 1 : -1; }
+            S.outline('#0c0a09');
+        });
+    }
+};
+// Paredes y construcciones (17×17, una casilla entera)
+const PX_WALLS = {
+    labFace: rnd => pxSprite(17, 17, S => { // pared del laberinto vista de frente: ladrillos con luz arriba
+        S.rect(0, 0, 17, 17, '#3b3542');
+        for (let r = 0; r < 4; r++) for (let k = -1; k < 3; k++) {
+            const x0 = k * 8 + (r % 2) * 4 + 1, y0 = r * 4 + 1, base = ['#5a5266', '#635a70', '#6c6379'][Math.floor(rnd() * 3)];
+            S.rect(x0, y0, 7, 3, base); S.rect(x0, y0, 7, 1, shade(base, 0.18)); S.set(x0 + 6, y0 + 2, shade(base, -0.25));
+        }
+        S.rect(0, 16, 17, 1, '#1e1a22');
+    }),
+    labTop: rnd => pxSprite(17, 17, S => { // pared vista desde arriba: piedra oscura con textura
+        S.rect(0, 0, 17, 17, '#26222b');
+        for (let i = 0; i < 14; i++) S.set(Math.floor(rnd() * 17), Math.floor(rnd() * 17), rnd() < 0.5 ? '#2f2a35' : '#1d1a21');
+    }),
+    caveFace: (rnd, pal) => pxSprite(17, 17, S => {
+        for (let y = 0; y < 17; y++) for (let x = 0; x < 17; x++) S.set(x, y, pal[Math.min(3, Math.floor(pxNoise(x / 3, y / 2, 5 + Math.floor(rnd() * 9)) * 3 + (y < 3 ? 1 : 0)))]);
+        for (let x = 0; x < 17; x++) { S.set(x, 0, pal[3]); S.set(x, 16, '#0d0b0a'); }
+    }),
+    caveTop: (rnd, pal) => pxSprite(17, 17, S => {
+        S.rect(0, 0, 17, 17, pal[0]);
+        for (let i = 0; i < 10; i++) S.set(Math.floor(rnd() * 17), Math.floor(rnd() * 17), pal[1]);
+    }),
+    cliff: (rnd, top, face) => pxSprite(17, 17, S => { // acantilado: el borde de arriba con pasto y la pared de roca en capas
+        for (let y = 0; y < 17; y++) for (let x = 0; x < 17; x++) S.set(x, y, y < 4 ? top[y < 1 ? 3 : 2] : face[Math.max(0, Math.min(3, Math.floor(3 - (y - 4) / 4 + (rnd() - 0.5) * 0.9)))]);
+        for (let x = 0; x < 17; x++) { S.set(x, 4, '#14110e'); if (rnd() < 0.35) S.set(x, 5, top[1]); }
+        for (let y = 8; y < 17; y += 4) for (let x = 0; x < 17; x++) if (rnd() < 0.6) S.set(x, y, shade(face[0], -0.2));
+    }),
+    palisade: rnd => pxSprite(17, 17, S => { // empalizada: troncos con punta y dos sogas
+        for (let i = 0; i < 4; i++) {
+            const x0 = i * 4 + 1, pal = ['#4f3725', '#634631', '#77573d', '#8b6849'];
+            S.rect(x0, 3, 3, 14, pal[1 + (i % 2)]); S.rect(x0, 3, 1, 14, pal[0]); S.set(x0 + 2, 6, pal[3]); S.set(x0 + 1, 2, pal[2]); S.set(x0 + 1, 1, pal[3]);
+        }
+        S.rect(0, 7, 17, 1, '#2f2218'); S.rect(0, 12, 17, 1, '#2f2218');
+        S.outline('#1a120c');
+    }),
+    fountain: rnd => pxSprite(17, 17, S => {
+        S.ball(8.5, 9, 7.5, 6.5, ['#4d4741', '#5b544d', '#6b635b', '#7b726a', '#8f867d'], rnd);
+        S.ball(8.5, 9, 5.5, 4.6, ['#24506a', '#2c6080', '#3a7396', '#5a92b3'], rnd);
+        S.rect(8, 3, 2, 6, '#7b726a'); S.set(8, 2, '#bfe3f2'); S.set(9, 1, '#bfe3f2'); S.set(7, 2, '#bfe3f2');
+        S.outline('#1a1614');
+    }),
+    ramp: rnd => pxSprite(17, 17, S => { for (let y = 2; y < 17; y += 4) { S.rect(1, y, 15, 1, 'rgba(20,16,12,0.55)'); S.rect(1, y + 1, 15, 1, 'rgba(255,240,210,0.18)'); } })
+};
+
+// Caché de sprites por bioma (3 variantes de cada uno)
+const pxSpriteCache = {};
+function pxObstacle(level, v) {
+    const B = BIOMES[level.biome], key = level.biome + ':' + B.obstacle + ':' + v;
+    if (!pxSpriteCache[key]) {
+        const draw = PX_OBST[B.obstacle] || PX_OBST.rock, rnd = pxSeeded(1000 + v * 77 + key.length * 13);
+        pxSpriteCache[key] = draw(v, pxBiome(level), rnd, level.biome);
+    }
+    return pxSpriteCache[key];
+}
+function pxWall(name, v, ...args) {
+    const key = name + ':' + v + ':' + args.map(a => Array.isArray(a) ? a.join() : a).join('|');
+    return pxSpriteCache[key] || (pxSpriteCache[key] = PX_WALLS[name](pxSeeded(500 + v * 101 + name.length * 7), ...args));
+}
+
+// Lo que va encima del suelo en una casilla (lo llama drawTowerTiles)
+function drawPixelWall(level, x, y) {
+    const w = level.walls[y][x], h = ((x * 73856093) ^ (y * 19349663)) >>> 0, S = PXG.scale;
+    const put = (img, dy = 0) => { const s = ctx.imageSmoothingEnabled; ctx.imageSmoothingEnabled = false; ctx.drawImage(img, x * TILE, y * TILE + TILE - img.height * S + dy, img.width * S, img.height * S); ctx.imageSmoothingEnabled = s; };
+    const below = y + 1 < ROWS && !level.walls[y + 1][x];
+    if (level.isCave) {
+        if (!w) return;
+        const pal = pxBiome(level).ground.map(c => shade(c, -0.3));
+        put(below ? pxWall('caveFace', h & 1, pal) : pxWall('caveTop', h & 1, pal.map(c => shade(c, -0.35))));
+        return;
+    }
+    if (level.ramp && level.ramp[y * COLS + x]) { put(pxWall('ramp', 0)); return; }
+    if (!w) return;
+    if (pxKind(level, x, y) === 'lab' && w === WALL.stone) { put(below ? pxWall('labFace', h & 1) : pxWall('labTop', h & 1)); return; }
+    if (w === WALL.obstacle || w === WALL.edge) { put(pxObstacle(level, h % 3), 0); return; }
+    if (w === WALL.cliff) { const B = pxBiome(level); put(pxWall('cliff', h & 1, B.ground, B.ground.map(c => shade(c, -0.4)))); return; }
+    if (w === WALL.palisade) { put(pxWall('palisade', 0)); return; }
+    if (w === WALL.fountain) { put(pxWall('fountain', 0)); return; }
+    if (w === WALL.stone) put(below ? pxWall('labFace', h & 1) : pxWall('labTop', h & 1));
 }

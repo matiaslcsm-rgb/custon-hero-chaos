@@ -499,14 +499,15 @@ function towerTiles() {
     return (towerTileCache = { floors: ['#2e2b33', '#2a2730', '#322e37', '#29262d'].map(floor), face: wall(true), top: wall(false) });
 }
 function drawTowerTiles(level) {
-    const t = pixelOn() ? towerTiles() : inkTiles(); // estética tinta y pergamino (inkart.js); en el estilo pixel, piedra oscura (towerPixel.js)
+    const t = inkTiles(); // estética tinta y pergamino (inkart.js)
+    const px = pixelOn() && drawPixelGround(level); // o el suelo en pixel art (towerPixel.js)
     const x0 = Math.floor(camera.x), y0 = Math.floor(camera.y);
     for (let y = y0; y <= Math.min(ROWS - 1, y0 + viewRows()); y++) for (let x = x0; x <= Math.min(COLS - 1, x0 + viewCols()); x++) {
         if (!level.explored[y][x]) continue;
         const w = level.walls[y][x], labTile = !level.zone || (level.zone[y * COLS + x] === ZONE.lab && (!w || w === WALL.stone));
-        const img = level.isCave ? caveTileFor(level, x, y) : !labTile ? biomeTileFor(level, x, y) // cueva, o campo y pueblo del bioma (towerWorld.js)
-            : w ? (y + 1 < ROWS && !level.walls[y + 1][x] ? t.face : t.top) : t.floors[((x * 73856093) ^ (y * 19349663)) & 3];
-        ctx.drawImage(img, x * TILE, y * TILE);
+        if (px) drawPixelWall(level, x, y); // árboles, rocas, paredes y acantilados encima del suelo
+        else ctx.drawImage(level.isCave ? caveTileFor(level, x, y) : !labTile ? biomeTileFor(level, x, y) // cueva, o campo y pueblo del bioma (towerWorld.js)
+            : w ? (y + 1 < ROWS && !level.walls[y + 1][x] ? t.face : t.top) : t.floors[((x * 73856093) ^ (y * 19349663)) & 3], x * TILE, y * TILE);
         if (level.height) { // relieve: arriba más claro; al pie del acantilado, sombra
             const i = y * COLS + x;
             if (level.height[i] && w !== WALL.cliff) { ctx.fillStyle = 'rgba(255,250,235,0.16)'; ctx.fillRect(x * TILE, y * TILE, TILE, TILE); }
@@ -544,8 +545,6 @@ function renderTower(level, dt) {
     towerMusicTick(level, dt); // música por capas (towerMusic.js)
     updateArenaFx(level, dt);
     updateCamera(level, player, dt);
-    const px = pixelOn(); // estilo pixel art con luz (towerPixel.js)
-    if (px) pixelBegin();
     ctx.save();
     if (shakeAmount) ctx.translate((Math.random() - 0.5) * shakeAmount * 2, (Math.random() - 0.5) * shakeAmount * 2);
     ctx.scale(viewScale(), viewScale()); // zoom (towerView.js)
@@ -621,7 +620,7 @@ function renderTower(level, dt) {
     drawTowerBullets(level); // proyectiles enemigos, encima de todo lo del piso (towerBullets.js)
     drawCreepWindupMarks(level); // "!" sobre los que preparan un golpe (towerWindup.js)
     drawTowerFeel(level); // línea de tiro del arco y el combo de la espada (towerFeel.js)
-    fxTextPass = px ? 'skip' : null; drawArenaFx(level); fxTextPass = null; // en el estilo pixel, los números van después (sin pixelar)
+    drawArenaFx(level);
     drawMouseOverlay(level);
     // Niebla: lo no descubierto, negro; lo descubierto fuera de la vista, oscurecido
     const x0 = Math.floor(camera.x), y0 = Math.floor(camera.y);
@@ -630,11 +629,10 @@ function renderTower(level, dt) {
         else if (!canSee(level, x, y)) { ctx.fillStyle = 'rgba(43,33,24,0.5)'; ctx.fillRect(x * TILE, y * TILE, TILE + 1, TILE + 1); }
     }
     ctx.restore();
-    if (!px) drawTowerNight(level); // día y noche (towerWorld.js); en el estilo pixel, la noche es menos luz (towerPixel.js)
+    drawTowerNight(level); // día y noche (towerWorld.js)
     drawTowerWeather(level, dt); // lluvia, nieve, ceniza, hojas… por bioma (towerAtmos.js)
-    if (px) { pixelRender(level); pixelFxTexts(level); } // de acá en adelante, la interfaz (encima y sin pixelar)
     drawUltBanner(screenW() / 2, screenH() * 0.72); // cartel de la definitiva, encima de la niebla (fxSkills.js)
-    if (!px) drawInkVignette();
+    drawInkVignette();
     drawObjectiveArrow(level);
     drawOffscreenThreats(level); // balas y tiradores fuera de la vista (towerBullets.js)
     drawChampionCard(level); // qué hace cada afijo del campeón bajo el mouse (towerChampions.js)
