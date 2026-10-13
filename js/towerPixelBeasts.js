@@ -308,27 +308,50 @@ function pxHeroLook(u) {
     return { cape, hood: col(gear.helm) || cape, trim: col(gear.boots) || '#c9a227', glow: el ? el.c1 : '#9ad1ff',
         weapon: w ? PXH_WEAPON[w.heroKey] || HERO_WEAPONS[w.heroKey].shape : 'fists' };
 }
+// f.atk (0 o 1): el cuadro propio del golpe (pxbHeroFrame kind 'attack'), un solo cuadro por forma de arma, no
+// toda una secuencia — el giro/estirón de todo el cuerpo ya lo hace attackPose() (fx.js) aparte.
 function pxhWeapon(S, hx, hy, L, f) {
-    const st = PXB_STEEL, wd = PXB_WOOD, gl = L.glow;
+    const st = PXB_STEEL, wd = PXB_WOOD, gl = L.glow, atk = f.atk || 0;
+    const mx = hx + atk * 2.2, my = hy - atk * 2.6; // cuerpo a cuerpo: el arma se extiende hacia adelante y arriba
     switch (L.weapon) {
         case 'sword': case 'twin':
-            S.line(hx + 1, hy - 1, hx + 1, hy - 10, st[3]); S.line(hx + 2, hy - 1, hx + 2, hy - 9, st[1]); S.set(hx + 1, hy - 11, '#ffffff');
-            S.rect(hx, hy - 1, 3, 1, '#c9a227'); S.set(hx + 1, hy + 1, '#8a6a20');
+            S.line(mx + 1, my - 1, mx + 1, my - 10, st[3]); S.line(mx + 2, my - 1, mx + 2, my - 9, st[1]); S.set(mx + 1, my - 11, '#ffffff');
+            S.rect(mx, my - 1, 3, 1, '#c9a227'); S.set(mx + 1, my + 1, '#8a6a20');
+            if (atk > 0.3) S.line(mx - 2, my - 9, mx + 4, my - 1, '#ffffff'); // tajo: brillo cruzando el filo
             if (L.weapon === 'twin') { S.line(3, 15 + f.bob + f.br, 1, 9 + f.bob + f.br, st[2]); S.set(3, 16 + f.bob + f.br, '#c9a227'); }
             break;
-        case 'hammer': S.line(hx + 1, hy + 2, hx + 1, hy - 9, wd[1]); S.rect(hx + 2, hy - 10, 3, 4, st[2]); S.rect(hx + 4, hy - 11, 1, 6, st[3]); S.set(hx, hy - 9, st[1]); break;
-        case 'spear': S.line(hx + 1, hy + 5, hx + 1, hy - 12, wd[1]); S.tri([hx - 0.5, hy - 12], [hx + 2.5, hy - 12], [hx + 1, hy - 16.5], st[3]); break;
+        case 'hammer': S.line(mx + 1, my + 2, mx + 1, my - 9, wd[1]); S.rect(mx + 2, my - 10, 3, 4, st[2]); S.rect(mx + 4, my - 11, 1, 6, st[3]); S.set(mx, my - 9, st[1]); break;
+        case 'spear': S.line(mx + 1, my + 5, mx + 1, my - 12, wd[1]); S.tri([mx - 0.5, my - 12], [mx + 2.5, my - 12], [mx + 1, my - 16.5], st[3]); break;
         case 'bow': for (let k = -6; k <= 6; k++) S.set(hx + 2 + Math.round(2 * Math.cos(k / 6 * 1.3)), hy - 4 + k, wd[2]); S.line(hx + 2, hy - 10, hx + 2, hy + 2, '#e0d8c8'); break;
-        case 'rifle': S.line(hx - 3, hy, hx + 7, hy - 2, st[1]); S.line(hx - 3, hy + 1, hx + 1, hy, wd[1]); S.set(hx + 7, hy - 2, st[3]); break;
-        case 'scythe': S.line(hx + 1, hy + 5, hx + 1, hy - 12, '#3a2e28'); S.line(hx + 1, hy - 12, hx - 4, hy - 11, st[3]); S.line(hx - 4, hy - 11, hx - 6, hy - 8, st[2]); break;
+        case 'rifle': {
+            const kick = atk * 1.6; // retroceso del rifle al disparar
+            S.line(hx - 3 - kick, hy, hx + 7 - kick, hy - 2, st[1]); S.line(hx - 3 - kick, hy + 1, hx + 1 - kick, hy, wd[1]); S.set(hx + 7 - kick, hy - 2, st[3]);
+            if (atk > 0.2) S.ball(hx + 8 - kick, hy - 2, 1.3, 1.3, ['#fff6b0', '#ffe066', '#ffd60a']); // fogonazo
+            break;
+        }
+        case 'scythe': S.line(mx + 1, my + 5, mx + 1, my - 12, '#3a2e28'); S.line(mx + 1, my - 12, mx - 4, my - 11, st[3]); S.line(mx - 4, my - 11, mx - 6, my - 8, st[2]); break;
         case 'dagger': case 'daggers':
-            S.line(hx + 1, hy - 1, hx + 3, hy - 4, st[3]); S.set(hx + 1, hy, '#c9a227');
+            S.line(mx + 1, my - 1, mx + 3, my - 4, st[3]); S.set(mx + 1, my, '#c9a227');
             if (L.weapon === 'daggers') S.line(4, 15 + f.bob + f.br, 2, 12 + f.bob + f.br, st[3]);
             break;
-        case 'staff': S.line(hx + 1, 23, hx + 1, hy - 12, wd[1]); S.ball(hx + 1, hy - 13, 1.8, 1.8, [shade(gl, -0.4), shade(gl, -0.15), gl, shade(gl, 0.35), '#ffffff']); S.set(hx + 1, hy - 14, '#ffffff'); break;
-        case 'orb': S.rect(hx + 1, hy - 4, 1, 2, '#d8e4e8'); S.ball(hx + 1.5, hy - 1, 1.8, 1.6, [shade(gl, -0.3), gl, gl, shade(gl, 0.3), '#ffffff']); break;
-        case 'crystal': S.tri([hx, hy - 2], [hx + 3, hy - 2], [hx + 1.5, hy - 9], '#ffd60a'); S.line(hx + 1, hy - 3, hx + 1, hy - 7, '#fff6b0'); S.set(hx + 3, hy - 8, (f.idle || f.walk % 2) ? '#ffffff' : '#ffd60a'); break;
-        default: S.rect(hx, hy - 1, 3, 2, st[2]); S.set(hx + 2, hy - 1, st[3]); // puños: guantelete
+        case 'staff': {
+            const r = 1.8 + atk * 0.9;
+            S.line(hx + 1, 23, hx + 1, hy - 12, wd[1]); S.ball(hx + 1, hy - 13, r, r, [shade(gl, -0.4), shade(gl, -0.15), gl, shade(gl, 0.35), '#ffffff']); S.set(hx + 1, hy - 14, '#ffffff');
+            if (atk > 0.3) { S.set(hx - 1, hy - 15, gl); S.set(hx + 3, hy - 15, gl); } // chispas al lanzar
+            break;
+        }
+        case 'orb': {
+            const r = 1.8 + atk * 0.9;
+            S.rect(hx + 1, hy - 4, 1, 2, '#d8e4e8'); S.ball(hx + 1.5, hy - 1, r, r * 0.9, [shade(gl, -0.3), gl, gl, shade(gl, 0.3), '#ffffff']);
+            if (atk > 0.3) { S.set(hx - 1, hy - 2, gl); S.set(hx + 4, hy - 1, gl); }
+            break;
+        }
+        case 'crystal':
+            S.tri([hx, hy - 2], [hx + 3, hy - 2], [hx + 1.5, hy - 9 - atk], '#ffd60a'); S.line(hx + 1, hy - 3, hx + 1, hy - 7 - atk, '#fff6b0');
+            S.set(hx + 3, hy - 8, (atk > 0.3 || f.idle || f.walk % 2) ? '#ffffff' : '#ffd60a');
+            if (atk > 0.3) S.set(hx - 1, hy - 7, '#fff6b0');
+            break;
+        default: S.rect(mx, my - 1, 3, 2, st[2]); S.set(mx + 2, my - 1, st[3]); // puños: guantelete
     }
 }
 function pxhDraw(S, L, f) {
@@ -366,7 +389,9 @@ PXB.hero = { w: 18, h: 24, head: [8, 2], back: [8, 9], draw() {} };
 function pxbHeroFrame(L, kind, k) {
     const key = ['hero', L.cape, L.hood, L.trim, L.glow, L.weapon, kind, k].join('|');
     if (pxbCache[key]) return pxbCache[key];
-    const f = kind === 'walk' ? { walk: k, idle: 0, ph: [0, 1, 0, -1][k], bob: k % 2 ? -1 : 0, br: 0 } : { walk: -1, idle: k, ph: 0, bob: 0, br: k };
+    const f = kind === 'walk' ? { walk: k, idle: 0, ph: [0, 1, 0, -1][k], bob: k % 2 ? -1 : 0, br: 0 }
+        : kind === 'attack' ? { walk: -1, idle: 0, ph: 0, bob: 0, br: 0, atk: 1 } // golpe de arma visible (pxhWeapon)
+        : { walk: -1, idle: k, ph: 0, bob: 0, br: k };
     const make = white => {
         const c = pxSprite(PXB.hero.w + PXB_PAD * 2, PXB.hero.h + PXB_PAD, S => { S.tx = PXB_PAD; S.ty = PXB_PAD; pxhDraw(S, L, f); S.outline('#110d0b'); });
         if (white) { const g = c.getContext('2d'); g.globalCompositeOperation = 'source-in'; g.fillStyle = '#ffffff'; g.fillRect(0, 0, c.width, c.height); }
@@ -424,6 +449,13 @@ function drawPixelUnit(u, cx, cy, facing, flash, pose) {
     let kind = 'idle', k;
     if (moving) kind = 'walk', k = Math.floor(((fxClock / (2 * Math.max(0.12, unitStepTime(u))) + (u.bobSeed || 0)) % 1) * 4);
     else k = Math.floor(((fxClock * 1.4 + (u.bobSeed || 0)) % 1) * 2);
+    // Golpe de arma visible (2026-10-14): en el instante del golpe (ni al arrancar ni al terminar la animación
+    // de ataque) el héroe pasa a su cuadro de ataque, donde el arma se extiende o brilla según su forma
+    // (pxhWeapon) — aparte del giro/estirón de todo el cuerpo que ya hace attackPose() (fx.js).
+    if (body === 'hero' && u.fxAttack) {
+        const t = (fxClock - u.fxAttack.at) / ATTACK_ANIM[u.fxAttack.kind];
+        if (t >= 0.15 && t < 0.85) { kind = 'attack'; k = 0; }
+    }
     const fr = body === 'hero' ? pxbHeroFrame(pxHeroLook(u), kind, k) : pxbFrame(body, u.color, (u.type.parts || []), kind, k), img = flash ? fr.white : fr.img, s = pxbScale(u);
     ctx.save();
     ctx.translate(cx, cy + TILE * 0.45);

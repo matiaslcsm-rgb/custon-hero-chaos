@@ -83,6 +83,15 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   elección de héroe, códice) siguen con el sprite estático de 12×12 a propósito, no hacía falta animarlos ahí;
   ese sprite sigue existiendo para esos íconos y como respaldo técnico (tecla G / 🎨 apaga los dibujos del todo
   y vuelve a las letras ASCII, no al sprite viejo).
+- **Golpe de arma visible, compartido por forma (2026-10-14):** en el instante del golpe, el muñeco pasa a un
+  cuadro propio donde el arma se extiende o brilla según su forma (`pxhWeapon`, `js/towerPixelBeasts.js`) — un
+  tajo con brillo para espada/dagas/gemelas, el rifle del Sniper retrocede y tira un fogonazo, báculo/orbe/cristal
+  agrandan su brillo y sueltan chispas al lanzar. Comparte el dibujo por FORMA de arma, no por héroe (si dos
+  héroes tienen báculo, el golpe se ve igual); es aparte del giro/estirón de todo el cuerpo que ya hacía
+  `attackPose()` (fx.js), que sigue como estaba. Un solo cuadro por golpe, no una secuencia completa (se descartó
+  a propósito una réplica de la mecánica propia que tienen las 3 armas iniciales de la Torre — tensar, combo,
+  carga — por ser mucho más trabajo para 9 formas de arma). Como el héroe de la Torre también pasa por el mismo
+  `drawPixelUnit`, sus golpes básicos ganaron el mismo detalle de regalo.
 - **Mundo con profundidad (2026-10-06):** pisos de 220×150 con mesetas, día y noche, cuevas con niveles de profundidad y
   bestiario generado por run (ROGUELIKE.md §4 quater).
 - **Códice, piezas sin alma y Herrero (2026-10-07):** ROGUELIKE.md §4 septies.
