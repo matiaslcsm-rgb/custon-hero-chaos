@@ -598,6 +598,29 @@ pausa (🟫 Suelo en pixel art) o con `?pixel=1`; apagado queda la tinta.
 - Pendiente si gusta: personajes y enemigos en pixel art (hoy siguen en tinta), antorchas/fogatas/cofres/santuarios,
   la niebla de lo explorado sin el cuadriculado, partículas de a un píxel, y la interfaz.
 
+## 19. Criaturas en pixel art (prueba, 2026-10-13, `js/towerPixelBeasts.js`)
+Segundo paso del rework gráfico (§18): con el suelo en pixel art prendido, las criaturas también. Como el bestiario se
+arma por piezas, se dibujaron los **16 cuerpos** (lobo, jabalí, lagarto, escorpión, sapo, guerrero, arquero, mago,
+curandero, trasgo, ogro, gólem, espectro, fantasma, enjambre, escarabajo bomba) y las **5 partes** (cuernos, púas, alas,
+ojos, manchas), y el resto sale solo: el color de la criatura da 5 tonos con luz de arriba a la izquierda, y las partes se
+enganchan en la cabeza y el lomo de cada cuerpo. 4 cuadros de caminata y 2 de reposo; el tamaño (pequeño, grande) agranda
+el píxel. Para que se lean en cualquier suelo: contorno oscuro, sombra y el color principal nunca muy oscuro.
+Vista de todos: `index.html?demo=pixelbeasts`. Siguen en tinta: el héroe, los guardianes, los jefes de bioma y de cueva.
+
+### Ideas para las criaturas (propuesta externa revisada, 2026-10-13; para después, de a una)
+- ✅ **Alas que vuelan:** ignoran fango, lava y trampas; si las aturdís, caen y pierden eso.
+- ✅ **Dúos de rol + cuerpo** con nombre (pocos, no todas las combinaciones): escorpión maldiciente deja charcos
+  corrosivos; gólem bomba suelta esquirlas.
+- ✅ **Campeones que cambian la pelea:** *Enlace* (une a 2 cercanos, que no mueren mientras viva) y *Espejo* (1-2 copias
+  de poca vida al recibir el primer golpe). Hoy los 8 afijos son de números.
+- ✅ **Portador que muta** con tu pieza (una de fuego lo vuelve Ígneo mientras la tenga).
+- 🟡 Partes que se rompen (cuernos → pierde la embestida): primero haría falta ese ataque.
+- 🟡 Gélidos inmunes al piso helado del Wyrm (fácil); barriles que explotan (sistema nuevo).
+- 🟡 Rasgos por piso: 0-1 en el primero, 1-2 en el segundo (hoy ya es casi así).
+- ❌ Portador que huye y se queda con la pieza: choca con el freno a la espiral de muertes (§4, 2026-10-07).
+- ❌ Un color por tipo de aviso: se mantiene un solo color de peligro (con su versión para daltonismo); si hace falta
+  distinguir, por forma.
+
 ## Orden propuesto (cada fase jugable y medida)
 1. **Pantalla:** zoom, HUD más chico y menú de pausa con pestañas. Es barato y mejora todo lo que viene después.
 2. **Despertar y tutorial:** cuaderno y las 3 armas (espada, arco y bastón, con su habilidad). ✅ — las 3 armas

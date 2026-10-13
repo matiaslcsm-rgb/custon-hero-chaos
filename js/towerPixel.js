@@ -167,10 +167,20 @@ function drawPixelGround(level) {
 // Grilla de píxeles con ayudas para pintar formas con luz de arriba a la izquierda y contorno oscuro.
 function pxSprite(w, h, paint) {
     const grid = new Array(w * h).fill(null);
+    const raw = (x, y) => (x >= 0 && y >= 0 && x < w && y < h ? grid[y * w + x] : null);
     const S = {
-        w, h,
-        set(x, y, col) { x = Math.round(x); y = Math.round(y); if (x >= 0 && y >= 0 && x < w && y < h) grid[y * w + x] = col; },
-        get(x, y) { return x >= 0 && y >= 0 && x < w && y < h ? grid[y * w + x] : null; },
+        w, h, tx: 0, ty: 0, // tx/ty: corrimiento (margen para cuernos y alas)
+        set(x, y, col) { x = Math.round(x) + S.tx; y = Math.round(y) + S.ty; if (x >= 0 && y >= 0 && x < w && y < h) grid[y * w + x] = col; },
+        get(x, y) { return raw(Math.round(x) + S.tx, Math.round(y) + S.ty); },
+        // Triángulo relleno
+        tri(a, b, c, col) {
+            const x0 = Math.floor(Math.min(a[0], b[0], c[0])), x1 = Math.ceil(Math.max(a[0], b[0], c[0])), y0 = Math.floor(Math.min(a[1], b[1], c[1])), y1 = Math.ceil(Math.max(a[1], b[1], c[1]));
+            const side = (p, q, x, y) => (q[0] - p[0]) * (y - p[1]) - (q[1] - p[1]) * (x - p[0]);
+            for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+                const px = x + 0.5, py = y + 0.5, d1 = side(a, b, px, py), d2 = side(b, c, px, py), d3 = side(c, a, px, py);
+                if (!((d1 < 0 || d2 < 0 || d3 < 0) && (d1 > 0 || d2 > 0 || d3 > 0))) S.set(x, y, col);
+            }
+        },
         // Bola con sombreado (pal: de oscuro a claro)
         ball(cx, cy, rx, ry, pal, rnd = Math.random) {
             for (let y = Math.floor(cy - ry); y <= Math.ceil(cy + ry); y++) for (let x = Math.floor(cx - rx); x <= Math.ceil(cx + rx); x++) {
@@ -188,7 +198,7 @@ function pxSprite(w, h, paint) {
         // Contorno: los vacíos que tocan algo pintado se vuelven del color oscuro
         outline(col) {
             const add = [];
-            for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (!grid[y * w + x] && (S.get(x - 1, y) || S.get(x + 1, y) || S.get(x, y - 1) || S.get(x, y + 1)) && [S.get(x - 1, y), S.get(x + 1, y), S.get(x, y - 1), S.get(x, y + 1)].some(c => c && c !== 'shadow')) add.push([x, y]);
+            for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if ((!grid[y * w + x] || grid[y * w + x] === 'shadow') && [raw(x - 1, y), raw(x + 1, y), raw(x, y - 1), raw(x, y + 1)].some(c => c && c !== 'shadow')) add.push([x, y]);
             add.forEach(([x, y]) => { grid[y * w + x] = col; });
         }
     };

@@ -867,7 +867,7 @@ function drawUnit(u, color, symbol, pos = u, opts = {}) {
     if (sprite) {
         const size = spriteSize(u, opts);
         halfHeight = Math.max(TILE / 2, size / 2);
-        if (gameMode === 'tower' && inkPlanFor(u)) halfHeight = inkHalfHeight(u); // figuras de tinta: más altas
+        if (gameMode === 'tower' && inkPlanFor(u)) halfHeight = pixelBodyFor(u) ? pixelHalfHeight(u) : inkHalfHeight(u); // figuras de tinta (o pixel art): más altas
         // Sombra en el piso; en los héroes, un aro del color del bando (celeste vos, naranja los rivales)
         if (gameMode !== 'tower') { // en la Torre la sombra la dibuja la figura de tinta
         ctx.fillStyle = 'rgba(0,0,0,0.45)';
@@ -885,7 +885,7 @@ function drawUnit(u, color, symbol, pos = u, opts = {}) {
         if (alpha < 1) ctx.globalAlpha = alpha;
         const jitter = look && look.jitter ? (Math.random() - 0.5) * look.jitter : 0;
         const facing = u.facing || (u.isHero ? 1 : -1);
-        if (gameMode === 'tower') { if (!drawInkUnit(u, cx + jitter, cy + bob, size, facing, hit, pose)) drawInkedSprite(sprite, cx + jitter, cy + bob, size, facing, hit, pose); }
+        if (gameMode === 'tower') { if (drawPixelUnit(u, cx + Math.round(jitter), cy, facing, hit, pose)) { /* criatura en pixel art (towerPixelBeasts.js) */ } else if (!drawInkUnit(u, cx + jitter, cy + bob, size, facing, hit, pose)) drawInkedSprite(sprite, cx + jitter, cy + bob, size, facing, hit, pose); }
         else drawSprite(sprite, cx + jitter, cy + bob, size, facing, hit, pose);
         ctx.globalAlpha = 1; ctx.shadowBlur = 0;
         if (pose && pose.flash > 0 && u.fxAttack) { // fogonazo del disparo
