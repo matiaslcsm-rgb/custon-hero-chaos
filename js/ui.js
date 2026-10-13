@@ -580,8 +580,8 @@ function renderHeroBar() {
     const portrait = document.getElementById('hb-portrait');
     portrait.title = heroTooltip();
     const sym = document.getElementById('hb-symbol');
-    const url = gameMode === 'tower' ? inkPortrait(p) : heroSpriteUrl(p);
-    if (url) sym.innerHTML = `<img src="${url}" alt="${p.symbol}" class="${gameMode === 'tower' ? 'ink-portrait' : 'pixel-img'}">`;
+    const url = gameMode === 'tower' ? (pixelOn() ? pixelPortrait(p) : inkPortrait(p)) : heroSpriteUrl(p); // retrato en pixel art (towerPixelBeasts.js)
+    if (url) sym.innerHTML = `<img src="${url}" alt="${p.symbol}" class="${gameMode === 'tower' ? 'ink-portrait' : 'pixel-img'}"${pixelOn() ? ' style="image-rendering:pixelated"' : ''}>`;
     else { sym.textContent = p.symbol; sym.style.color = heroColor(p); }
     document.getElementById('hb-level').innerHTML = `Nv ${p.level}` + (p.skillPoints > 0 && gameMode !== 'tower' ? ` <span class="pts" title="Puntos de habilidad para repartir con [+]">+${p.skillPoints}</span>` : '');
     document.getElementById('hb-name').textContent = p.name;

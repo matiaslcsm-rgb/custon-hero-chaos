@@ -215,8 +215,99 @@ function pxbFrame(body, color, parts, kind, k) {
     return (pxbCache[key] = fr);
 }
 
+// --- EL HÉROE (un muñeco que se viste con el equipo) ---
+// Capa del color de la armadura (o del arma), capucha del casco, ribete y botas de las botas, y el arma con su forma.
+const PXH_WEAPON = { ADVENTURER_BOW: 'bow', SNIPER: 'rifle', NECROMANCER: 'scythe', DANCER: 'twin', ASSASSIN: 'daggers' };
+function pxHeroLook(u) {
+    const gear = u.gear || {}, col = item => item && item.heroKey && HERO_TEMPLATES[item.heroKey] ? shade(ATTR_INFO[HERO_TEMPLATES[item.heroKey].primaryAttr].color, -0.15) : null;
+    const w = gear.weapon, el = typeof weaponFx === 'function' ? ELEMENTS[weaponFx(u).el] : null;
+    const cape = col(gear.armor) || col(w) || '#a33a3a';
+    return { cape, hood: col(gear.helm) || cape, trim: col(gear.boots) || '#c9a227', glow: el ? el.c1 : '#9ad1ff',
+        weapon: w ? PXH_WEAPON[w.heroKey] || HERO_WEAPONS[w.heroKey].shape : 'fists' };
+}
+function pxhWeapon(S, hx, hy, L, f) {
+    const st = PXB_STEEL, wd = PXB_WOOD, gl = L.glow;
+    switch (L.weapon) {
+        case 'sword': case 'twin':
+            S.line(hx + 1, hy - 1, hx + 1, hy - 10, st[3]); S.line(hx + 2, hy - 1, hx + 2, hy - 9, st[1]); S.set(hx + 1, hy - 11, '#ffffff');
+            S.rect(hx, hy - 1, 3, 1, '#c9a227'); S.set(hx + 1, hy + 1, '#8a6a20');
+            if (L.weapon === 'twin') { S.line(3, 15 + f.bob + f.br, 1, 9 + f.bob + f.br, st[2]); S.set(3, 16 + f.bob + f.br, '#c9a227'); }
+            break;
+        case 'hammer': S.line(hx + 1, hy + 2, hx + 1, hy - 9, wd[1]); S.rect(hx + 2, hy - 10, 3, 4, st[2]); S.rect(hx + 4, hy - 11, 1, 6, st[3]); S.set(hx, hy - 9, st[1]); break;
+        case 'spear': S.line(hx + 1, hy + 5, hx + 1, hy - 12, wd[1]); S.tri([hx - 0.5, hy - 12], [hx + 2.5, hy - 12], [hx + 1, hy - 16.5], st[3]); break;
+        case 'bow': for (let k = -6; k <= 6; k++) S.set(hx + 2 + Math.round(2 * Math.cos(k / 6 * 1.3)), hy - 4 + k, wd[2]); S.line(hx + 2, hy - 10, hx + 2, hy + 2, '#e0d8c8'); break;
+        case 'rifle': S.line(hx - 3, hy, hx + 7, hy - 2, st[1]); S.line(hx - 3, hy + 1, hx + 1, hy, wd[1]); S.set(hx + 7, hy - 2, st[3]); break;
+        case 'scythe': S.line(hx + 1, hy + 5, hx + 1, hy - 12, '#3a2e28'); S.line(hx + 1, hy - 12, hx - 4, hy - 11, st[3]); S.line(hx - 4, hy - 11, hx - 6, hy - 8, st[2]); break;
+        case 'dagger': case 'daggers':
+            S.line(hx + 1, hy - 1, hx + 3, hy - 4, st[3]); S.set(hx + 1, hy, '#c9a227');
+            if (L.weapon === 'daggers') S.line(4, 15 + f.bob + f.br, 2, 12 + f.bob + f.br, st[3]);
+            break;
+        case 'staff': S.line(hx + 1, 23, hx + 1, hy - 12, wd[1]); S.ball(hx + 1, hy - 13, 1.8, 1.8, [shade(gl, -0.4), shade(gl, -0.15), gl, shade(gl, 0.35), '#ffffff']); S.set(hx + 1, hy - 14, '#ffffff'); break;
+        case 'orb': S.rect(hx + 1, hy - 4, 1, 2, '#d8e4e8'); S.ball(hx + 1.5, hy - 1, 1.8, 1.6, [shade(gl, -0.3), gl, gl, shade(gl, 0.3), '#ffffff']); break;
+        case 'crystal': S.tri([hx, hy - 2], [hx + 3, hy - 2], [hx + 1.5, hy - 9], '#ffd60a'); S.line(hx + 1, hy - 3, hx + 1, hy - 7, '#fff6b0'); S.set(hx + 3, hy - 8, (f.idle || f.walk % 2) ? '#ffffff' : '#ffd60a'); break;
+        default: S.rect(hx, hy - 1, 3, 2, st[2]); S.set(hx + 2, hy - 1, st[3]); // puños: guantelete
+    }
+}
+function pxhDraw(S, L, f) {
+    const b = f.bob, ph = f.ph, br = f.br;
+    const C = pxbPalette(L.cape), H = pxbPalette(L.hood), T = pxbPalette(L.trim), cloth = ['#4f473c', '#665c4d', '#7f735f', '#978a72', '#ada087'];
+    const legs = ['#231d1a', '#352d29', '#4a403a'], st = PXB_STEEL, sway = f.walk >= 0 ? f.walk % 2 : br;
+    pxbShadow(S, 8, 23, 5.5);
+    // Capa (atrás, flamea al caminar)
+    for (let y = 8; y <= 21; y++) {
+        const left = 6 - Math.round((y - 8) * 0.32) - (y > 15 ? sway : 0), yy = y + (y < 16 ? b + br : 0);
+        for (let x = left; x <= 8; x++) S.set(x, yy, C[x === left ? 0 : x < left + 2 ? 1 : 2]);
+    }
+    // Pierna de atrás, brazo de atrás (guantelete)
+    S.rect(6 - ph, 16 + b, 2, 7 - b, legs[0]); S.rect(6 - ph, 21, 2, 2, T[1]);
+    S.rect(4, 10 + b + br, 2, 5, st[1]); S.set(4, 15 + b + br, st[0]); S.set(5, 15 + b + br, st[0]);
+    // Torso: túnica con el tabardo del ribete y cinturón
+    S.ball(8.5, 12.5 + b + br, 3.6, 4, cloth);
+    S.rect(8, 10 + b + br, 2, 6, T[2]); S.rect(8, 10 + b + br, 1, 6, T[3]);
+    S.rect(5, 15 + b, 8, 1, '#3a2a1c'); S.set(9, 15 + b, '#e0b84a');
+    // Esclavina: la capa sobre los hombros (así se ve su color de frente)
+    S.rect(5, 8 + b + br, 7, 3, C[2]); S.rect(5, 8 + b + br, 7, 1, C[3]); S.set(11, 10 + b + br, C[1]); S.set(5, 10 + b + br, C[1]);
+    // Pierna de adelante
+    S.rect(9 + ph, 16 + b, 2, 7 - b, legs[1]); S.set(9 + ph, 16 + b, legs[2]); S.rect(9 + ph, 21, 2, 2, T[2]); S.set(10 + ph, 21, T[3]);
+    // Capucha con la cara en sombra y el brillo de los ojos
+    const hy = 5.5 + b + br;
+    S.ball(8.5, hy, 3.5, 3.4, H); S.set(5, hy - 2, H[1]); S.set(4, hy - 1, H[1]);
+    S.ball(10.2, hy + 0.6, 1.9, 1.8, ['#0c0a09', '#15110f', '#1d1815', '#241e1a', '#2b2420']);
+    S.set(11, hy + 0.4, '#f2e6c8');
+    // Brazo de adelante y el arma
+    S.rect(11, 10 + b + br, 2, 5, st[2]); S.set(11, 10 + b + br, st[3]);
+    pxhWeapon(S, 11, 15 + b + br, L, f);
+    S.rect(11, 15 + b + br, 2, 1, st[1]);
+}
+PXB.hero = { w: 18, h: 24, head: [8, 2], back: [8, 9], draw() {} };
+function pxbHeroFrame(L, kind, k) {
+    const key = ['hero', L.cape, L.hood, L.trim, L.glow, L.weapon, kind, k].join('|');
+    if (pxbCache[key]) return pxbCache[key];
+    const f = kind === 'walk' ? { walk: k, idle: 0, ph: [0, 1, 0, -1][k], bob: k % 2 ? -1 : 0, br: 0 } : { walk: -1, idle: k, ph: 0, bob: 0, br: k };
+    const make = white => {
+        const c = pxSprite(PXB.hero.w + PXB_PAD * 2, PXB.hero.h + PXB_PAD, S => { S.tx = PXB_PAD; S.ty = PXB_PAD; pxhDraw(S, L, f); S.outline('#110d0b'); });
+        if (white) { const g = c.getContext('2d'); g.globalCompositeOperation = 'source-in'; g.fillStyle = '#ffffff'; g.fillRect(0, 0, c.width, c.height); }
+        return c;
+    };
+    const fr = { img: make(false), _white: null };
+    Object.defineProperty(fr, 'white', { get() { return this._white || (this._white = make(true)); } });
+    return (pxbCache[key] = fr);
+}
+// Retrato de la barra del héroe: busto en pixel art
+const pxhPortraitCache = {};
+function pixelPortrait(u) {
+    const L = pxHeroLook(u), key = JSON.stringify(L);
+    if (pxhPortraitCache[key]) return pxhPortraitCache[key];
+    const fr = pxbHeroFrame(L, 'idle', 0).img, c = document.createElement('canvas'); c.width = c.height = 64;
+    const g = c.getContext('2d'); g.imageSmoothingEnabled = false;
+    g.fillStyle = '#2b2420'; g.fillRect(0, 0, 64, 64);
+    g.drawImage(fr, PXB_PAD + 1, PXB_PAD - 2, 16, 16, 0, 0, 64, 64);
+    return (pxhPortraitCache[key] = c.toDataURL());
+}
+
 // Qué cuerpo de pixel art usa una unidad (null: sigue en tinta)
 function pixelBodyFor(u) {
+    if (pixelOn() && u.isHero && gameMode === 'tower') return 'hero';
     if (!pixelOn() || u.isHero || u.isGuardian || u.isBoss || u.isCaveBoss || !u.type) return null;
     const plan = inkPlanFor(u);
     return PXB[plan] ? plan : null;
@@ -233,7 +324,7 @@ function drawPixelUnit(u, cx, cy, facing, flash, pose) {
     let kind = 'idle', k;
     if (moving) kind = 'walk', k = Math.floor(((fxClock / (2 * Math.max(0.12, unitStepTime(u))) + (u.bobSeed || 0)) % 1) * 4);
     else k = Math.floor(((fxClock * 1.4 + (u.bobSeed || 0)) % 1) * 2);
-    const fr = pxbFrame(body, u.color, (u.type.parts || []), kind, k), img = flash ? fr.white : fr.img, s = pxbScale(u);
+    const fr = body === 'hero' ? pxbHeroFrame(pxHeroLook(u), kind, k) : pxbFrame(body, u.color, (u.type.parts || []), kind, k), img = flash ? fr.white : fr.img, s = pxbScale(u);
     ctx.save();
     ctx.translate(cx, cy + TILE * 0.45);
     if (pose) { ctx.rotate(pose.rot * (facing < 0 ? -1 : 1)); ctx.scale(pose.sx, pose.sy); }

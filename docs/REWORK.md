@@ -605,7 +605,12 @@ curandero, trasgo, ogro, gólem, espectro, fantasma, enjambre, escarabajo bomba)
 ojos, manchas), y el resto sale solo: el color de la criatura da 5 tonos con luz de arriba a la izquierda, y las partes se
 enganchan en la cabeza y el lomo de cada cuerpo. 4 cuadros de caminata y 2 de reposo; el tamaño (pequeño, grande) agranda
 el píxel. Para que se lean en cualquier suelo: contorno oscuro, sombra y el color principal nunca muy oscuro.
-Vista de todos: `index.html?demo=pixelbeasts`. Siguen en tinta: el héroe, los guardianes, los jefes de bioma y de cueva.
+Vista de todos: `index.html?demo=pixelbeasts`. Siguen en tinta: los guardianes y los jefes de bioma y de cueva.
+
+**El héroe (2026-10-13):** también en pixel art, como muñeco que se viste igual que la figura de tinta: capa y esclavina
+del color de la armadura (o del arma), capucha del casco, ribete y botas de las botas, y el arma con su forma (puños,
+espada, hacha, lanza, arco, rifle, guadaña, dagas, espadas gemelas, bastón y matraz con el color de su elemento, rayo).
+4 cuadros de caminata y 2 de reposo; el retrato de la barra del héroe sale del mismo dibujo.
 
 ### Ideas para las criaturas (propuesta externa revisada, 2026-10-13; para después, de a una)
 - ✅ **Alas que vuelan:** ignoran fango, lava y trampas; si las aturdís, caen y pierden eso.
