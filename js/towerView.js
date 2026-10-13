@@ -5,9 +5,11 @@
 //   Los mensajes aparecen unos segundos abajo a la izquierda del mapa; la L abre el diario del piso con el registro
 //   completo. El HUD del héroe queda debajo del mapa.
 
-const VIEW = { w: MAP_W, h: MAP_H, across: 30, min: 14, max: 64, step: 1.12 };
+// across: 24 casillas a lo ancho de entrada (2026-10-14, antes 30: el héroe se veía chico para leer los tajos del combo).
+// La preferencia se guarda con otra clave (chc-zoom2) para que todos arranquen una vez con la cámara nueva.
+const VIEW = { w: MAP_W, h: MAP_H, across: 24, min: 14, max: 64, step: 1.12 };
 let towerLayout = false, towerLogOpen = false;
-try { const a = +localStorage.getItem('chc-zoom'); if (a >= VIEW.min && a <= VIEW.max) VIEW.across = a; } catch (e) { /* sin almacenamiento */ }
+try { const a = +localStorage.getItem('chc-zoom2'); if (a >= VIEW.min && a <= VIEW.max) VIEW.across = a; } catch (e) { /* sin almacenamiento */ }
 
 // Lo que se ve de la Torre (en el modo normal, la arena fija de siempre)
 function viewScale() { return towerLayout ? VIEW.w / (VIEW.across * TILE) : 1; }
@@ -40,7 +42,7 @@ window.addEventListener('resize', () => { if (towerLayout) fitTowerCanvas(); });
 // --- ZOOM ---
 function setTowerZoom(across) {
     VIEW.across = Math.max(VIEW.min, Math.min(VIEW.max, across));
-    try { localStorage.setItem('chc-zoom', String(Math.round(VIEW.across * 10) / 10)); } catch (e) { /* no se guarda */ }
+    try { localStorage.setItem('chc-zoom2', String(Math.round(VIEW.across * 10) / 10)); } catch (e) { /* no se guarda */ }
 }
 function towerZoom(dir) { setTowerZoom(VIEW.across * (dir > 0 ? 1 / VIEW.step : VIEW.step)); } // dir > 0: acercar
 canvas.addEventListener('wheel', e => {

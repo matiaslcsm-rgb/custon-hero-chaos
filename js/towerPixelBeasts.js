@@ -405,7 +405,9 @@ function pixelBodyFor(u) {
     const plan = inkPlanFor(u);
     return PXB[plan] ? plan : null;
 }
+const PXH_SCALE = 1.25; // el héroe, un poco más grande que el resto: se leen sus poses (2026-10-14)
 function pxbScale(u) {
+    if (u.isHero && gameMode === 'tower') return PXG.scale * PXH_SCALE;
     if (u.isRoundBoss) return PXG.scale * (String(pixelBodyFor(u)).startsWith('boss:') ? 1.15 : 1.6); // jefes de ronda de Custom Hero Chaos
     return PXG.scale * (u.isGuardian ? 1.35 : ((u.type && u.type.scale) || 1) * (u.isCaveBoss ? 1.6 : u.isBoss ? 1.3 : 1));
 }

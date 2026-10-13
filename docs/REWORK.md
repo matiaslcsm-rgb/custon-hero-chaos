@@ -747,6 +747,11 @@ el mismo paso; lo grande queda acá, ordenado por impacto.
     levanta). Golpe recibido: 2 (la cabeza y el cuerpo atrás). Muerte: 5 (se tambalea, cae de rodillas, queda tendido con
     los ojos apagados hasta renacer). Las otras armas usan el mismo cuerpo. **Pendiente** (decisión: segundo paso): mirar
     hacia arriba y hacia abajo (dibujar al encapuchado de frente y de espalda) y agrandar al héroe en pantalla.
+  - **Héroe más grande en pantalla** (2026-10-14, opción elegida): la cámara de la Torre arranca más cerca (24 casillas a
+    lo ancho en vez de 30) y el héroe se dibuja ×1,25 respecto del resto: en total se ve ~1,56× más grande. El zoom se
+    sigue cambiando con la rueda o + −; la preferencia pasó a `chc-zoom2`, así que todos arrancan una vez con la cámara
+    nueva. Ojo: se ve menos alrededor; los avisos de balas fuera de la vista (flechas en el borde) cubren lo que queda
+    afuera. **Pendiente:** medir si con la cámara más cerca el jugador recibe más golpes de lejos.
 - ✅ Volumen general, música y efectos, y temblor de pantalla (0-150%), con deslizadores en la pausa que se guardan.
 - ✅ La forja ya no corta una pelea: si una pieza sube de nivel peleando aparece un aviso arriba a la izquierda, y la
   ventana se abre sola cuando nadie te persigue.
