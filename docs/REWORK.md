@@ -237,6 +237,15 @@ hay que encontrar la grieta y romperla. En el piso 1 (afuera, sin cámaras) sigu
 Cuaderno, cada página que falta dice dónde buscarla ("detrás de una pared agrietada del piso N"). **Medido** (3 torres ×
 pisos 2-10): 27 de 27 adentro de una cámara, con la grieta a 121-310 pasos de la entrada.
 
+**Jefes escondidos, paso 1: el Ciervo Blanco (2026-10-14, modo automático, `js/towerSecrets.js`):** en el piso 1 hay un
+claro abierto (7×7) lo más lejos posible de la entrada. De noche aparece el Ciervo Blanco (la primera vez, Brena avisa
+en el registro); al amanecer, si no lo despertaste, se va. Es opcional, sale del generador de criaturas (cuerpo de
+cuadrúpedo con astas, blanco) con tamaño fijo y sin rasgos sorteados, tiene su entrada en el Bestiario ("Jefe escondido
+del piso 1...") y suelta una pieza única: **Astas del Ciervo Blanco** (casco raro con nombre propio y +velocidad y +vida
+de yapa). Vencido, no vuelve en esa run. **Medido:** 593 de vida y 52 de daño (el señor de la cueva del piso 1: 387 y
+149; el héroe arranca con 215 de vida): con la espada inicial sin equipo lo matás en 21-26 golpes y te mata en 5 de los
+suyos. Más largo que el señor de la cueva, menos letal de un golpe. El claro queda a ~270 pasos de la entrada.
+
 ## 7. Música y sonido
 - **Música ambiental por bioma**, de día y de noche, más una **capa de combate** que entra con fundido cuando hay
   enemigos cerca y se va al terminar la pelea (música dinámica en capas, como Hades o Zelda).

@@ -1635,6 +1635,29 @@ test('Torre: paredes agrietadas — cámaras selladas desde el piso 2, se rompen
     const k2 = { x: 5, y: 5, hp: 1 }; L.cracks.push(k2); L.walls[5][5] = WALL.stone;
     check(hitCrack(L, 5, 5, player) && !L.walls[5][5], 'cualquier golpe tuyo cuenta (flechas y orbes también)');
 }, { random: true });
+test('Torre: jefe escondido — el Ciervo Blanco sale de noche en un claro del piso 1, se va al amanecer y suelta una pieza única', () => {
+    newTower();
+    const L = towerLevel(1), hb = L.hiddenBoss;
+    check(hb && L.zone[hb.y * COLS + hb.x] === ZONE.field && walkable(L, hb.x, hb.y), 'el piso 1 tiene su claro apartado');
+    checkEq(towerLevel(2).hiddenBoss, null, 'los demás pisos todavía no (paso 1)');
+    const setNight = on => { towerRun.startedAt = gameClock - (on ? DAYNIGHT.day + DAYNIGHT.dusk + 10 : 10); };
+    setNight(false); hiddenBossTick(L);
+    check(!hb.unit, 'de día no está');
+    setNight(true); hiddenBossTick(L);
+    check(hb.unit && hb.unit.isHiddenBoss && L.creeps.includes(hb.unit) && hb.unit.type.label === 'Ciervo Blanco', 'de noche aparece');
+    setNight(false); hiddenBossTick(L);
+    check(!hb.unit && !L.creeps.some(c => c.isHiddenBoss), 'al amanecer, si nadie lo despertó, se va');
+    setNight(true); hiddenBossTick(L);
+    const deer = hb.unit; Object.assign(player, { arena: L }); L.drops = [];
+    dealDamage(player, deer, deer.hp * 10, 'pure');
+    check(!deer.isAlive(), 'se lo puede vencer');
+    const drop = L.drops.find(d => d.item.unique);
+    check(drop && drop.item.name === 'Astas del Ciervo Blanco' && drop.item.slot === 'helm' && drop.item.affixes.some(a => a.key === 'moveSpeedPct'), 'suelta su pieza única');
+    hiddenBossTick(L); setNight(false); hiddenBossTick(L); setNight(true); hiddenBossTick(L);
+    check(hb.dead && !hb.unit, 'vencido, no vuelve a salir en esta run');
+    noteBeastSeen(deer.type);
+    check(bestiaryStore.beasts['Ciervo Blanco'] && bestiaryStore.beasts['Ciervo Blanco'].mechanic.includes('escondido'), 'tiene su entrada en el Bestiario');
+}, { random: true });
 test('Torre: las Páginas de Arén — una por piso en un rincón apartado, se juntan al pisarla y no vuelven a aparecer', () => {
     arenStore = { found: {} };
     newTower();

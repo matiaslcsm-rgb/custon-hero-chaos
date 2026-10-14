@@ -84,7 +84,7 @@ El orden de la lista **es** la prioridad: primero lo que destraba el loop comple
       línea de historia (`js/towerLore.js`). 2026-10-14.
 - [x] **Las Páginas de Arén:** una por piso, escondida en un rincón difícil. La Bitácora las junta en orden y cuenta
       la historia de la expedición (`docs/TORRE-MUNDO.md`). 2026-10-14.
-- [ ] **Paredes agrietadas y salas secretas:** grietas que se ven si mirás bien en los muros de los salones y del
+- [x] **Paredes agrietadas y salas secretas:** grietas que se ven si mirás bien en los muros de los salones y del
       laberinto. Se rompen a golpes y adentro hay un cofre, una página o el camino al jefe escondido.
   - [x] Paso 1: 2 cámaras de piedra selladas por piso (2+) en el campo, con una pared agrietada (3 golpes: tajos,
         flechas u orbes) y un cofre con una pieza rara adentro (`js/towerSecrets.js`). 2026-10-14.
@@ -92,11 +92,17 @@ El orden de la lista **es** la prioridad: primero lo que destraba el loop comple
         hacia un pasillo o una sala. 2026-10-14.
   - [x] Paso 3a: la Página de Arén va adentro de la cámara sellada más lejana (pisos 2+; en el 1, que es afuera, sigue
         en el rincón más apartado). El Cuaderno dice dónde buscar las que faltan. 2026-10-14.
-  - [ ] Paso 3b: el camino al jefe escondido detrás de una grieta (va con el ítem del jefe escondido).
+  - Paso 3b (el camino al jefe escondido detrás de una grieta) pasó al ítem del jefe escondido.
   - [x] ~~Paso 4: que el guardado recuerde las paredes rotas~~ Descartado: al continuar una run el piso entero se arma
         de nuevo (cofres comunes incluidos, towerSave.js); las cámaras se comportan igual que el resto.
-- [ ] **Jefe escondido, paso 1:** el Ciervo Blanco del piso 1 (aparece solo de noche en un claro apartado), con su
-      entrada propia del Bestiario y una pieza única. Después, uno por piso según la tabla de TORRE-MUNDO.md.
+- [ ] **Jefes escondidos:** uno por piso según la tabla de TORRE-MUNDO.md.
+  - [x] Paso 1: el Ciervo Blanco del piso 1 (solo de noche en un claro apartado, se va al amanecer), con su entrada
+        del Bestiario y una pieza única (Astas del Ciervo Blanco). 2026-10-14.
+  - [ ] Paso 2: la Flor Carnívora del piso 2, en el invernadero tapiado: detrás de una pared agrietada (el paso 3b
+        de las salas secretas).
+  - [ ] Paso 3: el resto, de a uno (Leviatán del Fango, Semilla Primera, Guardián de Arena, Lector Sin Ojos, Lobo de
+        Escarcha, Vigía Perdido, Yunque Vivo).
+  - [ ] Dibujo propio del ciervo (hoy usa el cuerpo de cuadrúpedo con astas del generador).
 - [ ] **La gente del pueblo se ve:** 2 o 3 personajes en pixel art que caminan por el pueblo, con el aspecto de su
       gente (barqueros, relojeros, faroleros…). Hablás con F y cada run dicen algo nuevo.
 - [ ] **Pedidos que cruzan pisos:** ej. la llave de las compuertas (piso 5) abre la sala de bombas del piso 3.

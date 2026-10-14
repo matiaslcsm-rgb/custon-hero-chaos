@@ -283,6 +283,7 @@ function generateTowerLevel(floor) {
     level.drops = [];
     placeChests(level, clearings.concat(shuffle(rooms.filter(r => r !== first && r !== guardRoom)).slice(0, 5 - clearings.length)));
     placeSecretRooms(level, dist); // cámaras selladas con una pared agrietada (towerSecrets.js)
+    placeHiddenBoss(level, dist); // y el jefe escondido del piso
     level.creeps.forEach(c => { c.spawnTime = -1e9; }); // sin el oro extra por velocidad de las oleadas (no aplica en la Torre)
     return level;
 }
@@ -344,6 +345,7 @@ function climateSight(hero) {
 function towerTerrainTick(level, hero, dt) {
     if (!level.ground) return;
     towerDayNightTick(level);
+    hiddenBossTick(level); // el jefe escondido sale de noche (towerSecrets.js)
     if (!hero.isAlive()) return;
     const i = hero.y * COLS + hero.x, B = BIOMES[level.biome], z = level.zone[i];
     if (z === ZONE.field && level.ground[i] === GROUND.hazard) {
