@@ -1660,6 +1660,18 @@ test('Torre: pedidos que cruzan pisos — la llave del Guardián de Arena (piso 
     const D = bfsFrom(L3, L3.start.x, L3.start.y);
     check(sunk.every(c => !chestUnderWater(L3, c) && D[c.y * COLS + c.x] >= 0), 'los cofres hundidos quedan al alcance');
 }, { random: true });
+test('Torre: pedidos que cruzan pisos — la llave del Vigía Perdido (piso 8) abre el almacén del 7 y prende todos sus faroles', () => {
+    newTower(); enterTowerFloor(7);
+    const L7 = arenas[0], door = L7.cracks.find(c => c.lock === 'almacen');
+    check(door && L7.chests.some(c => c.quest === 'almacen') && L7.lanterns, 'el piso 7 tiene el almacén de los faroleros');
+    enterTowerFloor(8);
+    const L8 = arenas[0]; hiddenBossTick(L8);
+    dealDamage(player, L8.hiddenBoss.unit, L8.hiddenBoss.unit.hp * 10, 'pure');
+    check(hasQuestKey('almacen') && !hasQuestKey('compuertas'), 'el Vigía Perdido suelta la llave del almacén (y no la de las compuertas)');
+    const gold = player.gold;
+    Object.assign(player, { arena: L7 }); hitQuestDoor(L7, door);
+    check(door.hp <= 0 && L7.lanterns.every(o => o.lit) && player.gold === gold + FAROL.goldPerFloor * 7, 'abierto el almacén, se prenden todos los faroles y paga Isla');
+}, { random: true });
 test('Torre: misterio del piso 5 — los relojes dan vuelta las compuertas de arena del laberinto (siempre queda camino)', () => {
     newTower(); enterTowerFloor(5);
     const L = arenas[0], S = L.sandGates;

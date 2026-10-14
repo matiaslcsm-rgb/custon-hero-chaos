@@ -62,7 +62,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **Pedidos que cruzan pisos (2026-10-14):** la llave del Guardián de Arena (piso 5) abre las compuertas del piso 3
   (sala con reja y cofre; js/towerQuests.js); al abrirlas baja el agua del piso y asoman 2 cofres hundidos (el misterio
   del piso 3). En el laberinto del piso 5, los relojes dan vuelta compuertas de arena cada 30 s (js/towerMysteries.js).
-  En el piso 7, de noche hay que prender los faroles del camino para ver. Faltan más pedidos.
+  En el piso 7, de noche hay que prender los faroles del camino para ver; la llave del Vigía Perdido (piso 8) abre el
+  almacén del 7 y los prende todos.
 - **La gente del pueblo (2026-10-14):** dos vecinos por piso pasean por el pueblo y hablan con F; cada run dicen otra
   cosa (js/towerFolk.js, REWORK.md).
 - **Jefes escondidos (2026-10-14, modo automático):** el Ciervo Blanco (piso 1) sale de noche en un claro apartado; la

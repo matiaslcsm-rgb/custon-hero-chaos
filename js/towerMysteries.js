@@ -119,17 +119,28 @@ function placeLanterns(level, dist) {
     if (L.length) level.lanterns = L;
 }
 const lanternNear = (hero = player) => (hero && hero.arena && hero.arena.lanterns || []).find(o => !o.lit && Math.hypot(o.x - hero.x, o.y - hero.y) <= FAROL.reach);
+function litLantern(level, o) {
+    o.lit = true;
+    towerLights(level).push({ x: o.x, y: o.y, kind: 'lamp', noDraw: true });
+    if (fxArena(player) === level) fxParticles(level, o.x, o.y, 'fire', 10, 2);
+}
+function lanternsPaid(level) { const gold = FAROL.goldPerFloor * level.floor; player.gold += gold; log(`🏮 ¡Todos los faroles del piso prendidos! Isla, la farolera: «Hacía años que no veía la galería entera.» Te paga ${gold} de oro.`); }
 function lightLantern() {
     const o = lanternNear();
     if (!o) return false;
     const level = player.arena;
-    o.lit = true;
-    towerLights(level).push({ x: o.x, y: o.y, kind: 'lamp', noDraw: true });
+    litLantern(level, o); sfx('coin');
     const left = level.lanterns.filter(l => !l.lit).length;
-    if (fxArena(player)) { fxParticles(level, o.x, o.y, 'fire', 10, 2); sfx('coin'); }
     if (left) log(`🏮 Prendiste un farol (faltan ${left}). Cerca de uno, de noche, se ve el camino.`);
-    else { const gold = FAROL.goldPerFloor * level.floor; player.gold += gold; log(`🏮 ¡Prendiste todos los faroles del piso! Isla, la farolera: «Hacía años que no veía la galería entera.» Te paga ${gold} de oro.`); }
+    else lanternsPaid(level);
     return true;
+}
+// El aceite del almacén (towerQuests.js): prende de una todos los que faltan
+function lightAllLanterns(level) {
+    const off = (level.lanterns || []).filter(o => !o.lit);
+    if (!off.length) return;
+    off.forEach(o => litLantern(level, o));
+    lanternsPaid(level);
 }
 // Lo suma nightSight (towerWorld.js): de noche en el campo del piso 7, más oscuro, salvo cerca de un farol prendido
 function lanternSight(hero) {

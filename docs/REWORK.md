@@ -838,6 +838,9 @@ también tiene que aprender a esquivar los ataques anunciados).
 - ✅ **Jefe escondido del piso 7: el Lobo de Escarcha** (2026-10-14; lo empezó la corrida automática que se detuvo y
   se completó acá): en el mirador cerrado (sala sellada con grieta), aviso de Isla la farolera; suelta las **Garras del
   Lobo de Escarcha** (guantes con crítico y velocidad de ataque). Verificado: la sala se arma en 8 de 8 pisos 7.
+- ✅ **Pedidos que cruzan pisos, el segundo** (2026-10-14, `js/towerQuests.js`): el Vigía Perdido (piso 8) suelta la
+  **Llave del Almacén de Faroles**. En el piso 7 hay una reja: el almacén de los faroleros. Al abrirlo hay un cofre y,
+  con su aceite, Isla prende todos los faroles de la galería de una vez (y paga como si los hubieras prendido vos).
 - ✅ **El misterio del piso 7: los faroles** (2026-10-14, `js/towerMysteries.js`): de noche, en el campo de las
   Galerías del Viento se ve 1,5 casillas menos. Al costado del camino hay 8 faroles apagados (poste con caja gris):
   F los prende (luz cálida que parpadea), quedan prendidos toda la run y cerca de uno, de noche, se ve 1 casilla más en

@@ -4,6 +4,7 @@
 //   El primero: la LLAVE DE LAS COMPUERTAS. La suelta el Guardián de Arena (jefe escondido del piso 5, towerSecrets.js);
 //   abre las compuertas del piso 3, una sala sellada con una reja de hierro (no se rompe a golpes) y un cofre adentro.
 //   Las llaves de la run se guardan con la run (towerSave.js).
+//   El segundo: la llave del almacén de los faroleros (Vigía Perdido, piso 8) abre el almacén del piso 7 y prende sus faroles.
 //   EL MISTERIO DEL PISO 3 (jugable): al abrir las compuertas baja el agua de todo el piso. Los pozos hondos se secan y se
 //   cruzan (atajos), y en el fondo de los dos más grandes asoman cofres hundidos que antes no se veían.
 
@@ -11,7 +12,13 @@ const QUESTS = {
     compuertas: { keyFloor: 5, doorFloor: 3, key: 'Llave de las Compuertas', inner: [7, 5],
         locked: '🔒 Una reja de hierro con candado: las compuertas de los barqueros. Madre Junco dice que la llave se la llevó la arena de arriba.',
         got: '🗝️ Entre la arena del reloj, una llave oxidada: la Llave de las Compuertas. Las compuertas están en el piso 3 (la piedra de regreso te lleva).',
-        open: '🗝️ La llave gira. Las compuertas se abren y el agua baja: detrás hay una sala que nadie pisó desde la expedición.', drains: true }
+        open: '🗝️ La llave gira. Las compuertas se abren y el agua baja: detrás hay una sala que nadie pisó desde la expedición.', drains: true },
+    // El segundo: la llave del almacén de los faroleros la tenía el Vigía Perdido (piso 8). Abre el almacén del piso 7, y
+    // con su aceite se prenden todos los faroles de la galería de una vez (el misterio del 7, towerMysteries.js).
+    almacen: { keyFloor: 8, doorFloor: 7, key: 'Llave del Almacén de Faroles', inner: [5, 4],
+        locked: '🔒 Una reja con candado: el almacén de los faroleros. Isla dice que la llave la tenía un vigía que subió al piso 8 y no bajó.',
+        got: '🗝️ El Vigía Perdido tenía colgada una llave con una etiqueta: «Almacén de faroles, piso 7» (la piedra de regreso te lleva).',
+        open: '🗝️ Abrís el almacén de los faroleros: hay aceite para todos los faroles. Isla los prende de una punta a la otra de la galería.', lightsAll: true }
 };
 const SUNKEN = { chests: 2, minPool: 5 };
 const chestUnderWater = (level, ch) => !!(ch.sunken && level.deep && level.deep[ch.y * COLS + ch.x]);
@@ -80,6 +87,7 @@ function hitQuestDoor(level, c) {
     if (typeof markMinimap === 'function' && level.explored[c.y][c.x]) markMinimap(level, c.x, c.y);
     log(Q.open); sfx('levelup');
     if (Q.drains) drainFloor(level); // el misterio del piso 3
+    if (Q.lightsAll) lightAllLanterns(level); // y el del 7 (towerMysteries.js)
     return true;
 }
 function questDoorNear(hero = player) {
