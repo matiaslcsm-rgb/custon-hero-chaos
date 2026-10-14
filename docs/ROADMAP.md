@@ -231,3 +231,4 @@ El orden de la lista **es** la prioridad: primero lo que destraba el loop comple
 ## Hecho por el modo automático
 (Fecha · ítem · commit · qué se midió.)
 - 2026-10-14 · Las Páginas de Arén · 696aecb · 3 torres × 10 pisos: siempre aparece y se alcanza; 280-400 pasos de la entrada (87-100% del máximo del campo). Pruebas 234/234.
+- 2026-10-14 · Salas secretas, paso 1 (cámaras con pared agrietada) · ccfc343 · 3 torres × pisos 2-10: 2 cámaras por piso siempre, laberinto alcanzable, grieta a 51-311 pasos de la entrada. Pruebas 235/235.
