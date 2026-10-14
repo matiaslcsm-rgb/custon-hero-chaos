@@ -360,6 +360,7 @@ function towerTerrainTick(level, hero, dt) {
     if (z === ZONE.lab) level.enteredLab = true;
     useShrines(level, hero);
     takeArenPage(level, hero);
+    if (hero.relics) relicTick(hero); // escudo y stats de las reliquias (towerRelics.js)
     towerEventsTick(level, hero, dt); // eventos del campo
     towerSmithTick(level, hero); // el herrero abre su ventana al acercarte (towerCodex.js)
     if (z !== hero.towerZone && level.town && z !== ZONE.town) level.town.aiShopped = false; // la IA vuelve a comprar en la próxima visita

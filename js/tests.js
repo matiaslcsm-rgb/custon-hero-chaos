@@ -1689,6 +1689,40 @@ test('Torre: jefes escondidos en salas tapiadas (pisos 3 en adelante) — cada u
         check(L.drops.some(dr => dr.item.unique && dr.item.name === H.unique.name && dr.item.slot === H.unique.slot), `piso ${f}: suelta ${H.unique.name}`);
     });
 }, { random: true });
+test('Torre: reliquias — se apilan, se activan con la pelea, prenden su conjunto y se guardan', () => {
+    newTower();
+    const L = arenas[0];
+    checkEq(Object.keys(player.relics).length, 0, 'la run empieza sin reliquias');
+    const crit0 = effCritChance(player);
+    addRelic(player, 'LENTE'); addRelic(player, 'LENTE'); relicTick(player);
+    checkEq(relicCount(player, 'LENTE'), 2, 'se apilan');
+    checkEq(effCritChance(player), crit0 + 16, 'la Lente ×2 da +16% de crítico');
+    check(!relicSet(player, 'critico'), 'con 2 de crítico todavía no hay conjunto');
+    addRelic(player, 'OJO');
+    check(relicSet(player, 'critico'), 'con 3 de la misma etiqueta se prende el conjunto');
+    // Brasa Viva al 100%: pegar prende fuego, y la quemadura no vuelve a disparar reliquias
+    const c = L.creeps.find(o => o.isAlive()); Object.assign(c, { x: player.x + 1, y: player.y, hp: c.maxHp = 99999 });
+    player.relics.BRASA = 10;
+    dealDamage(player, c, 5, 'physical');
+    check(getEffect(c, 'RELIC_BURN'), 'Brasa Viva: prende fuego al pegar');
+    removeEffect(c, 'RELIC_BURN'); dealDamage(player, c, 5, 'pure', { relic: true });
+    check(!getEffect(c, 'RELIC_BURN'), 'el daño de una reliquia no dispara otra');
+    // Égida: escudo que absorbe antes que la vida
+    player.relics = { EGIDA: 2 }; player.relicHitAt = -99; relicTick(player);
+    checkEq(player.relicShield, Math.round(player.maxHp * 0.16), 'la Égida ×2 da un escudo de 16% de la vida');
+    const hp0 = player.hp; dealDamage(c, player, 5, 'pure');
+    check(player.hp === hp0 && player.relicShield < Math.round(player.maxHp * 0.16), 'el escudo se come el golpe');
+    // Broquel: al esquivar suma escudo
+    player.relics = { BROQUEL: 1 }; player.relicShield = 0; emit(player, 'onDodge', {});
+    check(player.relicShield > 0, 'el Broquel da escudo al esquivar');
+    // se ganan al vencer al guardián y viajan en el guardado
+    player.relics = {};
+    dealDamage(player, L.guardian, L.guardian.hp * 10, 'pure');
+    checkEq(Object.values(player.relics).reduce((a, b) => a + b, 0), 1, 'vencer al guardián da una reliquia');
+    check(towerSnapshot().hero.relics && Object.keys(towerSnapshot().hero.relics).length === 1, 'las reliquias se guardan con la run');
+    renderRelicBar();
+    check(document.getElementById('relic-bar').children.length >= 1, 'se ven en la fila de íconos');
+}, { random: true });
 test('Torre: las Páginas de Arén — una por piso en un rincón apartado, se juntan al pisarla y no vuelven a aparecer', () => {
     arenStore = { found: {} };
     newTower();

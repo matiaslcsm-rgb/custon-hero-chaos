@@ -512,6 +512,25 @@ humanos, registrando en cada piso nivel, ataque, vida, arma, piezas raras y de d
    recorrido. Una persona va del pueblo al laberinto sin matar todo. Para medir la dificultad conviene, más adelante, un
    piloto que juegue "como persona" también en el recorrido (objetivo del piso primero, explorar solo un rato).
 
+## 20. Reliquias al estilo Risk of Rain (2026-10-14, `js/towerRelics.js`, fase T00 del roadmap)
+Primer paso del rework decidido por el usuario (docs/PROPUESTA-SISTEMAS.md). Las reliquias no tienen ranura, se apilan
+(cada copia hace el efecto más fuerte) y se enganchan a lo que pasa en la pelea con los eventos del combate (`emit`): al
+pegar, al matar, al recibir daño y dos nuevos, **al esquivar** (`onDodge`, en `playerDash`) y **al parar** (`onParry`,
+en `parrySuccess`). El daño de una reliquia no vuelve a disparar reliquias (`opts.relic`).
+- **12 reliquias en 4 etiquetas:** fuego (Brasa Viva, Corazón de Ceniza, Pedernal), sangrado (Colmillo, Sanguijuela,
+  Cota de Espinas), crítico (Lente del Tirador, Filo Hambriento, Ojo del Cazador) y escudo (Égida, Broquel, Piedra Firme).
+- **Conjunto** al juntar 3 de una etiqueta (contando copias): Incendio (+50% quemaduras), Hemorragia (+50% sangrados),
+  Rebote (cada crítico salta a otro enemigo) y Bastión (el escudo se recarga el doble de rápido).
+- **Escudo nuevo** (`relicShield`): absorbe daño antes que la vida (en `dealDamage`).
+- **De dónde salen:** siempre de guardianes, jefes escondidos, señores de cueva, cofres secretos y tesoros; a veces de
+  campeones (5%) y cofres comunes (10%). Se ganan directo (sin tirarlas al piso), se guardan con la run y se ven en una
+  fila de íconos arriba de la barra del héroe, con su cartel y el ✦ del conjunto prendido.
+- **Medido** (piloto con reflejos humanos, espada, 45 min de juego): sin reliquias llegó al piso 3 con 2 muertes; con
+  las chances de prueba (25% campeones, 35% cofres) juntó **19 en 3 pisos**, demasiadas (48 campeones); con 5%/10%
+  juntó **7 en 3 pisos** (~2,3 por piso: unas 25 por run, más para quien rompe grietas), llegó al piso 4 y no murió.
+- Pendiente (próximos pasos de la fase T00): dibujos en pixel art para los íconos (hoy son emojis), más reliquias, que
+  el mercader las venda y el herrero funda dos iguales, y desbloquearlas con Esencia.
+
 ## 15. Más armas y el caos de cada run (propuesta, 2026-10-08)
 Pedido del usuario: "agregar más armas y que el gameplay se base en esas armas (ballesta, mazo, guantes de casteo,
 libros de hechizos); después, cómo escalar las cosas y mezclarlas para inventar mecánicas al azar y darle ese toque

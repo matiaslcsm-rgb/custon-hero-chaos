@@ -52,6 +52,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **Equipo de desarrollo (2026-10-14):** agentes del proyecto en `.claude/agents/` (director-de-juego,
   disenador-de-sistemas, disenador-de-niveles, narrativa, arte-pixel, qa-jugador) y el comando `/equipo <tema>`
   (`.claude/skills/equipo/`) que los coordina: diseño → especialistas → integración → QA → cierre.
+- **Reliquias (2026-10-14, fase T00):** 12 reliquias apilables al estilo Risk of Rain, con 4 etiquetas y bonus de
+  conjunto; conviven con el equipo hasta que lleguen las clases fijas (REWORK.md §20).
 - **Jefes escondidos (2026-10-14, modo automático):** el Ciervo Blanco (piso 1) sale de noche en un claro apartado; la
   Flor Carnívora (piso 2), el Leviatán del Fango (3), la Semilla Primera (4), el Guardián de Arena (5) y el Lector Sin Ojos (6) esperan en salas tapiadas, detrás de una grieta. Cada uno suelta una pieza única. Faltan
   los de los otros pisos (REWORK.md §6, ROADMAP.md T0).
@@ -222,7 +224,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **Idioma:** español rioplatense (voseo), en el código, los comentarios, los textos del juego y los commits.
 - **Decisiones de diseño:** se consultan con opciones y una recomendada, idealmente con números medidos. Lo que se decide
   se anota en DISEÑO.md (secciones de la fase y "Decisiones tomadas").
-- **Cada cambio:** pruebas automáticas (`tests.html`, hoy **238**) → commit en git → push a GitHub siempre al terminar cada paso (pedido del usuario 2026-10-07, para trabajar desde otros lugares).
+- **Cada cambio:** pruebas automáticas (`tests.html`, hoy **239**) → commit en git → push a GitHub siempre al terminar cada paso (pedido del usuario 2026-10-07, para trabajar desde otros lugares).
 - **Commits:** mensaje en español que explica el porqué; terminan con `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 - **Héroes nuevos con otra IA:** prompt en [`prompt-heroes.md`](prompt-heroes.md); lo que devuelva se revisa contra el motor
   (pasivas, efectos por segundo con `everyInterval`, descripciones que coincidan con el código) antes de integrarlo.

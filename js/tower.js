@@ -55,6 +55,7 @@ function startTowerRun() {
     player.inRest = false;
     player.towerStats = { str: 0, agi: 0, int: 0, vit: 0, vis: 0 }; // puntos puestos en cada stat
     player.statPoints = 0;
+    player.relics = {}; player.relicShield = 0; renderRelicBar(); // reliquias de la run (towerRelics.js)
     heroes = [player];
     viewedHero = player;
     heroOffers = null;

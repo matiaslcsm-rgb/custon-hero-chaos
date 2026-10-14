@@ -851,6 +851,7 @@ function resetHud() {
     document.getElementById('round-num').textContent = '1';
     ['lives-text', 'points-text', 'player-gold'].forEach(id => { document.getElementById(id).textContent = ''; });
     document.getElementById('hero-bar').style.display = 'none';
+    document.getElementById('relic-bar').style.display = 'none';
     document.getElementById('hero-stats-panel').style.display = 'none';
     document.getElementById('combat-info').style.display = 'none';
     document.getElementById('scoreboard').innerHTML = ''; lastScoreboardSignature = '';

@@ -47,6 +47,7 @@ function parryCatchesMelee(target, c) { return target === player && parryActive(
 
 function parrySuccess(h, x, y, text) {
     h.parry.caught++;
+    if (h.parry.caught === 1) emit(h, 'onParry', {}); // reliquias que se activan al parar (towerRelics.js)
     h.parryReadyAt = Math.min(h.parryReadyAt, gameClock + PARRY.refund); // agarró algo: se recarga casi enseguida
     const arena = fxArena(h);
     if (!arena) return;

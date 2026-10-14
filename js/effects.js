@@ -111,6 +111,7 @@ function emit(unit, event, payload) {
         if (s.hooks && s.hooks[event] && (unit.skillLevels[s.id] || 0) > 0) s.hooks[event].call(s, unit, payload, s);
     });
     activeEffects(unit).forEach(e => { if (e.hooks[event]) e.hooks[event].call(e, unit, payload, e); });
+    if (unit.relics) relicEmit(unit, event, payload); // reliquias de la Torre (towerRelics.js)
 }
 
 // Para cosas que pasan "cada X segundos" (auras, daño en el tiempo, regeneración): devuelve true una vez

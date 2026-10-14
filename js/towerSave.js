@@ -12,7 +12,7 @@
 //     quitado un portador vuelve a tu bolsa (el portador no existe en el piso nuevo).
 
 const TOWER_SAVE = { key: 'chc-tower-save', version: 1, every: 15 };
-const SAVE_HERO_FIELDS = ['str', 'agi', 'int', 'bonus', 'permGains', 'level', 'xp', 'skillPoints', 'statPoints', 'towerStats', 'gold', 'tomesBought'];
+const SAVE_HERO_FIELDS = ['str', 'agi', 'int', 'bonus', 'permGains', 'level', 'xp', 'skillPoints', 'statPoints', 'towerStats', 'gold', 'tomesBought', 'relics'];
 let towerSaveAt = 0;
 // En las pruebas y las demos no se toca el guardado de verdad: se guarda en memoria
 let towerSavePersist = !/[?&](test|demo)/.test(location.search), towerSaveMemory = null;
@@ -63,7 +63,7 @@ function continueTowerRun() {
     Object.entries(h.gear || {}).forEach(([slot, item]) => { if (item) equipItem(player, item, slot); });
     player.bag = h.bag || [];
     (S.lost || []).forEach(item => { if (!addToBag(player, item)) player.bag.push({ item, x: 0, y: 0 }); });
-    player.recalculateStats();
+    player.recalculateStats(); renderRelicBar();
     player.hp = Math.max(1, Math.round(player.maxHp * (h.hpPct ?? 1))); player.mana = Math.round(player.maxMana * (h.manaPct ?? 1));
     const R = S.run;
     Object.assign(towerRun, { base: R.base || towerRun.base, deaths: R.deaths || 0, startedAt: gameClock - (R.elapsed || 0), stats: R.stats || towerRun.stats,
