@@ -247,3 +247,4 @@ El orden de la lista **es** la prioridad: primero lo que destraba el loop comple
 - 2026-10-14 · Jefes escondidos, paso 1 (Ciervo Blanco) · dbffc66 · 593 vida/52 daño (señor de cueva piso 1: 387/149); espada inicial: 21-26 golpes para vencerlo, 5 suyos para caer; claro a ~270 pasos. Pruebas 236/236.
 - 2026-10-14 · Jefes escondidos, paso 2 (Flor Carnívora) · 04a8771 · 10 pisos 2: invernadero 10/10, laberinto alcanzable 10/10, grieta a 51-292 pasos; 785 vida/99 daño (señor de cueva: 644/172). Pruebas 237/237.
 - 2026-10-14 · Jefes escondidos, paso 3 (Leviatán del Fango) · de95735 · 10/10 pisos 3, laberinto alcanzable; vida 2117→1000, daño 137 (señores de cueva del piso 3: 393-1226 / 153-333). Pruebas 238/238.
+- 2026-10-14 · Jefes escondidos, paso 4 (Semilla Primera) · 4a117bb · 10/10 pisos 4, laberinto alcanzable, grieta a 56-265 pasos; 1125 vida/100 daño (cuevas del piso 4: 456-2435 / 106-380). Pruebas 238/238.
