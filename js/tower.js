@@ -95,10 +95,11 @@ function enterTowerFloor(floor, where = 'start') {
     enterTowerLevel(level, level.start); // towerWorld.js
     level.titleAt = gameClock;
     const B = BIOMES[level.biome];
-    setStateText(`INFINITE TOWER · PISO ${floor} DE ${TOWER.floors} · ${B.name.toUpperCase()}`);
+    const lore = floorLore(floor); // el lugar y su gente (towerLore.js)
+    setStateText(`INFINITE TOWER · PISO ${floor} DE ${TOWER.floors} · ${lore.place.toUpperCase()}`);
     sfx('wave');
     saveTowerRun(); // guardado automático al entrar a cada piso (towerSave.js)
-    if (where === 'start') log(`${floor === 1 ? '🪨 Estás en el círculo de piedra, en la base de la torre.' : `🗼 Subiste al piso ${floor}.`} ${B.icon} ${B.name}: seguí el camino al pueblo y, más allá, al laberinto donde el guardián cuida la escalera. ${B.hazard.name}: ${B.hazard.desc}.${B.climate ? ` ${B.climate.name}: ${B.climate.desc}.` : ''}`);
+    if (where === 'start') log(`${floor === 1 ? '🪨 Estás en el círculo de piedra, al pie de la torre.' : `🗼 Piso ${floor}: ${lore.place}.`} ${lore.intro} ${B.icon} ${B.name}${lore.people ? ` · su gente: ${lore.people}` : ''}. Seguí el camino al pueblo y, más allá, al laberinto donde el guardián cuida la escalera. ${B.hazard.name}: ${B.hazard.desc}.${B.climate ? ` ${B.climate.name}: ${B.climate.desc}.` : ''}`);
 }
 
 // --- GENERACIÓN ---

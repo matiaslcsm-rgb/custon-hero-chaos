@@ -704,6 +704,12 @@ Las fases 3 y 4 son las más grandes: hay que rehacer pruebas y volver a medir e
 también tiene que aprender a esquivar los ataques anunciados).
 
 ## Interfaz y calidad de vida (lista viva)
+- ✅ **La Torre por dentro** (2026-10-14, `js/towerLore.js`, diseño en `docs/TORRE-MUNDO.md`): el piso 1 sigue afuera;
+  del 2 en adelante, muro exterior de piedra y una grilla de salones de 38×30 con muros de 2 casillas y un portón de
+  4-6 por tramo, más 26 columnas. La chance de que un tramo esté derrumbado baja con el piso (50% en el 2, 12% en el 9):
+  abajo más abierto, arriba más cerrado. Los caminos atraviesan los muros y una prueba verifica que siempre se llega
+  al laberinto. El cartel, la barra de estado, el mapa y la piedra de regreso muestran el lugar ("El Atrio Verde");
+  al entrar al pueblo, su anciano dice su línea la primera vez de cada run (se guarda con la run).
 Pedido del usuario (2026-10-07): en cada paso, pensar la interfaz y la calidad de vida como diseñador. Lo chico se hace en
 el mismo paso; lo grande queda acá, ordenado por impacto.
 

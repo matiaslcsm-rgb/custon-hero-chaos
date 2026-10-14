@@ -189,6 +189,9 @@ function generateTowerLevel(floor) {
         })).slice(0, 2).forEach(([x, y]) => { walls[y][x] = 0; ramp[at(x, y)] = 1; });
     }
 
+    // 5 ter. Adentro de la torre (pisos 2+): muro exterior, columnas y muros con puertas (towerLore.js)
+    towerInterior({ floor, walls, zone, deep, height, ramp, W, H, at, rint, guarded });
+
     // 6. Caminos de 3 casillas: entrada → portón oeste del pueblo, y portón este → laberinto (garantizan el paso)
     const pave = (x, y) => {
         for (let oy = -1; oy <= 1; oy++) for (let ox = -1; ox <= 1; ox++) {
@@ -357,6 +360,7 @@ function towerTerrainTick(level, hero, dt) {
     if (z !== hero.towerZone && level.town && z !== ZONE.town) level.town.aiShopped = false; // la IA vuelve a comprar en la próxima visita
     if (z !== hero.towerZone) {
         if (hero.towerZone !== undefined && hero === player) {
+            if (z === ZONE.town) towerLoreGreet(level); // su gente y su parte de la historia (towerLore.js)
             if (z === ZONE.town) log(`🏘️ Entraste al pueblo: zona segura (los creeps no te siguen y recuperás vida y maná). El mercader vende y compra piezas (B).${level.town.smith ? ' Hay un Herrero: imbuye poderes de tu Códice en piezas sin alma.' : ''}`);
             else if (z === ZONE.lab) log(`🗼 Entraste al laberinto de la torre: el guardián cuida la escalera al piso ${level.floor + 1}.`);
         }
@@ -521,8 +525,8 @@ function drawFloorTitle(level) {
     ctx.save(); ctx.globalAlpha = alpha; ctx.textAlign = 'center';
     ctx.fillStyle = 'rgba(233,220,192,0.9)'; ctx.fillRect(screenW() / 2 - 220, screenH() * 0.28, 440, 74);
     ctx.strokeStyle = INK.line; ctx.lineWidth = 2; ctx.strokeRect(screenW() / 2 - 220, screenH() * 0.28, 440, 74);
-    ctx.fillStyle = '#6b2a1f'; ctx.font = 'bold 15px Georgia, serif'; ctx.fillText(level.isCave ? `PISO ${level.floor} · BAJO TIERRA` : `PISO ${level.floor} DE ${TOWER.floors} · ${B.icon}`, screenW() / 2, screenH() * 0.28 + 24);
-    ctx.fillStyle = INK.line; ctx.font = 'bold 26px Georgia, serif'; ctx.fillText(level.isCave ? `Cueva · nivel −${level.depth}` : B.name, screenW() / 2, screenH() * 0.28 + 56);
+    ctx.fillStyle = '#6b2a1f'; ctx.font = 'bold 15px Georgia, serif'; ctx.fillText(level.isCave ? `PISO ${level.floor} · BAJO TIERRA` : `PISO ${level.floor} DE ${TOWER.floors} · ${B.icon} ${B.name.toUpperCase()}`, screenW() / 2, screenH() * 0.28 + 24);
+    ctx.fillStyle = INK.line; ctx.font = 'bold 26px Georgia, serif'; ctx.fillText(level.isCave ? `Cueva · nivel −${level.depth}` : floorLore(level.floor).place, screenW() / 2, screenH() * 0.28 + 56); // el lugar (towerLore.js)
     ctx.restore();
 }
 

@@ -53,7 +53,7 @@ function drawTowerBigMap(level) {
     ctx.strokeStyle = INK.line; ctx.lineWidth = 2; ctx.strokeRect(m / 2, m / 2, W - m, H - m);
     ctx.fillStyle = '#6b2a1f'; ctx.font = 'bold 17px Georgia, serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
     const B = BIOMES[level.biome];
-    ctx.fillText(level.isCave ? `Piso ${level.floor} · Cueva, nivel −${level.depth}` : `Piso ${level.floor} de ${TOWER.floors} · ${B ? B.icon + ' ' + B.name : ''}`, m + 4, m + 12);
+    ctx.fillText(level.isCave ? `Piso ${level.floor} · Cueva, nivel −${level.depth}` : `Piso ${level.floor} de ${TOWER.floors} · ${B ? B.icon + ' ' : ''}${floorLore(level.floor).place}`, m + 4, m + 12);
     ctx.font = '12px Georgia, serif'; ctx.fillStyle = INK.line; ctx.textAlign = 'right';
     ctx.fillText('M o Esc para cerrar · la partida sigue', W - m - 4, m + 12);
     // Lo descubierto (el minimapa, ampliado) sobre lo no descubierto en sombra

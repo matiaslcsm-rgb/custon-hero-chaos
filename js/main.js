@@ -1,7 +1,7 @@
 // Punto de entrada: conecta los botones y arranca el bucle principal.
 
 // Versión visible en el menú: si no coincide con la última subida, el navegador muestra una copia vieja (Ctrl+F5).
-const GAME_VERSION = '2026-10-14 · Custom Hero e Infinite Tower (nombres nuevos)';
+const GAME_VERSION = '2026-10-14 · la torre por dentro (salones, lugares y su gente)';
 document.getElementById('game-version').textContent = `Versión ${GAME_VERSION}`;
 
 document.getElementById('start-wave-btn').onclick = () => startWave(); // sin argumentos: si recibe el clic, lo toma como plan de duelo y la oleada no arranca (arreglado 2026-10-13)
@@ -155,14 +155,14 @@ if (location.search.includes('demo=biomes')) setTimeout(() => {
     const wrap = document.createElement('div');
     wrap.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#2b2118;display:flex;flex-wrap:wrap;gap:8px;padding:8px;align-content:flex-start';
     document.body.appendChild(wrap);
-    [1, 3, 5, 7, 9].forEach(f => {
+    [1, 2, 4, 6, 8, 10].forEach(f => { // el 1 afuera; del 2 en adelante, adentro de la torre (towerLore.js)
         const L = towerLevel(f), c = document.createElement('canvas'), g = c.getContext('2d');
         c.width = COLS * 2.5; c.height = ROWS * 2.5;
         for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) { g.fillStyle = towerMiniColor(L, x, y); g.fillRect(x * 2.5, y * 2.5, 2.5, 2.5); }
         L.creeps.forEach(cr => { g.fillStyle = cr.isGuardian ? '#d00' : '#1d1712'; g.fillRect(cr.x * 2.5, cr.y * 2.5, cr.isGuardian ? 6 : 2.5, cr.isGuardian ? 6 : 2.5); });
         (L.chests || []).forEach(ch => { g.fillStyle = '#e0a800'; g.fillRect(ch.x * 2.5 - 2, ch.y * 2.5 - 2, 6, 6); });
         g.fillStyle = '#0a0'; g.fillRect(L.start.x * 2.5 - 3, L.start.y * 2.5 - 3, 7, 7);
-        g.font = 'bold 14px Georgia'; g.fillStyle = '#1d1712'; g.fillText(`Piso ${f}: ${BIOMES[L.biome].name}`, 10, 18);
+        g.font = 'bold 14px Georgia'; g.fillStyle = '#1d1712'; g.fillText(`Piso ${f}: ${floorLore(f).place} · ${BIOMES[L.biome].name}`, 10, 18);
         wrap.appendChild(c);
     });
 }, 300);

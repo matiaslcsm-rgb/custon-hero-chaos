@@ -1591,6 +1591,23 @@ test('Torre: el héroe en pixel art se anima por poses — cada movimiento elige
         check(Math.abs(head - HERO_ART_BOX.w / 2) <= 1, `${n}: la cabeza queda centrada`); });
     check(PXG.walkGrace > 0.05, 'llegar a la casilla un instante antes del paso siguiente no pone el cuadro de quieto');
 });
+test('Torre por dentro: el piso 1 es afuera; del 2 en adelante, muro exterior y salones de piedra; cada piso con su lugar y su gente', () => {
+    newTower('AXE');
+    const fieldStone = L => { let n = 0; for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) if (L.walls[y][x] === WALL.stone && L.zone[y * COLS + x] === ZONE.field) n++; return n; };
+    const L1 = towerLevel(1), L2 = towerLevel(2), L8 = towerLevel(8);
+    checkEq(fieldStone(L1), 0, 'piso 1: bosque abierto, sin muros de la torre');
+    check(L2.walls[0][COLS >> 1] === WALL.stone && L2.walls[1][COLS >> 1] === WALL.stone, 'piso 2: muro exterior de piedra');
+    check(fieldStone(L2) > COLS * 4, `piso 2: salones y columnas (${fieldStone(L2)} casillas de piedra)`);
+    check(fieldStone(L8) > fieldStone(L2) * 0.9, 'más arriba, muros más enteros');
+    // la escalera se alcanza desde la entrada (los portones dejan pasar siempre)
+    [L2, L8].forEach(L => { const d = bfsFrom(L, L.start.x, L.start.y); check(d[L.gate.y * COLS + L.gate.x] >= 0 || d[L.gate.y * COLS + L.gate.x + 1] >= 0, `piso ${L.floor}: se llega al laberinto`); });
+    for (let f = 1; f <= 10; f++) check(floorLore(f).place && floorLore(f).intro, `piso ${f} tiene lugar`);
+    checkEq(floorLore(14).place, 'Lo No Escrito', 'más allá del 10: pisos recién crecidos');
+    // el anciano habla una sola vez por run
+    towerRun.lore = {};
+    towerLoreGreet(L2); towerLoreGreet(L2);
+    check(towerRun.lore[2] === true, 'queda anotado que ya te habló');
+});
 test('Torre: guardar y continuar la run — héroe, equipo, bolsa, oro, piso, guardián vencido y restos vuelven', () => {
     clearTowerSave();
     newTower('AXE', { weapon: 'ADVENTURER_SWORD' });

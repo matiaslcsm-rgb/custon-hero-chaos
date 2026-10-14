@@ -40,7 +40,7 @@ function toggleWaystone(open = !waystoneOpen) {
     waystoneFloors().forEach(f => {
         const B = BIOMES[biomeFor(f)], b = document.createElement('button');
         b.className = 'secondary-btn waystone-btn';
-        b.innerHTML = `${B.icon} Piso ${f} · ${B.name}${corpse && corpse.floor === f ? ' <small>(tus restos)</small>' : ''}${f === towerRun.stats.bestFloor ? ' <small>(el más alto)</small>' : ''}`;
+        b.innerHTML = `${B.icon} Piso ${f} · ${floorLore(f).place}${corpse && corpse.floor === f ? ' <small>(tus restos)</small>' : ''}${f === towerRun.stats.bestFloor ? ' <small>(el más alto)</small>' : ''}`;
         b.onclick = () => waystoneTravel(f);
         box.appendChild(b);
     });

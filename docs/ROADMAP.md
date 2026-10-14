@@ -78,6 +78,27 @@ El orden de la lista **es** la prioridad: primero lo que destraba el loop comple
   muerte "sin entender por qué" (cada golpe que pega se anuncia), cada piso dura entre 3 y 5 minutos, 60 cuadros
   por segundo en una PC común, 0 errores en la consola en 10 runs del piloto.
 
+## Fase T0 — La Torre por dentro: mundo, historia y secretos (pedido del usuario, diseño en `docs/TORRE-MUNDO.md`)
+- [x] **Adentro de la torre (pisos 2+):** muro exterior de piedra, salones con muros gruesos y portones, y columnas.
+      Más derrumbado abajo y más entero arriba. **Identidad de cada piso:** lugar, gente y anciano del pueblo con su
+      línea de historia (`js/towerLore.js`). 2026-10-14.
+- [ ] **Las Páginas de Arén:** una por piso, escondida en un rincón difícil. La Bitácora las junta en orden y cuenta
+      la historia de la expedición (`docs/TORRE-MUNDO.md`).
+- [ ] **Paredes agrietadas y salas secretas:** grietas que se ven si mirás bien en los muros de los salones y del
+      laberinto. Se rompen a golpes y adentro hay un cofre, una página o el camino al jefe escondido.
+- [ ] **Jefe escondido, paso 1:** el Ciervo Blanco del piso 1 (aparece solo de noche en un claro apartado), con su
+      entrada propia del Bestiario y una pieza única. Después, uno por piso según la tabla de TORRE-MUNDO.md.
+- [ ] **La gente del pueblo se ve:** 2 o 3 personajes en pixel art que caminan por el pueblo, con el aspecto de su
+      gente (barqueros, relojeros, faroleros…). Hablás con F y cada run dicen algo nuevo.
+- [ ] **Pedidos que cruzan pisos:** ej. la llave de las compuertas (piso 5) abre la sala de bombas del piso 3.
+      La piedra de regreso permite volver.
+- [ ] **El misterio de cada piso, jugable:** compuertas que bajan el agua (3), relojes que cambian el laberinto (5),
+      faroles que hay que encender de noche (7). De a uno, empezando por el 3.
+- [ ] **Menos explorado hacia arriba:** caminos, carteles, tamaño del pueblo, mapa que vende el mercader y luz según la
+      tabla de TORRE-MUNDO.md.
+- [ ] **Transición de biomas:** cerca de la escalera ya se ve el bioma de arriba (arena que cae, nieve que entra).
+- [ ] **El piso 1 afuera:** la torre gigante se ve desde el bosque (silueta al fondo) y el laberinto es su puerta.
+
 ## Fase T1 — Cerrar el loop (lo que falta para que sea un juego completo)
 - [ ] **Pantalla de fin de run:** al morir o ganar, un resumen claro con el piso alcanzado, el tiempo, las bajas,
       quién te mató, la build final (íconos de las piezas), lo que ganaste para siempre (Esencia, entradas del
@@ -85,7 +106,7 @@ El orden de la lista **es** la prioridad: primero lo que destraba el loop comple
 - [ ] **Mejor marca y estadísticas guardadas:** piso más alto, runs jugadas, Cumbres, mejor tiempo. Se muestran en
       el menú de Infinite Tower y en el resumen ("¡Nuevo récord!").
 - [ ] **Ascenso infinito, paso 1:** después del piso 10 (la Cumbre) se ofrece "Seguir subiendo" o "Volver con el
-      botín". Los pisos 11 en adelante mezclan biomas al azar y escalan con la fórmula del piso (REWORK.md §14),
+      botín". Los pisos 11 en adelante ("Lo No Escrito": la torre crece) mezclan biomas al azar y escalan con la fórmula del piso (REWORK.md §14),
       con tope blando para que el jugador no choque contra una pared exponencial (medir con el piloto).
 - [ ] **Ascenso infinito, paso 2 (hitos):** guardián cada 5 pisos. Cada 10 pisos se suma un **agravante** a los
       enemigos (escudo → escudo que refleja → escudo que cura a los cercanos), anunciado con un cartel. Piedra de
