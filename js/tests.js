@@ -1672,6 +1672,21 @@ test('Torre: pedidos que cruzan pisos — la llave del Vigía Perdido (piso 8) a
     Object.assign(player, { arena: L7 }); hitQuestDoor(L7, door);
     check(door.hp <= 0 && L7.lanterns.every(o => o.lit) && player.gold === gold + FAROL.goldPerFloor * 7, 'abierto el almacén, se prenden todos los faroles y paga Isla');
 }, { random: true });
+test('Torre: transición de biomas — cerca de la escalera ya se ve el clima del piso de arriba (si cambia de bioma)', () => {
+    newTower(); enterTowerFloor(2);
+    const L = arenas[0], st = L.stairs, was = weatherOn; weatherOn = true; // sin tocar la opción guardada
+    Object.assign(player, { arena: L, x: st.x - 1, y: st.y });
+    const up = upstairsWeather(L);
+    check(up && up.biome === 'swamp' && up.k > 0.8 && L.upHinted, 'al lado de la escalera del piso 2 llueve como en las cisternas, con aviso');
+    weatherParts = []; drawTowerWeather(L, 0.05);
+    check(weatherParts.length > 0 && weatherParts.every(p => p.kind === 'rain'), 'dentro del laberinto, el clima de arriba');
+    Object.assign(player, { x: st.x - UPSTAIRS.reach - 3 });
+    check(!upstairsWeather(L), 'lejos de la escalera, nada');
+    enterTowerFloor(1); const L1 = arenas[0];
+    Object.assign(player, { arena: L1, x: L1.stairs.x, y: L1.stairs.y });
+    check(!upstairsWeather(L1), 'si arriba es el mismo bioma, no cambia');
+    weatherOn = was;
+}, { random: true });
 test('Torre: misterio del piso 5 — los relojes dan vuelta las compuertas de arena del laberinto (siempre queda camino)', () => {
     newTower(); enterTowerFloor(5);
     const L = arenas[0], S = L.sandGates;

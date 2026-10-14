@@ -75,11 +75,27 @@ const WEATHER = {
 let weatherParts = [], weatherBiome = null;
 // Intensidad que va y viene (0,3-1), distinta por piso
 function weatherIntensity(level) { const t = gameClock / 40 + (level.floor || 0) * 1.7; return 0.3 + 0.7 * (0.5 + 0.5 * Math.sin(t) * Math.sin(t * 0.37 + 1)); }
+// TRANSICIÓN DE BIOMAS (2026-10-14): cuando el piso de arriba es de otro bioma, cerca de la escalera ya se ve su clima
+// (arena que cae, nieve que entra, ceniza), más fuerte cuanto más cerca. La primera vez, un aviso.
+const UPSTAIRS = { reach: 14, hint: 8,
+    hints: { swamp: '🌧️ Por la escalera baja un aire húmedo y se oye llover: arriba están las cisternas.',
+        desert: '⏳ Por la escalera cae arena fina, como de un reloj: arriba está el desierto.',
+        snow: '❄️ Por la escalera entra un viento helado con copos de nieve: arriba hace frío.',
+        volcano: '🔥 Por la escalera sube ceniza tibia: arriba está la fragua.' } };
+function upstairsWeather(level) {
+    const st = level.stairs;
+    if (!st || level.isCave || !level.floor || level.floor >= TOWER.floors) return null;
+    const next = biomeFor(level.floor + 1), d = Math.hypot(player.x - st.x, player.y - st.y);
+    if (next === level.biome || d > UPSTAIRS.reach) return null;
+    if (!level.upHinted && d <= UPSTAIRS.hint) { level.upHinted = true; log(UPSTAIRS.hints[next]); }
+    return { biome: next, k: 0.25 + 0.75 * (1 - d / UPSTAIRS.reach) };
+}
 function drawTowerWeather(level, dt) {
-    if (!weatherOn || level.isCave || !level.biome || towerZoneAt(level, player.x, player.y) === ZONE.lab) { weatherParts = []; return; }
-    const W = WEATHER[level.biome];
-    if (weatherBiome !== level.biome) { weatherParts = []; weatherBiome = level.biome; }
-    const sw = screenW(), sh = screenH(), dark = towerDarkness(), k = weatherIntensity(level);
+    const up = weatherOn && level.biome ? upstairsWeather(level) : null;
+    if (!weatherOn || level.isCave || !level.biome || (!up && towerZoneAt(level, player.x, player.y) === ZONE.lab)) { weatherParts = []; return; }
+    const biome = up ? up.biome : level.biome, W = WEATHER[biome];
+    if (weatherBiome !== biome) { weatherParts = []; weatherBiome = biome; }
+    const sw = screenW(), sh = screenH(), dark = towerDarkness(), k = up ? up.k : weatherIntensity(level);
     const want = Math.round(ATMOS.particles * W.rate * k);
     while (weatherParts.length < want) weatherParts.push(newWeatherPart(W, sw, sh, dark, weatherParts.length > want * 0.5));
     if (weatherParts.length > want + 10) weatherParts.length = want;

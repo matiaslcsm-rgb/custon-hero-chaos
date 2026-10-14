@@ -838,6 +838,10 @@ también tiene que aprender a esquivar los ataques anunciados).
 - ✅ **Jefe escondido del piso 7: el Lobo de Escarcha** (2026-10-14; lo empezó la corrida automática que se detuvo y
   se completó acá): en el mirador cerrado (sala sellada con grieta), aviso de Isla la farolera; suelta las **Garras del
   Lobo de Escarcha** (guantes con crítico y velocidad de ataque). Verificado: la sala se arma en 8 de 8 pisos 7.
+- ✅ **Transición de biomas** (2026-10-14, `js/towerAtmos.js`): cuando el piso de arriba es de otro bioma (pisos 2, 4,
+  6 y 8), a 14 casillas de la escalera ya se ve su clima, también adentro del laberinto: lluvia de las cisternas, arena
+  que cae, nieve que entra, ceniza. Va de 0,25 a 1 de intensidad según lo cerca que estés. A 8 casillas, un aviso
+  ("Por la escalera entra un viento helado con copos de nieve: arriba hace frío").
 - ✅ **Pedidos que cruzan pisos, el segundo** (2026-10-14, `js/towerQuests.js`): el Vigía Perdido (piso 8) suelta la
   **Llave del Almacén de Faroles**. En el piso 7 hay una reja: el almacén de los faroleros. Al abrirlo hay un cofre y,
   con su aceite, Isla prende todos los faroles de la galería de una vez (y paga como si los hubieras prendido vos).
