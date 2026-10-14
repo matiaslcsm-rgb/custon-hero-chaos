@@ -1443,7 +1443,7 @@ test('Torre: cada arma inicial da su propia habilidad y atributo; cambiar de arm
         checkEq(player.primaryAttr, heroOf(key).primaryAttr, 'el atributo principal sale del arma elegida');
     });
     // Cambiar de arma (como con cualquier otra pieza) saca la habilidad vieja y pone la nueva.
-    newTower('AXE', { weapon: 'ADVENTURER_BOW' });
+    newTower('AXE', { weapon: 'ADVENTURER_BOW' }); player.heroClass = null; // prueba el cambio de arma con habilidades (las clases no las usan)
     check(player.hasSkill('ADVENTURER_VOLLEY'), 'arrancó con Tiro Tensado');
     const entry = towerCatalog().find(e => e.heroKey === 'SNIPER' && e.slot === 'weapon');
     equipItem(player, makeTowerItem(1, entry, 'normal'));
@@ -1759,6 +1759,25 @@ test('Torre: el Guerrero — la espada es una clase y su pasiva hace que el dañ
     addToBag(player, glove); equipItem(player, glove);
     check(player.gear.gloves === glove && !player.skills.includes(itemSkill(glove)), 'al Guerrero los guantes no le dan su habilidad (solo stats)');
     check(itemTooltipHtml(glove).includes('no usa las habilidades'), 'y el cartel de la pieza lo avisa');
+}, { random: true });
+test('Torre: el Arquero — ráfaga de 3, flechazo que critea y aturde, y su pasiva Ojo Rápido', () => {
+    const L = newTower('AXE', { weapon: 'ADVENTURER_BOW' });
+    checkEq(player.heroClass, 'archer', 'agarrar el arco te hace Arquero');
+    L.projectiles = [];
+    archerBurst(player, { dx: 1, dy: 0 }, 6);
+    checkEq(L.projectiles.length, ARCHER.burst, 'el clic tira una ráfaga de 3 flechas');
+    L.projectiles = [];
+    const c = L.creeps.find(o => o.isAlive()); L.creeps = [c];
+    Object.assign(c, { x: player.x + 2, y: player.y, hp: 1e6, maxHp: 1e6 });
+    for (let x = player.x; x <= c.x; x++) L.walls[player.y][x] = 0;
+    check(archerSnipe(player, { x: c.x, y: c.y }), 'el clic derecho tira el flechazo');
+    check(!archerSnipe(player, { x: c.x, y: c.y }), 'y tiene enfriamiento');
+    checkEq(+(player.snipeReadyAt - gameClock).toFixed(2), +(ARCHER.snipeCd * ARCHER.haste).toFixed(2), 'Ojo Rápido: enfriamiento 20% más corto');
+    for (let i = 0; i < 20 && L.projectiles.length; i++) updateProjectiles(L, 0.05);
+    check(c.hp < 1e6 && hasFlag(c, 'stun'), 'el flechazo pega y aturde');
+    const bow = SKILL_INDEX.ADVENTURER_VOLLEY;
+    check(Math.abs(skillCooldown(bow, player) - val(bow, player, 'cooldown') * COOLDOWN_MULT * ARCHER.haste) < 1e-9, 'sus habilidades también se recargan más rápido');
+    checkEq(relicProc(player), ARCHER.relicProc, 'y sus reliquias se activan más seguido');
 }, { random: true });
 test('Torre: las Páginas de Arén — una por piso en un rincón apartado, se juntan al pisarla y no vuelven a aparecer', () => {
     arenStore = { found: {} };

@@ -69,6 +69,7 @@ function clickAttackStep(hero, dt, blocked) {
     hero.attackTimer = 0; attackButton.queuedAt = -99;
     if (swordWielder(hero)) { towerSwordAttack(hero, mouse.over ? { x: mouse.x, y: mouse.y } : null); return; } // espada: el combo
     const ranged = hero.projectileSpeed > 0, range = effRange(hero), dir = clickAimDir(hero);
+    if (ranged && isArcher(hero)) { archerBurst(hero, dir, range + CLICK_ATTACK.shotReach); return; } // el Arquero: ráfaga de 3 (towerArcher.js)
     if (ranged) { // disparo apuntado: línea recta hacia el cursor, se frena en el primero
         const reach = range + CLICK_ATTACK.shotReach, aimAt = { x: hero.x + dir.dx * reach, y: hero.y + dir.dy * reach };
         const { dmg, isCrit } = rollAttackDamage(hero, aimAt);

@@ -18,13 +18,13 @@ const RELIC_DROP = { champion: 0.05, chest: 0.1 }; // medido: con 0,25/0,35 el p
 // n: copias. Los números de cada copia están en la descripción para que se lean en el cartel.
 const RELICS = {
     BRASA: { name: 'Brasa Viva', icon: '🔥', tag: 'fuego', desc: n => `Al pegar: ${10 * n}% de prender fuego (30% de tu daño por segundo, 3 s).`,
-        onDealDamage(h, p, n) { if (Math.random() < 0.1 * n) relicBurn(h, p.target); } },
+        onDealDamage(h, p, n) { if (Math.random() < 0.1 * n * relicProc(h)) relicBurn(h, p.target); } },
     CENIZA: { name: 'Corazón de Ceniza', icon: '🌋', tag: 'fuego', desc: n => `Al matar: explota en llamas alrededor (${60 * n}% de tu daño, radio 2).`,
         onKill(h, p, n) { relicBlast(h, p.victim, 2, 0.6 * n, 'fire'); } },
     PEDERNAL: { name: 'Pedernal', icon: '🪨', tag: 'fuego', desc: n => `Al esquivar: prendés fuego a los enemigos a ${1 + n} casillas.`,
         onDodge(h, p, n) { relicNear(h, 1 + n).forEach(e => relicBurn(h, e)); } },
     COLMILLO: { name: 'Colmillo', icon: '🦷', tag: 'sangrado', desc: n => `Al pegar: ${15 * n}% de hacer sangrar (20% de tu daño por segundo, 4 s).`,
-        onDealDamage(h, p, n) { if (Math.random() < 0.15 * n) relicBleed(h, p.target); } },
+        onDealDamage(h, p, n) { if (Math.random() < 0.15 * n * relicProc(h)) relicBleed(h, p.target); } },
     SANGUIJUELA: { name: 'Sanguijuela', icon: '🪱', tag: 'sangrado', desc: n => `Al matar a un enemigo que sangra: te curás ${4 * n}% de tu vida.`,
         onKill(h, p, n) { if (p.victim && getEffect(p.victim, 'RELIC_BLEED')) h.hp = Math.min(h.maxHp, h.hp + h.maxHp * 0.04 * n); } },
     ESPINAS: { name: 'Cota de Espinas', icon: '🌵', tag: 'sangrado', desc: n => `Al recibir un golpe: quien te pegó sangra (${n} vez${n > 1 ? 'es' : ''} más fuerte).`,

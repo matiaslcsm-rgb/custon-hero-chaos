@@ -53,7 +53,7 @@ function describeSkill(skill, level) {
 // Enfriamientos: todos un 25% más cortos (a pedido: las habilidades salían poco). Los valores de cada habilidad quedan
 // como están; el multiplicador se aplica al lanzarla y en los textos.
 const COOLDOWN_MULT = 0.75;
-function skillCooldown(skill, hero) { return (val(skill, hero, 'cooldown') || 0) * COOLDOWN_MULT; }
+function skillCooldown(skill, hero) { return (val(skill, hero, 'cooldown') || 0) * COOLDOWN_MULT * (typeof archerHaste === 'function' ? archerHaste(hero) : 1); } // Ojo Rápido del Arquero (towerArcher.js)
 
 function skillCostLine(skill, level) {
     if (skill.kind === 'passive') return 'Pasiva';

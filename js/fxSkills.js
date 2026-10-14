@@ -447,18 +447,18 @@ const DASH = { tiles: 3, cooldown: 1.1, iframes: 0.3 };
 function cursorWorld() { return mouse.over && mouse.fx !== undefined ? { x: mouse.fx * viewCols() - 0.5 + camera.x, y: mouse.fy * viewRows() - 0.5 + camera.y } : null; }
 function playerDash(dir = null) { // dir: lo pasa el piloto automático (towerTelegraph.js)
     if ((dir ? !(player && player.isAlive() && player.arena && inCombat()) : !canControlPlayer()) || hasFlag(player, 'stun') || gameClock < (player.dashReadyAt || 0)) return false;
-    let d = dir || keyboardDirection();
+    let d = dir || (isArcher(player) && archerDashDir()) || keyboardDirection(); // el Arquero se impulsa hacia el mouse (towerArcher.js)
     if (!d.dx && !d.dy) { const c = cursorWorld(); d = c ? { dx: Math.sign(Math.round(c.x - player.x)), dy: Math.sign(Math.round(c.y - player.y)) } : { dx: player.facing || 1, dy: 0 }; }
     if (!d.dx && !d.dy) d = { dx: player.facing || 1, dy: 0 };
     const arena = player.arena, from = { x: player.x, y: player.y };
     let moved = 0;
-    for (let i = 0; i < DASH.tiles; i++) {
+    for (let i = 0; i < (isArcher(player) ? ARCHER.dashTiles : DASH.tiles); i++) {
         const nx = player.x + d.dx, ny = player.y + d.dy;
         if (!walkable(arena, nx, ny) || (d.dx && d.dy && (!walkable(arena, nx, player.y) || !walkable(arena, player.x, ny)))) break;
         player.x = nx; player.y = ny; moved++;
     }
     if (!moved) return false;
-    player.dashReadyAt = gameClock + DASH.cooldown;
+    player.dashReadyAt = gameClock + DASH.cooldown * archerHaste(player);
     player.moveTarget = null; player.moveTimer = 0;
     addEffect(player, { id: 'DASH', name: 'Esquive', duration: DASH.iframes, flags: ['invulnerable', 'phasing'], tags: ['MEJORA'] });
     emit(player, 'onDodge', {}); // reliquias que se activan al esquivar (towerRelics.js)
