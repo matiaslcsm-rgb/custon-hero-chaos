@@ -129,7 +129,9 @@ pieza de equipo, **elegir 1 de 3 mejoras al subir de nivel**, **arenas de jefes 
 Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic derecho, Espacio = movilidad):
 - **Guerrero** (espada): combo de 3 tajos · parada · rodar · pasiva: el daño físico puede ser crítico (o critea más).
 - **Mago** (bastón): orbe de magia que rebota 1 vez · tormenta de 3 rayos a enemigos al azar · teletransporte corto ·
-  pasiva: *a confirmar* — interpretación propuesta: mantener una habilidad la carga (más daño o más rebotes).
+  pasiva: *a confirmar* — si el usuario no contesta antes, usar la interpretación propuesta: mantener una habilidad
+  la carga (más daño o un rebote más), y marcarlo en el informe para que lo corrija en el feedback.
+- Sin cuarta habilidad por ahora: la "especial" llega más adelante como una mejora de 1 de 3 (a confirmar).
 - **Arquero** (arco): ráfaga de 3 flechas · flechazo que critea y aturde · impulso rápido hacia el mouse · pasiva: sus
   habilidades y reliquias se activan más rápido (menos enfriamiento y más chance de disparo de las reliquias).
 - [ ] **Reliquias, paso 1 (motor):** `js/towerRelics.js` con reliquias que se apilan y se enganchan a los eventos que
