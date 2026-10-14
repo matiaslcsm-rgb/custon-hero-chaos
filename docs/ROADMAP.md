@@ -202,7 +202,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
       vida que tiembla. Medir con el piloto cuántos golpes recibidos no tenían aviso previo (meta: 0).
 - [ ] **Pausa de impacto por peso:** el remate del combo y el golpe a un guardián frenan 60-90 ms; los golpes chicos,
       nada. Revisar que no se apilen (REWORK.md §8).
-- [ ] **Señores de cueva con daño desmedido:** midiendo el piso 6 salió uno con 1833 de daño por golpe (los demás,
+- [x] **Señores de cueva con daño desmedido:** midiendo el piso 6 salió uno con 1833 de daño por golpe (los demás,
       261-393). Buscar qué combinación de afijos de campeón lo dispara y ponerle tope.
 - [ ] **Prueba aleatoria de la Raíz Madre:** a veces falla sola. Fijar la semilla o el margen para que sea estable.
 - [ ] **Dificultad medida con el piloto** después de los cambios de la espada (combo con clic, parada): enseñarle la

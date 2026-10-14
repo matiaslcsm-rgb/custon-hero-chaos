@@ -630,7 +630,7 @@ function drawTowerNight(level) {
 // nivel: −1, −2… hasta −2 en los pisos 1-3, −3 en los 4-7 y −4 en los 8-10. Más hondo: más oscuro, creeps más fuertes,
 // más campeones, más experiencia y mejor botín. En el fondo, un jefe cuida un tesoro (2 piezas raras). No hace falta
 // entrar para subir la torre. El piloto automático no entra.
-const CAVE = { w: 90, h: 70, mouths: 2, packs: 12, packsPerDepth: 3, statPerDepth: 0.12, xpPerDepth: 0.25, lootPerDepth: 0.5, champPerDepth: 0.08, sight: -1.5 };
+const CAVE = { w: 90, h: 70, mouths: 2, packs: 12, packsPerDepth: 3, statPerDepth: 0.12, xpPerDepth: 0.25, lootPerDepth: 0.5, champPerDepth: 0.08, sight: -1.5, bossAtkCap: 2.2 };
 function caveMaxDepth(floor) { return 2 + Math.floor((floor - 1) / 3.5); }
 // Entradas de cueva en el campo de un piso (de preferencia al pie de un acantilado o de una roca)
 function placeCaveMouths(level, dist) {
@@ -705,6 +705,10 @@ function generateCaveLevel(cave, depth) {
         const boss = makeCreep(type, far.x, far.y, TOWER.creepMult(lvl) * bonus * 2.4, false, 0);
         Object.assign(boss, { arena: level, level: lvl, xp: Math.round(type.xp * TOWER.xpMult(lvl) * 6), spawnTime: -1e9, isCaveBoss: true });
         makeChampion(boss, pickChampionAffixes(Math.min(3, 1 + Math.floor(depth / 2)))); // sin los combos excluidos (towerChampions.js)
+        // Tope de daño: el bestiario sale al azar en cada run y un tipo con mucho daño de base dio un señor de cueva del
+        // piso 6 con 1833 por golpe (los demás, 261-393). Nunca más que CAVE.bossAtkCap veces el daño típico del piso.
+        const medAtk = pool.map(t => t.atk).sort((a, b) => a - b)[pool.length >> 1];
+        boss.atk = Math.min(boss.atk, Math.round(medAtk * TOWER.creepMult(lvl) * bonus * 2.4 * CAVE.bossAtkCap));
         boss.label = `${type.label} Ancestral (señor de la cueva)`;
         level.creeps.push(boss); level.caveBoss = boss;
         const spot = arrivalNear(level, far);

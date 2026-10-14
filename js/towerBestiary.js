@@ -95,22 +95,29 @@ function generateBeast(biome, roleKey, from) {
     };
     return makeGunnerType(t, roleKey); // los tiradores salen con su patrón de disparo (towerBullets.js)
 }
-// Bestiario de un bioma: 6 criaturas del primer piso (cuerpo a cuerpo, rápida, a distancia, hechicera y 2 más) y 3 más
-// difíciles para el segundo.
+// Bestiario de un bioma, AMPLIO Y FIJO (pedido del usuario, 2026-10-14: "un bestiario amplio con criaturas mezcladas de lo
+// que tenemos, pero que sea fijo"): todos los roles, con 2 variantes de cada rol del primer piso (cuerpo a cuerpo, rápida,
+// a distancia, hechicera, enjambre y tirador) y uno de cada rol difícil para el segundo piso. Se arma con una semilla por
+// bioma, así sale igual en todas las runs (y el Bestiario de la Bitácora se completa de a poco). Antes: 9 al azar por run.
+const BESTIARY_SEED = { forest: 918273645, swamp: 527364819, desert: 1736452891, snow: 1192837465, volcano: 674839201 }; // grandes: con semillas chicas los primeros números salen casi 0
 function generateBestiary(biome) {
-    const t0 = Object.keys(BEAST_ROLES).filter(k => !BEAST_ROLES[k].tier);
+    const t0 = Object.keys(BEAST_ROLES).filter(k => !BEAST_ROLES[k].tier); // incluye el tirador (gunner, towerBullets.js)
     const t1 = Object.keys(BEAST_ROLES).filter(k => BEAST_ROLES[k].tier);
-    const roles0 = ['brawler', 'skirmisher', 'gunner', 'caster'].concat(shuffle(t0.slice()).slice(0, 2)); // 4 fijos (uno que dispara ráfagas, towerBullets.js) + 2 al azar
-    const roles1 = shuffle(t1.slice()).slice(0, 3);
-    const list = roles0.map(r => generateBeast(biome, r, 0)).concat(roles1.map(r => generateBeast(biome, r, 1)));
+    const list = t0.flatMap(r => [generateBeast(biome, r, 0), generateBeast(biome, r, 0)]).concat(t1.map(r => generateBeast(biome, r, 1)));
     const seen = new Set(); // sin nombres repetidos
     list.forEach(t => { while (seen.has(t.label)) t.label += ' Mayor'; seen.add(t.label); });
     return list;
 }
+const fixedBestiary = {};
 function towerBestiary(biome) {
     if (!towerRun) return null;
-    towerRun.bestiary = towerRun.bestiary || {};
-    return towerRun.bestiary[biome] || (towerRun.bestiary[biome] = generateBestiary(biome));
+    if (!fixedBestiary[biome]) {
+        // shortcut: el generador usa Math.random (y shuffle también); lo cambiamos por uno con semilla mientras arma el bioma.
+        const real = Math.random;
+        Math.random = seededRandom(BESTIARY_SEED[biome] || 7);
+        try { fixedBestiary[biome] = generateBestiary(biome); } finally { Math.random = real; }
+    }
+    return fixedBestiary[biome];
 }
 // Espinas: devuelve parte del daño de los ataques de un héroe (lo llama dealDamage)
 function beastThorns(target, source, dealt, opts) {

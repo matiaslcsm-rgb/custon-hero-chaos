@@ -1279,11 +1279,14 @@ test('Torre: cuevas con niveles de profundidad, jefe y tesoro en el fondo, y vol
     check(player.arena === L && COLS === TOWER.cols, 'volvió a la superficie con el mundo grande');
 }, { random: true });
 
-test('Torre: generador de criaturas (bestiario propio por run, nombres, rasgos del bioma, figuras con partes)', () => {
+test('Torre: generador de criaturas (bestiario amplio y fijo, nombres, rasgos del bioma, figuras con partes)', () => {
     newTower();
-    const list = generateBestiary('swamp');
-    checkEq(list.length, 9, '6 del primer piso + 3 difíciles');
-    checkEq(list.filter(t => t.from === 1).length, 3, 'tres difíciles');
+    const list = towerBestiary('swamp');
+    checkEq(list.length, 20, '6 roles × 2 variantes del primer piso + 8 difíciles');
+    checkEq(list.filter(t => t.from === 1).length, 8, 'un difícil de cada rol');
+    const labels = list.map(t => t.label).join('|');
+    newTower(); // otra run: el mismo bestiario
+    checkEq(towerBestiary('swamp').map(t => t.label).join('|'), labels, 'fijo entre runs');
     checkEq(new Set(list.map(t => t.label)).size, list.length, 'sin nombres repetidos');
     check(list.every(t => t.traits.every(k => BEAST_TRAITS[k].biomes.includes('swamp'))), 'rasgos con afinidad por el bioma');
     check(list.every(t => INK_PLANS[t.plan] && CREEP_TYPES[t.key]), 'cuerpo dibujable y mecánica de un creep conocido');

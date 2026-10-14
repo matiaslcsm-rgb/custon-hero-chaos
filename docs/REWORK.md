@@ -827,6 +827,14 @@ Las fases 3 y 4 son las más grandes: hay que rehacer pruebas y volver a medir e
 también tiene que aprender a esquivar los ataques anunciados).
 
 ## Interfaz y calidad de vida (lista viva)
+- ✅ **Bestiario amplio y fijo** (2026-10-14, pedido del usuario: "un bestiario amplio con criaturas mezcladas de lo que
+  tenemos, pero que sea fijo"): el generador de `js/towerBestiary.js` arma cada bioma con una semilla fija, así sale
+  igual en todas las runs y el Bestiario de la Bitácora se completa de a poco. Usa todos los roles: 6 del primer piso con
+  2 variantes cada uno y los 8 difíciles para el segundo piso, o sea 20 por bioma y 100 en total (antes 9 al azar por
+  run). En el segundo piso de cada bioma ahora hay 40% de criaturas difíciles en vez de 33% (sin medir con el piloto).
+- ✅ **Tope de daño a los señores de cueva** (2026-10-14): con el bestiario al azar salió uno del piso 6 con 1833 por golpe.
+  Ahora no pasan de `CAVE.bossAtkCap` (2,2) veces el daño típico del piso. Medido en 20-30 runs, máximo por piso:
+  2: 270 · 4: 372 · 6: 576 · 8: 736 · 10: 931 (antes: 386 · 1183 · 1309 · 1030 · 2965).
 - **Tipografía Tiny5 en vez de Pixelify Sans (2026-10-14, pedido del usuario: "otra tipografía que vaya más a tono y
   cueste menos leer los números").** Con Pixelify Sans el 5 se leía como S ("PISO S DE 10", "Nivel 1S"). Se compararon 5
   fuentes pixel de Google Fonts en `docs/arte/tipografias.html` (números, pares 5/S 8/B 0/O 1/l y textos del juego en 3
