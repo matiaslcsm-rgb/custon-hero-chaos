@@ -1641,7 +1641,9 @@ test('Torre: las Páginas de Arén — una por piso en un rincón apartado, se j
     const L = towerLevel(3), p = L.arenPage;
     check(p && walkable(L, p.x, p.y) && L.zone[p.y * COLS + p.x] === ZONE.field, 'el piso 3 trae su página en el campo');
     const d = bfsFrom(L, L.start.x, L.start.y);
-    check(d[p.y * COLS + p.x] > 40, `lejos de la entrada (${d[p.y * COLS + p.x]} pasos)`);
+    check(d[p.y * COLS + p.x] < 0 && L.chests.some(c => c.secret && c.x === p.x + 1 && c.y === p.y), 'adentro de una cámara sellada (towerSecrets.js)');
+    const L1 = towerLevel(1), p1 = L1.arenPage, d1 = bfsFrom(L1, L1.start.x, L1.start.y);
+    check(p1 && d1[p1.y * COLS + p1.x] > 40, `en el piso 1 (afuera), en el rincón más apartado (${d1[p1.y * COLS + p1.x]} pasos)`);
     for (let f = 1; f <= 10; f++) check(AREN_PAGES[f], `el piso ${f} tiene su página escrita`);
     Object.assign(player, { arena: L, x: p.x, y: p.y });
     takeArenPage(L, player);

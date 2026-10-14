@@ -28,6 +28,9 @@ function placeSecretRooms(level, dist) {
         taken.push(buildChamber(level, x0, y0, chamberSides(x0, y0)[Math.floor(Math.random() * 4)]));
         made++;
     }
+    // La Página de Arén del piso va adentro de la cámara más lejana (en vez del rincón apartado: towerLore.js)
+    const far = level.chests.filter(c => c.secret).sort((a, b) => dist[b.y * COLS + b.x] - dist[a.y * COLS + a.x])[0]; // (dist es de antes de levantar los muros)
+    if (level.arenPage && far) Object.assign(level.arenPage, { x: far.x - 1, y: far.y });
     placeLabSecret(level, dist);
 }
 // Los 4 lugares posibles de la grieta (el medio de cada lado) y la casilla de afuera que le corresponde

@@ -52,8 +52,9 @@ function towerLoreGreet(level) {
 }
 
 // --- LAS PÁGINAS DE ARÉN (TORRE-MUNDO.md) ---
-// El diario de la expedición tiene las páginas arrancadas: una por piso, tirada en el rincón más apartado del campo (lo
-// más lejos de la entrada, pegado a muros o rocas). Se juntan al pisarlas y quedan para siempre, como el Bestiario: una
+// El diario de la expedición tiene las páginas arrancadas: una por piso. En el piso 1 (afuera), tirada en el rincón más
+// apartado del campo (lo más lejos de la entrada, pegado a muros o rocas); del 2 en adelante, adentro de la cámara
+// sellada más lejana (hay que romper la pared agrietada: towerSecrets.js). Se juntan al pisarlas y quedan para siempre, como el Bestiario: una
 // vez encontrada, esa página ya no aparece en las runs siguientes. El Cuaderno (N) las muestra en orden.
 const AREN_PAGES = {
     1: '«Somos siete. Brena nos anotó en su libro y se rió: dice que nadie vuelve a firmar dos veces. Arén firmó primero.»',
@@ -103,7 +104,7 @@ function renderArenPages() {
     if (!box) return;
     box.innerHTML = `<h4 class="aren-title">📄 Las Páginas de Arén (${arenFoundCount()}/10)</h4>` + Object.keys(AREN_PAGES).map(f => arenStore.found[f]
         ? `<div class="notebook-page"><h4>Piso ${f} · ${floorLore(+f).place}</h4><p>${AREN_PAGES[f]}</p></div>`
-        : `<div class="notebook-page locked"><h4>Piso ${f} · ???</h4><p>Arrancada. Está tirada en algún rincón apartado del piso ${f}.</p></div>`).join('');
+        : `<div class="notebook-page locked"><h4>Piso ${f} · ???</h4><p>Arrancada. ${+f === 1 ? 'Está tirada en el rincón más apartado del bosque.' : `Está detrás de una pared agrietada del piso ${f}, en la cámara más lejos de la entrada.`}</p></div>`).join('');
 }
 
 // --- LA ARQUITECTURA DE LA TORRE (pisos 2+) ---

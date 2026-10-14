@@ -232,6 +232,11 @@ continuar una run el piso entero se arma de nuevo, cofres comunes incluidos.)
 grieta hacia un pasillo o una sala. **Medido** (3 torres × 10 pisos): entra en 30 de 30, el guardián sigue alcanzable en
 todos y la grieta queda a 187-323 pasos de la entrada del piso.
 
+**Paso 3a (2026-10-14):** desde el piso 2, la Página de Arén va adentro de la cámara sellada más lejana (junto al cofre):
+hay que encontrar la grieta y romperla. En el piso 1 (afuera, sin cámaras) sigue en el rincón más apartado. En el
+Cuaderno, cada página que falta dice dónde buscarla ("detrás de una pared agrietada del piso N"). **Medido** (3 torres ×
+pisos 2-10): 27 de 27 adentro de una cámara, con la grieta a 121-310 pasos de la entrada.
+
 ## 7. Música y sonido
 - **Música ambiental por bioma**, de día y de noche, más una **capa de combate** que entra con fundido cuando hay
   enemigos cerca y se va al terminar la pelea (música dinámica en capas, como Hades o Zelda).

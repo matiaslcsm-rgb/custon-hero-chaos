@@ -54,7 +54,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   (`.claude/skills/equipo/`) que los coordina: diseño → especialistas → integración → QA → cierre.
 - **Salas secretas (2026-10-14, modo automático):** cámaras selladas desde el piso 2 y una sala escondida en cada
   laberinto, con una pared agrietada que se rompe a golpes y un cofre con una pieza rara (REWORK.md §6).
-- **Las Páginas de Arén (2026-10-14, modo automático):** una por piso en el rincón más apartado del campo; se juntan al
+- **Las Páginas de Arén (2026-10-14, modo automático):** una por piso, adentro de la cámara sellada más lejana (en el
+  piso 1, en el rincón más apartado del bosque); se juntan al
   pisarlas, quedan para siempre y el Cuaderno (N) cuenta la historia de la expedición en orden (REWORK.md §6).
 - **La Torre por dentro (2026-10-14, pedido del usuario):** el piso 1 es afuera (el bosque al pie de la torre); del 2
   en adelante estás adentro: muro exterior, salones con portones y columnas (más enteros arriba). Cada piso tiene su

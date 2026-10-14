@@ -90,7 +90,9 @@ El orden de la lista **es** la prioridad: primero lo que destraba el loop comple
         flechas u orbes) y un cofre con una pieza rara adentro (`js/towerSecrets.js`). 2026-10-14.
   - [x] Paso 2: una sala escondida por piso en la piedra maciza del laberinto (también en el piso 1), con la grieta
         hacia un pasillo o una sala. 2026-10-14.
-  - [ ] Paso 3: que la sala secreta guarde también la Página de Arén o el camino al jefe escondido (con el ítem del jefe).
+  - [x] Paso 3a: la Página de Arén va adentro de la cámara sellada más lejana (pisos 2+; en el 1, que es afuera, sigue
+        en el rincón más apartado). El Cuaderno dice dónde buscar las que faltan. 2026-10-14.
+  - [ ] Paso 3b: el camino al jefe escondido detrás de una grieta (va con el ítem del jefe escondido).
   - [x] ~~Paso 4: que el guardado recuerde las paredes rotas~~ Descartado: al continuar una run el piso entero se arma
         de nuevo (cofres comunes incluidos, towerSave.js); las cámaras se comportan igual que el resto.
 - [ ] **Jefe escondido, paso 1:** el Ciervo Blanco del piso 1 (aparece solo de noche en un claro apartado), con su
