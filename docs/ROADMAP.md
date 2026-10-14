@@ -236,3 +236,4 @@ El orden de la lista **es** la prioridad: primero lo que destraba el loop comple
 - 2026-10-14 · Las Páginas de Arén · 696aecb · 3 torres × 10 pisos: siempre aparece y se alcanza; 280-400 pasos de la entrada (87-100% del máximo del campo). Pruebas 234/234.
 - 2026-10-14 · Salas secretas, paso 1 (cámaras con pared agrietada) · ccfc343 · 3 torres × pisos 2-10: 2 cámaras por piso siempre, laberinto alcanzable, grieta a 51-311 pasos de la entrada. Pruebas 235/235.
 - 2026-10-14 · Salas secretas, paso 2 (sala escondida en el laberinto) · 5cb0dc5 · 3 torres × 10 pisos: entra en 30/30, guardián alcanzable en todos, grieta a 187-323 pasos. Pruebas 235/235.
+- 2026-10-14 · Salas secretas, paso 3a (la página detrás de la grieta) · 3605bdb · 3 torres × pisos 2-10: 27/27 páginas adentro de una cámara, grieta a 121-310 pasos. Pruebas 235/235.
