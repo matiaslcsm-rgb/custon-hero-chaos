@@ -708,6 +708,17 @@ Pedido del usuario (2026-10-07): en cada paso, pensar la interfaz y la calidad d
 el mismo paso; lo grande queda acá, ordenado por impacto.
 
 **Hecho:**
+- ✅ **Guardar la run y continuarla** (2026-10-14, pedido: "que se guarde la partida para poder continuar la run",
+  `js/towerSave.js`): se guarda solo (al entrar a cada piso, al morir, cada 15 s, al salir al menú y al cerrar la pestaña)
+  todo lo que es del jugador: héroe, nivel, stats y bonus permanentes, equipo, bolsa, oro, el piso, los pisos con el
+  guardián vencido, los restos y la crónica de la run. En el menú de Tower Chaos aparece **Continuar** (piso, nivel,
+  minutos jugados y hace cuánto). Al continuar volvés a la **entrada del piso** donde estabas, con el piso armado de nuevo
+  (como Dead Cells al entrar a un bioma); si su guardián ya estaba vencido, la escalera queda abierta, y tus restos te
+  esperan en la entrada. Lo que se había llevado un portador vuelve a la bolsa. "Salir al menú" en la Torre pasa a
+  "Guardar y salir" (sin perder nada); "Nueva run" pide confirmación si hay una guardada; ganar la torre borra el
+  guardado. Un solo lugar de guardado. Las pruebas y las demos guardan en memoria (no pisan la run de verdad).
+  **No viaja:** las criaturas del piso, lo tirado en el suelo y los efectos del momento; las criaturas de cada bioma se
+  vuelven a sortear (el bestiario guardado no se pierde).
 - ✅ **Ataque básico con el mouse** (2026-10-13, pedido: "quiero poder dar los golpes básicos con los clicks del mouse",
   `js/towerClickAttack.js`): en la Torre el clic izquierdo es el golpe hacia el cursor y mantenerlo sigue pegando al ritmo
   de la velocidad de ataque (como Hades o Diablo); ya no se pega solo. Cuerpo a cuerpo: al enemigo a tu alcance más

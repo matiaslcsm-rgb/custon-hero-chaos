@@ -1584,6 +1584,38 @@ test('Torre: el héroe en pixel art se anima por poses — cada movimiento elige
     u.fxAttack = { kind: 'swing', dx: 0, dy: 1, at: fxClock }; checkEq(pxhDir(u, false), 'down', 'hacia abajo: de frente');
     u.fxAttack = null; u.lastStepDir = { dx: 1, dy: 1 }; checkEq(pxhDir(u, true), 'side', 'en diagonal: de costado');
 });
+test('Torre: guardar y continuar la run — héroe, equipo, bolsa, oro, piso, guardián vencido y restos vuelven', () => {
+    clearTowerSave();
+    newTower('AXE', { weapon: 'ADVENTURER_SWORD' });
+    // una run avanzada: piso 3, nivel 7, stats puestos, oro, una pieza equipada y otra en la bolsa, piso 2 ya vencido
+    const cat = towerCatalog(), helm = makeTowerItem(3, cat.find(e => e.slot === 'helm'), 'rare'), ring = makeTowerItem(3, cat.find(e => e.slot === 'ring'), 'magic');
+    equipItem(player, helm); addToBag(player, ring);
+    Object.assign(player, { level: 7, xp: 123, gold: 456, statPoints: 2 }); changeTowerStat(player, 'str', 3); grantPermanent(player, 'atk', 5, 'Prueba');
+    towerRun.stats.kills = 42; towerRun.deaths = 1;
+    enterTowerFloor(2); towerLevel(2).stairsOpen = true; enterTowerFloor(3);
+    towerRun.corpse = { x: 1, y: 1, floor: 3, level: towerLevel(3), lost: { str: 2 }, points: 2, killer: 'Lobo' };
+    player.hp = player.maxHp * 0.5;
+    const before = { str: player.str, atk: player.atk, maxHp: player.maxHp, helm: helm.name, ring: ring.name };
+    check(saveTowerRun(), 'se guarda');
+    const S = loadTowerSave(); check(S && S.run.floor === 3, 'el guardado dice piso 3');
+    check(/Piso 3 · nivel 7/.test(towerSaveSummary()), 'el menú lo muestra');
+    // salir y continuar
+    resetGame(); check(!player, 'salimos');
+    gameMode = 'tower'; check(continueTowerRun(), 'continúa');
+    checkEq(towerRun.floor, 3, 'en el piso 3');
+    checkEq(player.level, 7, 'mismo nivel'); checkEq(player.gold, 456, 'mismo oro'); checkEq(player.statPoints, 2, 'mismos puntos');
+    checkEq(player.str, before.str, 'misma fuerza'); checkEq(player.atk, before.atk, 'mismo ataque'); checkEq(player.maxHp, before.maxHp, 'misma vida máxima');
+    checkEq(player.gear.weapon && player.gear.weapon.heroKey, 'ADVENTURER_SWORD', 'la espada en la mano');
+    checkEq(player.gear.helm && player.gear.helm.name, before.helm, 'el casco puesto');
+    check(player.bag.some(b => b.item.name === before.ring), 'el anillo en la bolsa');
+    check(Math.abs(player.hp / player.maxHp - 0.5) < 0.02, 'con la vida que tenía');
+    checkEq(towerRun.stats.kills, 42, 'la crónica sigue'); checkEq(towerRun.deaths, 1, 'las muertes también');
+    check(!towerRun.starterPending, 'no vuelve a pedir el arma');
+    check(towerLevel(2).stairsOpen, 'el piso 2 ya vencido: escalera abierta');
+    check(!towerLevel(4).stairsOpen, 'el 4 no');
+    check(player.arena.corpses.some(c => c.points === 2), 'tus restos te esperan en la entrada del piso');
+    clearTowerSave(); check(!loadTowerSave(), 'se borra');
+});
 test('Torre: Tiro Tensado (arco) — al toque no atraviesa, tensado del todo atraviesa, perfecto suma, tensar frena', () => {
     const level = newTower('AXE', { weapon: 'ADVENTURER_BOW' });
     level.creeps.forEach(c => { c.hp = 0; });

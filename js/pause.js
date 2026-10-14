@@ -59,6 +59,7 @@ function renderPauseMenu() {
         };
     });
     document.getElementById('pause-tower').innerHTML = gameMode === 'tower' && towerRun ? towerPauseHtml() : '';
+    document.getElementById('pause-quit').textContent = gameMode === 'tower' && canSaveTower() ? '💾 Guardar y salir al menú' : '🏠 Salir al menú';
     document.getElementById('pause-glossary').style.display = gameMode === 'tower' ? 'none' : '';
     document.getElementById('pause-info').textContent = gameMode === 'tower' && towerRun ? `Aventurero nivel ${player.level} · piso ${towerRun.floor} de ${TOWER.floors} · ${player.gold}g` : player
         ? `${player.name} · ronda ${waveNumber} · ${aliveHeroes().length} héroes en juego · ${heroRank(player)}º con ${player.points} puntos` : '';
@@ -81,7 +82,8 @@ function isGlossaryOpen() { return ['heroes', 'creeps', 'items'].some(v => docum
 
 
 function quitToMenu() {
-    if (player && !confirm('¿Salir al menú? Se pierde la partida en curso.')) return; // eligiendo héroe no hay nada que perder
+    const towerSaved = gameMode === 'tower' && saveTowerRun(); // la run de la Torre se guarda: se continúa desde el menú (towerSave.js)
+    if (player && !towerSaved && !confirm('¿Salir al menú? Se pierde la partida en curso.')) return; // eligiendo héroe no hay nada que perder
     setPaused(false);
     resetGame();
 }

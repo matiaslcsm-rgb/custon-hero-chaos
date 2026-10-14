@@ -49,6 +49,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 | Duelo simultáneo con las oleadas de los demás; enfriamientos en el descanso; contador central con pitidos; cartel de apuestas; nombres de jugadores; sonidos propios (`sounds/`) | ✅ |
 
 ## Pendientes y temas abiertos
+- **Tower Chaos se guarda (2026-10-14):** la run se guarda sola y se continúa desde el menú (entrada del piso donde
+  estabas, piso armado de nuevo). Ver REWORK.md, "Interfaz y calidad de vida".
 - **Tower Chaos, ataque con clic (2026-10-13):** el golpe básico sale con el clic izquierdo hacia el cursor (mantener
   repite); se vuelve al automático en la pausa. Ver REWORK.md, "Interfaz y calidad de vida". Falta medir cuánto pierde
   quien apunta mal con el arco.

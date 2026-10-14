@@ -82,7 +82,7 @@ function chooseStarterWeapon(weaponKey) {
 }
 
 function towerLevel(floor) {
-    if (!towerRun.levels[floor]) towerRun.levels[floor] = generateTowerLevel(floor);
+    if (!towerRun.levels[floor]) { towerRun.levels[floor] = generateTowerLevel(floor); applySaveToLevel(towerRun.levels[floor]); } // run continuada: guardián vencido, restos (towerSave.js)
     return towerRun.levels[floor];
 }
 
@@ -97,6 +97,7 @@ function enterTowerFloor(floor, where = 'start') {
     const B = BIOMES[level.biome];
     setStateText(`TOWER CHAOS · PISO ${floor} DE ${TOWER.floors} · ${B.name.toUpperCase()}`);
     sfx('wave');
+    saveTowerRun(); // guardado automático al entrar a cada piso (towerSave.js)
     if (where === 'start') log(`${floor === 1 ? '🪨 Estás en el círculo de piedra, en la base de la torre.' : `🗼 Subiste al piso ${floor}.`} ${B.icon} ${B.name}: seguí el camino al pueblo y, más allá, al laberinto donde el guardián cuida la escalera. ${B.hazard.name}: ${B.hazard.desc}.${B.climate ? ` ${B.climate.name}: ${B.climate.desc}.` : ''}`);
 }
 
@@ -284,6 +285,7 @@ function updateTower(dt) {
     towerAwakenTick(level, from); // sin arma no salís del círculo; el piloto agarra la espada (towerAwaken.js)
     towerFeelTick(player); // tensar el arco (towerFeel.js)
     parryTick(player); // la parada de la espada (towerParry.js)
+    towerAutosave(); // cada 15 s (towerSave.js)
     unstickFromWall(player);
     // Cuaderno (REWORK.md §1): moverse y esquivar se detectan leyendo el estado, sin tocar el código compartido.
     if (keys[KEYMAP.up] || keys[KEYMAP.left] || keys[KEYMAP.down] || keys[KEYMAP.right]) writeNotebookPage('MOVE');
@@ -419,6 +421,7 @@ function towerHeroDeath(hero, killer) {
     const carrier = spawnItemCarrier(level, hero); // towerWorld.js
     const carried = carrier ? `${carrier.label.replace(' (portador)', '')} se llevó ${carrier.carrier.map(i => i.name).join(' y ')}: cazalo para recuperarlo. ` : '';
     sfx('lose');
+    saveTowerRun(); // tus restos quedan guardados (towerSave.js)
     log(`💀 ${killer ? killer.label + ' te mató' : 'Moriste'} en el piso ${level.floor}. ${lostText.length ? 'Perdés ' + lostText.join(', ') + ': quedan en tus restos, volvé a buscarlos. ' : ''}${carried}` +
         `${old && old.faded && old.points ? `Tus restos anteriores (${old.points} puntos) se perdieron. ` : ''}${old && old.merged ? 'Tus restos anteriores se juntaron con estos. ' : ''}Renacés en el círculo de piedra de la base en ${TOWER.respawnDelay}s.`);
 }
@@ -442,6 +445,7 @@ function towerRespawn() {
 
 function towerVictory() {
     gameState = 'ENDED';
+    clearTowerSave(); // la run terminó: no hay nada que continuar (towerSave.js)
     setStateText('¡CONQUISTASTE LA TORRE!');
     const s = towerRun.stats;
     log(`🏆 ¡Venciste al guardián del último piso! ${player.displayName} conquistó la Torre: nivel ${player.level}, ${Math.floor((gameClock - towerRun.startedAt) / 60)} minutos, ${towerRun.deaths} muerte${towerRun.deaths === 1 ? '' : 's'}, ${s.kills} bajas (${s.champions} campeones), ${s.shrines} santuarios.`);

@@ -219,11 +219,14 @@ function openLobby(mode) {
     box.innerHTML = `<div class="ts-lobby-art">${L.art()}</div>
         <h2>${L.title}</h2><em>${L.tag}</em><p class="ts-lobby-desc">${L.desc}</p>
         <ul class="ts-facts">${L.facts().map(f => `<li>${f}</li>`).join('')}</ul>
-        <div class="ts-lobby-actions"><button class="ts-play">▶ Jugar</button><button class="ts-tut secondary-btn">📖 Tutorial</button>
+        ${mode === 'tower' && towerSaveSummary() ? `<div class="ts-continue"><button class="ts-cont">▶ Continuar</button><small>${towerSaveSummary()}</small></div>` : ''}
+        <div class="ts-lobby-actions"><button class="ts-play">${mode === 'tower' && towerSaveSummary() ? '✦ Nueva run' : '▶ Jugar'}</button><button class="ts-tut secondary-btn">📖 Tutorial</button>
             ${L.extra().map((x, i) => `<button class="secondary-btn" data-extra="${i}">${x[0]}</button>`).join('')}</div>
         <label class="ts-first"><input type="checkbox" id="ts-tut-first"${first ? ' checked' : ''}> Ver el tutorial antes de jugar</label>
         <button class="ts-back secondary-btn">← Volver</button>`;
     box.querySelector('.ts-play').onclick = () => lobbyPlay(mode);
+    const cont = box.querySelector('.ts-cont');
+    if (cont) cont.onclick = () => { closeLobby(); gameMode = 'tower'; continueTowerRun(); }; // towerSave.js
     box.querySelector('.ts-tut').onclick = () => openTutorial(0, mode);
     box.querySelector('.ts-back').onclick = closeLobby;
     const extras = L.extra();
@@ -232,6 +235,8 @@ function openLobby(mode) {
 }
 function closeLobby() { tsLobbyMode = null; document.getElementById('title-screen').classList.remove('lobby-open'); }
 function lobbyPlay(mode) {
+    if (mode === 'tower' && towerSaveSummary() && !confirm('Hay una run guardada. ¿Empezar una nueva? La guardada se pierde.')) return;
+    if (mode === 'tower') clearTowerSave();
     const start = () => { closeLobby(); gameMode = mode; if (mode === 'tower') startTowerRun(); else startHeroPick(); };
     const cb = document.getElementById('ts-tut-first');
     if (cb && cb.checked) openTutorial(0, mode, start); else start();
