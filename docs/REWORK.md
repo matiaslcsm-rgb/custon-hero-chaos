@@ -827,6 +827,9 @@ Las fases 3 y 4 son las más grandes: hay que rehacer pruebas y volver a medir e
 también tiene que aprender a esquivar los ataques anunciados).
 
 ## Interfaz y calidad de vida (lista viva)
+- ✅ **Récords de la Torre** (2026-10-14, fase T1): se guardan entre runs (clave `chc-tower-records`) el piso más alto,
+  las runs empezadas, las cumbres y la cumbre más rápida; se ven en el menú de Infinite Tower. Al superar tu piso más
+  alto o tu mejor tiempo, el registro avisa "¡Nuevo récord!". Continuar una run no la cuenta como nueva.
 - ✅ **Pausa de impacto por peso** (2026-10-14, fase T2): los tajos de la espada que le pegan a un guardián, un señor de
   cueva o un jefe escondido frenan al menos 65 ms (antes 25-30 ms los dos primeros). El remate sigue en 75 ms y los
   golpes chicos a criaturas comunes siguen cortos. No se apilan: la pausa toma el máximo, no suma.

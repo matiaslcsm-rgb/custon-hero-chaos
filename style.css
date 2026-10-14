@@ -979,3 +979,6 @@ body.on-title { overflow: hidden; }
 #level-cards .level-card small { opacity: 0.85; }
 .perk { font-size: 11px; opacity: 0.6; }
 .perk.on, #level-cards .perk { opacity: 1; color: #ffd166; }
+
+/* Récords de la Torre en el menú (towerSave.js) */
+.ts-records { text-align: center; color: #e8c872; font-size: 0.82rem; margin: 2px 0 6px; }

@@ -182,7 +182,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 - [ ] **Pantalla de fin de run:** al morir o ganar, un resumen claro con el piso alcanzado, el tiempo, las bajas,
       quién te mató, la build final (íconos de las piezas), lo que ganaste para siempre (Esencia, entradas del
       Códice) y un botón grande "▶ Otra run". Es el puente entre la run y la metaprogresión.
-- [ ] **Mejor marca y estadísticas guardadas:** piso más alto, runs jugadas, Cumbres, mejor tiempo. Se muestran en
+- [x] **Mejor marca y estadísticas guardadas** (2026-10-14: piso más alto, runs, cumbres y mejor tiempo en el menú): piso más alto, runs jugadas, Cumbres, mejor tiempo. Se muestran en
       el menú de Infinite Tower y en el resumen ("¡Nuevo récord!").
 - [ ] **Ascenso infinito, paso 1:** después del piso 10 (la Cumbre) se ofrece "Seguir subiendo" o "Volver con el
       botín". Los pisos 11 en adelante ("Lo No Escrito": la torre crece) mezclan biomas al azar y escalan con la fórmula del piso (REWORK.md §14),
@@ -195,6 +195,9 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
       escribe la última página) antes de ofrecer seguir subiendo.
 
 ## Fase T2 — Sensación de juego y claridad
+- [ ] **Las pruebas escriben en el guardado real de localhost:** al correr toda la batería en `index.html?test`,
+      `towerSavePersist` termina en `true` (ninguna prueba sola lo hace; pasa con `runTests`). Solo afecta a la dirección de
+      pruebas, no al juego publicado. Encontrar quién lo cambia y forzarlo en falso en `runTests`.
 - [ ] **Ataques de la espada de frente y de espaldas:** los 3 tajos del combo hacia abajo y hacia arriba con su
       estela, en el estilo de `docs/arte/vistas-frente-espalda.py` y la paleta de `js/towerHeroArt.js`.
 - [ ] **Golpe recibido y caída propios del héroe dibujado:** hoy se arman con el cuadro de quieto.

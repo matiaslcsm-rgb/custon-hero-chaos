@@ -78,6 +78,7 @@ function chooseStarterWeapon(weaponKey) {
     const w = STARTER_WEAPONS[weaponKey];
     if (!w || !player) return;
     giveStarterWeapon(player, weaponKey);
+    noteTowerRecord(r => { r.runs++; }); // una run nueva (continuar no pasa por acá; towerSave.js)
     player.heroClass = w.heroClass; // la clase (fase T00: Guerrero, Arquero, Mago)
     if (towerRun) towerRun.starterPending = false; // las otras dos se hunden (towerAwaken.js)
     log(w.passive ? `🗡️ Sos ${w.className}. ${w.why} Pasiva: ${w.passive}` : w.skillId ? `🗡️ Elegiste ${w.noun}: tenés ${SKILL_INDEX[w.skillId].name} en la ${player.keyBindings[w.skillId].toUpperCase()}.` : `🗡️ Elegiste ${w.noun}: ${w.why}`);
@@ -94,6 +95,8 @@ function enterTowerFloor(floor, where = 'start') {
     const level = towerLevel(floor);
     towerRun.floor = floor;
     towerRun.stats.bestFloor = Math.max(towerRun.stats.bestFloor, floor);
+    const rec = towerRecords().bestFloor; // récord de piso (towerSave.js)
+    if (floor > rec) { noteTowerRecord(r => { r.bestFloor = floor; }); if (rec > 0 && where === 'start') log(`🏅 ¡Nuevo récord! Nunca habías llegado al piso ${floor}.`); }
     enterTowerLevel(level, level.start); // towerWorld.js
     level.titleAt = gameClock;
     const B = BIOMES[level.biome];
@@ -454,6 +457,9 @@ function towerRespawn() {
 function towerVictory() {
     gameState = 'ENDED';
     clearTowerSave(); // la run terminó: no hay nada que continuar (towerSave.js)
+    const runTime = gameClock - towerRun.startedAt, prevBest = towerRecords().bestTime;
+    noteTowerRecord(r => { r.summits++; if (r.bestTime == null || runTime < r.bestTime) r.bestTime = runTime; });
+    if (prevBest != null && runTime < prevBest) log('🏅 ¡Tu cumbre más rápida!');
     setStateText('¡CONQUISTASTE LA TORRE!');
     const s = towerRun.stats;
     log(`🏆 ¡Venciste al guardián del último piso! ${player.displayName} conquistó la Torre: nivel ${player.level}, ${Math.floor((gameClock - towerRun.startedAt) / 60)} minutos, ${towerRun.deaths} muerte${towerRun.deaths === 1 ? '' : 's'}, ${s.kills} bajas (${s.champions} campeones), ${s.shrines} santuarios.`);

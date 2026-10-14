@@ -92,3 +92,21 @@ function towerSaveSummary(S = loadTowerSave()) {
     const mins = Math.round((Date.now() - S.savedAt) / 60000), ago = mins < 1 ? 'recién' : mins < 60 ? `hace ${mins} min` : mins < 1440 ? `hace ${Math.round(mins / 60)} h` : `hace ${Math.round(mins / 1440)} d`;
     return `Piso ${S.run.floor} · nivel ${S.hero.level} · ${Math.floor((S.run.elapsed || 0) / 60)} min jugados · ${ago}`;
 }
+
+// --- RÉCORDS (entre runs; ROADMAP T1): piso más alto, runs empezadas, cumbres y la cumbre más rápida ---
+const TOWER_RECORDS_KEY = 'chc-tower-records';
+let towerRecordsMemory = null; // en pruebas y demos no se toca lo guardado de verdad
+function towerRecords() {
+    try { return Object.assign({ runs: 0, bestFloor: 0, summits: 0, bestTime: null }, JSON.parse((towerSavePersist ? localStorage.getItem(TOWER_RECORDS_KEY) : towerRecordsMemory) || '{}')); }
+    catch (e) { return { runs: 0, bestFloor: 0, summits: 0, bestTime: null }; }
+}
+function noteTowerRecord(fn) {
+    const r = towerRecords(); fn(r);
+    try { const s = JSON.stringify(r); if (towerSavePersist) localStorage.setItem(TOWER_RECORDS_KEY, s); else towerRecordsMemory = s; } catch (e) { /* sin lugar: no pasa nada */ }
+    return r;
+}
+function towerRecordsSummary(r = towerRecords()) {
+    if (!r.runs) return null;
+    const t = r.bestTime == null ? '' : ` · mejor cumbre ${Math.floor(r.bestTime / 60)}:${String(Math.floor(r.bestTime % 60)).padStart(2, '0')}`;
+    return `🏅 Piso más alto: ${r.bestFloor} · ${r.runs} run${r.runs === 1 ? '' : 's'} · ${r.summits} cumbre${r.summits === 1 ? '' : 's'}${t}`;
+}
