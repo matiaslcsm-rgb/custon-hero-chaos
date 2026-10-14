@@ -74,6 +74,7 @@ canvas.addEventListener('mousedown', e => {
         if (targeting) { cancelTargeting(); return; }
         if (canControlPlayer() && swordParryOn(player)) { swordParry(player, p); return; } // Torre con espada: la parada (towerParry.js)
         if (canControlPlayer() && isArcher(player)) { archerSnipe(player, p); return; } // el Arquero: el flechazo (towerArcher.js)
+        if (canControlPlayer() && isMage(player)) { mageChargeStart(player, 'storm'); return; } // el Mago: la tormenta, al soltar (towerMage.js)
         if (player && player.inRest && !player.eliminated && !autopilot) { // caminar por la sala de espera
             player.moveTarget = { x: Math.max(0, Math.min(COLS - 1, Math.round(p.x))), y: Math.max(0, Math.min(ROWS - 1, Math.round(p.y))), arena: null, at: fxClock };
             return;

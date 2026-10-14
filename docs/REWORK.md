@@ -827,6 +827,13 @@ Las fases 3 y 4 son las más grandes: hay que rehacer pruebas y volver a medir e
 también tiene que aprender a esquivar los ataques anunciados).
 
 ## Interfaz y calidad de vida (lista viva)
+- ✅ **El Mago** (2026-10-14, fase T00 paso 3, `js/towerMage.js`): clic, orbe que rebota 1 vez (sale al soltar);
+  clic derecho, tormenta de 3 rayos sobre enemigos al azar cerca del cursor (7 s); Espacio, teletransporte de hasta
+  4 casillas hacia el mouse (no atraviesa paredes); pasiva **Carga**: mantener cualquiera de los dos clics carga en 3
+  etapas de 0,45 s, cada una sortea una mejora (área, daño, velocidad, tamaño o rebote; se apilan) más +8% de daño
+  por etapa, y queda quieto mientras carga. El equipo no le da Q/E/R; conserva la Saeta Arcana en la Q.
+  **Medido** (banco de 30 s contra 3 muñecos, 8 corridas): Guerrero 49 juntos / 43 separados; Mago tocando 52 / 41
+  (+6% / −5%); Mago cargando siempre 63 / 37 (+29% / −14%): la carga es una apuesta para grupos.
 - ✅ **Bestiario amplio y fijo** (2026-10-14, pedido del usuario: "un bestiario amplio con criaturas mezcladas de lo que
   tenemos, pero que sea fijo"): el generador de `js/towerBestiary.js` arma cada bioma con una semilla fija, así sale
   igual en todas las runs y el Bestiario de la Bitácora se completa de a poco. Usa todos los roles: 6 del primer piso con

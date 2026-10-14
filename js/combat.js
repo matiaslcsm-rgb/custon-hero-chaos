@@ -216,11 +216,12 @@ function fireProjectile(attacker, target, dmg, isCrit) {
 // hechizo de habilidad en Dota 2. Cada objetivo recibe el golpe una sola vez (opts.onHit por cada uno nuevo).
 // opts: { tx, ty, speed, radius, dmg, dmgType, vfx: {color, shape}, skillName, onHit(target), onArrive(x,y) }
 function fireSkillProjectile(attacker, opts) {
-    const dx = opts.tx - attacker.x, dy = opts.ty - attacker.y;
+    const ox = opts.x ?? attacker.x, oy = opts.y ?? attacker.y; // de dónde sale (el rebote del orbe del Mago sale del que tocó)
+    const dx = opts.tx - ox, dy = opts.ty - oy;
     const dist = Math.hypot(dx, dy) || 0.0001;
     if (attacker.isHero && fxArena(attacker)) sfx('shoot');
     attacker.arena.projectiles.push({
-        attacker, kind: 'skill', x: attacker.x, y: attacker.y, tx: opts.tx, ty: opts.ty,
+        attacker, kind: 'skill', x: ox, y: oy, tx: opts.tx, ty: opts.ty,
         dx: dx / dist, dy: dy / dist, dist, traveled: 0, speed: opts.speed, radius: opts.radius,
         dmg: opts.dmg, dmgType: opts.dmgType || 'magical', vfx: opts.vfx, skillName: opts.skillName,
         onHit: opts.onHit, onArrive: opts.onArrive, hitSet: new Set(), fxEl: fxCastingSkill ? skillVfx(fxCastingSkill).el : null,

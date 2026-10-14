@@ -288,6 +288,7 @@ function updateTower(dt) {
     towerAwakenTick(level, from); // sin arma no salís del círculo; el piloto agarra la espada (towerAwaken.js)
     towerFeelTick(player); // tensar el arco (towerFeel.js)
     parryTick(player); // la parada de la espada (towerParry.js)
+    mageTick(player); // la Carga del Mago (towerMage.js)
     towerAutosave(); // cada 15 s (towerSave.js)
     unstickFromWall(player);
     // Cuaderno (REWORK.md §1): moverse y esquivar se detectan leyendo el estado, sin tocar el código compartido.

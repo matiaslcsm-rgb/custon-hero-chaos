@@ -159,7 +159,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
   - [ ] 1c: revisar la dificultad sin las Q/E/R (hoy va 15-20% más lento) después de sumar la especial (paso 4).
 - [x] **Las 3 clases, paso 2: el Arquero** (ráfaga de 3, flechazo que critea y aturde, impulso hacia el mouse, pasiva
       Ojo Rápido; sin Q/E/R del equipo, conserva el Tiro Tensado en la Q). 2026-10-14.
-- [ ] **Las 3 clases, paso 3: el Mago** (orbe que rebota 1 vez, tormenta de 3 rayos a enemigos al azar,
+- [x] **Las 3 clases, paso 3: el Mago** (2026-10-14: tocando, +6% en grupo y −5% solo contra el Guerrero; cargando, +29% / −14%) (orbe que rebota 1 vez, tormenta de 3 rayos a enemigos al azar,
       teletransporte corto, pasiva Carga). Medir contra el Guerrero (±10%).
 - [ ] **Las 3 clases, paso 4: la especial (R) de cada clase** (Torbellino, Lluvia de Flechas, Meteoro), medida. Cada uno medido contra el Guerrero (daño por segundo
       parejo ±10%, muertes por piso).
@@ -204,7 +204,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
       nada. Revisar que no se apilen (REWORK.md §8).
 - [x] **Señores de cueva con daño desmedido:** midiendo el piso 6 salió uno con 1833 de daño por golpe (los demás,
       261-393). Buscar qué combinación de afijos de campeón lo dispara y ponerle tope.
-- [ ] **Prueba aleatoria de la Raíz Madre:** a veces falla sola. Fijar la semilla o el margen para que sea estable.
+- [x] **Prueba aleatoria de la Raíz Madre:** con el bestiario fijo pasa 260 de 260 veces (lo que variaba eran las criaturas generadas). 2026-10-14.
 - [ ] **Dificultad medida con el piloto** después de los cambios de la espada (combo con clic, parada): enseñarle la
       parada al piloto y comparar muertes y tiempos por piso contra la marca de REWORK.md §10.
 - [ ] **Cuánto pierde quien apunta mal con el arco** (ataque con clic): simular puntería con error y medir el daño.

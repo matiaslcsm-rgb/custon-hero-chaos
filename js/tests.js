@@ -1763,6 +1763,33 @@ test('Torre: el Guerrero — la espada es una clase y su pasiva hace que el dañ
     check(player.gear.gloves === glove && !player.skills.includes(itemSkill(glove)), 'al Guerrero los guantes no le dan su habilidad (solo stats)');
     check(itemTooltipHtml(glove).includes('no usa las habilidades'), 'y el cartel de la pieza lo avisa');
 }, { random: true });
+test('Torre: el Mago — orbe que rebota, tormenta de 3 rayos, teletransporte y su pasiva Carga', () => {
+    const L = newTower('AXE', { weapon: 'ADVENTURER_STAFF' });
+    checkEq(player.heroClass, 'mage', 'agarrar el bastón te hace Mago');
+    const foes = L.creeps.filter(o => o.isAlive()).slice(0, 2); L.creeps = foes;
+    foes.forEach((c, i) => { Object.assign(c, { x: player.x + 3, y: player.y + i, hp: 1e6, maxHp: 1e6 }); });
+    for (let y = player.y - 1; y <= player.y + 2; y++) for (let x = player.x - 1; x <= player.x + 6; x++) L.walls[y][x] = 0;
+    // el orbe pega al primero y rebota al otro
+    L.projectiles = []; mageOrb(player, { dx: 1, dy: 0 });
+    for (let i = 0; i < 40; i++) updateProjectiles(L, 0.05);
+    check(foes.every(c => c.hp < 1e6), 'el orbe rebota 1 vez');
+    // tormenta: 3 rayos y enfriamiento
+    const hp0 = foes.map(c => c.hp);
+    check(mageStorm(player, { x: foes[0].x, y: foes[0].y }), 'el clic derecho llama la tormenta');
+    check(foes.some((c, i) => c.hp < hp0[i]) && !mageStorm(player, { x: foes[0].x, y: foes[0].y }), 'pega y tiene enfriamiento');
+    // Carga: cada etapa suma una mejora y lo deja quieto
+    check(mageChargeStart(player, 'orb'), 'empieza a cargar');
+    gameClock += MAGE.stage * MAGE.stages + 0.01; mageTick(player);
+    checkEq(player.mageCharge.perks.length, MAGE.stages, 'tres etapas, tres mejoras');
+    check(effMoveMult(player) < 0.1, 'mientras carga queda quieto');
+    L.projectiles = []; mageRelease(player, 'orb');
+    check(!player.mageCharge && L.projectiles.length === 1, 'al soltar sale el orbe');
+    // teletransporte: no atraviesa paredes
+    const x0 = player.x; L.walls[player.y][x0 + 2] = WALL.stone;
+    const cw = cursorWorld; cursorWorld = () => ({ x: x0 + 4, y: player.y });
+    try { mageBlink(player); } finally { cursorWorld = cw; }
+    checkEq(player.x, x0 + 1, 'se frena antes de la pared');
+}, { random: true });
 test('Torre: el Arquero — ráfaga de 3, flechazo que critea y aturde, y su pasiva Ojo Rápido', () => {
     const L = newTower('AXE', { weapon: 'ADVENTURER_BOW' });
     checkEq(player.heroClass, 'archer', 'agarrar el arco te hace Arquero');
