@@ -60,8 +60,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **Reliquias (2026-10-14, fase T00):** 12 reliquias apilables al estilo Risk of Rain, con 4 etiquetas y bonus de
   conjunto; conviven con el equipo hasta que lleguen las clases fijas (REWORK.md §20).
 - **Jefes escondidos (2026-10-14, modo automático):** el Ciervo Blanco (piso 1) sale de noche en un claro apartado; la
-  Flor Carnívora (piso 2), el Leviatán del Fango (3), la Semilla Primera (4), el Guardián de Arena (5) y el Lector Sin Ojos (6) esperan en salas tapiadas, detrás de una grieta. Cada uno suelta una pieza única. Faltan
-  los de los otros pisos (REWORK.md §6, ROADMAP.md T0).
+  Flor Carnívora (piso 2), el Leviatán del Fango (3), la Semilla Primera (4), el Guardián de Arena (5) y el Lector Sin Ojos (6), el Lobo de Escarcha (7), el Vigía Perdido (8) y el Yunque Vivo (9) esperan en salas tapiadas,
+  detrás de una grieta. Cada uno suelta una pieza única. Ya están todos los de la tabla (REWORK.md §6, ROADMAP.md T0).
 - **Salas secretas (2026-10-14, modo automático):** cámaras selladas desde el piso 2 y una sala escondida en cada
   laberinto, con una pared agrietada que se rompe a golpes y un cofre con una pieza rara (REWORK.md §6).
 - **Las Páginas de Arén (2026-10-14, modo automático):** una por piso, adentro de la cámara sellada más lejana (en el

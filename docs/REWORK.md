@@ -838,6 +838,12 @@ también tiene que aprender a esquivar los ataques anunciados).
 - ✅ **Jefe escondido del piso 7: el Lobo de Escarcha** (2026-10-14; lo empezó la corrida automática que se detuvo y
   se completó acá): en el mirador cerrado (sala sellada con grieta), aviso de Isla la farolera; suelta las **Garras del
   Lobo de Escarcha** (guantes con crítico y velocidad de ataque). Verificado: la sala se arma en 8 de 8 pisos 7.
+- ✅ **Jefes escondidos de los pisos 8 y 9** (2026-10-14): el **Vigía Perdido** (piso 8, junto a la campana congelada;
+  se parece a vos, ataca a distancia; suelta la **Capa del Vigía Perdido**, coraza con resistencia mágica y velocidad)
+  y el **Yunque Vivo** (piso 9, en la forja apagada; aturde; suelta el **Martillo del Yunque Vivo**, arma con Fuerza y
+  daño). Medido en 10 pisos de cada uno: salas 10/10, grieta a 99-235 y 60-309 pasos. Vigía 1674 de vida/211 de daño;
+  el Yunque salía con 3477 de vida (el que aturde trae mucha de base) y quedó en 1912/169. Curva de los pisos 6 a 9:
+  1242, 1246, 1674, 1912 de vida. Con esto están todos los de la tabla de TORRE-MUNDO.md.
 - ✅ **La especial (R) de cada clase** (2026-10-14, fase T00 paso 4, `js/towerSpecials.js`), 20 s de enfriamiento
   (el Arquero, 16 por Ojo Rápido): Guerrero, **Torbellino** (pega ×3 a todos en 2,2 casillas y los empuja 2);
   Arquero, **Lluvia de Flechas** (zona de radio 2 en el cursor, 6 golpes de ×0,3 en 2 s); Mago, **Meteoro** (cae a los

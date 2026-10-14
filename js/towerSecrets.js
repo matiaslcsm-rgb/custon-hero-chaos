@@ -123,7 +123,8 @@ function drawCracks(level) {
 // · La Flor Carnívora (piso 2) está encerrada en el invernadero tapiado: una sala grande sellada con una pared agrietada.
 // · El Leviatán del Fango (piso 3), igual, en la sala de bombas de las cisternas; la Semilla Primera (piso 4), en el
 //   hueco de la raíz; el Guardián de Arena (piso 5), en la sala del reloj detenido; el Lector Sin Ojos (piso 6), entre las estanterías hundidas;
-//   el Lobo de Escarcha (piso 7), en el mirador cerrado.
+//   el Lobo de Escarcha (piso 7), en el mirador cerrado; el Vigía Perdido (piso 8), junto a la campana congelada; el Yunque
+//   Vivo (piso 9), en la forja apagada.
 const HIDDEN_BOSSES = {
     1: { label: 'Ciervo Blanco', role: 'skirmisher', body: 'wolf', color: '#eee6d2', parts: ['horns', 'eyes'], scale: 1.35, mult: 2.6, hp: 3.8, lvl: 3, night: true, // hp: vida extra (más que un señor de cueva sin pegar de un golpe)
         mechanic: 'Jefe escondido del piso 1: pasta de noche en un claro apartado del bosque y se va al amanecer. Rápido y escurridizo.',
@@ -152,7 +153,15 @@ const HIDDEN_BOSSES = {
     7: { label: 'Lobo de Escarcha', role: 'skirmisher', body: 'wolf', color: '#bde0fe', parts: ['spikes', 'eyes'], scale: 1.45, mult: 2.4, hp: 3.6, lvl: 3, sealed: [11, 8],
         mechanic: 'Jefe escondido del piso 7: lo encerraron en el mirador cerrado, donde entra la nieve. Rápido y escurridizo.',
         hint: '🏮 Isla, la farolera: «El mirador lo cerramos porque algo aullaba ahí. El farol de esa sala nunca se prende.»',
-        icon: '🐺', unique: { slot: 'gloves', name: 'Garras del Lobo de Escarcha', extra: ['critChance', 'atkSpeedPct'] } }
+        icon: '🐺', unique: { slot: 'gloves', name: 'Garras del Lobo de Escarcha', extra: ['critChance', 'atkSpeedPct'] } },
+    8: { label: 'Vigía Perdido', role: 'archer', body: 'archer', color: '#a8dadc', parts: ['eyes'], scale: 1.4, mult: 2.4, hp: 3.6, lvl: 3, sealed: [11, 8],
+        mechanic: 'Jefe escondido del piso 8: quedó congelado junto a la campana del mirador. Se parece a vos. Ataca a distancia.',
+        hint: '🔔 Los vigías: «Hace cien años subió alguien igual a vos. Se quedó en la sala de la campana congelada y la tapiamos.»',
+        icon: '🔔', unique: { slot: 'armor', name: 'Capa del Vigía Perdido', extra: ['magicResist', 'moveSpeedPct'] } },
+    9: { label: 'Yunque Vivo', role: 'stunner', body: 'golem', color: '#e85d04', parts: ['spikes', 'eyes'], scale: 1.6, mult: 2.2, hp: 1.65, lvl: 3, sealed: [11, 8], // el que aturde trae mucha vida de base (con 3 salía con 3477)
+        mechanic: 'Jefe escondido del piso 9: el yunque de la forja apagada que se levantó solo. Aturde con sus golpes.',
+        hint: '🔨 Maestro Brasa: «Apagamos la forja vieja porque el yunque empezó a moverse. Si oís martillazos detrás de una pared, es él.»',
+        icon: '🔨', unique: { slot: 'weapon', name: 'Martillo del Yunque Vivo', extra: ['str', 'flatAtk'] } }
 };
 // Un claro abierto (7×7 sin muros) lo más lejos posible de la entrada y de la página
 function placeHiddenBoss(level, dist) {
