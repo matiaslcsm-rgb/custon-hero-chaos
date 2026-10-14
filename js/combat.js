@@ -84,7 +84,7 @@ function blinkNextTo(unit, target) {
     unstickFromWall(unit, target);
 }
 
-// Si una unidad terminó sobre una pared (saltos y teletransportes en Tower Chaos), la lleva a la casilla libre más
+// Si una unidad terminó sobre una pared (saltos y teletransportes en Infinite Tower), la lleva a la casilla libre más
 // cercana (a `near` si se indica, si no a ella misma). En las arenas sin paredes no hace nada.
 function unstickFromWall(unit, near = unit) {
     const arena = unit.arena;
@@ -296,7 +296,7 @@ function killCreep(c, killer) {
     c.hp = 0;
     fxDeath(c);
     if (!killer || !killer.isHero) return;
-    if (c.arena && c.arena.kind === 'tower') towerLootOnKill(c.arena, c, killer); // Tower Chaos: botín
+    if (c.arena && c.arena.kind === 'tower') towerLootOnKill(c.arena, c, killer); // Infinite Tower: botín
     if (c.type && c.type.onDeath) c.type.onDeath(c, killer);
     if (c.champion) championOnDeath(c);
     if (killer === player && fxArena(c) && (c.champion || c.isBoss || c.isGuardian || c.isCaveBoss || c.isCarrier)) { fxHitStop(0.09); fxShake(4); } // muerte pesada: pausa de impacto

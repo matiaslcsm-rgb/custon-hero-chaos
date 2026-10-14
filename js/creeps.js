@@ -138,7 +138,7 @@ function creepStrike(c, target, effAtk) {
     const result = dealDamage(c, target, Math.round(effAtk), c.attackType, { isAttack: true });
     if (result.evaded) log(`💨 Esquivaste el ataque de ${c.label}.`);
     if (c.type.onAttack) c.type.onAttack(c, target, result);
-    if (c.champion) championOnAttack(c, target, result); // Tower Chaos: afijos de campeón (towerWorld.js)
+    if (c.champion) championOnAttack(c, target, result); // Infinite Tower: afijos de campeón (towerWorld.js)
 }
 
 // --- AVISO DE LA PRÓXIMA OLEADA ---

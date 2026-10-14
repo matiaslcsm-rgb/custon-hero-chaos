@@ -1,4 +1,4 @@
-# Rework de Tower Chaos (plan, 2026-10-07)
+# Rework de Infinite Tower (plan, 2026-10-07)
 
 Pedido del usuario (2026-10-07): "vamos a reworkear muchas cosas". Este documento junta todo lo pedido, lo ordena
 como diseño (qué problema resuelve, referencias, cómo encaja con lo que ya hay) y propone un orden de fases. Lo que se
@@ -74,7 +74,7 @@ manejar tanto.
   - **Decisión (2026-10-07):** sin sistema de carga. Las ex-definitivas pasan a ser activas comunes (maná y
     enfriamiento, como cualquier otra), con sus números rebalanceados a la baja para que anden seguido en vez de
     una vez cada mucho. Técnicamente, cada habilidad puede declarar un `towerValues` con los números que usa solo
-    en la Torre (`js/progression.js`, `skillValueSource`); Caos de Héroes sigue usando los valores de siempre.
+    en la Torre (`js/progression.js`, `skillValueSource`); Custom Hero sigue usando los valores de siempre.
 - **Rediseñar el catálogo** con roles claros y efectos que se lean:
   - **Control de unidades:** atraer (vórtice), empujar (onda), aturdir, congelar, raíz, provocar, miedo (huyen),
     convertir a un enemigo en aliado por unos segundos.
@@ -118,7 +118,7 @@ manejar tanto.
   | Nieve | Wyrm de Escarcha | Aliento en cono que congela 1 s y deja el piso helado 10 s (−45% de velocidad). Desde la fase 2, lluvia de carámbanos. |
   | Volcán | Señor de la Ceniza | Un sector (un cuarto alrededor suyo) se marca y arde 6 s: hay que cambiar de sector. Desde la fase 2, meteoritos. |
   **Zonas que duran en el piso** (veneno, hielo, lava): sistema nuevo, reutilizable; el piloto las evita.
-  **Medido** (piloto): con la vida de los jefes de Custom Hero Chaos (1400-2000) morían en 5-60 s, antes de mostrar sus
+  **Medido** (piloto): con la vida de los jefes de Custom Hero (1400-2000) morían en 5-60 s, antes de mostrar sus
   fases, y las runs salieron sin muertes (Espada 75 min, Bastón 112). Igualados a 4500 de vida y 40 de ataque: Espada
   137 min y 5 muertes (jefes de 32 s a 3 min; la Bruja del Fango era la más dura para el cuerpo a cuerpo, por eso su
   niebla bajó a 2,5 s y reaparece a 3-5 casillas), Bastón 92 min sin muertes (jefes en 13-33 s). **Queda abierto:** el
@@ -226,7 +226,7 @@ volcán CC BY 4.0, créditos en docs/CREDITOS.md y en el menú), ~21 MB que se b
   30%. Contra un guardián o un señor de cueva suena el tema de jefe en vez del combate. En el pueblo no hay combate.
 - **Noche:** la base baja al 75% y pasa por un filtro de graves (más oscura), sin pista aparte.
 - Opción **🎵 Música** en la pausa (se guarda); el 🔊 Sonido también la apaga. En pausa baja al 40%.
-- Falta: música del menú y del Custom Hero Chaos (por ahora solo suena en la Torre).
+- Falta: música del menú y del Custom Hero (por ahora solo suena en la Torre).
 
 ---
 
@@ -428,7 +428,7 @@ humanos, registrando en cada piso nivel, ataque, vida, arma, piezas raras y de d
 2. **Las muertes son las que más tiempo se comen:** al morir renacés en el piso 1 y volvés a subir. 6 muertes en el piso
    10 = 47 minutos perdidos (~8 min cada una). Eso explica casi toda la diferencia. → Decisión pendiente (ver abajo).
 3. **Error de diseño heredado:** las habilidades de los héroes que suman "+X permanente por cada baja" (pensadas para las
-   rondas de Custom Hero Chaos) en la Torre, con ~2400 bajas por run, daban +240 de daño o +757% de crítico. →
+   rondas de Custom Hero) en la Torre, con ~2400 bajas por run, daban +240 de daño o +757% de crítico. →
    **Arreglado:** tope por habilidad y por run (`TOWER_PERM_CAP`, progression.js): daño +40, vida +300, atributos +15,
    armadura +8, crítico +15%, vel. de ataque +20%, robo de vida +10%, regeneración +10/+5. Al llegar al tope, un mensaje
    lo avisa. El escalado propio del Aventurero (vida por bajas, +1150-1235 por run) no tiene tope: es igual para todos.
@@ -518,7 +518,7 @@ aunque uses la misma arma (como los Pactos de Hades o las Variantes de Dead Cell
 
 ## 17. Prototipo en 3D estilo PS1 (2026-10-08, carpeta `3d/`)
 Pedido: "¿podés hacer un juego 3D low poly? como el Lunacid". Prototipo aparte (no toca el juego en 2D) para ver cómo se
-siente Tower Chaos en primera persona con la estética de Lunacid / King's Field, antes de decidir nada sobre el juego entero.
+siente Infinite Tower en primera persona con la estética de Lunacid / King's Field, antes de decidir nada sobre el juego entero.
 Se abre desde el menú ("🧊 Prototipo 3D") o en `3d/`. Usa Three.js (cargado de unpkg, sin instalar nada).
 - **Look PS1:** se dibuja a 320 px de ancho y se agranda sin suavizar; texturas pixeladas generadas con código (ladrillo con
   musgo, baldosas, techo); los vértices se redondean a una grilla de pantalla (el temblor de PS1); niebla espesa; antorchas
@@ -647,24 +647,24 @@ se cambian por los del panel oscuro desde el contexto del canvas (sin tocar cada
 
 **Estilo principal (2026-10-13):** el usuario decidió que el pixel art pasa a ser el estilo de la Torre. Viene prendido
 para todos (preferencia nueva `chc-style`; la de la prueba se ignora); en la pausa (🟫 Pixel art) se puede volver a la
-tinta, o con `?pixel=0`. El modo Custom Hero Chaos no cambia.
+tinta, o con `?pixel=0`. El modo Custom Hero no cambia.
 
-**Minimapa, portada y Custom Hero Chaos (2026-10-13):**
+**Minimapa, portada y Custom Hero (2026-10-13):**
 - El minimapa y el mapa grande pintan lo descubierto con la paleta del pixel art de cada bioma (si cambiás de estilo se
   repintan con lo ya explorado).
 - **Portada** (`js/titleScreen.js`): escena en pixel art animada (atardecer con estrellas y luna, la torre que se pierde
   en las nubes con ventanas que titilan, colinas con pinos, el camino, el aventurero junto a una fogata y criaturas del
-  bestiario que cruzan), el nombre del juego y dos tarjetas para elegir Custom Hero Chaos o Tower Chaos, con el nombre,
+  bestiario que cruzan), el nombre del juego y dos tarjetas para elegir Custom Hero o Infinite Tower, con el nombre,
   el tutorial, el glosario y el prototipo 3D abajo.
-- **Custom Hero Chaos** con lo que encaja de la Torre (sus escenarios ya eran pixel art con el mismo píxel): creeps con
+- **Custom Hero** con lo que encaja de la Torre (sus escenarios ya eran pixel art con el mismo píxel): creeps con
   los cuerpos del bestiario, jefes de ronda con el más parecido (Reina de la Colmena → Reina Escorpión, Dragón de
   Escarcha → Wyrm, Señor del Abismo → Señor de la Ceniza, Liche → Bruja del Fango, Gólem, Titán → ogro, Espectro →
   fantasma, Hidra → lagarto grande), efectos de combate en píxeles, sangre y restos, números con fuente de píxeles y la
   interfaz oscura con Pixelify Sans. Los héroes conservan sus sprites de 12×12 (ya son pixel art y los identifican).
 
 **Menú previo y tutorial de cada modo (2026-10-13):** tocar una tarjeta de la portada abre el menú de ese modo (de qué
-se trata, cómo es una partida, Jugar, su Tutorial y lo propio: glosario en Custom Hero Chaos; estilo visual y bestiario
-guardado en Tower Chaos). Tower Chaos tiene ahora su tutorial de 9 páginas (objetivo, las tres armas, controles con las
+se trata, cómo es una partida, Jugar, su Tutorial y lo propio: glosario en Custom Hero; estilo visual y bestiario
+guardado en Infinite Tower). Infinite Tower tiene ahora su tutorial de 9 páginas (objetivo, las tres armas, controles con las
 teclas configuradas, equipo, pueblo, leer la pelea, el mundo, morir, la Bitácora). La primera vez viene marcado "ver el
 tutorial antes de jugar" y al terminarlo con "¡A jugar!" arranca la partida. En partida, Esc → Tutorial abre el del modo.
 
@@ -711,7 +711,7 @@ el mismo paso; lo grande queda acá, ordenado por impacto.
 - ✅ **Guardar la run y continuarla** (2026-10-14, pedido: "que se guarde la partida para poder continuar la run",
   `js/towerSave.js`): se guarda solo (al entrar a cada piso, al morir, cada 15 s, al salir al menú y al cerrar la pestaña)
   todo lo que es del jugador: héroe, nivel, stats y bonus permanentes, equipo, bolsa, oro, el piso, los pisos con el
-  guardián vencido, los restos y la crónica de la run. En el menú de Tower Chaos aparece **Continuar** (piso, nivel,
+  guardián vencido, los restos y la crónica de la run. En el menú de Infinite Tower aparece **Continuar** (piso, nivel,
   minutos jugados y hace cuánto). Al continuar volvés a la **entrada del piso** donde estabas, con el piso armado de nuevo
   (como Dead Cells al entrar a un bioma); si su guardián ya estaba vencido, la escalera queda abierta, y tus restos te
   esperan en la entrada. Lo que se había llevado un portador vuelve a la bolsa. "Salir al menú" en la Torre pasa a
@@ -725,7 +725,7 @@ el mismo paso; lo grande queda acá, ordenado por impacto.
   cercano al cursor dentro de un cono de ~57° hacia el cursor (el de al lado, ~77°); si no hay nadie, el golpe va al aire.
   A distancia: el disparo sale en línea recta hacia el cursor y se frena en el primero (si apuntás mal, falla). Un clic
   antes de tiempo queda guardado 0,3 s. Clic en un enemigo lejos: caminás hasta él. En la pausa (🖱️) se vuelve al ataque
-  automático; el piloto y Custom Hero Chaos no cambian. **Pendiente:** medir con el piloto cuánto pierde un jugador que
+  automático; el piloto y Custom Hero no cambian. **Pendiente:** medir con el piloto cuánto pierde un jugador que
   apunta mal con el arco (el piloto sigue con el automático).
 - ✅ **La espada sin Q: combo con el clic y parada con el clic derecho** (2026-10-13, pedido: "sacá la Q y que haga un
   combo de 3 golpes con el clic; usar la espada te da eso de base. El segundo clic es un golpe que rebota el disparo, un
@@ -834,7 +834,7 @@ el mismo paso; lo grande queda acá, ordenado por impacto.
   piloto automático levanta todo.
 - ✅ **El Cuaderno explica lo nuevo** con 5 páginas más, la primera vez que pasa: el suelo que avisa (ataques anunciados),
   la Esencia, el Herrero, fundir y dominar un poder.
-- ✅ **Música en el menú y en Custom Hero Chaos:** el pueblo en el menú y las fases tranquilas, combate en oleadas y
+- ✅ **Música en el menú y en Custom Hero:** el pueblo en el menú y las fases tranquilas, combate en oleadas y
   duelos, jefe en los jefes de ronda. Volumen y opción de música en la pausa de los dos modos.
 - ✅ **La Q de las armas iniciales se ve y se siente** (2026-10-08): tajos en arco, línea de tiro que se tensa, flechas con
   forma de flecha, puntitos del combo, el remate frena el tiempo; los tiradores avisan con un aro rojo y sus balas son
@@ -873,5 +873,5 @@ el mismo paso; lo grande queda acá, ordenado por impacto.
   completo (no solo las 11 ex-definitivas) para que arma/guantes/armadura tengan opciones parejas entre sí.
 - ❓ Energía con tiempo de espera, o solo Esencia. Recomendado: solo Esencia.
 - ❓ Música de bancos libres o generada con código. Recomendado: bancos libres con créditos.
-- ❓ El modo Custom Hero Chaos: ¿el rework de habilidades también lo toca? Recomendado: no, queda como está. El rework
-  es de Tower Chaos.
+- ❓ El modo Custom Hero: ¿el rework de habilidades también lo toca? Recomendado: no, queda como está. El rework
+  es de Infinite Tower.

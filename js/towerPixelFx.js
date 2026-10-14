@@ -1,4 +1,4 @@
-// Tower Chaos: efectos de combate en pixel art (2026-10-13, estilo principal de la Torre; va con el suelo en pixel art, towerPixel.js).
+// Infinite Tower: efectos de combate en pixel art (2026-10-13, estilo principal de la Torre; va con el suelo en pixel art, towerPixel.js).
 //
 //   - CAPAS DE EFECTOS: los tajos, aros, avisos de golpe, zonas, proyectiles y balas se dibujan como siempre, pero en una
 //     imagen chica con el mismo tamaño de píxel que los sprites (1 píxel = 2 unidades) y con bordes duros (sin el borde
@@ -17,7 +17,7 @@ function withCtx(c, fn) { const old = ctx; ctx = c; try { fn(); } finally { ctx 
 
 // Dibuja `draw` (en coordenadas del mundo) en una capa de píxeles grandes y la pega en la pantalla
 function pxFxLayer(name, draw) {
-    const P = PXG.scale * (towerLayout ? viewScale() : mapScale) * (window.devicePixelRatio || 1); // píxeles reales por píxel de sprite (en Custom Hero Chaos, con el mapa agrandado)
+    const P = PXG.scale * (towerLayout ? viewScale() : mapScale) * (window.devicePixelRatio || 1); // píxeles reales por píxel de sprite (en Custom Hero, con el mapa agrandado)
     const w = Math.ceil(canvas.width / P) + 1, h = Math.ceil(canvas.height / P) + 1;
     let L = pxfLayers[name];
     if (!L) { const c = document.createElement('canvas'); L = pxfLayers[name] = { c, g: c.getContext('2d', { willReadFrequently: true }) }; }
@@ -61,7 +61,7 @@ function pxBloodOf(u) {
     return ['#7a1212', '#5a0c0c', '#9a1a1a'];
 }
 function pxBleed(u, n, kind) {
-    if (!pixelEnabled || !u || !u.arena || u.arena !== viewArena()) return; // en la Torre y en Custom Hero Chaos
+    if (!pixelEnabled || !u || !u.arena || u.arena !== viewArena()) return; // en la Torre y en Custom Hero
     const L = u.arena, list = L.pxDebris || (L.pxDebris = []);
     const x = (u.rx ?? u.x) * TILE + TILE / 2, y = (u.ry ?? u.y) * TILE + TILE * 0.85, blood = pxBloodOf(u);
     const gib = kind === 'death' && u.color ? [shade(u.color, -0.2), shade(u.color, -0.45)] : null;

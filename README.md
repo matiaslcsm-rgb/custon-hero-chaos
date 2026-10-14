@@ -1,6 +1,6 @@
-# Custom Hero Chaos — ASCII Edition
+# Custom Hero — ASCII Edition
 
-Juego inspirado en Custom Hero Chaos: elegís un héroe, drafteás habilidades de todos los héroes,
+Juego inspirado en Custom Hero: elegís un héroe, drafteás habilidades de todos los héroes,
 subís de nivel, comprás ítems y sobrevivís oleadas de creeps.
 
 - **Jugar:** abrir `index.html` (doble clic). Tecla **P** (o el botón 🤖): la IA juega por vos.

@@ -1,4 +1,4 @@
-// Tower Chaos: suelo en pixel art (2026-10-13, estilo principal de la Torre). Referencias del usuario: Noita y Risk of Rain 1.
+// Infinite Tower: suelo en pixel art (2026-10-13, estilo principal de la Torre). Referencias del usuario: Noita y Risk of Rain 1.
 //
 //   Sin filtros: el suelo se dibuja de verdad en pixel art, a 17 píxeles por casilla (cada píxel ocupa 2×2 unidades).
 //   - SUELO CONTINUO: en vez de baldosas repetidas, el suelo se pinta píxel por píxel con ruido (manchas grandes de

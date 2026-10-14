@@ -38,7 +38,7 @@ registerHero({
         tags: ['MÁGICO', 'ÁREA'],
         values: { cooldown: [9, 8, 7, 6], manaCost: [70, 80, 90, 100], baseDmg: [70, 110, 150, 190], intRatio: 0.4, jumps: [3, 4, 5, 6], jumpRange: 4, range: 6 },
         // Rebalanceo para la Torre ("armar y balancear lo que tenemos"): Zeus pagaba 70-115 de maná por
-        // activa contra 30-50 del resto del roster; en Caos de Héroes lo compensa el maná que crece por nivel,
+        // activa contra 30-50 del resto del roster; en Custom Hero lo compensa el maná que crece por nivel,
         // en la Torre depende solo del equipo. Se recorta a la par de sus pares.
         towerValues: { manaCost: [45, 50, 55] },
         description: 'Lanza un rayo al enemigo más cercano (rango {range}) que salta a otros {jumps} enemigos cercanos (hasta {jumpRange} de un salto al siguiente): {baseDmg} + {intRatio%} de tu Inteligencia como daño mágico por salto.',

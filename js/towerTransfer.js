@@ -1,4 +1,4 @@
-// Tower Chaos: traspasar el crecimiento de una pieza a otra, en el Herrero (REWORK.md, "traspaso", 2026-10-08).
+// Infinite Tower: traspasar el crecimiento de una pieza a otra, en el Herrero (REWORK.md, "traspaso", 2026-10-08).
 //
 //   A pedido: "las armas que se suban de nivel y después aparezca una mejor, que se puedan fundir para sacar un
 //   porcentaje de sus stats y sumarlo a otro objeto, así no desperdiciamos eso; que tenga algún costo". Es la

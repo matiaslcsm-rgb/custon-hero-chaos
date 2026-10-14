@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Custom Hero Chaos · Héroes y requisitos</title>
+<title>Custom Hero · Héroes y requisitos</title>
 <!-- Documento imprimible con el roster de héroes y los requisitos para sumar héroes nuevos.
      Se arma solo con los datos del juego (js/data/heroes/*.js), así que siempre está al día.
      Para regenerar el PDF: abrir esta página y "Imprimir → Guardar como PDF", o con Edge/Chrome sin ventana:
@@ -125,7 +125,7 @@ const usedSymbols = () => {
 function cover() {
     const counts = ATTR_ORDER.map(a => `${heroes.filter(t => t.primaryAttr === a).length} de ${ATTR[a]}`).join(' · ');
     return `<div class="cover">
-        <h1>CUSTOM HERO CHAOS</h1>
+        <h1>CUSTOM HERO</h1>
         <div class="sub">Héroes y requisitos para sumar héroes nuevos</div>
         <div class="sprites">${heroes.map(t => spr(t)).join('')}</div>
         <div class="meta">${heroes.length} héroes (${counts}) · actualizado al ${TODAY}</div>

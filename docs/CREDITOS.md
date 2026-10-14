@@ -2,7 +2,7 @@
 
 ## Íconos
 
-Los íconos de habilidades, armas y equipo de Tower Chaos son de **[game-icons.net](https://game-icons.net)**,
+Los íconos de habilidades, armas y equipo de Infinite Tower son de **[game-icons.net](https://game-icons.net)**,
 bajo licencia **[CC BY 3.0](https://creativecommons.org/licenses/by/3.0/)**. El juego los repinta en estilo tinta
 (color, contorno y sombra) sobre pergamino.
 
@@ -13,7 +13,7 @@ bajo licencia **[CC BY 3.0](https://creativecommons.org/licenses/by/3.0/)**. El 
 - **skoll**: blood, fangs, winchester-rifle
 - **willdabeast**: gold-bar, orb-wand
 
-## Música (Tower Chaos)
+## Música (Infinite Tower)
 
 Pistas de **[OpenGameArt.org](https://opengameart.org)**. Todas son **CC0** (dominio público, sin obligación de crédito, igual
 lo damos), salvo la del volcán, que es **[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)**.

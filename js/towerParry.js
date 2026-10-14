@@ -1,4 +1,4 @@
-// Tower Chaos: la parada de la espada (pedido del usuario, 2026-10-13: "el segundo clic de la espada es un golpe que rebota
+// Infinite Tower: la parada de la espada (pedido del usuario, 2026-10-13: "el segundo clic de la espada es un golpe que rebota
 // el disparo que le hagan, un tipo de parry reflectivo"). Referencias: el parry de Sekiro / Hollow Knight (una ventana
 // corta que premia el momento justo) y el reflejo de Hades (Égida) o de Enter the Gungeon (la espada que devuelve balas).
 //   · Clic derecho con una espada: un tajo corto hacia el cursor que pega poco y abre una ventana de 0,3 s.

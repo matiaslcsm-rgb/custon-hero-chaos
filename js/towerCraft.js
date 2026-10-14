@@ -1,4 +1,4 @@
-// Tower Chaos: Esencia, desguace con calidades y mejoras permanentes (REWORK.md §4, fase 5, 2026-10-07).
+// Infinite Tower: Esencia, desguace con calidades y mejoras permanentes (REWORK.md §4, fase 5, 2026-10-07).
 //
 //   ESENCIA (✦): moneda permanente, no se pierde al morir ni al terminar la run (se guarda con el Códice). La sueltan
 //   jefes, señores de cueva, guardianes malditos y campeones, y se gana al dominar un poder.

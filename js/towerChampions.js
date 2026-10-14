@@ -1,4 +1,4 @@
-// Tower Chaos: campeones legibles (REWORK.md §13, 2026-10-08).
+// Infinite Tower: campeones legibles (REWORK.md §13, 2026-10-08).
 //
 //   Medido con el piloto de reflejos humanos: los campeones fueron los que más mataron, y su nombre ("Gran Troll Acorazado
 //   Campeón (Regenerador, Veloz)") no se lee en plena pelea. Como los íconos de afijo de Diablo III y Path of Exile:

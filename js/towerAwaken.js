@@ -1,4 +1,4 @@
-// Tower Chaos: el despertar en el mundo (REWORK.md §1, 2026-10-08).
+// Infinite Tower: el despertar en el mundo (REWORK.md §1, 2026-10-08).
 //
 //   Antes: al entrar a la torre se abría una ventana con 3 cartas y la partida esperaba. A pedido ("el inicio es feo"),
 //   ahora las 3 armas están CLAVADAS en el piso del círculo de piedra, alrededor tuyo, y vas caminando a agarrar una:

@@ -1,4 +1,4 @@
-// Tower Chaos: un jefe con nombre por bioma (REWORK.md §3, 2026-10-07).
+// Infinite Tower: un jefe con nombre por bioma (REWORK.md §3, 2026-10-07).
 //
 //   El guardián de cada piso es el jefe de su bioma (dos pisos por bioma; en el segundo, "Gran …"). Además de las 3 fases,
 //   los ataques anunciados y la definitiva (towerTelegraph.js), cada uno tiene una MECÁNICA PROPIA que cambia la pelea:
@@ -21,14 +21,14 @@ const BIOME_BOSSES = {
     volcano: { base: 'ABYSS_LORD', name: 'Señor de la Ceniza', color: '#d00000', signature: 'lava',
         mechanic: 'Llena de lava un sector por vez: movete al que no arde. Desde la fase 2 tira meteoritos.' }
 };
-// hp/atk: iguales para los 5 (antes, con los jefes de Custom Hero Chaos, 1400-2000 de vida: medido 2026-10-07, morían en
+// hp/atk: iguales para los 5 (antes, con los jefes de Custom Hero, 1400-2000 de vida: medido 2026-10-07, morían en
 // 5-60 s, antes de mostrar sus fases; la idea es ~1-1,5 minutos con el piloto, que esquiva casi todo)
 // Raíces (medido 2026-10-08: con 0,6%/s por raíz, sin techo y rebrotando 5 s después de cortarlas, curaban hasta el 113% de la
 // vida del jefe y la pelea podía durar 23 min): ahora curan 0,45%/s, se secan solas a los 16 s y brotan solo al empezar
 // cada fase → la curación total queda acotada (~3 × 16 × 0,45% ≈ 22% por fase si no cortás ninguna).
 const BOSS_SIG = { every: [7, 6, 5], rootRegen: 0.0045, rootLife: 16, rootArmor: 4, roots: 2, zoneTick: 0.5, hp: 4500, atk: 40 };
 const bossTypeCache = {};
-// Tipo del guardián de un piso: el jefe de su bioma (copia del jefe base, sin su mecánica de Custom Hero Chaos)
+// Tipo del guardián de un piso: el jefe de su bioma (copia del jefe base, sin su mecánica de Custom Hero)
 function biomeBossType(floor) {
     const biome = biomeFor(floor), b = BIOME_BOSSES[biome], second = floor % 2 === 0;
     const key = biome + (second ? '2' : '');

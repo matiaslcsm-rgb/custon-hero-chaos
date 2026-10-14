@@ -19,7 +19,7 @@ let MOVE_ATTACK_RULE = 'free'; // a pedido: se ataca caminando; el equilibrio se
 // Solo el movimiento: ataques y proyectiles quedan igual.
 const MOVE_SPEED_MULT = 0.65; // bajado otra vez a pedido (antes 0,8)
 
-// Segundos que tarda una unidad en avanzar una casilla (con sus efectos). En Tower Chaos el héroe camina más rápido
+// Segundos que tarda una unidad en avanzar una casilla (con sus efectos). En Infinite Tower el héroe camina más rápido
 // (TOWER.heroSpeed): el mapa es mucho más grande que una arena. Lo usa también el dibujo para deslizarse sin frenar.
 function heroStepTime(hero) {
     const tower = hero.arena && hero.arena.kind === 'tower' ? TOWER.heroSpeed : 1;

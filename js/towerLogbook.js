@@ -1,4 +1,4 @@
-// Tower Chaos: la Bitácora (REWORK.md §6, 2026-10-08).
+// Infinite Tower: la Bitácora (REWORK.md §6, 2026-10-08).
 //
 //   Un solo libro con pestañas en vez de tres ventanas sueltas: ✏️ Cuaderno (N) · 📜 Códice (J) · 🐾 Bestiario (K).
 //   Cada tecla abre el libro en su pestaña; la misma tecla lo cierra y otra cambia de pestaña (como el diario de Hades

@@ -321,7 +321,7 @@ function drawElementMark(u, cx, cy, half) {
     ctx.restore();
 }
 
-// --- REACCIONES ELEMENTALES (Tower Chaos) ---
+// --- REACCIONES ELEMENTALES (Infinite Tower) ---
 // Una habilidad que daña marca al enemigo con su elemento (5 s). Si otra de OTRO elemento le pega mientras tiene la
 // marca, se produce una reacción y la marca se consume (como en Magicka, Divinity o Genshin). Premia combinar
 // habilidades de héroes distintos en el equipo. Los ataques básicos no marcan.

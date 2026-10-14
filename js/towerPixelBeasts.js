@@ -1,4 +1,4 @@
-// Tower Chaos: criaturas en pixel art (2026-10-13, estilo principal de la Torre; va con el suelo en pixel art, towerPixel.js).
+// Infinite Tower: criaturas en pixel art (2026-10-13, estilo principal de la Torre; va con el suelo en pixel art, towerPixel.js).
 //
 //   Las criaturas se generan por piezas (towerBestiary.js): rol, CUERPO, tamaño, color y PARTES. Acá cada uno de los 16
 //   cuerpos es un dibujo en pixel art hecho en código, mirando a la derecha, con 4 cuadros de caminata y 2 de reposo.
@@ -295,7 +295,7 @@ function pxbFrame(body, color, parts, kind, k) {
 // Capa del color de la armadura (o del arma), capucha del casco, ribete y botas de las botas, y el arma con su forma.
 const PXH_WEAPON = { ADVENTURER_BOW: 'bow', SNIPER: 'rifle', NECROMANCER: 'scythe', DANCER: 'twin', ASSASSIN: 'daggers' };
 function pxHeroLook(u) {
-    // Caos de Héroes (2026-10-13): no hay equipo dinámico, así que la pinta sale de la identidad fija de cada
+    // Custom Hero (2026-10-13): no hay equipo dinámico, así que la pinta sale de la identidad fija de cada
     // héroe (la misma paleta de sprites.js) en vez del equipo puesto; el arma usa la misma tabla que la Torre.
     if (!u.gear) {
         const pal = (HERO_SPRITES[u.key] || [])[1] || {};
@@ -386,7 +386,7 @@ function pixelPortrait(u) {
 }
 
 // Qué cuerpo de pixel art usa una unidad (null: sigue en el sprite estático)
-// Custom Hero Chaos (2026-10-13): con el pixel art prendido, sus creeps y jefes también usan estos cuerpos. Jefes de
+// Custom Hero (2026-10-13): con el pixel art prendido, sus creeps y jefes también usan estos cuerpos. Jefes de
 // ronda → el cuerpo que más se parece. Los héroes (2026-10-14) usan el mismo muñeco animado que la Torre, vestido con
 // la pinta fija de cada héroe en vez del equipo (pxHeroLook).
 const PXB_ROUND_BOSS = { GOLEM: 'golem', HIVE_QUEEN: 'boss:desert', FROST_DRAGON: 'boss:snow', ABYSS_LORD: 'boss:volcano', HYDRA: 'lizard', LICH: 'boss:swamp', BLOOD_TITAN: 'brute', PHANTOM: 'phantom' };
@@ -409,7 +409,7 @@ function pixelBodyFor(u) {
 const PXH_SCALE = 1; // el héroe: misma grilla de píxeles que el mundo (su dibujo ya tiene más resolución, towerPixelHero.js)
 function pxbScale(u) {
     if (u.isHero && gameMode === 'tower') return PXG.scale * PXH_SCALE;
-    if (u.isRoundBoss) return PXG.scale * (String(pixelBodyFor(u)).startsWith('boss:') ? 1.15 : 1.6); // jefes de ronda de Custom Hero Chaos
+    if (u.isRoundBoss) return PXG.scale * (String(pixelBodyFor(u)).startsWith('boss:') ? 1.15 : 1.6); // jefes de ronda de Custom Hero
     return PXG.scale * (u.isGuardian ? 1.35 : ((u.type && u.type.scale) || 1) * (u.isCaveBoss ? 1.6 : u.isBoss ? 1.3 : 1));
 }
 // Altura de la figura por encima del centro de la casilla (para la barra de vida)

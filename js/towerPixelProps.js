@@ -1,4 +1,4 @@
-// Tower Chaos: objetos del mundo en pixel art (2026-10-13, estilo principal de la Torre; va con el suelo en pixel art, towerPixel.js).
+// Infinite Tower: objetos del mundo en pixel art (2026-10-13, estilo principal de la Torre; va con el suelo en pixel art, towerPixel.js).
 //
 //   Cofres, botín, antorchas y fogatas, mercader, herrero y yunque, santuarios, las armas clavadas del despertar, la
 //   piedra de regreso, los menhires del círculo, la escalera, las cuevas (boca, pozo y soga), tus restos y los eventos

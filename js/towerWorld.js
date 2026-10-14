@@ -1,4 +1,4 @@
-// Tower Chaos: pisos al estilo Aincrad (Sword Art Online). Cada piso es un bioma abierto con un pueblo seguro y, en el
+// Infinite Tower: pisos al estilo Aincrad (Sword Art Online). Cada piso es un bioma abierto con un pueblo seguro y, en el
 // otro extremo, la torre-laberinto (salas y pasillos de piedra) con el guardián y la escalera al piso siguiente.
 // Diseño: docs/ROGUELIKE.md (Fase 4: biomas).
 //
@@ -746,7 +746,7 @@ function enterCave(cave, depth, fromBelow = false) {
     enterTowerLevel(level, fromBelow ? arrivalNear(level, level.down) : level.start);
     level.titleAt = gameClock;
     towerRun.stats.deepest = Math.max(towerRun.stats.deepest || 0, depth);
-    setStateText(`TOWER CHAOS · PISO ${cave.surface.floor} · CUEVA −${depth} DE −${cave.max}`);
+    setStateText(`INFINITE TOWER · PISO ${cave.surface.floor} · CUEVA −${depth} DE −${cave.max}`);
     sfx('wave');
     if (!fromBelow) log(depth === 1 ? `🕳️ Entraste a una cueva (baja hasta −${cave.max}). Más hondo: más oscuro, más difícil y mejor botín; en el fondo, un tesoro.` : `🕳️ Bajaste al nivel −${depth} de la cueva.`);
 }
@@ -754,7 +754,7 @@ function leaveCave(level) {
     const cave = level.cave;
     if (level.depth > 1) { enterCave(cave, level.depth - 1, true); return; }
     enterTowerLevel(cave.surface, arrivalNear(cave.surface, cave));
-    setStateText(`TOWER CHAOS · PISO ${cave.surface.floor} DE ${TOWER.floors} · ${BIOMES[cave.surface.biome].name.toUpperCase()}`);
+    setStateText(`INFINITE TOWER · PISO ${cave.surface.floor} DE ${TOWER.floors} · ${BIOMES[cave.surface.biome].name.toUpperCase()}`);
     log('☀️ Saliste de la cueva.');
 }
 // Pisar una entrada, una bajada o una salida (al final del frame, ver updateTower)

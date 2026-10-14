@@ -1,4 +1,4 @@
-// Tower Chaos: pantalla grande, zoom, registro flotante y pausa de la Torre (REWORK.md §5, fase 1, 2026-10-07).
+// Infinite Tower: pantalla grande, zoom, registro flotante y pausa de la Torre (REWORK.md §5, fase 1, 2026-10-07).
 //
 //   En la Torre el mapa ocupa toda la ventana (sin ranking ni panel derecho: en este modo no hay rivales). El zoom se
 //   maneja con la rueda del mouse o + / −, y se guarda como "casillas a lo ancho", así se ve igual en cualquier pantalla.

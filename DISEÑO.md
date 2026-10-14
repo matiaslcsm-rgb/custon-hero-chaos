@@ -1,4 +1,4 @@
-# Custom Hero Chaos — Documento de diseño
+# Custom Hero — Documento de diseño
 
 Documento vivo: define las reglas del juego y el orden en que se van construyendo.
 Si algo del código contradice este documento, se discute y se actualiza uno de los dos.

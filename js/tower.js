@@ -1,4 +1,4 @@
-// Tower Chaos: modo roguelike (fase 1 de docs/ROGUELIKE.md). Se elige en el menú, al lado de Custom Hero Chaos.
+// Infinite Tower: modo roguelike (fase 1 de docs/ROGUELIKE.md). Se elige en el menú, al lado de Custom Hero.
 //
 //   Una torre de TOWER.floors niveles que se sube. Cada nivel se genera al azar la primera vez que llegás y queda igual
 //   el resto de la run. En cada nivel hay creeps sueltos con NIVEL (stats fijos por nivel, no por ronda) y un GUARDIÁN
@@ -95,7 +95,7 @@ function enterTowerFloor(floor, where = 'start') {
     enterTowerLevel(level, level.start); // towerWorld.js
     level.titleAt = gameClock;
     const B = BIOMES[level.biome];
-    setStateText(`TOWER CHAOS · PISO ${floor} DE ${TOWER.floors} · ${B.name.toUpperCase()}`);
+    setStateText(`INFINITE TOWER · PISO ${floor} DE ${TOWER.floors} · ${B.name.toUpperCase()}`);
     sfx('wave');
     saveTowerRun(); // guardado automático al entrar a cada piso (towerSave.js)
     if (where === 'start') log(`${floor === 1 ? '🪨 Estás en el círculo de piedra, en la base de la torre.' : `🗼 Subiste al piso ${floor}.`} ${B.icon} ${B.name}: seguí el camino al pueblo y, más allá, al laberinto donde el guardián cuida la escalera. ${B.hazard.name}: ${B.hazard.desc}.${B.climate ? ` ${B.climate.name}: ${B.climate.desc}.` : ''}`);
@@ -466,7 +466,7 @@ function towerInfoHtml() {
         `<p class="subtitle">Bajo el piso ${level.floor} (${BIOMES[level.biome].name}). Está oscuro: ves menos. Cada nivel más hondo tiene creeps más fuertes, más campeones y mejor botín; en el fondo, el señor de la cueva cuida un tesoro. La soga te sube.</p>` +
         `<button class="secondary-btn" onclick="toggleStatsWindow(true)">📊 Stats del héroe (C)</button><button class="secondary-btn" onclick="toggleInventory(true)">🎒 Equipo e inventario (I)</button>` +
         `<p class="subtitle">Creeps en este nivel: ${alive}.</p>` + towerChronicleHtml();
-    return `<h3>🗼 Tower Chaos · piso ${level.floor} de ${TOWER.floors}</h3>` +
+    return `<h3>🗼 Infinite Tower · piso ${level.floor} de ${TOWER.floors}</h3>` +
         `<p class="subtitle">${biomeSummary(level)}</p>` +
         (towerIsNight() ? `<p class="subtitle">🌙 <b>Es de noche</b>: en el campo ves menos y andan criaturas nocturnas; todo da +50% de experiencia y botín.</p>` : '') +
         `<p class="subtitle">Cruzá el campo, descansá en el <b>pueblo</b> (zona segura, mercader con B) y entrá al <b>laberinto</b>: el guardián (${level.guardian.label}) cuida la escalera.</p>` +

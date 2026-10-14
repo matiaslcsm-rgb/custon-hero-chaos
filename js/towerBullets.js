@@ -1,4 +1,4 @@
-// Tower Chaos: tiradores y lluvias de proyectiles (REWORK.md, "tiradores", 2026-10-08).
+// Infinite Tower: tiradores y lluvias de proyectiles (REWORK.md, "tiradores", 2026-10-08).
 //
 //   A pedido: "enemigos que disparen tipo Enter the Gungeon". La mecánica se llama "bullet hell" (en japonés danmaku):
 //   los enemigos llenan el aire de proyectiles LENTOS con formas reconocibles (ráfaga, abanico, escopeta, anillo,

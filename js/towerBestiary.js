@@ -1,4 +1,4 @@
-// Tower Chaos: generador de criaturas. Cada run arma su propio bestiario por bioma combinando variables:
+// Infinite Tower: generador de criaturas. Cada run arma su propio bestiario por bioma combinando variables:
 //   rol (cómo pelea: reutiliza la mecánica y la IA de un creep de siempre) · cuerpo (figura de tinta) · tamaño ·
 //   colores de la paleta del bioma · 0 a 2 rasgos (con afinidad por bioma) · partes visuales (cuernos, púas, alas,
 //   ojos, manchas). El nombre se arma con las partes, concordando el género ("Gran Hiena Sangrienta").

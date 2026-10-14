@@ -3263,7 +3263,7 @@ test('Elección de héroe: los rivales eligen de sus opciones y ningún héroe s
     }
 });
 
-test('Tutorial de Tower Chaos: se abre en su modo, se recorre y al final arranca lo que le pidieron', () => {
+test('Tutorial de Infinite Tower: se abre en su modo, se recorre y al final arranca lo que le pidieron', () => {
     let started = false;
     openTutorial(0, 'tower', () => { started = true; });
     checkEq(tutorialMode, 'tower', 'modo');
@@ -3272,7 +3272,7 @@ test('Tutorial de Tower Chaos: se abre en su modo, se recorre y al final arranca
     for (let i = 0; i < TOWER_TUTORIAL_PAGES.length; i++) tutorialStep(1);
     check(started, 'al terminar con ¡A jugar! corre la partida');
     checkEq(document.getElementById('tutorial').style.display, 'none', 'cerrado');
-    openTutorial(0, 'normal'); checkEq(tutorialPages(), TUTORIAL_PAGES, 'el de Custom Hero Chaos'); closeTutorial();
+    openTutorial(0, 'normal'); checkEq(tutorialPages(), TUTORIAL_PAGES, 'el de Custom Hero'); closeTutorial();
 });
 
 test('Con héroes de sobra, cada jugador tiene opciones que no se repiten', () => {

@@ -480,7 +480,7 @@ kbd { background: #2a2e3a; border: 1px solid #555; border-bottom-width: 3px; pad
 .name-field { display: flex; align-items: center; gap: 8px; margin: 8px 0; font-size: 0.85rem; color: #8ecae6; }
 .name-field input { flex: 1; background: #11141a; color: #fff; border: 1px solid #444; padding: 4px 6px; font-family: inherit; }
 
-/* Tower Chaos: ventanas color pergamino (estética tinta) */
+/* Infinite Tower: ventanas color pergamino (estética tinta) */
 body.ink-theme .modal-box { background: #e9dcc0; color: #2b2118; border-color: #5e5444; box-shadow: 0 0 0 3px #2b2118, 0 10px 30px rgba(0,0,0,0.6); }
 body.ink-theme .modal-head h3 { color: #6b2a1f; }
 body.ink-theme .subtitle, body.ink-theme .stat-gives, body.ink-theme .stat-spent { color: #5e5444 !important; }
@@ -496,7 +496,7 @@ body.ink-theme .skill-card { background: #f1e7d0; color: #2b2118; border-color: 
 body.ink-theme .skill-card h4 { color: #6b2a1f; }
 body.ink-theme .modal-close { color: #2b2118; border-color: #8f8166; }
 
-/* Tower Chaos: inventario y forja */
+/* Infinite Tower: inventario y forja */
 .inv-box { max-width: 900px; border-color: #ffd43b; }
 .inv-layout { display: flex; gap: 14px; align-items: flex-start; }
 #inv-gear { display: grid; grid-template-columns: repeat(2, 76px); gap: 6px; }
@@ -523,7 +523,7 @@ body.ink-theme .modal-close { color: #2b2118; border-color: #8f8166; }
 .forge-box { max-width: 640px; border-color: #ffd43b; }
 .forge-card h4 { color: #ffd43b !important; }
 
-/* Tower Chaos: ventana de stats */
+/* Infinite Tower: ventana de stats */
 #stats-container .modal-box { max-width: 620px; border-color: #c77dff; }
 .stat-row { display: grid; grid-template-columns: 26px 110px 50px 80px 32px 1fr; align-items: center; gap: 6px; padding: 6px 4px; border-bottom: 1px solid #2a2d36; }
 .stat-icon { font-size: 1.1rem; text-align: center; }
@@ -579,7 +579,7 @@ body.ink-theme .modal-close { color: #2b2118; border-color: #8f8166; }
 /* El tiempo se muestra en el contador grande del centro (#center-timer) */
 #phase-timer { display: none; }
 
-/* ============================================================ TOWER CHAOS: INTERFAZ EN PERGAMINO (estética tinta)
+/* ============================================================ INFINITE TOWER: INTERFAZ EN PERGAMINO (estética tinta)
    Todo el HUD con papel viejo, tinta y tipografía con serifa. Solo con body.ink-theme (se prende al entrar a la Torre). */
 body.ink-theme { background: #2b2118 radial-gradient(ellipse at center, #3a2d21 0%, #1e1711 80%); color: #2b2118; }
 body.ink-theme, body.ink-theme button, body.ink-theme input { font-family: Georgia, 'Palatino Linotype', 'Book Antiqua', serif; }
@@ -656,7 +656,7 @@ body.ink-theme #hb-slots { grid-template-columns: repeat(4, 1fr); }
 .bag-item .ink-icon { width: 80%; height: auto; max-height: 90%; }
 .bag-item .ink-icon { max-width: 64px; }
 
-/* Tower Chaos: mercader del pueblo */
+/* Infinite Tower: mercader del pueblo */
 .tshop-layout { display: grid; grid-template-columns: 1fr 1fr 1.1fr; gap: 12px; align-items: start; }
 .tshop-layout h4 { margin: 0 0 6px; }
 .tshop-row { display: flex; align-items: center; gap: 8px; padding: 4px 6px; margin-bottom: 4px; border: 1px solid #c9b791; background: #f1e7d0; }
@@ -666,13 +666,13 @@ body.ink-theme #hb-slots { grid-template-columns: repeat(4, 1fr); }
 #tshop-tooltip { border: 1.5px solid #8f8166; background: #f1e7d0; padding: 8px; min-height: 160px; font-size: 0.85rem; }
 @media (max-width: 700px) { .tshop-layout { grid-template-columns: 1fr; } }
 .tshop-row .tshop-tome { font-size: 1.6rem; width: 34px; text-align: center; }
-/* Tower Chaos: bestiario */
+/* Infinite Tower: bestiario */
 #bestiary-list { max-height: 60vh; overflow-y: auto; }
 #bestiary-list h4 { margin: 10px 0 4px; color: #6b2a1f; }
 .beast-row { display: flex; gap: 10px; align-items: center; padding: 4px 6px; margin-bottom: 4px; border: 1px solid #c9b791; background: #f1e7d0; }
 .beast-row .beast-fig { width: 42px; height: 63px; }
 .beast-row .beast-stats { font-size: 0.8rem; color: #5e5444; }
-/* Tower Chaos: cuaderno */
+/* Infinite Tower: cuaderno */
 #notebook-pages { max-height: 60vh; overflow-y: auto; }
 .notebook-page { padding: 8px 10px; margin-bottom: 6px; border: 1px solid #c9b791; background: #f1e7d0; }
 .notebook-page h4 { margin: 0 0 4px; color: #6b2a1f; }
@@ -684,7 +684,7 @@ body.ink-theme #hb-slots { grid-template-columns: repeat(4, 1fr); }
 body.ink-theme .forge-card h4 { color: #6b2a1f !important; }
 body.ink-theme .forge-card .meta { color: #2f5d62 !important; }
 
-/* Tower Chaos: Códice (J) y Herrero */
+/* Infinite Tower: Códice (J) y Herrero */
 .codex-layout { display: grid; grid-template-columns: 1fr 280px; gap: 14px; }
 #codex-list { max-height: 60vh; overflow-y: auto; }
 #codex-list h4 { margin: 10px 0 4px; color: #6b2a1f; }
@@ -696,7 +696,7 @@ body.ink-theme .forge-card .meta { color: #2f5d62 !important; }
 .tshop-row.picked { outline: 2px solid #c9a227; border-radius: 6px; }
 @media (max-width: 700px) { .codex-layout { grid-template-columns: 1fr; } }
 
-/* Tower Chaos: pantalla grande (towerView.js) */
+/* Infinite Tower: pantalla grande (towerView.js) */
 body.tower-layout #hud-main { grid-template-columns: minmax(0, 1fr); }
 body.tower-layout #left-col, body.tower-layout #controls-hint { display: none; }
 body.tower-layout #game-container { padding: 8px 10px; }
@@ -738,7 +738,7 @@ body.ink-theme .pm-toggle.on span { color: #2d6a4f; }
 body.ink-theme .pm-toggle:hover { border-color: #6b2a1f; }
 body.paused #center-timer { display: none !important; }
 
-/* Tower Chaos: barra del héroe compacta encima del mapa, abajo al centro (estilo Hades; REWORK.md, interfaz) */
+/* Infinite Tower: barra del héroe compacta encima del mapa, abajo al centro (estilo Hades; REWORK.md, interfaz) */
 body.tower-layout #center-col { position: relative; }
 body.tower-layout #hero-bar { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); z-index: 6;
     grid-template-columns: 50px 210px auto; grid-template-areas: "portrait name skills" "portrait hp skills" "portrait mana skills";
@@ -824,7 +824,7 @@ body.tower-layout #hero-bar, .modal-box, body.tower-layout #float-log, body.towe
 .waystone-btn { text-align: left; font-family: Georgia, serif; }
 .waystone-btn small { color: #8a5a00; }
 
-/* ===== Tower Chaos: interfaz en pixel art (2026-10-13, estilo principal de la Torre; va con towerPixel.js) =====
+/* ===== Infinite Tower: interfaz en pixel art (2026-10-13, estilo principal de la Torre; va con towerPixel.js) =====
    Con body.pixel-ui (se prende junto con el pixel art en la Torre): paneles oscuros con borde de píxeles (contorno
    negro, borde claro adentro, luz arriba a la izquierda), fuente pixel (Pixelify Sans) y texto claro. Pisa el tema de
    pergamino (body.ink-theme) sin borrarlo: apagado, todo queda como estaba. */
@@ -905,7 +905,7 @@ body.on-title { overflow: hidden; }
 .ts-logo { text-align: center; user-select: none; }
 .ts-logo-main { font-size: clamp(2rem, 6.4vw, 5rem); font-weight: 700; line-height: 1; color: #ffe0a0; letter-spacing: 2px;
     text-shadow: 0 4px 0 #b4501e, 0 8px 0 #5a1e14, 0 12px 0 #1a0c10, 4px 0 0 #1a0c10, -4px 0 0 #1a0c10, 0 -4px 0 #1a0c10; }
-.ts-logo-main span { color: #ff8a4a; }
+.ts-logo-main span { color: #ff8a4a; display: block; font-size: 0.55em; margin-top: 6px; letter-spacing: 4px; } /* "& INFINITE TOWER" debajo, más chico */
 .ts-logo-sub { margin-top: 18px; font-size: clamp(0.9rem, 1.6vw, 1.25rem); color: #d8c8f0; letter-spacing: 6px; text-transform: uppercase; text-shadow: 2px 2px 0 #1a0c10; }
 .ts-modes { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; }
 .ts-card { width: min(340px, 86vw); display: flex !important; flex-direction: column; align-items: center; gap: 6px; text-align: center; cursor: pointer;
@@ -953,7 +953,7 @@ body.on-title { overflow: hidden; }
 .ts-lobby.tower .ts-play:hover { background: #3558a0; }
 .ts-first { font-size: 0.8rem; color: #c8b8a0; display: flex; align-items: center; gap: 6px; cursor: pointer; }
 .ts-lobby .ts-back { font-size: 0.8rem; padding: 4px 10px; }
-/* Tutorial: tira de dibujos en pixel art (tutorial de Tower Chaos) */
+/* Tutorial: tira de dibujos en pixel art (tutorial de Infinite Tower) */
 .tut-art { display: flex; align-items: flex-end; justify-content: center; gap: 14px; margin-bottom: 10px; }
 .tut-art img { image-rendering: pixelated; }
 #tutorial, #tutorial * { font-family: 'Pixelify Sans', Consolas, monospace !important; }

@@ -1,4 +1,4 @@
-// Tower Chaos: ataques anunciados y jefes con fases (REWORK.md §3, fase 4, 2026-10-07).
+// Infinite Tower: ataques anunciados y jefes con fases (REWORK.md §3, fase 4, 2026-10-07).
 //
 //   ATAQUES ANUNCIADOS (como Hades o Hyper Light Drifter): una zona marcada en el piso se va llenando y, al
 //   completarse, pega fuerte a quien siga adentro. Se esquivan saliendo o con el esquive (Espacio, invulnerable).

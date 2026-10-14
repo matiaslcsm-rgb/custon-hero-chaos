@@ -1,4 +1,4 @@
-// Tower Chaos: interfaz del equipo — inventario en grilla (tecla I), forja e íconos de las piezas (ver towerItems.js).
+// Infinite Tower: interfaz del equipo — inventario en grilla (tecla I), forja e íconos de las piezas (ver towerItems.js).
 //
 //   Inventario: clic en una pieza la levanta; clic en una casilla libre o en su ranura la suelta (o la equipa);
 //   clic derecho equipa o desequipa. Mientras está abierto (o la forja, o los stats), la partida espera.

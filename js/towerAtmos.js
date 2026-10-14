@@ -1,4 +1,4 @@
-// Tower Chaos: luz y clima (REWORK.md, "luz y clima", 2026-10-08).
+// Infinite Tower: luz y clima (REWORK.md, "luz y clima", 2026-10-08).
 //
 //   Para que el mundo se sienta vivo (referencias: las fogatas de Don't Starve y Valheim, que son a la vez luz y refugio;
 //   el clima de Hyper Light Drifter, que es pura atmósfera y no tapa la pelea).

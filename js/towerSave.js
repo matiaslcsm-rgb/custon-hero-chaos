@@ -1,4 +1,4 @@
-// Tower Chaos: guardar la run y continuarla (pedido del usuario, 2026-10-14: "que se guarde la partida para poder guardar
+// Infinite Tower: guardar la run y continuarla (pedido del usuario, 2026-10-14: "que se guarde la partida para poder guardar
 // la run y continuarla").
 //
 //   Cómo lo resuelven los roguelikes: Hades guarda al cambiar de cámara, Dead Cells al entrar a cada bioma, Slay the Spire
@@ -6,7 +6,7 @@
 //   llegaste, los pisos cuyo guardián ya venciste, tus restos, la crónica de la run) y al continuar volvés a la ENTRADA
 //   del piso donde estabas, con el piso armado de nuevo (otro mapa). Así el guardado es chico y nunca se rompe.
 //   · Se guarda solo: al entrar a un piso, al morir, cada 15 s de juego, al salir al menú y al cerrar la pestaña.
-//   · "Continuar" aparece en el menú de Tower Chaos; empezar una run nueva pide confirmación si hay una guardada.
+//   · "Continuar" aparece en el menú de Infinite Tower; empezar una run nueva pide confirmación si hay una guardada.
 //   · Ganar la torre borra el guardado. Un solo lugar de guardado (una run a la vez).
 //   · Lo que no viaja: las criaturas del piso, lo que estaba tirado en el suelo y los efectos del momento. Lo que te había
 //     quitado un portador vuelve a tu bolsa (el portador no existe en el piso nuevo).

@@ -1,4 +1,4 @@
-// Tower Chaos: interfaz en pixel art (2026-10-13, estilo principal de la Torre; va con el suelo en pixel art, towerPixel.js).
+// Infinite Tower: interfaz en pixel art (2026-10-13, estilo principal de la Torre; va con el suelo en pixel art, towerPixel.js).
 //
 //   - HTML (ventanas, barra del héroe, avisos): body.pixel-ui prende el tema de style.css (paneles oscuros con borde de
 //     píxeles y fuente Pixelify Sans) encima del de pergamino.

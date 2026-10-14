@@ -1,4 +1,4 @@
-// Tower Chaos: los golpes comunes avisan (REWORK.md §12, 2026-10-08).
+// Infinite Tower: los golpes comunes avisan (REWORK.md §12, 2026-10-08).
 //
 //   Medido con el piloto de reflejos humanos: el 70-77% del daño que recibís son ataques comunes, que pegaban al instante
 //   (no había nada que esquivar fuera de los ataques anunciados de los fuertes). Como en Hades, ahora cada golpe común

@@ -1,4 +1,4 @@
-// Tower Chaos: mapa del piso a pantalla completa (tecla M; REWORK.md, lista de interfaz, 2026-10-07).
+// Infinite Tower: mapa del piso a pantalla completa (tecla M; REWORK.md, lista de interfaz, 2026-10-07).
 //
 //   Como el mapa de Diablo o de Hollow Knight: lo descubierto del piso, grande y con leyenda (pueblo, herrero, mercader,
 //   laberinto, escalera, guardián, santuarios, cuevas, eventos, cofres, tus restos y el portador). La partida no se frena:

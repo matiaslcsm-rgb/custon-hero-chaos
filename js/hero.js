@@ -18,7 +18,7 @@ const ATTRIBUTE_RULES = {
 };
 
 // Teclas de habilidades activas, asignadas por orden de aprendizaje.
-const SKILL_KEYS = ['e', 'r', 't', 'f', 'q', 'v']; // 4 en el modo normal; en Tower Chaos el equipo puede dar hasta 6 activas
+const SKILL_KEYS = ['e', 'r', 't', 'f', 'q', 'v']; // 4 en el modo normal; en Infinite Tower el equipo puede dar hasta 6 activas
 
 class Hero {
     constructor(template) {
@@ -88,7 +88,7 @@ class Hero {
     }
     // Al subir de nivel: suma la ganancia de atributos del héroe (más en el principal).
     gainLevelAttributes() {
-        if (this.towerStats) { this.statPoints += TOWER.pointsPerLevel; return; } // Tower Chaos: puntos para repartir (tower.js)
+        if (this.towerStats) { this.statPoints += TOWER.pointsPerLevel; return; } // Infinite Tower: puntos para repartir (tower.js)
         this.str += this.attrGain.str; this.agi += this.attrGain.agi; this.int += this.attrGain.int;
         this.recalculateStats();
     }

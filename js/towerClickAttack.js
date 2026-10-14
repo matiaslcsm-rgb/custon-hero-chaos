@@ -1,4 +1,4 @@
-// Tower Chaos: el ataque básico con el mouse (pedido del usuario, 2026-10-13: "quiero poder dar los golpes básicos con los
+// Infinite Tower: el ataque básico con el mouse (pedido del usuario, 2026-10-13: "quiero poder dar los golpes básicos con los
 // clicks del mouse"). Antes el héroe le pegaba solo al más cercano; ahora el golpe es tuyo, como en Hades o Diablo.
 //   · Clic izquierdo: un golpe hacia el cursor. Mantenerlo: golpea seguido, al ritmo de tu velocidad de ataque.
 //   · Cuerpo a cuerpo: le pega al enemigo a tu alcance más cercano al cursor, dentro de un cono hacia el cursor (el de al
@@ -6,7 +6,7 @@
 //   · A distancia: el disparo sale en línea recta hacia el cursor y se frena en el primero que toca; si apuntás mal, falla.
 //   · Un clic que llega antes de que el golpe esté listo queda guardado un momento (no se pierde).
 //   · Clic sobre un enemigo fuera de alcance: caminás hasta él (y si mantenés, le pegás al llegar).
-//   · Se vuelve al ataque automático en la pausa (🖱️). El piloto automático y Custom Hero Chaos siguen como antes.
+//   · Se vuelve al ataque automático en la pausa (🖱️). El piloto automático y Custom Hero siguen como antes.
 //   · ESPADA (2026-10-13, pedido: "sacá la Q y que haga un combo de 3 golpes con el clic; usar la espada te da eso de
 //     base"): con cualquier espada el ataque básico es el combo de 3 tajos en arco (al aire también cuenta, el ritmo es
 //     tuyo); el remate empuja y tarda un poco más. Vale con el clic, con el automático y con el piloto. La parada del clic

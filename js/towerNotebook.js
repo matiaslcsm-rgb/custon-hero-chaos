@@ -1,4 +1,4 @@
-// Tower Chaos: el Cuaderno (REWORK.md §1, tutorial jugado) — pedido del usuario 2026-10-07.
+// Infinite Tower: el Cuaderno (REWORK.md §1, tutorial jugado) — pedido del usuario 2026-10-07.
 //
 //   El Aventurero no recuerda nada, salvo escribir. Cada acción nueva (despertar, moverse, esquivar, lanzar,
 //   matar, abrir un cofre, llegar al pueblo) se anota sola, una vez, en su propia voz. Las páginas quedan para

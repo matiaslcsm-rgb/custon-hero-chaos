@@ -1,6 +1,6 @@
-# Modo roguelike: Tower Chaos
+# Modo roguelike: Infinite Tower
 
-Documento de diseño del modo roguelike. Estado: **fases 1 a 4 hechas** (2026-10-03; en el menú se elige el modo: **Custom Hero Chaos** o **Tower Chaos**; código en
+Documento de diseño del modo roguelike. Estado: **fases 1 a 4 hechas** (2026-10-03; en el menú se elige el modo: **Custom Hero** o **Infinite Tower**; código en
 `js/tower.js`). Las demás fases están por hacer.
 Las decisiones marcadas ❓ están abiertas.
 
@@ -15,7 +15,7 @@ Al morir no se pierde todo: **tu cadáver y tus cosas quedan en el mapa** y pued
 
 ## 1 bis. Decisiones del 2026-10-03 (tarde): héroes convertidos en ítems
 
-- **Sin elección de héroe en Tower Chaos**: arrancás como un **aventurero sin clase**, con stats parejos y sin innato.
+- **Sin elección de héroe en Infinite Tower**: arrancás como un **aventurero sin clase**, con stats parejos y sin innato.
   Tu "clase" sale de lo que encontrás y de cómo repartís los puntos de stats.
 - **Los 11 héroes se convierten en ítems**: cada habilidad (44) y cada innato (11) pasa a ser una **pieza de equipo**
   (arma, casco, armadura, guantes, botas, anillo, amuleto) que trae esa habilidad y sus stats. Ej: un rifle con
@@ -324,7 +324,7 @@ Metaprogresión estilo Códice de Hades / runas de Rogue Legacy: lo que dominás
 ## 4 bis. Estética "tinta y pergamino" (en curso)
 Pedido del usuario con referencias de ilustraciones de caballeros en tinta (líneas negras gruesas, colores planos
 apagados, fondo crema, rayado; no se usan esas imágenes, solo el estilo). Decidido: dirección de arte + personajes
-vectoriales, primero en Tower Chaos. Código: `js/inkart.js`; hoja de muestra: `docs/ink-preview.html`; captura del juego:
+vectoriales, primero en Infinite Tower. Código: `js/inkart.js`; hoja de muestra: `docs/ink-preview.html`; captura del juego:
 `index.html?demo=tower`.
 - Paso 1 hecho: piso de pergamino, paredes de piedra en tinta con rayado, niebla sepia, viñeta de papel viejo, contorno de
   tinta y colores apagados en los sprites que todavía son pixel art, ventanas de la Torre color pergamino.
@@ -335,7 +335,7 @@ vectoriales, primero en Tower Chaos. Código: `js/inkart.js`; hoja de muestra: `
   pico y espadas flotando. **El aventurero se ve según su equipo**: la capa toma el color del héroe de su armadura,
   la capucha el de su casco, la guarda el de sus botas y el arma tiene la forma de la suya (espada, hacha, báculo,
   rifle, dagas…).
-- **Upgrade gráfico grande** (pedido del usuario, solo Tower Chaos por ahora):
+- **Upgrade gráfico grande** (pedido del usuario, solo Infinite Tower por ahora):
   - **Animación de los cuerpos**: cada figura tiene 8 cuadros de caminata (piernas que alternan, capa y túnica que
     ondean con retraso, brazos y arma que acompañan, rebote del paso, cintas que flamean) y 4 de respiración quieta.
     Se dibujan una vez y se reutilizan (liviano).
@@ -460,7 +460,7 @@ botas, amuleto y anillos ya no reciben ninguna activa — solo pasivas y stats. 
 importar el orden de equipado: `TOWER_SLOT_KEY = { weapon: 'q', gloves: 'e', armor: 'r' }`, forzado dentro de
 `equipItem()`.
 
-**Rebalanceo de las 11 definitivas sin tocar Caos de Héroes:** los objetos de habilidad (`HERO_SKILLS`/
+**Rebalanceo de las 11 definitivas sin tocar Custom Hero:** los objetos de habilidad (`HERO_SKILLS`/
 `SKILL_INDEX`) son los mismos en los dos modos, así que no se puede simplemente cambiar `values`. Se agregó un
 override opcional por habilidad, `towerValues`, consultado solo en la Torre: `skillValueSource(skill, key)` en
 `js/progression.js` devuelve `skill.towerValues` si existe la clave y `gameMode === 'tower'`, si no cae a
@@ -477,7 +477,7 @@ tres puntos filtran/validan por `slot === slotKind(item.slot)`.
 faltaba revisar las 33 activas de arma/guantes contra ellas. La mayoría ya caía en un rango parejo (7-15s de
 enfriamiento); dos outliers corregidos vía `towerValues`: Manto Fantasma (Nigromante) tenía el doble de
 enfriamiento/maná que cualquier par suyo, y las 3 activas no-definitiva de Zeus pagaban 70-115 de maná contra
-30-50 del resto del roster (en Caos de Héroes lo compensa el maná que crece por nivel, acá no).
+30-50 del resto del roster (en Custom Hero lo compensa el maná que crece por nivel, acá no).
 
 **Movilidad → Espacio:** toda habilidad con el tag `MOVILIDAD` (Parpadeo, Salto Sangriento, Distorsión Espacial,
 Corte Errante, Paso Fantasma, Tormenta Cinética) se ata siempre a la tecla del esquive en vez de a su Q/E/R —

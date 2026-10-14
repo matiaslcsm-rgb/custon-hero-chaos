@@ -20,7 +20,7 @@ function skillLevel(hero, skill) { return hero.skillLevels[skill.id] || 0; }
 
 // De dónde sale el valor de una clave: en la Torre, las ex-definitivas tienen números propios más chicos
 // (towerValues, ver el rebalanceo en cada heroes/*.js) para que anden como una activa común en vez de un botón
-// de una vez cada un rato largo; en Custom Hero Chaos no se toca nada. Solo hace falta definir en towerValues
+// de una vez cada un rato largo; en Custom Hero no se toca nada. Solo hace falta definir en towerValues
 // las claves que cambian — el resto sigue saliendo de values.
 function skillValueSource(skill, key) {
     return (gameMode === 'tower' && skill.towerValues && key in skill.towerValues) ? skill.towerValues : skill.values;
@@ -32,7 +32,7 @@ function valueAt(skill, key, level) {
     return v[Math.max(0, Math.min(v.length, level) - 1)];
 }
 // Valor de una habilidad según el nivel que tiene en ese héroe (lo usan cast() y los hooks).
-// Con las mejoras forjadas en la pieza que trae la habilidad (Tower Chaos, ver applySkillBoost en towerItems.js).
+// Con las mejoras forjadas en la pieza que trae la habilidad (Infinite Tower, ver applySkillBoost en towerItems.js).
 function val(skill, hero, key) { return applySkillBoost(skill, hero, key, valueAt(skill, key, skillLevel(hero, skill))); }
 
 // Texto de un valor: "100/120/140/160%" con el nivel actual resaltado (level 0 = ninguno).
@@ -115,7 +115,7 @@ const PERMANENT_LABELS = {
 };
 
 // En la Torre, lo que suma cada habilidad "por baja" tiene un tope por run (2026-10-08). Medido: en una run se matan ~2400
-// bichos, y estas habilidades (pensadas para las rondas de Custom Hero Chaos) daban +240 de daño (Grieta del Vacío) o
+// bichos, y estas habilidades (pensadas para las rondas de Custom Hero) daban +240 de daño (Grieta del Vacío) o
 // +757% de crítico (Masacre): el poder dependía de la suerte de encontrar esa pieza. El escalado propio del Aventurero
 // (vida por bajas) no tiene tope: es igual para todos.
 const TOWER_PERM_CAP = { atk: 40, maxHp: 300, str: 15, agi: 15, int: 15, armor: 8, critChance: 15, atkSpeed: 20, lifesteal: 10, hpRegen: 10, manaRegen: 5 };

@@ -1,4 +1,4 @@
-// Estética "tinta y pergamino" (Tower Chaos): dirección de arte inspirada en ilustraciones de caballeros en tinta.
+// Estética "tinta y pergamino" (Infinite Tower): dirección de arte inspirada en ilustraciones de caballeros en tinta.
 //
 //   Paso 1 — dirección de arte: piso de pergamino con textura de papel, paredes de piedra dibujadas en tinta con rayado,
 //   niebla color sepia, colores apagados y contorno de tinta en todo.
@@ -474,7 +474,7 @@ Object.assign(INK_PLANS, {
 });
 const INK_BOSS_PLANS = { GOLEM: 'golem', HIVE_QUEEN: 'hiveQueen', FROST_DRAGON: 'frostDragon', ABYSS_LORD: 'abyssLord', HYDRA: 'hydra', LICH: 'lich', BLOOD_TITAN: 'bloodTitan', PHANTOM: 'phantom' };
 
-// Qué silueta usa cada unidad en Tower Chaos (null = se queda con el pixel art con contorno)
+// Qué silueta usa cada unidad en Infinite Tower (null = se queda con el pixel art con contorno)
 function inkPlanFor(u) {
     if (u.isHero) return 'hoodedKnight';
     const t = u.type;

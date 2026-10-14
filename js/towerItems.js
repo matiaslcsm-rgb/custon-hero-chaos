@@ -1,4 +1,4 @@
-// Tower Chaos: los héroes convertidos en ítems (docs/ROGUELIKE.md §1 bis).
+// Infinite Tower: los héroes convertidos en ítems (docs/ROGUELIKE.md §1 bis).
 //
 //   En la Torre no se elige héroe: arrancás como AVENTURERO sin clase. Cada habilidad (44) y cada innato (11) de los
 //   héroes es una PIEZA DE EQUIPO que trae esa habilidad: equiparla te la da; sacártela, te la quita. Sin bonos de set:

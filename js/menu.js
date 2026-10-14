@@ -44,12 +44,12 @@ function startHeroPick() {
     setPhaseTimer(PHASE_TIMES.heroSelect);
     renderHeroPick();
     const tower = gameMode === 'tower';
-    document.getElementById('hero-select-title').textContent = tower ? 'Tower Chaos · elegí tu héroe' : 'Custom Hero Chaos · elegí tu héroe';
+    document.getElementById('hero-select-title').textContent = tower ? 'Infinite Tower · elegí tu héroe' : 'Custom Hero · elegí tu héroe';
     document.getElementById('hero-select-subtitle').textContent = tower
         ? 'Subís solo con su innato y su ataque básico. Elegí bien: si morís, volvés a la base de la torre.'
         : 'Estas opciones son solo tuyas. Ningún héroe se repite en la partida.';
     document.getElementById('hero-any-btn').textContent = tower ? '🔓 Elegir cualquier héroe' : '🔓 Elegir cualquier héroe (arrancás sin oro)';
-    log(`🎲 ${tower ? 'Tower Chaos' : 'Custom Hero Chaos'}: elegí tu héroe entre tus ${HERO_PICK_OPTIONS} opciones o probá suerte con uno al azar.`);
+    log(`🎲 ${tower ? 'Infinite Tower' : 'Custom Hero'}: elegí tu héroe entre tus ${HERO_PICK_OPTIONS} opciones o probá suerte con uno al azar.`);
 }
 
 // --- ELEGIR CUALQUIER HÉROE (panel que se despliega desde la izquierda) ---
@@ -183,8 +183,8 @@ const TUTORIAL_PAGES = [
         </div>
         <p class="tut-note">¡Listo! Tocá <b>¡A jugar!</b>. En partida, <kbd>Esc</kbd> abre este tutorial.</p>` }
 ];
-// --- TUTORIAL DE TOWER CHAOS (2026-10-13) ---
-// Mismo formato que el de Custom Hero Chaos. El cuerpo puede ser una función (así las teclas salen como las tenga
+// --- TUTORIAL DE INFINITE TOWER (2026-10-13) ---
+// Mismo formato que el de Custom Hero. El cuerpo puede ser una función (así las teclas salen como las tenga
 // configuradas el jugador) y art: una tira de dibujos en pixel art arriba de la página.
 const tutK = a => keyName(KEYMAP[a]);
 const tutArt = list => () => `<div class="tut-art">${list.map(([fr, s]) => { const c = fr(); return `<img src="${c.toDataURL()}" style="width:${c.width * s}px;height:${c.height * s}px">`; }).join('')}</div>`;
@@ -221,7 +221,7 @@ const TOWER_TUTORIAL_PAGES = [
     { icon: '🎒', color: '#c77dff', title: 'Tu equipo es tu clase', body: () => `
         <div class="tut-cards">
             ${tutCard('✋', 'Tres habilidades', `El arma (<kbd>${tutK('skill1')}</kbd>), los guantes (<kbd>${tutK('skill2')}</kbd>) y la armadura (<kbd>${tutK('skill3')}</kbd>) traen una habilidad cada uno. Casco, botas, amuleto y anillo dan stats.`)}
-            ${tutCard('🧩', 'Piezas de héroes', 'Cada pieza viene de un héroe de Custom Hero Chaos: su color, su habilidad y su estilo. Mezclalas.')}
+            ${tutCard('🧩', 'Piezas de héroes', 'Cada pieza viene de un héroe de Custom Hero: su color, su habilidad y su estilo. Mezclalas.')}
             ${tutCard('📊', 'Niveles y stats', `Al subir de nivel ganás puntos para repartir (<kbd>${tutK('stats')}</kbd>). El equipo y el inventario, con <kbd>${tutK('inventory')}</kbd>.`)}
             ${tutCard('⚒', 'Forjar', 'Cuando un arma sube de nivel elegís cómo crece (más daño, menos costo, menos recarga…). Queda en la pieza.')}
         </div>` },
@@ -266,7 +266,7 @@ const TOWER_TUTORIAL_PAGES = [
 
 // Un tutorial por modo. openTutorial(página, modo, alTerminar): alTerminar corre si se llega al final con "¡A jugar!"
 // (el menú previo de cada modo lo usa para arrancar la partida, titleScreen.js).
-const TUTORIALS = { normal: { brand: 'CUSTOM HERO CHAOS', pages: TUTORIAL_PAGES }, tower: { brand: 'TOWER CHAOS', pages: TOWER_TUTORIAL_PAGES } };
+const TUTORIALS = { normal: { brand: 'CUSTOM HERO', pages: TUTORIAL_PAGES }, tower: { brand: 'INFINITE TOWER', pages: TOWER_TUTORIAL_PAGES } };
 let tutorialPage = 0, tutorialMode = 'normal', tutorialDone = null;
 function tutorialPages() { return TUTORIALS[tutorialMode].pages; }
 function markTutorialSeen(mode) { if (/[?&]test/.test(location.search)) return; try { localStorage.setItem('chc-tut-' + mode, '1'); } catch (e) { /* no se guarda */ } } // (las pruebas no lo marcan)

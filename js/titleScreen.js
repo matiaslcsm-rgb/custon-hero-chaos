@@ -1,7 +1,7 @@
 // Portada (2026-10-13): escena en pixel art animada detrás del nombre del juego y la elección de modo.
 //
-//   Atardecer violeta con estrellas y luna, montañas lejanas, el coliseo de Custom Hero Chaos (público, antorchas y
-//   estandartes) y la torre de Tower Chaos, siniestra (ojo rojo que late, murciélagos, relámpagos), que se pierde entre las nubes (con
+//   Atardecer violeta con estrellas y luna, montañas lejanas, el coliseo de Custom Hero (público, antorchas y
+//   estandartes) y la torre de Infinite Tower, siniestra (ojo rojo que late, murciélagos, relámpagos), que se pierde entre las nubes (con
 //   ventanas que titilan), colinas con pinos y un camino de tierra hacia la torre. Adelante, el aventurero junto a una
 //   fogata, y cada tanto cruza una criatura del bestiario. Todo con los sprites de la Torre (towerPixel*.js).
 //   La escena se dibuja en una imagen chica (1 píxel = 2 a 5 píxeles de la pantalla, según el alto) que el CSS agranda
@@ -31,7 +31,7 @@ function tsBuild(w, h) {
     for (let y = -mr; y <= mr; y++) for (let x = -mr; x <= mr; x++) { const r2 = x * x + y * y; if (r2 <= mr * mr) put(mx + x, my + y, tsRgb(r2 > (mr - 1) * (mr - 1) ? '#d8c8b0' : (pxHash(x, y, 9) < 0.08 || (x + 3) * (x + 3) + (y + 2) * (y + 2) < 6) ? '#d0c0a8' : '#f2e6c8')); }
     // Montañas lejanas
     for (let x = 0; x < w; x++) { const top = hy - Math.round(10 + pxNoise(x / 40, 0, 3) * h * 0.14 + pxNoise(x / 12, 0, 4) * 5); for (let y = top; y < hy + 4; y++) put(x, y, tsRgb(y === top ? '#4a2a52' : '#2a1838')); }
-    // El coliseo (Custom Hero Chaos): tres pisos de arcos, la punta derecha en ruinas, antorchas en los arcos de abajo
+    // El coliseo (Custom Hero): tres pisos de arcos, la punta derecha en ruinas, antorchas en los arcos de abajo
     const ccx = Math.round(w * 0.2), ccw = Math.round(w * 0.25), cch = Math.round(h * 0.17), ccb = hy + 9, tierH = Math.max(6, Math.round(cch / 3));
     const colo = TS.colo.map(tsRgb), crowd = [];
     const coloTop = x => { const nx = x / (ccw / 2); let t = ccb - Math.round(cch * Math.min(1, Math.sqrt(Math.max(0, 1 - Math.pow(Math.abs(nx), 5))) * 1.04)); if (nx > 0.35) t += Math.round(tierH * 1.4 * pxNoise(x / 3, 1, 12) * Math.min(1, (nx - 0.35) * 3)); return t; };
@@ -196,16 +196,16 @@ requestAnimationFrame(tsFrame);
 
 // --- MENÚ PREVIO DE CADA MODO (2026-10-13) ---
 // Tocar una tarjeta abre su menú: de qué se trata, cómo es una partida, Jugar, su Tutorial y lo propio del modo
-// (glosario en Custom Hero Chaos; estilo visual y bestiario guardado en Tower Chaos). La primera vez viene marcado
+// (glosario en Custom Hero; estilo visual y bestiario guardado en Infinite Tower). La primera vez viene marcado
 // "ver el tutorial antes de jugar": al terminarlo con "¡A jugar!", arranca la partida.
 const tsImg = (c, s) => `<img src="${c.toDataURL()}" style="width:${c.width * s}px;height:${c.height * s}px">`;
 const TS_LOBBY = {
-    normal: { title: '⚔ Custom Hero Chaos', tag: 'arena · 8 héroes', cls: '',
+    normal: { title: '⚔ Custom Hero', tag: 'arena · 8 héroes', cls: '',
         desc: 'Sos uno de 8 héroes en un coliseo. Armás tu kit mezclando habilidades de cualquier héroe, peleás oleadas, duelos y jefes, y gana el último en pie.',
         facts: () => ['🎲 Elegís entre 3 héroes (o cualquiera, arrancando sin oro)', '🃏 Rondas 1 a 4: draft de habilidad, tienda y oleada', '⚔ Desde la ronda 5: un duelo por ronda, con apuestas', '👑 Rondas 5, 10, 15 y 20: un jefe para cada uno', '♥ 2 vidas: se pierden contra creeps y jefes'],
         art: () => ['AXE', 'VAMPIRE', 'SNIPER', 'ZEUS', 'NECROMANCER'].map(k => spriteFor({ isHero: true, key: k })).filter(Boolean).map(s => tsImg(s.img, 2.2)).join(''),
         extra: () => [['🦸 Héroes', () => openGlossary('heroes')], ['👹 Creeps y jefes', () => openGlossary('creeps')], ['🎒 Ítems', () => openGlossary('items')]] },
-    tower: { title: '🗼 Tower Chaos', tag: 'roguelike · 10 pisos', cls: 'tower',
+    tower: { title: '🗼 Infinite Tower', tag: 'roguelike · 10 pisos', cls: 'tower',
         desc: 'Despertás al pie de una torre sin nada. Cada piso es un bioma con su pueblo, su laberinto y su guardián. Tu clase la arma el equipo que encontrás.',
         facts: () => ['🗡 Arrancás eligiendo espada, arco o bastón', '🌲 5 biomas, dos pisos cada uno, con día y noche', '🎒 Cada pieza de equipo trae una habilidad', '🦴 Morir no es el final: tus restos te esperan', `📖 Bestiario guardado: ${typeof bestiaryStore !== 'undefined' ? Object.keys(bestiaryStore.beasts || {}).length : 0} criaturas vistas`],
         art: () => tsImg(pxbHeroFrame(tsHero, 'idle', 0).img, 3) + tsImg(pxbFrame('wolf', '#8d8d8d', ['horns'], 'idle', 0).img, 3) + tsImg(pxbFrame('boss:volcano', '#d00000', [], 'idle', 0).img, 2),

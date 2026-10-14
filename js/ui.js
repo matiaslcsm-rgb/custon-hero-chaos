@@ -578,7 +578,7 @@ function renderHeroBar() {
     const portrait = document.getElementById('hb-portrait');
     portrait.title = heroTooltip();
     const sym = document.getElementById('hb-symbol');
-    // Retrato del muñeco en pixel art (towerPixelBeasts.js): en la Torre sale del equipo puesto, en Caos de Héroes
+    // Retrato del muñeco en pixel art (towerPixelBeasts.js): en la Torre sale del equipo puesto, en Custom Hero
     // de la pinta fija de cada héroe (pxHeroLook). pixelEnabled es global a los dos modos; pixelOn() solo a la Torre.
     const usePixelDoll = gameMode === 'tower' ? pixelOn() : pixelEnabled;
     const url = usePixelDoll ? pixelPortrait(p) : (gameMode === 'tower' ? inkPortrait(p) : heroSpriteUrl(p));
@@ -591,7 +591,7 @@ function renderHeroBar() {
         `<span class="st-int">INT ${Math.floor(p.attr('int'))}</span> <span>ARM ${p.armor.toFixed(1)}</span> <span class="st-more">ⓘ</span>`;
     stats.title = heroTooltip();
 
-    // Habilidades activas: 4 casillas en Caos de Héroes (se llenan en el draft); en la Torre son exactamente
+    // Habilidades activas: 4 casillas en Custom Hero (se llenan en el draft); en la Torre son exactamente
     // 3 (arma/guantes/armadura, ver REWORK.md §2 fase 3), nunca 4, porque solo esas 3 ranuras dan activas.
     const skills = document.getElementById('hb-skills'); skills.innerHTML = '';
     const actives = p.skills.filter(s => s.kind === 'active');
@@ -877,7 +877,7 @@ function drawUnit(u, color, symbol, pos = u, opts = {}) {
     if (sprite) {
         const size = spriteSize(u, opts);
         halfHeight = Math.max(TILE / 2, size / 2);
-        const pxBody = pixelBodyFor(u); // cuerpo en pixel art (towerPixelBeasts.js), también en Custom Hero Chaos
+        const pxBody = pixelBodyFor(u); // cuerpo en pixel art (towerPixelBeasts.js), también en Custom Hero
         if (gameMode === 'tower' && inkPlanFor(u)) halfHeight = pxBody ? pixelHalfHeight(u) : inkHalfHeight(u); // figuras de tinta (o pixel art): más altas
         else if (pxBody) halfHeight = pixelHalfHeight(u);
         // Sombra en el piso; en los héroes, un aro del color del bando (celeste vos, naranja los rivales)
@@ -999,10 +999,10 @@ function renderRestArea(dt = 0) {
 function renderTitle() {
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.font = 'bold 30px monospace'; ctx.fillStyle = '#ffb703';
-    const title = gameState === 'MENU' ? 'CUSTOM HERO CHAOS' : gameMode === 'tower' ? 'TOWER CHAOS' : 'CUSTOM HERO CHAOS';
+    const title = gameState === 'MENU' ? 'CUSTOM HERO' : gameMode === 'tower' ? 'INFINITE TOWER' : 'CUSTOM HERO';
     ctx.fillText(title, MAP_W / 2, MAP_H / 2 - 30);
     ctx.font = '13px monospace'; ctx.fillStyle = '#8ecae6';
-    ctx.fillText(gameState === 'MENU' ? 'Elegí un modo: Custom Hero Chaos o Tower Chaos →' : 'Elegí tu héroe →', MAP_W / 2, MAP_H / 2 + 10);
+    ctx.fillText(gameState === 'MENU' ? 'Elegí un modo: Custom Hero o Infinite Tower →' : 'Elegí tu héroe →', MAP_W / 2, MAP_H / 2 + 10);
     ctx.font = '20px monospace';
     const order = { STR: 0, AGI: 1, INT: 2 }; // agrupados por atributo, en su color
     Object.values(HERO_TEMPLATES).sort((a, b) => order[a.primaryAttr] - order[b.primaryAttr]).forEach((t, i, all) => {
@@ -1017,7 +1017,7 @@ function render() {
     const dt = tickFx();
     if (typeof pxUiSync === 'function') pxUiSync(); // tema de interfaz en pixel art (towerPixelUi.js)
     document.body.classList.toggle('on-title', gameState === 'MENU'); // portada (titleScreen.js)
-    musicTick(dt); // música del menú y de Custom Hero Chaos (en la Torre la maneja renderTower, towerMusic.js)
+    musicTick(dt); // música del menú y de Custom Hero (en la Torre la maneja renderTower, towerMusic.js)
     const k = (towerLayout ? 1 : mapScale) * (window.devicePixelRatio || 1);
     ctx.setTransform(k, 0, 0, k, 0, 0);
     const hero = viewedHero || player;

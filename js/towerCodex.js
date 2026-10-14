@@ -1,4 +1,4 @@
-// Tower Chaos: Códice de poderes, piezas sin alma y el Herrero (pedido del usuario, 2026-10-07; ROGUELIKE.md §4 septies).
+// Infinite Tower: Códice de poderes, piezas sin alma y el Herrero (pedido del usuario, 2026-10-07; ROGUELIKE.md §4 septies).
 //
 //   CÓDICE (tecla J): cada habilidad e innato del catálogo (55). Cuando llevás la habilidad de una pieza a su nivel
 //   máximo (4, o 3 la definitiva; los innatos, con la pieza a nivel CODEX.innateLevel), queda DESBLOQUEADA PARA SIEMPRE:

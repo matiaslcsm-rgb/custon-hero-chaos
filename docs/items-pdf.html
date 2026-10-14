@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Custom Hero Chaos · Ítems y requisitos</title>
+<title>Custom Hero · Ítems y requisitos</title>
 <!-- Documento imprimible con todos los ítems (tienda y neutrales) y los requisitos para sumar ítems nuevos.
      Se arma solo con los datos del juego (js/data/items.js y js/data/neutrals.js), así que siempre está al día.
      Para regenerar el PDF (con el servidor local andando):
@@ -102,7 +102,7 @@ const priceText = i => i.talent ? `${TALENT_BOOK.baseCost}g (+${TALENT_BOOK.cost
 function cover() {
     const keys = [...all, ...neutrals].map(i => i.key).filter(k => ITEM_ICONS[k]);
     return `<div class="cover">
-        <h1>CUSTOM HERO CHAOS</h1>
+        <h1>CUSTOM HERO</h1>
         <div class="sub">Ítems y requisitos para sumar ítems nuevos</div>
         <div class="icons">${keys.map(k => icon(k, 34)).join('')}</div>
         <div class="meta">${basics.length} básicos · ${composites.length} compuestos · ${instants.length} inmediatos · ${neutrals.length} neutrales · actualizado al ${TODAY}</div>

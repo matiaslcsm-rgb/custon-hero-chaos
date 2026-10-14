@@ -1,4 +1,4 @@
-// Tower Chaos: cómo se sienten las 3 armas iniciales (REWORK.md, "sensación de las armas", 2026-10-08).
+// Infinite Tower: cómo se sienten las 3 armas iniciales (REWORK.md, "sensación de las armas", 2026-10-08).
 //
 //   El problema (a pedido): sin animación de combate se sentía tosco, y la Q de cada arma tardaba 6-7 s en volver,
 //   así que la mayor parte del tiempo no había nada que apretar. Referencias: el combo de Hades (ritmo de 3 golpes

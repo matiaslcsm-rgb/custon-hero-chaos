@@ -1,4 +1,4 @@
-// Tower Chaos: la piedra de regreso (REWORK.md §16, decisión del usuario 2026-10-08).
+// Infinite Tower: la piedra de regreso (REWORK.md §16, decisión del usuario 2026-10-08).
 //
 //   Medido: lo que más separaba una run de otra eran las muertes, porque renacés en el piso 1 y había que volver a subir
 //   todo (~8 min por muerte en los pisos altos). Seguís renaciendo en el círculo de la base, pero ahí hay una piedra

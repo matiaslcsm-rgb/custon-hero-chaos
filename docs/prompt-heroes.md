@@ -4,7 +4,7 @@ Copiá el bloque de abajo, reemplazá lo que está entre corchetes y pegale la r
 Actualizalo cuando el motor sume funciones nuevas (y la lista de símbolos usados).
 
 ```text
-Estoy desarrollando un juego web en JavaScript inspirado en "Custom Hero Chaos" (Dota 2). Necesito que diseñes
+Estoy desarrollando un juego web en JavaScript inspirado en "Custom Hero" (Dota 2). Necesito que diseñes
 [CANTIDAD] héroes nuevos de tipo [FUERZA / AGILIDAD / INTELIGENCIA (mago)]. Ideas/temática: [TUS IDEAS O "libre"].
 
 Devolvé los héroes EXACTAMENTE en el formato de datos de abajo, usando SOLO las funciones del motor que te listo.

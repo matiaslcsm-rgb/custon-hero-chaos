@@ -49,13 +49,17 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 | Duelo simultáneo con las oleadas de los demás; enfriamientos en el descanso; contador central con pitidos; cartel de apuestas; nombres de jugadores; sonidos propios (`sounds/`) | ✅ |
 
 ## Pendientes y temas abiertos
+- **Nombres nuevos y roadmap a la 1.0 (2026-10-14):** el juego clásico se llama **Custom Hero** y el roguelike
+  **Infinite Tower** (sin "Chaos"). Cambiaron solo los textos: el código interno (`gameMode 'tower'`), el guardado y el
+  link del repo siguen igual. El plan hasta la versión final, con la investigación de referencias, está en
+  [`ROADMAP.md`](ROADMAP.md); lo sigue el modo automático.
 - **Héroe de la espada dibujado a mano (2026-10-14):** hoja del usuario (costado) + frente y espaldas dibujados;
   caminar sin parpadeo (sin cuadro de quieto colado, ciclo con la capa al viento, centrado por la cabeza). Falta:
   ataques de frente/espaldas, golpe recibido y caída propios, arco y bastón en este estilo. Ver REWORK.md.
   Prueba que a veces falla sola: la de las raíces de la Raíz Madre (aleatoria; pasó al repetir).
-- **Tower Chaos se guarda (2026-10-14):** la run se guarda sola y se continúa desde el menú (entrada del piso donde
+- **Infinite Tower se guarda (2026-10-14):** la run se guarda sola y se continúa desde el menú (entrada del piso donde
   estabas, piso armado de nuevo). Ver REWORK.md, "Interfaz y calidad de vida".
-- **Tower Chaos, ataque con clic (2026-10-13):** el golpe básico sale con el clic izquierdo hacia el cursor (mantener
+- **Infinite Tower, ataque con clic (2026-10-13):** el golpe básico sale con el clic izquierdo hacia el cursor (mantener
   repite); se vuelve al automático en la pausa. Ver REWORK.md, "Interfaz y calidad de vida". Falta medir cuánto pierde
   quien apunta mal con el arco.
 - **La espada (2026-10-13):** sin Q; el clic es el combo de 3 tajos (también en automático y con el piloto) y el clic
@@ -75,7 +79,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   Hielo 158 vs 154, con 60% vs 100%). Ojo: la comparación contra la marca vieja de este documento (Arcanista 79s) estaba
   confundida — el juego se puso más difícil en general desde esa medición, por otros cambios. **Sin medir:** el impacto
   en duelos 1v1, donde el nuke mágico de golpe pesa más que en una oleada larga. Medir con `simulateGame(i, false, 60)`.
-- **Modo roguelike «Tower Chaos» (2026-10-03, se elige en el menú junto a Custom Hero Chaos):** diseño en `docs/ROGUELIKE.md`; fase 1 hecha (nivel explorable con cámara,
+- **Modo roguelike «Infinite Tower» (2026-10-03, se elige en el menú junto a Custom Hero):** diseño en `docs/ROGUELIKE.md`; fase 1 hecha (nivel explorable con cámara,
   creeps con nivel, guardián y escalera, muerte con renacer en la base) y fases 2-3 (aventurero sin clase, héroes convertidos
   en 55 piezas de equipo, inventario en grilla, cofres, forja al subir de nivel) y fase 4 (2026-10-05: pisos de 160×110 al
   estilo Aincrad con 5 biomas, pueblo seguro con mercader y torre-laberinto; ver `js/towerWorld.js`) y una revisión de diseño
@@ -85,7 +89,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **Rework gráfico en pixel art (2026-10-13, estilo principal de la Torre):** suelo, criaturas, héroe, guardianes, objetos,
   efectos de combate, niebla, clima e interfaz (`js/towerPixel*.js`). Se puede volver a la tinta en la pausa. Detalle y
   pendientes en REWORK.md §18-19 (minimapa con colores de pergamino, ideas para las criaturas).
-- **El mismo muñeco animado para Caos de Héroes (2026-10-14):** los 11 héroes pasan del sprite estático de 12×12
+- **El mismo muñeco animado para Custom Hero (2026-10-14):** los 11 héroes pasan del sprite estático de 12×12
   (sin ciclo de caminata, solo una pose al atacar) al muñeco en pixel art que ya tenía la Torre — 4 cuadros de
   caminata y 2 de reposo. Como acá no hay equipo dinámico, `pxHeroLook()` (`js/towerPixelBeasts.js`) arma la
   pinta (capa, capucha, ribete, arma) desde la identidad fija de cada héroe en vez del equipo puesto: color de
@@ -106,7 +110,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **Mundo con profundidad (2026-10-06):** pisos de 220×150 con mesetas, día y noche, cuevas con niveles de profundidad y
   bestiario generado por run (ROGUELIKE.md §4 quater).
 - **Códice, piezas sin alma y Herrero (2026-10-07):** ROGUELIKE.md §4 septies.
-- **Rework grande de Tower Chaos (plan 2026-10-07):** `docs/REWORK.md` — despertar con cuaderno y 3 armas, 3 ranuras de
+- **Rework grande de Infinite Tower (plan 2026-10-07):** `docs/REWORK.md` — despertar con cuaderno y 3 armas, 3 ranuras de
   habilidad, jefes estilo Hades, Esencia y crafteo con calidades, pantalla con zoom y pausa, Bitácora, música. Con orden
   de fases y preguntas abiertas.
 - **Fase 2 del rework completa (2026-10-07):** las 3 armas iniciales (Espada/Arco/Bastón) como pedestal obligatorio
@@ -126,7 +130,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   arma/guantes contra las 11 ex-definitivas ya rebalanceadas — la mayoría ya caía en un rango parejo (7-15s de
   enfriamiento). Dos outliers corregidos vía `towerValues`: Manto Fantasma (Nigromante) tenía el doble de
   enfriamiento/maná que cualquier par suyo (26s/60 maná → 16-12s/55-45); las 3 activas no-definitiva de Zeus
-  pagaban 70-115 de maná contra 30-50 del resto del roster (en Caos de Héroes lo compensa el maná que crece por
+  pagaban 70-115 de maná contra 30-50 del resto del roster (en Custom Hero lo compensa el maná que crece por
   nivel, en la Torre no) → recortadas a 45-60.
 - **Fase 3 del rework completa (2026-10-07):** además del balance de arriba, las habilidades con tag `MOVILIDAD`
   (Parpadeo, Salto Sangriento, Distorsión Espacial, Corte Errante, Paso Fantasma, Tormenta Cinética) se atan
@@ -186,7 +190,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   nubes), con un **palo**; animales en el camino (cangrejo, lobos en manada, jabalí que embiste). La espada está en la
   puerta de la torre y el bastón en un claro con ruinas. Adentro, los pisos de antes (ahora se sube).
 - **Motor (decidido 2026-10-06):** seguimos en canvas + JavaScript puro. Pasar a un motor (Phaser para seguir en el
-  navegador, Godot para publicar en PC/celular) se decide cuando el contenido de Tower Chaos esté más cerrado.
+  navegador, Godot para publicar en PC/celular) se decide cuando el contenido de Infinite Tower esté más cerrado.
 - **Balance en curso (2026-09-28):** jefes más suaves desde la ronda 20 + Kaya y Cetro del Eclipse (ver DISEÑO.md §9 bis).
   Falta: los 4 magos (Arcanista, Bruja, Sabio, Alquimista) quedan eliminados cerca de la ronda 14; Zeus pasó a ganar 1 de 3.
 - **Después:** balancear la supervivencia contra creeps en el formato de un duelo por ronda (gana el último en pie: el Sniper

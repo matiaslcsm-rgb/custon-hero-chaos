@@ -1,4 +1,4 @@
-// Tower Chaos: música por capas (REWORK.md §7, fase 7, 2026-10-07). Pistas libres de opengameart.org (docs/CREDITOS.md).
+// Infinite Tower: música por capas (REWORK.md §7, fase 7, 2026-10-07). Pistas libres de opengameart.org (docs/CREDITOS.md).
 //
 //   Capa BASE: una pista por lugar (el bioma en el campo, el pueblo, el laberinto, la cueva). Capa de COMBATE: entra
 //   con fundido cuando te persigue algo cerca y la base baja; contra un jefe, en vez del combate suena su tema. De noche
@@ -54,7 +54,7 @@ function musicTargets(level) {
     return out;
 }
 // Cada frame (renderTower): fundidos hacia el volumen objetivo; lo que queda en silencio un rato se pausa
-// Fuera de la Torre: el menú y las fases tranquilas de Custom Hero Chaos con la del pueblo; oleadas y duelos con la de
+// Fuera de la Torre: el menú y las fases tranquilas de Custom Hero con la del pueblo; oleadas y duelos con la de
 // combate; los jefes de ronda con la de jefe.
 function normalMusicTargets() {
     if (gameState === 'BOSS') return { boss: 1 };
