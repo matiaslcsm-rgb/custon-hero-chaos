@@ -122,9 +122,16 @@ El orden de la lista **es** la prioridad: primero lo que destraba el loop comple
 - [ ] **El piso 1 afuera:** la torre gigante se ve desde el bosque (silueta al fondo) y el laberinto es su puerta.
 
 ## Fase T00 — Rework de equipo, habilidades y stats (decidido por el usuario 2026-10-14, `docs/PROPUESTA-SISTEMAS.md`)
-Decidido: **sistema híbrido** (3 ranuras que dan el arma y Q/E/R + reliquias apilables tipo Risk of Rain con etiquetas
-y bonus de conjunto), **stats: elegir 1 de 3 mejoras al subir de nivel** con umbrales por atributo, **arenas de jefes
-con la llave del piso**, y **seguir en el navegador sumando PixiJS** para luces y efectos.
+Decidido: **3 clases fijas al estilo Risk of Rain** (cada una con sus habilidades y su pasiva, ya no salen del
+equipo), **reliquias apilables** con etiquetas y bonus de conjunto (lo que arma cada run), **la armadura** como única
+pieza de equipo, **elegir 1 de 3 mejoras al subir de nivel**, **arenas de jefes con la llave del piso** y **PixiJS**.
+
+Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic derecho, Espacio = movilidad):
+- **Guerrero** (espada): combo de 3 tajos · parada · rodar · pasiva: el daño físico puede ser crítico (o critea más).
+- **Mago** (bastón): orbe de magia que rebota 1 vez · tormenta de 3 rayos a enemigos al azar · teletransporte corto ·
+  pasiva: *a confirmar* — interpretación propuesta: mantener una habilidad la carga (más daño o más rebotes).
+- **Arquero** (arco): ráfaga de 3 flechas · flechazo que critea y aturde · impulso rápido hacia el mouse · pasiva: sus
+  habilidades y reliquias se activan más rápido (menos enfriamiento y más chance de disparo de las reliquias).
 - [ ] **Reliquias, paso 1 (motor):** `js/towerRelics.js` con reliquias que se apilan y se enganchan a los eventos que
       ya emite el combate (`emit`: onHit, onKill, onCast, onDamaged, onTick) más dos nuevos (al esquivar, al parar).
       12 reliquias con 4 etiquetas (fuego, sangrado, crítico, escudo) y el bonus al juntar 3 de una etiqueta. Caen de
@@ -132,10 +139,14 @@ con la llave del piso**, y **seguir en el navegador sumando PixiJS** para luces 
       daño por piso y variación entre runs, antes y después.
 - [ ] **Subir de nivel: elegir 1 de 3 mejoras** (ventana con 3 cartas, como Hades), con umbrales por atributo (3 de
       Fuerza destraban un efecto, etc.). Reemplaza los 5 puntos por nivel; el piloto elige con una regla.
-- [ ] **Equipo reducido a 3 ranuras** (arma, guantes, armadura) sin afijos al azar: nivel + como mucho 1 rasgo. Casco,
-      amuleto y anillos pasan a reliquias. Medir que el daño por piso no cambie más de ±15%.
-- [ ] **Mercader y herrero nuevos:** el mercader vende 3 reliquias por piso (y rerolls); el herrero sube el nivel o
-      cambia el rasgo de una pieza y funde 2 reliquias iguales en su versión mayor. Se van fundir y traspasar.
+- [ ] **Las 3 clases, paso 1: el Guerrero** completo (combo, parada, rodar y su pasiva) con las teclas fijas; las
+      habilidades dejan de salir del equipo. Medir con el piloto contra la espada de hoy.
+- [ ] **Las 3 clases, paso 2: el Arquero.** Paso 3: **el Mago.** Cada uno medido contra el Guerrero (daño por segundo
+      parejo ±10%, muertes por piso).
+- [ ] **El equipo queda en la armadura:** una sola pieza (vida, armadura, 1 rasgo) que se encuentra y se mejora. Las
+      piezas de héroes de Custom Hero salen del botín de la Torre (o pasan a ser reliquias). Medir daño por piso ±15%.
+- [ ] **Mercader y herrero nuevos:** el mercader vende 3 reliquias por piso (y rerolls); el herrero mejora la armadura
+      (o le cambia el rasgo) y funde 2 reliquias iguales en su versión mayor. Se van fundir y traspasar.
 - [ ] **Esencia que desbloquea reliquias** nuevas en el mazo; las piezas únicas de los jefes escondidos pasan a ser
       reliquias únicas.
 - [ ] **Más reliquias**, de a 5 por entrega y midiendo, hasta 40.

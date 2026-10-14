@@ -9,6 +9,10 @@ comerciantes quedaron abandonados, pero dependen de lo primero."*
 **Decidido por el usuario (2026-10-14):** C (híbrido), stats con elegir 1 de 3 al subir de nivel, arenas con la llave
 del piso, y seguir en el navegador sumando PixiJS. El plan por pasos está en la fase T00 de ROADMAP.md.
 
+**Cambio del usuario (2026-10-14, después):** en vez de que las habilidades salgan del equipo, **3 clases fijas como
+Risk of Rain** (Guerrero, Mago, Arquero, cada una con sus habilidades y pasiva). El equipo queda en la armadura y la
+build de cada run la arman las reliquias. Detalle de las clases en la fase T00 de ROADMAP.md.
+
 ---
 
 ## 1. El diagnóstico: por qué hoy no se siente bien
