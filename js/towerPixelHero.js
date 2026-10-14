@@ -40,6 +40,7 @@ const PXH_ANIM = {
         pxhP({ lean: 0.5, fh: [1.5, -1], blade: -50, sway: 1 }),
         pxhP({ fh: [0.5, 3], blade: -45 })
     ],
+    swing3: null, // (la parada: se arma abajo, igual que el revés)
     swing2: [ // el remate: arriba a dos manos, salto, golpe al piso
         pxhP({ lean: -1.5, by: -1, rf: [6, 21], ff: [11, 21], fh: [-2, -10.5], rh: [0, -10], two: true, blade: -95, sway: 2 }), // las manos arriba y atrás de la capucha: la cara se sigue viendo
         pxhP({ lean: -1, by: -2, rf: [6.5, 20], ff: [11, 20], fh: [-2.5, -11], rh: [-0.5, -10.5], two: true, blade: -115, lift: 0.6 }),
@@ -235,8 +236,10 @@ function pxhScaled(S, R) {
         line(x0, y0, x1, y1, c, w = 1) { const W = Math.max(1, Math.round(w * R)), o = (R - 1) / 2; for (let k = 0; k < W; k++) S.line(x0 * R + o + k, y0 * R + o, x1 * R + o + k, y1 * R + o, c); }
     };
 }
+PXH_ANIM.swing3 = PXH_ANIM.swing1;
 PXB.hero = { w: Math.round(18 * PXH_RES), h: Math.round(24 * PXH_RES), head: [8, 2], back: [8, 9], draw() {} };
 function pxbHeroFrame(L, kind, k, dir = 'side') {
+    if (heroUsesArt(L)) return heroArtSprite(kind, k); // con espada: los cuadros dibujados (de costado; se espeja)
     const key = ['hero', L.cape, L.hood, L.trim, L.glow, L.weapon, kind, k, dir].join('|');
     if (pxbCache[key]) return pxbCache[key];
     const f = { pose: pxhFramePose(kind, k), blink: kind === 'idle' && k >= 4, idle: kind === 'idle' ? k % 4 : 0, dir, kind };
@@ -324,4 +327,54 @@ function pxhDrawGhosts(ghosts) {
         ctx.imageSmoothingEnabled = false; ctx.drawImage(g.img, -g.img.width * g.s / 2, -g.img.height * g.s, g.img.width * g.s, g.img.height * g.s);
         ctx.restore();
     });
+}
+
+// --- EL HÉROE DIBUJADO (2026-10-14, pedido: "se sigue viendo feo y deforme" → el usuario pasó una hoja de sprites) ---
+// Con la espada, el héroe usa los cuadros dibujados de towerHeroArt.js en vez del muñeco por poses: quieto (respira y
+// parpadea), caminar (4), el combo (preparación, tajo con estela, recuperación; el remate levanta la espada), la parada
+// (el escudo) y el esquive. Las otras armas siguen con el muñeco por poses hasta que tengan sus dibujos.
+const HERO_ART_BOX = { w: 40, h: 36 }; // todos los cuadros en el mismo lienzo: los pies en el centro de abajo
+const HERO_ART_SEQ = {
+    swing0: ['ready', 'slashA', 'slashA', 'recover', 'recover', 'idle'],
+    swing1: ['ready', 'slashB', 'slashB', 'recover', 'recover', 'idle'],
+    swing2: ['raise', 'raise', 'slashA', 'slashA', 'recover', 'idle'], // el remate: arriba y abajo
+    swing3: ['block', 'block', 'block', 'block', 'block', 'block'],    // la parada (towerParry.js)
+    dash: ['walk1', 'walk1', 'walk1', 'walk3']
+};
+function heroUsesArt(L) { return typeof HERO_ART !== 'undefined' && L && L.weapon === 'sword'; }
+// Cuál dibujo y cómo: corrimiento del cuerpo (respirar), parpadeo, retroceso, tendido
+function heroArtPick(kind, k) {
+    if (kind === 'walk') return { name: 'walk' + (Math.floor(k / 2) % 4) };
+    if (kind === 'swing') return { name: (HERO_ART_SEQ['swing' + Math.floor(k / 6)] || HERO_ART_SEQ.swing0)[k % 6] };
+    if (kind === 'dash') return { name: HERO_ART_SEQ.dash[Math.min(3, k)] };
+    if (kind === 'hurt') return { name: 'idle', dx: -1 };
+    if (kind === 'death') return k >= 3 ? { name: 'idle', lie: true } : { name: 'idle', sink: k + 1 };
+    return { name: 'idle', breath: [0, 0, 1, 1][k % 4], blink: k >= 4 };
+}
+function heroArtSprite(kind, k) {
+    const key = 'heroart|' + kind + '|' + k;
+    if (pxbCache[key]) return pxbCache[key];
+    const pk = heroArtPick(kind, k), F = HERO_ART.frames[pk.name], P = HERO_ART.pal, rows = F.rows, fh = rows.length;
+    const make = white => {
+        const c = pxSprite(HERO_ART_BOX.w, HERO_ART_BOX.h, S => {
+            const ox = Math.round(HERO_ART_BOX.w / 2 - F.ax) + (pk.dx || 0), oy = HERO_ART_BOX.h - 2 - fh;
+            if (pk.lie) { // tendido: el dibujo de costado, acostado en el piso y más oscuro
+                pxShadow(S, HERO_ART_BOX.w / 2, HERO_ART_BOX.h - 2.5, 11, 2);
+                rows.forEach((r, y) => [...r].forEach((ch, x) => { if (ch !== '.') S.set(HERO_ART_BOX.w / 2 - fh / 2 + (fh - 1 - y), HERO_ART_BOX.h - 3 - (r.length - 1 - x) * 0.5, ch === '!' ? '#3a0806' : shade(P[ch], -0.25)); }));
+                return;
+            }
+            pxShadow(S, HERO_ART_BOX.w / 2, HERO_ART_BOX.h - 2.5, 6, 1.6);
+            const cut = Math.round(fh * 0.55); // respirar: lo de arriba de la cintura baja un píxel
+            rows.forEach((r, y) => [...r].forEach((ch, x) => {
+                if (ch === '.') return;
+                const yy = oy + y + (y < cut ? pk.breath || 0 : 0) + (pk.sink || 0);
+                S.set(ox + x, yy, ch === '!' && pk.blink ? '#2a0806' : P[ch]);
+            }));
+        });
+        if (white) { const g = c.getContext('2d'); g.globalCompositeOperation = 'source-in'; g.fillStyle = '#ffffff'; g.fillRect(0, 0, c.width, c.height); }
+        return c;
+    };
+    const fr = { img: make(false), _white: null };
+    Object.defineProperty(fr, 'white', { get() { return this._white || (this._white = make(true)); } });
+    return (pxbCache[key] = fr);
 }

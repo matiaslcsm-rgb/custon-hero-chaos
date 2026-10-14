@@ -378,6 +378,7 @@ function pixelPortrait(u) {
     const L = pxHeroLook(u), key = JSON.stringify(L);
     if (pxhPortraitCache[key]) return pxhPortraitCache[key];
     const fr = pxbHeroFrame(L, 'idle', 0).img, c = document.createElement('canvas'); c.width = c.height = 64;
+    if (heroUsesArt(L)) { const g = c.getContext('2d'); g.imageSmoothingEnabled = false; g.fillStyle = '#2b2420'; g.fillRect(0, 0, 64, 64); g.drawImage(fr, 12, HERO_ART_BOX.h - 2 - 24, 16, 16, 0, 0, 64, 64); return (pxhPortraitCache[key] = c.toDataURL()); } // el dibujo: la capucha
     const g = c.getContext('2d'); g.imageSmoothingEnabled = false;
     g.fillStyle = '#2b2420'; g.fillRect(0, 0, 64, 64);
     const R = PXH_RES; g.drawImage(fr, Math.round((PXB_PAD + 1) * R), Math.round((PXB_PAD - 2) * R), Math.round(16 * R), Math.round(16 * R), 0, 0, 64, 64); // con la resolución del héroe (towerPixelHero.js)
@@ -412,7 +413,7 @@ function pxbScale(u) {
     return PXG.scale * (u.isGuardian ? 1.35 : ((u.type && u.type.scale) || 1) * (u.isCaveBoss ? 1.6 : u.isBoss ? 1.3 : 1));
 }
 // Altura de la figura por encima del centro de la casilla (para la barra de vida)
-function pixelHalfHeight(u) { const B = PXB[pixelBodyFor(u)]; return B.h * pxbScale(u) - TILE * 0.45 + 2; }
+function pixelHalfHeight(u) { const body = pixelBodyFor(u), B = PXB[body]; return (body === 'hero' && heroUsesArt(pxHeroLook(u)) ? 27 : B.h) * pxbScale(u) - TILE * 0.45 + 2; }
 
 // Dibuja una criatura en pixel art. Devuelve false si no tiene cuerpo de pixel (y se dibuja en tinta).
 function drawPixelUnit(u, cx, cy, facing, flash, pose) {
@@ -426,7 +427,7 @@ function drawPixelUnit(u, cx, cy, facing, flash, pose) {
     // de ataque) el héroe pasa a su cuadro de ataque, donde el arma se extiende o brilla según su forma
     // (pxhWeapon) — aparte del giro/estirón de todo el cuerpo que ya hace attackPose() (fx.js).
     let dir = 'side';
-    if (body === 'hero') { ({ kind, k } = pxhPick(u, moving)); dir = kind === 'death' ? 'side' : pxhDir(u, moving); } // el héroe: su cuadro y para dónde mira (towerPixelHero.js)
+    if (body === 'hero') { ({ kind, k } = pxhPick(u, moving)); dir = kind === 'death' || heroUsesArt(pxHeroLook(u)) ? 'side' : pxhDir(u, moving); } // el héroe: su cuadro y para dónde mira (towerPixelHero.js)
     const fr = body === 'hero' ? pxbHeroFrame(pxHeroLook(u), kind, k, dir) : pxbFrame(body, u.color, (u.type.parts || []), kind, k), img = flash ? fr.white : fr.img, s = pxbScale(u);
     if (body === 'hero' && gameMode === 'tower') pxhDrawGhosts(pxhFeel(u, kind, moving, cx, cy, fr, s, facing < 0 && dir === 'side')); // polvo y estelas (towerPixelHero.js)
     else u.pxLast = { fr, s, flip: facing < 0 }; // su último dibujo: con él se hace la caída al morir (fx.js)

@@ -783,6 +783,15 @@ el mismo paso; lo grande queda acá, ordenado por impacto.
     entero (eso ensuciaba los píxeles: la pose la hacen los cuadros). Pantalón marrón en vez de casi negro; de frente y de
     espaldas la espada cuelga al costado (en escorzo no se veía). Los pasos van con la distancia recorrida, no con el
     reloj (los pies no patinan).
+  - **El héroe dibujado** (2026-10-14): seguía viéndose "feo y deforme" porque el muñeco se arma con formas (bolas y
+    líneas) que se acomodan en cada pose. El usuario pasó una hoja de 16 sprites (`docs/arte/heroe-hoja-original.jpg`):
+    se recuperaron los píxeles de la imagen ampliada y comprimida (grilla ajustada por cuadro, ~15,4 px por píxel; color
+    del centro de cada celda; paleta de 31 colores; fondo afuera; ojos a rojo) con `docs/arte/extraer-sprites.py` y
+    `docs/arte/paleta-y-ojos.py`, y quedaron en `js/towerHeroArt.js`. Con la espada el héroe usa esos dibujos: quieto
+    (respira y parpadea), caminar (4 cuadros), el combo (preparación → tajo con estela → recuperación; el remate levanta
+    la espada), la parada (el escudo) y el esquive; el golpe recibido y la caída se arman con el mismo dibujo. **Faltan**
+    (para que el usuario los dibuje o pase): de frente y de espaldas (hoy se ve de costado y se espeja), y las otras
+    armas (arco, bastón…), que siguen con el muñeco por poses. La capa ya no toma el color de la armadura.
 - ✅ Volumen general, música y efectos, y temblor de pantalla (0-150%), con deslizadores en la pausa que se guardan.
 - ✅ La forja ya no corta una pelea: si una pieza sube de nivel peleando aparece un aviso arriba a la izquierda, y la
   ventana se abre sola cuando nadie te persigue.

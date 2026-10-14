@@ -26,7 +26,7 @@ function swordParry(h, aim) {
     const arena = fxArena(h);
     if (arena) {
         if (Math.abs(dir.dx) > 0.2) h.facing = Math.sign(dir.dx);
-        h.fxAttack = { kind: 'swing', dx: dir.dx, dy: dir.dy, at: fxClock }; h.fxSwingStep = 1; // se dibuja como el revés hacia arriba (towerPixelBeasts.js)
+        h.fxAttack = { kind: 'swing', dx: dir.dx, dy: dir.dy, at: fxClock }; h.fxSwingStep = 3; // se dibuja con el escudo (towerPixelHero.js; el muñeco por poses, como el revés)
         pushFx(arena, { kind: 'sweep', unit: h, x: h.x, y: h.y, angle: Math.atan2(dir.dy, dir.dx), reach: PARRY.reach, half: PARRY.halfArc, flip: true, color: PARRY.color, color2: '#2a6f97', life: PARRY.window });
         sfx('swing');
     }
