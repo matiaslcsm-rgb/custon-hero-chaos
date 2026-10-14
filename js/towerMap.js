@@ -79,7 +79,7 @@ function drawTowerBigMap(level) {
     if (level.down && seen(level.down.x, level.down.y)) mark('cave', level.down.x, level.down.y, 'Bajada');
     if (level.exitUp) drawMapMark(ctx, 'stairs', X(level.exitUp.x), Y(level.exitUp.y), '#c9a227');
     (level.events || []).forEach(e => { if (e.kind !== 'ambush' && e.seen && !['saved', 'lost', 'open', 'freed'].includes(e.state)) drawMapMark(ctx, 'star', X(e.x), Y(e.y), EVENT_INFO[e.kind].color); });
-    (level.chests || []).forEach(ch => { if (!ch.open && seen(ch.x, ch.y)) mark('chest', ch.x, ch.y); });
+    (level.chests || []).forEach(ch => { if (!ch.open && seen(ch.x, ch.y) && !chestUnderWater(level, ch)) mark('chest', ch.x, ch.y); });
     if (towerRun.corpse && towerRun.corpse.level === level) mark('corpse', towerRun.corpse.x, towerRun.corpse.y, 'Tus restos');
     carriersOn(level).forEach(c => mark('carrier', c.x, c.y, 'Portador'));
     if (player.isAlive()) mark('you', player.x, player.y);

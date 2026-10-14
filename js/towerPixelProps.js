@@ -72,7 +72,7 @@ function pxChest(open, cursed) {
 }
 function pxDrawLoot(level) {
     (level.chests || []).forEach(ch => {
-        if (!canSee(level, ch.x, ch.y) && !level.explored[ch.y][ch.x]) return;
+        if ((!canSee(level, ch.x, ch.y) && !level.explored[ch.y][ch.x]) || chestUnderWater(level, ch)) return; // hundido: no se ve (towerQuests.js)
         const [cx, by] = tileBase(ch.x, ch.y);
         if (!ch.open) pxGlow(cx, by - 4, 13, 5, '#ffd166', 0.12 + 0.08 * Math.sin(fxClock * 3 + ch.x));
         pxPut(pxChest(ch.open, false), cx, by);

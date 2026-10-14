@@ -4,13 +4,17 @@
 //   El primero: la LLAVE DE LAS COMPUERTAS. La suelta el Guardián de Arena (jefe escondido del piso 5, towerSecrets.js);
 //   abre las compuertas del piso 3, una sala sellada con una reja de hierro (no se rompe a golpes) y un cofre adentro.
 //   Las llaves de la run se guardan con la run (towerSave.js).
+//   EL MISTERIO DEL PISO 3 (jugable): al abrir las compuertas baja el agua de todo el piso. Los pozos hondos se secan y se
+//   cruzan (atajos), y en el fondo de los dos más grandes asoman cofres hundidos que antes no se veían.
 
 const QUESTS = {
     compuertas: { keyFloor: 5, doorFloor: 3, key: 'Llave de las Compuertas', inner: [7, 5],
         locked: '🔒 Una reja de hierro con candado: las compuertas de los barqueros. Madre Junco dice que la llave se la llevó la arena de arriba.',
         got: '🗝️ Entre la arena del reloj, una llave oxidada: la Llave de las Compuertas. Las compuertas están en el piso 3 (la piedra de regreso te lleva).',
-        open: '🗝️ La llave gira. Las compuertas se abren y el agua baja: detrás hay una sala que nadie pisó desde la expedición.' }
+        open: '🗝️ La llave gira. Las compuertas se abren y el agua baja: detrás hay una sala que nadie pisó desde la expedición.', drains: true }
 };
+const SUNKEN = { chests: 2, minPool: 5 };
+const chestUnderWater = (level, ch) => !!(ch.sunken && level.deep && level.deep[ch.y * COLS + ch.x]);
 const hasQuestKey = id => !!(towerRun && towerRun.keys && towerRun.keys[id]);
 
 // Al armar el piso: la sala con reja de cada pedido que se abre acá
@@ -22,7 +26,43 @@ function placeQuestDoors(level, dist) {
         const crack = buildChamber(level, p.x, p.y, p.side, Q.inner);
         crack.lock = id;
         level.chests[level.chests.length - 1].quest = id;
+        if (Q.drains) placeSunkenChests(level);
     });
+}
+// Cofres en el fondo de los pozos más grandes (en la casilla más rodeada de agua de cada uno)
+function placeSunkenChests(level) {
+    const deep = level.deep, seen = new Uint8Array(COLS * ROWS), pools = [];
+    if (!deep) return;
+    for (let s = 0; s < deep.length; s++) {
+        if (!deep[s] || seen[s]) continue;
+        const cells = [], stack = [s]; seen[s] = 1;
+        while (stack.length) {
+            const i = stack.pop(), x = i % COLS, y = (i - x) / COLS; cells.push(i);
+            [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(([dx, dy]) => { const j = (y + dy) * COLS + x + dx; if (x + dx >= 0 && x + dx < COLS && y + dy >= 0 && y + dy < ROWS && deep[j] && !seen[j]) { seen[j] = 1; stack.push(j); } });
+        }
+        if (cells.length >= SUNKEN.minPool) pools.push(cells);
+    }
+    const wet = i => { const x = i % COLS, y = (i - x) / COLS; let n = 0; for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (deep[(y + dy) * COLS + x + dx]) n++; return n; };
+    pools.sort((a, b) => b.length - a.length).slice(0, SUNKEN.chests).forEach(cells => {
+        const i = cells.reduce((a, b) => (wet(b) > wet(a) ? b : a)), x = i % COLS;
+        level.chests.push({ x, y: (i - x) / COLS, open: false, guards: [], secret: true, sunken: true });
+    });
+}
+// Baja el agua: los pozos hondos quedan en fondo seco (se pisan) y asoman los cofres hundidos
+function drainFloor(level) {
+    if (level.drained || !level.deep) return;
+    level.drained = true;
+    for (let i = 0; i < level.deep.length; i++) {
+        if (!level.deep[i]) continue;
+        level.deep[i] = 0; level.ground[i] = GROUND.plain;
+        const x = i % COLS, y = (i - x) / COLS;
+        if (typeof markMinimap === 'function' && level.explored[y][x]) markMinimap(level, x, y);
+    }
+    level.pxGround = null; // el suelo en pixel art se vuelve a pintar (towerPixel.js)
+    const sunk = level.chests.filter(c => c.sunken);
+    sunk.forEach(c => { c.unreachable = false; });
+    fxShake(5);
+    log(`🌊 Un rugido de agua por todo el piso: las cisternas se vacían. Donde había pozos hondos queda fondo seco${sunk.length ? `, y en el fondo asoman ${sunk.length} cofres hundidos` : ''}.`);
 }
 // Al vencer a un jefe escondido que guarda una llave
 function questBossDown(level, floor) {
@@ -39,6 +79,7 @@ function hitQuestDoor(level, c) {
     c.hp = 0; level.walls[c.y][c.x] = 0;
     if (typeof markMinimap === 'function' && level.explored[c.y][c.x]) markMinimap(level, c.x, c.y);
     log(Q.open); sfx('levelup');
+    if (Q.drains) drainFloor(level); // el misterio del piso 3
     return true;
 }
 function questDoorNear(hero = player) {

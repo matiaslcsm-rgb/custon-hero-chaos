@@ -1653,7 +1653,12 @@ test('Torre: pedidos que cruzan pisos — la llave del Guardián de Arena (piso 
     check(towerSnapshot().run.keys.compuertas, 'la llave se guarda con la run');
     const out = [[0, -1], [0, 1], [-1, 0], [1, 0]].map(([dx, dy]) => ({ x: door.x + dx, y: door.y + dy })).find(p => walkable(L3, p.x, p.y) && bfsFrom(L3, L3.start.x, L3.start.y)[p.y * COLS + p.x] >= 0);
     Object.assign(player, { arena: L3, x: out.x, y: out.y });
+    const sunk = L3.chests.filter(c => c.sunken);
+    check(sunk.length >= 1 && sunk.every(c => chestUnderWater(L3, c)), `cofres hundidos bajo el agua (${sunk.length})`);
     check(towerInteract() && door.hp <= 0 && reach(), 'con la llave, F abre las compuertas');
+    check(L3.drained && !L3.deep.some(v => v), 'y baja el agua de todo el piso');
+    const D = bfsFrom(L3, L3.start.x, L3.start.y);
+    check(sunk.every(c => !chestUnderWater(L3, c) && D[c.y * COLS + c.x] >= 0), 'los cofres hundidos quedan al alcance');
 }, { random: true });
 test('Torre: la gente del pueblo pasea adentro del pueblo y habla con F (otra frase si le volvés a hablar)', () => {
     newTower(); enterTowerFloor(3);

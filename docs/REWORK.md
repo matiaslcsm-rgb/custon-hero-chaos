@@ -838,6 +838,10 @@ también tiene que aprender a esquivar los ataques anunciados).
 - ✅ **Jefe escondido del piso 7: el Lobo de Escarcha** (2026-10-14; lo empezó la corrida automática que se detuvo y
   se completó acá): en el mirador cerrado (sala sellada con grieta), aviso de Isla la farolera; suelta las **Garras del
   Lobo de Escarcha** (guantes con crítico y velocidad de ataque). Verificado: la sala se arma en 8 de 8 pisos 7.
+- ✅ **El misterio del piso 3: el agua baja** (2026-10-14, `js/towerQuests.js`): al abrir las compuertas con la llave,
+  las cisternas se vacían: todos los pozos hondos del piso quedan en fondo seco (se pisan) y en el fondo de los dos más
+  grandes asoman **cofres hundidos** (tesoro de sala secreta) que con agua no se veían. Medido en 20 pisos 3: 2 cofres en
+  todos, se secan 93-356 casillas; el camino al guardián se acorta solo en 1 de 20, así que el premio es el tesoro.
 - ✅ **Pedidos que cruzan pisos, el primero** (2026-10-14, `js/towerQuests.js`): el Guardián de Arena (jefe escondido
   del piso 5) suelta la **Llave de las Compuertas**. En el piso 3 hay una sala sellada con una **reja de hierro** (barrotes
   grises; dorados si ya tenés la llave) que no se rompe a golpes: sin la llave, el aviso de Madre Junco; con la llave, F

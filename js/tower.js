@@ -741,7 +741,7 @@ function towerAutoDir(hero) {
     if (corpse && corpse.level === level && !corpse.unreachable) { const dir = towerPathDir(hero, corpse); hero.autoGoal = 'restos'; if (dir) return dir; corpse.unreachable = true; }
     // Botín a la vista (si hay lugar) y cofres sin custodios
     const loot = (level.drops || []).filter(d => !d.unreachable && canSee(level, d.x, d.y) && bagSpotFor(hero, d.item))
-        .concat((level.chests || []).filter(ch => !ch.open && !ch.unreachable && level.explored[ch.y][ch.x] && ch.guards.every(g => !g.isAlive())))
+        .concat((level.chests || []).filter(ch => !ch.open && !ch.unreachable && !chestUnderWater(level, ch) && level.explored[ch.y][ch.x] && ch.guards.every(g => !g.isAlive())))
         .concat((level.shrines || []).filter(sh => !sh.used && !sh.unreachable && canSee(level, sh.x, sh.y)))
         .concat((level.events || []).filter(e => e.kind === 'prisoner' && e.state === 'idle' && !e.unreachable && canSee(level, e.x, e.y) && e.guards.every(c => !c.isAlive())));
     if (loot.length) target = loot.reduce((a, b) => (Math.hypot(a.x - hero.x, a.y - hero.y) <= Math.hypot(b.x - hero.x, b.y - hero.y) ? a : b));

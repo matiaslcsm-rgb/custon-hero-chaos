@@ -122,6 +122,9 @@ El orden de la lista **es** la prioridad: primero lo que destraba el loop comple
   - [ ] Paso 2: más pedidos con la misma pieza (por ejemplo, algo del piso 8 que prenda los faroles del 7).
 - [ ] **El misterio de cada piso, jugable:** compuertas que bajan el agua (3), relojes que cambian el laberinto (5),
       faroles que hay que encender de noche (7). De a uno, empezando por el 3.
+  - [x] Piso 3: al abrir las compuertas baja el agua de todo el piso (fondo seco) y asoman 2 cofres hundidos. 2026-10-14.
+  - [ ] Piso 5: relojes que cambian el laberinto.
+  - [ ] Piso 7: faroles que hay que encender de noche.
 - [ ] **Menos explorado hacia arriba:** caminos, carteles, tamaño del pueblo, mapa que vende el mercader y luz según la
       tabla de TORRE-MUNDO.md.
 - [ ] **Transición de biomas:** cerca de la escalera ya se ve el bioma de arriba (arena que cae, nieve que entra).
@@ -329,6 +332,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 - 2026-10-14 · Dibujo propio del ciervo (pedido en el chat) · 55401af · revisado a ojo en 4 cuadros de caminata y 2 de reposo, al lado del lobo; ojos en la cara. Pruebas 246/246.
 - 2026-10-14 · La gente del pueblo se ve (pedido en el chat) · 57fec6e · 2 vecinos por piso (1 a 9) con 4 frases cada gente; en 15 s de prueba siguen adentro del pueblo y en casillas libres, caminan, se quedan quietos mientras hablan; revisado en pantalla en el piso 3. Pruebas 247/247.
 - 2026-10-14 · Pedidos que cruzan pisos, paso 1 (las compuertas) · 9c97698 · 20/20 pisos 3 con la reja, alcanzable en los 20 (a 39-269 pasos); a golpes no se abre, con la llave sí; la llave se guarda con la run. Pruebas 248/248.
+- 2026-10-14 · Misterio del piso 3 (el agua baja) · COMMIT · 20/20 pisos 3 con 2 cofres hundidos; se secan 93-356 casillas; atajo al guardián solo en 1/20 (los pozos casi nunca cortan el camino: el premio es el tesoro). Pruebas 248/248.
 - 2026-10-14 · Reliquias, paso 1 (motor y 12 reliquias) · 8c1e664 · piloto con reflejos humanos, 45 min: sin reliquias piso 3 y 2 muertes; con 0,25/0,35 de chance, 19 reliquias en 3 pisos (demasiadas); con 0,05/0,10, 7 en 3 pisos (~2,3 por piso), piso 4 y 0 muertes. Pruebas 239/239.
 - 2026-10-14 · Subir de nivel: 1 de 3 mejoras · 6716de1 · piloto con reflejos humanos, 45 min: piso 4 a los 41 min, 0 muertes, nivel 15, 6 reliquias (igual que sin la elección: piso 4 a los 43 min); destrabó Piel de Roble, Golpe Pesado y Sangre Espesa. Pruebas 240/240.
 - 2026-10-14 · Guerrero, paso 1a (clases y Templanza) · 259f4bc · banco de 60 s contra un muñeco, 8 muestras: 119 de daño/s sin pasiva y 116 con ella (sin diferencia: el combo ya critea; el ruido es ±25). Pruebas 241/241; se arregló la prueba de visión que fallaba si el héroe quedaba en una meseta.
