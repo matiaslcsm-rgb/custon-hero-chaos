@@ -827,6 +827,9 @@ Las fases 3 y 4 son las más grandes: hay que rehacer pruebas y volver a medir e
 también tiene que aprender a esquivar los ataques anunciados).
 
 ## Interfaz y calidad de vida (lista viva)
+- ✅ **Jefe escondido del piso 7: el Lobo de Escarcha** (2026-10-14; lo empezó la corrida automática que se detuvo y
+  se completó acá): en el mirador cerrado (sala sellada con grieta), aviso de Isla la farolera; suelta las **Garras del
+  Lobo de Escarcha** (guantes con crítico y velocidad de ataque). Verificado: la sala se arma en 8 de 8 pisos 7.
 - ✅ **La especial (R) de cada clase** (2026-10-14, fase T00 paso 4, `js/towerSpecials.js`), 20 s de enfriamiento
   (el Arquero, 16 por Ojo Rápido): Guerrero, **Torbellino** (pega ×3 a todos en 2,2 casillas y los empuja 2);
   Arquero, **Lluvia de Flechas** (zona de radio 2 en el cursor, 6 golpes de ×0,3 en 2 s); Mago, **Meteoro** (cae a los
