@@ -49,6 +49,9 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 | Duelo simultáneo con las oleadas de los demás; enfriamientos en el descanso; contador central con pitidos; cartel de apuestas; nombres de jugadores; sonidos propios (`sounds/`) | ✅ |
 
 ## Pendientes y temas abiertos
+- **Equipo de desarrollo (2026-10-14):** agentes del proyecto en `.claude/agents/` (director-de-juego,
+  disenador-de-sistemas, disenador-de-niveles, narrativa, arte-pixel, qa-jugador) y el comando `/equipo <tema>`
+  (`.claude/skills/equipo/`) que los coordina: diseño → especialistas → integración → QA → cierre.
 - **La Torre por dentro (2026-10-14, pedido del usuario):** el piso 1 es afuera (el bosque al pie de la torre); del 2
   en adelante estás adentro: muro exterior, salones con portones y columnas (más enteros arriba). Cada piso tiene su
   lugar, su gente y un anciano que cuenta su parte de la historia (la Expedición de Arén, los Ecos, la torre que crece).
