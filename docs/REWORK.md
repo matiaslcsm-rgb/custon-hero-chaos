@@ -270,6 +270,11 @@ botas, pero el catálogo no tiene botas). **Medido:** 10 de 10 pisos 5, grieta a
 los otros salía con 3126 de vida (el blindado trae mucha de base); bajado a 1329 de vida, 199 de daño y 12 de armadura,
 apenas arriba del señor de cueva más duro del piso 5 (354-1241 / 89-295).
 
+**Paso 6: el Lector Sin Ojos (2026-10-14):** piso 6, sala de estanterías tapiada, aviso de la archivista Sela. Lanza
+hechizos; suelta la **Venda del Lector Sin Ojos** (casco raro con Inteligencia y amplificación de hechizo de yapa).
+**Medido:** 10 de 10 pisos 6, grieta a 49-229 pasos; 1242 de vida y 191 de daño (señores de cueva del piso 6: 629-1374
+de vida, 261-393 de daño, y uno con **1833** de daño: quedó como pendiente en el roadmap).
+
 ## 7. Música y sonido
 - **Música ambiental por bioma**, de día y de noche, más una **capa de combate** que entra con fundido cuando hay
   enemigos cerca y se va al terminar la pelea (música dinámica en capas, como Hades o Zelda).

@@ -60,6 +60,8 @@ elija; el modo automático anota las opciones en "Esperando al usuario" y los sa
 - Rioplatense con voseo en código, comentarios, commits e interfaz. Sube `GAME_VERSION` (js/main.js) en cada entrega.
 - Anota cada cambio en REWORK.md ("Interfaz y calidad de vida" o su sección) y ESTADO.md.
 - No toca el guardado de partidas del jugador, no borra archivos del usuario, no cambia el estilo gráfico elegido.
+- Al terminar cada corrida deja un informe en `docs/informes/` (qué hizo, qué midió, cómo probarlo) con un pie
+  **"Tu feedback"**: lo que escribas ahí, la corrida siguiente lo lee primero y lo pasa al roadmap (pedido del usuario 2026-10-14).
 
 El orden de la lista **es** la prioridad: primero lo que destraba el loop completo, después contenido y pulido.
 
@@ -103,7 +105,8 @@ El orden de la lista **es** la prioridad: primero lo que destraba el loop comple
   - [x] Paso 3: el Leviatán del Fango del piso 3, encerrado en la sala de bombas. 2026-10-14.
   - [x] Paso 4: la Semilla Primera del piso 4, en el hueco de la raíz. 2026-10-14.
   - [x] Paso 5: el Guardián de Arena del piso 5, en la sala del reloj detenido. 2026-10-14.
-  - [ ] Paso 6: el resto, de a uno (Lector Sin Ojos, Lobo de Escarcha, Vigía Perdido, Yunque Vivo).
+  - [x] Paso 6: el Lector Sin Ojos del piso 6, entre las estanterías hundidas. 2026-10-14.
+  - [ ] Paso 7: el resto, de a uno (Lobo de Escarcha, Vigía Perdido, Yunque Vivo).
   - [ ] Botas y anillos únicos: el catálogo no tiene piezas de esas ranuras (hoy los únicos usan arma, casco, coraza,
         guantes y amuleto).
   - [ ] Dibujo propio del ciervo (hoy usa el cuerpo de cuadrúpedo con astas del generador).
@@ -143,6 +146,8 @@ El orden de la lista **es** la prioridad: primero lo que destraba el loop comple
       vida que tiembla. Medir con el piloto cuántos golpes recibidos no tenían aviso previo (meta: 0).
 - [ ] **Pausa de impacto por peso:** el remate del combo y el golpe a un guardián frenan 60-90 ms; los golpes chicos,
       nada. Revisar que no se apilen (REWORK.md §8).
+- [ ] **Señores de cueva con daño desmedido:** midiendo el piso 6 salió uno con 1833 de daño por golpe (los demás,
+      261-393). Buscar qué combinación de afijos de campeón lo dispara y ponerle tope.
 - [ ] **Prueba aleatoria de la Raíz Madre:** a veces falla sola. Fijar la semilla o el margen para que sea estable.
 - [ ] **Dificultad medida con el piloto** después de los cambios de la espada (combo con clic, parada): enseñarle la
       parada al piloto y comparar muertes y tiempos por piso contra la marca de REWORK.md §10.

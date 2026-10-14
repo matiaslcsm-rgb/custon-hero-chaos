@@ -1639,7 +1639,7 @@ test('Torre: jefe escondido — el Ciervo Blanco sale de noche en un claro del p
     newTower();
     const L = towerLevel(1), hb = L.hiddenBoss;
     check(hb && L.zone[hb.y * COLS + hb.x] === ZONE.field && walkable(L, hb.x, hb.y), 'el piso 1 tiene su claro apartado');
-    checkEq(towerLevel(6).hiddenBoss, null, 'los demás pisos todavía no');
+    checkEq(towerLevel(7).hiddenBoss, null, 'los demás pisos todavía no');
     const setNight = on => { towerRun.startedAt = gameClock - (on ? DAYNIGHT.day + DAYNIGHT.dusk + 10 : 10); };
     setNight(false); hiddenBossTick(L);
     check(!hb.unit, 'de día no está');
