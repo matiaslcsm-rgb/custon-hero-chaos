@@ -126,7 +126,7 @@ function drawCracks(level) {
 //   el Lobo de Escarcha (piso 7), en el mirador cerrado; el Vigía Perdido (piso 8), junto a la campana congelada; el Yunque
 //   Vivo (piso 9), en la forja apagada.
 const HIDDEN_BOSSES = {
-    1: { label: 'Ciervo Blanco', role: 'skirmisher', body: 'wolf', color: '#eee6d2', parts: ['horns', 'eyes'], scale: 1.35, mult: 2.6, hp: 3.8, lvl: 3, night: true, // hp: vida extra (más que un señor de cueva sin pegar de un golpe)
+    1: { label: 'Ciervo Blanco', role: 'skirmisher', body: 'wolf', px: 'deer', color: '#eee6d2', parts: ['eyes'], scale: 1.35, mult: 2.6, hp: 3.8, lvl: 3, night: true, // hp: vida extra (más que un señor de cueva sin pegar de un golpe)
         mechanic: 'Jefe escondido del piso 1: pasta de noche en un claro apartado del bosque y se va al amanecer. Rápido y escurridizo.',
         hint: '🦌 Brena dice que algunas noches un ciervo blanco pasta en un claro, lejos del camino. Nadie lo pudo alcanzar.',
         icon: '🦌', unique: { slot: 'boots', name: 'Botas del Ciervo Blanco', extra: ['moveSpeedPct', 'maxHp'] } },
@@ -186,11 +186,12 @@ function placeHiddenBoss(level, dist) {
     }
     if (best) level.hiddenBoss = Object.assign(best, { floor: level.floor, unit: null, dead: false });
 }
-// Sale del generador de criaturas (cuerpo, dibujo, IA), pero con tamaño fijo y sin rasgos sorteados
+// Sale del generador de criaturas (cuerpo, dibujo, IA), pero con tamaño fijo y sin rasgos sorteados. px: dibujo propio en
+// pixel art (towerPixelBeasts.js); con el pixel art apagado sigue con la tinta de su cuerpo.
 function hiddenBossType(H, biome) {
     const t = generateBeast(biome, H.role, 1), base = CREEP_TYPES[BEAST_ROLES[H.role].base];
     return Object.assign(t, { hp: base.hp, atk: base.atk, armor: base.armor || 0, magicResist: base.magicResist || 0, atkSpeed: base.atkSpeed, moveInterval: base.moveInterval,
-        thorns: 0, onAttack: base.onAttack, label: H.label, color: H.color, plan: H.body, parts: H.parts, scale: H.scale, traits: [], trait: null, mechanic: H.mechanic,
+        thorns: 0, onAttack: base.onAttack, pxBody: H.px || null, label: H.label, color: H.color, plan: H.body, parts: H.parts, scale: H.scale, traits: [], trait: null, mechanic: H.mechanic,
         genome: Object.assign({}, t.genome, { body: H.body, size: 'normal', hidden: true }) });
 }
 // Cada cuadro del piso: aparece de noche (con un aviso la primera vez) y se va de día si nadie lo despertó

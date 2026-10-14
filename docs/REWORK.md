@@ -838,6 +838,9 @@ también tiene que aprender a esquivar los ataques anunciados).
 - ✅ **Jefe escondido del piso 7: el Lobo de Escarcha** (2026-10-14; lo empezó la corrida automática que se detuvo y
   se completó acá): en el mirador cerrado (sala sellada con grieta), aviso de Isla la farolera; suelta las **Garras del
   Lobo de Escarcha** (guantes con crítico y velocidad de ataque). Verificado: la sala se arma en 8 de 8 pisos 7.
+- ✅ **El Ciervo Blanco con dibujo propio** (2026-10-14): antes era el lobo con cuernos del generador; ahora tiene su
+  cuerpo de pixel art (`deer` en towerPixelBeasts.js): patas largas, cuello alto, astas de hueso, manchas y cola blanca.
+  Lo elige el campo `px` del jefe escondido; con el pixel art apagado sigue con la tinta del lobo.
 - ✅ **Botas y anillos únicos** (2026-10-14, decisión del usuario): las únicas de esas ranuras salen solo de los jefes
   escondidos. El Ciervo Blanco ahora suelta las **Botas del Ciervo Blanco** (antes eran las Astas, un casco) y la Flor
   Carnívora el **Anillo de la Flor Carnívora** (antes, guantes). Son piezas de stats, sin habilidad, como las botas y

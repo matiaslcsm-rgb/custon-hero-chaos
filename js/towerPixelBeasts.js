@@ -63,6 +63,19 @@ const PXB = {
         S.set(17, 5 + b, '#f0d060');
         pxbLeg(S, 5, 10 + b, 5 - b, ph, P[2]); pxbLeg(S, 13, 10 + b, 5 - b, -ph, P[2]);
     } },
+    deer: { w: 22, h: 20, head: [18, 1], back: [9, 7], draw(S, P, f) { // solo el Ciervo Blanco (jefe escondido del piso 1)
+        const b = f.bob, ph = f.ph;
+        pxbShadow(S, 11, 19, 7);
+        pxbLeg(S, 7, 11 + b, 8 - b, -ph, P[1]); pxbLeg(S, 15, 11 + b, 8 - b, ph, P[1]);
+        S.set(3, 8 + b, P[3]); S.set(2, 7 + b - f.br, P[4]);                                  // la cola, blanca
+        S.ball(10, 10 + b, 6.5, 3, P); S.line(6, 12 + b, 14, 12 + b, P[3]);
+        S.set(8, 8 + b, P[4]); S.set(11, 8 + b, P[4]); S.set(9, 9 + b, P[4]);              // manchas
+        S.line(15, 9 + b, 17, 4 + b, P[2]); S.line(16, 9 + b, 18, 4 + b, P[2]);              // el cuello, alto
+        S.ball(18.5, 4 + b, 2.2, 1.8, P); S.rect(20, 4 + b, 2, 2, P[2]); S.set(21, 5 + b, '#1a1412'); S.set(18, 3 + b, '#1a1412'); S.set(16, 3 + b, P[3]);
+        S.line(18, 2 + b, 16, -3 + b, PXB_BONE); S.line(17, 0 + b, 19, -2 + b, PXB_BONE);  // astas
+        S.line(19, 2 + b, 21, -2 + b, PXB_BONE); S.set(22, -1 + b, PXB_BONE); S.set(15, -2 + b, PXB_BONE);
+        pxbLeg(S, 5, 11 + b, 8 - b, ph, P[2]); pxbLeg(S, 13, 11 + b, 8 - b, -ph, P[2]);
+    } },
     boar: { w: 22, h: 16, head: [17, 6], back: [9, 4], draw(S, P, f) {
         const b = f.bob, ph = f.ph;
         pxbShadow(S, 11, 15, 8.5);
@@ -402,8 +415,8 @@ function pixelBodyFor(u) {
     if (pixelOn() && u.isHero) return 'hero';
     if (!pixelOn() || u.isHero || !u.type) return null;
     if (u.isGuardian) return u.type.biomeBoss && PXB['boss:' + u.type.biomeBoss] ? 'boss:' + u.type.biomeBoss : null; // el jefe del bioma
-    // Jefes de cueva y guardianes de cofres malditos: el cuerpo de su criatura, más grande (pxbScale)
-    const plan = inkPlanFor(u);
+    // Jefes de cueva y guardianes de cofres malditos: el cuerpo de su criatura, más grande (pxbScale). pxBody: dibujo propio (el ciervo)
+    const plan = u.type.pxBody || inkPlanFor(u);
     return PXB[plan] ? plan : null;
 }
 const PXH_SCALE = 1; // el héroe: misma grilla de píxeles que el mundo (su dibujo ya tiene más resolución, towerPixelHero.js)

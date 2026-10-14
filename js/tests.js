@@ -1648,6 +1648,7 @@ test('Torre: jefe escondido — el Ciervo Blanco sale de noche en un claro del p
     check(!hb.unit, 'de día no está');
     setNight(true); hiddenBossTick(L);
     check(hb.unit && hb.unit.isHiddenBoss && L.creeps.includes(hb.unit) && hb.unit.type.label === 'Ciervo Blanco', 'de noche aparece');
+    check(hb.unit.type.pxBody === 'deer' && pxbFrame('deer', hb.unit.color, hb.unit.type.parts, 'walk', 1).img.width > 0, 'tiene su propio dibujo de ciervo');
     setNight(false); hiddenBossTick(L);
     check(!hb.unit && !L.creeps.some(c => c.isHiddenBoss), 'al amanecer, si nadie lo despertó, se va');
     setNight(true); hiddenBossTick(L);
