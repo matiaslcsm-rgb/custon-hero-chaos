@@ -121,6 +121,13 @@ El orden de la lista **es** la prioridad: primero lo que destraba el loop comple
 - [ ] **Transición de biomas:** cerca de la escalera ya se ve el bioma de arriba (arena que cae, nieve que entra).
 - [ ] **El piso 1 afuera:** la torre gigante se ve desde el bosque (silueta al fondo) y el laberinto es su puerta.
 
+## Fase T00 — Rework de equipo, habilidades y stats (pedido del usuario 2026-10-14, `docs/PROPUESTA-SISTEMAS.md`)
+Hasta que el usuario decida, el modo automático **no toca** equipo, habilidades, stats, herrero ni mercader.
+- [ ] **(decisión) Sistema de equipo y habilidades:** A Risk of Rain puro, B Diablo mejorado, C híbrido (recomendada).
+- [ ] **(decisión) Stats:** elegir 1 de 3 mejoras al subir de nivel con umbrales (recomendada) o umbrales sobre los puntos.
+- [ ] **(decisión) Arenas de jefes:** llave del piso + arena cerrada (recomendada), 3 sellos, o arena sin condición.
+- [ ] **(decisión) Motor y gráficos:** seguir en el navegador + PixiJS para luces (recomendada), Godot ya, o Unity.
+
 ## Fase T1 — Cerrar el loop (lo que falta para que sea un juego completo)
 - [ ] **Pantalla de fin de run:** al morir o ganar, un resumen claro con el piso alcanzado, el tiempo, las bajas,
       quién te mató, la build final (íconos de las piezas), lo que ganaste para siempre (Esencia, entradas del
@@ -245,6 +252,7 @@ El orden de la lista **es** la prioridad: primero lo que destraba el loop comple
 
 ## Esperando al usuario
 (El modo automático anota acá las opciones de los ítems **(decisión)**, con una marcada como recomendada.)
+- **Fase T00 (equipo, habilidades, stats, arenas, motor):** las opciones con pros y contras están en `docs/PROPUESTA-SISTEMAS.md` §2-4.
 
 ## Hecho por el modo automático
 (Fecha · ítem · commit · qué se midió.)
