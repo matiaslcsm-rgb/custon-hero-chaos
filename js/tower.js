@@ -653,6 +653,7 @@ function renderTower(level, dt) {
     pxUiPass = px; // de acá en adelante, la interfaz: en pixel art, con colores de panel oscuro (towerPixelUi.js)
     drawUltBanner(screenW() / 2, screenH() * 0.72); // cartel de la definitiva, encima de la niebla (fxSkills.js)
     if (!px) drawInkVignette(); // (en pixel art, sin la viñeta de papel)
+    drawHurtVignette(); // te pegaron: borde rojo (fx.js)
     drawObjectiveArrow(level);
     drawOffscreenThreats(level); // balas y tiradores fuera de la vista (towerBullets.js)
     drawChampionCard(level); // qué hace cada afijo del campeón bajo el mouse (towerChampions.js)

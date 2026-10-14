@@ -34,11 +34,23 @@ function fxDamage(target, amount, type, isCrit) {
     const arena = fxArena(target);
     if (!arena || amount <= 0) return;
     target.fxHitAt = fxClock;
+    if (target === player) { const k = fxClock - (player.hurtAt ?? -9) < 0.35 ? player.hurtFrac || 0 : 0; player.hurtAt = fxClock; player.hurtFrac = Math.min(1, k + amount / Math.max(1, player.maxHp)); } // borde rojo (drawHurtVignette)
     sfx(isCrit ? 'crit' : target.isHero ? 'heroHit' : 'hit');
     const color = target.isHero ? '#ff477e' : DMG_COLORS[type] || '#fff';
     pushFx(arena, { kind: 'text', x: target.x + (Math.random() - 0.5) * 0.6, y: target.y - 0.4, text: isCrit ? `${amount}!` : `${amount}`, color, size: isCrit ? 18 : 12, life: isCrit ? 1.1 : 0.8 });
     if (isCrit) { fxBurst(target, '#ffd166', 6, 3); fxShake(2.5); if (!target.isHero) fxHitStop(0.04); }
     if (typeof pxBleed === 'function') pxBleed(target, isCrit ? 7 : 3, 'hit'); // salpicadura en pixel art (towerPixelFx.js)
+}
+
+// Te pegaron: el borde de la pantalla se pone rojo un instante, más fuerte cuanto más vida te sacaron (ROADMAP T2: que
+// ninguna muerte llegue sin entender por qué). 0,35 s; con un golpe del 10% de tu vida ya se nota, con el 25% es fuerte.
+function drawHurtVignette() {
+    const t = fxClock - (player && player.hurtAt !== undefined ? player.hurtAt : -9);
+    if (t > 0.35 || t < 0) return;
+    const a = Math.min(0.7, 0.18 + player.hurtFrac * 2.2) * (1 - t / 0.35), w = screenW(), h = screenH();
+    const g = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.35, w / 2, h / 2, Math.max(w, h) * 0.75);
+    g.addColorStop(0, 'rgba(200,20,30,0)'); g.addColorStop(1, `rgba(200,20,30,${a.toFixed(3)})`);
+    ctx.save(); ctx.fillStyle = g; ctx.fillRect(0, 0, w, h); ctx.restore();
 }
 
 function fxHeal(unit, amount) { if (amount >= 3) fxText(unit, `+${amount}`, '#72efdd', 11, 0.8); }

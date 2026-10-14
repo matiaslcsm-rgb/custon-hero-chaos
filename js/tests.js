@@ -1763,6 +1763,14 @@ test('Torre: el Guerrero — la espada es una clase y su pasiva hace que el dañ
     check(player.gear.gloves === glove && !player.skills.includes(itemSkill(glove)), 'al Guerrero los guantes no le dan su habilidad (solo stats)');
     check(itemTooltipHtml(glove).includes('no usa las habilidades'), 'y el cartel de la pieza lo avisa');
 }, { random: true });
+test('Torre: al recibir daño el borde de la pantalla se pone rojo, más fuerte cuanto más te sacan', () => {
+    newTower('AXE');
+    fxDamage(player, Math.round(player.maxHp * 0.05), 'physical', false);
+    const small = player.hurtFrac;
+    fxDamage(player, Math.round(player.maxHp * 0.2), 'physical', false);
+    check(player.hurtAt === fxClock && player.hurtFrac > small, 'golpes seguidos se suman');
+    drawHurtVignette(); // no rompe
+}, { random: true });
 test('Torre: la especial (R) de cada clase — Torbellino, Lluvia de Flechas y Meteoro, con enfriamiento largo', () => {
     [['ADVENTURER_SWORD', 'warrior'], ['ADVENTURER_BOW', 'archer'], ['ADVENTURER_STAFF', 'mage']].forEach(([w, cls]) => {
         const L = newTower('AXE', { weapon: w });

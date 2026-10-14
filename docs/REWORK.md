@@ -827,6 +827,8 @@ Las fases 3 y 4 son las más grandes: hay que rehacer pruebas y volver a medir e
 también tiene que aprender a esquivar los ataques anunciados).
 
 ## Interfaz y calidad de vida (lista viva)
+- ✅ **Señal clara al recibir daño** (2026-10-14, fase T2): cuando te pegan, el borde de la pantalla se pone rojo 0,35 s,
+  más fuerte cuanto más vida te sacan (golpes seguidos se suman). Ya estaban el número, el sonido y el cuadro de golpe.
 - ✅ **Jefe escondido del piso 7: el Lobo de Escarcha** (2026-10-14; lo empezó la corrida automática que se detuvo y
   se completó acá): en el mirador cerrado (sala sellada con grieta), aviso de Isla la farolera; suelta las **Garras del
   Lobo de Escarcha** (guantes con crítico y velocidad de ataque). Verificado: la sala se arma en 8 de 8 pisos 7.

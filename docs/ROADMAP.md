@@ -198,7 +198,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
       estela, en el estilo de `docs/arte/vistas-frente-espalda.py` y la paleta de `js/towerHeroArt.js`.
 - [ ] **Golpe recibido y caída propios del héroe dibujado:** hoy se arman con el cuadro de quieto.
 - [ ] **Parada y esquive de frente y de espaldas.**
-- [ ] **Señal clara al recibir daño:** destello rojo en el borde de la pantalla, un sonido propio y la barra de
+- [x] **Señal clara al recibir daño** (2026-10-14: borde rojo según el daño; falta medir golpes sin aviso con el piloto): destello rojo en el borde de la pantalla, un sonido propio y la barra de
       vida que tiembla. Medir con el piloto cuántos golpes recibidos no tenían aviso previo (meta: 0).
 - [ ] **Pausa de impacto por peso:** el remate del combo y el golpe a un guardián frenan 60-90 ms; los golpes chicos,
       nada. Revisar que no se apilen (REWORK.md §8).
