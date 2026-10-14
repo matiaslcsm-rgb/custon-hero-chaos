@@ -264,6 +264,12 @@ raíces y maldice a distancia; suelta el amuleto **Semilla Primera** (vida/s y v
 con el laberinto alcanzable, grieta a 56-265 pasos; 1125 de vida y 100 de daño, en el medio de los señores de cueva del
 piso 4 (456-2435 / 106-380).
 
+**Paso 5: el Guardián de Arena (2026-10-14):** piso 5, sala del reloj detenido (sellada), aviso del Contador. Muy
+resistente; suelta la **Aguja del Reloj Detenido** (arma rara con vel. de ataque y de movimiento de yapa; iban a ser
+botas, pero el catálogo no tiene botas). **Medido:** 10 de 10 pisos 5, grieta a 50-191 pasos. Con el multiplicador de
+los otros salía con 3126 de vida (el blindado trae mucha de base); bajado a 1329 de vida, 199 de daño y 12 de armadura,
+apenas arriba del señor de cueva más duro del piso 5 (354-1241 / 89-295).
+
 ## 7. Música y sonido
 - **Música ambiental por bioma**, de día y de noche, más una **capa de combate** que entra con fundido cuando hay
   enemigos cerca y se va al terminar la pelea (música dinámica en capas, como Hades o Zelda).

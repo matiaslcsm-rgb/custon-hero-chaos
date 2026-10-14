@@ -53,7 +53,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   disenador-de-sistemas, disenador-de-niveles, narrativa, arte-pixel, qa-jugador) y el comando `/equipo <tema>`
   (`.claude/skills/equipo/`) que los coordina: diseño → especialistas → integración → QA → cierre.
 - **Jefes escondidos (2026-10-14, modo automático):** el Ciervo Blanco (piso 1) sale de noche en un claro apartado; la
-  Flor Carnívora (piso 2), el Leviatán del Fango (3) y la Semilla Primera (4) esperan en salas tapiadas, detrás de una grieta. Cada uno suelta una pieza única. Faltan
+  Flor Carnívora (piso 2), el Leviatán del Fango (3), la Semilla Primera (4) y el Guardián de Arena (5) esperan en salas tapiadas, detrás de una grieta. Cada uno suelta una pieza única. Faltan
   los de los otros pisos (REWORK.md §6, ROADMAP.md T0).
 - **Salas secretas (2026-10-14, modo automático):** cámaras selladas desde el piso 2 y una sala escondida en cada
   laberinto, con una pared agrietada que se rompe a golpes y un cofre con una pieza rara (REWORK.md §6).

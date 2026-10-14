@@ -122,7 +122,7 @@ function drawCracks(level) {
 // · El Ciervo Blanco (piso 1) pasta solo de NOCHE en un claro apartado del bosque; al amanecer, si no lo despertaste, se va.
 // · La Flor Carnívora (piso 2) está encerrada en el invernadero tapiado: una sala grande sellada con una pared agrietada.
 // · El Leviatán del Fango (piso 3), igual, en la sala de bombas de las cisternas; la Semilla Primera (piso 4), en el
-//   hueco de la raíz.
+//   hueco de la raíz; el Guardián de Arena (piso 5), en la sala del reloj detenido.
 const HIDDEN_BOSSES = {
     1: { label: 'Ciervo Blanco', role: 'skirmisher', body: 'wolf', color: '#eee6d2', parts: ['horns', 'eyes'], scale: 1.35, mult: 2.6, hp: 3.8, lvl: 3, night: true, // hp: vida extra (más que un señor de cueva sin pegar de un golpe)
         mechanic: 'Jefe escondido del piso 1: pasta de noche en un claro apartado del bosque y se va al amanecer. Rápido y escurridizo.',
@@ -139,7 +139,11 @@ const HIDDEN_BOSSES = {
     4: { label: 'Semilla Primera', role: 'hexer', body: 'golem', color: '#6a994e', parts: ['spikes', 'spots'], scale: 1.5, mult: 2.2, hp: 3, lvl: 3, sealed: [11, 8], rooted: true,
         mechanic: 'Jefe escondido del piso 4: la semilla de la que nació la raíz gigante, en el hueco de la raíz. No se mueve; maldice a distancia.',
         hint: '🌱 El viejo Tallo: «En el hueco de la raíz hay una semilla que late. Arén la tocó y se le secó la mano.»',
-        icon: '🌱', unique: { slot: 'amulet', name: 'Semilla Primera', extra: ['hpRegen', 'maxHp'] } }
+        icon: '🌱', unique: { slot: 'amulet', name: 'Semilla Primera', extra: ['hpRegen', 'maxHp'] } },
+    5: { label: 'Guardián de Arena', role: 'tank', body: 'golem', color: '#d4a373', parts: ['horns', 'eyes'], scale: 1.6, mult: 2.2, hp: 0.85, lvl: 3, sealed: [11, 8], // el blindado ya trae mucha vida y armadura
+        mechanic: 'Jefe escondido del piso 5: cuida el único reloj que no se rompió, en una sala tapiada. Muy resistente.',
+        hint: '⏳ El Contador: «Hay un reloj que no cae. Lo tapiamos con su guardián adentro. Si lo despertás, que sea con tiempo.»',
+        icon: '⏳', unique: { slot: 'weapon', name: 'Aguja del Reloj Detenido', extra: ['atkSpeedPct', 'moveSpeedPct'] } } // (no hay botas en el catálogo)
 };
 // Un claro abierto (7×7 sin muros) lo más lejos posible de la entrada y de la página
 function placeHiddenBoss(level, dist) {

@@ -102,7 +102,10 @@ El orden de la lista **es** la prioridad: primero lo que destraba el loop comple
         agrietada; la flor echó raíces y escupe espinas). 2026-10-14.
   - [x] Paso 3: el Leviatán del Fango del piso 3, encerrado en la sala de bombas. 2026-10-14.
   - [x] Paso 4: la Semilla Primera del piso 4, en el hueco de la raíz. 2026-10-14.
-  - [ ] Paso 5: el resto, de a uno (Guardián de Arena, Lector Sin Ojos, Lobo de Escarcha, Vigía Perdido, Yunque Vivo).
+  - [x] Paso 5: el Guardián de Arena del piso 5, en la sala del reloj detenido. 2026-10-14.
+  - [ ] Paso 6: el resto, de a uno (Lector Sin Ojos, Lobo de Escarcha, Vigía Perdido, Yunque Vivo).
+  - [ ] Botas y anillos únicos: el catálogo no tiene piezas de esas ranuras (hoy los únicos usan arma, casco, coraza,
+        guantes y amuleto).
   - [ ] Dibujo propio del ciervo (hoy usa el cuerpo de cuadrúpedo con astas del generador).
 - [ ] **La gente del pueblo se ve:** 2 o 3 personajes en pixel art que caminan por el pueblo, con el aspecto de su
       gente (barqueros, relojeros, faroleros…). Hablás con F y cada run dicen algo nuevo.

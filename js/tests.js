@@ -1639,7 +1639,7 @@ test('Torre: jefe escondido — el Ciervo Blanco sale de noche en un claro del p
     newTower();
     const L = towerLevel(1), hb = L.hiddenBoss;
     check(hb && L.zone[hb.y * COLS + hb.x] === ZONE.field && walkable(L, hb.x, hb.y), 'el piso 1 tiene su claro apartado');
-    checkEq(towerLevel(5).hiddenBoss, null, 'los demás pisos todavía no');
+    checkEq(towerLevel(6).hiddenBoss, null, 'los demás pisos todavía no');
     const setNight = on => { towerRun.startedAt = gameClock - (on ? DAYNIGHT.day + DAYNIGHT.dusk + 10 : 10); };
     setNight(false); hiddenBossTick(L);
     check(!hb.unit, 'de día no está');
@@ -1677,8 +1677,8 @@ test('Torre: jefe escondido — la Flor Carnívora del piso 2 espera en el inver
     L.drops = []; dealDamage(player, f, f.hp * 10, 'pure');
     check(L.drops.some(dr => dr.item.unique && dr.item.slot === 'gloves'), 'suelta sus guantes únicos');
 }, { random: true });
-test('Torre: jefes escondidos en salas tapiadas (pisos 3 y 4) — cada uno en su sala sellada, con su pieza única', () => {
-    [3, 4].forEach(f => {
+test('Torre: jefes escondidos en salas tapiadas (pisos 3 en adelante) — cada uno en su sala sellada, con su pieza única', () => {
+    Object.keys(HIDDEN_BOSSES).map(Number).filter(f => f >= 3).forEach(f => {
         const H = HIDDEN_BOSSES[f];
         newTower(); enterTowerFloor(f);
         const L = arenas[0], hb = L.hiddenBoss;
