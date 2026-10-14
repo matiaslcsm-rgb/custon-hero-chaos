@@ -101,8 +101,8 @@ El orden de la lista **es** la prioridad: primero lo que destraba el loop comple
   - [x] Paso 2: la Flor Carnívora del piso 2, en el invernadero tapiado (sala grande sellada con una pared
         agrietada; la flor echó raíces y escupe espinas). 2026-10-14.
   - [x] Paso 3: el Leviatán del Fango del piso 3, encerrado en la sala de bombas. 2026-10-14.
-  - [ ] Paso 4: el resto, de a uno (Semilla Primera, Guardián de Arena, Lector Sin Ojos, Lobo de Escarcha, Vigía
-        Perdido, Yunque Vivo).
+  - [x] Paso 4: la Semilla Primera del piso 4, en el hueco de la raíz. 2026-10-14.
+  - [ ] Paso 5: el resto, de a uno (Guardián de Arena, Lector Sin Ojos, Lobo de Escarcha, Vigía Perdido, Yunque Vivo).
   - [ ] Dibujo propio del ciervo (hoy usa el cuerpo de cuadrúpedo con astas del generador).
 - [ ] **La gente del pueblo se ve:** 2 o 3 personajes en pixel art que caminan por el pueblo, con el aspecto de su
       gente (barqueros, relojeros, faroleros…). Hablás con F y cada run dicen algo nuevo.

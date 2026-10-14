@@ -121,7 +121,8 @@ function drawCracks(level) {
 // Opcionales, más difíciles que un señor de cueva, con su entrada propia en el Bestiario y una pieza única.
 // · El Ciervo Blanco (piso 1) pasta solo de NOCHE en un claro apartado del bosque; al amanecer, si no lo despertaste, se va.
 // · La Flor Carnívora (piso 2) está encerrada en el invernadero tapiado: una sala grande sellada con una pared agrietada.
-// · El Leviatán del Fango (piso 3), igual, en la sala de bombas de las cisternas.
+// · El Leviatán del Fango (piso 3), igual, en la sala de bombas de las cisternas; la Semilla Primera (piso 4), en el
+//   hueco de la raíz.
 const HIDDEN_BOSSES = {
     1: { label: 'Ciervo Blanco', role: 'skirmisher', body: 'wolf', color: '#eee6d2', parts: ['horns', 'eyes'], scale: 1.35, mult: 2.6, hp: 3.8, lvl: 3, night: true, // hp: vida extra (más que un señor de cueva sin pegar de un golpe)
         mechanic: 'Jefe escondido del piso 1: pasta de noche en un claro apartado del bosque y se va al amanecer. Rápido y escurridizo.',
@@ -134,7 +135,11 @@ const HIDDEN_BOSSES = {
     3: { label: 'Leviatán del Fango', role: 'bruiser', body: 'lizard', color: '#4a5d23', parts: ['spikes', 'eyes'], scale: 1.6, mult: 2, hp: 1.7, lvl: 3, sealed: [11, 8], // el bruto ya trae mucha vida de base
         mechanic: 'Jefe escondido del piso 3: quedó encerrado en la sala de bombas cuando se cerraron las compuertas. Pega muy fuerte.',
         hint: '🛶 Madre Junco: «La sala de bombas quedó cerrada con algo adentro. Los botes que se acercan a la pared rajada no vuelven.»',
-        icon: '🐊', unique: { slot: 'armor', name: 'Coraza del Leviatán', extra: ['armor', 'hpRegen'] } }
+        icon: '🐊', unique: { slot: 'armor', name: 'Coraza del Leviatán', extra: ['armor', 'hpRegen'] } },
+    4: { label: 'Semilla Primera', role: 'hexer', body: 'golem', color: '#6a994e', parts: ['spikes', 'spots'], scale: 1.5, mult: 2.2, hp: 3, lvl: 3, sealed: [11, 8], rooted: true,
+        mechanic: 'Jefe escondido del piso 4: la semilla de la que nació la raíz gigante, en el hueco de la raíz. No se mueve; maldice a distancia.',
+        hint: '🌱 El viejo Tallo: «En el hueco de la raíz hay una semilla que late. Arén la tocó y se le secó la mano.»',
+        icon: '🌱', unique: { slot: 'amulet', name: 'Semilla Primera', extra: ['hpRegen', 'maxHp'] } }
 };
 // Un claro abierto (7×7 sin muros) lo más lejos posible de la entrada y de la página
 function placeHiddenBoss(level, dist) {

@@ -259,6 +259,11 @@ Junco, pega muy fuerte cuerpo a cuerpo y suelta la **Coraza del Leviatán** (cor
 mucha vida de base), se bajó a 1000 de vida y 137 de daño, contra 393-1226 / 153-333 de los señores de cueva del piso 3:
 más duro que el promedio y menos letal, como los otros dos.
 
+**Paso 4: la Semilla Primera (2026-10-14):** piso 4, en el hueco de la raíz (sala sellada), aviso del viejo Tallo. Echó
+raíces y maldice a distancia; suelta el amuleto **Semilla Primera** (vida/s y vida de yapa). **Medido:** 10 de 10 pisos 4
+con el laberinto alcanzable, grieta a 56-265 pasos; 1125 de vida y 100 de daño, en el medio de los señores de cueva del
+piso 4 (456-2435 / 106-380).
+
 ## 7. Música y sonido
 - **Música ambiental por bioma**, de día y de noche, más una **capa de combate** que entra con fundido cuando hay
   enemigos cerca y se va al terminar la pelea (música dinámica en capas, como Hades o Zelda).
