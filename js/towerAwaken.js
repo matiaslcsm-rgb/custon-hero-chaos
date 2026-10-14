@@ -37,6 +37,7 @@ function towerInteract() {
     if (w) { takeStarterWeapon(w); return true; }
     if (nearWaystone()) { toggleWaystone(true); return true; } // la piedra de regreso (towerWaystone.js)
     if (talkToFolk()) return true; // la gente del pueblo (towerFolk.js)
+    if (questInteract()) return true; // las rejas de los pedidos (towerQuests.js)
     return false;
 }
 function towerClickWeapon(p) {

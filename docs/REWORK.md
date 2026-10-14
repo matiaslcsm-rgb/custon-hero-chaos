@@ -838,6 +838,11 @@ también tiene que aprender a esquivar los ataques anunciados).
 - ✅ **Jefe escondido del piso 7: el Lobo de Escarcha** (2026-10-14; lo empezó la corrida automática que se detuvo y
   se completó acá): en el mirador cerrado (sala sellada con grieta), aviso de Isla la farolera; suelta las **Garras del
   Lobo de Escarcha** (guantes con crítico y velocidad de ataque). Verificado: la sala se arma en 8 de 8 pisos 7.
+- ✅ **Pedidos que cruzan pisos, el primero** (2026-10-14, `js/towerQuests.js`): el Guardián de Arena (jefe escondido
+  del piso 5) suelta la **Llave de las Compuertas**. En el piso 3 hay una sala sellada con una **reja de hierro** (barrotes
+  grises; dorados si ya tenés la llave) que no se rompe a golpes: sin la llave, el aviso de Madre Junco; con la llave, F
+  (o un golpe) la abre y adentro hay un cofre de sala secreta. La piedra de regreso te lleva de vuelta al 3. Las llaves
+  se guardan con la run. La misma pieza (`QUESTS`) sirve para los próximos pedidos.
 - ✅ **La gente del pueblo se ve** (2026-10-14, `js/towerFolk.js`): dos vecinos por piso (del 1 al 9) con la pinta de
   su gente (capucha y farol los que Esperan, sombrero y tijera los jardineros, pértiga los barqueros, casco y arco los
   vigías, martillo los herreros…) pasean por el pueblo entre pausas. Cerca, F: hablar; la frase sale en un globo y en

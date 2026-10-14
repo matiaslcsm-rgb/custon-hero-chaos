@@ -21,6 +21,7 @@ function placeSecretRooms(level, dist) {
     const far = level.chests.filter(c => c.secret).sort((a, b) => dist[b.y * COLS + b.x] - dist[a.y * COLS + a.x])[0]; // (dist es de antes de levantar los muros)
     if (level.arenPage && far) Object.assign(level.arenPage, { x: far.x - 1, y: far.y });
     placeLabSecret(level, dist);
+    placeQuestDoors(level, dist); // la sala con reja de los pedidos que cruzan pisos (towerQuests.js)
 }
 // Un lugar libre de campo para una cámara de `inner` por dentro (con margen), lejos de la entrada, del pueblo y de las otras.
 // trees: puede pisar árboles y rocas del bioma (se despejan); la casilla de afuera de la grieta tiene que ser alcanzable.
@@ -82,6 +83,7 @@ function crackAt(level, x, y) { return (level.cracks || []).find(c => c.hp > 0 &
 function hitCrack(level, x, y, hero) {
     const c = level && hero === player && crackAt(level, x, y);
     if (!c) return false;
+    if (c.lock) return hitQuestDoor(level, c); // una reja: se abre con su llave (towerQuests.js)
     c.hp--;
     const arena = fxArena(hero);
     if (arena) fxParticles(arena, x, y, 'steel', c.hp > 0 ? 4 : 14, 3, { life: 0.35 });
@@ -101,7 +103,7 @@ function swingCracks(c, dir, reach, halfArc) {
 // Las grietas: líneas finas oscuras sobre la piedra (se notan si mirás bien) y más abiertas con cada golpe
 function drawCracks(level) {
     (level.cracks || []).forEach(c => {
-        if (c.hp <= 0 || !level.explored[c.y][c.x]) return;
+        if (c.hp <= 0 || c.lock || !level.explored[c.y][c.x]) return;
         const x = c.x * TILE, y = c.y * TILE, dmg = SECRET.hp - c.hp;
         const path = (ox, oy) => {
             ctx.beginPath();
@@ -219,4 +221,5 @@ function hiddenBossLoot(level, c) {
     Object.assign(item, { name: U.name, unique: true });
     level.drops.push({ x: c.x, y: c.y, item });
     log(`${HIDDEN_BOSSES[c.hiddenFloor].icon} ${c.type.label} cae. Deja algo que nadie había visto: ${U.name}.`);
+    questBossDown(level, c.hiddenFloor); // y si guardaba una llave (towerQuests.js)
 }

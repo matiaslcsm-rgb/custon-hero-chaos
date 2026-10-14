@@ -1638,6 +1638,23 @@ test('Torre: paredes agrietadas — cámaras selladas desde el piso 2, se rompen
     const k2 = { x: 5, y: 5, hp: 1 }; L.cracks.push(k2); L.walls[5][5] = WALL.stone;
     check(hitCrack(L, 5, 5, player) && !L.walls[5][5], 'cualquier golpe tuyo cuenta (flechas y orbes también)');
 }, { random: true });
+test('Torre: pedidos que cruzan pisos — la llave del Guardián de Arena (piso 5) abre las compuertas del piso 3', () => {
+    newTower(); enterTowerFloor(3);
+    const L3 = arenas[0], door = L3.cracks.find(c => c.lock === 'compuertas'), chest = L3.chests.find(c => c.quest === 'compuertas');
+    check(door && chest, 'el piso 3 tiene las compuertas con su cofre');
+    const reach = () => bfsFrom(L3, L3.start.x, L3.start.y)[chest.y * COLS + chest.x] >= 0;
+    check(!reach(), 'sellada');
+    for (let i = 0; i < 5; i++) hitCrack(L3, door.x, door.y, player);
+    check(door.hp > 0 && !reach(), 'a golpes no se abre');
+    enterTowerFloor(5);
+    const L5 = arenas[0]; hiddenBossTick(L5);
+    dealDamage(player, L5.hiddenBoss.unit, L5.hiddenBoss.unit.hp * 10, 'pure');
+    check(hasQuestKey('compuertas'), 'el Guardián de Arena suelta la llave');
+    check(towerSnapshot().run.keys.compuertas, 'la llave se guarda con la run');
+    const out = [[0, -1], [0, 1], [-1, 0], [1, 0]].map(([dx, dy]) => ({ x: door.x + dx, y: door.y + dy })).find(p => walkable(L3, p.x, p.y) && bfsFrom(L3, L3.start.x, L3.start.y)[p.y * COLS + p.x] >= 0);
+    Object.assign(player, { arena: L3, x: out.x, y: out.y });
+    check(towerInteract() && door.hp <= 0 && reach(), 'con la llave, F abre las compuertas');
+}, { random: true });
 test('Torre: la gente del pueblo pasea adentro del pueblo y habla con F (otra frase si le volvés a hablar)', () => {
     newTower(); enterTowerFloor(3);
     const L = arenas[0], folk = townFolk(L), t = L.town;

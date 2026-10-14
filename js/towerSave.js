@@ -35,7 +35,7 @@ function towerSnapshot() {
     return {
         v: TOWER_SAVE.version, savedAt: Date.now(), itemSeq: towerItemSeq, hero: h, lost,
         run: { floor: towerRun.floor, base: towerRun.base, deaths: towerRun.deaths, elapsed: gameClock - towerRun.startedAt, stats: towerRun.stats,
-            reactions: towerRun.reactions || {}, lore: towerRun.lore || {}, smithless: towerRun.smithless || 0, cleared: [...new Set([...(towerRun.cleared || []), ...cleared])],
+            reactions: towerRun.reactions || {}, lore: towerRun.lore || {}, keys: towerRun.keys || {}, smithless: towerRun.smithless || 0, cleared: [...new Set([...(towerRun.cleared || []), ...cleared])],
             corpse: c && !c.recovered ? { floor: c.floor, lost: c.lost, points: c.points, killer: c.killer } : null }
     };
 }
@@ -67,7 +67,7 @@ function continueTowerRun() {
     player.hp = Math.max(1, Math.round(player.maxHp * (h.hpPct ?? 1))); player.mana = Math.round(player.maxMana * (h.manaPct ?? 1));
     const R = S.run;
     Object.assign(towerRun, { base: R.base || towerRun.base, deaths: R.deaths || 0, startedAt: gameClock - (R.elapsed || 0), stats: R.stats || towerRun.stats,
-        reactions: R.reactions || {}, lore: R.lore || {}, smithless: R.smithless || 0, cleared: R.cleared || [], pendingCorpse: R.corpse });
+        reactions: R.reactions || {}, lore: R.lore || {}, keys: R.keys || {}, smithless: R.smithless || 0, cleared: R.cleared || [], pendingCorpse: R.corpse });
     enterTowerFloor(R.floor || 1, 'start');
     log(`💾 Seguís la run: piso ${towerRun.floor}, nivel ${player.level}. El piso se armó de nuevo; ${R.cleared && R.cleared.includes(towerRun.floor) ? 'su guardián ya lo habías vencido: la escalera está abierta.' : 'el guardián te espera en el laberinto.'}` +
         (R.corpse ? ` Tus restos (${R.corpse.points} puntos) te esperan en la entrada del piso ${R.corpse.floor}.` : '') + (S.lost && S.lost.length ? ` Lo que se había llevado el portador volvió a tu bolsa.` : ''));
