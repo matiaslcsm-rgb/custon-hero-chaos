@@ -52,8 +52,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **Equipo de desarrollo (2026-10-14):** agentes del proyecto en `.claude/agents/` (director-de-juego,
   disenador-de-sistemas, disenador-de-niveles, narrativa, arte-pixel, qa-jugador) y el comando `/equipo <tema>`
   (`.claude/skills/equipo/`) que los coordina: diseño → especialistas → integración → QA → cierre.
-- **Salas secretas, paso 1 (2026-10-14, modo automático):** cámaras selladas desde el piso 2 con una pared agrietada que
-  se rompe a golpes y un cofre con una pieza rara (REWORK.md §6). Al continuar una run guardada vuelven a estar cerradas.
+- **Salas secretas (2026-10-14, modo automático):** cámaras selladas desde el piso 2 y una sala escondida en cada
+  laberinto, con una pared agrietada que se rompe a golpes y un cofre con una pieza rara (REWORK.md §6).
 - **Las Páginas de Arén (2026-10-14, modo automático):** una por piso en el rincón más apartado del campo; se juntan al
   pisarlas, quedan para siempre y el Cuaderno (N) cuenta la historia de la expedición en orden (REWORK.md §6).
 - **La Torre por dentro (2026-10-14, pedido del usuario):** el piso 1 es afuera (el bosque al pie de la torre); del 2

@@ -1610,7 +1610,10 @@ test('Torre por dentro: el piso 1 es afuera; del 2 en adelante, muro exterior y 
 });
 test('Torre: paredes agrietadas — cámaras selladas desde el piso 2, se rompen a golpes y adentro hay un tesoro', () => {
     newTower();
-    checkEq((towerLevel(1).cracks || []).length, 0, 'el piso 1 es afuera: sin cámaras');
+    const L1 = towerLevel(1), labK = L1.cracks[0];
+    check(L1.cracks.length === 1 && L1.zone[labK.y * COLS + labK.x] === ZONE.lab, 'el piso 1 es afuera: solo la sala escondida del laberinto');
+    const d1 = bfsFrom(L1, L1.start.x, L1.start.y), labCh = L1.chests.find(c => c.secret);
+    check(labCh && d1[labCh.y * COLS + labCh.x] < 0 && [[0, -1], [0, 1], [-1, 0], [1, 0]].some(([dx, dy]) => d1[(labK.y + dy) * COLS + labK.x + dx] >= 0), 'la del laberinto: cerrada, con la grieta hacia un pasillo');
     const L = towerLevel(4), k = L.cracks[0], ch = L.chests.find(c => c.secret);
     check(L.cracks.length >= 1 && ch, `el piso 4 trae cámaras selladas (${L.cracks.length})`);
     checkEq(L.walls[k.y][k.x], WALL.stone, 'la grieta es parte de la pared');

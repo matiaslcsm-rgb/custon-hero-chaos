@@ -88,10 +88,11 @@ El orden de la lista **es** la prioridad: primero lo que destraba el loop comple
       laberinto. Se rompen a golpes y adentro hay un cofre, una página o el camino al jefe escondido.
   - [x] Paso 1: 2 cámaras de piedra selladas por piso (2+) en el campo, con una pared agrietada (3 golpes: tajos,
         flechas u orbes) y un cofre con una pieza rara adentro (`js/towerSecrets.js`). 2026-10-14.
-  - [ ] Paso 2: grietas en los muros del laberinto que dan a una sala escondida.
+  - [x] Paso 2: una sala escondida por piso en la piedra maciza del laberinto (también en el piso 1), con la grieta
+        hacia un pasillo o una sala. 2026-10-14.
   - [ ] Paso 3: que la sala secreta guarde también la Página de Arén o el camino al jefe escondido (con el ítem del jefe).
-  - [ ] Paso 4: que el guardado de la run recuerde las paredes rotas y los cofres secretos abiertos (hoy, al continuar
-        una run, el piso se arma de nuevo y las cámaras vuelven a estar cerradas).
+  - [x] ~~Paso 4: que el guardado recuerde las paredes rotas~~ Descartado: al continuar una run el piso entero se arma
+        de nuevo (cofres comunes incluidos, towerSave.js); las cámaras se comportan igual que el resto.
 - [ ] **Jefe escondido, paso 1:** el Ciervo Blanco del piso 1 (aparece solo de noche en un claro apartado), con su
       entrada propia del Bestiario y una pieza única. Después, uno por piso según la tabla de TORRE-MUNDO.md.
 - [ ] **La gente del pueblo se ve:** 2 o 3 personajes en pixel art que caminan por el pueblo, con el aspecto de su

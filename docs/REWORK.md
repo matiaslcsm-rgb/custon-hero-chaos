@@ -225,7 +225,12 @@ de su pared tiene una grieta: un filo claro con sombra sobre el ladrillo, que se
 golpe. Tres golpes tuyos la derrumban (tajos de la espada en el arco, flechas y orbes que chocan contra ella; los enemigos
 no la rompen) y adentro hay un cofre con una pieza rara. **Medido** (3 torres × pisos 2-10): siempre entran las 2 cámaras
 por piso, la entrada al laberinto sigue alcanzable y la grieta queda a 51-311 pasos de la entrada. Pendiente: grietas en
-el laberinto, salas con la página o el jefe escondido, y que el guardado de la run recuerde las paredes rotas.
+el laberinto, salas con la página o el jefe escondido. (Que el guardado recuerde las paredes rotas no hace falta: al
+continuar una run el piso entero se arma de nuevo, cofres comunes incluidos.)
+
+**Paso 2 (2026-10-14):** cada laberinto (también el del piso 1) tiene una sala escondida en su piedra maciza, con la
+grieta hacia un pasillo o una sala. **Medido** (3 torres × 10 pisos): entra en 30 de 30, el guardián sigue alcanzable en
+todos y la grieta queda a 187-323 pasos de la entrada del piso.
 
 ## 7. Música y sonido
 - **Música ambiental por bioma**, de día y de noche, más una **capa de combate** que entra con fundido cuando hay
