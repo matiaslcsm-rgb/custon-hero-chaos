@@ -148,8 +148,10 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
   - [x] 1a: las armas iniciales son clases (Guerrero, Arquero, Mago: nombre en el pedestal y en el cartel, se guarda
         con la run) y la pasiva del Guerrero, Templanza (+5% de crítico y el daño físico de habilidades puede critear).
         2026-10-14.
-  - [ ] 1b: habilidades propias del Guerrero en Q/E/R (no del equipo) y el rodar como esquive con invulnerabilidad; ahí
-        la pasiva va a pesar (hoy no se nota: ver la medición).
+  - [x] 1b: el Guerrero pelea solo con su kit (combo con clic, parada con clic derecho, rodar con Espacio): el equipo ya
+        no le da Q/E/R ni pasivas, solo stats, y el cartel de la pieza lo avisa. 2026-10-14.
+  - [ ] 1c: una habilidad "especial" del Guerrero (la cuarta, como en Risk of Rain) como mejora de 1 de 3, si el
+        usuario la confirma; y revisar la dificultad sin las Q/E/R (hoy va 15-20% más lento).
 - [ ] **Las 3 clases, paso 2: el Arquero.** Paso 3: **el Mago.** Cada uno medido contra el Guerrero (daño por segundo
       parejo ±10%, muertes por piso).
 - [ ] **El equipo queda en la armadura:** una sola pieza (vida, armadura, 1 rasgo) que se encuentra y se mejora. Las
@@ -306,3 +308,4 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 - 2026-10-14 · Reliquias, paso 1 (motor y 12 reliquias) · 8c1e664 · piloto con reflejos humanos, 45 min: sin reliquias piso 3 y 2 muertes; con 0,25/0,35 de chance, 19 reliquias en 3 pisos (demasiadas); con 0,05/0,10, 7 en 3 pisos (~2,3 por piso), piso 4 y 0 muertes. Pruebas 239/239.
 - 2026-10-14 · Subir de nivel: 1 de 3 mejoras · 6716de1 · piloto con reflejos humanos, 45 min: piso 4 a los 41 min, 0 muertes, nivel 15, 6 reliquias (igual que sin la elección: piso 4 a los 43 min); destrabó Piel de Roble, Golpe Pesado y Sangre Espesa. Pruebas 240/240.
 - 2026-10-14 · Guerrero, paso 1a (clases y Templanza) · 259f4bc · banco de 60 s contra un muñeco, 8 muestras: 119 de daño/s sin pasiva y 116 con ella (sin diferencia: el combo ya critea; el ruido es ±25). Pruebas 241/241; se arregló la prueba de visión que fallaba si el héroe quedaba en una meseta.
+- 2026-10-14 · Guerrero, paso 1b (sin Q/E/R del equipo) · (este commit) · piloto con reflejos humanos, 45 min: piso 3 a los 35 min y no llegó al 4 (antes, piso 4 a los 41); 0 muertes, nivel 14, 10 reliquias. Pruebas 241/241.

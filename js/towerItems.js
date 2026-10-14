@@ -228,6 +228,8 @@ function applyGear(hero) {
 // Teclas fijas por ranura (REWORK.md §2, fase 3): el arma siempre en Q, los guantes en E, la armadura en R —
 // no importa en qué orden equipás, así los controles son siempre los mismos.
 // (las teclas salen de keymap.js: se pueden cambiar en la pausa)
+// Las clases (fase T00) traen sus habilidades: al Guerrero el equipo ya no le da Q/E/R ni pasivas, solo stats
+function gearGivesSkills(hero, item) { return !(hero.heroClass === 'warrior' && !STARTER_WEAPONS[item.heroKey]); }
 function equipItem(hero, item, slot = null) {
     slot = slot || (item.slot === 'ring' ? (hero.gear.ring1 ? 'ring2' : 'ring1') : item.slot);
     if (slotKind(slot) !== item.slot) return false;
@@ -235,7 +237,7 @@ function equipItem(hero, item, slot = null) {
     if (old) unequipSlot(hero, slot, false);
     hero.bag = hero.bag.filter(b => b.item !== item);
     hero.gear[slot] = item;
-    const skill = itemSkill(item);
+    const skill = gearGivesSkills(hero, item) ? itemSkill(item) : null;
     if (skill && !hero.skills.includes(skill)) {
         hero.addSkill(skill); hero.skillLevels[skill.id] = item.skillLevel; hero.skillBoosts[skill.id] = item.boosts;
         if (gameMode === 'tower' && skill.kind === 'active') {

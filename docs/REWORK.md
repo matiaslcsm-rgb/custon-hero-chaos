@@ -555,6 +555,12 @@ crítico, y el daño físico de sus habilidades también puede ser crítico (en 
 **no se nota**, porque el combo ya critea y las Q/E/R del equipo varían mucho (±25). Va a pesar cuando el Guerrero tenga
 sus habilidades físicas propias (paso 1b). Las pasivas del Arquero y del Mago llegan en sus pasos.
 
+**Paso 1b (2026-10-14):** el Guerrero pelea solo con el kit que diseñó el usuario: combo de 3 tajos (clic), parada (clic
+derecho) y rodar (Espacio, con invulnerabilidad). El equipo ya no le da Q/E/R ni pasivas (`gearGivesSkills`), solo
+stats; el cartel de la pieza lo avisa. El Arquero y el Mago siguen usando las del equipo hasta que tengan su kit.
+**Medido** (piloto con reflejos humanos, 45 min): piso 3 a los 35 min y no llegó al 4 (antes llegaba a los 41): un
+15-20% más lento, sin muertes. Más difícil pero sin pared (las ex-definitivas como Q/E/R hacían la Torre muy fácil, §3).
+
 ## 15. Más armas y el caos de cada run (propuesta, 2026-10-08)
 Pedido del usuario: "agregar más armas y que el gameplay se base en esas armas (ballesta, mazo, guantes de casteo,
 libros de hechizos); después, cómo escalar las cosas y mezclarlas para inventar mecánicas al azar y darle ese toque

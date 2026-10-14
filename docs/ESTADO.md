@@ -52,8 +52,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **Equipo de desarrollo (2026-10-14):** agentes del proyecto en `.claude/agents/` (director-de-juego,
   disenador-de-sistemas, disenador-de-niveles, narrativa, arte-pixel, qa-jugador) y el comando `/equipo <tema>`
   (`.claude/skills/equipo/`) que los coordina: diseño → especialistas → integración → QA → cierre.
-- **Clases (2026-10-14, fase T00):** las armas iniciales son Guerrero, Arquero y Mago; el Guerrero ya tiene su pasiva
-  (REWORK.md §22). Faltan sus habilidades propias y las otras dos clases.
+- **Clases (2026-10-14, fase T00):** las armas iniciales son Guerrero, Arquero y Mago; el Guerrero ya pelea solo con su
+  kit (combo, parada, rodar) y su pasiva, sin habilidades del equipo (REWORK.md §22). Faltan el Arquero y el Mago.
 - **Subir de nivel (2026-10-14, fase T00):** elegís 1 de 3 mejoras; repetir un stat 3 y 6 veces destraba mejoras
   propias (REWORK.md §21).
 - **Reliquias (2026-10-14, fase T00):** 12 reliquias apilables al estilo Risk of Rain, con 4 etiquetas y bonus de

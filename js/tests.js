@@ -1755,6 +1755,10 @@ test('Torre: el Guerrero — la espada es una clase y su pasiva hace que el dañ
     const r2 = dealDamage(player, c, 100, 'magical');
     check(r2.dealt < 190, 'el mágico no');
     check(towerSnapshot().hero.heroClass === 'warrior', 'la clase se guarda con la run');
+    const glove = makeTowerItem(2, towerCatalog().find(e => e.slot === 'gloves' && e.skillId), 'rare');
+    addToBag(player, glove); equipItem(player, glove);
+    check(player.gear.gloves === glove && !player.skills.includes(itemSkill(glove)), 'al Guerrero los guantes no le dan su habilidad (solo stats)');
+    check(itemTooltipHtml(glove).includes('no usa las habilidades'), 'y el cartel de la pieza lo avisa');
 }, { random: true });
 test('Torre: las Páginas de Arén — una por piso en un rincón apartado, se juntan al pisarla y no vuelven a aparecer', () => {
     arenStore = { found: {} };
@@ -2187,7 +2191,7 @@ test('Torre: equipar un arma cambia el ataque y da su habilidad; sacarla la quit
 }, { random: true });
 
 test('Torre: las piezas suben de nivel con el uso y la forja mejora su habilidad', () => {
-    newTower();
+    newTower(); player.heroClass = null; // prueba el equipo con habilidades (el Guerrero no las usa)
     const entry = towerCatalog().find(e => e.skillId === 'SNIPER_POTENTE');
     const item = makeTowerItem(1, entry, 'normal');
     equipItem(player, item);
@@ -2207,7 +2211,7 @@ test('Torre: las piezas suben de nivel con el uso y la forja mejora su habilidad
 }, { random: true });
 
 test('Torre: el amuleto trae el innato de su héroe (reacciona a eventos)', () => {
-    const level = newTower();
+    const level = newTower(); player.heroClass = null; // prueba el equipo con habilidades (el Guerrero no las usa)
     const amulet = makeTowerItem(1, towerCatalog().find(e => e.innateId === 'PERFECT_AIM'), 'normal');
     equipItem(player, amulet);
     player.baseAttackRange = 5; player.recalculateStats();
@@ -2412,7 +2416,7 @@ test('Controles estilo Hades: esquive con Espacio (3 casillas, invulnerable, rec
 }, { random: true });
 
 test('Torre: las habilidades de movilidad van siempre al espacio, y de última a su ranura', () => {
-    newTower();
+    newTower(); player.heroClass = null; // prueba el equipo con habilidades (el Guerrero no las usa)
     // Parpadeo (arma, Asesino) es de movilidad: tiene que atarse a Espacio, no a Q.
     const blinkPiece = makeTowerItem(1, towerCatalog().find(e => e.skillId === 'ASSASSIN_BLINK'), 'normal');
     equipItem(player, blinkPiece);

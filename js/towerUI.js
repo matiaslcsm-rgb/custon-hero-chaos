@@ -78,7 +78,8 @@ function itemTooltipHtml(item) {
         html += `<div class="tt-weapon">Ataque: ${atk} de daño · ${w.atkSpeed} ataques/s · alcance ${w.range}${w.projectile ? ' (a distancia)' : ''} · atributo ${ATTR_INFO[t.primaryAttr].label}</div>`;
     }
     if (mods) html += `<ul class="tt-mods">${mods}</ul>`;
-    if (skill) {
+    if (skill && player && !gearGivesSkills(player, item)) html += `<div class="tt-skill" style="opacity:0.6"><b>${skill.name}</b>: el Guerrero no usa las habilidades de las piezas (pelea con las de su clase).</div>`;
+    else if (skill) {
         const lvl = skill.isInnateItem ? 0 : item.skillLevel;
         const kind = skill.isInnateItem ? 'Innato' : skill.kind === 'passive' ? 'Pasiva' : skill.isUltimate ? 'Definitiva' : 'Activa';
         const elKey = skill.kind === 'active' && !skill.isInnateItem ? skillVfx(skill).el : null;
