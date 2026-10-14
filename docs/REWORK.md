@@ -564,8 +564,8 @@ stats; el cartel de la pieza lo avisa. El Arquero y el Mago siguen usando las de
 **Paso 2: el Arquero (2026-10-14, `js/towerArcher.js`):** el kit del usuario. Clic: **ráfaga de 3 flechas** en abanico.
 Clic derecho: **flechazo** que siempre critea y aturde 1,2 s al primero que toca (6 s de enfriamiento). Espacio: **impulso
 hacia el mouse** (4 casillas). Pasiva **Ojo Rápido**: enfriamientos 20% más cortos (también el esquive) y reliquias que
-se activan 50% más seguido. Sin Q/E/R del equipo; conserva el Tiro Tensado del arco en la Q (no estaba en el diseño: a
-confirmar si se queda). **Medido** (banco de 60 s contra un muñeco, clic mantenido, 8 muestras): con 55% por flecha y el
+se activan 50% más seguido. Sin Q/E/R del equipo; conserva el Tiro Tensado del arco en la Q (confirmado por el
+usuario). **Medido** (banco de 60 s contra un muñeco, clic mantenido, 8 muestras): con 55% por flecha y el
 flechazo ×2,2 pegaba **+36%** que el Guerrero; con 40%/×1,8, +18%; con **33%/×1,8**, 102 contra 93 de daño/s (**+10%**,
 en el límite de la meta ±10%, y pegando de lejos). Revisar con el piloto cuando aprenda a usar el kit (hoy el piloto
 usa el ataque automático).

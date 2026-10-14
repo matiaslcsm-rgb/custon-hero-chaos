@@ -129,9 +129,15 @@ pieza de equipo, **elegir 1 de 3 mejoras al subir de nivel**, **arenas de jefes 
 Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic derecho, Espacio = movilidad):
 - **Guerrero** (espada): combo de 3 tajos · parada · rodar · pasiva: el daño físico puede ser crítico (o critea más).
 - **Mago** (bastón): orbe de magia que rebota 1 vez · tormenta de 3 rayos a enemigos al azar · teletransporte corto ·
-  pasiva: *a confirmar* — si el usuario no contesta antes, usar la interpretación propuesta: mantener una habilidad
-  la carga (más daño o un rebote más), y marcarlo en el informe para que lo corrija en el feedback.
-- Sin cuarta habilidad por ahora: la "especial" llega más adelante como una mejora de 1 de 3 (a confirmar).
+  pasiva **Carga** (decidido por el usuario 2026-10-14): mantener apretada una habilidad la carga en 3 etapas; cada
+  etapa sortea una mejora que se ve sobre el mago mientras cargás (más área, más daño, más velocidad, más tamaño o un
+  rebote más; pueden repetirse y se apilan) y al soltar sale con todo lo que juntó. Es una apuesta: cargar más es más
+  fuerte pero te deja quieto más tiempo.
+- **Cuarta habilidad (decidido por el usuario 2026-10-14): cada clase tiene una "especial"** con enfriamiento largo
+  (~20 s), desde el principio, en la R. Propuesta (a corregir en el feedback): Guerrero, **Torbellino** (giro que pega
+  alrededor y empuja); Arquero, **Lluvia de Flechas** (zona en el cursor que pega varias veces); Mago, **Meteoro** (cae
+  en el cursor tras un aviso y deja el suelo ardiendo).
+- El Arquero **conserva el Tiro Tensado en la Q** (decidido por el usuario 2026-10-14).
 - **Arquero** (arco): ráfaga de 3 flechas · flechazo que critea y aturde · impulso rápido hacia el mouse · pasiva: sus
   habilidades y reliquias se activan más rápido (menos enfriamiento y más chance de disparo de las reliquias).
 - [x] **Reliquias, paso 1 (motor):** `js/towerRelics.js` con reliquias que se apilan y se enganchan a los eventos que
@@ -150,11 +156,12 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
         2026-10-14.
   - [x] 1b: el Guerrero pelea solo con su kit (combo con clic, parada con clic derecho, rodar con Espacio): el equipo ya
         no le da Q/E/R ni pasivas, solo stats, y el cartel de la pieza lo avisa. 2026-10-14.
-  - [ ] 1c: una habilidad "especial" del Guerrero (la cuarta, como en Risk of Rain) como mejora de 1 de 3, si el
-        usuario la confirma; y revisar la dificultad sin las Q/E/R (hoy va 15-20% más lento).
+  - [ ] 1c: revisar la dificultad sin las Q/E/R (hoy va 15-20% más lento) después de sumar la especial (paso 4).
 - [x] **Las 3 clases, paso 2: el Arquero** (ráfaga de 3, flechazo que critea y aturde, impulso hacia el mouse, pasiva
       Ojo Rápido; sin Q/E/R del equipo, conserva el Tiro Tensado en la Q). 2026-10-14.
-- [ ] **Las 3 clases, paso 3: el Mago.** Cada uno medido contra el Guerrero (daño por segundo
+- [ ] **Las 3 clases, paso 3: el Mago** (orbe que rebota 1 vez, tormenta de 3 rayos a enemigos al azar,
+      teletransporte corto, pasiva Carga). Medir contra el Guerrero (±10%).
+- [ ] **Las 3 clases, paso 4: la especial (R) de cada clase** (Torbellino, Lluvia de Flechas, Meteoro), medida. Cada uno medido contra el Guerrero (daño por segundo
       parejo ±10%, muertes por piso).
 - [ ] **El equipo queda en la armadura:** una sola pieza (vida, armadura, 1 rasgo) que se encuentra y se mejora. Las
       piezas de héroes de Custom Hero salen del botín de la Torre (o pasan a ser reliquias). Medir daño por piso ±15%.
