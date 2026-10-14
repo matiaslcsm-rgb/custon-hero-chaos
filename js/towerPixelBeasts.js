@@ -427,7 +427,7 @@ function drawPixelUnit(u, cx, cy, facing, flash, pose) {
     // de ataque) el héroe pasa a su cuadro de ataque, donde el arma se extiende o brilla según su forma
     // (pxhWeapon) — aparte del giro/estirón de todo el cuerpo que ya hace attackPose() (fx.js).
     let dir = 'side';
-    if (body === 'hero') { ({ kind, k } = pxhPick(u, moving)); dir = kind === 'death' || heroUsesArt(pxHeroLook(u)) ? 'side' : pxhDir(u, moving); } // el héroe: su cuadro y para dónde mira (towerPixelHero.js)
+    if (body === 'hero') { ({ kind, k } = pxhPick(u, moving)); dir = kind === 'death' ? 'side' : pxhDir(u, moving); } // el héroe: su cuadro y para dónde mira (towerPixelHero.js)
     const fr = body === 'hero' ? pxbHeroFrame(pxHeroLook(u), kind, k, dir) : pxbFrame(body, u.color, (u.type.parts || []), kind, k), img = flash ? fr.white : fr.img, s = pxbScale(u);
     if (body === 'hero' && gameMode === 'tower') pxhDrawGhosts(pxhFeel(u, kind, moving, cx, cy, fr, s, facing < 0 && dir === 'side')); // polvo y estelas (towerPixelHero.js)
     else u.pxLast = { fr, s, flip: facing < 0 }; // su último dibujo: con él se hace la caída al morir (fx.js)
@@ -435,7 +435,7 @@ function drawPixelUnit(u, cx, cy, facing, flash, pose) {
     const q = PXG.scale * (body === 'hero' ? 1 : 0) || 0; // el héroe, alineado a la grilla de píxeles del mundo
     ctx.translate(q ? Math.round(cx / q) * q : cx, q ? Math.round((cy + TILE * 0.45) / q) * q : cy + TILE * 0.45);
     if (pose && body !== 'hero') { ctx.rotate(pose.rot * (facing < 0 ? -1 : 1)); ctx.scale(pose.sx, pose.sy); } // el héroe no se estira ni gira: sus cuadros ya tienen la pose (estirar el pixel art lo ensucia)
-    if (facing < 0 && dir === 'side') ctx.scale(-1, 1); // de frente o de espaldas no se espeja (la espada queda en su mano)
+    if (facing < 0 && (fr.side ?? dir === 'side')) ctx.scale(-1, 1); // de frente o de espaldas no se espeja (la espada queda en su mano)
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(img, -Math.round(img.width / 2) * s, -img.height * s, img.width * s, img.height * s); // a píxel entero del dibujo
     ctx.restore();

@@ -792,6 +792,11 @@ el mismo paso; lo grande queda acá, ordenado por impacto.
     la espada), la parada (el escudo) y el esquive; el golpe recibido y la caída se arman con el mismo dibujo. **Faltan**
     (para que el usuario los dibuje o pase): de frente y de espaldas (hoy se ve de costado y se espeja), y las otras
     armas (arco, bastón…), que siguen con el muñeco por poses. La capa ya no toma el color de la armadura.
+    **De frente y de espaldas** (2026-10-14, el usuario pidió que los invente): dibujados a mano con la misma paleta
+    (`docs/arte/vistas-frente-espalda.py`, vista en `docs/arte/heroe-frente-espalda.png`): de frente la capucha con los
+    ojos rojos, el tabardo, los brazos y la espada colgando; de espaldas la capa con pliegues, la costura de la capucha
+    y la espada al costado; quieto (respira) y caminando (4 pasos con rebote). Los ataques, la parada y el esquive
+    siguen de costado (de la hoja). Sin mouse, mira hacia su último paso.
 - ✅ Volumen general, música y efectos, y temblor de pantalla (0-150%), con deslizadores en la pausa que se guardan.
 - ✅ La forja ya no corta una pelea: si una pieza sube de nivel peleando aparece un aviso arriba a la izquierda, y la
   ventana se abre sola cuando nadie te persigue.

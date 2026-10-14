@@ -239,7 +239,7 @@ function pxhScaled(S, R) {
 PXH_ANIM.swing3 = PXH_ANIM.swing1;
 PXB.hero = { w: Math.round(18 * PXH_RES), h: Math.round(24 * PXH_RES), head: [8, 2], back: [8, 9], draw() {} };
 function pxbHeroFrame(L, kind, k, dir = 'side') {
-    if (heroUsesArt(L)) return heroArtSprite(kind, k); // con espada: los cuadros dibujados (de costado; se espeja)
+    if (heroUsesArt(L)) return heroArtSprite(kind, k, dir); // con espada: los cuadros dibujados (de frente y de espaldas para quieto y caminar)
     const key = ['hero', L.cape, L.hood, L.trim, L.glow, L.weapon, kind, k, dir].join('|');
     if (pxbCache[key]) return pxbCache[key];
     const f = { pose: pxhFramePose(kind, k), blink: kind === 'idle' && k >= 4, idle: kind === 'idle' ? k % 4 : 0, dir, kind };
@@ -262,6 +262,7 @@ function pxhDir(u, moving) {
     if (a && a.dx !== undefined && fxClock - a.at < 0.5) { dx = a.dx; dy = a.dy; }
     else if (moving && u.lastStepDir) { dx = u.lastStepDir.dx; dy = u.lastStepDir.dy; }
     else if (u === player && !autopilot && gameMode === 'tower' && mouse.over && typeof cursorWorld === 'function') { const c = cursorWorld(); if (!c) return u.pxDir || 'side'; dx = c.x - u.x; dy = c.y - u.y; }
+    else if (u.lastStepDir) { dx = u.lastStepDir.dx; dy = u.lastStepDir.dy; } // sin mouse: hacia su último paso
     else return u.pxDir || 'side';
     return (u.pxDir = Math.abs(dy) > Math.abs(dx) * 1.3 ? (dy > 0 ? 'down' : 'up') : 'side');
 }
@@ -343,7 +344,10 @@ const HERO_ART_SEQ = {
 };
 function heroUsesArt(L) { return typeof HERO_ART !== 'undefined' && L && L.weapon === 'sword'; }
 // Cuál dibujo y cómo: corrimiento del cuerpo (respirar), parpadeo, retroceso, tendido
-function heroArtPick(kind, k) {
+function heroArtPick(kind, k, dir = 'side') {
+    const view = dir === 'down' ? 'front' : dir === 'up' ? 'back' : null; // de frente o de espaldas: quieto, caminar y el golpe recibido
+    if (view && kind === 'walk') return { name: view + 'Walk' + (Math.floor(k / 2) % 4), facing: true };
+    if (view && (kind === 'idle' || kind === 'hurt')) return { name: view + 'Idle', facing: true, breath: kind === 'idle' ? [0, 0, 1, 1][k % 4] : 0, dy: kind === 'hurt' ? -1 : 0 };
     if (kind === 'walk') return { name: 'walk' + (Math.floor(k / 2) % 4) };
     if (kind === 'swing') return { name: (HERO_ART_SEQ['swing' + Math.floor(k / 6)] || HERO_ART_SEQ.swing0)[k % 6] };
     if (kind === 'dash') return { name: HERO_ART_SEQ.dash[Math.min(3, k)] };
@@ -351,13 +355,13 @@ function heroArtPick(kind, k) {
     if (kind === 'death') return k >= 3 ? { name: 'idle', lie: true } : { name: 'idle', sink: k + 1 };
     return { name: 'idle', breath: [0, 0, 1, 1][k % 4], blink: k >= 4 };
 }
-function heroArtSprite(kind, k) {
-    const key = 'heroart|' + kind + '|' + k;
+function heroArtSprite(kind, k, dir = 'side') {
+    const key = 'heroart|' + kind + '|' + k + '|' + dir;
     if (pxbCache[key]) return pxbCache[key];
-    const pk = heroArtPick(kind, k), F = HERO_ART.frames[pk.name], P = HERO_ART.pal, rows = F.rows, fh = rows.length;
+    const pk = heroArtPick(kind, k, dir), F = HERO_ART.frames[pk.name], P = HERO_ART.pal, rows = F.rows, fh = rows.length;
     const make = white => {
         const c = pxSprite(HERO_ART_BOX.w, HERO_ART_BOX.h, S => {
-            const ox = Math.round(HERO_ART_BOX.w / 2 - F.ax) + (pk.dx || 0), oy = HERO_ART_BOX.h - 2 - fh;
+            const ox = Math.round(HERO_ART_BOX.w / 2 - F.ax) + (pk.dx || 0), oy = HERO_ART_BOX.h - 2 - fh + (pk.dy || 0);
             if (pk.lie) { // tendido: el dibujo de costado, acostado en el piso y más oscuro
                 pxShadow(S, HERO_ART_BOX.w / 2, HERO_ART_BOX.h - 2.5, 11, 2);
                 rows.forEach((r, y) => [...r].forEach((ch, x) => { if (ch !== '.') S.set(HERO_ART_BOX.w / 2 - fh / 2 + (fh - 1 - y), HERO_ART_BOX.h - 3 - (r.length - 1 - x) * 0.5, ch === '!' ? '#3a0806' : shade(P[ch], -0.25)); }));
@@ -374,7 +378,7 @@ function heroArtSprite(kind, k) {
         if (white) { const g = c.getContext('2d'); g.globalCompositeOperation = 'source-in'; g.fillStyle = '#ffffff'; g.fillRect(0, 0, c.width, c.height); }
         return c;
     };
-    const fr = { img: make(false), _white: null };
+    const fr = { img: make(false), _white: null, side: !pk.facing }; // side: es de costado (se espeja según para dónde mira)
     Object.defineProperty(fr, 'white', { get() { return this._white || (this._white = make(true)); } });
     return (pxbCache[key] = fr);
 }
