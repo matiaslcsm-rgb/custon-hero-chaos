@@ -129,11 +129,11 @@ const HIDDEN_BOSSES = {
     1: { label: 'Ciervo Blanco', role: 'skirmisher', body: 'wolf', color: '#eee6d2', parts: ['horns', 'eyes'], scale: 1.35, mult: 2.6, hp: 3.8, lvl: 3, night: true, // hp: vida extra (más que un señor de cueva sin pegar de un golpe)
         mechanic: 'Jefe escondido del piso 1: pasta de noche en un claro apartado del bosque y se va al amanecer. Rápido y escurridizo.',
         hint: '🦌 Brena dice que algunas noches un ciervo blanco pasta en un claro, lejos del camino. Nadie lo pudo alcanzar.',
-        icon: '🦌', unique: { slot: 'helm', name: 'Astas del Ciervo Blanco', extra: ['moveSpeedPct', 'maxHp'] } },
+        icon: '🦌', unique: { slot: 'boots', name: 'Botas del Ciervo Blanco', extra: ['moveSpeedPct', 'maxHp'] } },
     2: { label: 'Flor Carnívora', role: 'archer', body: 'toad', color: '#b5179e', parts: ['spikes', 'eyes'], scale: 1.5, mult: 2.4, hp: 3.6, lvl: 3, sealed: [11, 8], rooted: true,
         mechanic: 'Jefe escondido del piso 2: echó raíces en el invernadero tapiado. No se mueve; escupe espinas a distancia.',
         hint: '🌺 Hermano Musgo: «Tapiamos el invernadero viejo. Si escuchás algo que mastica detrás de una pared rajada, no la rompas.»',
-        icon: '🌺', unique: { slot: 'gloves', name: 'Guantes de la Flor Carnívora', extra: ['lifesteal', 'hpRegen'] } },
+        icon: '🌺', unique: { slot: 'ring', name: 'Anillo de la Flor Carnívora', extra: ['lifesteal', 'hpRegen'] } },
     3: { label: 'Leviatán del Fango', role: 'bruiser', body: 'lizard', color: '#4a5d23', parts: ['spikes', 'eyes'], scale: 1.6, mult: 2, hp: 1.7, lvl: 3, sealed: [11, 8], // el bruto ya trae mucha vida de base
         mechanic: 'Jefe escondido del piso 3: quedó encerrado en la sala de bombas cuando se cerraron las compuertas. Pega muy fuerte.',
         hint: '🛶 Madre Junco: «La sala de bombas quedó cerrada con algo adentro. Los botes que se acercan a la pared rajada no vuelven.»',
@@ -209,10 +209,11 @@ function hiddenBossTick(level) {
         if (!hb.hinted) { hb.hinted = true; log(H.hint); }
     } else if (!out && u && !u.aggro) { level.creeps = level.creeps.filter(o => o !== u); hb.unit = null; } // amanece: se va
 }
-// La pieza única que suelta (una rara de su ranura, con nombre propio y un afijo extra)
+// La pieza única que suelta (una rara de su ranura, con nombre propio y un afijo extra). Botas y anillo salen como
+// pieza de stats (no traen habilidad, como las del botín: towerCodex.js).
 function hiddenBossLoot(level, c) {
     const U = HIDDEN_BOSSES[c.hiddenFloor].unique, floor = level.floor + 2;
-    const item = makeTowerItem(floor, pickRandom(towerCatalog().filter(e => e.slot === U.slot)), 'rare');
+    const item = CODEX.statSlots.includes(U.slot) ? makeBlankItem(floor, U.slot, 'rare') : makeTowerItem(floor, pickRandom(towerCatalog().filter(e => e.slot === U.slot)), 'rare');
     U.extra.forEach(k => { const a = AFFIXES.find(x => x.key === k); if (a && !item.affixes.some(x => x.key === k)) item.affixes.push({ key: a.key, name: a.name, value: round1(a.roll(floor)) }); });
     Object.assign(item, { name: U.name, unique: true });
     level.drops.push({ x: c.x, y: c.y, item });

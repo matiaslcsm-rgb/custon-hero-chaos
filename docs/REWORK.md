@@ -838,6 +838,10 @@ también tiene que aprender a esquivar los ataques anunciados).
 - ✅ **Jefe escondido del piso 7: el Lobo de Escarcha** (2026-10-14; lo empezó la corrida automática que se detuvo y
   se completó acá): en el mirador cerrado (sala sellada con grieta), aviso de Isla la farolera; suelta las **Garras del
   Lobo de Escarcha** (guantes con crítico y velocidad de ataque). Verificado: la sala se arma en 8 de 8 pisos 7.
+- ✅ **Botas y anillos únicos** (2026-10-14, decisión del usuario): las únicas de esas ranuras salen solo de los jefes
+  escondidos. El Ciervo Blanco ahora suelta las **Botas del Ciervo Blanco** (antes eran las Astas, un casco) y la Flor
+  Carnívora el **Anillo de la Flor Carnívora** (antes, guantes). Son piezas de stats, sin habilidad, como las botas y
+  anillos del botín, que siguen cayendo igual (20% de las piezas).
 - ✅ **Jefes escondidos de los pisos 8 y 9** (2026-10-14): el **Vigía Perdido** (piso 8, junto a la campana congelada;
   se parece a vos, ataca a distancia; suelta la **Capa del Vigía Perdido**, coraza con resistencia mágica y velocidad)
   y el **Yunque Vivo** (piso 9, en la forja apagada; aturde; suelta el **Martillo del Yunque Vivo**, arma con Fuerza y

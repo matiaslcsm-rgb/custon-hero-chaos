@@ -1655,7 +1655,7 @@ test('Torre: jefe escondido — el Ciervo Blanco sale de noche en un claro del p
     dealDamage(player, deer, deer.hp * 10, 'pure');
     check(!deer.isAlive(), 'se lo puede vencer');
     const drop = L.drops.find(d => d.item.unique);
-    check(drop && drop.item.name === 'Astas del Ciervo Blanco' && drop.item.slot === 'helm' && drop.item.affixes.some(a => a.key === 'moveSpeedPct'), 'suelta su pieza única');
+    check(drop && drop.item.name === 'Botas del Ciervo Blanco' && drop.item.slot === 'boots' && drop.item.affixes.some(a => a.key === 'moveSpeedPct'), 'suelta su pieza única');
     hiddenBossTick(L); setNight(false); hiddenBossTick(L); setNight(true); hiddenBossTick(L);
     check(hb.dead && !hb.unit, 'vencido, no vuelve a salir en esta run');
     noteBeastSeen(deer.type);
@@ -1678,7 +1678,9 @@ test('Torre: jefe escondido — la Flor Carnívora del piso 2 espera en el inver
     for (let i = 0; i < 40; i++) { gameClock += 0.05; updateTower(0.05); }
     checkEq(f.x, x0, 'no se mueve (echó raíces)');
     L.drops = []; dealDamage(player, f, f.hp * 10, 'pure');
-    check(L.drops.some(dr => dr.item.unique && dr.item.slot === 'gloves'), 'suelta sus guantes únicos');
+    const ring = L.drops.map(dr => dr.item).find(it => it.unique && it.slot === 'ring');
+    check(ring && ring.name === 'Anillo de la Flor Carnívora' && ring.affixes.some(a => a.key === 'lifesteal'), 'suelta su anillo único');
+    check(equipItem(player, ring) && Object.values(player.gear).includes(ring), 'el anillo se equipa');
 }, { random: true });
 test('Torre: jefes escondidos en salas tapiadas (pisos 3 en adelante) — cada uno en su sala sellada, con su pieza única', () => {
     Object.keys(HIDDEN_BOSSES).map(Number).filter(f => f >= 3).forEach(f => {
