@@ -838,6 +838,11 @@ también tiene que aprender a esquivar los ataques anunciados).
 - ✅ **Jefe escondido del piso 7: el Lobo de Escarcha** (2026-10-14; lo empezó la corrida automática que se detuvo y
   se completó acá): en el mirador cerrado (sala sellada con grieta), aviso de Isla la farolera; suelta las **Garras del
   Lobo de Escarcha** (guantes con crítico y velocidad de ataque). Verificado: la sala se arma en 8 de 8 pisos 7.
+- ✅ **La gente del pueblo se ve** (2026-10-14, `js/towerFolk.js`): dos vecinos por piso (del 1 al 9) con la pinta de
+  su gente (capucha y farol los que Esperan, sombrero y tijera los jardineros, pértiga los barqueros, casco y arco los
+  vigías, martillo los herreros…) pasean por el pueblo entre pausas. Cerca, F: hablar; la frase sale en un globo y en
+  el registro. Cada run arrancan por otra (cuenta las runs de los récords) y si les volvés a hablar siguen con la
+  próxima; mientras hablan se quedan quietos y te miran. El Corazón (10) y Lo No Escrito no tienen gente.
 - ✅ **El Ciervo Blanco con dibujo propio** (2026-10-14): antes era el lobo con cuernos del generador; ahora tiene su
   cuerpo de pixel art (`deer` en towerPixelBeasts.js): patas largas, cuello alto, astas de hueso, manchas y cola blanca.
   Lo elige el campo `px` del jefe escondido; con el pixel art apagado sigue con la tinta del lobo.

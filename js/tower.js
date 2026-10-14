@@ -293,6 +293,7 @@ function updateTower(dt) {
     parryTick(player); // la parada de la espada (towerParry.js)
     mageTick(player); // la Carga del Mago (towerMage.js)
     specialTick(player); // lo que sigue de la especial: lluvia, meteoro, suelo ardiendo (towerSpecials.js)
+    folkTick(level, dt); // la gente del pueblo pasea (towerFolk.js)
     towerAutosave(); // cada 15 s (towerSave.js)
     unstickFromWall(player);
     // Cuaderno (REWORK.md §1): moverse y esquivar se detectan leyendo el estado, sin tocar el código compartido.
@@ -568,6 +569,7 @@ function renderTower(level, dt) {
     else underFx();
     pxDrawMerchant(level); // mercader, herrero, santuarios, eventos, armas del despertar, piedra de regreso y fuegos (towerPixelProps.js)
     pxDrawSmith(level);
+    pxDrawFolk(level); // la gente del pueblo (towerFolk.js)
     pxDrawShrines(level);
     pxDrawArenPage(level);
     pxDrawEvents(level);

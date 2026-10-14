@@ -59,6 +59,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   propias (REWORK.md §21).
 - **Reliquias (2026-10-14, fase T00):** 12 reliquias apilables al estilo Risk of Rain, con 4 etiquetas y bonus de
   conjunto; conviven con el equipo hasta que lleguen las clases fijas (REWORK.md §20).
+- **La gente del pueblo (2026-10-14):** dos vecinos por piso pasean por el pueblo y hablan con F; cada run dicen otra
+  cosa (js/towerFolk.js, REWORK.md).
 - **Jefes escondidos (2026-10-14, modo automático):** el Ciervo Blanco (piso 1) sale de noche en un claro apartado; la
   Flor Carnívora (piso 2), el Leviatán del Fango (3), la Semilla Primera (4), el Guardián de Arena (5) y el Lector Sin Ojos (6), el Lobo de Escarcha (7), el Vigía Perdido (8) y el Yunque Vivo (9) esperan en salas tapiadas,
   detrás de una grieta. Cada uno suelta una pieza única. Ya están todos los de la tabla (REWORK.md §6, ROADMAP.md T0).

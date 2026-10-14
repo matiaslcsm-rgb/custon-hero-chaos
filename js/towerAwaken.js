@@ -36,6 +36,7 @@ function towerInteract() {
     const w = starterWeaponNear();
     if (w) { takeStarterWeapon(w); return true; }
     if (nearWaystone()) { toggleWaystone(true); return true; } // la piedra de regreso (towerWaystone.js)
+    if (talkToFolk()) return true; // la gente del pueblo (towerFolk.js)
     return false;
 }
 function towerClickWeapon(p) {

@@ -1638,6 +1638,25 @@ test('Torre: paredes agrietadas — cámaras selladas desde el piso 2, se rompen
     const k2 = { x: 5, y: 5, hp: 1 }; L.cracks.push(k2); L.walls[5][5] = WALL.stone;
     check(hitCrack(L, 5, 5, player) && !L.walls[5][5], 'cualquier golpe tuyo cuenta (flechas y orbes también)');
 }, { random: true });
+test('Torre: la gente del pueblo pasea adentro del pueblo y habla con F (otra frase si le volvés a hablar)', () => {
+    newTower(); enterTowerFloor(3);
+    const L = arenas[0], folk = townFolk(L), t = L.town;
+    checkEq(folk.length, 2, 'dos vecinos en el pueblo');
+    const start = folk.map(f => [f.x, f.y]);
+    for (let i = 0; i < 300; i++) { gameClock += 0.05; folkTick(L, 0.05); }
+    check(folk.every(f => towerZoneAt(L, Math.round(f.x), Math.round(f.y)) === ZONE.town && walkable(L, Math.round(f.x), Math.round(f.y))), 'siguen adentro del pueblo, en casillas libres');
+    check(folk.some((f, i) => Math.hypot(f.x - start[i][0], f.y - start[i][1]) > 0.5), 'caminan');
+    const f = folk[0]; Object.assign(player, { arena: L, x: f.x + 1, y: f.y });
+    check(towerInteract() && f.say && FOLK[3].lines.includes(f.say.text), 'con F dice una frase de su gente');
+    const first = f.say.text; towerInteract();
+    check(f.say.text !== first, 'si le volvés a hablar, dice otra');
+    const at = [f.x, f.y];
+    for (let i = 0; i < 20; i++) { gameClock += 0.05; folkTick(L, 0.05); }
+    check(f.x === at[0] && f.y === at[1] && f.facing === 1, 'mientras habla no se va y te mira');
+    Object.assign(player, { x: t.x - 20, y: t.y });
+    check(!folkNear(), 'lejos no hay a quién hablarle');
+    checkEq(townFolk(towerLevel(10)).length, 0, 'en el Corazón de la Torre no hay nadie');
+}, { random: true });
 test('Torre: jefe escondido — el Ciervo Blanco sale de noche en un claro del piso 1, se va al amanecer y suelta una pieza única', () => {
     newTower();
     const L = towerLevel(1), hb = L.hiddenBoss;
