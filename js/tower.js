@@ -525,6 +525,7 @@ function updateCamera(level, hero, dt) {
     const pos = drawPos(hero, 0);
     camera.x = Math.max(0, Math.min(COLS - viewCols(), pos.x - viewCols() / 2 + 0.5));
     camera.y = Math.max(0, Math.min(ROWS - viewRows(), pos.y - viewRows() / 2 + 0.5));
+    const g = PXG.scale / TILE; camera.x = Math.round(camera.x / g) * g; camera.y = Math.round(camera.y / g) * g; // a la grilla de píxeles del dibujo
 }
 
 function renderTower(level, dt) {

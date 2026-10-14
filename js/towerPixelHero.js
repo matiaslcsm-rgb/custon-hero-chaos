@@ -83,7 +83,7 @@ function pxhLeg(S, hx, hy, fx, fy, col, boot) {
 function pxhPose(S, L, f) {
     const P = f.pose;
     const C = pxbPalette(L.cape), H = pxbPalette(L.hood), T = pxbPalette(L.trim), cloth = ['#4f473c', '#665c4d', '#7f735f', '#978a72', '#ada087'];
-    const legs = ['#231d1a', '#352d29', '#4a403a'], st = PXB_STEEL;
+    const legs = ['#3a2e27', '#52423a', '#6b594c'], st = PXB_STEEL; // pantalón de cuero marrón (antes casi negro: se perdía)
     const eyeOn = !(f.blink || P.closed), eye = eyeOn ? (P.dim ? '#8a1a14' : '#ff2a1f') : '#2a0806', eye2 = eyeOn ? (P.dim ? '#6a120e' : '#e0180e') : '#2a0806';
     if (P.lie !== undefined && P.lie > 0) { pxhLying(S, L, P, C, H, T, cloth, eye, eye2); return; }
     if (P.roll !== undefined) { pxhRoll(S, L, P, C, H, T, eye); return; }
@@ -125,8 +125,8 @@ function pxhPose(S, L, f) {
     const hx = shX + P.hd[0], hy = shY - 4 + P.hd[1];
     S.ball(hx, hy, 3.5, 3.4, H); S.set(hx - 3.5, hy - 2, H[1]); S.set(hx - 4.5, hy - 1 + (P.lift > 0.5 ? 1 : 0), H[1]);
     S.ball(hx + 1.7, hy + 0.6, 1.9, 1.8, ['#0c0a09', '#15110f', '#1d1815', '#241e1a', '#2b2420']);
-    S.set(hx + 1.5, hy + 0.4, eye2); S.set(hx + 3.5, hy + 0.4, eye);
-    if (eyeOn && (P.glint || P.impact)) { S.set(hx + 1.5, hy - 0.6, '#ff6a50'); S.set(hx + 3.5, hy - 0.6, '#ff6a50'); }
+    S.dot(hx + 1.5, hy + 0.4, eye2); S.dot(hx + 3.5, hy + 0.4, eye);
+    if (eyeOn && (P.glint || P.impact)) { S.dot(hx + 1.5, hy - 0.6, '#ff6a50'); S.dot(hx + 3.5, hy - 0.6, '#ff6a50'); }
     if (P.hurt) S.set(hx + 2.5, hy + 1.5, '#ff2a1f');
     // Brazo de adelante y el arma
     if (sword) { if (!overhead) swordArm(); }
@@ -142,7 +142,7 @@ function pxhPose(S, L, f) {
 // se acorta (escorzo) y la espada abre un poco hacia afuera, así los tajos se leen igual. side: +1 de frente, −1 de espaldas.
 function pxhProject(fwd, up, side) { return [-0.4 * fwd * side, up + 0.8 * fwd * side]; } // [x, y] en pantalla
 function pxhPoseFacing(S, L, f, P, side, C, H, T, cloth, eye, eye2) {
-    const legs = ['#231d1a', '#352d29', '#4a403a'], st = PXB_STEEL, cx = 8.5 + P.bx * 0.3;
+    const legs = ['#3a2e27', '#52423a', '#6b594c'], st = PXB_STEEL, cx = 8.5 + P.bx * 0.3;
     const by = P.by, shY = 9.5 + by + (P.sh || 0), hipY = 15.5 + by, eyeOn = eye !== '#2a0806';
     const sword = L.weapon === 'sword' || L.weapon === 'twin';
     pxbShadow(S, cx, 23, 5.5);
@@ -150,7 +150,8 @@ function pxhPoseFacing(S, L, f, P, side, C, H, T, cloth, eye, eye2) {
     const ws = side > 0 ? -1 : 1, wsx = cx + ws * 3.5, wsy = shY + 1, osx = cx - ws * 3.5;
     const [hfx, hfy] = pxhProject(P.fh[0], P.fh[1], side), mx = wsx + ws * 0.5 + hfx, my = wsy + hfy;
     const a = P.blade * Math.PI / 180, [bdx, bdy] = pxhProject(Math.cos(a), Math.sin(a), side);
-    const bl = Math.max(4, 10 * Math.hypot(bdx, bdy)), bladeAng = Math.atan2(bdy, bdx) * 180 / Math.PI; // la hoja en escorzo
+    const calm = f.kind === 'idle' || f.kind === 'walk'; // quieto o caminando: la espada cuelga al costado, apuntando abajo y afuera
+    const bl = calm ? 9 : Math.max(4, 10 * Math.hypot(bdx, bdy)), bladeAng = calm ? (ws < 0 ? 112 : 68) : Math.atan2(bdy, bdx) * 180 / Math.PI; // la hoja en escorzo
     const drawWeapon = () => {
         if (!sword) { S.line(wsx, wsy, mx, my, st[2], 2); pxhWeapon(S, Math.round(mx) - 1, Math.round(my) + 1, L, { atk: P.atk || 0, bob: by, br: 0, walk: -1, idle: f.idle || 0 }); return; }
         if (P.smear) { const s0 = P.smear[0] * Math.PI / 180, s1 = P.smear[1] * Math.PI / 180, p0 = pxhProject(Math.cos(s0), Math.sin(s0), side), p1 = pxhProject(Math.cos(s1), Math.sin(s1), side);
@@ -187,8 +188,8 @@ function pxhPoseFacing(S, L, f, P, side, C, H, T, cloth, eye, eye2) {
     S.ball(hx, hy, 3.6, 3.4, H);
     if (side > 0) {
         S.ball(hx, hy + 0.9, 2.3, 1.9, ['#0c0a09', '#15110f', '#1d1815', '#241e1a', '#2b2420']);
-        S.set(hx - 1, hy + 0.6, eye2); S.set(hx + 1, hy + 0.6, eye);
-        if (eyeOn && (P.glint || P.impact)) { S.set(hx - 1, hy - 0.4, '#ff6a50'); S.set(hx + 1, hy - 0.4, '#ff6a50'); }
+        S.dot(hx - 1, hy + 0.6, eye2); S.dot(hx + 1, hy + 0.6, eye);
+        if (eyeOn && (P.glint || P.impact)) { S.dot(hx - 1, hy - 0.4, '#ff6a50'); S.dot(hx + 1, hy - 0.4, '#ff6a50'); }
     } else { S.set(hx, hy - 3.5, H[3]); S.line(hx, hy - 2.5, hx, hy + 2.5, H[1]); } // la costura de atrás
     if (!behind) drawWeapon();
 }
@@ -219,14 +220,29 @@ function pxhFramePose(kind, k) {
     if (kind === 'idle') return PXH_ANIM.idle[k % 4];
     return PXH_ANIM[kind][Math.min(k, PXH_ANIM[kind].length - 1)];
 }
-PXB.hero = { w: 18, h: 24, head: [8, 2], back: [8, 9], draw() {} };
+// Más resolución (2026-10-14, pedido: "se ve medio feo"): el muñeco se diseña en 18×24 pero se dibuja con PXH_RES más
+// píxeles por lado, en la MISMA grilla que el mundo (escala 1). Las formas (bolas, líneas, rectángulos) salen con más
+// detalle; los ojos y los brillos son puntos de un píxel. Antes se agrandaba ×1,25 y los píxeles quedaban desparejos.
+const PXH_RES = 4 / 3;
+function pxhScaled(S, R) {
+    const block = (x0, y0, x1, y1, c) => { for (let y = Math.round(y0); y < Math.round(y1); y++) for (let x = Math.round(x0); x < Math.round(x1); x++) S.set(x, y, c); };
+    return { R, raw: S,
+        set(x, y, c) { const X = Math.round(x), Y = Math.round(y); block(X * R, Y * R, (X + 1) * R, (Y + 1) * R, c); },
+        dot(x, y, c) { S.set(Math.floor((Math.round(x) + 0.5) * R), Math.floor((Math.round(y) + 0.5) * R), c); },
+        rect(x, y, w, h, c) { block(x * R, y * R, (x + w) * R, (y + h) * R, c); },
+        ball(cx, cy, rx, ry, pal, rnd) { S.ball(cx * R + (R - 1) / 2, cy * R + (R - 1) / 2, rx * R, ry * R, pal, rnd); },
+        tri(a, b, c, col) { S.tri([a[0] * R, a[1] * R], [b[0] * R, b[1] * R], [c[0] * R, c[1] * R], col); },
+        line(x0, y0, x1, y1, c, w = 1) { const W = Math.max(1, Math.round(w * R)), o = (R - 1) / 2; for (let k = 0; k < W; k++) S.line(x0 * R + o + k, y0 * R + o, x1 * R + o + k, y1 * R + o, c); }
+    };
+}
+PXB.hero = { w: Math.round(18 * PXH_RES), h: Math.round(24 * PXH_RES), head: [8, 2], back: [8, 9], draw() {} };
 function pxbHeroFrame(L, kind, k, dir = 'side') {
     const key = ['hero', L.cape, L.hood, L.trim, L.glow, L.weapon, kind, k, dir].join('|');
     if (pxbCache[key]) return pxbCache[key];
-    const f = { pose: pxhFramePose(kind, k), blink: kind === 'idle' && k >= 4, idle: kind === 'idle' ? k % 4 : 0, dir };
+    const f = { pose: pxhFramePose(kind, k), blink: kind === 'idle' && k >= 4, idle: kind === 'idle' ? k % 4 : 0, dir, kind };
     const ex = kind === 'idle' || kind === 'walk' ? 0 : 8; // los tajos, el esquive y la caída salen del cuerpo: más lienzo (sigue centrado)
     const make = white => {
-        const c = pxSprite(PXB.hero.w + PXB_PAD * 2 + ex * 2, PXB.hero.h + PXB_PAD + ex, S => { S.tx = PXB_PAD + ex; S.ty = PXB_PAD + ex; pxhPose(S, L, f); S.outline('#110d0b'); });
+        const R = PXH_RES, c = pxSprite(Math.ceil((18 + PXB_PAD * 2 + ex * 2) * R), Math.ceil((24 + PXB_PAD + ex) * R), S => { S.tx = Math.round((PXB_PAD + ex) * R); S.ty = Math.round((PXB_PAD + ex) * R); pxhPose(pxhScaled(S, R), L, f); S.outline('#110d0b'); });
         if (white) { const g = c.getContext('2d'); g.globalCompositeOperation = 'source-in'; g.fillStyle = '#ffffff'; g.fillRect(0, 0, c.width, c.height); }
         return c;
     };
@@ -267,7 +283,12 @@ function pxhPick(u, moving) {
         const frac = u.attackTimer * effAtkSpeed(u);
         if (frac > 0.6 && frac < 1) return { kind: 'swing', k: (u.comboStep || 0) * 6 };
     }
-    if (moving) return { kind: 'walk', k: Math.floor(((fxClock / (4 * Math.max(0.12, unitStepTime(u))) + seed) % 1) * 8) }; // un ciclo cada 4 casillas
+    if (moving) { // los pasos van con la distancia recorrida (no con el reloj): los pies no patinan al acelerar o frenar
+        const w = u.pxWalk || (u.pxWalk = { x: u.rx ?? u.x, y: u.ry ?? u.y, d: 0 }), rx = u.rx ?? u.x, ry = u.ry ?? u.y;
+        w.d += Math.min(1, Math.hypot(rx - w.x, ry - w.y)); w.x = rx; w.y = ry;
+        return { kind: 'walk', k: Math.floor(((w.d / 2.4 + seed) % 1) * 8) }; // un ciclo de dos pasos cada 2,4 casillas
+    }
+    if (u.pxWalk) { u.pxWalk.x = u.rx ?? u.x; u.pxWalk.y = u.ry ?? u.y; }
     let k = Math.floor(((fxClock / 1.6 + seed) % 1) * 4); // respira
     if ((fxClock + seed * 7) % 3.3 < 0.14) k += 4; // parpadea
     return { kind: 'idle', k };

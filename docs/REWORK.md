@@ -775,6 +775,14 @@ el mismo paso; lo grande queda acá, ordenado por impacto.
     dibujo y levanta polvo al terminar (Hades, Hyper Light Drifter). Los enemigos **anticipan con el cuerpo** el golpe
     anunciado (se echan atrás, se comprimen y al final tiemblan) y **caen** al morir: destello blanco, se aplastan contra
     el piso y se apagan, en vez de desaparecer de golpe.
+  - **Pixel art nítido y héroe con más resolución** (2026-10-14, pedido: "se ve medio feo y muy tosco"). Diagnóstico:
+    cada píxel del dibujo ocupaba 2,86 píxeles de pantalla (unas columnas salían de 2 y otras de 3) y el héroe tenía otra
+    grilla que el piso. Arreglos: el zoom se ajusta a un tamaño de píxel **entero** (la rueda salta de a uno: 2, 3, 4…) y
+    la cámara se alinea a la grilla del dibujo; el héroe se dibuja en la **misma grilla que el mundo** con un tercio más
+    de resolución (sus formas tienen más detalle; ojos y brillos son puntos de un píxel); ya no se estira ni se gira
+    entero (eso ensuciaba los píxeles: la pose la hacen los cuadros). Pantalón marrón en vez de casi negro; de frente y de
+    espaldas la espada cuelga al costado (en escorzo no se veía). Los pasos van con la distancia recorrida, no con el
+    reloj (los pies no patinan).
 - ✅ Volumen general, música y efectos, y temblor de pantalla (0-150%), con deslizadores en la pausa que se guardan.
 - ✅ La forja ya no corta una pelea: si una pieza sube de nivel peleando aparece un aviso arriba a la izquierda, y la
   ventana se abre sola cuando nadie te persigue.

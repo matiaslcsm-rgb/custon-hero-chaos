@@ -13,7 +13,7 @@ const PXB_SKIN = ['#7a5038', '#a06c4c', '#c48e68', '#dcae86', '#ecc8a2'];
 
 // Pierna de un cuadrúpedo: o corre el pie (paso)
 function pxbLeg(S, x, y, len, o, col) { for (let k = 0; k < len; k++) S.set(x + (k >= len - 2 ? o : 0), y + k - (o !== 0 && k === len - 1 ? 1 : 0), col); }
-function pxbShadow(S, cx, cy, rx) { pxShadow(S, cx, cy, rx, Math.max(1, rx * 0.22)); }
+function pxbShadow(S, cx, cy, rx) { const R = S.R || 1, o = (R - 1) / 2; pxShadow(S.raw || S, cx * R + o, cy * R + o, rx * R, Math.max(1, rx * 0.22) * R); } // S.R: el héroe con más resolución (towerPixelHero.js)
 
 // Humanoide (14×22): piernas o túnica, torso, brazos, cabeza y arma
 function pxbHumanoid(S, P, f, o) {
@@ -380,7 +380,7 @@ function pixelPortrait(u) {
     const fr = pxbHeroFrame(L, 'idle', 0).img, c = document.createElement('canvas'); c.width = c.height = 64;
     const g = c.getContext('2d'); g.imageSmoothingEnabled = false;
     g.fillStyle = '#2b2420'; g.fillRect(0, 0, 64, 64);
-    g.drawImage(fr, PXB_PAD + 1, PXB_PAD - 2, 16, 16, 0, 0, 64, 64);
+    const R = PXH_RES; g.drawImage(fr, Math.round((PXB_PAD + 1) * R), Math.round((PXB_PAD - 2) * R), Math.round(16 * R), Math.round(16 * R), 0, 0, 64, 64); // con la resolución del héroe (towerPixelHero.js)
     return (pxhPortraitCache[key] = c.toDataURL());
 }
 
@@ -405,7 +405,7 @@ function pixelBodyFor(u) {
     const plan = inkPlanFor(u);
     return PXB[plan] ? plan : null;
 }
-const PXH_SCALE = 1.25; // el héroe, un poco más grande que el resto: se leen sus poses (2026-10-14)
+const PXH_SCALE = 1; // el héroe: misma grilla de píxeles que el mundo (su dibujo ya tiene más resolución, towerPixelHero.js)
 function pxbScale(u) {
     if (u.isHero && gameMode === 'tower') return PXG.scale * PXH_SCALE;
     if (u.isRoundBoss) return PXG.scale * (String(pixelBodyFor(u)).startsWith('boss:') ? 1.15 : 1.6); // jefes de ronda de Custom Hero Chaos
@@ -431,11 +431,12 @@ function drawPixelUnit(u, cx, cy, facing, flash, pose) {
     if (body === 'hero' && gameMode === 'tower') pxhDrawGhosts(pxhFeel(u, kind, moving, cx, cy, fr, s, facing < 0 && dir === 'side')); // polvo y estelas (towerPixelHero.js)
     else u.pxLast = { fr, s, flip: facing < 0 }; // su último dibujo: con él se hace la caída al morir (fx.js)
     ctx.save();
-    ctx.translate(cx, cy + TILE * 0.45);
-    if (pose) { ctx.rotate(pose.rot * (facing < 0 ? -1 : 1)); ctx.scale(pose.sx, pose.sy); }
+    const q = PXG.scale * (body === 'hero' ? 1 : 0) || 0; // el héroe, alineado a la grilla de píxeles del mundo
+    ctx.translate(q ? Math.round(cx / q) * q : cx, q ? Math.round((cy + TILE * 0.45) / q) * q : cy + TILE * 0.45);
+    if (pose && body !== 'hero') { ctx.rotate(pose.rot * (facing < 0 ? -1 : 1)); ctx.scale(pose.sx, pose.sy); } // el héroe no se estira ni gira: sus cuadros ya tienen la pose (estirar el pixel art lo ensucia)
     if (facing < 0 && dir === 'side') ctx.scale(-1, 1); // de frente o de espaldas no se espeja (la espada queda en su mano)
     ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(img, -img.width * s / 2, -img.height * s, img.width * s, img.height * s);
+    ctx.drawImage(img, -Math.round(img.width / 2) * s, -img.height * s, img.width * s, img.height * s); // a píxel entero del dibujo
     ctx.restore();
     return true;
 }

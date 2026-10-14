@@ -12,8 +12,11 @@ let towerLayout = false, towerLogOpen = false;
 try { const a = +localStorage.getItem('chc-zoom2'); if (a >= VIEW.min && a <= VIEW.max) VIEW.across = a; } catch (e) { /* sin almacenamiento */ }
 
 // Lo que se ve de la Torre (en el modo normal, la arena fija de siempre)
-function viewScale() { return towerLayout ? VIEW.w / (VIEW.across * TILE) : 1; }
-function viewCols() { return towerLayout ? VIEW.across : VIEW_COLS; }
+// Pixel art nítido (2026-10-14): el zoom se ajusta para que cada píxel del dibujo ocupe un número ENTERO de píxeles de
+// pantalla (2, 3, 4…). Con escalas como 2,86, unas columnas salían más gruesas que otras y el dibujo se veía sucio.
+function pxPerArt() { const dpr = window.devicePixelRatio || 1; return Math.max(1, Math.round(PXG.scale * VIEW.w / (VIEW.across * TILE) * dpr)); }
+function viewScale() { return towerLayout ? pxPerArt() / (PXG.scale * (window.devicePixelRatio || 1)) : 1; }
+function viewCols() { return towerLayout ? VIEW.w / (TILE * viewScale()) : VIEW_COLS; }
 function viewRows() { return towerLayout ? VIEW.h / (TILE * viewScale()) : VIEW_ROWS; }
 function screenW() { return towerLayout ? VIEW.w : MAP_W; }
 function screenH() { return towerLayout ? VIEW.h : MAP_H; }
@@ -44,7 +47,11 @@ function setTowerZoom(across) {
     VIEW.across = Math.max(VIEW.min, Math.min(VIEW.max, across));
     try { localStorage.setItem('chc-zoom2', String(Math.round(VIEW.across * 10) / 10)); } catch (e) { /* no se guarda */ }
 }
-function towerZoom(dir) { setTowerZoom(VIEW.across * (dir > 0 ? 1 / VIEW.step : VIEW.step)); } // dir > 0: acercar
+// dir > 0: acercar. Salta de a un tamaño de píxel entero (así cada paso de la rueda se nota y el dibujo sigue nítido)
+function towerZoom(dir) {
+    const dpr = window.devicePixelRatio || 1, p = Math.max(1, pxPerArt() + (dir > 0 ? 1 : -1));
+    setTowerZoom(PXG.scale * VIEW.w * dpr / (p * TILE));
+}
 canvas.addEventListener('wheel', e => {
     if (!towerLayout) return;
     e.preventDefault();

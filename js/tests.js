@@ -2290,11 +2290,14 @@ test('Torre: pantalla grande con zoom (rueda o + −) y mouse acorde al zoom', (
         towerZoom(1); check(VIEW.across < 30, 'acercar muestra menos casillas');
         setTowerZoom(1000); checkEq(VIEW.across, VIEW.max, 'tope de alejar');
         setTowerZoom(24);
-        checkEq(viewCols(), 24, 'casillas a lo ancho');
-        check(Math.abs(viewRows() - VIEW.h / VIEW.w * 24) < 1e-6, 'las filas siguen la proporción de la pantalla');
+        const px = PXG.scale * viewScale() * (window.devicePixelRatio || 1);
+        check(Math.abs(px - Math.round(px)) < 1e-9 && px >= 1, 'cada píxel del dibujo ocupa píxeles de pantalla enteros (pixel art nítido)');
+        check(Math.abs(viewCols() - 24) < 24 * 0.25, 'casillas a lo ancho: cerca de lo pedido (se ajusta al píxel entero)');
+        check(Math.abs(viewRows() - VIEW.h / VIEW.w * viewCols()) < 1e-6, 'las filas siguen la proporción de la pantalla');
         const r = canvas.getBoundingClientRect();
         const m = mouseToTile({ clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 });
-        check(Math.abs(m.x - (camera.x + 12 - 0.5)) < 1e-6, 'el mouse apunta a la casilla correcta con el zoom');
+        check(Math.abs(m.x - (camera.x + viewCols() / 2 - 0.5)) < 1e-6, 'el mouse apunta a la casilla correcta con el zoom');
+        const before = pxPerArt(); towerZoom(1); checkEq(pxPerArt(), before + 1, 'cada paso de la rueda: un tamaño de píxel más');
     } finally { setTowerZoom(saved); }
     resetGame();
     check(!towerLayout && viewCols() === VIEW_COLS, 'fuera de la Torre vuelve la arena fija');
