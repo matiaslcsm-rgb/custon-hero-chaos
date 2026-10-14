@@ -219,6 +219,14 @@ en orden debajo del tutorial, con las que faltan en blanco. Las 10 páginas cuen
 ("Soy Arén. Sos Arén."). **Medido** (3 torres × 10 pisos): siempre aparece y se llega caminando; queda a 280-400 pasos de
 la entrada, entre el 87% y el 100% de lo más lejos que se puede ir en el campo de ese piso.
 
+**Paredes agrietadas y salas secretas, paso 1 (2026-10-14, modo automático, `js/towerSecrets.js`):** del piso 2 en
+adelante hay 2 cámaras de piedra selladas en el campo (sala de 5×4 sin puerta, lejos de la entrada y del pueblo). Un tramo
+de su pared tiene una grieta: un filo claro con sombra sobre el ladrillo, que se nota si mirás bien y se abre con cada
+golpe. Tres golpes tuyos la derrumban (tajos de la espada en el arco, flechas y orbes que chocan contra ella; los enemigos
+no la rompen) y adentro hay un cofre con una pieza rara. **Medido** (3 torres × pisos 2-10): siempre entran las 2 cámaras
+por piso, la entrada al laberinto sigue alcanzable y la grieta queda a 51-311 pasos de la entrada. Pendiente: grietas en
+el laberinto, salas con la página o el jefe escondido, y que el guardado de la run recuerde las paredes rotas.
+
 ## 7. Música y sonido
 - **Música ambiental por bioma**, de día y de noche, más una **capa de combate** que entra con fundido cuando hay
   enemigos cerca y se va al terminar la pelea (música dinámica en capas, como Hades o Zelda).

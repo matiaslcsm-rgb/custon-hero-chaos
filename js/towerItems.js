@@ -407,7 +407,8 @@ function towerPickup(hero) {
         if (ch.open || ch.x !== hero.x || ch.y !== hero.y) return;
         if (ch.guards.some(g => g.isAlive())) { if (!ch.warned) { ch.warned = true; log('🔒 El cofre está custodiado: vencé a sus guardias.'); } return; }
         ch.open = true;
-        if (ch.treasure) { for (let i = 0; i < 2; i++) level.drops.push({ x: ch.x, y: ch.y, item: makeTowerItem(level.floor + level.depth, undefined, 'rare') }); log('💎 ¡El tesoro de la cueva!'); }
+        if (ch.secret) { level.drops.push({ x: ch.x, y: ch.y, item: makeTowerItem(level.floor, undefined, 'rare') }); log('💎 ¡El tesoro de la sala secreta!'); }
+        else if (ch.treasure) { for (let i = 0; i < 2; i++) level.drops.push({ x: ch.x, y: ch.y, item: makeTowerItem(level.floor + level.depth, undefined, 'rare') }); log('💎 ¡El tesoro de la cueva!'); }
         else level.drops.push({ x: ch.x, y: ch.y, item: lootItem(level.floor + (level.depth || 0), Math.random() < 0.25 + 0.1 * (level.depth || 0) ? 'rare' : 'magic') });
         log('🧰 ¡Abriste el cofre!'); sfx('coin');
         writeNotebookPage('CHEST'); // el cuaderno (REWORK.md §1)

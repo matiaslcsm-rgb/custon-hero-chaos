@@ -74,6 +74,7 @@ function swingArc(c, dir, step, reach, mult, basic = false) {
         }
     });
     deflectBullets(c, dir, reach, SWORD_COMBO.halfArc); // el tajo desvía los proyectiles que agarra (towerBullets.js)
+    swingCracks(c, dir, reach, SWORD_COMBO.halfArc); // y rompe las paredes agrietadas (towerSecrets.js)
     c.attackTimer = 0; // el tajo reemplaza al ataque automático (no se suman)
     c.comboAt = gameClock; c.comboStep = (step + 1) % 3; c.fxSwingStep = step; // fxSwingStep: qué tajo dibujar (towerPixelBeasts.js)
     fxSwordSwing(c, dir, step, reach, hit.length > 0);

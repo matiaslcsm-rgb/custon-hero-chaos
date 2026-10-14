@@ -1608,6 +1608,30 @@ test('Torre por dentro: el piso 1 es afuera; del 2 en adelante, muro exterior y 
     towerLoreGreet(L2); towerLoreGreet(L2);
     check(towerRun.lore[2] === true, 'queda anotado que ya te habló');
 });
+test('Torre: paredes agrietadas — cámaras selladas desde el piso 2, se rompen a golpes y adentro hay un tesoro', () => {
+    newTower();
+    checkEq((towerLevel(1).cracks || []).length, 0, 'el piso 1 es afuera: sin cámaras');
+    const L = towerLevel(4), k = L.cracks[0], ch = L.chests.find(c => c.secret);
+    check(L.cracks.length >= 1 && ch, `el piso 4 trae cámaras selladas (${L.cracks.length})`);
+    checkEq(L.walls[k.y][k.x], WALL.stone, 'la grieta es parte de la pared');
+    const reach = () => bfsFrom(L, L.start.x, L.start.y)[ch.y * COLS + ch.x] >= 0;
+    check(!reach(), 'el cofre no se alcanza con la pared entera');
+    // se para al lado de la grieta (afuera) y le pega con la espada
+    const out = [[0, -1], [0, 1], [-1, 0], [1, 0]].map(([dx, dy]) => ({ x: k.x + dx, y: k.y + dy })).find(p => walkable(L, p.x, p.y) && bfsFrom(L, L.start.x, L.start.y)[p.y * COLS + p.x] >= 0);
+    Object.assign(player, { arena: L, x: out.x, y: out.y });
+    L.creeps = [];
+    const dir = { dx: k.x - out.x, dy: k.y - out.y, dist: 1 };
+    swingArc(player, dir, 0, 1.9, 1); check(L.walls[k.y][k.x] && k.hp === SECRET.hp - 1, 'un tajo la agrieta más');
+    swingArc(player, dir, 1, 1.9, 1); swingArc(player, dir, 2, 1.9, 1);
+    checkEq(L.walls[k.y][k.x], 0, 'a los tres golpes se derrumba');
+    check(reach(), 'y el cofre ya se alcanza');
+    Object.assign(player, { x: ch.x, y: ch.y }); L.drops = [];
+    towerPickup(player);
+    check(ch.open && (L.drops.length || player.bag.some(b => b.item.quality === 'rare')), 'el cofre secreto da una pieza rara');
+    // una flecha que choca contra una grieta también la golpea
+    const k2 = { x: 5, y: 5, hp: 1 }; L.cracks.push(k2); L.walls[5][5] = WALL.stone;
+    check(hitCrack(L, 5, 5, player) && !L.walls[5][5], 'cualquier golpe tuyo cuenta (flechas y orbes también)');
+}, { random: true });
 test('Torre: las Páginas de Arén — una por piso en un rincón apartado, se juntan al pisarla y no vuelven a aparecer', () => {
     arenStore = { found: {} };
     newTower();

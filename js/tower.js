@@ -539,6 +539,7 @@ function renderTower(level, dt) {
     ctx.scale(viewScale(), viewScale()); // zoom (towerView.js)
     ctx.translate(-camera.x * TILE, -camera.y * TILE);
     drawTowerTiles(level);
+    drawCracks(level); // paredes agrietadas (towerSecrets.js)
     pxDrawLoot(level); // cofres y botín (towerPixelProps.js)
     const underFx = () => {
         drawTowerZones(level); // lo que dejan los jefes en el piso (towerBosses.js)

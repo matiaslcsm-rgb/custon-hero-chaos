@@ -234,7 +234,7 @@ function updateProjectiles(arena, dt) {
             p.traveled += step;
             p.x += p.dx * step; p.y += p.dy * step;
             // Sólidos (flechas y orbes de la Torre): una pared los frena
-            if (p.solid && !walkable(arena, Math.round(p.x), Math.round(p.y))) { fxProjectileHit(p, p.x, p.y); projectiles.splice(i, 1); continue; }
+            if (p.solid && !walkable(arena, Math.round(p.x), Math.round(p.y))) { if (arena.cracks) hitCrack(arena, Math.round(p.x), Math.round(p.y), p.attacker); fxProjectileHit(p, p.x, p.y); projectiles.splice(i, 1); continue; } // la flecha también rompe grietas (towerSecrets.js)
             let stopped = false;
             enemiesOf(p.attacker).forEach(c => {
                 if (stopped || !c.isAlive() || p.hitSet.has(c) || Math.hypot(c.x - p.x, c.y - p.y) > p.radius) return;
