@@ -289,6 +289,7 @@ function updateTower(dt) {
     towerFeelTick(player); // tensar el arco (towerFeel.js)
     parryTick(player); // la parada de la espada (towerParry.js)
     mageTick(player); // la Carga del Mago (towerMage.js)
+    specialTick(player); // lo que sigue de la especial: lluvia, meteoro, suelo ardiendo (towerSpecials.js)
     towerAutosave(); // cada 15 s (towerSave.js)
     unstickFromWall(player);
     // Cuaderno (REWORK.md §1): moverse y esquivar se detectan leyendo el estado, sin tocar el código compartido.

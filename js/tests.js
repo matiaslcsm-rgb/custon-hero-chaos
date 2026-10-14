@@ -1642,7 +1642,7 @@ test('Torre: jefe escondido — el Ciervo Blanco sale de noche en un claro del p
     newTower();
     const L = towerLevel(1), hb = L.hiddenBoss;
     check(hb && L.zone[hb.y * COLS + hb.x] === ZONE.field && walkable(L, hb.x, hb.y), 'el piso 1 tiene su claro apartado');
-    checkEq(towerLevel(7).hiddenBoss, null, 'los demás pisos todavía no');
+    checkEq(towerLevel(8).hiddenBoss, null, 'los demás pisos todavía no');
     const setNight = on => { towerRun.startedAt = gameClock - (on ? DAYNIGHT.day + DAYNIGHT.dusk + 10 : 10); };
     setNight(false); hiddenBossTick(L);
     check(!hb.unit, 'de día no está');
@@ -1762,6 +1762,18 @@ test('Torre: el Guerrero — la espada es una clase y su pasiva hace que el dañ
     addToBag(player, glove); equipItem(player, glove);
     check(player.gear.gloves === glove && !player.skills.includes(itemSkill(glove)), 'al Guerrero los guantes no le dan su habilidad (solo stats)');
     check(itemTooltipHtml(glove).includes('no usa las habilidades'), 'y el cartel de la pieza lo avisa');
+}, { random: true });
+test('Torre: la especial (R) de cada clase — Torbellino, Lluvia de Flechas y Meteoro, con enfriamiento largo', () => {
+    [['ADVENTURER_SWORD', 'warrior'], ['ADVENTURER_BOW', 'archer'], ['ADVENTURER_STAFF', 'mage']].forEach(([w, cls]) => {
+        const L = newTower('AXE', { weapon: w });
+        checkEq(player.heroClass, cls, w);
+        const foes = L.creeps.filter(o => o.isAlive()).slice(0, 2); L.creeps = foes;
+        foes.forEach((c, i) => Object.assign(c, { x: player.x + 1, y: player.y + i, hp: 1e6, maxHp: 1e6 }));
+        check(classSpecial(player, { x: player.x + 1, y: player.y }), `${cls}: la R tira su especial`);
+        for (let t = 0; t < 4; t += 0.1) { gameClock += 0.1; specialTick(player); }
+        check(foes.every(c => c.hp < 1e6), `${cls}: pega a todos los de la zona`);
+        check(player.specialReadyAt - gameClock > 10, `${cls}: enfriamiento largo`);
+    });
 }, { random: true });
 test('Torre: el Mago — orbe que rebota, tormenta de 3 rayos, teletransporte y su pasiva Carga', () => {
     const L = newTower('AXE', { weapon: 'ADVENTURER_STAFF' });

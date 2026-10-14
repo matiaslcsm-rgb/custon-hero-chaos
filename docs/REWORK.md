@@ -827,6 +827,12 @@ Las fases 3 y 4 son las más grandes: hay que rehacer pruebas y volver a medir e
 también tiene que aprender a esquivar los ataques anunciados).
 
 ## Interfaz y calidad de vida (lista viva)
+- ✅ **La especial (R) de cada clase** (2026-10-14, fase T00 paso 4, `js/towerSpecials.js`), 20 s de enfriamiento
+  (el Arquero, 16 por Ojo Rápido): Guerrero, **Torbellino** (pega ×3 a todos en 2,2 casillas y los empuja 2);
+  Arquero, **Lluvia de Flechas** (zona de radio 2 en el cursor, 6 golpes de ×0,3 en 2 s); Mago, **Meteoro** (cae a los
+  0,8 s con ×1,6 en radio 2 y deja el suelo ardiendo 3 s). **Medido** (banco de 40 s contra 3 muñecos juntos, 6
+  corridas): suman +12% al Guerrero (96→108), +20% al Arquero (40→48) y +18% al Mago (51→60). La primera versión
+  (×2,4 / ×0,75 / ×3,2) daba +17% / +51% / +41%.
 - ✅ **El Mago** (2026-10-14, fase T00 paso 3, `js/towerMage.js`): clic, orbe que rebota 1 vez (sale al soltar);
   clic derecho, tormenta de 3 rayos sobre enemigos al azar cerca del cursor (7 s); Espacio, teletransporte de hasta
   4 casillas hacia el mouse (no atraviesa paredes); pasiva **Carga**: mantener cualquiera de los dos clics carga en 3

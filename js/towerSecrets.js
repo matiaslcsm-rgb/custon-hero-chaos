@@ -122,7 +122,8 @@ function drawCracks(level) {
 // · El Ciervo Blanco (piso 1) pasta solo de NOCHE en un claro apartado del bosque; al amanecer, si no lo despertaste, se va.
 // · La Flor Carnívora (piso 2) está encerrada en el invernadero tapiado: una sala grande sellada con una pared agrietada.
 // · El Leviatán del Fango (piso 3), igual, en la sala de bombas de las cisternas; la Semilla Primera (piso 4), en el
-//   hueco de la raíz; el Guardián de Arena (piso 5), en la sala del reloj detenido; el Lector Sin Ojos (piso 6), entre las estanterías hundidas.
+//   hueco de la raíz; el Guardián de Arena (piso 5), en la sala del reloj detenido; el Lector Sin Ojos (piso 6), entre las estanterías hundidas;
+//   el Lobo de Escarcha (piso 7), en el mirador cerrado.
 const HIDDEN_BOSSES = {
     1: { label: 'Ciervo Blanco', role: 'skirmisher', body: 'wolf', color: '#eee6d2', parts: ['horns', 'eyes'], scale: 1.35, mult: 2.6, hp: 3.8, lvl: 3, night: true, // hp: vida extra (más que un señor de cueva sin pegar de un golpe)
         mechanic: 'Jefe escondido del piso 1: pasta de noche en un claro apartado del bosque y se va al amanecer. Rápido y escurridizo.',
@@ -147,7 +148,11 @@ const HIDDEN_BOSSES = {
     6: { label: 'Lector Sin Ojos', role: 'caster', body: 'wraith', color: '#cdb4db', parts: ['eyes', 'spots'], scale: 1.5, mult: 2.2, hp: 3, lvl: 3, sealed: [11, 8],
         mechanic: 'Jefe escondido del piso 6: lee en la oscuridad entre las estanterías hundidas. Lanza hechizos (daño mágico).',
         hint: '📚 La archivista Sela: «Hay una sala de estanterías que tapiamos. Adentro alguien pasa las páginas, y no tiene ojos.»',
-        icon: '📚', unique: { slot: 'helm', name: 'Venda del Lector Sin Ojos', extra: ['int', 'spellAmp'] } }
+        icon: '📚', unique: { slot: 'helm', name: 'Venda del Lector Sin Ojos', extra: ['int', 'spellAmp'] } },
+    7: { label: 'Lobo de Escarcha', role: 'skirmisher', body: 'wolf', color: '#bde0fe', parts: ['spikes', 'eyes'], scale: 1.45, mult: 2.4, hp: 3.6, lvl: 3, sealed: [11, 8],
+        mechanic: 'Jefe escondido del piso 7: lo encerraron en el mirador cerrado, donde entra la nieve. Rápido y escurridizo.',
+        hint: '🏮 Isla, la farolera: «El mirador lo cerramos porque algo aullaba ahí. El farol de esa sala nunca se prende.»',
+        icon: '🐺', unique: { slot: 'gloves', name: 'Garras del Lobo de Escarcha', extra: ['critChance', 'atkSpeedPct'] } }
 };
 // Un claro abierto (7×7 sin muros) lo más lejos posible de la entrada y de la página
 function placeHiddenBoss(level, dist) {

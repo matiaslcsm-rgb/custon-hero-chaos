@@ -161,7 +161,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
       Ojo Rápido; sin Q/E/R del equipo, conserva el Tiro Tensado en la Q). 2026-10-14.
 - [x] **Las 3 clases, paso 3: el Mago** (2026-10-14: tocando, +6% en grupo y −5% solo contra el Guerrero; cargando, +29% / −14%) (orbe que rebota 1 vez, tormenta de 3 rayos a enemigos al azar,
       teletransporte corto, pasiva Carga). Medir contra el Guerrero (±10%).
-- [ ] **Las 3 clases, paso 4: la especial (R) de cada clase** (Torbellino, Lluvia de Flechas, Meteoro), medida. Cada uno medido contra el Guerrero (daño por segundo
+- [x] **Las 3 clases, paso 4: la especial (R) de cada clase** (2026-10-14: cada una suma 12-20% de daño en grupo) (Torbellino, Lluvia de Flechas, Meteoro), medida. Cada uno medido contra el Guerrero (daño por segundo
       parejo ±10%, muertes por piso).
 - [ ] **El equipo queda en la armadura:** una sola pieza (vida, armadura, 1 rasgo) que se encuentra y se mejora. Las
       piezas de héroes de Custom Hero salen del botín de la Torre (o pasan a ser reliquias). Medir daño por piso ±15%.
