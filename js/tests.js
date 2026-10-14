@@ -1639,7 +1639,7 @@ test('Torre: jefe escondido — el Ciervo Blanco sale de noche en un claro del p
     newTower();
     const L = towerLevel(1), hb = L.hiddenBoss;
     check(hb && L.zone[hb.y * COLS + hb.x] === ZONE.field && walkable(L, hb.x, hb.y), 'el piso 1 tiene su claro apartado');
-    checkEq(towerLevel(3).hiddenBoss, null, 'los demás pisos todavía no');
+    checkEq(towerLevel(4).hiddenBoss, null, 'los demás pisos todavía no');
     const setNight = on => { towerRun.startedAt = gameClock - (on ? DAYNIGHT.day + DAYNIGHT.dusk + 10 : 10); };
     setNight(false); hiddenBossTick(L);
     check(!hb.unit, 'de día no está');
@@ -1676,6 +1676,15 @@ test('Torre: jefe escondido — la Flor Carnívora del piso 2 espera en el inver
     checkEq(f.x, x0, 'no se mueve (echó raíces)');
     L.drops = []; dealDamage(player, f, f.hp * 10, 'pure');
     check(L.drops.some(dr => dr.item.unique && dr.item.slot === 'gloves'), 'suelta sus guantes únicos');
+}, { random: true });
+test('Torre: jefe escondido — el Leviatán del Fango del piso 3, encerrado en la sala de bombas', () => {
+    newTower(); enterTowerFloor(3);
+    const L = arenas[0], hb = L.hiddenBoss;
+    hiddenBossTick(L);
+    check(hb && hb.unit && hb.unit.type.label === 'Leviatán del Fango', 'está en su sala');
+    check(bfsFrom(L, L.start.x, L.start.y)[hb.y * COLS + hb.x] < 0, 'sellada hasta romper la grieta');
+    L.drops = []; dealDamage(player, hb.unit, hb.unit.hp * 10, 'pure');
+    check(L.drops.some(dr => dr.item.unique && dr.item.name === 'Coraza del Leviatán'), 'suelta su coraza única');
 }, { random: true });
 test('Torre: las Páginas de Arén — una por piso en un rincón apartado, se juntan al pisarla y no vuelven a aparecer', () => {
     arenStore = { found: {} };

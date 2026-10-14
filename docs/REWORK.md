@@ -253,6 +253,12 @@ espinas a distancia; suelta los **Guantes de la Flor Carnívora** (guantes raros
 **Medido** (10 pisos 2): entra en 10 de 10, el laberinto sigue alcanzable en todos y la grieta queda a 51-292 pasos.
 785 de vida y 99 de daño a 4,5 casillas (el señor de la cueva del piso 2: 644 y 172).
 
+**Paso 3: el Leviatán del Fango (2026-10-14):** piso 3, sala de bombas sellada (como el invernadero), aviso de Madre
+Junco, pega muy fuerte cuerpo a cuerpo y suelta la **Coraza del Leviatán** (coraza rara con armadura y vida/s de yapa).
+**Medido:** entra en 10 de 10 pisos 3 con el laberinto alcanzable; con la vida de la Flor salía con 2117 (el bruto trae
+mucha vida de base), se bajó a 1000 de vida y 137 de daño, contra 393-1226 / 153-333 de los señores de cueva del piso 3:
+más duro que el promedio y menos letal, como los otros dos.
+
 ## 7. Música y sonido
 - **Música ambiental por bioma**, de día y de noche, más una **capa de combate** que entra con fundido cuando hay
   enemigos cerca y se va al terminar la pelea (música dinámica en capas, como Hades o Zelda).

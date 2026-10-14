@@ -121,6 +121,7 @@ function drawCracks(level) {
 // Opcionales, más difíciles que un señor de cueva, con su entrada propia en el Bestiario y una pieza única.
 // · El Ciervo Blanco (piso 1) pasta solo de NOCHE en un claro apartado del bosque; al amanecer, si no lo despertaste, se va.
 // · La Flor Carnívora (piso 2) está encerrada en el invernadero tapiado: una sala grande sellada con una pared agrietada.
+// · El Leviatán del Fango (piso 3), igual, en la sala de bombas de las cisternas.
 const HIDDEN_BOSSES = {
     1: { label: 'Ciervo Blanco', role: 'skirmisher', body: 'wolf', color: '#eee6d2', parts: ['horns', 'eyes'], scale: 1.35, mult: 2.6, hp: 3.8, lvl: 3, night: true, // hp: vida extra (más que un señor de cueva sin pegar de un golpe)
         mechanic: 'Jefe escondido del piso 1: pasta de noche en un claro apartado del bosque y se va al amanecer. Rápido y escurridizo.',
@@ -129,7 +130,11 @@ const HIDDEN_BOSSES = {
     2: { label: 'Flor Carnívora', role: 'archer', body: 'toad', color: '#b5179e', parts: ['spikes', 'eyes'], scale: 1.5, mult: 2.4, hp: 3.6, lvl: 3, sealed: [11, 8], rooted: true,
         mechanic: 'Jefe escondido del piso 2: echó raíces en el invernadero tapiado. No se mueve; escupe espinas a distancia.',
         hint: '🌺 Hermano Musgo: «Tapiamos el invernadero viejo. Si escuchás algo que mastica detrás de una pared rajada, no la rompas.»',
-        icon: '🌺', unique: { slot: 'gloves', name: 'Guantes de la Flor Carnívora', extra: ['lifesteal', 'hpRegen'] } }
+        icon: '🌺', unique: { slot: 'gloves', name: 'Guantes de la Flor Carnívora', extra: ['lifesteal', 'hpRegen'] } },
+    3: { label: 'Leviatán del Fango', role: 'bruiser', body: 'lizard', color: '#4a5d23', parts: ['spikes', 'eyes'], scale: 1.6, mult: 2, hp: 1.7, lvl: 3, sealed: [11, 8], // el bruto ya trae mucha vida de base
+        mechanic: 'Jefe escondido del piso 3: quedó encerrado en la sala de bombas cuando se cerraron las compuertas. Pega muy fuerte.',
+        hint: '🛶 Madre Junco: «La sala de bombas quedó cerrada con algo adentro. Los botes que se acercan a la pared rajada no vuelven.»',
+        icon: '🐊', unique: { slot: 'armor', name: 'Coraza del Leviatán', extra: ['armor', 'hpRegen'] } }
 };
 // Un claro abierto (7×7 sin muros) lo más lejos posible de la entrada y de la página
 function placeHiddenBoss(level, dist) {
