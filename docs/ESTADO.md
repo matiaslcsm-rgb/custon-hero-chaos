@@ -52,8 +52,9 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **Equipo de desarrollo (2026-10-14):** agentes del proyecto en `.claude/agents/` (director-de-juego,
   disenador-de-sistemas, disenador-de-niveles, narrativa, arte-pixel, qa-jugador) y el comando `/equipo <tema>`
   (`.claude/skills/equipo/`) que los coordina: diseño → especialistas → integración → QA → cierre.
-- **Jefe escondido del piso 1 (2026-10-14, modo automático):** el Ciervo Blanco sale de noche en un claro apartado y
-  suelta las Astas del Ciervo Blanco (pieza única). Faltan los de los otros pisos (REWORK.md §6, ROADMAP.md T0).
+- **Jefes escondidos (2026-10-14, modo automático):** el Ciervo Blanco (piso 1) sale de noche en un claro apartado; la
+  Flor Carnívora (piso 2) espera en el invernadero tapiado, detrás de una grieta. Cada uno suelta una pieza única. Faltan
+  los de los otros pisos (REWORK.md §6, ROADMAP.md T0).
 - **Salas secretas (2026-10-14, modo automático):** cámaras selladas desde el piso 2 y una sala escondida en cada
   laberinto, con una pared agrietada que se rompe a golpes y un cofre con una pieza rara (REWORK.md §6).
 - **Las Páginas de Arén (2026-10-14, modo automático):** una por piso, adentro de la cámara sellada más lejana (en el
@@ -221,7 +222,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **Idioma:** español rioplatense (voseo), en el código, los comentarios, los textos del juego y los commits.
 - **Decisiones de diseño:** se consultan con opciones y una recomendada, idealmente con números medidos. Lo que se decide
   se anota en DISEÑO.md (secciones de la fase y "Decisiones tomadas").
-- **Cada cambio:** pruebas automáticas (`tests.html`, hoy **236**) → commit en git → push a GitHub siempre al terminar cada paso (pedido del usuario 2026-10-07, para trabajar desde otros lugares).
+- **Cada cambio:** pruebas automáticas (`tests.html`, hoy **237**) → commit en git → push a GitHub siempre al terminar cada paso (pedido del usuario 2026-10-07, para trabajar desde otros lugares).
 - **Commits:** mensaje en español que explica el porqué; terminan con `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 - **Héroes nuevos con otra IA:** prompt en [`prompt-heroes.md`](prompt-heroes.md); lo que devuelva se revisa contra el motor
   (pasivas, efectos por segundo con `everyInterval`, descripciones que coincidan con el código) antes de integrarlo.

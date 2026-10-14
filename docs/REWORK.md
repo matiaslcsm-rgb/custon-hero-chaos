@@ -246,6 +246,13 @@ de yapa). Vencido, no vuelve en esa run. **Medido:** 593 de vida y 52 de daño (
 149; el héroe arranca con 215 de vida): con la espada inicial sin equipo lo matás en 21-26 golpes y te mata en 5 de los
 suyos. Más largo que el señor de la cueva, menos letal de un golpe. El claro queda a ~270 pasos de la entrada.
 
+**Paso 2: la Flor Carnívora (2026-10-14):** en el piso 2, el invernadero tapiado es una sala grande (11×8 por dentro)
+sellada con una pared agrietada; despeja los árboles que pisa y la grieta siempre da a un lugar alcanzable. Al llegar al
+piso, Hermano Musgo avisa en el registro. La flor ya está adentro (de día también), echó raíces (no camina) y escupe
+espinas a distancia; suelta los **Guantes de la Flor Carnívora** (guantes raros con robo de vida y vida/s de yapa).
+**Medido** (10 pisos 2): entra en 10 de 10, el laberinto sigue alcanzable en todos y la grieta queda a 51-292 pasos.
+785 de vida y 99 de daño a 4,5 casillas (el señor de la cueva del piso 2: 644 y 172).
+
 ## 7. Música y sonido
 - **Música ambiental por bioma**, de día y de noche, más una **capa de combate** que entra con fundido cuando hay
   enemigos cerca y se va al terminar la pelea (música dinámica en capas, como Hades o Zelda).

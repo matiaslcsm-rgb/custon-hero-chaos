@@ -98,8 +98,8 @@ El orden de la lista **es** la prioridad: primero lo que destraba el loop comple
 - [ ] **Jefes escondidos:** uno por piso según la tabla de TORRE-MUNDO.md.
   - [x] Paso 1: el Ciervo Blanco del piso 1 (solo de noche en un claro apartado, se va al amanecer), con su entrada
         del Bestiario y una pieza única (Astas del Ciervo Blanco). 2026-10-14.
-  - [ ] Paso 2: la Flor Carnívora del piso 2, en el invernadero tapiado: detrás de una pared agrietada (el paso 3b
-        de las salas secretas).
+  - [x] Paso 2: la Flor Carnívora del piso 2, en el invernadero tapiado (sala grande sellada con una pared
+        agrietada; la flor echó raíces y escupe espinas). 2026-10-14.
   - [ ] Paso 3: el resto, de a uno (Leviatán del Fango, Semilla Primera, Guardián de Arena, Lector Sin Ojos, Lobo de
         Escarcha, Vigía Perdido, Yunque Vivo).
   - [ ] Dibujo propio del ciervo (hoy usa el cuerpo de cuadrúpedo con astas del generador).

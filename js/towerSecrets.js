@@ -12,40 +12,53 @@ const SECRET = { perFloor: 2, inner: [5, 4], hp: 3, minDist: 30 };
 function placeSecretRooms(level, dist) {
     level.cracks = [];
     if (level.floor < 2) return placeLabSecret(level, dist); // el piso 1 es afuera: solo la del laberinto
-    const at = (x, y) => y * COLS + x, ow = SECRET.inner[0] + 2, oh = SECRET.inner[1] + 2;
-    const taken = (level.shrines || []).concat(level.caves || [], level.events || [], level.chests || [], level.creeps, level.arenPage ? [level.arenPage] : []);
-    const town = level.town && level.town.merchant;
-    for (let t = 0, made = 0; t < 3000 && made < SECRET.perFloor; t++) {
-        const x0 = 3 + Math.floor(Math.random() * (COLS - ow - 6)), y0 = 3 + Math.floor(Math.random() * (ROWS - oh - 6));
-        if (town && Math.abs(x0 - town.x) < 24 && Math.abs(y0 - town.y) < 18) continue;
-        let ok = true;
-        for (let y = y0 - 1; y <= y0 + oh && ok; y++) for (let x = x0 - 1; x <= x0 + ow && ok; x++) {
-            const i = at(x, y);
-            ok = level.zone[i] === ZONE.field && walkable(level, x, y) && level.ground[i] !== GROUND.road && !(level.height && level.height[i]) && !(level.ramp && level.ramp[i]) && dist[i] >= SECRET.minDist;
-        }
-        if (!ok || taken.some(s => s.x >= x0 - 2 && s.x <= x0 + ow + 1 && s.y >= y0 - 2 && s.y <= y0 + oh + 1)) continue;
-        if (level.cracks.some(c => Math.hypot(c.x - x0, c.y - y0) < 40)) continue;
-        taken.push(buildChamber(level, x0, y0, chamberSides(x0, y0)[Math.floor(Math.random() * 4)]));
-        made++;
+    for (let made = 0; made < SECRET.perFloor; made++) {
+        const p = findFieldRect(level, dist, SECRET.inner);
+        if (!p) break;
+        buildChamber(level, p.x, p.y, p.side);
     }
     // La Página de Arén del piso va adentro de la cámara más lejana (en vez del rincón apartado: towerLore.js)
     const far = level.chests.filter(c => c.secret).sort((a, b) => dist[b.y * COLS + b.x] - dist[a.y * COLS + a.x])[0]; // (dist es de antes de levantar los muros)
     if (level.arenPage && far) Object.assign(level.arenPage, { x: far.x - 1, y: far.y });
     placeLabSecret(level, dist);
 }
+// Un lugar libre de campo para una cámara de `inner` por dentro (con margen), lejos de la entrada, del pueblo y de las otras.
+// trees: puede pisar árboles y rocas del bioma (se despejan); la casilla de afuera de la grieta tiene que ser alcanzable.
+function findFieldRect(level, dist, inner, trees = false) {
+    const at = (x, y) => y * COLS + x, ow = inner[0] + 2, oh = inner[1] + 2;
+    const taken = (level.shrines || []).concat(level.caves || [], level.events || [], level.chests || [], level.creeps, level.arenPage ? [level.arenPage] : []);
+    const town = level.town && level.town.merchant;
+    for (let t = 0; t < 3000; t++) {
+        const x0 = 3 + Math.floor(Math.random() * (COLS - ow - 6)), y0 = 3 + Math.floor(Math.random() * (ROWS - oh - 6));
+        if (town && Math.abs(x0 - town.x) < 24 && Math.abs(y0 - town.y) < 18) continue;
+        if (level.cracks.some(c => Math.hypot(c.x - x0, c.y - y0) < 40)) continue;
+        let ok = true;
+        for (let y = y0 - 1; y <= y0 + oh && ok; y++) for (let x = x0 - 1; x <= x0 + ow && ok; x++) {
+            const i = at(x, y);
+            const free = walkable(level, x, y) && dist[i] >= SECRET.minDist, tree = trees && level.walls[y][x] === WALL.obstacle && !(level.deep && level.deep[i]);
+            ok = level.zone[i] === ZONE.field && (free || tree) && level.ground[i] !== GROUND.road && !(level.height && level.height[i]) && !(level.ramp && level.ramp[i]);
+        }
+        if (!ok || taken.some(s => s.x >= x0 - 2 && s.x <= x0 + ow + 1 && s.y >= y0 - 2 && s.y <= y0 + oh + 1)) continue;
+        const sides = chamberSides(x0, y0, inner).filter(s => dist[s.oy * COLS + s.ox] >= SECRET.minDist);
+        if (!sides.length) continue;
+        if (trees) for (let y = y0 - 1; y <= y0 + oh; y++) for (let x = x0 - 1; x <= x0 + ow; x++) if (level.walls[y][x] === WALL.obstacle) level.walls[y][x] = 0; // despeja el margen
+        return { x: x0, y: y0, side: sides[Math.floor(Math.random() * sides.length)] };
+    }
+    return null;
+}
 // Los 4 lugares posibles de la grieta (el medio de cada lado) y la casilla de afuera que le corresponde
-function chamberSides(x0, y0) {
-    const ow = SECRET.inner[0] + 2, oh = SECRET.inner[1] + 2, mx = x0 + (ow >> 1), my = y0 + (oh >> 1);
+function chamberSides(x0, y0, inner = SECRET.inner) {
+    const ow = inner[0] + 2, oh = inner[1] + 2, mx = x0 + (ow >> 1), my = y0 + (oh >> 1);
     return [{ x: mx, y: y0, ox: mx, oy: y0 - 1 }, { x: mx, y: y0 + oh - 1, ox: mx, oy: y0 + oh }, { x: x0, y: my, ox: x0 - 1, oy: my }, { x: x0 + ow - 1, y: my, ox: x0 + ow, oy: my }];
 }
-// Levanta la cámara (pared de piedra, adentro vacío), pone la grieta y el cofre
-function buildChamber(level, x0, y0, side) {
-    const [iw, ih] = SECRET.inner, ow = iw + 2, oh = ih + 2;
+// Levanta la cámara (pared de piedra, adentro vacío), pone la grieta y el cofre (sin cofre: la sala de un jefe)
+function buildChamber(level, x0, y0, side, inner = SECRET.inner, chest = true) {
+    const [iw, ih] = inner, ow = iw + 2, oh = ih + 2;
     for (let y = y0; y < y0 + oh; y++) for (let x = x0; x < x0 + ow; x++)
         level.walls[y][x] = (x === x0 || y === y0 || x === x0 + ow - 1 || y === y0 + oh - 1) ? WALL.stone : 0;
     const crack = { x: side.x, y: side.y, hp: SECRET.hp };
     level.cracks.push(crack);
-    level.chests.push({ x: x0 + 1 + (iw >> 1), y: y0 + 1 + (ih >> 1), open: false, guards: [], secret: true });
+    if (chest) level.chests.push({ x: x0 + 1 + (iw >> 1), y: y0 + 1 + (ih >> 1), open: false, guards: [], secret: true });
     return crack;
 }
 // En el laberinto (todos los pisos): una sala escondida en la piedra maciza, con la grieta hacia un pasillo o una sala
@@ -104,20 +117,32 @@ function drawCracks(level) {
     });
 }
 
-// --- JEFES ESCONDIDOS (TORRE-MUNDO.md, uno por piso; paso 1: el Ciervo Blanco del piso 1) ---
+// --- JEFES ESCONDIDOS (TORRE-MUNDO.md, uno por piso) ---
 // Opcionales, más difíciles que un señor de cueva, con su entrada propia en el Bestiario y una pieza única.
-// El Ciervo Blanco pasta solo de NOCHE en un claro apartado del bosque; al amanecer, si no lo despertaste, se va.
+// · El Ciervo Blanco (piso 1) pasta solo de NOCHE en un claro apartado del bosque; al amanecer, si no lo despertaste, se va.
+// · La Flor Carnívora (piso 2) está encerrada en el invernadero tapiado: una sala grande sellada con una pared agrietada.
 const HIDDEN_BOSSES = {
     1: { label: 'Ciervo Blanco', role: 'skirmisher', body: 'wolf', color: '#eee6d2', parts: ['horns', 'eyes'], scale: 1.35, mult: 2.6, hp: 3.8, lvl: 3, night: true, // hp: vida extra (más que un señor de cueva sin pegar de un golpe)
         mechanic: 'Jefe escondido del piso 1: pasta de noche en un claro apartado del bosque y se va al amanecer. Rápido y escurridizo.',
         hint: '🦌 Brena dice que algunas noches un ciervo blanco pasta en un claro, lejos del camino. Nadie lo pudo alcanzar.',
-        unique: { slot: 'helm', name: 'Astas del Ciervo Blanco', extra: ['moveSpeedPct', 'maxHp'] } }
+        icon: '🦌', unique: { slot: 'helm', name: 'Astas del Ciervo Blanco', extra: ['moveSpeedPct', 'maxHp'] } },
+    2: { label: 'Flor Carnívora', role: 'archer', body: 'toad', color: '#b5179e', parts: ['spikes', 'eyes'], scale: 1.5, mult: 2.4, hp: 3.6, lvl: 3, sealed: [11, 8], rooted: true,
+        mechanic: 'Jefe escondido del piso 2: echó raíces en el invernadero tapiado. No se mueve; escupe espinas a distancia.',
+        hint: '🌺 Hermano Musgo: «Tapiamos el invernadero viejo. Si escuchás algo que mastica detrás de una pared rajada, no la rompas.»',
+        icon: '🌺', unique: { slot: 'gloves', name: 'Guantes de la Flor Carnívora', extra: ['lifesteal', 'hpRegen'] } }
 };
 // Un claro abierto (7×7 sin muros) lo más lejos posible de la entrada y de la página
 function placeHiddenBoss(level, dist) {
     const H = HIDDEN_BOSSES[level.floor];
     level.hiddenBoss = null;
     if (!H) return;
+    if (H.sealed) { // la sala sellada: una cámara grande sin cofre, con su grieta; el jefe espera en el medio
+        const p = findFieldRect(level, dist, H.sealed, true);
+        if (!p) return;
+        buildChamber(level, p.x, p.y, p.side, H.sealed, false);
+        level.hiddenBoss = { x: p.x + 1 + (H.sealed[0] >> 1), y: p.y + 1 + (H.sealed[1] >> 1), floor: level.floor, unit: null, dead: false };
+        return;
+    }
     let best = null, bestD = -1;
     for (let t = 0; t < 6000; t++) {
         const x = 5 + Math.floor(Math.random() * (COLS - 10)), y = 5 + Math.floor(Math.random() * (ROWS - 10)), i = y * COLS + x;
@@ -146,6 +171,7 @@ function hiddenBossTick(level) {
         const type = hiddenBossType(H, level.biome), lvl = level.floor + H.lvl;
         const c = makeCreep(type, hb.x, hb.y, TOWER.creepMult(lvl) * H.mult, false, 0);
         c.hp = c.maxHp = Math.round(c.maxHp * H.hp);
+        if (H.rooted) c.moveInterval = 1e9; // echó raíces: no camina
         Object.assign(c, { arena: level, level: lvl, xp: Math.round(type.xp * TOWER.xpMult(lvl) * 8), spawnTime: -1e9, isCaveBoss: true, isHiddenBoss: true, hiddenFloor: level.floor });
         level.creeps.push(c); hb.unit = c;
         if (!hb.hinted) { hb.hinted = true; log(H.hint); }
@@ -158,5 +184,5 @@ function hiddenBossLoot(level, c) {
     U.extra.forEach(k => { const a = AFFIXES.find(x => x.key === k); if (a && !item.affixes.some(x => x.key === k)) item.affixes.push({ key: a.key, name: a.name, value: round1(a.roll(floor)) }); });
     Object.assign(item, { name: U.name, unique: true });
     level.drops.push({ x: c.x, y: c.y, item });
-    log(`🦌 ${c.type.label} cae. Deja algo que nadie había visto: ${U.name}.`);
+    log(`${HIDDEN_BOSSES[c.hiddenFloor].icon} ${c.type.label} cae. Deja algo que nadie había visto: ${U.name}.`);
 }

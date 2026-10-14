@@ -1639,7 +1639,7 @@ test('Torre: jefe escondido — el Ciervo Blanco sale de noche en un claro del p
     newTower();
     const L = towerLevel(1), hb = L.hiddenBoss;
     check(hb && L.zone[hb.y * COLS + hb.x] === ZONE.field && walkable(L, hb.x, hb.y), 'el piso 1 tiene su claro apartado');
-    checkEq(towerLevel(2).hiddenBoss, null, 'los demás pisos todavía no (paso 1)');
+    checkEq(towerLevel(3).hiddenBoss, null, 'los demás pisos todavía no');
     const setNight = on => { towerRun.startedAt = gameClock - (on ? DAYNIGHT.day + DAYNIGHT.dusk + 10 : 10); };
     setNight(false); hiddenBossTick(L);
     check(!hb.unit, 'de día no está');
@@ -1657,6 +1657,25 @@ test('Torre: jefe escondido — el Ciervo Blanco sale de noche en un claro del p
     check(hb.dead && !hb.unit, 'vencido, no vuelve a salir en esta run');
     noteBeastSeen(deer.type);
     check(bestiaryStore.beasts['Ciervo Blanco'] && bestiaryStore.beasts['Ciervo Blanco'].mechanic.includes('escondido'), 'tiene su entrada en el Bestiario');
+}, { random: true });
+test('Torre: jefe escondido — la Flor Carnívora del piso 2 espera en el invernadero tapiado, detrás de una grieta', () => {
+    newTower(); enterTowerFloor(2);
+    const L = towerLevel(2), hb = L.hiddenBoss;
+    check(hb && arenas[0] === L, 'el piso 2 tiene su invernadero');
+    hiddenBossTick(L);
+    const f = hb.unit;
+    check(f && f.type.label === 'Flor Carnívora' && f.isHiddenBoss, 'la flor ya está adentro (de día también)');
+    const d = bfsFrom(L, L.start.x, L.start.y);
+    check(d[hb.y * COLS + hb.x] < 0, 'la sala está sellada');
+    const k = L.cracks.find(c => Math.abs(c.x - hb.x) <= 7 && Math.abs(c.y - hb.y) <= 5);
+    check(k, 'con una pared agrietada');
+    for (let i = 0; i < SECRET.hp; i++) hitCrack(L, k.x, k.y, player);
+    check(bfsFrom(L, L.start.x, L.start.y)[hb.y * COLS + hb.x] >= 0, 'rota la grieta, se llega a la flor');
+    const x0 = f.x; f.aggro = true; Object.assign(player, { arena: L, x: hb.x - 4, y: hb.y });
+    for (let i = 0; i < 40; i++) { gameClock += 0.05; updateTower(0.05); }
+    checkEq(f.x, x0, 'no se mueve (echó raíces)');
+    L.drops = []; dealDamage(player, f, f.hp * 10, 'pure');
+    check(L.drops.some(dr => dr.item.unique && dr.item.slot === 'gloves'), 'suelta sus guantes únicos');
 }, { random: true });
 test('Torre: las Páginas de Arén — una por piso en un rincón apartado, se juntan al pisarla y no vuelven a aparecer', () => {
     arenStore = { found: {} };
