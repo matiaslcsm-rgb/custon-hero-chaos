@@ -6,8 +6,9 @@ commit. Los ítems **(decisión)** esperan que el usuario elija una opción; el 
 anotadas las opciones en la sección "Esperando al usuario".
 
 Reglas del modo automático (las mismas de siempre):
-- Corre solo si el límite de 5 horas y el semanal del plan están **por debajo del 50%**. Si alguno llega a 50%, frena.
-- Un ítem por vez, chico y jugable. Si un ítem es grande, lo parte en pasos y hace solo el primero.
+- Trabaja de corrido mientras el límite de 5 horas del plan esté **por debajo del 50%** y frena al llegar.
+  Si el límite **semanal** llegó al 50%, no trabaja en el juego.
+- Un ítem por vez (sin tope por corrida), chico y jugable. Si un ítem es grande, lo parte en pasos y hace solo el primero.
 - Sube solo si pasan **todas** las pruebas (`index.html?test`). Si no pasan y no lo puede arreglar, deshace sus
   cambios, anota por qué en el ítem y sigue con otro.
 - Balance: se mide (simulación o banco de pruebas) antes y después, y se anotan los números.
