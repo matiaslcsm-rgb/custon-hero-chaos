@@ -1583,6 +1583,13 @@ test('Torre: el héroe en pixel art se anima por poses — cada movimiento elige
     u.fxAttack = { kind: 'swing', dx: 0, dy: -1, at: fxClock }; checkEq(pxhDir(u, false), 'up', 'pega hacia arriba: de espaldas');
     u.fxAttack = { kind: 'swing', dx: 0, dy: 1, at: fxClock }; checkEq(pxhDir(u, false), 'down', 'hacia abajo: de frente');
     u.fxAttack = null; u.lastStepDir = { dx: 1, dy: 1 }; checkEq(pxhDir(u, true), 'side', 'en diagonal: de costado');
+    // caminar sin parpadeo: el ciclo usa solo cuadros con la capa al viento, y entre cuadros la cabeza no se corre más de 1 píxel
+    const walkNames = [...new Set([0, 1, 2, 3, 4, 5, 6, 7].map(k => heroArtPick('walk', k).name))];
+    check(!walkNames.includes('walk0'), 'walk0 (capa caída) no entra al ciclo');
+    walkNames.forEach(n => { const F = HERO_ART.frames[n], xs = []; F.rows.slice(0, 8).forEach(r => [...r].forEach((c, x) => { if (c !== '.') xs.push(x); }));
+        const head = Math.round(HERO_ART_BOX.w / 2 - heroArtAnchor(n)) + xs.reduce((a, b) => a + b, 0) / xs.length;
+        check(Math.abs(head - HERO_ART_BOX.w / 2) <= 1, `${n}: la cabeza queda centrada`); });
+    check(PXG.walkGrace > 0.05, 'llegar a la casilla un instante antes del paso siguiente no pone el cuadro de quieto');
 });
 test('Torre: guardar y continuar la run — héroe, equipo, bolsa, oro, piso, guardián vencido y restos vuelven', () => {
     clearTowerSave();

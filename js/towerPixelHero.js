@@ -290,7 +290,7 @@ function pxhPick(u, moving) {
     if (moving) { // los pasos van con la distancia recorrida (no con el reloj): los pies no patinan al acelerar o frenar
         const w = u.pxWalk || (u.pxWalk = { x: u.rx ?? u.x, y: u.ry ?? u.y, d: 0 }), rx = u.rx ?? u.x, ry = u.ry ?? u.y;
         w.d += Math.min(1, Math.hypot(rx - w.x, ry - w.y)); w.x = rx; w.y = ry;
-        return { kind: 'walk', k: Math.floor(((w.d / 2.4 + seed) % 1) * 8) }; // un ciclo de dos pasos cada 2,4 casillas
+        return { kind: 'walk', k: Math.floor(((w.d / 1.2 + seed) % 1) * 8) }; // un ciclo cada 1,2 casillas: ~10 cuadros por segundo (con 2,4 iba a ~7 y los pies patinaban)
     }
     if (u.pxWalk) { u.pxWalk.x = u.rx ?? u.x; u.pxWalk.y = u.ry ?? u.y; }
     let k = Math.floor(((fxClock / 1.6 + seed) % 1) * 4); // respira
@@ -336,6 +336,8 @@ function pxhDrawGhosts(ghosts) {
 // (el escudo) y el esquive. Las otras armas siguen con el muñeco por poses hasta que tengan sus dibujos.
 const HERO_ART_BOX = { w: 40, h: 36 }; // todos los cuadros en el mismo lienzo: los pies en el centro de abajo
 const HERO_ART_SEQ = {
+    // caminar: los tres cuadros con la capa al viento (walk0 la tiene caída: metido en el ciclo, la capa saltaba y parpadeaba)
+    walk: ['walk1', 'walk2', 'walk3'],
     swing0: ['ready', 'slashA', 'slashA', 'recover', 'recover', 'idle'],
     swing1: ['ready', 'slashB', 'slashB', 'recover', 'recover', 'idle'],
     swing2: ['raise', 'raise', 'slashA', 'slashA', 'recover', 'idle'], // el remate: arriba y abajo
@@ -348,12 +350,23 @@ function heroArtPick(kind, k, dir = 'side') {
     const view = dir === 'down' ? 'front' : dir === 'up' ? 'back' : null; // de frente o de espaldas: quieto, caminar y el golpe recibido
     if (view && kind === 'walk') return { name: view + 'Walk' + (Math.floor(k / 2) % 4), facing: true };
     if (view && (kind === 'idle' || kind === 'hurt')) return { name: view + 'Idle', facing: true, breath: kind === 'idle' ? [0, 0, 1, 1][k % 4] : 0, dy: kind === 'hurt' ? -1 : 0 };
-    if (kind === 'walk') return { name: 'walk' + (Math.floor(k / 2) % 4) };
+    if (kind === 'walk') return { name: HERO_ART_SEQ.walk[Math.floor(k * HERO_ART_SEQ.walk.length / 8) % HERO_ART_SEQ.walk.length] };
     if (kind === 'swing') return { name: (HERO_ART_SEQ['swing' + Math.floor(k / 6)] || HERO_ART_SEQ.swing0)[k % 6] };
     if (kind === 'dash') return { name: HERO_ART_SEQ.dash[Math.min(3, k)] };
     if (kind === 'hurt') return { name: 'idle', dx: -1 };
     if (kind === 'death') return k >= 3 ? { name: 'idle', lie: true } : { name: 'idle', sink: k + 1 };
     return { name: 'idle', breath: [0, 0, 1, 1][k % 4], blink: k >= 4 };
+}
+// Dónde se centra cada dibujo: quieto y caminando, por la cabeza (si se centra por los pies, con el paso abierto el cuerpo
+// se corría hasta 2 píxeles de un cuadro al otro y parecía que temblaba); los golpes, por los pies (la espada desbalancea la cabeza)
+function heroArtAnchor(name) {
+    const F = HERO_ART.frames[name];
+    if (F.hx === undefined) {
+        const xs = [];
+        if (/idle|walk/i.test(name)) F.rows.slice(0, 8).forEach(r => [...r].forEach((c, x) => { if (c !== '.') xs.push(x); }));
+        F.hx = xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : F.ax;
+    }
+    return F.hx;
 }
 function heroArtSprite(kind, k, dir = 'side') {
     const key = 'heroart|' + kind + '|' + k + '|' + dir;
@@ -361,7 +374,7 @@ function heroArtSprite(kind, k, dir = 'side') {
     const pk = heroArtPick(kind, k, dir), F = HERO_ART.frames[pk.name], P = HERO_ART.pal, rows = F.rows, fh = rows.length;
     const make = white => {
         const c = pxSprite(HERO_ART_BOX.w, HERO_ART_BOX.h, S => {
-            const ox = Math.round(HERO_ART_BOX.w / 2 - F.ax) + (pk.dx || 0), oy = HERO_ART_BOX.h - 2 - fh + (pk.dy || 0);
+            const ox = Math.round(HERO_ART_BOX.w / 2 - heroArtAnchor(pk.name)) + (pk.dx || 0), oy = HERO_ART_BOX.h - 2 - fh + (pk.dy || 0);
             if (pk.lie) { // tendido: el dibujo de costado, acostado en el piso y más oscuro
                 pxShadow(S, HERO_ART_BOX.w / 2, HERO_ART_BOX.h - 2.5, 11, 2);
                 rows.forEach((r, y) => [...r].forEach((ch, x) => { if (ch !== '.') S.set(HERO_ART_BOX.w / 2 - fh / 2 + (fh - 1 - y), HERO_ART_BOX.h - 3 - (r.length - 1 - x) * 0.5, ch === '!' ? '#3a0806' : shade(P[ch], -0.25)); }));

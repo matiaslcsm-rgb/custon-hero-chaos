@@ -419,7 +419,11 @@ function pixelHalfHeight(u) { const body = pixelBodyFor(u), B = PXB[body]; retur
 function drawPixelUnit(u, cx, cy, facing, flash, pose) {
     const body = pixelBodyFor(u);
     if (!body) return false;
-    const moving = Math.hypot(u.x - (u.rx ?? u.x), u.y - (u.ry ?? u.y)) > 0.04 || body === 'wraith' || body === 'phantom' || body === 'swarm';
+    // Caminando de seguido, a veces llega a su casilla un instante antes del paso siguiente: sin este margen se colaba un
+    // cuadro de quieto en medio del caminar y la figura parpadeaba (2026-10-14)
+    const sliding = Math.hypot(u.x - (u.rx ?? u.x), u.y - (u.ry ?? u.y)) > 0.04;
+    if (sliding) u.pxMovedAt = fxClock;
+    const moving = sliding || fxClock - (u.pxMovedAt ?? -9) < PXG.walkGrace || body === 'wraith' || body === 'phantom' || body === 'swarm';
     let kind = 'idle', k;
     if (moving) kind = 'walk', k = Math.floor(((fxClock / (2 * Math.max(0.12, unitStepTime(u))) + (u.bobSeed || 0)) % 1) * 4);
     else k = Math.floor(((fxClock * 1.4 + (u.bobSeed || 0)) % 1) * 2);

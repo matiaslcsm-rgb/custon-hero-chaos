@@ -49,6 +49,10 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 | Duelo simultáneo con las oleadas de los demás; enfriamientos en el descanso; contador central con pitidos; cartel de apuestas; nombres de jugadores; sonidos propios (`sounds/`) | ✅ |
 
 ## Pendientes y temas abiertos
+- **Héroe de la espada dibujado a mano (2026-10-14):** hoja del usuario (costado) + frente y espaldas dibujados;
+  caminar sin parpadeo (sin cuadro de quieto colado, ciclo con la capa al viento, centrado por la cabeza). Falta:
+  ataques de frente/espaldas, golpe recibido y caída propios, arco y bastón en este estilo. Ver REWORK.md.
+  Prueba que a veces falla sola: la de las raíces de la Raíz Madre (aleatoria; pasó al repetir).
 - **Tower Chaos se guarda (2026-10-14):** la run se guarda sola y se continúa desde el menú (entrada del piso donde
   estabas, piso armado de nuevo). Ver REWORK.md, "Interfaz y calidad de vida".
 - **Tower Chaos, ataque con clic (2026-10-13):** el golpe básico sale con el clic izquierdo hacia el cursor (mantener

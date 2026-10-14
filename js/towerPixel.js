@@ -11,7 +11,7 @@
 //     fuente y rampas.
 //   Viene prendido; en la pausa (🟫 Pixel art) se puede volver al estilo tinta, o con ?pixel=0 en la dirección.
 
-const PXG = { per: 17, scale: 2, chunk: 16, maxChunks: 40 }; // 40 trozos ≈ 12 MB (la pantalla usa ~12)
+const PXG = { per: 17, scale: 2, chunk: 16, maxChunks: 40, walkGrace: 0.12 }; // 40 trozos ≈ 12 MB (la pantalla usa ~12)
 // Estilo principal desde 2026-10-13: pixel art prendido salvo que el jugador elija la tinta en la pausa (o ?pixel=0).
 // Preferencia nueva (chc-style): la de la prueba (chc-pixel) se ignora, así arranca en pixel art aunque la hayas apagado.
 const pixelEnabled = true; // 2026-10-13: el pergamino se sacó; el pixel art es el único estilo

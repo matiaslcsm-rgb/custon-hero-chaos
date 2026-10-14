@@ -797,6 +797,13 @@ el mismo paso; lo grande queda acá, ordenado por impacto.
     ojos rojos, el tabardo, los brazos y la espada colgando; de espaldas la capa con pliegues, la costura de la capucha
     y la espada al costado; quieto (respira) y caminando (4 pasos con rebote). Los ataques, la parada y el esquive
     siguen de costado (de la hoja). Sin mouse, mira hacia su último paso.
+    **Caminar sin parpadeo** (2026-10-14, "parpadea mucho cuando se mueve, como que le faltan cuadros"). Medido cuadro
+    por cuadro, eran tres cosas: (1) caminando de seguido llegaba a su casilla un instante antes del paso siguiente y se
+    colaba un cuadro de quieto cada 2-3 pasos → ahora sigue "caminando" 0,12 s después de frenar (`PXG.walkGrace`, vale
+    para todas las criaturas); (2) `walk0` de la hoja tiene la capa caída y los otros tres al viento: la capa saltaba en
+    cada ciclo → el ciclo usa solo `walk1-3`; (3) los cuadros se centraban por los pies y con el paso abierto el cuerpo
+    se corría hasta 2 píxeles → quieto y caminando se centran por la cabeza (`heroArtAnchor`). Además el ciclo pasó de
+    2,4 a 1,2 casillas (~10 cuadros por segundo en vez de ~7; los pies patinaban menos).
 - ✅ Volumen general, música y efectos, y temblor de pantalla (0-150%), con deslizadores en la pausa que se guardan.
 - ✅ La forja ya no corta una pelea: si una pieza sube de nivel peleando aparece un aviso arriba a la izquierda, y la
   ventana se abre sola cuando nadie te persigue.
