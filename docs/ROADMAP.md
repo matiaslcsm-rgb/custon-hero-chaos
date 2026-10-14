@@ -120,12 +120,13 @@ El orden de la lista **es** la prioridad: primero lo que destraba el loop comple
   - [x] Paso 1: la Llave de las Compuertas (la suelta el Guardián de Arena, piso 5) abre las compuertas del piso 3, una
         sala con reja de hierro y un cofre (js/towerQuests.js). 2026-10-14.
   - [ ] Paso 2: más pedidos con la misma pieza (por ejemplo, algo del piso 8 que prenda los faroles del 7).
-- [ ] **El misterio de cada piso, jugable:** compuertas que bajan el agua (3), relojes que cambian el laberinto (5),
+- [x] **El misterio de cada piso, jugable:** compuertas que bajan el agua (3), relojes que cambian el laberinto (5),
       faroles que hay que encender de noche (7). De a uno, empezando por el 3.
   - [x] Piso 3: al abrir las compuertas baja el agua de todo el piso (fondo seco) y asoman 2 cofres hundidos. 2026-10-14.
   - [x] Piso 5: relojes que cambian el laberinto: 8 compuertas de arena en 2 tandas que se dan vuelta cada 30 s
         (js/towerMysteries.js). 2026-10-14.
-  - [ ] Piso 7: faroles que hay que encender de noche.
+  - [x] Piso 7: faroles que hay que encender de noche: 8 al costado del camino, con F; de noche se ve menos salvo cerca
+        de uno prendido; todos prendidos, paga Isla. 2026-10-14.
 - [ ] **Menos explorado hacia arriba:** caminos, carteles, tamaño del pueblo, mapa que vende el mercader y luz según la
       tabla de TORRE-MUNDO.md.
 - [ ] **Transición de biomas:** cerca de la escalera ya se ve el bioma de arriba (arena que cae, nieve que entra).
@@ -335,6 +336,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 - 2026-10-14 · Pedidos que cruzan pisos, paso 1 (las compuertas) · 9c97698 · 20/20 pisos 3 con la reja, alcanzable en los 20 (a 39-269 pasos); a golpes no se abre, con la llave sí; la llave se guarda con la run. Pruebas 248/248.
 - 2026-10-14 · Misterio del piso 3 (el agua baja) · 7b85c59 · 20/20 pisos 3 con 2 cofres hundidos; se secan 93-356 casillas; atajo al guardián solo en 1/20 (los pozos casi nunca cortan el camino: el premio es el tesoro). Pruebas 248/248.
 - 2026-10-14 · Misterio del piso 5 (los relojes) · ebfb9a1 · 20/20 pisos 5 con 8 compuertas; camino a la escalera 260-354 pasos y en las dos posiciones siempre hay camino; el reloj cambia el largo del camino en 18/20 (hasta 58 pasos). Primer intento al azar: 16/20 y 11/20. Pruebas 249/249.
+- 2026-10-14 · Misterio del piso 7 (los faroles) · COMMIT · 20/20 pisos 7 con 8 faroles; visión de noche en el campo: piso 6 3,5 casillas, piso 7 sin farol 2, al lado de uno prendido 4,5. Pruebas 250/250.
 - 2026-10-14 · Reliquias, paso 1 (motor y 12 reliquias) · 8c1e664 · piloto con reflejos humanos, 45 min: sin reliquias piso 3 y 2 muertes; con 0,25/0,35 de chance, 19 reliquias en 3 pisos (demasiadas); con 0,05/0,10, 7 en 3 pisos (~2,3 por piso), piso 4 y 0 muertes. Pruebas 239/239.
 - 2026-10-14 · Subir de nivel: 1 de 3 mejoras · 6716de1 · piloto con reflejos humanos, 45 min: piso 4 a los 41 min, 0 muertes, nivel 15, 6 reliquias (igual que sin la elección: piso 4 a los 43 min); destrabó Piel de Roble, Golpe Pesado y Sangre Espesa. Pruebas 240/240.
 - 2026-10-14 · Guerrero, paso 1a (clases y Templanza) · 259f4bc · banco de 60 s contra un muñeco, 8 muestras: 119 de daño/s sin pasiva y 116 con ella (sin diferencia: el combo ya critea; el ruido es ±25). Pruebas 241/241; se arregló la prueba de visión que fallaba si el héroe quedaba en una meseta.

@@ -285,6 +285,7 @@ function generateTowerLevel(floor) {
     placeSecretRooms(level, dist); // cámaras selladas con una pared agrietada (towerSecrets.js)
     placeHiddenBoss(level, dist); // y el jefe escondido del piso
     placeSandGates(level); // el misterio del piso 5: compuertas de arena que cambian el laberinto (towerMysteries.js)
+    placeLanterns(level, dist); // y el del 7: faroles para prender de noche
     level.creeps.forEach(c => { c.spawnTime = -1e9; }); // sin el oro extra por velocidad de las oleadas (no aplica en la Torre)
     return level;
 }
@@ -566,7 +567,7 @@ function nightSight(hero) {
     const level = hero.arena;
     if (level && level.isCave) return CAVE.sight; // la cueva es oscura siempre
     if (!level || !level.zone || towerZoneAt(level, hero.x, hero.y) !== ZONE.field) return 0;
-    return DAYNIGHT.nightSight * towerDarkness();
+    return DAYNIGHT.nightSight * towerDarkness() + lanternSight(hero); // el piso 7, con sus faroles (towerMysteries.js)
 }
 // Al caer la noche aparecen criaturas nocturnas en el campo del piso donde estás; al amanecer, las que no te vieron se van.
 function towerDayNightTick(level) {

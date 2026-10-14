@@ -838,6 +838,11 @@ también tiene que aprender a esquivar los ataques anunciados).
 - ✅ **Jefe escondido del piso 7: el Lobo de Escarcha** (2026-10-14; lo empezó la corrida automática que se detuvo y
   se completó acá): en el mirador cerrado (sala sellada con grieta), aviso de Isla la farolera; suelta las **Garras del
   Lobo de Escarcha** (guantes con crítico y velocidad de ataque). Verificado: la sala se arma en 8 de 8 pisos 7.
+- ✅ **El misterio del piso 7: los faroles** (2026-10-14, `js/towerMysteries.js`): de noche, en el campo de las
+  Galerías del Viento se ve 1,5 casillas menos. Al costado del camino hay 8 faroles apagados (poste con caja gris):
+  F los prende (luz cálida que parpadea), quedan prendidos toda la run y cerca de uno, de noche, se ve 1 casilla más en
+  vez de menos. Todos prendidos: Isla la farolera paga 40 de oro por piso (280). Medido de noche: piso 6, 3,5 casillas;
+  piso 7 sin farol, 2; al lado de uno prendido, 4,5.
 - ✅ **El misterio del piso 5: los relojes cambian el laberinto** (2026-10-14, `js/towerMysteries.js`): 8 compuertas
   de arena de lado a lado de los pasillos, en dos tandas. Cada 30 s los relojes se dan vuelta: una tanda se cierra
   (bloque de arena con un reloj dibujado) y la otra se abre (línea de arena en el piso). 4 s antes, las que se van a

@@ -12,7 +12,7 @@
 //   que suben. Va y viene en intensidad. Se puede apagar en la pausa (Opciones).
 
 const ATMOS = { townTorches: 8, fieldCamps: 4, caveTorches: 6, campHeal: 0.012, campReach: 1.6, particles: 140 };
-const LIGHT_KIND = { torch: { r: 3.2, glow: 1.4 }, fire: { r: 5, glow: 2.2 }, forge: { r: 3.6, glow: 1.6 } };
+const LIGHT_KIND = { torch: { r: 3.2, glow: 1.4 }, fire: { r: 5, glow: 2.2 }, forge: { r: 3.6, glow: 1.6 }, lamp: { r: 4, glow: 1.6 } }; // lamp: los faroles del piso 7 (towerMysteries.js)
 let weatherOn = true;
 try { weatherOn = localStorage.getItem('chc-weather') !== '0'; } catch (e) { /* por defecto, sí */ }
 function setWeather(on) { weatherOn = on; try { localStorage.setItem('chc-weather', on ? '1' : '0'); } catch (e) { /* no se guarda */ } }

@@ -6,6 +6,8 @@
 //   segundos antes, las que se van a cerrar largan arena (aviso). En las dos posiciones siempre hay camino de la entrada
 //   a la escalera (se comprueba al armar el piso); lo que cambia es POR DÓNDE: un atajo abierto ahora puede cerrarse
 //   en medio de una pelea. Nunca se cierra una compuerta con alguien parado encima (espera a que se corra).
+//
+//   PISO 7 — LOS FAROLES (más abajo).
 
 const SANDCLOCK = { floor: 5, period: 30, warn: 4, perGroup: 4, minGap: 6 };
 
@@ -91,4 +93,61 @@ function drawSandGates(level) {
         }
         ctx.restore();
     }));
+}
+
+// PISO 7 — LOS FAROLES. De noche, en el campo de las Galerías del Viento se ve menos que en otros pisos (el viento apaga
+// las luces). A lo largo del camino hay faroles apagados: con F se prenden y quedan prendidos toda la run, alumbran
+// alrededor (cerca de uno, de noche, se ve más) y si prendés todos, Isla la farolera te paga.
+const FAROL = { floor: 7, count: 8, gap: 16, reach: 1.6, dark: -1.5, lit: 1, near: 5, goldPerFloor: 40 };
+
+// Al armar el piso: cada FAROL.gap pasos del camino (contando desde la entrada), un farol al costado
+function placeLanterns(level, dist) {
+    level.lanterns = null;
+    if (level.floor !== FAROL.floor || level.isCave || !level.ground) return;
+    const road = [];
+    for (let i = 0; i < level.ground.length; i++) if (level.ground[i] === GROUND.road && dist[i] >= 0) road.push(i);
+    road.sort((a, b) => dist[a] - dist[b]);
+    const L = [];
+    for (const i of road) {
+        if (L.length >= FAROL.count) break;
+        const x = i % COLS, y = (i - x) / COLS;
+        if (dist[i] < 10 || L.some(o => Math.hypot(o.x - x, o.y - y) < FAROL.gap)) continue;
+        const side = [[0, -1], [0, 1], [-1, 0], [1, 0]].map(([dx, dy]) => ({ x: x + dx, y: y + dy }))
+            .find(p => walkable(level, p.x, p.y) && level.ground[p.y * COLS + p.x] !== GROUND.road && towerZoneAt(level, p.x, p.y) === ZONE.field);
+        if (side) L.push({ x: side.x, y: side.y, lit: false });
+    }
+    if (L.length) level.lanterns = L;
+}
+const lanternNear = (hero = player) => (hero && hero.arena && hero.arena.lanterns || []).find(o => !o.lit && Math.hypot(o.x - hero.x, o.y - hero.y) <= FAROL.reach);
+function lightLantern() {
+    const o = lanternNear();
+    if (!o) return false;
+    const level = player.arena;
+    o.lit = true;
+    towerLights(level).push({ x: o.x, y: o.y, kind: 'lamp', noDraw: true });
+    const left = level.lanterns.filter(l => !l.lit).length;
+    if (fxArena(player)) { fxParticles(level, o.x, o.y, 'fire', 10, 2); sfx('coin'); }
+    if (left) log(`🏮 Prendiste un farol (faltan ${left}). Cerca de uno, de noche, se ve el camino.`);
+    else { const gold = FAROL.goldPerFloor * level.floor; player.gold += gold; log(`🏮 ¡Prendiste todos los faroles del piso! Isla, la farolera: «Hacía años que no veía la galería entera.» Te paga ${gold} de oro.`); }
+    return true;
+}
+// Lo suma nightSight (towerWorld.js): de noche en el campo del piso 7, más oscuro, salvo cerca de un farol prendido
+function lanternSight(hero) {
+    const level = hero.arena;
+    if (!level || !level.lanterns) return 0;
+    const lit = level.lanterns.some(o => o.lit && Math.hypot(o.x - hero.x, o.y - hero.y) <= FAROL.near);
+    return (lit ? FAROL.lit : FAROL.dark) * towerDarkness();
+}
+function drawLanterns(level) {
+    (level.lanterns || []).forEach(o => {
+        if (!level.explored[o.y][o.x]) return;
+        const x = o.x * TILE + TILE / 2, by = o.y * TILE + TILE - 3;
+        ctx.save();
+        ctx.fillStyle = '#2a2420'; ctx.fillRect(Math.round(x - 1), Math.round(by - TILE * 0.9), 3, Math.round(TILE * 0.9)); // el poste
+        ctx.fillStyle = '#3a3028'; ctx.fillRect(Math.round(x - 5), Math.round(by - TILE * 1.05), 11, 9);                    // la caja
+        ctx.fillStyle = o.lit ? (Math.sin(fxClock * 9 + o.x) > -0.6 ? '#ffd166' : '#ffb703') : '#4a4440';
+        ctx.fillRect(Math.round(x - 3), Math.round(by - TILE * 1.05 + 2), 7, 5);
+        ctx.restore();
+        if (o === lanternNear()) pxLabel(`${keyName(KEYMAP.interact)}: prender el farol`, x, by - TILE * 1.4, '#ffe08a');
+    });
 }

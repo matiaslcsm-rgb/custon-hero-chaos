@@ -1675,6 +1675,21 @@ test('Torre: misterio del piso 5 — los relojes dan vuelta las compuertas de ar
     c.x = g1.x + 50; sandClockTick(L, 0.1);
     check(shut(g1) && S.gates.every(g => shut(g) === (g.group === 1)) && reach(), 'cuando se corre, se cierra; y sigue habiendo camino');
 }, { random: true });
+test('Torre: misterio del piso 7 — de noche se ve menos, salvo cerca de los faroles que prendés con F (todos: paga Isla)', () => {
+    newTower(); enterTowerFloor(7);
+    const L = arenas[0], F = L.lanterns;
+    check(F && F.length >= 4 && F.every(o => !o.lit && walkable(L, o.x, o.y)), `faroles apagados al costado del camino (${F && F.length})`);
+    towerRun.startedAt = gameClock - (DAYNIGHT.day + DAYNIGHT.dusk + 10); // de noche
+    const o = F[0]; Object.assign(player, { arena: L, x: o.x, y: o.y });
+    const dark = nightSight(player);
+    check(dark < DAYNIGHT.nightSight * towerDarkness(), 'de noche, en el piso 7 se ve menos que en otro piso');
+    check(towerInteract() && o.lit && towerLights(L).some(l => l.kind === 'lamp' && l.x === o.x), 'F prende el farol y alumbra');
+    check(nightSight(player) > DAYNIGHT.nightSight * towerDarkness(), 'cerca de un farol prendido se ve más');
+    const gold = player.gold;
+    F.slice(1).forEach(l => { Object.assign(player, { x: l.x, y: l.y }); towerInteract(); });
+    check(F.every(l => l.lit) && player.gold === gold + FAROL.goldPerFloor * 7, 'prendidos todos, Isla paga');
+    checkEq(towerLevel(6).lanterns, null, 'los otros pisos no tienen faroles');
+}, { random: true });
 test('Torre: la gente del pueblo pasea adentro del pueblo y habla con F (otra frase si le volvés a hablar)', () => {
     newTower(); enterTowerFloor(3);
     const L = arenas[0], folk = townFolk(L), t = L.town;
