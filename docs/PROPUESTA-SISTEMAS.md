@@ -6,8 +6,8 @@ el sistema tipo Diablo (ir encontrando equipo)? Los puntos de stats dan un creci
 especializar nada. Los jefes, en una arena de la que no se pueda salir, con una condición para entrar. El herrero y los
 comerciantes quedaron abandonados, pero dependen de lo primero."*
 
-Este documento ordena la decisión. Hasta que el usuario elija, el modo automático **no toca** equipo, habilidades,
-stats, herrero ni mercader.
+**Decidido por el usuario (2026-10-14):** C (híbrido), stats con elegir 1 de 3 al subir de nivel, arenas con la llave
+del piso, y seguir en el navegador sumando PixiJS. El plan por pasos está en la fase T00 de ROADMAP.md.
 
 ---
 

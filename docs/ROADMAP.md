@@ -121,12 +121,30 @@ El orden de la lista **es** la prioridad: primero lo que destraba el loop comple
 - [ ] **Transición de biomas:** cerca de la escalera ya se ve el bioma de arriba (arena que cae, nieve que entra).
 - [ ] **El piso 1 afuera:** la torre gigante se ve desde el bosque (silueta al fondo) y el laberinto es su puerta.
 
-## Fase T00 — Rework de equipo, habilidades y stats (pedido del usuario 2026-10-14, `docs/PROPUESTA-SISTEMAS.md`)
-Hasta que el usuario decida, el modo automático **no toca** equipo, habilidades, stats, herrero ni mercader.
-- [ ] **(decisión) Sistema de equipo y habilidades:** A Risk of Rain puro, B Diablo mejorado, C híbrido (recomendada).
-- [ ] **(decisión) Stats:** elegir 1 de 3 mejoras al subir de nivel con umbrales (recomendada) o umbrales sobre los puntos.
-- [ ] **(decisión) Arenas de jefes:** llave del piso + arena cerrada (recomendada), 3 sellos, o arena sin condición.
-- [ ] **(decisión) Motor y gráficos:** seguir en el navegador + PixiJS para luces (recomendada), Godot ya, o Unity.
+## Fase T00 — Rework de equipo, habilidades y stats (decidido por el usuario 2026-10-14, `docs/PROPUESTA-SISTEMAS.md`)
+Decidido: **sistema híbrido** (3 ranuras que dan el arma y Q/E/R + reliquias apilables tipo Risk of Rain con etiquetas
+y bonus de conjunto), **stats: elegir 1 de 3 mejoras al subir de nivel** con umbrales por atributo, **arenas de jefes
+con la llave del piso**, y **seguir en el navegador sumando PixiJS** para luces y efectos.
+- [ ] **Reliquias, paso 1 (motor):** `js/towerRelics.js` con reliquias que se apilan y se enganchan a los eventos que
+      ya emite el combate (`emit`: onHit, onKill, onCast, onDamaged, onTick) más dos nuevos (al esquivar, al parar).
+      12 reliquias con 4 etiquetas (fuego, sangrado, crítico, escudo) y el bonus al juntar 3 de una etiqueta. Caen de
+      campeones, cofres y jefes; fila de íconos en la interfaz con su cartel. Convive con lo viejo. Medir con el piloto:
+      daño por piso y variación entre runs, antes y después.
+- [ ] **Subir de nivel: elegir 1 de 3 mejoras** (ventana con 3 cartas, como Hades), con umbrales por atributo (3 de
+      Fuerza destraban un efecto, etc.). Reemplaza los 5 puntos por nivel; el piloto elige con una regla.
+- [ ] **Equipo reducido a 3 ranuras** (arma, guantes, armadura) sin afijos al azar: nivel + como mucho 1 rasgo. Casco,
+      amuleto y anillos pasan a reliquias. Medir que el daño por piso no cambie más de ±15%.
+- [ ] **Mercader y herrero nuevos:** el mercader vende 3 reliquias por piso (y rerolls); el herrero sube el nivel o
+      cambia el rasgo de una pieza y funde 2 reliquias iguales en su versión mayor. Se van fundir y traspasar.
+- [ ] **Esencia que desbloquea reliquias** nuevas en el mazo; las piezas únicas de los jefes escondidos pasan a ser
+      reliquias únicas.
+- [ ] **Más reliquias**, de a 5 por entrega y midiendo, hasta 40.
+- [ ] **Arenas de jefes, paso 1:** la sala del guardián se cierra al entrar (rejas) hasta que gane alguien; la puerta
+      pide la **llave del piso**, que lleva el campeón más fuerte (marcado en el mapa y en el objetivo del piso).
+- [ ] **Arenas, paso 2:** los jefes escondidos también pelean en arena cerrada; la llave puede salir del misterio del
+      piso (compuertas, relojes, faroles).
+- [ ] **PixiJS, paso 1:** probar PixiJS (WebGL) dibujando encima del canvas actual solo la capa de luces (antorchas,
+      fogatas, balas, noche) y medir cuadros por segundo antes y después. Si anda, migrar de a capas.
 
 ## Fase T1 — Cerrar el loop (lo que falta para que sea un juego completo)
 - [ ] **Pantalla de fin de run:** al morir o ganar, un resumen claro con el piso alcanzado, el tiempo, las bajas,
@@ -252,7 +270,6 @@ Hasta que el usuario decida, el modo automático **no toca** equipo, habilidades
 
 ## Esperando al usuario
 (El modo automático anota acá las opciones de los ítems **(decisión)**, con una marcada como recomendada.)
-- **Fase T00 (equipo, habilidades, stats, arenas, motor):** las opciones con pros y contras están en `docs/PROPUESTA-SISTEMAS.md` §2-4.
 
 ## Hecho por el modo automático
 (Fecha · ítem · commit · qué se midió.)
