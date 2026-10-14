@@ -679,6 +679,7 @@ body.ink-theme #hb-slots { grid-template-columns: repeat(4, 1fr); }
 .notebook-page p { margin: 0; font-style: italic; }
 .notebook-page.locked { opacity: 0.5; }
 .notebook-page.locked h4 { color: #8f8166; }
+.aren-title { margin: 14px 0 6px; color: #6b2a1f; }
 
 /* Forja legible sobre el pergamino */
 body.ink-theme .forge-card h4 { color: #6b2a1f !important; }

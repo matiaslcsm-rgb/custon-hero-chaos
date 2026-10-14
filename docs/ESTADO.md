@@ -52,6 +52,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **Equipo de desarrollo (2026-10-14):** agentes del proyecto en `.claude/agents/` (director-de-juego,
   disenador-de-sistemas, disenador-de-niveles, narrativa, arte-pixel, qa-jugador) y el comando `/equipo <tema>`
   (`.claude/skills/equipo/`) que los coordina: diseño → especialistas → integración → QA → cierre.
+- **Las Páginas de Arén (2026-10-14, modo automático):** una por piso en el rincón más apartado del campo; se juntan al
+  pisarlas, quedan para siempre y el Cuaderno (N) cuenta la historia de la expedición en orden (REWORK.md §6).
 - **La Torre por dentro (2026-10-14, pedido del usuario):** el piso 1 es afuera (el bosque al pie de la torre); del 2
   en adelante estás adentro: muro exterior, salones con portones y columnas (más enteros arriba). Cada piso tiene su
   lugar, su gente y un anciano que cuenta su parte de la historia (la Expedición de Arén, los Ecos, la torre que crece).
@@ -214,7 +216,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **Idioma:** español rioplatense (voseo), en el código, los comentarios, los textos del juego y los commits.
 - **Decisiones de diseño:** se consultan con opciones y una recomendada, idealmente con números medidos. Lo que se decide
   se anota en DISEÑO.md (secciones de la fase y "Decisiones tomadas").
-- **Cada cambio:** pruebas automáticas (`tests.html`, hoy **196**) → commit en git → push a GitHub siempre al terminar cada paso (pedido del usuario 2026-10-07, para trabajar desde otros lugares).
+- **Cada cambio:** pruebas automáticas (`tests.html`, hoy **234**) → commit en git → push a GitHub siempre al terminar cada paso (pedido del usuario 2026-10-07, para trabajar desde otros lugares).
 - **Commits:** mensaje en español que explica el porqué; terminan con `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 - **Héroes nuevos con otra IA:** prompt en [`prompt-heroes.md`](prompt-heroes.md); lo que devuelva se revisa contra el motor
   (pasivas, efectos por segundo con `everyInterval`, descripciones que coincidan con el código) antes de integrarlo.

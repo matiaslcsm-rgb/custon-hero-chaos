@@ -143,6 +143,19 @@ function pxDrawShrines(level) {
         }), cx, by);
     });
 }
+// La página de Arén: un papel arrugado en el piso que brilla apenas (towerLore.js)
+function pxDrawArenPage(level) {
+    const p = level.arenPage;
+    if (!p || !level.explored[p.y][p.x]) return;
+    const [cx, by] = tileBase(p.x, p.y);
+    pxGlow(cx, by - 2, 10, 4, '#fff3c4', 0.2 + 0.15 * Math.sin(fxClock * 2.4));
+    pxPut(pxProp('arenPage', 9, 7, S => {
+        pxShadow(S, 4, 6, 4, 1);
+        S.rect(1, 1, 7, 5, '#e9dcc0'); S.rect(1, 1, 7, 1, '#f7efd9'); S.rect(6, 4, 2, 2, '#c9b48a');
+        S.line(2, 3, 5, 3, '#6b5a44'); S.line(2, 4, 4, 4, '#6b5a44');
+        S.outline('#110d0b');
+    }), cx, by);
+}
 function pxDrawWaystone(level) {
     const w = waystoneSpot(level);
     if (!w || !level.explored[w.y] || !level.explored[w.y][w.x]) return;

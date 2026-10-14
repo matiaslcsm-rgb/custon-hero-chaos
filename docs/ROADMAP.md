@@ -82,8 +82,8 @@ El orden de la lista **es** la prioridad: primero lo que destraba el loop comple
 - [x] **Adentro de la torre (pisos 2+):** muro exterior de piedra, salones con muros gruesos y portones, y columnas.
       Más derrumbado abajo y más entero arriba. **Identidad de cada piso:** lugar, gente y anciano del pueblo con su
       línea de historia (`js/towerLore.js`). 2026-10-14.
-- [ ] **Las Páginas de Arén:** una por piso, escondida en un rincón difícil. La Bitácora las junta en orden y cuenta
-      la historia de la expedición (`docs/TORRE-MUNDO.md`).
+- [x] **Las Páginas de Arén:** una por piso, escondida en un rincón difícil. La Bitácora las junta en orden y cuenta
+      la historia de la expedición (`docs/TORRE-MUNDO.md`). 2026-10-14.
 - [ ] **Paredes agrietadas y salas secretas:** grietas que se ven si mirás bien en los muros de los salones y del
       laberinto. Se rompen a golpes y adentro hay un cofre, una página o el camino al jefe escondido.
 - [ ] **Jefe escondido, paso 1:** el Ciervo Blanco del piso 1 (aparece solo de noche en un claro apartado), con su

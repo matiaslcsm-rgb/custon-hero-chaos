@@ -51,6 +51,61 @@ function towerLoreGreet(level) {
     log(`📜 ${L.people}${L.elder ? ` · ${L.elder}` : ''}: ${L.greet}`);
 }
 
+// --- LAS PÁGINAS DE ARÉN (TORRE-MUNDO.md) ---
+// El diario de la expedición tiene las páginas arrancadas: una por piso, tirada en el rincón más apartado del campo (lo
+// más lejos de la entrada, pegado a muros o rocas). Se juntan al pisarlas y quedan para siempre, como el Bestiario: una
+// vez encontrada, esa página ya no aparece en las runs siguientes. El Cuaderno (N) las muestra en orden.
+const AREN_PAGES = {
+    1: '«Somos siete. Brena nos anotó en su libro y se rió: dice que nadie vuelve a firmar dos veces. Arén firmó primero.»',
+    2: '«Las raíces bajan desde arriba, como si algo allá adentro tuviera sed. Arén dice que vamos a ver qué la alimenta.»',
+    3: '«Las compuertas no se abren. Junco nos cruzó en bote. Arén guardó la llave en la bolsa sin decirnos de dónde la sacó.»',
+    4: '«Tallo se queda. Le tiembla todo. Arén le dejó su brújula y le dijo: "Si no volvemos, no subas a buscarnos".»',
+    5: '«Los relojes caen más rápido cuando alguien llega arriba. Arén los miró mucho rato. "Ya pasó antes", dijo. ¿Cómo sabe?»',
+    6: '«Somos cinco. Arén arranca estas páginas y las deja atrás, una por piso. Dice que son para alguien que viene después.»',
+    7: '«Los faroles se apagan solos. En la oscuridad, Arén camina como si ya conociera el camino. No mira el mapa.»',
+    8: '«Somos dos. Los vigías nos anotaron y nos miraron raro: dicen que Arén ya pasó por acá, hace mucho, con la misma capucha.»',
+    9: '«Brasa forja sin parar para el Corazón. Arén le preguntó para qué. "Para que la torre siga creciendo", dijo. "Para que siga esperando."»',
+    10: '«Quedo yo solo. El Corazón no mata: devuelve. Me va a bajar al bosque sin memoria, con este cuaderno. Si leés esto, Eco, esta es tu letra. Soy Arén. Sos Arén.»'
+};
+const AREN_KEY = 'chc-aren-pages';
+let arenPersist = true; // las pruebas lo apagan
+let arenStore = (() => { try { const a = JSON.parse(localStorage.getItem(AREN_KEY) || 'null'); if (a && a.found) return a; } catch (e) { /* vacío */ } return { found: {} }; })();
+function arenSave() { if (!arenPersist) return; try { localStorage.setItem(AREN_KEY, JSON.stringify(arenStore)); } catch (e) { /* no se guarda */ } }
+function arenFoundCount() { return Object.keys(arenStore.found).length; }
+// El rincón más difícil del campo: lejos de la entrada (dist) y encerrado (muros alrededor). Sin pisar santuarios ni cuevas.
+function placeArenPage(level, dist) {
+    level.arenPage = null;
+    if (!AREN_PAGES[level.floor] || arenStore.found[level.floor]) return;
+    const at = (x, y) => y * COLS + x, taken = (level.shrines || []).concat(level.caves || []);
+    let best = null, bestScore = -1;
+    for (let y = 3; y < ROWS - 3; y++) for (let x = 3; x < COLS - 3; x++) {
+        const i = at(x, y);
+        if (level.zone[i] !== ZONE.field || dist[i] < 0 || level.ground[i] === GROUND.road || level.ground[i] === GROUND.hazard || !walkable(level, x, y)) continue;
+        if (taken.some(s => s.x === x && s.y === y)) continue;
+        let walls = 0;
+        for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) if (level.walls[y + dy][x + dx]) walls++;
+        const score = dist[i] + walls * 3;
+        if (score > bestScore) { bestScore = score; best = { x, y }; }
+    }
+    if (best) level.arenPage = Object.assign(best, { floor: level.floor });
+}
+function takeArenPage(level, hero) {
+    const p = level.arenPage;
+    if (!p || hero !== player || p.x !== hero.x || p.y !== hero.y) return;
+    level.arenPage = null;
+    arenStore.found[p.floor] = true; arenSave();
+    if (fxArena(hero)) { fxRing(hero, '#e9dcc0', 2, 0.8); fxText(hero, `Página de Arén (${arenFoundCount()}/10)`, '#e9dcc0', 12, 2); }
+    log(`📄 Una página arrancada del diario de la expedición (${arenFoundCount()}/10, la guardás en el Cuaderno, N): ${AREN_PAGES[p.floor]}`); sfx('levelup');
+}
+// En el Cuaderno, debajo de las páginas del tutorial: las de Arén en orden (las que faltan, en blanco)
+function renderArenPages() {
+    const box = document.getElementById('aren-pages');
+    if (!box) return;
+    box.innerHTML = `<h4 class="aren-title">📄 Las Páginas de Arén (${arenFoundCount()}/10)</h4>` + Object.keys(AREN_PAGES).map(f => arenStore.found[f]
+        ? `<div class="notebook-page"><h4>Piso ${f} · ${floorLore(+f).place}</h4><p>${AREN_PAGES[f]}</p></div>`
+        : `<div class="notebook-page locked"><h4>Piso ${f} · ???</h4><p>Arrancada. Está tirada en algún rincón apartado del piso ${f}.</p></div>`).join('');
+}
+
 // --- LA ARQUITECTURA DE LA TORRE (pisos 2+) ---
 // Cada piso es una planta de la torre: muro exterior de piedra (en vez del borde del bosque) y SALONES enormes separados
 // por muros gruesos con portones anchos; el bioma llena los salones. Abajo los muros están más derrumbados (piso abierto,

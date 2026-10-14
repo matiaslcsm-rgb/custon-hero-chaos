@@ -210,6 +210,15 @@ diario de Hades o el Compendio de Hollow Knight). El **Bestiario se guarda entre
 criaturas de ahora y "Colección" todas las que viste alguna vez (hasta 400), con en cuántas runs aparecieron y cuántas
 mataste. Queda para después: recetas y planos (cuando existan) y una pestaña de armas (ver §15).
 
+**Las Páginas de Arén (2026-10-14, modo automático, `js/towerLore.js`):** una página del diario de la expedición por
+piso (1-10), tirada en el rincón más apartado del campo: el punto que suma más pasos desde la entrada + muros alrededor
+(sin camino, sin terreno dañino, sin pisar santuarios ni cuevas). Se ve como un papel con un brillo suave (y una luz chica
+de noche), y queda marcada en el mapa cuando la viste. Se junta al pisarla y se guarda para siempre en su propia clave
+(`chc-aren-pages`, aparte de los demás guardados): una vez encontrada no vuelve a aparecer. El Cuaderno (N) las muestra
+en orden debajo del tutorial, con las que faltan en blanco. Las 10 páginas cuentan la subida de los siete hasta la última
+("Soy Arén. Sos Arén."). **Medido** (3 torres × 10 pisos): siempre aparece y se llega caminando; queda a 280-400 pasos de
+la entrada, entre el 87% y el 100% de lo más lejos que se puede ir en el campo de ese piso.
+
 ## 7. Música y sonido
 - **Música ambiental por bioma**, de día y de noche, más una **capa de combate** que entra con fundido cuando hay
   enemigos cerca y se va al terminar la pelea (música dinámica en capas, como Hades o Zelda).

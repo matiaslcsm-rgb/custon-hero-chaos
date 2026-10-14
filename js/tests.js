@@ -1608,6 +1608,23 @@ test('Torre por dentro: el piso 1 es afuera; del 2 en adelante, muro exterior y 
     towerLoreGreet(L2); towerLoreGreet(L2);
     check(towerRun.lore[2] === true, 'queda anotado que ya te habló');
 });
+test('Torre: las Páginas de Arén — una por piso en un rincón apartado, se juntan al pisarla y no vuelven a aparecer', () => {
+    arenStore = { found: {} };
+    newTower();
+    const L = towerLevel(3), p = L.arenPage;
+    check(p && walkable(L, p.x, p.y) && L.zone[p.y * COLS + p.x] === ZONE.field, 'el piso 3 trae su página en el campo');
+    const d = bfsFrom(L, L.start.x, L.start.y);
+    check(d[p.y * COLS + p.x] > 40, `lejos de la entrada (${d[p.y * COLS + p.x]} pasos)`);
+    for (let f = 1; f <= 10; f++) check(AREN_PAGES[f], `el piso ${f} tiene su página escrita`);
+    Object.assign(player, { arena: L, x: p.x, y: p.y });
+    takeArenPage(L, player);
+    check(arenStore.found[3] && !L.arenPage, 'al pisarla queda en la colección');
+    checkEq(arenFoundCount(), 1, 'una de diez');
+    check(!AREN_PAGES[11], 'más allá del 10 no hay páginas');
+    renderArenPages();
+    check(document.getElementById('aren-pages').textContent.includes('(1/10)'), 'el Cuaderno las muestra');
+    arenStore = { found: {} };
+}, { random: true });
 test('Torre: guardar y continuar la run — héroe, equipo, bolsa, oro, piso, guardián vencido y restos vuelven', () => {
     clearTowerSave();
     newTower('AXE', { weapon: 'ADVENTURER_SWORD' });
@@ -3600,6 +3617,7 @@ function runTests() {
     codexPersist = false; codex = { unlocked: {}, best: {} }; // el Códice guardado no se toca
     notebookPersist = false; notebookState = { seen: {} }; // el cuaderno guardado tampoco
     bestiaryPersist = false; bestiaryStore = { beasts: {} }; // ni la colección del Bestiario
+    arenPersist = false; arenStore = { found: {} }; // ni las Páginas de Arén
     autoCast = false; // las pruebas controlan a mano cuándo se lanza cada habilidad (la de habilidades automáticas lo prende)
     const results = TESTS.map(t => {
         try {

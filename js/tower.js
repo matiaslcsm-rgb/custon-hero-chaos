@@ -555,6 +555,7 @@ function renderTower(level, dt) {
     pxDrawMerchant(level); // mercader, herrero, santuarios, eventos, armas del despertar, piedra de regreso y fuegos (towerPixelProps.js)
     pxDrawSmith(level);
     pxDrawShrines(level);
+    pxDrawArenPage(level);
     pxDrawEvents(level);
     pxDrawStarterWeapons(level);
     pxDrawWaystone(level);

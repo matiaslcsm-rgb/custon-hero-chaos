@@ -278,6 +278,7 @@ function generateTowerLevel(floor) {
     placeShrines(level, dist);
     placeCaveMouths(level, dist);
     placeEvents(level, dist);
+    placeArenPage(level, dist); // la página del diario de la expedición (towerLore.js)
     placeTownSmith(level); // herrero en algunos pueblos (towerCodex.js)
     level.drops = [];
     placeChests(level, clearings.concat(shuffle(rooms.filter(r => r !== first && r !== guardRoom)).slice(0, 5 - clearings.length)));
@@ -355,6 +356,7 @@ function towerTerrainTick(level, hero, dt) {
     if (z === ZONE.town) level.visitedTown = true;
     if (z === ZONE.lab) level.enteredLab = true;
     useShrines(level, hero);
+    takeArenPage(level, hero);
     towerEventsTick(level, hero, dt); // eventos del campo
     towerSmithTick(level, hero); // el herrero abre su ventana al acercarte (towerCodex.js)
     if (z !== hero.towerZone && level.town && z !== ZONE.town) level.town.aiShopped = false; // la IA vuelve a comprar en la próxima visita
@@ -610,6 +612,7 @@ function drawTowerNight(level) {
     const tw = level.town; if (tw) light(tw.merchant.x, tw.merchant.y + 4, 11 * TILE);
     if (level.exitUp) light(level.exitUp.x, level.exitUp.y, 3 * TILE);
     (level.shrines || []).forEach(s => { if (!s.used) light(s.x, s.y, 2.2 * TILE); });
+    if (level.arenPage) light(level.arenPage.x, level.arenPage.y, 1.6 * TILE);
     towerNightLights(level, light); // antorchas, fogatas, fragua y balas (towerAtmos.js)
     if (pixelOn()) pxDitherDraw(nightLayer); else ctx.drawImage(nightLayer, 0, 0); // en pixel art, con tramado (towerPixelFx.js)
 

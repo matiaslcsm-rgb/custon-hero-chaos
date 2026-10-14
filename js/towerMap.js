@@ -74,6 +74,7 @@ function drawTowerBigMap(level) {
     const g = level.guardian || level.caveBoss;
     if (g && g.isAlive() && seen(g.x, g.y)) mark('guardian', g.x, g.y);
     (level.shrines || []).forEach(sh => { if (!sh.used && seen(sh.x, sh.y)) drawMapMark(ctx, 'diamond', X(sh.x), Y(sh.y), SHRINES[sh.kind].color); });
+    if (level.arenPage && seen(level.arenPage.x, level.arenPage.y)) drawMapMark(ctx, 'diamond', X(level.arenPage.x), Y(level.arenPage.y), '#e9dcc0');
     (level.caves || []).forEach(c => { if (seen(c.x, c.y)) mark('cave', c.x, c.y); });
     if (level.down && seen(level.down.x, level.down.y)) mark('cave', level.down.x, level.down.y, 'Bajada');
     if (level.exitUp) drawMapMark(ctx, 'stairs', X(level.exitUp.x), Y(level.exitUp.y), '#c9a227');

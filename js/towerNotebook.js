@@ -60,4 +60,5 @@ function renderNotebook() {
         row.innerHTML = seen ? `<h4>${p.title}</h4><p>${p.text}</p>` : `<h4>???</h4><p>Página en blanco todavía.</p>`;
         box.appendChild(row);
     });
+    renderArenPages(); // las de la expedición (towerLore.js)
 }
