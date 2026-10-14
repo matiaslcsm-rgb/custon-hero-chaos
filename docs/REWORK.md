@@ -547,6 +547,14 @@ al morir funcionan igual. El piloto elige entre las 3 cartas como un jugador (su
 los 43 min); destrabó Piel de Roble, Golpe Pesado y Sangre Espesa. Pendiente: mejoras que cambien cómo se juega (no solo
 números), junto con las clases fijas.
 
+## 22. Las clases, paso 1a: el Guerrero (2026-10-14, fase T00)
+Las 3 armas del despertar ahora son **clases**: Guerrero (espada), Arquero (arco) y Mago (bastón). Se ven así en el
+pedestal y en su cartel, y la clase se guarda con la run (`heroClass`). El Guerrero tiene su pasiva, **Templanza**: +5% de
+crítico, y el daño físico de sus habilidades también puede ser crítico (en `dealDamage`; los golpes ya lo tiraban).
+**Medido** (banco de 60 s contra un muñeco, piloto perfecto, 8 muestras): 119 de daño/s sin la pasiva y 116 con ella:
+**no se nota**, porque el combo ya critea y las Q/E/R del equipo varían mucho (±25). Va a pesar cuando el Guerrero tenga
+sus habilidades físicas propias (paso 1b). Las pasivas del Arquero y del Mago llegan en sus pasos.
+
 ## 15. Más armas y el caos de cada run (propuesta, 2026-10-08)
 Pedido del usuario: "agregar más armas y que el gameplay se base en esas armas (ballesta, mazo, guantes de casteo,
 libros de hechizos); después, cómo escalar las cosas y mezclarlas para inventar mecánicas al azar y darle ese toque

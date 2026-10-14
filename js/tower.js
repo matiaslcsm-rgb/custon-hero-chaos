@@ -78,8 +78,9 @@ function chooseStarterWeapon(weaponKey) {
     const w = STARTER_WEAPONS[weaponKey];
     if (!w || !player) return;
     giveStarterWeapon(player, weaponKey);
+    player.heroClass = w.heroClass; // la clase (fase T00: Guerrero, Arquero, Mago)
     if (towerRun) towerRun.starterPending = false; // las otras dos se hunden (towerAwaken.js)
-    log(w.skillId ? `🗡️ Elegiste ${w.noun}: tenés ${SKILL_INDEX[w.skillId].name} en la ${player.keyBindings[w.skillId].toUpperCase()}.` : `🗡️ Elegiste ${w.noun}: ${w.why}`);
+    log(w.passive ? `🗡️ Sos ${w.className}. ${w.why} Pasiva: ${w.passive}` : w.skillId ? `🗡️ Elegiste ${w.noun}: tenés ${SKILL_INDEX[w.skillId].name} en la ${player.keyBindings[w.skillId].toUpperCase()}.` : `🗡️ Elegiste ${w.noun}: ${w.why}`);
 }
 
 function towerLevel(floor) {

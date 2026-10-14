@@ -198,7 +198,7 @@ function pxDrawStarterWeapons(level) {
         const [cx, by] = tileBase(w.x, w.y), pulse = 0.5 + 0.5 * Math.sin(fxClock * 3 + i * 2), on = w === near;
         pxGlow(cx, by - 4, TILE * 0.5, TILE * 0.18, '#ffd166', 0.18 + 0.2 * pulse + (on ? 0.2 : 0));
         pxPut(pxStuckWeapon(w.key), cx, by, PXG.scale * (on ? 1.15 : 1));
-        pxLabel(STARTER_WEAPONS[w.key].noun, cx, by - TILE * 1.55, on ? '#ffd166' : '#f2e6c8');
+        pxLabel(STARTER_WEAPONS[w.key].className, cx, by - TILE * 1.55, on ? '#ffd166' : '#f2e6c8');
     });
     if (near) { pxUiPass = true; drawStarterCard(near); pxUiPass = false; } // cartel con colores de panel oscuro (towerPixelUi.js)
 }

@@ -41,6 +41,7 @@ function chooseLevelPick(h, k) {
 function levelPerkTick(h) {
     const mods = {};
     levelPerksOf(h).forEach(p => Object.entries(p.mods || {}).forEach(([k, v]) => { mods[k] = k === 'dmgReduction' ? Math.max(mods[k] || 0, v) : (mods[k] || 0) + v; }));
+    if (h.heroClass === 'warrior') mods.critChance = (mods.critChance || 0) + 5; // Templanza (pasiva del Guerrero)
     const e = getEffect(h, 'LEVEL_PERKS');
     if (e) e.mods = mods; else addEffect(h, { id: 'LEVEL_PERKS', name: 'Mejoras', duration: Infinity, flags: ['persistent'], tags: ['MEJORA'], mods });
 }

@@ -179,9 +179,9 @@ const STARTER_WEAPON_IDENTITY = {
 function heroOf(heroKey) { return STARTER_WEAPON_IDENTITY[heroKey] || HERO_TEMPLATES[heroKey]; }
 
 const STARTER_WEAPONS = {
-    ADVENTURER_SWORD: { noun: 'Espada', shape: 'sword', range: 1.4, atkSpeed: 1.0, atk: 10, projectile: 0, skillId: null, why: 'Clic: combo de tres tajos en arco (el remate empuja y el tajo desvía proyectiles). Clic derecho: parada que te devuelve los disparos.' },
-    ADVENTURER_BOW: { noun: 'Arco', shape: 'spear', range: 4.5, atkSpeed: 0.9, atk: 8, projectile: 11, skillId: 'ADVENTURER_VOLLEY', why: 'Mantené Q para tensar y soltá hacia el cursor; tensada atraviesa. Soltá justo: tiro perfecto.' },
-    ADVENTURER_STAFF: { noun: 'Bastón', shape: 'staff', range: 4, atkSpeed: 0.8, atk: 7, projectile: 10, skillId: 'ADVENTURER_BOLT', why: 'Orbe arcano apuntado (Q) que explota en área y marca para las reacciones. Gasta maná.' }
+    ADVENTURER_SWORD: { heroClass: 'warrior', className: 'Guerrero', passive: 'Templanza: +5% de crítico, y el daño físico de tus habilidades también puede ser crítico.', noun: 'Espada', shape: 'sword', range: 1.4, atkSpeed: 1.0, atk: 10, projectile: 0, skillId: null, why: 'Clic: combo de tres tajos en arco (el remate empuja y el tajo desvía proyectiles). Clic derecho: parada que te devuelve los disparos.' },
+    ADVENTURER_BOW: { heroClass: 'archer', className: 'Arquero', noun: 'Arco', shape: 'spear', range: 4.5, atkSpeed: 0.9, atk: 8, projectile: 11, skillId: 'ADVENTURER_VOLLEY', why: 'Mantené Q para tensar y soltá hacia el cursor; tensada atraviesa. Soltá justo: tiro perfecto.' },
+    ADVENTURER_STAFF: { heroClass: 'mage', className: 'Mago', noun: 'Bastón', shape: 'staff', range: 4, atkSpeed: 0.8, atk: 7, projectile: 10, skillId: 'ADVENTURER_BOLT', why: 'Orbe arcano apuntado (Q) que explota en área y marca para las reacciones. Gasta maná.' }
 };
 Object.assign(HERO_WEAPONS, STARTER_WEAPONS);
 

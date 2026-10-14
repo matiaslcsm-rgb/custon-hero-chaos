@@ -52,6 +52,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **Equipo de desarrollo (2026-10-14):** agentes del proyecto en `.claude/agents/` (director-de-juego,
   disenador-de-sistemas, disenador-de-niveles, narrativa, arte-pixel, qa-jugador) y el comando `/equipo <tema>`
   (`.claude/skills/equipo/`) que los coordina: diseño → especialistas → integración → QA → cierre.
+- **Clases (2026-10-14, fase T00):** las armas iniciales son Guerrero, Arquero y Mago; el Guerrero ya tiene su pasiva
+  (REWORK.md §22). Faltan sus habilidades propias y las otras dos clases.
 - **Subir de nivel (2026-10-14, fase T00):** elegís 1 de 3 mejoras; repetir un stat 3 y 6 veces destraba mejoras
   propias (REWORK.md §21).
 - **Reliquias (2026-10-14, fase T00):** 12 reliquias apilables al estilo Risk of Rain, con 4 etiquetas y bonus de
@@ -226,7 +228,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **Idioma:** español rioplatense (voseo), en el código, los comentarios, los textos del juego y los commits.
 - **Decisiones de diseño:** se consultan con opciones y una recomendada, idealmente con números medidos. Lo que se decide
   se anota en DISEÑO.md (secciones de la fase y "Decisiones tomadas").
-- **Cada cambio:** pruebas automáticas (`tests.html`, hoy **240**) → commit en git → push a GitHub siempre al terminar cada paso (pedido del usuario 2026-10-07, para trabajar desde otros lugares).
+- **Cada cambio:** pruebas automáticas (`tests.html`, hoy **241**) → commit en git → push a GitHub siempre al terminar cada paso (pedido del usuario 2026-10-07, para trabajar desde otros lugares).
 - **Commits:** mensaje en español que explica el porqué; terminan con `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 - **Héroes nuevos con otra IA:** prompt en [`prompt-heroes.md`](prompt-heroes.md); lo que devuelva se revisa contra el motor
   (pasivas, efectos por segundo con `everyInterval`, descripciones que coincidan con el código) antes de integrarlo.

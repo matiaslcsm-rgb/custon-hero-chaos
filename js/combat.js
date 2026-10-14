@@ -122,6 +122,8 @@ function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     const canEvade = opts.isAttack && !(source && hasFlag(source, 'trueStrike'));
     if (canEvade && Math.random() < effEvasion(target) / 100) { fxText(target, 'esquiva', '#8ecae6', 10); return { dealt: 0, evaded: true }; }
     let final = amount;
+    // Pasiva del Guerrero (Templanza): el daño físico de sus habilidades también tira crítico (los golpes ya lo tiran)
+    if (source && source.heroClass === 'warrior' && type === 'physical' && opts.isCrit === undefined && !opts.relic && Math.random() < effCritChance(source) / 100) { final *= 2; opts = { ...opts, isCrit: true }; }
     final *= elementReactionMult(source, target); // reacciones elementales (Torre, fxSkills.js)
     if (type === 'magical' && source) final *= 1 + effSpellAmp(source) / 100;
     if (source && source.isHero && target.isHero && target.arena && target.arena.kind === 'duel') final *= 1 - DUEL_DAMAGE_REDUCTION;

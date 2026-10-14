@@ -12,7 +12,7 @@
 //     quitado un portador vuelve a tu bolsa (el portador no existe en el piso nuevo).
 
 const TOWER_SAVE = { key: 'chc-tower-save', version: 1, every: 15 };
-const SAVE_HERO_FIELDS = ['str', 'agi', 'int', 'bonus', 'permGains', 'level', 'xp', 'skillPoints', 'statPoints', 'towerStats', 'gold', 'tomesBought', 'relics'];
+const SAVE_HERO_FIELDS = ['str', 'agi', 'int', 'bonus', 'permGains', 'level', 'xp', 'skillPoints', 'statPoints', 'towerStats', 'gold', 'tomesBought', 'relics', 'heroClass'];
 let towerSaveAt = 0;
 // En las pruebas y las demos no se toca el guardado de verdad: se guarda en memoria
 let towerSavePersist = !/[?&](test|demo)/.test(location.search), towerSaveMemory = null;

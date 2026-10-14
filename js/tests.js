@@ -1356,7 +1356,7 @@ test('Torre: visión con paredes que tapan y distancia según el héroe', () => 
         check(!canSee(level, hidden.x + 2, hidden.y), 'la pared tapa lo que hay detrás');
         check(canSee(level, hidden.x + 1, hidden.y), 'la pared misma se ve');
     }
-    checkEq(heroSight(player), TOWER.baseSight, 'visión base');
+    checkEq(heroSight(player), TOWER.baseSight + (heightAt(level, player.x, player.y) ? HEIGHT_RULES.sight : 0), 'visión base (+2 si quedó arriba de una meseta)');
 }, { random: true });
 
 test('Torre: cada nivel da 5 puntos de stats para repartir (Vitalidad da vida, Visión da distancia)', () => {
@@ -1742,6 +1742,19 @@ test('Torre: subir de nivel — elegís 1 de 3 mejoras y elegir el mismo stat de
     toggleStatsWindow(true); player.statPoints = LEVEL_PICK.points; player.levelOffer = null; renderStatsWindow();
     checkEq(document.querySelectorAll('#level-cards .level-card').length, 3, 'la ventana de stats muestra las 3 cartas');
     toggleStatsWindow(false);
+}, { random: true });
+test('Torre: el Guerrero — la espada es una clase y su pasiva hace que el daño físico de habilidades pueda ser crítico', () => {
+    newTower('AXE', { weapon: 'ADVENTURER_SWORD' });
+    checkEq(player.heroClass, 'warrior', 'agarrar la espada te hace Guerrero');
+    const crit0 = effCritChance(player); levelPerkTick(player);
+    checkEq(effCritChance(player), crit0 + 5, 'Templanza: +5% de crítico');
+    const c = arenas[0].creeps.find(o => o.isAlive()); c.hp = c.maxHp = 1e6; c.armor = 0;
+    player.critChance = 100;
+    const r = dealDamage(player, c, 100, 'physical');
+    check(r.dealt >= 190, `un golpe de habilidad física critea (${r.dealt})`);
+    const r2 = dealDamage(player, c, 100, 'magical');
+    check(r2.dealt < 190, 'el mágico no');
+    check(towerSnapshot().hero.heroClass === 'warrior', 'la clase se guarda con la run');
 }, { random: true });
 test('Torre: las Páginas de Arén — una por piso en un rincón apartado, se juntan al pisarla y no vuelven a aparecer', () => {
     arenStore = { found: {} };

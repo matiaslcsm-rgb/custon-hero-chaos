@@ -71,13 +71,13 @@ function towerAwakenTick(level, from) {
 // Cartel de pergamino arriba del arma que tenés a mano: nombre, qué hace y cómo agarrarla
 function drawStarterCard(w) {
     const W = STARTER_WEAPONS[w.key], sk = W.skillId ? SKILL_INDEX[W.skillId] : { name: 'Combo y parada' }, cx = w.x * TILE + TILE / 2, top = w.y * TILE - TILE * 2.3;
-    const width = 230, lines = wrapCanvasText(W.why, width - 16, '11px Georgia, serif');
+    const width = 230, lines = wrapCanvasText(W.why + (W.passive ? ' Pasiva: ' + W.passive : ''), width - 16, '11px Georgia, serif');
     const h = 40 + lines.length * 13 + 16;
     ctx.save();
     ctx.fillStyle = 'rgba(241,231,208,0.97)'; ctx.strokeStyle = INK.line; ctx.lineWidth = 2;
     ctx.fillRect(cx - width / 2, top - h + 20, width, h); ctx.strokeRect(cx - width / 2, top - h + 20, width, h);
     ctx.textAlign = 'center'; ctx.fillStyle = INK.line; ctx.font = 'bold 13px Georgia, serif';
-    let y = top - h + 38; ctx.fillText(`${W.noun} · ${sk.name}`, cx, y);
+    let y = top - h + 38; ctx.fillText(`${W.className} · ${W.noun}`, cx, y);
     ctx.font = '11px Georgia, serif'; ctx.fillStyle = '#3d3226'; y += 6;
     lines.forEach(l => { y += 13; ctx.fillText(l, cx, y); });
     ctx.font = 'bold 11px Georgia, serif'; ctx.fillStyle = '#8a5a00'; ctx.fillText(`${keyName(KEYMAP.interact)} o clic: agarrarla`, cx, y + 17);
