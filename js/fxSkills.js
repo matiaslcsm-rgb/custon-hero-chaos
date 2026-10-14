@@ -206,6 +206,11 @@ function projectileLook(p) {
 
 // --- Dibujo de las formas (lo llama drawArenaFx) ---
 function drawSkillFx(f, t, px, py) {
+    if (f.kind === 'corpse') { // la caída de una criatura: destello blanco, se aplasta contra el piso y se apaga (fx.js)
+        const img = t < 0.18 ? f.fr.white : f.fr.img, sy = Math.max(0.05, 1 - t * 0.95), sx = 1 + t * 0.35;
+        ctx.save(); ctx.translate(px, py + TILE * 0.45); ctx.scale(f.flip ? -sx : sx, sy); ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(img, -img.width * f.s / 2, -img.height * f.s, img.width * f.s, img.height * f.s); ctx.restore(); return;
+    }
     if (f.kind === 'sweep') { if (f.unit) { px = (f.unit.rx ?? f.unit.x) * TILE + TILE / 2; py = (f.unit.ry ?? f.unit.y) * TILE + TILE / 2; } drawSweepFx(f, t, px, py); return; } // towerFeel.js
     const T = TILE, ex = (f.tx ?? f.x) * T + T / 2, ey = (f.ty ?? f.y) * T + T / 2;
     if (f.unit) { px = (f.unit.rx ?? f.unit.x) * T + T / 2; py = (f.unit.ry ?? f.unit.y) * T + T / 2; }

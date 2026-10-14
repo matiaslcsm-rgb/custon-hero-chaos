@@ -759,6 +759,11 @@ el mismo paso; lo grande queda acá, ordenado por impacto.
     la cámara o hacia el fondo en escorzo, así el combo, correr, el golpe recibido y las otras armas salen solos en las
     tres. Para dónde mira: el golpe manda (hacia donde pega); si no, el paso (en diagonal, de costado); quieto, el
     cursor. La rodada y la caída se ven de costado.
+  - **Sensación de movimiento** (2026-10-14, pedido: "mejorar los movimientos y todo", elegido por mí):
+    polvo a los pies al arrancar, frenar, girar y cada dos casillas corriendo; el esquive deja estelas claras del propio
+    dibujo y levanta polvo al terminar (Hades, Hyper Light Drifter). Los enemigos **anticipan con el cuerpo** el golpe
+    anunciado (se echan atrás, se comprimen y al final tiemblan) y **caen** al morir: destello blanco, se aplastan contra
+    el piso y se apagan, en vez de desaparecer de golpe.
 - ✅ Volumen general, música y efectos, y temblor de pantalla (0-150%), con deslizadores en la pausa que se guardan.
 - ✅ La forja ya no corta una pelea: si una pieza sube de nivel peleando aparece un aviso arriba a la izquierda, y la
   ventana se abre sola cuando nadie te persigue.

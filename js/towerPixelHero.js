@@ -272,3 +272,35 @@ function pxhPick(u, moving) {
     if ((fxClock + seed * 7) % 3.3 < 0.14) k += 4; // parpadea
     return { kind: 'idle', k };
 }
+
+// --- SENSACIÓN DE MOVIMIENTO (2026-10-14, pedido: "mejorar los movimientos y todo") ---
+// Referencias: Hades y Hyper Light Drifter (polvo al arrancar, frenar y girar; estelas del propio dibujo en el esquive).
+//   · Polvo a los pies al arrancar a correr, al frenar, al cambiar de dirección y, corriendo, cada dos casillas.
+//   · El esquive deja copias claras del dibujo que se apagan (estelas) y levanta polvo al terminar.
+const PXH_FEEL = { ghostEvery: 0.03, ghostLife: 0.24, ghostAlpha: 0.45, stepEvery: 2 };
+function pxhDust(u, n, size = 2.5, life = 0.35) {
+    const arena = fxArena(u);
+    if (arena) fxParticles(arena, u.rx ?? u.x, (u.ry ?? u.y) + 0.38, 'steel', n, 1.1, { style: 'smoke', size, life });
+}
+// Cada vez que se dibuja: detecta arranques, frenadas, giros y pasos; guarda las estelas del esquive
+function pxhFeel(u, kind, moving, cx, cy, fr, s, flip) {
+    const st = u.pxFeel || (u.pxFeel = { moving: false, dir: '', x: u.x, y: u.y, steps: 0, dash: false, ghostAt: -9, ghosts: [] });
+    const dir = u.lastStepDir ? `${u.lastStepDir.dx},${u.lastStepDir.dy}` : '';
+    if (moving && !st.moving) pxhDust(u, 3);                          // arranca
+    else if (!moving && st.moving && kind !== 'dash') pxhDust(u, 2, 2); // frena
+    else if (moving && dir !== st.dir && st.dir) pxhDust(u, 2);        // gira
+    if (u.x !== st.x || u.y !== st.y) { if (++st.steps % PXH_FEEL.stepEvery === 0 && kind === 'walk') pxhDust(u, 1, 2, 0.3); st.x = u.x; st.y = u.y; }
+    if (kind === 'dash' && fxClock - st.ghostAt > PXH_FEEL.ghostEvery) { st.ghostAt = fxClock; st.ghosts.push({ img: fr.white, cx, cy, s, flip, at: fxClock }); }
+    if (st.dash && kind !== 'dash') pxhDust(u, 5, 3, 0.45);             // aterriza del esquive
+    st.moving = moving; st.dir = dir; st.dash = kind === 'dash';
+    st.ghosts = st.ghosts.filter(g => fxClock - g.at < PXH_FEEL.ghostLife);
+    return st.ghosts;
+}
+function pxhDrawGhosts(ghosts) {
+    ghosts.forEach(g => {
+        const k = 1 - (fxClock - g.at) / PXH_FEEL.ghostLife;
+        ctx.save(); ctx.globalAlpha *= PXH_FEEL.ghostAlpha * k; ctx.translate(g.cx, g.cy + TILE * 0.45); if (g.flip) ctx.scale(-1, 1);
+        ctx.imageSmoothingEnabled = false; ctx.drawImage(g.img, -g.img.width * g.s / 2, -g.img.height * g.s, g.img.width * g.s, g.img.height * g.s);
+        ctx.restore();
+    });
+}

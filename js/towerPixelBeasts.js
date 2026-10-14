@@ -428,6 +428,8 @@ function drawPixelUnit(u, cx, cy, facing, flash, pose) {
     let dir = 'side';
     if (body === 'hero') { ({ kind, k } = pxhPick(u, moving)); dir = kind === 'death' ? 'side' : pxhDir(u, moving); } // el héroe: su cuadro y para dónde mira (towerPixelHero.js)
     const fr = body === 'hero' ? pxbHeroFrame(pxHeroLook(u), kind, k, dir) : pxbFrame(body, u.color, (u.type.parts || []), kind, k), img = flash ? fr.white : fr.img, s = pxbScale(u);
+    if (body === 'hero' && gameMode === 'tower') pxhDrawGhosts(pxhFeel(u, kind, moving, cx, cy, fr, s, facing < 0 && dir === 'side')); // polvo y estelas (towerPixelHero.js)
+    else u.pxLast = { fr, s, flip: facing < 0 }; // su último dibujo: con él se hace la caída al morir (fx.js)
     ctx.save();
     ctx.translate(cx, cy + TILE * 0.45);
     if (pose) { ctx.rotate(pose.rot * (facing < 0 ? -1 : 1)); ctx.scale(pose.sx, pose.sy); }

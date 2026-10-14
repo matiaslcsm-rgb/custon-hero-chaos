@@ -63,6 +63,8 @@ function fxDeath(unit) {
     if (fxArena(unit)) sfx(unit.isHero ? 'death' : 'pop');
     fxBurst(unit, unit.color || '#ff477e', unit.isHero ? 22 : 12, unit.isHero ? 5 : 3.5);
     if (typeof pxBleed === 'function') pxBleed(unit, unit.isHero ? 30 : unit.isGuardian ? 40 : 16, 'death'); // revienta en pedacitos (towerPixelFx.js)
+    const arena = fxArena(unit); // pixel art: la criatura destella, se aplasta y se apaga en vez de desaparecer de golpe (2026-10-14)
+    if (arena && unit.pxLast && !unit.isHero) pushFx(arena, { kind: 'corpse', x: unit.rx ?? unit.x, y: unit.ry ?? unit.y, fr: unit.pxLast.fr, s: unit.pxLast.s, flip: unit.pxLast.flip, life: 0.4 });
     if (unit.isHero) fxShake(5);
 }
 
@@ -90,6 +92,12 @@ function attackPose(u) {
     const frac = atkSpeed ? (u.attackTimer || 0) * atkSpeed : 0;
     const wind = frac > 0.6 && frac < 1 && inCombat() ? (frac - 0.6) / 0.4 : 0;
     const dir = a || { dx: u.facing || 1, dy: 0 };
+    if (u.windup && u.windup.until > u.windup.at) { // golpe anunciado (towerWindup.js): se echa atrás, se comprime y al final tiembla
+        const w = u.windup, k = Math.max(0, Math.min(1, (gameClock - w.at) / (w.until - w.at)));
+        const tx = (w.aimX ?? u.x + (u.facing || 1)) - u.x, ty = (w.aimY ?? u.y) - u.y, d = Math.hypot(tx, ty) || 1;
+        pose.ox -= tx / d * 0.16 * k; pose.oy -= ty / d * 0.16 * k; pose.rot -= 0.18 * k; pose.sx += 0.1 * k; pose.sy -= 0.12 * k;
+        if (k > 0.7) { pose.ox += (Math.random() - 0.5) * 0.06; pose.oy += (Math.random() - 0.5) * 0.04; }
+    }
     if (wind > 0 && (!a || a.kind === 'melee')) { // preparación: se echa atrás y se comprime
         pose.ox -= dir.dx * 0.12 * wind; pose.oy -= dir.dy * 0.12 * wind;
         pose.rot -= 0.2 * wind; pose.sx += 0.08 * wind; pose.sy -= 0.08 * wind;
