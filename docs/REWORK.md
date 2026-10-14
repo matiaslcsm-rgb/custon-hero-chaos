@@ -827,6 +827,9 @@ Las fases 3 y 4 son las más grandes: hay que rehacer pruebas y volver a medir e
 también tiene que aprender a esquivar los ataques anunciados).
 
 ## Interfaz y calidad de vida (lista viva)
+- ✅ **Pausa de impacto por peso** (2026-10-14, fase T2): los tajos de la espada que le pegan a un guardián, un señor de
+  cueva o un jefe escondido frenan al menos 65 ms (antes 25-30 ms los dos primeros). El remate sigue en 75 ms y los
+  golpes chicos a criaturas comunes siguen cortos. No se apilan: la pausa toma el máximo, no suma.
 - ✅ **Señal clara al recibir daño** (2026-10-14, fase T2): cuando te pegan, el borde de la pantalla se pone rojo 0,35 s,
   más fuerte cuanto más vida te sacan (golpes seguidos se suman). Ya estaban el número, el sonido y el cuadro de golpe.
 - ✅ **Jefe escondido del piso 7: el Lobo de Escarcha** (2026-10-14; lo empezó la corrida automática que se detuvo y

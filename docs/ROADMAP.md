@@ -200,7 +200,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 - [ ] **Parada y esquive de frente y de espaldas.**
 - [x] **Señal clara al recibir daño** (2026-10-14: borde rojo según el daño; falta medir golpes sin aviso con el piloto): destello rojo en el borde de la pantalla, un sonido propio y la barra de
       vida que tiembla. Medir con el piloto cuántos golpes recibidos no tenían aviso previo (meta: 0).
-- [ ] **Pausa de impacto por peso:** el remate del combo y el golpe a un guardián frenan 60-90 ms; los golpes chicos,
+- [x] **Pausa de impacto por peso** (2026-10-14: espada contra jefes, 65 ms; el remate, 75 ms): el remate del combo y el golpe a un guardián frenan 60-90 ms; los golpes chicos,
       nada. Revisar que no se apilen (REWORK.md §8).
 - [x] **Señores de cueva con daño desmedido:** midiendo el piso 6 salió uno con 1833 de daño por golpe (los demás,
       261-393). Buscar qué combinación de afijos de campeón lo dispara y ponerle tope.

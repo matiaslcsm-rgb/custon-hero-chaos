@@ -19,7 +19,7 @@
 //   Equilibrio: usar bien la Q rinde un 30-50% más que dejar que pegue el ataque automático (lo reemplaza mientras
 //   la usás), no el doble. Medido con el piloto automático (que también la usa); los números, en REWORK.md.
 
-const SWORD_COMBO = { hits: [1, 1.15, 2], others: 0.6, window: 0.9, halfArc: 1.15, hitStop: [0.025, 0.03, 0.075], shake: [0, 0.8, 3] };
+const SWORD_COMBO = { hits: [1, 1.15, 2], others: 0.6, window: 0.9, halfArc: 1.15, hitStop: [0.025, 0.03, 0.075], shake: [0, 0.8, 3], bossStop: 0.065 }; // bossStop: pegarle a un jefe pesa más (ROADMAP T2)
 const BOW_SHOT = { chargeTime: 0.9, perfect: 0.2, tap: 0.5, full: 2.3, perfectMult: 1.3, slow: -0.45, aiHold: 1.3, speed: 18 }; // aiHold: el piloto suelta tensado del todo, pasado el momento perfecto (como un jugador correcto, no perfecto)
 
 // Hacia dónde sale un golpe apuntado: el cursor (aimPoint) o, si no hay, el enemigo más cercano o hacia donde mira.
@@ -77,11 +77,11 @@ function swingArc(c, dir, step, reach, mult, basic = false) {
     swingCracks(c, dir, reach, SWORD_COMBO.halfArc); // y rompe las paredes agrietadas (towerSecrets.js)
     c.attackTimer = 0; // el tajo reemplaza al ataque automático (no se suman)
     c.comboAt = gameClock; c.comboStep = (step + 1) % 3; c.fxSwingStep = step; // fxSwingStep: qué tajo dibujar (towerPixelBeasts.js)
-    fxSwordSwing(c, dir, step, reach, hit.length > 0);
+    fxSwordSwing(c, dir, step, reach, hit.length > 0, hit.some(e => e.isGuardian || e.isCaveBoss || e.isBoss || e.isHiddenBoss));
     return hit;
 }
 function unitAt(arena, x, y) { return (arena.creeps || []).some(o => o.isAlive() && o.x === x && o.y === y) || (arena.heroes || []).some(h => h.isAlive() && h.x === x && h.y === y); }
-function fxSwordSwing(c, dir, step, reach, landed) {
+function fxSwordSwing(c, dir, step, reach, landed, onBoss = false) {
     const arena = fxArena(c);
     if (!arena) return;
     const angle = Math.atan2(dir.dy, dir.dx);
@@ -90,7 +90,7 @@ function fxSwordSwing(c, dir, step, reach, landed) {
     pushFx(arena, { kind: 'sweep', unit: c, x: c.x, y: c.y, angle, reach, half: SWORD_COMBO.halfArc, flip: step === 1, finisher: step === 2,
         color: step === 2 ? '#ffd166' : '#f3e7c9', color2: step === 2 ? '#c9a227' : '#8a7a5c', life: step === 2 ? 0.3 : 0.2 });
     sfx('swing');
-    if (landed) { sfx(step === 2 ? 'crit' : 'hit'); fxHitStop(SWORD_COMBO.hitStop[step]); if (SWORD_COMBO.shake[step]) fxShake(SWORD_COMBO.shake[step]); }
+    if (landed) { sfx(step === 2 ? 'crit' : 'hit'); fxHitStop(onBoss ? Math.max(SWORD_COMBO.hitStop[step], SWORD_COMBO.bossStop) : SWORD_COMBO.hitStop[step]); if (SWORD_COMBO.shake[step]) fxShake(SWORD_COMBO.shake[step]); }
     if (step === 2) fxParticles(arena, c.x + dir.dx * reach * 0.6, c.y + dir.dy * reach * 0.6, 'steel', landed ? 10 : 4, 4, { angle, spread: 1.1, life: 0.35 });
 }
 
