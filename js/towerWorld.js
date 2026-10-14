@@ -361,6 +361,7 @@ function towerTerrainTick(level, hero, dt) {
     useShrines(level, hero);
     takeArenPage(level, hero);
     if (hero.relics) relicTick(hero); // escudo y stats de las reliquias (towerRelics.js)
+    if (hero.towerStats) levelPerkTick(hero); // mejoras destrabadas al subir de nivel (towerLevelUp.js)
     towerEventsTick(level, hero, dt); // eventos del campo
     towerSmithTick(level, hero); // el herrero abre su ventana al acercarte (towerCodex.js)
     if (z !== hero.towerZone && level.town && z !== ZONE.town) level.town.aiShopped = false; // la IA vuelve a comprar en la próxima visita

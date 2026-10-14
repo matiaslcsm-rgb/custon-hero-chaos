@@ -531,6 +531,22 @@ en `parrySuccess`). El daño de una reliquia no vuelve a disparar reliquias (`op
 - Pendiente (próximos pasos de la fase T00): dibujos en pixel art para los íconos (hoy son emojis), más reliquias, que
   el mercader las venda y el herrero funda dos iguales, y desbloquearlas con Esencia.
 
+## 21. Subir de nivel: 1 de 3 mejoras con umbrales (2026-10-14, `js/towerLevelUp.js`, fase T00)
+Antes repartías 5 puntos sueltos por nivel y cada punto hacía lo mismo: una cuenta, no una elección. Ahora la ventana de
+stats (C) ofrece **3 cartas al azar** (Fuerza, Agilidad, Inteligencia, Vitalidad, Visión), cada una con los 5 puntos
+del nivel juntos. Elegir el mismo stat **3 y 6 veces** destraba una mejora propia:
+- Fuerza: Piel de Roble (−10% de daño recibido) y Golpe Pesado (+15% de daño).
+- Agilidad: Pies Ligeros (+8% de movimiento) y Ojo Certero (+10% de crítico).
+- Inteligencia: Fuente Arcana (+2 de maná/s) y Mente Afilada (+20% de amplificación).
+- Vitalidad: Sangre Espesa (+6% de robo de vida) y Coraza Viva (−15% de daño recibido; vale la mayor con Piel de Roble).
+- Visión: Cazador de Tesoros y Ojo del Explorador (el doble y el triple de chance de reliquias en campeones y cofres).
+
+La oferta queda fija hasta que elijas (cerrar la ventana no la cambia). Los puntos siguen siendo puntos, así que los restos
+al morir funcionan igual. El piloto elige entre las 3 cartas como un jugador (su atributo, si no Vitalidad).
+**Medido** (piloto con reflejos humanos, 45 min): piso 4 a los 41 min, 0 muertes, nivel 15 (sin la elección: piso 4 a
+los 43 min); destrabó Piel de Roble, Golpe Pesado y Sangre Espesa. Pendiente: mejoras que cambien cómo se juega (no solo
+números), junto con las clases fijas.
+
 ## 15. Más armas y el caos de cada run (propuesta, 2026-10-08)
 Pedido del usuario: "agregar más armas y que el gameplay se base en esas armas (ballesta, mazo, guantes de casteo,
 libros de hechizos); después, cómo escalar las cosas y mezclarlas para inventar mecánicas al azar y darle ese toque

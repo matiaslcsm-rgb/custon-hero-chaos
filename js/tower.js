@@ -363,10 +363,13 @@ function spendStatPoint(hero, k) {
     if (hero === player) renderStatsWindow();
     return true;
 }
-// La IA (piloto automático) reparte: 3 al atributo principal y 2 a Vitalidad por nivel.
+// La IA (piloto automático) elige entre las 3 cartas como un jugador: su atributo principal, si no Vitalidad, si no la primera.
 function aiSpendStatPoints(hero) {
     const main = { STR: 'str', AGI: 'agi', INT: 'int' }[hero.primaryAttr];
-    while (hero.statPoints > 0) spendStatPoint(hero, (hero.towerStats[main] + hero.towerStats.vit) % 5 < 3 ? main : 'vit');
+    for (let guard = 0; hero.statPoints > 0 && guard < 50; guard++) {
+        const offer = levelOffer(hero);
+        if (!chooseLevelPick(hero, offer.includes(main) ? main : offer.includes('vit') ? 'vit' : offer[0])) break;
+    }
 }
 
 // Ventana de stats (tecla C): la partida se pausa mientras está abierta.
@@ -379,16 +382,16 @@ function toggleStatsWindow(open = !statsOpen) {
 }
 function renderStatsWindow() {
     if (!statsOpen) return;
-    document.getElementById('stats-points').textContent = player.statPoints ? `${player.statPoints} punto${player.statPoints === 1 ? '' : 's'} para repartir` : 'Sin puntos (subí de nivel)';
+    document.getElementById('stats-points').textContent = player.statPoints ? `¡Subiste de nivel! Elegí una mejora${player.statPoints > LEVEL_PICK.points ? ` (${Math.ceil(player.statPoints / LEVEL_PICK.points)} pendientes)` : ''}` : 'Al subir de nivel elegís 1 de 3 mejoras';
+    renderLevelCards(document.getElementById('level-cards')); // 1 de 3 (towerLevelUp.js)
     const rows = document.getElementById('stats-rows'); rows.innerHTML = '';
     Object.entries(TOWER_STATS).forEach(([k, st]) => {
         const row = document.createElement('div');
         row.className = 'stat-row';
         row.innerHTML = `<span class="stat-icon">${st.icon}</span><span class="stat-name" style="color:${st.color}">${st.name}</span>` +
             `<span class="stat-value">${k === 'vis' ? towerStatValue(player, k).toFixed(1) : towerStatValue(player, k)}</span>` +
-            `<span class="stat-spent">${player.towerStats[k] ? `+${player.towerStats[k]} puestos` : ''}</span>` +
-            `<button class="stat-plus" ${player.statPoints ? '' : 'disabled'}>+</button><span class="stat-gives">${st.gives()}</span>`;
-        row.querySelector('.stat-plus').onclick = () => spendStatPoint(player, k);
+            `<span class="stat-spent">${levelPicks(player, k) ? `elegido ${levelPicks(player, k)} ${levelPicks(player, k) === 1 ? 'vez' : 'veces'}` : ''}</span>` +
+            `<span class="stat-gives">${st.gives()}${LEVEL_PERKS[k].map(p => `<br><span class="perk ${levelPicks(player, k) >= p.at ? 'on' : ''}">${p.at}: ${p.name} — ${p.desc}</span>`).join('')}</span>`;
         rows.appendChild(row);
     });
 }
@@ -472,7 +475,7 @@ function towerInfoHtml() {
         `<p class="subtitle">${biomeSummary(level)}</p>` +
         (towerIsNight() ? `<p class="subtitle">🌙 <b>Es de noche</b>: en el campo ves menos y andan criaturas nocturnas; todo da +50% de experiencia y botín.</p>` : '') +
         `<p class="subtitle">Cruzá el campo, descansá en el <b>pueblo</b> (zona segura, mercader con B) y entrá al <b>laberinto</b>: el guardián (${level.guardian.label}) cuida la escalera.</p>` +
-        (player.statPoints ? `<button class="primary-btn" onclick="toggleStatsWindow(true)">📊 Repartir ${player.statPoints} punto${player.statPoints === 1 ? '' : 's'} de stats (C)</button>` : `<button class="secondary-btn" onclick="toggleStatsWindow(true)">📊 Stats del héroe (C)</button>`) +
+        (player.statPoints ? `<button class="primary-btn" onclick="toggleStatsWindow(true)">✨ Elegir mejora de nivel (C)</button>` : `<button class="secondary-btn" onclick="toggleStatsWindow(true)">📊 Stats del héroe (C)</button>`) +
         `<button class="secondary-btn" onclick="toggleInventory(true)">🎒 Equipo e inventario (I) · ${player.bag.length} en la bolsa</button>` +
         `<button class="secondary-btn" onclick="toggleBestiary(true)">📖 Bestiario (K) · ${Object.keys(towerRun.seen || {}).length} criaturas</button>` +
         `<p class="subtitle">Creeps en este piso: ${alive}. Al morir renacés en la base y perdés la mitad de los atributos ganados.</p>` +

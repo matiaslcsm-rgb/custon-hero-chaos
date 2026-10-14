@@ -139,8 +139,10 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
       12 reliquias con 4 etiquetas (fuego, sangrado, crítico, escudo) y el bonus al juntar 3 de una etiqueta. Caen de
       campeones, cofres y jefes; fila de íconos en la interfaz con su cartel. Convive con lo viejo. Medir con el piloto:
       daño por piso y variación entre runs, antes y después. 2026-10-14.
-- [ ] **Subir de nivel: elegir 1 de 3 mejoras** (ventana con 3 cartas, como Hades), con umbrales por atributo (3 de
-      Fuerza destraban un efecto, etc.). Reemplaza los 5 puntos por nivel; el piloto elige con una regla.
+- [x] **Subir de nivel: elegir 1 de 3 mejoras** (ventana con 3 cartas, como Hades), con umbrales por atributo (3 de
+      Fuerza destraban un efecto, etc.). Reemplaza los 5 puntos por nivel; el piloto elige con una regla. 2026-10-14.
+  - [ ] Paso 2: mejoras que cambien cómo se juega (no solo números): por ejemplo, el remate aturde, una carga más de
+        esquive, la parada devuelve más. Van con las clases fijas.
 - [ ] **Las 3 clases, paso 1: el Guerrero** completo (combo, parada, rodar y su pasiva) con las teclas fijas; las
       habilidades dejan de salir del equipo. Medir con el piloto contra la espada de hoy.
 - [ ] **Las 3 clases, paso 2: el Arquero.** Paso 3: **el Mago.** Cada uno medido contra el Guerrero (daño por segundo
@@ -297,3 +299,4 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 - 2026-10-14 · Jefes escondidos, paso 5 (Guardián de Arena) · 0e992ac · 10/10 pisos 5, grieta a 50-191 pasos; vida 3126→1329, daño 199, armadura 12 (cuevas del piso 5: 354-1241 / 89-295). Pruebas 238/238.
 - 2026-10-14 · Jefes escondidos, paso 6 (Lector Sin Ojos) · 608a23d · 10/10 pisos 6, grieta a 49-229 pasos; 1242 vida/191 daño (cuevas del piso 6: 629-1374 / 261-393, una con 1833). Pruebas 238/238.
 - 2026-10-14 · Reliquias, paso 1 (motor y 12 reliquias) · 8c1e664 · piloto con reflejos humanos, 45 min: sin reliquias piso 3 y 2 muertes; con 0,25/0,35 de chance, 19 reliquias en 3 pisos (demasiadas); con 0,05/0,10, 7 en 3 pisos (~2,3 por piso), piso 4 y 0 muertes. Pruebas 239/239.
+- 2026-10-14 · Subir de nivel: 1 de 3 mejoras · (este commit) · piloto con reflejos humanos, 45 min: piso 4 a los 41 min, 0 muertes, nivel 15, 6 reliquias (igual que sin la elección: piso 4 a los 43 min); destrabó Piel de Roble, Golpe Pesado y Sangre Espesa. Pruebas 240/240.

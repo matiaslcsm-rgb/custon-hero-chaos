@@ -970,3 +970,12 @@ body.on-title { overflow: hidden; }
 #relic-bar .relic { position: relative; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; font-size: 15px; background: rgba(22,24,29,0.9); border: 2px solid; border-radius: 4px; cursor: help; }
 #relic-bar .relic b { position: absolute; right: -3px; bottom: -4px; font-size: 10px; color: #fff; background: #000; border-radius: 3px; padding: 0 2px; }
 #relic-bar .relic.set { box-shadow: 0 0 6px currentColor; }
+
+/* Subir de nivel: 1 de 3 mejoras (towerLevelUp.js) */
+#level-cards { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+#level-cards .subtitle { width: 100%; margin: 0; }
+#level-cards .level-card { flex: 1 1 150px; display: flex; flex-direction: column; gap: 4px; text-align: left; padding: 8px; background: rgba(0,0,0,0.25); border: 2px solid; border-radius: 6px; color: inherit; cursor: pointer; font: inherit; }
+#level-cards .level-card:hover { background: rgba(255,255,255,0.08); }
+#level-cards .level-card small { opacity: 0.85; }
+.perk { font-size: 11px; opacity: 0.6; }
+.perk.on, #level-cards .perk { opacity: 1; color: #ffd166; }

@@ -1723,6 +1723,26 @@ test('Torre: reliquias — se apilan, se activan con la pelea, prenden su conjun
     renderRelicBar();
     check(document.getElementById('relic-bar').children.length >= 1, 'se ven en la fila de íconos');
 }, { random: true });
+test('Torre: subir de nivel — elegís 1 de 3 mejoras y elegir el mismo stat destraba mejoras propias', () => {
+    newTower();
+    player.statPoints = LEVEL_PICK.points;
+    const offer = levelOffer(player);
+    checkEq(offer.length, 3, 'se ofrecen 3 cartas');
+    checkEq(levelOffer(player), offer, 'la oferta queda fija hasta elegir (cerrar la ventana no la cambia)');
+    check(!chooseLevelPick(player, Object.keys(TOWER_STATS).find(k => !offer.includes(k))), 'no se puede elegir algo que no se ofreció');
+    const k = offer[0], before = player.towerStats[k];
+    check(chooseLevelPick(player, k), 'se elige una carta');
+    checkEq(player.towerStats[k], before + LEVEL_PICK.points, 'la carta da los 5 puntos juntos');
+    checkEq(player.statPoints, 0, 'y gasta los puntos del nivel');
+    // tres veces Fuerza: Piel de Roble
+    player.statPoints = 0; changeTowerStat(player, 'str', 15 - player.towerStats.str); levelPerkTick(player);
+    check(levelPerksOf(player).some(p => p.name === 'Piel de Roble') && effDmgReduction(player) >= 0.1, 'Fuerza ×3: Piel de Roble (−10% de daño recibido)');
+    changeTowerStat(player, 'vis', 15 - player.towerStats.vis);
+    checkEq(relicLuck(player), 2, 'Visión ×3: el doble de chance de reliquias');
+    toggleStatsWindow(true); player.statPoints = LEVEL_PICK.points; player.levelOffer = null; renderStatsWindow();
+    checkEq(document.querySelectorAll('#level-cards .level-card').length, 3, 'la ventana de stats muestra las 3 cartas');
+    toggleStatsWindow(false);
+}, { random: true });
 test('Torre: las Páginas de Arén — una por piso en un rincón apartado, se juntan al pisarla y no vuelven a aparecer', () => {
     arenStore = { found: {} };
     newTower();
