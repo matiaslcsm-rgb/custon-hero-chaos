@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Tipografías candidatas</title>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans&family=VT323&family=Silkscreen&family=Jersey+10&family=Tiny5&display=swap" rel="stylesheet">
+<style>
+body { background: #16181d; color: #f2e6c8; margin: 16px; font-family: sans-serif; }
+.row { display: grid; grid-template-columns: 140px 1fr; gap: 12px; padding: 10px 0; border-bottom: 1px solid #333; align-items: center; }
+.name { color: #ffd166; font-size: 13px; }
+.s1 { font-size: 13px; } .s2 { font-size: 18px; } .s3 { font-size: 28px; }
+.dmg { color: #ff6b6b; } .gold { color: #ffd166; } .heal { color: #69db7c; }
+</style></head><body>
+<p>Comparación (2026-10-14): números, pares que se confunden (5/S, 8/B, 0/O, 1/l) y textos del juego en 3 tamaños.</p>
+<script>
+const fonts = ['Pixelify Sans (la de hoy)', 'VT323', 'Silkscreen', 'Jersey 10', 'Tiny5'];
+const sample = '<span class="s1">Elegí una mejora (5 puntos) · 1868/1868 · 105g · Nv 15 · 0,5 s</span><br>' +
+  '<span class="s2">0123456789 · 5S 8B 0O 1l · <span class="dmg">-247</span> <span class="heal">+35</span> <span class="gold">1050g</span></span><br>' +
+  '<span class="s3">PISO 5 DE 10 · ¡Nivel 15!</span>';
+fonts.forEach(f => { const fam = f.split(' (')[0]; document.write(`<div class="row"><div class="name">${f}</div><div style="font-family:'${fam}'">${sample}</div></div>`); });
+</script>
+</body></html>

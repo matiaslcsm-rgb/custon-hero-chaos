@@ -827,6 +827,12 @@ Las fases 3 y 4 son las más grandes: hay que rehacer pruebas y volver a medir e
 también tiene que aprender a esquivar los ataques anunciados).
 
 ## Interfaz y calidad de vida (lista viva)
+- **Tipografía Tiny5 en vez de Pixelify Sans (2026-10-14, pedido del usuario: "otra tipografía que vaya más a tono y
+  cueste menos leer los números").** Con Pixelify Sans el 5 se leía como S ("PISO S DE 10", "Nivel 1S"). Se compararon 5
+  fuentes pixel de Google Fonts en `docs/arte/tipografias.html` (números, pares 5/S 8/B 0/O 1/l y textos del juego en 3
+  tamaños): Tiny5 es la más parecida en tono y distingue bien los números; Jersey 10 también, pero más chica y angosta;
+  VT323 queda fina; Silkscreen es todo mayúsculas y muy ancha. De paso se arregló la ventana de stats (la descripción
+  quedaba en una columna angosta desde que se sacó el botón +).
 - ✅ **La Torre por dentro** (2026-10-14, `js/towerLore.js`, diseño en `docs/TORRE-MUNDO.md`): el piso 1 sigue afuera;
   del 2 en adelante, muro exterior de piedra y una grilla de salones de 38×30 con muros de 2 casillas y un portón de
   4-6 por tramo, más 26 columnas. La chance de que un tramo esté derrumbado baja con el piso (50% en el 2, 12% en el 9):

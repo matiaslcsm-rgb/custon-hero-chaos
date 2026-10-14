@@ -1,14 +1,14 @@
 // Infinite Tower: interfaz en pixel art (2026-10-13, estilo principal de la Torre; va con el suelo en pixel art, towerPixel.js).
 //
 //   - HTML (ventanas, barra del héroe, avisos): body.pixel-ui prende el tema de style.css (paneles oscuros con borde de
-//     píxeles y fuente Pixelify Sans) encima del de pergamino.
+//     píxeles y fuente Tiny5) encima del de pergamino.
 //   - CANVAS: con el pixel art prendido, la letra de los carteles dibujados (Georgia) pasa a la fuente pixel. Y en la
 //     pasada de interfaz (título del piso, minimapa, barra del jefe, cartel de campeones, mapa grande, cartel del arma)
 //     los colores del pergamino se cambian por los del panel oscuro: el papel pasa a oscuro y la tinta a texto claro.
 //     Se hace en el contexto del canvas (ctx.font, fillStyle, strokeStyle), así no hay que tocar cada función de dibujo.
 
 let pxUiPass = false; // true mientras se dibuja la interfaz encima del mundo (renderTower)
-const PXUI_FONT = "'Pixelify Sans', Consolas, monospace";
+const PXUI_FONT = "'Tiny5', Consolas, monospace";
 const PXUI_FILL = {
     '#e9dcc0': '#241e19', '#f1e7d0': '#241e19', '#e4d6b9': '#2f2822', '#d8c7a3': '#2f2822', '#f3e7c9': '#efe4cc',
     'rgba(241,231,208,0.97)': 'rgba(36,30,25,0.96)', 'rgba(241,231,208,0.93)': 'rgba(36,30,25,0.93)', 'rgba(233,220,192,0.95)': 'rgba(36,30,25,0.95)',
