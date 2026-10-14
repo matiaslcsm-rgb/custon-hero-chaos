@@ -1660,6 +1660,21 @@ test('Torre: pedidos que cruzan pisos — la llave del Guardián de Arena (piso 
     const D = bfsFrom(L3, L3.start.x, L3.start.y);
     check(sunk.every(c => !chestUnderWater(L3, c) && D[c.y * COLS + c.x] >= 0), 'los cofres hundidos quedan al alcance');
 }, { random: true });
+test('Torre: misterio del piso 5 — los relojes dan vuelta las compuertas de arena del laberinto (siempre queda camino)', () => {
+    newTower(); enterTowerFloor(5);
+    const L = arenas[0], S = L.sandGates;
+    check(S && S.gates.length >= 4, `el laberinto del piso 5 tiene compuertas de arena (${S && S.gates.length})`);
+    const reach = () => bfsFrom(L, L.start.x, L.start.y)[L.stairs.y * COLS + L.stairs.x] >= 0;
+    const shut = g => !walkable(L, g.x, g.y);
+    check(S.gates.every(g => shut(g) === (g.group === 0)) && reach(), 'arranca con una tanda cerrada y hay camino a la escalera');
+    const g0 = S.gates.find(g => g.group === 0), g1 = S.gates.find(g => g.group === 1);
+    const c = L.creeps.find(o => o.isAlive()); Object.assign(c, { x: g1.x, y: g1.y });
+    Object.assign(player, { arena: L, x: L.start.x, y: L.start.y });
+    sandClockTick(L, SANDCLOCK.period);
+    check(!shut(g0) && !shut(g1) && reach(), 'se da vuelta: abre la otra tanda, y no cierra la que tiene a alguien encima');
+    c.x = g1.x + 50; sandClockTick(L, 0.1);
+    check(shut(g1) && S.gates.every(g => shut(g) === (g.group === 1)) && reach(), 'cuando se corre, se cierra; y sigue habiendo camino');
+}, { random: true });
 test('Torre: la gente del pueblo pasea adentro del pueblo y habla con F (otra frase si le volvés a hablar)', () => {
     newTower(); enterTowerFloor(3);
     const L = arenas[0], folk = townFolk(L), t = L.town;

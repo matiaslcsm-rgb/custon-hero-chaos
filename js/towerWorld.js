@@ -284,6 +284,7 @@ function generateTowerLevel(floor) {
     placeChests(level, clearings.concat(shuffle(rooms.filter(r => r !== first && r !== guardRoom)).slice(0, 5 - clearings.length)));
     placeSecretRooms(level, dist); // cámaras selladas con una pared agrietada (towerSecrets.js)
     placeHiddenBoss(level, dist); // y el jefe escondido del piso
+    placeSandGates(level); // el misterio del piso 5: compuertas de arena que cambian el laberinto (towerMysteries.js)
     level.creeps.forEach(c => { c.spawnTime = -1e9; }); // sin el oro extra por velocidad de las oleadas (no aplica en la Torre)
     return level;
 }

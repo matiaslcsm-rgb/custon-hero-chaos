@@ -294,6 +294,7 @@ function updateTower(dt) {
     mageTick(player); // la Carga del Mago (towerMage.js)
     specialTick(player); // lo que sigue de la especial: lluvia, meteoro, suelo ardiendo (towerSpecials.js)
     folkTick(level, dt); // la gente del pueblo pasea (towerFolk.js)
+    sandClockTick(level, dt); // los relojes del piso 5 (towerMysteries.js)
     towerAutosave(); // cada 15 s (towerSave.js)
     unstickFromWall(player);
     // Cuaderno (REWORK.md §1): moverse y esquivar se detectan leyendo el estado, sin tocar el código compartido.
@@ -555,6 +556,7 @@ function renderTower(level, dt) {
     drawTowerTiles(level);
     drawCracks(level); // paredes agrietadas (towerSecrets.js)
     drawQuestDoors(level); // rejas de los pedidos (towerQuests.js)
+    drawSandGates(level); // compuertas de arena del piso 5 (towerMysteries.js)
     pxDrawLoot(level); // cofres y botín (towerPixelProps.js)
     const underFx = () => {
         drawTowerZones(level); // lo que dejan los jefes en el piso (towerBosses.js)

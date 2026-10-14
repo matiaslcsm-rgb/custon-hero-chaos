@@ -838,6 +838,12 @@ también tiene que aprender a esquivar los ataques anunciados).
 - ✅ **Jefe escondido del piso 7: el Lobo de Escarcha** (2026-10-14; lo empezó la corrida automática que se detuvo y
   se completó acá): en el mirador cerrado (sala sellada con grieta), aviso de Isla la farolera; suelta las **Garras del
   Lobo de Escarcha** (guantes con crítico y velocidad de ataque). Verificado: la sala se arma en 8 de 8 pisos 7.
+- ✅ **El misterio del piso 5: los relojes cambian el laberinto** (2026-10-14, `js/towerMysteries.js`): 8 compuertas
+  de arena de lado a lado de los pasillos, en dos tandas. Cada 30 s los relojes se dan vuelta: una tanda se cierra
+  (bloque de arena con un reloj dibujado) y la otra se abre (línea de arena en el piso). 4 s antes, las que se van a
+  cerrar largan arena. Nunca se cierra una con alguien encima. Se arman de a una, prefiriendo el camino más corto a la
+  escalera, y solo se acepta la que cerrada con su tanda deja camino. Medido en 20 pisos 5: 20/20 con 8 compuertas,
+  y el reloj cambia el largo del camino en 18/20 (hasta 58 pasos).
 - ✅ **El misterio del piso 3: el agua baja** (2026-10-14, `js/towerQuests.js`): al abrir las compuertas con la llave,
   las cisternas se vacían: todos los pozos hondos del piso quedan en fondo seco (se pisan) y en el fondo de los dos más
   grandes asoman **cofres hundidos** (tesoro de sala secreta) que con agua no se veían. Medido en 20 pisos 3: 2 cofres en
