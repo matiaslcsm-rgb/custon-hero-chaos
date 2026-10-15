@@ -838,6 +838,10 @@ también tiene que aprender a esquivar los ataques anunciados).
 - ✅ **Jefe escondido del piso 7: el Lobo de Escarcha** (2026-10-14; lo empezó la corrida automática que se detuvo y
   se completó acá): en el mirador cerrado (sala sellada con grieta), aviso de Isla la farolera; suelta las **Garras del
   Lobo de Escarcha** (guantes con crítico y velocidad de ataque). Verificado: la sala se arma en 8 de 8 pisos 7.
+- ✅ **El mercader vende reliquias** (2026-10-14, `js/towerUI.js`): 3 por piso, a 200g + 60 por piso (320 en el piso 2,
+  como un Tomo de Talento); "Cambiar las reliquias" saca otras 3 por 25g, cada cambio 50% más caro. El cartel muestra
+  qué hace y su conjunto. Medido: el piloto llega al piso 2 con ~830g (con el precio de 120+40 compraba 4: el doble de
+  lo que cae). La columna "A la venta" de la tienda quedó más ancha (los nombres se partían en varias líneas).
 - ✅ **5 reliquias más (22)** (2026-10-14): etiqueta nueva **Hielo** (❄️; conjunto Glaciar: las ralentizaciones duran el
   doble) con **Escarcha** (al pegar, a veces frena 35% por 2 s), **Copo** (al esquivar, frena a los cercanos) y **Carámbano**
   (al matar, estalla en hielo); **Garfio** (sangrado: al esquivar o parar, hace sangrar a los cercanos) y **Nube Cargada**

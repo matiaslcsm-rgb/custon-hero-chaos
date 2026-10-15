@@ -657,7 +657,7 @@ body.ink-theme #hb-slots { grid-template-columns: repeat(4, 1fr); }
 .bag-item .ink-icon { max-width: 64px; }
 
 /* Infinite Tower: mercader del pueblo */
-.tshop-layout { display: grid; grid-template-columns: 1fr 1fr 1.1fr; gap: 12px; align-items: start; }
+.tshop-layout { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 12px; align-items: start; }
 .tshop-layout h4 { margin: 0 0 6px; }
 .tshop-row { display: flex; align-items: center; gap: 8px; padding: 4px 6px; margin-bottom: 4px; border: 1px solid #c9b791; background: #f1e7d0; }
 .tshop-row .ink-icon { width: 34px; height: 34px; }

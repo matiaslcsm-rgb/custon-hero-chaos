@@ -234,6 +234,25 @@ function buyFloorMap(hero) {
     log(`🗺️ Compraste el mapa del piso (${price}g): se ve todo lo que se puede caminar (M para verlo grande). Las salas tapiadas no figuran.`); sfx('coin');
     return true;
 }
+// Reliquias a la venta (ROADMAP T00, "Mercader y herrero nuevos", 2026-10-14): 3 por piso; cambiarlas cuesta poco y cada
+// cambio sale más caro. Precio según el piso (como el resto del botín, más caras arriba).
+const RELIC_SHOP = { count: 3, base: 200, perFloor: 60, reroll: 25, rerollGrowth: 1.5 }; // medido: el piloto llega al piso 2 con ~830g; con 120+40 se compraba 4 (el doble de lo que cae)
+const relicPrice = level => RELIC_SHOP.base + RELIC_SHOP.perFloor * level.floor;
+const relicRerollPrice = level => Math.round(RELIC_SHOP.reroll * Math.pow(RELIC_SHOP.rerollGrowth, level.relicRerolls || 0));
+function relicStock(level) { return level.relicStock || (level.relicStock = shuffle(Object.keys(RELICS)).slice(0, RELIC_SHOP.count)); }
+function buyRelic(hero, id) {
+    const level = hero.arena, price = relicPrice(level), stock = relicStock(level);
+    if (!stock.includes(id)) return false;
+    if (hero.gold < price) { log(`🛒 Te faltan ${price - hero.gold}g para ${RELICS[id].name}.`); return false; }
+    hero.gold -= price; stock.splice(stock.indexOf(id), 1); addRelic(hero, id); sfx('coin');
+    return true;
+}
+function rerollRelics(hero) {
+    const level = hero.arena, price = relicRerollPrice(level);
+    if (hero.gold < price) { log(`🛒 Te faltan ${price - hero.gold}g para cambiar las reliquias.`); return false; }
+    hero.gold -= price; level.relicRerolls = (level.relicRerolls || 0) + 1; level.relicStock = null; relicStock(level); sfx('coin');
+    return true;
+}
 function sellTowerItem(hero, item) {
     const price = towerSellPrice(item);
     hero.bag = hero.bag.filter(b => b.item !== item);
@@ -281,6 +300,22 @@ function renderTowerShop() {
     tome.onmouseenter = () => { tip.innerHTML = `<div class="tt-name">📘 Tomo de Talento</div><div>+1 punto de stats para repartir (tecla C). Siempre a la venta; cada uno cuesta 25% más que el anterior. Al morir cuenta como cualquier punto puesto (la mitad queda en tus restos).</div>`; };
     tome.querySelector('button').onclick = () => { buyTowerTome(player); renderTowerShop(); };
     if (inTown) stock.appendChild(tome); // los tomos, solo en el pueblo
+    if (inTown) { // las reliquias del mercader (3 por piso, se pueden cambiar)
+        const rp = relicPrice(level), rr = relicRerollPrice(level);
+        relicStock(level).forEach(id => {
+            const R = RELICS[id], T = RELIC_TAGS[R.tag], el = document.createElement('div'); el.className = 'tshop-row';
+            el.innerHTML = `<span class="tshop-tome">${R.icon}</span><span class="tshop-name"><b style="color:${T.color}">${R.name}</b> · reliquia (${T.name})</span>` +
+                `<button class="${player.gold >= rp ? 'primary-btn' : 'secondary-btn'}" ${player.gold >= rp ? '' : 'disabled'}>Comprar · ${rp}g</button>`;
+            el.onmouseenter = () => { tip.innerHTML = `<div class="tt-name">${R.icon} ${R.name}</div><div>${R.desc(relicCount(player, id) + 1)}</div><div class="subtitle">${T.icon} ${T.name}: con 3 de esta etiqueta, ${T.set}</div>`; };
+            el.querySelector('button').onclick = () => { buyRelic(player, id); renderTowerShop(); };
+            stock.appendChild(el);
+        });
+        const re = document.createElement('div'); re.className = 'tshop-row';
+        re.innerHTML = `<span class="tshop-tome">🔄</span><span class="tshop-name">Cambiar las reliquias</span><button class="${player.gold >= rr ? 'secondary-btn' : 'secondary-btn'}" ${player.gold >= rr ? '' : 'disabled'}>Cambiar · ${rr}g</button>`;
+        re.onmouseenter = () => { tip.innerHTML = '<div class="tt-name">🔄 Cambiar las reliquias</div><div>Saca otras 3 al azar. Cada cambio en este piso cuesta 50% más.</div>'; };
+        re.querySelector('button').onclick = () => { rerollRelics(player); renderTowerShop(); };
+        stock.appendChild(re);
+    }
     if (inTown && floorMapForSale(level)) { // el mapa del piso, en los pisos de abajo
         const mp = floorMapPrice(level), map = document.createElement('div'); map.className = 'tshop-row';
         map.innerHTML = `<span class="tshop-tome">🗺️</span><span class="tshop-name"><b>Mapa del piso</b> · todo lo que se camina</span>` +

@@ -1901,6 +1901,16 @@ test('Torre: reliquias de hielo — frenan (el conjunto Glaciar lo duplica), el 
     check(a.hp < hp && player.relicCloudAt > gameClock, 'la Nube tira su rayo y espera 8 s');
     checkEq(Object.keys(RELICS).length, 22, '22 reliquias');
 }, { random: true });
+test('Torre: el mercader vende 3 reliquias por piso y se pueden cambiar (cada cambio más caro)', () => {
+    newTower(); const L = arenas[0]; Object.assign(player, { arena: L, gold: 2000 });
+    const st = relicStock(L).slice();
+    checkEq(st.length, 3, '3 reliquias a la venta');
+    check(buyRelic(player, st[0]) && relicCount(player, st[0]) === 1 && player.gold === 2000 - relicPrice(L), 'se compra una');
+    checkEq(relicStock(L).length, 2, 'quedan 2');
+    const r1 = relicRerollPrice(L); check(rerollRelics(player) && relicStock(L).length === 3, 'cambiarlas saca otras 3');
+    check(relicRerollPrice(L) > r1, 'el próximo cambio cuesta más');
+    player.gold = 0; check(!buyRelic(player, relicStock(L)[0]), 'sin oro no se compra');
+}, { random: true });
 test('Torre: misterio del piso 5 — los relojes dan vuelta las compuertas de arena del laberinto (siempre queda camino)', () => {
     newTower(); enterTowerFloor(5);
     const L = arenas[0], S = L.sandGates;
