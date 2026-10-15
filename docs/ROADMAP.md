@@ -225,12 +225,12 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 - [x] **Ascenso infinito, paso 1** (2026-10-14: botón en la pantalla de la Cumbre; 11+ con biomas mezclados): después del piso 10 (la Cumbre) se ofrece "Seguir subiendo" o "Volver con el
       botín". Los pisos 11 en adelante ("Lo No Escrito": la torre crece) mezclan biomas al azar y escalan con la fórmula del piso (REWORK.md §14),
       con tope blando para que el jugador no choque contra una pared exponencial (medir con el piloto).
-- [ ] **Ascenso infinito, paso 2 (hitos):** guardián cada 5 pisos. Cada 10 pisos se suma un **agravante** a los
+- [x] **Ascenso infinito, paso 2 (hitos):** guardián cada 5 pisos. Cada 10 pisos se suma un **agravante** a los
       enemigos (escudo → escudo que refleja → escudo que cura a los cercanos), anunciado con un cartel. Piedra de
       regreso cada 10 pisos como punto de control.
   - [x] 2a: el primer agravante: desde el piso 20 los enemigos tienen escudo del 20% de su vida, con aviso al llegar. 2026-10-14.
-  - [ ] 2b: que refleje (30) y que cure a los cercanos (40); los que salen de noche también con escudo. (Guardián: ya hay
-        uno por piso; la piedra de regreso ya lleva a cualquier piso alcanzado.)
+  - [x] 2b: desde el 30 el escudo devuelve 30% de lo que absorbe; desde el 40, con escudo, curan 3% cada 3 s a los aliados
+        a 3 casillas. 2026-10-14. (Falta: los que salen de noche también con escudo.)
 - [x] **Guardar en el Ascenso:** el guardado de la run (towerSave.js) incluye el piso infinito y los agravantes. (2026-10-14:
       el piso y el Ascenso; los agravantes, cuando existan, en el paso 2.)
 - [ ] **La Cumbre como final:** una escena corta al vencer al guardián del piso 10 (la torre se abre, el cuaderno
@@ -408,6 +408,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 - 2026-10-14 · Ascenso infinito, paso 1 · e511640 · guardián por piso: 10 12206, 11 13387, 12 14569, 13 15750, 14 16931 de vida (+~1180 por piso, lineal: sin pared); biomas del 11 al 15 mezclados. "Otra run" sigue disponible. Pruebas 271/271.
 - 2026-10-14 · Guardar en el Ascenso · fec925e · el guardado lleva el Ascenso y el piso 11+ (probado con la foto del guardado). Pruebas 271/271.
 - 2026-10-14 · Ascenso, paso 2a (escudo desde el 20) · 47740cb · en el piso 19 sin escudo, en el 20 escudo del 20% de la vida que absorbe antes que la vida (probado). Pruebas 272/272.
+- 2026-10-14 · Ascenso, paso 2b (reflejo y cura) · COMMIT · probado: en el 30 un golpe al escudo te devuelve daño; en el 40 un aliado con 1 de vida se cura al lado de uno con escudo. Pruebas 272/272.
 - 2026-10-14 · Reliquias, paso 1 (motor y 12 reliquias) · 8c1e664 · piloto con reflejos humanos, 45 min: sin reliquias piso 3 y 2 muertes; con 0,25/0,35 de chance, 19 reliquias en 3 pisos (demasiadas); con 0,05/0,10, 7 en 3 pisos (~2,3 por piso), piso 4 y 0 muertes. Pruebas 239/239.
 - 2026-10-14 · Subir de nivel: 1 de 3 mejoras · 6716de1 · piloto con reflejos humanos, 45 min: piso 4 a los 41 min, 0 muertes, nivel 15, 6 reliquias (igual que sin la elección: piso 4 a los 43 min); destrabó Piel de Roble, Golpe Pesado y Sangre Espesa. Pruebas 240/240.
 - 2026-10-14 · Guerrero, paso 1a (clases y Templanza) · 259f4bc · banco de 60 s contra un muñeco, 8 muestras: 119 de daño/s sin pasiva y 116 con ella (sin diferencia: el combo ya critea; el ruido es ±25). Pruebas 241/241; se arregló la prueba de visión que fallaba si el héroe quedaba en una meseta.

@@ -133,7 +133,8 @@ function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     // La maldición (Condenado) solo amplifica el daño de creeps y de héroes sin maldición
     if (source && source.isHero && isCondemned(source)) takenPct -= (getEffect(target, 'CONDEMNED') || { mods: {} }).mods.dmgTakenPct || 0;
     final = Math.round(final * (1 + takenPct));
-    if (target.relicShield) final = relicAbsorb(target, final); // escudo de las reliquias (towerRelics.js)
+    if (target.relicShield) { const before = final; final = relicAbsorb(target, final); // escudo de las reliquias (towerRelics.js)
+        if (target.shieldReflect && source && source !== target && !opts.relic && before > final) dealDamage(target, source, Math.round((before - final) * target.shieldReflect), 'pure', { relic: true }); } // agravante del Ascenso (towerLore.js)
     if (target.oneHit) final = target.hp;
     const floor = hasFlag(target, 'preventDeath') ? 1 : 0;
     const hpLost = Math.max(0, Math.min(final, target.hp - floor));

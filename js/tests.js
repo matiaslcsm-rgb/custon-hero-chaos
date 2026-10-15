@@ -1980,6 +1980,12 @@ test('Torre: agravantes del Ascenso — desde el piso 20 los enemigos tienen esc
     check(c20.relicShield === Math.round(c20.maxHp * 0.2), 'en el 20, escudo del 20% de su vida');
     const hp = c20.hp; dealDamage(player, c20, 5, 'pure');
     check(c20.hp === hp && c20.relicShield < Math.round(c20.maxHp * 0.2), 'el escudo absorbe el golpe antes que la vida');
+    const L30 = towerLevel(30), c30 = L30.creeps.find(c => !c.isGuardian); Object.assign(player, { arena: L30 });
+    const php = player.hp; dealDamage(player, c30, 100, 'pure');
+    check(c30.shieldReflect && player.hp < php, 'desde el 30, el escudo devuelve parte del golpe');
+    const L40 = towerLevel(40), [h1, h2] = L40.creeps.filter(c => !c.isGuardian); Object.assign(h2, { x: h1.x + 1, y: h1.y, hp: 1 });
+    for (let i = 0; i < 70; i++) tickEffects(h1, 0.05);
+    check(h2.hp > 1, 'desde el 40, los que tienen escudo curan a los de al lado');
 }, { random: true });
 test('Torre: misterio del piso 5 — los relojes dan vuelta las compuertas de arena del laberinto (siempre queda camino)', () => {
     newTower(); enterTowerFloor(5);

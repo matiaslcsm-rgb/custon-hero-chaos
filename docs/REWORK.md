@@ -840,7 +840,8 @@ también tiene que aprender a esquivar los ataques anunciados).
   Lobo de Escarcha** (guantes con crítico y velocidad de ataque). Verificado: la sala se arma en 8 de 8 pisos 7.
 - ✅ **Agravantes del Ascenso, el primero** (2026-10-14, `js/towerLore.js`): desde el piso 20 los enemigos aparecen con
   un escudo del 20% de su vida (el mismo de las reliquias: absorbe antes que la vida), y al llegar al piso un aviso lo
-  dice. Faltan el escudo que refleja (30) y el que cura a los cercanos (40).
+  dice. Desde el 30 el escudo devuelve el 30% de lo que absorbe a quien pegó; desde el 40, mientras tienen escudo, curan
+  3% cada 3 s a los aliados a 3 casillas (romper los escudos primero importa).
 - ✅ **Ascenso infinito, paso 1** (2026-10-14): en la pantalla de la Cumbre, "⬆ Seguir subiendo (Lo No Escrito)" sigue
   la misma run en el piso 11 y más: biomas mezclados, el estado dice "Piso 11 · Lo No Escrito", y vencer a esos
   guardianes solo abre la escalera. El guardián crece lineal (+~1180 de vida por piso). Faltan los hitos (paso 2) y

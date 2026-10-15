@@ -150,15 +150,25 @@ function towerInterior(g) {
 
 // --- AGRAVANTES DEL ASCENSO (ROADMAP T1, "Ascenso infinito, paso 2", 2026-10-14) ---
 // Cada 10 pisos de Lo No Escrito se suma uno a los enemigos. Paso 2a: el primero, desde el piso 20, un ESCUDO del 20% de su
-// vida que absorbe el daño antes (el mismo escudo que el de las reliquias, towerRelics.js). Faltan: que refleje (30) y que
-// cure a los cercanos (40).
-const AGGRAVANTS = [{ at: 20, key: 'escudo', name: 'Escudo', desc: 'los enemigos tienen un escudo del 20% de su vida', shield: 0.2 }];
+// vida que absorbe el daño antes (el mismo escudo que el de las reliquias, towerRelics.js). Paso 2b: desde el 30 el escudo
+// devuelve parte de lo que absorbe; desde el 40, mientras tienen escudo, curan a los aliados cercanos.
+const AGGRAVANTS = [{ at: 20, key: 'escudo', name: 'Escudo', desc: 'los enemigos tienen un escudo del 20% de su vida', shield: 0.2 },
+    { at: 30, key: 'refleja', name: 'Escudo que refleja', desc: 'el escudo devuelve el 30% de lo que absorbe a quien pegó', reflect: 0.3 },
+    { at: 40, key: 'cura', name: 'Escudo que cura', desc: 'mientras tienen escudo, cada 3 s curan 3% a los aliados a 3 casillas', heal: 0.03 }];
 function floorAggravants(floor) { return AGGRAVANTS.filter(a => floor >= a.at); }
 function applyAggravants(level) {
     const ag = floorAggravants(level.floor);
     if (!ag.length || level.isCave) return;
     const sh = ag.reduce((s, a) => s + (a.shield || 0), 0);
-    level.creeps.forEach(c => { if (sh) c.relicShield = Math.round(c.maxHp * sh); });
+    const reflect = ag.reduce((s, a) => s + (a.reflect || 0), 0), heal = ag.reduce((s, a) => s + (a.heal || 0), 0);
+    level.creeps.forEach(c => {
+        if (sh) c.relicShield = Math.round(c.maxHp * sh);
+        if (reflect) c.shieldReflect = reflect;
+        if (heal) addEffect(c, { id: 'AGG_HEAL', name: 'Escudo que cura', duration: Infinity, flags: ['persistent'], tags: ['MEJORA'], hooks: { onTick(u, { dt }) {
+            if (!everyInterval(u, 'AGG_HEAL', dt, 3) || !(u.relicShield > 0)) return;
+            (u.arena.creeps || []).forEach(o => { if (o !== u && o.isAlive() && Math.hypot(o.x - u.x, o.y - u.y) <= 3) o.hp = Math.min(o.maxHp, o.hp + o.maxHp * heal); });
+        } } });
+    });
 }
 
 // --- CAMINOS QUE SE PIERDEN (TORRE-MUNDO.md, "cada piso, menos explorado") ---
