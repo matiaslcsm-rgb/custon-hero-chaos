@@ -1950,6 +1950,13 @@ test('Torre: reliquias de viento — Pluma da velocidad, Ráfaga empuja al esqui
     check(player.hp > hp, 'Sangre Fría cura al pegarle a uno que sangra');
     checkEq(Object.keys(RELICS).length, 27, '27 reliquias');
 }, { random: true });
+test('Torre: piso 1 — el muro del laberinto es la base de la torre y su entrada, el portón (se dibuja sin errores)', () => {
+    newTower(); const L = towerLevel(1), lab = L.lab;
+    check(onLabRim(L, lab.x, lab.y + 5) && !onLabRim(L, lab.x + 5, lab.y + 5), 'el borde del laberinto es la base de la torre');
+    Object.assign(player, { arena: L, x: L.gate.x, y: L.gate.y });
+    let ok = true; try { drawTowerGate(L); pxTowerBase(lab.x, lab.y); } catch (e) { ok = false; }
+    check(ok, 'el portón y la base se dibujan');
+}, { random: true });
 test('Torre: misterio del piso 5 — los relojes dan vuelta las compuertas de arena del laberinto (siempre queda camino)', () => {
     newTower(); enterTowerFloor(5);
     const L = arenas[0], S = L.sandGates;

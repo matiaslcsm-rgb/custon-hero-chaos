@@ -141,6 +141,9 @@ El orden de la lista **es** la prioridad: primero lo que destraba el loop comple
 - [x] **Transición de biomas:** cerca de la escalera ya se ve el bioma de arriba (arena que cae, nieve que entra).
       Hecho con el clima: a 14 casillas de la escalera, el del piso de arriba (más fuerte cuanto más cerca) y un aviso. 2026-10-14.
 - [ ] **El piso 1 afuera:** la torre gigante se ve desde el bosque (silueta al fondo) y el laberinto es su puerta.
+  - [x] El laberinto como base de la torre: muro exterior más oscuro y pesado con contrafuertes, y la entrada con dos
+        pilares altos y el cartel "Puerta de la Torre". 2026-10-14.
+  - [ ] (decisión) La silueta al fondo: en vista de arriba no hay "fondo"; opciones en Esperando al usuario.
 
 ## Fase T00 — Rework de equipo, habilidades y stats (decidido por el usuario 2026-10-14, `docs/PROPUESTA-SISTEMAS.md`)
 Decidido: **3 clases fijas al estilo Risk of Rain** (cada una con sus habilidades y su pasiva, ya no salen del
@@ -341,6 +344,10 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 ## Esperando al usuario
 (El modo automático anota acá las opciones de los ítems **(decisión)**, con una marcada como recomendada.)
 
+- **La silueta de la torre en el piso 1:** la vista es de arriba, así que no hay un "fondo" donde verla. Opciones: (a) **una
+  sombra gigante de la torre sobre el bosque que se mueve con el día (recomendada: se ve desde todo el piso sin tapar nada)**;
+  (b) la silueta en la pantalla de carga del piso 1 y en el mapa; (c) dejarlo con la base y el portón que ya están.
+
 - **La llave del piso desde el misterio (Arenas, paso 2b):** hoy la lleva el campeón más fuerte. Opciones: (a) **dejarla
   así y que el misterio dé otro premio (recomendada: ya funciona y el piloto la consigue)**; (b) en los pisos 3, 5 y 7 la
   llave sale del misterio (compuertas, relojes, faroles) en vez del campeón; (c) las dos: cualquiera de las dos abre.
@@ -392,6 +399,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 - 2026-10-14 · Joystick: B cierra las ventanas (pedido en el chat) · 4797cd0 · probado con un joystick simulado: en pausa B manda Esc, jugando esquiva. Pruebas 267/267.
 - 2026-10-14 · Cartas de nivel sin mouse y con joystick · 428656c · probado con teclas de verdad: → marca la segunda y U la elige (+5 al stat); el 3 elige la tercera; revisado en pantalla. La lista de stats filtra las mejoras por clase. Pruebas 268/268.
 - 2026-10-14 · Más reliquias, entrega 3 (22→27) · 8b0b958 · son de esquive, defensa y movimiento: probadas una por una (Pluma da velocidad, Ráfaga empuja y pega, Ventarrón da +30% tras esquivar, Sangre Fría cura); sin banco de daño (los muñecos no pegan). Pruebas 269/269.
+- 2026-10-14 · Piso 1: base de la torre y portón · COMMIT · revisado en pantalla (los pilares primero quedaban oscuros como el muro: aclarados). Pruebas 270/270.
 - 2026-10-14 · Reliquias, paso 1 (motor y 12 reliquias) · 8c1e664 · piloto con reflejos humanos, 45 min: sin reliquias piso 3 y 2 muertes; con 0,25/0,35 de chance, 19 reliquias en 3 pisos (demasiadas); con 0,05/0,10, 7 en 3 pisos (~2,3 por piso), piso 4 y 0 muertes. Pruebas 239/239.
 - 2026-10-14 · Subir de nivel: 1 de 3 mejoras · 6716de1 · piloto con reflejos humanos, 45 min: piso 4 a los 41 min, 0 muertes, nivel 15, 6 reliquias (igual que sin la elección: piso 4 a los 43 min); destrabó Piel de Roble, Golpe Pesado y Sangre Espesa. Pruebas 240/240.
 - 2026-10-14 · Guerrero, paso 1a (clases y Templanza) · 259f4bc · banco de 60 s contra un muñeco, 8 muestras: 119 de daño/s sin pasiva y 116 con ella (sin diferencia: el combo ya critea; el ruido es ±25). Pruebas 241/241; se arregló la prueba de visión que fallaba si el héroe quedaba en una meseta.

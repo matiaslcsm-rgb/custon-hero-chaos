@@ -563,6 +563,7 @@ function renderTower(level, dt) {
     drawHiddenArena(level); // y las de la grieta del jefe escondido (towerSecrets.js)
     drawLanterns(level); // faroles del piso 7
     drawSigns(level); // carteles de los caminos (towerLore.js)
+    drawTowerGate(level); // el portón de la torre en el piso 1 (towerPixel.js)
     pxDrawLoot(level); // cofres y botín (towerPixelProps.js)
     const underFx = () => {
         drawTowerZones(level); // lo que dejan los jefes en el piso (towerBosses.js)

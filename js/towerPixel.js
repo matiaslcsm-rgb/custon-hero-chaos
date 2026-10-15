@@ -347,12 +347,38 @@ function drawPixelWall(level, x, y) {
     }
     if (level.ramp && level.ramp[y * COLS + x]) { put(pxWall('ramp', 0)); return; }
     if (!w) return;
-    if (pxKind(level, x, y) === 'lab' && w === WALL.stone) { put(below ? pxWall('labFace', h & 1) : pxWall('labTop', h & 1)); return; }
+    if (pxKind(level, x, y) === 'lab' && w === WALL.stone) { put(below ? pxWall('labFace', h & 1) : pxWall('labTop', h & 1)); if (level.floor === 1 && onLabRim(level, x, y)) pxTowerBase(x, y); return; }
     if (w === WALL.obstacle || w === WALL.edge) { put(pxObstacle(level, h % 3), 0); return; }
     if (w === WALL.cliff) { const B = pxBiome(level); put(pxWall('cliff', h & 1, B.ground, B.ground.map(c => shade(c, -0.4)))); return; }
     if (w === WALL.palisade) { put(pxWall('palisade', 0)); return; }
     if (w === WALL.fountain) { put(pxWall('fountain', 0)); return; }
     if (w === WALL.stone) put(below ? pxWall('labFace', h & 1) : pxWall('labTop', h & 1));
+}
+
+// El piso 1 es afuera: el muro exterior del laberinto es la BASE DE LA TORRE (TORRE-MUNDO.md, "el laberinto es su puerta"):
+// piedra más oscura y pesada, con un contrafuerte cada 6 casillas.
+const onLabRim = (level, x, y) => { const L = level.lab; return L && (x === L.x || y === L.y || x === L.x + L.w - 1 || y === L.y + L.h - 1); };
+function pxTowerBase(x, y) {
+    ctx.fillStyle = 'rgba(18,14,22,0.38)'; ctx.fillRect(x * TILE, y * TILE, TILE, TILE);
+    ctx.fillStyle = 'rgba(255,240,220,0.06)'; ctx.fillRect(x * TILE, y * TILE + Math.round(TILE * 0.48), TILE, 2); // junta de las piedras grandes
+    if ((x + y) % 6 === 0) { ctx.fillStyle = 'rgba(0,0,0,0.32)'; ctx.fillRect(x * TILE + Math.round(TILE * 0.35), y * TILE, Math.round(TILE * 0.3), TILE); }
+}
+// El portón de la torre: dos pilares altos a los lados de la entrada del laberinto, con el nombre al acercarte
+function drawTowerGate(level) {
+    if (level.floor !== 1 || level.isCave || !level.lab || !level.gate) return;
+    const gx = level.lab.x, gy = level.gate.y;
+    [gy - 1, gy + 2].forEach(y => {
+        if (!level.explored[y] || !level.explored[y][gx]) return;
+        const x0 = gx * TILE, y0 = y * TILE;
+        const top = y0 - Math.round(TILE * 0.8), hgt = Math.round(TILE * 1.8);
+        ctx.fillStyle = '#110d0b'; ctx.fillRect(x0, top - 2, TILE, hgt + 2);                      // contorno
+        ctx.fillStyle = '#6b6274'; ctx.fillRect(x0 + 2, top, TILE - 4, hgt - 2);                   // piedra del pilar
+        ctx.fillStyle = '#8a8194'; ctx.fillRect(x0 + 2, top, 3, hgt - 2); ctx.fillRect(x0 + 2, top, TILE - 4, 3); // luz de arriba a la izquierda
+        ctx.fillStyle = '#4a4352'; for (let k = 1; k < 4; k++) ctx.fillRect(x0 + 2, top + Math.round(k * hgt / 4), TILE - 4, 2); // juntas
+        ctx.fillStyle = '#c9a227'; ctx.fillRect(x0 + Math.round(TILE / 2) - 3, top + Math.round(TILE * 0.3), 6, 6); // el emblema
+        ctx.fillStyle = '#ffd166'; ctx.fillRect(x0 + Math.round(TILE / 2) - 3, top + Math.round(TILE * 0.3), 2, 2);
+    });
+    if (player && player.arena === level && Math.hypot(player.x - level.gate.x, player.y - level.gate.y) < 4) pxLabel('Puerta de la Torre', (gx + 0.5) * TILE, (gy - 1.4) * TILE, '#ffd166');
 }
 
 // --- MINIMAPA Y MAPA GRANDE CON LA PALETA DEL PIXEL ART ---
