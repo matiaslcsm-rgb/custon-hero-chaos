@@ -1717,6 +1717,14 @@ test('Torre: el camino se pierde hacia arriba (entero en 1-3, hasta el pueblo en
     [5, 8, 10].forEach(f => { const L = towerLevel(f); check(bfsFrom(L, L.start.x, L.start.y)[L.stairs.y * COLS + L.stairs.x] >= 0, `piso ${f}: se llega a la escalera`); });
     check(roadHint(9).includes('tramos') && roadHint(10).includes('no hay caminos'), 'el aviso del piso lo dice');
 }, { random: true });
+test('Torre: penumbra — de día, el campo de los pisos 7-9 es más oscuro y el del 10 más todavía (1-6, normal)', () => {
+    newTower();
+    towerRun.startedAt = gameClock - 10; // de día
+    const sight = f => { const L = towerLevel(f); let p = null; for (let k = 0; k < 20000 && !p; k++) { const x = 3 + Math.floor(Math.random() * (COLS - 6)), y = 3 + Math.floor(Math.random() * (ROWS - 6)); if (walkable(L, x, y) && towerZoneAt(L, x, y) === ZONE.field && !(L.lanterns || []).some(o => Math.hypot(o.x - x, o.y - y) < 8)) p = { x, y }; } Object.assign(player, { arena: L }, p); return nightSight(player); };
+    const s5 = sight(5), s8 = sight(8), s10 = sight(10);
+    check(s5 === 0 && s8 < 0 && s10 < s8, `visión de día: piso 5 ${s5}, 8 ${s8.toFixed(2)}, 10 ${s10.toFixed(2)}`);
+    check(!towerIsNight(), 'no cambia el día y la noche');
+}, { random: true });
 test('Torre: misterio del piso 5 — los relojes dan vuelta las compuertas de arena del laberinto (siempre queda camino)', () => {
     newTower(); enterTowerFloor(5);
     const L = arenas[0], S = L.sandGates;
@@ -1756,6 +1764,7 @@ test('Torre: la gente del pueblo pasea adentro del pueblo y habla con F (otra fr
     check(folk.every(f => towerZoneAt(L, Math.round(f.x), Math.round(f.y)) === ZONE.town && walkable(L, Math.round(f.x), Math.round(f.y))), 'siguen adentro del pueblo, en casillas libres');
     check(folk.some((f, i) => Math.hypot(f.x - start[i][0], f.y - start[i][1]) > 0.5), 'caminan');
     const f = folk[0]; Object.assign(player, { arena: L, x: f.x + 1, y: f.y });
+    Object.assign(folk[1], { x: f.x + 12, y: f.y, tx: null }); // que el otro no quede más cerca (si no, contesta él)
     check(towerInteract() && f.say && FOLK[3].lines.includes(f.say.text), 'con F dice una frase de su gente');
     const first = f.say.text; towerInteract();
     check(f.say.text !== first, 'si le volvés a hablar, dice otra');

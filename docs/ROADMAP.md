@@ -135,7 +135,8 @@ El orden de la lista **es** la prioridad: primero lo que destraba el loop comple
   - [x] Paso 2: caminos que se cortan hacia arriba (4-6 hasta el pueblo, 7-9 tramos sueltos, 10+ ninguno): solo cambia
         el suelo, al final de armar el piso (el paso sigue abierto, los faroles del 7 ya están puestos). 2026-10-14.
   - [x] Paso 3: el mercader vende el mapa del piso (pisos 1-6): 40g + 20 por piso; muestra lo que se camina. 2026-10-14.
-  - [ ] Paso 4: pueblos más chicos arriba y más oscuro en 7-9.
+  - [x] Paso 4a: más oscuro arriba: penumbra de día en el campo (0,3 en 7-9, 0,5 desde el 10). 2026-10-14.
+  - [ ] Paso 4b (decisión): pueblos más chicos arriba, sin mercader fijo en 7-9 y sin pueblo desde el 10 (cambia la economía).
 - [x] **Transición de biomas:** cerca de la escalera ya se ve el bioma de arriba (arena que cae, nieve que entra).
       Hecho con el clima: a 14 casillas de la escalera, el del piso de arriba (más fuerte cuanto más cerca) y un aviso. 2026-10-14.
 - [ ] **El piso 1 afuera:** la torre gigante se ve desde el bosque (silueta al fondo) y el laberinto es su puerta.
@@ -324,6 +325,11 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 ## Esperando al usuario
 (El modo automático anota acá las opciones de los ítems **(decisión)**, con una marcada como recomendada.)
 
+- **Pueblos más chicos arriba (Menos explorado, paso 4b):** la tabla de TORRE-MUNDO.md pide pueblo chico sin mercader fijo
+  en 7-9 y sin pueblo desde el 10. Opciones: (a) **solo achicar el pueblo y sacar la gente en 10+, el mercader sigue**
+  (recomendada: no toca la economía); (b) en 7-9 el mercader aparece algunas runs (como el herrero) y en 10+ no hay
+  pueblo; (c) hacerlo tal cual la tabla.
+
 ## Hecho por el modo automático
 (Fecha · ítem · commit · qué se midió.)
 - 2026-10-14 · Las Páginas de Arén · 696aecb · 3 torres × 10 pisos: siempre aparece y se alcanza; 280-400 pasos de la entrada (87-100% del máximo del campo). Pruebas 234/234.
@@ -350,6 +356,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 - 2026-10-14 · Menos explorado, paso 1 (carteles) · f1829d0 · 20/20 pisos 1-3 con los 2 carteles, el primero a 3-8 casillas de la entrada; piso 4 sin carteles. Pruebas 253/253.
 - 2026-10-14 · Menos explorado, paso 3 (el mapa del piso) · a427481 · pisos 1/3/6: 60/100/160g, muestra el 84/87/90% del mapa, tarda ~20 ms; las salas tapiadas no figuran; comprado desde la tienda en pantalla. Pruebas 254/254.
 - 2026-10-14 · Menos explorado, paso 2 (el camino se pierde) · e48d717 · casillas de camino en 5 torres: piso 1 638-930, 4-6 204-403, 7-9 158-265 (primero con tramos de 1 cada 2 quedaba más que en 4-6: pasé a 1 cada 3), 10: 0; escalera alcanzable; faroles del 7 siguen en 8. Pruebas 255/255.
+- 2026-10-14 · Menos explorado, paso 4a (penumbra) · COMMIT · visión de día en el campo: piso 5 6 casillas, piso 8 5,25, piso 10 4,75; de noche igual que antes. Se arregló de paso la prueba de la gente del pueblo (a veces contestaba el otro vecino). Pruebas 256/256.
 - 2026-10-14 · Reliquias, paso 1 (motor y 12 reliquias) · 8c1e664 · piloto con reflejos humanos, 45 min: sin reliquias piso 3 y 2 muertes; con 0,25/0,35 de chance, 19 reliquias en 3 pisos (demasiadas); con 0,05/0,10, 7 en 3 pisos (~2,3 por piso), piso 4 y 0 muertes. Pruebas 239/239.
 - 2026-10-14 · Subir de nivel: 1 de 3 mejoras · 6716de1 · piloto con reflejos humanos, 45 min: piso 4 a los 41 min, 0 muertes, nivel 15, 6 reliquias (igual que sin la elección: piso 4 a los 43 min); destrabó Piel de Roble, Golpe Pesado y Sangre Espesa. Pruebas 240/240.
 - 2026-10-14 · Guerrero, paso 1a (clases y Templanza) · 259f4bc · banco de 60 s contra un muñeco, 8 muestras: 119 de daño/s sin pasiva y 116 con ella (sin diferencia: el combo ya critea; el ruido es ±25). Pruebas 241/241; se arregló la prueba de visión que fallaba si el héroe quedaba en una meseta.

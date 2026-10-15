@@ -838,6 +838,9 @@ también tiene que aprender a esquivar los ataques anunciados).
 - ✅ **Jefe escondido del piso 7: el Lobo de Escarcha** (2026-10-14; lo empezó la corrida automática que se detuvo y
   se completó acá): en el mirador cerrado (sala sellada con grieta), aviso de Isla la farolera; suelta las **Garras del
   Lobo de Escarcha** (guantes con crítico y velocidad de ataque). Verificado: la sala se arma en 8 de 8 pisos 7.
+- ✅ **Penumbra arriba** (2026-10-14, `js/towerWorld.js`): de día, el campo de los pisos 7-9 tiene 0,3 de oscuridad y
+  el del 10 en adelante 0,5 (se ve el velo y las luces, y se ve menos: 6 casillas en el piso 5, 5,25 en el 8, 4,75 en
+  el 10). No cambia el día y la noche ni lo que sale de noche.
 - ✅ **El camino se pierde hacia arriba** (2026-10-14, `js/towerLore.js`): pisos 1-3, el camino entero; 4-6, solo hasta
   el pueblo; 7-9, tramos sueltos (uno de cada tres tramos de 12 pasos); 10 en adelante, ninguno. Solo cambia el suelo:
   el paso que tallaba el camino sigue abierto. El aviso al llegar al piso y el objetivo lo dicen ("Buscá el pueblo (el

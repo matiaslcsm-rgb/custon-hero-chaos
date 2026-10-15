@@ -557,6 +557,10 @@ function towerDarkness(t = towerTimeOfDay()) {
     return 1 - (t - D.day - D.dusk - D.night) / D.dawn;
 }
 function towerIsNight() { return towerDarkness() >= 0.5; }
+// Penumbra del piso (TORRE-MUNDO.md, "menos explorado": luz normal en 1-6, más oscuro en 7-9, oscuro de 10 en adelante).
+// Es el mínimo de oscuridad del campo también de día; no cambia el día y la noche (ni lo que sale de noche).
+const FLOOR_GLOOM = [[10, 0.5], [7, 0.3]];
+function floorGloom(level) { const g = level && !level.isCave && FLOOR_GLOOM.find(([f]) => level.floor >= f); return g ? g[1] : 0; }
 // Lo que falta para el próximo cambio (para el panel)
 function towerDayLabel() {
     const t = towerTimeOfDay(), D = DAYNIGHT, night = towerIsNight();
@@ -569,7 +573,7 @@ function nightSight(hero) {
     const level = hero.arena;
     if (level && level.isCave) return CAVE.sight; // la cueva es oscura siempre
     if (!level || !level.zone || towerZoneAt(level, hero.x, hero.y) !== ZONE.field) return 0;
-    return DAYNIGHT.nightSight * towerDarkness() + lanternSight(hero); // el piso 7, con sus faroles (towerMysteries.js)
+    return DAYNIGHT.nightSight * Math.max(towerDarkness(), floorGloom(level)) + lanternSight(hero); // la penumbra del piso y los faroles del 7 (towerMysteries.js)
 }
 // Al caer la noche aparecen criaturas nocturnas en el campo del piso donde estás; al amanecer, las que no te vieron se van.
 function towerDayNightTick(level) {
@@ -603,7 +607,7 @@ function towerDayNightTick(level) {
 // Capa de oscuridad (en pantalla): se recorta donde hay luz (vos, el pueblo, los santuarios). El laberinto tiene antorchas.
 let nightLayer = null;
 function drawTowerNight(level) {
-    const dark = level.isCave ? 0.82 : level.town ? towerDarkness() : 0;
+    const dark = level.isCave ? 0.82 : level.town ? Math.max(towerDarkness(), floorGloom(level)) : 0;
     if (dark <= 0.01 || towerZoneAt(level, player.x, player.y) === ZONE.lab) return;
     if (!nightLayer || nightLayer.width !== screenW() || nightLayer.height !== screenH()) { nightLayer = document.createElement('canvas'); nightLayer.width = screenW(); nightLayer.height = screenH(); }
     const g = nightLayer.getContext('2d');
