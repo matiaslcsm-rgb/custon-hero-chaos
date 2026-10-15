@@ -1970,6 +1970,7 @@ test('Torre: Ascenso infinito — en la Cumbre "Seguir subiendo" lleva al piso 1
         check(new Set([11, 12, 13, 14, 15].map(biomeFor)).size >= 3, 'los biomas se mezclan');
         const L = arenas[0]; L.guardian.hp = 0; updateTower(0.05);
         check(L.stairsOpen && gameState !== 'ENDED', 'vencer al guardián del 11 abre la escalera (no termina la run)');
+        check(towerSnapshot().run.ascent === true && towerSnapshot().run.floor === 11, 'el guardado se acuerda del Ascenso y del piso');
     } finally { towerSavePersist = persist; const b = document.getElementById('run-summary'); if (b) b.style.display = 'none'; }
 }, { random: true });
 test('Torre: misterio del piso 5 — los relojes dan vuelta las compuertas de arena del laberinto (siempre queda camino)', () => {
