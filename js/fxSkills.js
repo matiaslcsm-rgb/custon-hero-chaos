@@ -465,7 +465,7 @@ function playerDash(dir = null) { // dir: lo pasa el piloto automático (towerTe
         player.x = nx; player.y = ny; moved++;
     }
     if (!moved) return false;
-    player.dashReadyAt = gameClock + DASH.cooldown * archerHaste(player);
+    player.dashReadyAt = gameClock + DASH.cooldown * archerHaste(player) * (hasLevelFlag(player, 'quickDash') ? 0.6 : 1); // Paso de Viento (towerLevelUp.js)
     player.moveTarget = null; player.moveTimer = 0;
     addEffect(player, { id: 'DASH', name: 'Esquive', duration: DASH.iframes, flags: ['invulnerable', 'phasing'], tags: ['MEJORA'] });
     emit(player, 'onDodge', {}); // reliquias que se activan al esquivar (towerRelics.js)

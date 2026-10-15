@@ -170,7 +170,8 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
       Fuerza destraban un efecto, etc.). Reemplaza los 5 puntos por nivel; el piloto elige con una regla. 2026-10-14.
   - [x] Paso 2a: una mejora de clase a las 4 elecciones del stat principal: Remate Aturdidor (Guerrero), Flechazo
         Perforante (Arquero), Eco del Orbe (Mago). 2026-10-14.
-  - [ ] Paso 2b: una segunda mejora de clase (por ejemplo, una carga más de esquive o la parada devuelve más) a las 8.
+  - [x] Paso 2b: segunda mejora de clase a las 8: Espejo de Acero (parada doble y más larga), Paso de Viento (esquive
+        40% más rápido), Tormenta Mayor (+2 rayos). 2026-10-14. Vigilar la Tormenta Mayor (+67% a la tormenta).
 - [ ] **Las 3 clases, paso 1: el Guerrero** completo (combo, parada, rodar y su pasiva) con las teclas fijas; las
       habilidades dejan de salir del equipo. Medir con el piloto contra la espada de hoy.
   - [x] 1a: las armas iniciales son clases (Guerrero, Arquero, Mago: nombre en el pedestal y en el cartel, se guarda
@@ -363,6 +364,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 - 2026-10-14 · Pedidos que cruzan pisos, paso 3 (el Archivo Sellado) · 876ee0f · 20/20 pisos 6 con el archivo, alcanzable en los 20; la sala del Lector Sin Ojos sigue en 20/20; prueba nueva que recorre todos los pedidos. Pruebas 258/258.
 - 2026-10-14 · Sin mouse y con joystick (pedido en el chat) · e0069af · con teclas de verdad en el navegador: U apunta solo al Grunt, el héroe va y le pega (3000→2971), la mira se ve; el joystick no se pudo probar sin uno conectado (la prueba mira que los botones manden las teclas). Pruebas 259/259.
 - 2026-10-14 · Subir de nivel, paso 2a (mejoras de clase) · 77d3fc7 · Eco del Orbe: 40 orbes contra 4 muñecos agrupados, 1801→2002 de daño (+11%; contra uno solo no suma); el remate aturde y el flechazo atraviesa (probados). Pruebas 260/260.
+- 2026-10-14 · Subir de nivel, paso 2b (mejoras de clase a las 8) · COMMIT · tormenta contra 5 agrupados (promedio de 20): 87→145 de daño (+67%, de 3 a 5 rayos; enfriamiento de 7 s y llega tarde); la parada dura 0,45 s en vez de 0,3. Se arregló la prueba de la gente del pueblo (dejaba al héroe en casilla con decimales). Pruebas 260/260.
 - 2026-10-14 · Reliquias, paso 1 (motor y 12 reliquias) · 8c1e664 · piloto con reflejos humanos, 45 min: sin reliquias piso 3 y 2 muertes; con 0,25/0,35 de chance, 19 reliquias en 3 pisos (demasiadas); con 0,05/0,10, 7 en 3 pisos (~2,3 por piso), piso 4 y 0 muertes. Pruebas 239/239.
 - 2026-10-14 · Subir de nivel: 1 de 3 mejoras · 6716de1 · piloto con reflejos humanos, 45 min: piso 4 a los 41 min, 0 muertes, nivel 15, 6 reliquias (igual que sin la elección: piso 4 a los 43 min); destrabó Piel de Roble, Golpe Pesado y Sangre Espesa. Pruebas 240/240.
 - 2026-10-14 · Guerrero, paso 1a (clases y Templanza) · 259f4bc · banco de 60 s contra un muñeco, 8 muestras: 119 de daño/s sin pasiva y 116 con ella (sin diferencia: el combo ya critea; el ruido es ±25). Pruebas 241/241; se arregló la prueba de visión que fallaba si el héroe quedaba en una meseta.

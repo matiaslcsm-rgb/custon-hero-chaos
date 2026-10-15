@@ -18,7 +18,7 @@ function parryActive(h) { return !!(h && h.parry && gameClock < h.parry.until); 
 function swordParry(h, aim) {
     if (gameClock < (h.parryReadyAt || 0) || !h.isAlive() || hasFlag(h, 'stun') || h.charging) return false;
     const dx = aim.x - h.x, dy = aim.y - h.y, d = Math.hypot(dx, dy) || 1, dir = { dx: dx / d, dy: dy / d };
-    h.parry = { start: gameClock, until: gameClock + PARRY.window, dir, caught: 0 };
+    h.parry = { start: gameClock, until: gameClock + PARRY.window * (hasLevelFlag(h, 'mirrorParry') ? 1.5 : 1), dir, caught: 0 }; // Espejo de Acero (towerLevelUp.js)
     h.parryReadyAt = gameClock + PARRY.cooldown;
     h.attackTimer = 0;
     // el tajo de la parada: corto, pega poco (no empuja)
@@ -60,7 +60,7 @@ function reflectBullet(h, b) {
     const tx = o ? o.x : h.x + h.parry.dir.dx * 6, ty = o ? o.y : h.y + h.parry.dir.dy * 6;
     const dx = tx - b.x, dy = ty - b.y, d = Math.hypot(dx, dy) || 1, sp = Math.hypot(b.vx, b.vy) * PARRY.reflectSpeed;
     Object.assign(b, { vx: dx / d * sp, vy: dy / d * sp, reflected: true, owner: h, born: gameClock, life: 2.5, arrow: b.arrow, onHit: null,
-        dmg: Math.round(b.dmg * PARRY.reflectMult + effAttack(h) * PARRY.reflectAtk) });
+        dmg: Math.round((b.dmg * PARRY.reflectMult + effAttack(h) * PARRY.reflectAtk) * (hasLevelFlag(h, 'mirrorParry') ? 2 : 1)) });
     parrySuccess(h, b.x, b.y, '¡DEVUELTO!');
 }
 // Golpe cuerpo a cuerpo parado: no te toca y el que pegó queda aturdido

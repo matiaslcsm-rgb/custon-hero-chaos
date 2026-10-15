@@ -73,7 +73,7 @@ function mageOrbShot(h, from, aim, dmg, isCrit, bounces, perks, basic, hit) {
 function mageStorm(h, aim, perks = []) {
     if (gameClock < (h.stormReadyAt || 0)) return false;
     h.stormReadyAt = gameClock + MAGE.stormCd * Math.max(0.4, 1 - 0.15 * perkCount(perks, 'speed'));
-    const r = MAGE.stormRadius * (1 + 0.3 * perkCount(perks, 'area')), bolts = MAGE.stormBolts + perkCount(perks, 'bounce');
+    const r = MAGE.stormRadius * (1 + 0.3 * perkCount(perks, 'area')), bolts = MAGE.stormBolts + perkCount(perks, 'bounce') + (hasLevelFlag(h, 'bigStorm') ? 2 : 0); // Tormenta Mayor (towerLevelUp.js)
     const splash = perkCount(perks, 'size'), dmg = Math.round(effAttack(h) * MAGE.stormMult * (1 + MAGE.perk * perkCount(perks, 'dmg') + MAGE.stageDmg * perks.length));
     const foes = enemiesOf(h).filter(o => o.isAlive() && Math.hypot(o.x - aim.x, o.y - aim.y) <= r);
     const arena = fxArena(h);

@@ -838,6 +838,9 @@ también tiene que aprender a esquivar los ataques anunciados).
 - ✅ **Jefe escondido del piso 7: el Lobo de Escarcha** (2026-10-14; lo empezó la corrida automática que se detuvo y
   se completó acá): en el mirador cerrado (sala sellada con grieta), aviso de Isla la farolera; suelta las **Garras del
   Lobo de Escarcha** (guantes con crítico y velocidad de ataque). Verificado: la sala se arma en 8 de 8 pisos 7.
+- ✅ **Segunda mejora de clase, a las 8 elecciones** (2026-10-14): **Espejo de Acero** (Guerrero: la parada devuelve el
+  doble y su ventana pasa de 0,3 a 0,45 s), **Paso de Viento** (Arquero: el esquive se recarga 40% más rápido),
+  **Tormenta Mayor** (Mago: 5 rayos en vez de 3; +67% de daño de la tormenta contra un grupo — vigilar).
 - ✅ **Mejoras de clase al subir de nivel** (2026-10-14, `js/towerLevelUp.js`): a las 4 elecciones del stat principal de
   tu clase, una mejora que cambia cómo jugás: **Remate Aturdidor** (Guerrero, Fuerza: el tercer tajo aturde 0,8 s, no a
   los jefes), **Flechazo Perforante** (Arquero, Agilidad: el flechazo atraviesa y aturde a toda la línea), **Eco del

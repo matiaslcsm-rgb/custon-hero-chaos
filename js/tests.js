@@ -1792,6 +1792,12 @@ test('Torre: mejoras de clase al subir de nivel — remate que aturde, flechazo 
     // Mago: con 4 de Inteligencia
     newTower('AXE', { weapon: 'ADVENTURER_STAFF' }); player.towerStats.int = 20;
     check(hasLevelFlag(player, 'orbBounce') && !hasLevelFlag(player, 'finisherStun'), 'el Mago destraba el Eco del Orbe');
+    check(!hasLevelFlag(player, 'bigStorm'), 'la de las 8 todavía no'); player.towerStats.int = 40;
+    check(hasLevelFlag(player, 'bigStorm'), 'a las 8 elecciones, la Tormenta Mayor');
+    // Guerrero a las 8: la ventana de la parada dura 50% más
+    newTower('AXE', { weapon: 'ADVENTURER_SWORD' }); player.towerStats.str = 40; player.parryReadyAt = 0;
+    swordParry(player, { x: player.x + 3, y: player.y });
+    check(Math.abs(player.parry.until - player.parry.start - PARRY.window * 1.5) < 1e-6, 'Espejo de Acero: la parada dura más');
 }, { random: true });
 test('Torre: misterio del piso 5 — los relojes dan vuelta las compuertas de arena del laberinto (siempre queda camino)', () => {
     newTower(); enterTowerFloor(5);
@@ -1831,7 +1837,7 @@ test('Torre: la gente del pueblo pasea adentro del pueblo y habla con F (otra fr
     for (let i = 0; i < 300; i++) { gameClock += 0.05; folkTick(L, 0.05); }
     check(folk.every(f => towerZoneAt(L, Math.round(f.x), Math.round(f.y)) === ZONE.town && walkable(L, Math.round(f.x), Math.round(f.y))), 'siguen adentro del pueblo, en casillas libres');
     check(folk.some((f, i) => Math.hypot(f.x - start[i][0], f.y - start[i][1]) > 0.5), 'caminan');
-    const f = folk[0]; Object.assign(player, { arena: L, x: f.x + 1, y: f.y });
+    const f = folk[0]; Object.assign(f, { x: Math.round(f.x), y: Math.round(f.y), tx: null }); Object.assign(player, { arena: L, x: f.x + 1, y: f.y }); // en casillas enteras, como el héroe
     Object.assign(folk[1], { x: f.x + 12, y: f.y, tx: null }); // que el otro no quede más cerca (si no, contesta él)
     check(towerInteract() && f.say && FOLK[3].lines.includes(f.say.text), 'con F dice una frase de su gente');
     const first = f.say.text; towerInteract();

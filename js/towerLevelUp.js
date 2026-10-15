@@ -7,19 +7,22 @@
 //   (DEATH, tower.js) y el piloto automático (aiSpendStatPoints) funcionan igual.
 //   MEJORAS DE CLASE (paso 2, 2026-10-14): a las 4 elecciones del stat principal de tu clase, una mejora que cambia cómo
 //   se juega (no solo números): el remate del Guerrero aturde, el flechazo del Arquero atraviesa, el orbe del Mago rebota
-//   una vez más. Solo la ve y la destraba esa clase (cls).
+//   una vez más; y a las 8, otra (parada espejo, esquive que recarga rápido, tormenta mayor). Solo la ve y la destraba esa clase (cls).
 
 const LEVEL_PICK = { points: 5, offer: 3 };
 const LEVEL_PERKS = {
     str: [{ at: 3, name: 'Piel de Roble', desc: '−10% de daño recibido', mods: { dmgReduction: 0.1 } },
         { at: 4, cls: 'warrior', name: 'Remate Aturdidor', desc: 'el tercer tajo del combo aturde 0,8 s (no a los jefes)', flag: 'finisherStun' },
-        { at: 6, name: 'Golpe Pesado', desc: '+15% de daño', mods: { atkPct: 0.15 } }],
+        { at: 6, name: 'Golpe Pesado', desc: '+15% de daño', mods: { atkPct: 0.15 } },
+        { at: 8, cls: 'warrior', name: 'Espejo de Acero', desc: 'la parada devuelve el doble y su ventana dura 50% más', flag: 'mirrorParry' }],
     agi: [{ at: 3, name: 'Pies Ligeros', desc: '+8% de velocidad de movimiento', mods: { moveSpeedPct: 0.08 } },
         { at: 4, cls: 'archer', name: 'Flechazo Perforante', desc: 'el flechazo atraviesa y aturde a todos los de la línea', flag: 'snipePierce' },
-        { at: 6, name: 'Ojo Certero', desc: '+10% de crítico', mods: { critChance: 10 } }],
+        { at: 6, name: 'Ojo Certero', desc: '+10% de crítico', mods: { critChance: 10 } },
+        { at: 8, cls: 'archer', name: 'Paso de Viento', desc: 'el esquive se recarga 40% más rápido', flag: 'quickDash' }],
     int: [{ at: 3, name: 'Fuente Arcana', desc: '+2 de maná por segundo', mods: { manaRegen: 2 } },
         { at: 4, cls: 'mage', name: 'Eco del Orbe', desc: 'el orbe rebota una vez más', flag: 'orbBounce' },
-        { at: 6, name: 'Mente Afilada', desc: '+20% de amplificación de hechizo', mods: { spellAmp: 20 } }],
+        { at: 6, name: 'Mente Afilada', desc: '+20% de amplificación de hechizo', mods: { spellAmp: 20 } },
+        { at: 8, cls: 'mage', name: 'Tormenta Mayor', desc: 'la tormenta tira 2 rayos más', flag: 'bigStorm' }],
     vit: [{ at: 3, name: 'Sangre Espesa', desc: '+6% de robo de vida', mods: { lifesteal: 6 } },
         { at: 6, name: 'Coraza Viva', desc: '−15% de daño recibido (no se suma con Piel de Roble: vale la mayor)', mods: { dmgReduction: 0.15 } }],
     vis: [{ at: 3, name: 'Cazador de Tesoros', desc: 'reliquias: el doble de chance en campeones y cofres', relicLuck: 2 },
