@@ -1829,7 +1829,7 @@ test('Torre: reliquias nuevas — los rayos saltan (la Bobina cada 5 golpes, uno
     addRelic(player, 'COSTRA'); player.relicShield = 0;
     relicEmit(player, 'onKill', { victim: c });
     check(player.relicShield > 0, 'la Costra da escudo al matar');
-    checkEq(Object.keys(RELICS).length, 17, '17 reliquias');
+    check(Object.keys(RELICS).length >= 17, 'al menos 17 reliquias');
 }, { random: true });
 test('Torre: arena del guardián — al entrar a su sala se cierran las rejas; se abren al vencerlo o si te vas del piso', () => {
     newTower();
@@ -1884,6 +1884,22 @@ test('Torre: arena del jefe escondido — rota la grieta, al entrar bajan rejas 
     check(hb.locked && !walkable(L, g.x, g.y), 'adentro con el jefe vivo: rejas sobre la grieta');
     hb.unit.hp = 0; hiddenArenaTick(L);
     check(!hb.locked && walkable(L, g.x, g.y), 'vencido, se abren');
+}, { random: true });
+test('Torre: reliquias de hielo — frenan (el conjunto Glaciar lo duplica), el Garfio hace sangrar al esquivar, la Nube tira un rayo cada 8 s', () => {
+    const level = newTower('AXE', { weapon: 'ADVENTURER_SWORD' });
+    level.creeps.forEach(c => { c.hp = 0; });
+    for (let y = -2; y <= 2; y++) for (let x = -2; x <= 3; x++) level.walls[player.y + y][player.x + x] = 0;
+    const a = towerDummy(level, 1, 0);
+    addRelic(player, 'COPO'); relicEmit(player, 'onDodge', {});
+    check(getEffect(a, 'RELIC_CHILL') && getEffect(a, 'RELIC_CHILL').duration === 2, 'el Copo frena al esquivar');
+    addRelic(player, 'ESCARCHA'); addRelic(player, 'CARAMBANO');
+    check(relicSet(player, 'hielo'), 'con 3 de Hielo, el conjunto Glaciar');
+    relicChill(player, a); checkEq(getEffect(a, 'RELIC_CHILL').duration, 4, 'con el Glaciar, frena el doble');
+    addRelic(player, 'GARFIO'); relicEmit(player, 'onDodge', {});
+    check(getEffect(a, 'RELIC_BLEED'), 'el Garfio hace sangrar al esquivar');
+    const hp = a.hp; addRelic(player, 'NUBE'); player.relicCloudAt = 0; relicTick(player);
+    check(a.hp < hp && player.relicCloudAt > gameClock, 'la Nube tira su rayo y espera 8 s');
+    checkEq(Object.keys(RELICS).length, 22, '22 reliquias');
 }, { random: true });
 test('Torre: misterio del piso 5 — los relojes dan vuelta las compuertas de arena del laberinto (siempre queda camino)', () => {
     newTower(); enterTowerFloor(5);

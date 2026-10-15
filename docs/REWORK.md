@@ -838,6 +838,10 @@ también tiene que aprender a esquivar los ataques anunciados).
 - ✅ **Jefe escondido del piso 7: el Lobo de Escarcha** (2026-10-14; lo empezó la corrida automática que se detuvo y
   se completó acá): en el mirador cerrado (sala sellada con grieta), aviso de Isla la farolera; suelta las **Garras del
   Lobo de Escarcha** (guantes con crítico y velocidad de ataque). Verificado: la sala se arma en 8 de 8 pisos 7.
+- ✅ **5 reliquias más (22)** (2026-10-14): etiqueta nueva **Hielo** (❄️; conjunto Glaciar: las ralentizaciones duran el
+  doble) con **Escarcha** (al pegar, a veces frena 35% por 2 s), **Copo** (al esquivar, frena a los cercanos) y **Carámbano**
+  (al matar, estalla en hielo); **Garfio** (sangrado: al esquivar o parar, hace sangrar a los cercanos) y **Nube Cargada**
+  (rayo: cada 8 s, un rayo a uno cercano; +3% de daño medido).
 - ✅ **Los jefes escondidos pelean en arena** (2026-10-14, `js/towerSecrets.js`): en las salas tapiadas (pisos 2-9), una
   vez rota la grieta, si entrás con el jefe vivo bajan rejas sobre la abertura hasta que gane alguien (se abren al
   vencerlo, si morís, te vas del piso o el jefe sale de la sala).

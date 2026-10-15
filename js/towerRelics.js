@@ -7,13 +7,15 @@
 //   Paso 1: 12 reliquias en 4 etiquetas (fuego, sangrado, crítico, escudo). Se ganan al vencer campeones (a veces),
 //   al abrir cofres (a veces) y al vencer guardianes y jefes (siempre). Conviven con el equipo de siempre.
 //   Paso 2 (2026-10-14): +5 (17 en total): la etiqueta Rayo (Chispa, Pararrayos, Bobina) y Fuelle (fuego) y Costra (escudo).
+//   Paso 3 (2026-10-14): +5 (22): la etiqueta Hielo (Escarcha, Copo, Carámbano), Garfio (sangrado) y Nube (rayo).
 
 const RELIC_TAGS = {
     fuego: { name: 'Fuego', icon: '🔥', color: '#f77f00', set: 'Incendio: tus quemaduras pegan +50%.' },
     sangrado: { name: 'Sangrado', icon: '🩸', color: '#c1121f', set: 'Hemorragia: tus sangrados pegan +50%.' },
     critico: { name: 'Crítico', icon: '🎯', color: '#ffd166', set: 'Rebote: cada crítico tuyo salta a otro enemigo cercano (50% de tu daño).' },
     escudo: { name: 'Escudo', icon: '🛡️', color: '#8ecae6', set: 'Bastión: tu escudo se recarga el doble de rápido.' },
-    rayo: { name: 'Rayo', icon: '⚡', color: '#9ad1ff', set: 'Tormenta: tus rayos saltan a un enemigo más.' }
+    rayo: { name: 'Rayo', icon: '⚡', color: '#9ad1ff', set: 'Tormenta: tus rayos saltan a un enemigo más.' },
+    hielo: { name: 'Hielo', icon: '❄️', color: '#bde0fe', set: 'Glaciar: tus ralentizaciones duran el doble.' }
 };
 const RELIC_SET_AT = 3;
 const RELIC_DROP = { champion: 0.05, chest: 0.1 }; // medido: con 0,25/0,35 el piloto juntaba 19 en 3 pisos (48 campeones); meta ~2-5 por piso
@@ -48,7 +50,16 @@ const RELICS = {
     PARARRAYOS: { name: 'Pararrayos', icon: '🌩️', tag: 'rayo', desc: n => `Al recibir un golpe: un rayo a quien te pegó (${40 * n}% de tu daño).`,
         onDamaged(h, p, n) { if (p.source && p.source !== h && p.source.isAlive && p.source.isAlive()) relicZapAt(h, p.source, 0.4 * n); } },
     BOBINA: { name: 'Bobina', icon: '🌀', tag: 'rayo', desc: n => `Cada 5 golpes: un rayo que salta entre ${1 + n} enemigos (25% de tu daño).`, // medido: con 35% sumaba +7% (las demás, 2-4%)
-        onDealDamage(h, p, n) { h.relicCoil = (h.relicCoil || 0) + 1; if (h.relicCoil >= 5) { h.relicCoil = 0; relicZap(h, p.target, 0.25, 1 + n); } } }
+        onDealDamage(h, p, n) { h.relicCoil = (h.relicCoil || 0) + 1; if (h.relicCoil >= 5) { h.relicCoil = 0; relicZap(h, p.target, 0.25, 1 + n); } } },
+    NUBE: { name: 'Nube Cargada', icon: '☁️', tag: 'rayo', desc: n => `Cada 8 s: cae un rayo sobre un enemigo a 5 casillas (${50 * n}% de tu daño).` }, // relicTick
+    ESCARCHA: { name: 'Escarcha', icon: '❄️', tag: 'hielo', desc: n => `Al pegar: ${15 * n}% de frenar al enemigo 35% por 2 s.`,
+        onDealDamage(h, p, n) { if (Math.random() < 0.15 * n * relicProc(h)) relicChill(h, p.target); } },
+    COPO: { name: 'Copo', icon: '🌨️', tag: 'hielo', desc: n => `Al esquivar: frenás 35% a los enemigos a ${1 + n} casillas.`,
+        onDodge(h, p, n) { relicNear(h, 1 + n).forEach(e => relicChill(h, e)); } },
+    CARAMBANO: { name: 'Carámbano', icon: '🧊', tag: 'hielo', desc: n => `Al matar: estalla en hielo (radio 2): ${40 * n}% de tu daño y frena.`,
+        onKill(h, p, n) { relicBlast(h, p.victim, 2, 0.4 * n, 'ice'); relicNear(p.victim, 2).forEach(e => relicChill(h, e)); } },
+    GARFIO: { name: 'Garfio', icon: '🪝', tag: 'sangrado', desc: n => `Al esquivar o parar: hacés sangrar a los enemigos a ${1 + n} casillas.`,
+        onDodge(h, p, n) { relicNear(h, 1 + n).forEach(e => relicBleed(h, e)); }, onParry(h, p, n) { relicNear(h, 1 + n).forEach(e => relicBleed(h, e)); } }
 };
 
 function relicCount(h, id) { return (h.relics && h.relics[id]) || 0; }
@@ -96,6 +107,10 @@ function relicDot(h, t, id, name, pct, dur, tag) {
         if (everyInterval(u, id, dt, 1)) dealDamage(h, u, Math.max(1, Math.round(effAttack(h) * pct * mult)), 'pure', { relic: true });
     } } });
 }
+function relicChill(h, t) {
+    if (!t || !t.isAlive || !t.isAlive()) return;
+    addEffect(t, { id: 'RELIC_CHILL', name: 'Helado', duration: relicSet(h, 'hielo') ? 4 : 2, tags: ['PERJUICIO'], mods: { moveSpeedPct: -0.35 } });
+}
 function relicBurn(h, t) { relicDot(h, t, 'RELIC_BURN', 'Quemado', 0.3, 3 + relicCount(h, 'FUELLE'), 'fuego'); }
 // Rayos: le pega a uno y salta a los más cercanos que no tocó (uno más con el conjunto de Rayo)
 function relicZapAt(h, t, mult) {
@@ -134,6 +149,11 @@ function relicAbsorb(target, final) {
 function relicTick(h) {
     const e = getEffect(h, 'RELICS'), m = relicMods(h); // crítico y daño con escudo, en un efecto permanente
     if (e) e.mods = m; else addEffect(h, { id: 'RELICS', name: 'Reliquias', duration: Infinity, flags: ['persistent'], tags: ['MEJORA'], mods: m });
+    if (relicCount(h, 'NUBE') && gameClock >= (h.relicCloudAt || 0) && inCombat && inCombat()) { // la Nube: un rayo cada 8 s
+        h.relicCloudAt = gameClock + 8;
+        const t = relicNear(h, 5)[0];
+        if (t) relicZapAt(h, t, 0.5 * relicCount(h, 'NUBE'));
+    }
     const max = relicShieldMax(h);
     if (!max || (h.relicShield || 0) >= max) return;
     if (gameClock - (h.relicHitAt ?? -99) >= (relicSet(h, 'escudo') ? 2.5 : 5)) h.relicShield = max;
