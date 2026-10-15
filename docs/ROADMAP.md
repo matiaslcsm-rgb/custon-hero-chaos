@@ -233,7 +233,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
         a 3 casillas. 2026-10-14. (Falta: los que salen de noche también con escudo.)
 - [x] **Guardar en el Ascenso:** el guardado de la run (towerSave.js) incluye el piso infinito y los agravantes. (2026-10-14:
       el piso y el Ascenso; los agravantes, cuando existan, en el paso 2.)
-- [ ] **La Cumbre como final:** una escena corta al vencer al guardián del piso 10 (la torre se abre, el cuaderno
+- [x] **La Cumbre como final** (2026-10-14): una escena corta al vencer al guardián del piso 10 (la torre se abre, el cuaderno
       escribe la última página) antes de ofrecer seguir subiendo.
 
 ## Fase T2 — Sensación de juego y claridad
@@ -409,6 +409,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 - 2026-10-14 · Guardar en el Ascenso · fec925e · el guardado lleva el Ascenso y el piso 11+ (probado con la foto del guardado). Pruebas 271/271.
 - 2026-10-14 · Ascenso, paso 2a (escudo desde el 20) · 47740cb · en el piso 19 sin escudo, en el 20 escudo del 20% de la vida que absorbe antes que la vida (probado). Pruebas 272/272.
 - 2026-10-14 · Ascenso, paso 2b (reflejo y cura) · b056875 · probado: en el 30 un golpe al escudo te devuelve daño; en el 40 un aliado con 1 de vida se cura al lado de uno con escudo. Pruebas 272/272.
+- 2026-10-14 · La Cumbre como final · COMMIT · escena de 4 líneas que aparecen cada 1,6 s, página nueva del Cuaderno ("La Cumbre") y "Continuar" lleva al resumen; revisada en pantalla. Pruebas 272/272.
 - 2026-10-14 · Reliquias, paso 1 (motor y 12 reliquias) · 8c1e664 · piloto con reflejos humanos, 45 min: sin reliquias piso 3 y 2 muertes; con 0,25/0,35 de chance, 19 reliquias en 3 pisos (demasiadas); con 0,05/0,10, 7 en 3 pisos (~2,3 por piso), piso 4 y 0 muertes. Pruebas 239/239.
 - 2026-10-14 · Subir de nivel: 1 de 3 mejoras · 6716de1 · piloto con reflejos humanos, 45 min: piso 4 a los 41 min, 0 muertes, nivel 15, 6 reliquias (igual que sin la elección: piso 4 a los 43 min); destrabó Piel de Roble, Golpe Pesado y Sangre Espesa. Pruebas 240/240.
 - 2026-10-14 · Guerrero, paso 1a (clases y Templanza) · 259f4bc · banco de 60 s contra un muñeco, 8 muestras: 119 de daño/s sin pasiva y 116 con ella (sin diferencia: el combo ya critea; el ruido es ±25). Pruebas 241/241; se arregló la prueba de visión que fallaba si el héroe quedaba en una meseta.

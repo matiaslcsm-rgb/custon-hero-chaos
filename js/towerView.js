@@ -137,3 +137,17 @@ function showRunSummary(o) {
     const up = document.getElementById('rs-ascend'); if (up) up.onclick = () => { box.style.display = 'none'; continueAscent(); };
     document.getElementById('rs-menu').onclick = () => { box.style.display = 'none'; const b = document.getElementById('restart-btn'); if (b) b.click(); };
 }
+
+// --- LA CUMBRE COMO FINAL (ROADMAP T1, 2026-10-14) ---
+// Al vencer al guardián del piso 10: pantalla oscura, cuatro líneas que aparecen de a una (la torre se abre, el cuaderno
+// escribe su última página) y "Continuar" lleva al resumen (donde se puede seguir subiendo).
+const SUMMIT_LINES = ['El guardián cae. Las paredes del Corazón dejan de latir.', 'Arriba, la piedra se abre: se ve el cielo. Y más arriba, la torre sigue, sin escribir.',
+    'El cuaderno se abre solo en la última página. Tu letra escribe:', '«Llegué. Esta vez me acuerdo. Esta vez la firma es mía.»'];
+function showSummitScene(next) {
+    let box = document.getElementById('summit-scene');
+    if (!box) { box = document.createElement('div'); box.id = 'summit-scene'; box.className = 'modal summit-scene'; document.body.appendChild(box); }
+    box.innerHTML = `<div class="summit-box">${SUMMIT_LINES.map((l, i) => `<p style="animation-delay:${i * 1.6}s">${l}</p>`).join('')}<button id="summit-next" class="primary-btn">Continuar</button></div>`;
+    box.style.display = 'block';
+    writeNotebookPage('SUMMIT');
+    document.getElementById('summit-next').onclick = () => { box.style.display = 'none'; next(); };
+}

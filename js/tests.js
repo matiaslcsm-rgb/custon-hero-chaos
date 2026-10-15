@@ -1962,6 +1962,7 @@ test('Torre: Ascenso infinito — en la Cumbre "Seguir subiendo" lleva al piso 1
     try {
         newTower('AXE', { weapon: 'ADVENTURER_SWORD' });
         enterTowerFloor(10); towerRun.startedAt = gameClock - 600; towerVictory();
+        document.getElementById('summit-next').click();
         const up = document.getElementById('rs-ascend');
         check(up, 'la Cumbre ofrece seguir subiendo');
         up.click();
@@ -2177,6 +2178,9 @@ test('Torre: récords entre runs — runs, piso más alto, cumbres y la cumbre m
     r = towerRecords();
     check(r.summits === 1 && Math.round(r.bestTime) === 600, 'la cumbre y su tiempo');
     check(towerRecordsSummary().includes('Piso más alto: 3'), 'el resumen del menú');
+    const scene = document.getElementById('summit-scene');
+    check(scene && scene.style.display === 'block' && scene.textContent.includes('cuaderno'), 'primero, la escena de la Cumbre');
+    document.getElementById('summit-next').click();
     const box = document.getElementById('run-summary');
     check(box && box.style.display === 'block' && box.textContent.includes('Conquistaste') && box.textContent.includes('Bajas') && box.textContent.includes('récord'), 'la pantalla de fin de run, con el récord');
     document.getElementById('rs-again').click();
@@ -2640,7 +2644,7 @@ test('Torre: el Cuaderno escribe una página sola la primera vez que hacés cada
     writeNotebookPage('CHEST'); writeNotebookPage('TOWN');
     check(notebookState.seen.CHEST && notebookState.seen.TOWN, 'CHEST y TOWN');
 
-    ['TELEGRAPH', 'ESSENCE', 'SMITH', 'CRAFT', 'MASTERY', 'BULLETS', 'TRANSFER', 'CAMPFIRE', 'CHAMPION', 'WAYSTONE'].forEach(id => writeNotebookPage(id)); // las de lo nuevo (fases 4 y 5, tiradores)
+    ['TELEGRAPH', 'ESSENCE', 'SMITH', 'CRAFT', 'MASTERY', 'BULLETS', 'TRANSFER', 'CAMPFIRE', 'CHAMPION', 'WAYSTONE', 'SUMMIT'].forEach(id => writeNotebookPage(id)); // las de lo nuevo (fases 4 y 5, tiradores)
     checkEq(Object.keys(notebookState.seen).length, NOTEBOOK_PAGES.length, 'todas las páginas');
     const before = JSON.stringify(notebookState.seen);
     writeNotebookPage('WAKE'); // repetir no hace nada

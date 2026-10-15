@@ -838,6 +838,9 @@ también tiene que aprender a esquivar los ataques anunciados).
 - ✅ **Jefe escondido del piso 7: el Lobo de Escarcha** (2026-10-14; lo empezó la corrida automática que se detuvo y
   se completó acá): en el mirador cerrado (sala sellada con grieta), aviso de Isla la farolera; suelta las **Garras del
   Lobo de Escarcha** (guantes con crítico y velocidad de ataque). Verificado: la sala se arma en 8 de 8 pisos 7.
+- ✅ **La Cumbre como final** (2026-10-14, `js/towerView.js`): al vencer al guardián del piso 10, pantalla oscura con
+  cuatro líneas que aparecen de a una (el Corazón deja de latir, la piedra se abre, el cuaderno escribe con tu letra)
+  y "Continuar" al resumen. El Cuaderno suma su última página, "La Cumbre".
 - ✅ **Agravantes del Ascenso, el primero** (2026-10-14, `js/towerLore.js`): desde el piso 20 los enemigos aparecen con
   un escudo del 20% de su vida (el mismo de las reliquias: absorbe antes que la vida), y al llegar al piso un aviso lo
   dice. Desde el 30 el escudo devuelve el 30% de lo que absorbe a quien pegó; desde el 40, mientras tienen escudo, curan

@@ -24,7 +24,8 @@ const NOTEBOOK_PAGES = [
     { id: 'CAMPFIRE', title: 'Una fogata', text: 'Alguien acampó acá y se fue. El fuego todavía prende. De noche, sentado a su lado, las heridas cierran más rápido. Afuera del círculo de luz se mueven cosas.' },
     { id: 'CHAMPION', title: 'Los marcados', text: 'Algunos llevan un aro azul y unos signos sobre la cabeza: son más duros y cada signo es un don. Si paro el mouse encima, me doy cuenta de cuáles. Al que se cura solo hay que pegarle sin pausa.' },
     { id: 'WAYSTONE', title: 'La piedra que recuerda', text: 'En el círculo hay una piedra con marcas que no estaban. Cuando la toco, siento los pisos que ya subí, como escalones dentro de la cabeza. Me puede llevar de nuevo.' },
-    { id: 'MASTERY', title: 'Dominar', text: 'Usé tanto un poder que ya lo sé de memoria. Quedó en el Códice para siempre: aunque muera, un herrero me lo puede volver a poner en una pieza.' }
+    { id: 'MASTERY', title: 'Dominar', text: 'Usé tanto un poder que ya lo sé de memoria. Quedó en el Códice para siempre: aunque muera, un herrero me lo puede volver a poner en una pieza.' },
+    { id: 'SUMMIT', title: 'La Cumbre', text: 'Llegué arriba. El Corazón dejó de latir y la piedra se abrió: se ve el cielo, y más arriba la torre sigue, sin escribir. Esta vez me acuerdo de todo. Esta vez la firma es mía.' }
 ];
 
 let notebookPersist = true; // las pruebas lo apagan para no tocar el cuaderno guardado del navegador (como el Códice)
