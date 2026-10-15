@@ -53,6 +53,7 @@ window.addEventListener('keydown', e => {
     if (k === 'escape') { handleEscape(); return; }
     if (act === 'dash') { e.preventDefault(); if (!paused) spaceAction(); return; } // esquive o habilidad de movilidad (ver spaceAction)
     if (paused) return; // en pausa no responden las demás teclas
+    if (tower && (act === 'attack' || act === 'attack2')) { padKeyDown(act, e); return; } // sin mouse (padControls.js)
     if (tower && act === 'skill3' && inCombat() && !autopilot && classSpecial(player)) return; // la especial de la clase (towerSpecials.js)
     if (inCombat() && !autopilot) handleSkillKeypress(k);
 });

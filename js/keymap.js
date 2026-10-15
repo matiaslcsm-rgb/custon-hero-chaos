@@ -5,13 +5,15 @@
 const KEY_DEFAULTS = {
     up: 'w', left: 'a', down: 's', right: 'd', dash: ' ',
     skill1: 'q', skill2: 'e', skill3: 'r',
-    inventory: 'i', stats: 'c', codex: 'j', bestiary: 'k', log: 'l', map: 'm', notebook: 'n', shop: 'b', autocast: 'h', autopilot: 'p', interact: 'f'
+    inventory: 'i', stats: 'c', codex: 'j', bestiary: 'k', log: 'l', map: 'm', notebook: 'n', shop: 'b', autocast: 'h', autopilot: 'p', interact: 'f',
+    attack: 'u', attack2: 'o' // sin mouse (padControls.js)
 };
 const KEY_LABELS = {
     up: 'Mover arriba', left: 'Mover a la izquierda', down: 'Mover abajo', right: 'Mover a la derecha', dash: 'Esquive',
     skill1: 'Habilidad del arma', skill2: 'Habilidad de los guantes', skill3: 'Habilidad de la armadura',
     inventory: 'Equipo e inventario', stats: 'Stats', codex: 'Códice', bestiary: 'Bestiario', log: 'Diario del piso', map: 'Mapa',
-    notebook: 'Cuaderno', shop: 'Tienda / Herrero', autocast: 'Habilidades automáticas', autopilot: 'Piloto automático', interact: 'Agarrar / hablar (Torre)'
+    notebook: 'Cuaderno', shop: 'Tienda / Herrero', autocast: 'Habilidades automáticas', autopilot: 'Piloto automático', interact: 'Agarrar / hablar (Torre)',
+    attack: 'Atacar sin mouse (Torre)', attack2: 'Ataque secundario sin mouse (Torre)'
 };
 const KEY_FIXED = ['escape', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', '+', '=', '-', '_', 'g'];
 const KEYMAP = Object.assign({}, KEY_DEFAULTS);

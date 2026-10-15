@@ -72,9 +72,7 @@ canvas.addEventListener('mousedown', e => {
     Object.assign(mouse, p);
     if (e.button === 2) { // clic derecho: cancela el apuntado o camina
         if (targeting) { cancelTargeting(); return; }
-        if (canControlPlayer() && swordParryOn(player)) { swordParry(player, p); return; } // Torre con espada: la parada (towerParry.js)
-        if (canControlPlayer() && isArcher(player)) { archerSnipe(player, p); return; } // el Arquero: el flechazo (towerArcher.js)
-        if (canControlPlayer() && isMage(player)) { mageChargeStart(player, 'storm'); return; } // el Mago: la tormenta, al soltar (towerMage.js)
+        if (secondaryAction(p)) return; // Torre: la parada, el flechazo o la tormenta
         if (player && player.inRest && !player.eliminated && !autopilot) { // caminar por la sala de espera
             player.moveTarget = { x: Math.max(0, Math.min(COLS - 1, Math.round(p.x))), y: Math.max(0, Math.min(ROWS - 1, Math.round(p.y))), arena: null, at: fxClock };
             return;
@@ -100,6 +98,14 @@ canvas.addEventListener('mousedown', e => {
     }
 });
 
+// La acción secundaria de cada clase en la Torre (clic derecho, o la tecla/botón sin mouse: padControls.js)
+function secondaryAction(p) {
+    if (!canControlPlayer()) return false;
+    if (swordParryOn(player)) { swordParry(player, p); return true; } // con espada: la parada (towerParry.js)
+    if (isArcher(player)) { archerSnipe(player, p); return true; } // el Arquero: el flechazo (towerArcher.js)
+    if (isMage(player)) { mageChargeStart(player, 'storm'); return true; } // el Mago: la tormenta, al soltar (towerMage.js)
+    return false;
+}
 // Enemigo bajo el cursor (a menos de 0,8 casillas; si hay varios, el más cercano al cursor).
 function enemyUnderCursor(x, y) {
     let best = null, bestDist = 0.8;
@@ -132,6 +138,7 @@ function moveTargetDirection(hero) {
 // Dibujo: alcance, enemigo marcado y mira al apuntar; marca del destino del clic derecho.
 function drawMouseOverlay(arena) {
     if (!player || player.arena !== arena) return;
+    drawPadAim(arena); // la mira sin mouse (padControls.js)
     const px = x => x * TILE + TILE / 2;
     if (player.moveTarget && player.moveTarget.arena === arena) {
         const t = player.moveTarget, age = fxClock - t.at;

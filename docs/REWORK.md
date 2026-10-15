@@ -838,6 +838,13 @@ también tiene que aprender a esquivar los ataques anunciados).
 - ✅ **Jefe escondido del piso 7: el Lobo de Escarcha** (2026-10-14; lo empezó la corrida automática que se detuvo y
   se completó acá): en el mirador cerrado (sala sellada con grieta), aviso de Isla la farolera; suelta las **Garras del
   Lobo de Escarcha** (guantes con crítico y velocidad de ataque). Verificado: la sala se arma en 8 de 8 pisos 7.
+- ✅ **Jugar sin mouse y con joystick** (2026-10-14, pedido del usuario, `js/padControls.js`): dos teclas nuevas en ⌨️
+  Teclas: **U** ataca (mantenela) y **O** es el secundario (parada, flechazo o tormenta). Apuntan solas al enemigo
+  visible más cercano (a 9 casillas) o, si no hay, hacia donde caminás; se ve una mira amarilla. Es un cursor virtual:
+  todo lo que apunta al mouse anda igual, y si movés el mouse vuelve a mandar el mouse. **Joystick** (mapeo estándar):
+  stick izquierdo o cruceta mueven, stick derecho apunta a mano, A/RT atacan, B esquiva, X interactúa, Y especial, LB y LT
+  habilidades, RB secundario, Select mapa, Start pausa; manda las mismas teclas configuradas. Falta: moverse por los
+  menús (inventario, tienda) con el joystick; probarlo con un joystick de verdad.
 - ✅ **Pedidos que cruzan pisos, el tercero (hacia arriba)** (2026-10-14): la Semilla Primera (piso 4) suelta la **Llave
   del Archivo Sellado**, que abre una reja en la biblioteca del piso 6: cofre y una línea de la archivista Sela (la lista
   de siete nombres con el octavo tachado).

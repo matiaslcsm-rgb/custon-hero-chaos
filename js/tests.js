@@ -1747,6 +1747,27 @@ test('Torre: todos los pedidos entre pisos — su reja en su piso, la llave la d
         check(door.hp <= 0 && bfsFrom(L, L.start.x, L.start.y)[chest.y * COLS + chest.x] >= 0, `${id}: con la llave se abre y se llega al cofre`);
     });
 }, { random: true });
+test('Torre: sin mouse — la tecla de ataque apunta sola al más cercano, pega, y la secundaria hace la parada; el joystick aprieta las mismas teclas', () => {
+    const level = newTower('AXE', { weapon: 'ADVENTURER_SWORD' });
+    level.creeps.forEach(c => { c.hp = 0; });
+    for (let x = -4; x <= 4; x++) level.walls[player.y][player.x + x] = 0;
+    const c = makeCreep(CREEP_TYPES.GRUNT, player.x + 1, player.y, 1, false, 0); Object.assign(c, { arena: level, hp: 5000, maxHp: 5000, spawnTime: -1e9 }); level.creeps.push(c);
+    level.fovKey = null; computeFov(level, player);
+    const was = clickAttack, mouse0 = Object.assign({}, mouse); clickAttack = true;
+    padKeyDown('attack', {});
+    check(aimMode === 'pad' && Math.abs(mouse.x - c.x) < 0.01 && mouse.over, 'apunta solo al enemigo más cercano');
+    check(attackButton.held, 'queda "apretado" mientras la tecla esté abajo');
+    player.attackTimer = 99; updateTower(0.05);
+    check(c.hp < 5000, 'le pega');
+    padKeyUp('attack'); check(!attackButton.held, 'al soltar, deja de atacar');
+    padKeyDown('attack2', {}); check(player.parry, 'la secundaria hace la parada de la espada');
+    c.hp = 0; lastMoveDir = { dx: 0, dy: 1 }; padAim();
+    check(Math.abs(mouse.y - (player.y + PAD.ahead)) < 0.01, 'sin enemigos, apunta hacia donde caminás');
+    let sent = []; const orig = window.dispatchEvent; window.dispatchEvent = e => { sent.push(e.type + ':' + e.key); return true; };
+    padSend('keydown', 'dash'); padSend('keydown', 'escape'); window.dispatchEvent = orig;
+    checkEq(sent.join(' '), `keydown:${KEYMAP.dash} keydown:Escape`, 'los botones del joystick mandan las teclas configuradas');
+    clickAttack = was; aimMode = 'mouse'; Object.assign(mouse, mouse0, { over: false }); player.parry = null; // que no le quede apuntado a las otras pruebas
+}, { random: true });
 test('Torre: misterio del piso 5 — los relojes dan vuelta las compuertas de arena del laberinto (siempre queda camino)', () => {
     newTower(); enterTowerFloor(5);
     const L = arenas[0], S = L.sandGates;
