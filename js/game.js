@@ -124,7 +124,7 @@ function useFragment() {
 function sellFragment() {
     if (gameState !== 'PREP' || player.destiny.fragments <= 0) return;
     player.destiny.fragments--;
-    player.gold += FRAGMENT_SELL_PRICE;
+    player.gold += FRAGMENT_SELL_PRICE; ledgerAdd(player, 'sell', FRAGMENT_SELL_PRICE);
     log(`💰 Vendiste un Fragmento del Destino (+${FRAGMENT_SELL_PRICE}g).`);
     renderShop();
 }
@@ -244,6 +244,7 @@ function returnFromRestArea(hero) {
 function isDuelRound() { return waveNumber >= DUEL_START_ROUND && aliveHeroes().length >= 2; }
 
 function startWave(plan) {
+    if (plan === undefined) ledgerStart(); // la cuenta de la ronda (roundEconomy.js)
     if (plan === undefined && isDuelRound()) { showPanel('shop-container', false); startBetting(); return; }
     showPanel('shop-container', false);
     gameState = 'WAVE';
@@ -274,12 +275,10 @@ function onArenaCleared(arena) {
     if (hero.eliminated) return;
     if (!hero.diedThisRound) hero.points += POINTS.waveClean;
     gainXp(hero, 40 + 20 * waveNumber);
-    const interest = Math.min(5, Math.floor(hero.gold / 10));
-    hero.gold += interest;
-    sendToRestArea(hero);
+    sendToRestArea(hero); // (el interés se cobra al terminar la ronda, todos: roundEconomy.js)
     if (hero === player) {
         const waiting = arenas.filter(a => !a.done).length;
-        log(`🏆 Oleada superada${hero.diedThisRound ? '' : ' sin morir (+1 punto)'}. 🏕️ Vas al Área de Descanso${waiting ? ` (esperando a ${waiting} héroe${waiting > 1 ? 's' : ''})` : ''}.${interest ? ` Interés: +${interest}g.` : ''}`);
+        log(`🏆 Oleada superada${hero.diedThisRound ? '' : ' sin morir (+1 punto)'}. 🏕️ Vas al Área de Descanso${waiting ? ` (esperando a ${waiting} héroe${waiting > 1 ? 's' : ''})` : ''}.`);
     }
 }
 
@@ -293,10 +292,12 @@ function onRoundWavesDone() {
 // Fin de la ronda (después de los duelos): ranking, fin de partida o siguiente ronda.
 function endRound() {
     logMuted = false;
+    endRoundEconomy(); // interés y racha (roundEconomy.js)
     const top = rankedHeroes().slice(0, 3).map((h, i) => `${i + 1}º ${h.displayName} (${h.points})`).join(' · ');
     log(`📊 Fin de la ronda ${waveNumber}. Ranking: ${top}. Vas ${heroRank(player)}º.`);
     if (aliveHeroes().length <= 1 || waveNumber >= MAX_ROUNDS) { endGame(); return; }
     giveRankingRewards();
+    showRoundSummary(player); // la tarjeta con el oro de la ronda (roundEconomy.js)
     waveNumber++;
     startRoundDraft();
 }

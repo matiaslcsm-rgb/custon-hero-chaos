@@ -827,6 +827,12 @@ Las fases 3 y 4 son las más grandes: hay que rehacer pruebas y volver a medir e
 también tiene que aprender a esquivar los ataques anunciados).
 
 ## Interfaz y calidad de vida (lista viva)
+- ✅ **Custom Hero: resumen de ronda, interés y racha** (2026-10-15, `js/roundEconomy.js`): al terminar cada ronda,
+  una tarjeta arriba con el oro y de dónde salió (bajas, interés, racha, apuesta, jefe, ventas), si perdiste vida, tu
+  puesto y cuánto interés cobrás la próxima ("con 6g más, +16"). Al lado del oro, lo que vas a cobrar: "+15 🔥3".
+  El interés (+1 cada 10g) ahora se cobra al terminar la ronda, también los duelistas, con tope 25; la racha (ganar la
+  ronda = limpiar la oleada sin morir o ganar el duelo; perder también cuenta) da +5/+10/+15. Medido con el piloto:
+  antes interés y racha eran el 3% y 1% del oro (131g por ronda), ahora 9% y 3% (154g).
 - ✅ **Récords de la Torre** (2026-10-14, fase T1): se guardan entre runs (clave `chc-tower-records`) el piso más alto,
   las runs empezadas, las cumbres y la cumbre más rápida; se ven en el menú de Infinite Tower. Al superar tu piso más
   alto o tu mejor tiempo, el registro avisa "¡Nuevo récord!". Continuar una run no la cuenta como nueva.

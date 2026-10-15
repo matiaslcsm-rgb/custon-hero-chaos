@@ -1006,3 +1006,14 @@ body.on-title { overflow: hidden; }
 .summit-box p:last-of-type { color: #ffd166; font-style: italic; }
 .summit-box button { margin-top: 24px; opacity: 0; animation: summitIn 1s ease 6.4s forwards; }
 @keyframes summitIn { to { opacity: 1; } }
+
+/* Custom Hero: lo que cobrás al terminar la ronda, al lado del oro, y la tarjeta del resumen (roundEconomy.js) */
+.mh-income { color: #95d5b2; font-size: 0.8em; }
+#round-summary { display: none; position: fixed; top: 64px; left: 50%; transform: translateX(-50%); z-index: 800; max-width: 520px; width: calc(100% - 32px);
+    background: rgba(18,20,26,0.95); border: 2px solid #ffb703; border-radius: 8px; padding: 10px 14px; color: #eee; cursor: pointer; box-shadow: 0 6px 20px rgba(0,0,0,0.5); }
+#round-summary .rsum-head { font-size: 1.05rem; color: #ffd166; margin-bottom: 4px; }
+#round-summary .rsum-gold { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
+#round-summary .rsum-gold span { font-size: 0.85rem; color: #ccc; }
+#round-summary .rsum-line { font-size: 0.85rem; margin-top: 4px; }
+#round-summary .rsum-tip { font-size: 0.8rem; color: #95d5b2; margin-top: 6px; }
+#round-summary .up { color: #52b788; } #round-summary .down { color: #ef476f; }

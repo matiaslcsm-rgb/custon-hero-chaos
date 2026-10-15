@@ -86,7 +86,7 @@ function bossDefeated(arena) {
     arena.killTime = arena.elapsed;
     arena.creeps.forEach(c => { c.hp = 0; }); // se van los invocados
     const tier = bossTier(), gold = BOSS_FIGHT.gold[tier - 1];
-    hero.gold += gold;
+    hero.gold += gold; ledgerAdd(hero, 'boss', gold);
     quietly(() => gainXp(hero, BOSS_FIGHT.xpPerTier * tier));
     if (waveNumber < MAX_ROUNDS) offerNeutral(hero, tier);
     sendToRestArea(hero); hero.arena = null;
@@ -100,7 +100,7 @@ function onBossFightDone() {
     logMuted = false;
     const fastest = arenas.filter(a => a.killTime !== undefined).sort((a, b) => a.killTime - b.killTime).slice(0, BOSS_FIGHT.fastBonus.length);
     const base = BOSS_FIGHT.gold[bossTier() - 1];
-    fastest.forEach((a, i) => { a.heroes[0].gold += Math.round(base * BOSS_FIGHT.fastBonus[i]); });
+    fastest.forEach((a, i) => { const g = Math.round(base * BOSS_FIGHT.fastBonus[i]); a.heroes[0].gold += g; ledgerAdd(a.heroes[0], 'boss', g); });
     if (fastest.length) log(`👹 Más rápidos contra el jefe: ` + fastest.map((a, i) =>
         `${i + 1}º ${a.heroes[0].displayName} ${a.killTime.toFixed(1)}s (+${Math.round(base * BOSS_FIGHT.fastBonus[i])}g)`).join(' · ') + '.');
     logMuted = wasMuted;
@@ -141,7 +141,7 @@ function sellNeutral(hero = player) {
     if (!hero.neutral) return 0;
     const price = neutralSellPrice(hero.neutral);
     log(`💰 Vendiste ${NEUTRAL_ITEMS[hero.neutral].name} (+${price}g).`);
-    hero.gold += price;
+    hero.gold += price; ledgerAdd(hero, 'sell', price);
     hero.neutral = null;
     applyInventory(hero);
     if (hero === player && gameState === 'PREP') renderShop();

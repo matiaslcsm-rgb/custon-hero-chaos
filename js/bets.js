@@ -44,7 +44,7 @@ function placeBet(on, amount) {
     const pair = bettablePairs().find(p => p.includes(on));
     amount = Math.floor(amount);
     if (!pair || !(amount >= 1) || amount > betLimit()) return false;
-    player.gold -= amount;
+    player.gold -= amount; ledgerAdd(player, 'bet', -amount);
     currentBet = { on, against: pair.find(h => h !== on), amount };
     duelBets.push({ bettor: player, ...currentBet });
     log(`🎲 Apostaste ${amount}g a que ${on.displayName} le gana a ${currentBet.against.displayName}.`);
@@ -69,7 +69,7 @@ function aiPlaceBets() {
         const on = Math.random() < AI_BET.favoriteChance ? fav : dog;
         const amount = Math.min(betLimit(h), Math.floor(h.gold * (AI_BET.minPct + Math.random() * (AI_BET.maxPct - AI_BET.minPct))));
         if (amount < 1) return;
-        h.gold -= amount;
+        h.gold -= amount; ledgerAdd(h, 'bet', -amount);
         duelBets.push({ bettor: h, on, against: pair.find(x => x !== on), amount });
     });
 }
@@ -97,7 +97,7 @@ function settleBet(winner, loser) {
     const winners = [];
     bets.forEach(b => {
         const prize = b.on === winner ? Math.floor(b.amount + onLoser * b.amount / onWinner) : 0;
-        b.bettor.gold += prize;
+        b.bettor.gold += prize; ledgerAdd(b.bettor, 'bet', prize);
         if (prize > b.amount) winners.push({ hero: b.bettor, gain: prize - b.amount });
         if (b.bettor !== player) return;
         currentBet = null;
@@ -109,7 +109,7 @@ function settleBet(winner, loser) {
     const backing = bets.filter(b => b.on === winner).reduce((s, b) => s + b.amount, 0);
     const bonus = Math.round(backing * BACKING_BONUS);
     if (bonus > 0) {
-        winner.gold += bonus;
+        winner.gold += bonus; ledgerAdd(winner, 'bet', bonus);
         if (winner === player) log(`🎲 Te habían apostado ${backing}g y ganaste: cobrás +${bonus}g de respaldo.`);
     }
 }

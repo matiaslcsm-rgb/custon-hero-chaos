@@ -133,7 +133,7 @@ function aiUseDestiny(hero) {
     while (hero.destiny.fragments > 0) {
         hero.destiny.fragments--;
         if (hero.skills.length && foreign().length * 2 >= hero.skills.length) aiReplaceSkill(hero, pickRandom(hero.skills), 'fragment');
-        else hero.gold += FRAGMENT_SELL_PRICE;
+        else { hero.gold += FRAGMENT_SELL_PRICE; ledgerAdd(hero, 'sell', FRAGMENT_SELL_PRICE); }
     }
 }
 

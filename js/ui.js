@@ -700,6 +700,7 @@ function updateHud() {
     if (!player) return;
     renderHeroStats();
     document.getElementById('player-gold').textContent = player.gold;
+    document.getElementById('player-income').textContent = incomeHint(player); // interés y racha (roundEconomy.js)
     document.getElementById('essence-text').textContent = gameMode === 'tower' ? `✦ ${essence()}` : '';
     document.getElementById('round-num').textContent = `${waveNumber}${isRoundBossRound() ? ' 👹' : ''}`; // sin límite fijo: hasta que quede uno
     document.getElementById('pause-btn').style.visibility = canPause() ? 'visible' : 'hidden';
@@ -849,7 +850,7 @@ function resetHud() {
     showPanel('menu-panel', true);
     setStateText('MENÚ');
     document.getElementById('round-num').textContent = '1';
-    ['lives-text', 'points-text', 'player-gold'].forEach(id => { document.getElementById(id).textContent = ''; });
+    ['lives-text', 'points-text', 'player-gold', 'player-income'].forEach(id => { document.getElementById(id).textContent = ''; });
     document.getElementById('hero-bar').style.display = 'none';
     document.getElementById('relic-bar').style.display = 'none';
     document.getElementById('hero-stats-panel').style.display = 'none';

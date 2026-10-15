@@ -4251,6 +4251,23 @@ Object.keys(HERO_TEMPLATES).forEach((key, i) => {
     }, { random: true });
 });
 
+test('Economía de la ronda — interés al terminar la ronda, racha (ganada o perdida) y la cuenta de dónde salió el oro', () => {
+    newGame('AXE');
+    player.gold = 40; player.streak = 1; ledgerStart();
+    player.gold += 12; player.diedThisRound = false; // 12 de bajas
+    endRoundEconomy();
+    checkEq(player.gold, 40 + 12 + 5 + ECON.streakGold[2], 'interés +5 (52g) y racha de 2 ganadas');
+    const g = roundIncome(player);
+    check(g.kills === 12 && g.interest === 5 && g.streak === ECON.streakGold[2], 'la cuenta separa bajas, interés y racha');
+    showRoundSummary(player);
+    const box = document.getElementById('round-summary');
+    check(box.style.display === 'block' && box.textContent.includes('bajas') && box.textContent.includes('interés') && box.textContent.includes('Ronda'), 'la tarjeta del resumen');
+    box.style.display = 'none';
+    check(incomeHint(player).startsWith('+' + interestFor(player)) && incomeHint(player).includes('🔥2'), 'la barra de oro muestra lo que vas a cobrar');
+    player.streak = 0; ledgerStart(); player.diedThisRound = true; endRoundEconomy(); ledgerStart(); player.diedThisRound = true; const before = player.gold; endRoundEconomy();
+    check(player.streak === -2 && player.gold === before + interestFor({ gold: before }) + ECON.streakGold[2], 'perder seguido también paga la racha');
+    player.gold = 999; checkEq(interestFor(player), ECON.interestMax, 'el interés tiene tope');
+}, { random: true });
 test('Nueva Partida deja todo como al empezar', () => {
     newGame('AXE');
     resetGame();
