@@ -104,6 +104,7 @@ function enterTowerFloor(floor, where = 'start') {
     setStateText(`INFINITE TOWER · PISO ${floor} DE ${TOWER.floors} · ${lore.place.toUpperCase()}`);
     sfx('wave');
     saveTowerRun(); // guardado automático al entrar a cada piso (towerSave.js)
+    if (where === 'start') floorAggravants(floor).forEach(a => log(`⚠️ Agravante: ${a.name} — ${a.desc}.`)); // Lo No Escrito (towerLore.js)
     if (where === 'start') log(`${floor === 1 ? '🪨 Estás en el círculo de piedra, al pie de la torre.' : `🗼 Piso ${floor}: ${lore.place}.`} ${lore.intro} ${B.icon} ${B.name}${lore.people ? ` · su gente: ${lore.people}` : ''}. ${roadHint(floor)} ${B.hazard.name}: ${B.hazard.desc}.${B.climate ? ` ${B.climate.name}: ${B.climate.desc}.` : ''}`);
 }
 

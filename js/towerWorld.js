@@ -288,6 +288,7 @@ function generateTowerLevel(floor) {
     placeLanterns(level, dist); // y el del 7: faroles para prender de noche
     placeSigns(level, dist); // carteles en los caminos de los pisos de abajo (towerLore.js)
     placeFloorKey(level, dist); // la llave del piso la lleva el campeón más fuerte (towerBosses.js)
+    applyAggravants(level); // Lo No Escrito: agravantes cada 10 pisos (towerLore.js)
     fadeRoads(level, dist); // y hacia arriba el camino se pierde (al final: todo lo de arriba ya se ubicó con el camino entero)
     level.creeps.forEach(c => { c.spawnTime = -1e9; }); // sin el oro extra por velocidad de las oleadas (no aplica en la Torre)
     return level;

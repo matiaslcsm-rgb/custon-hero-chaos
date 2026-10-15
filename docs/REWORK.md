@@ -838,6 +838,9 @@ también tiene que aprender a esquivar los ataques anunciados).
 - ✅ **Jefe escondido del piso 7: el Lobo de Escarcha** (2026-10-14; lo empezó la corrida automática que se detuvo y
   se completó acá): en el mirador cerrado (sala sellada con grieta), aviso de Isla la farolera; suelta las **Garras del
   Lobo de Escarcha** (guantes con crítico y velocidad de ataque). Verificado: la sala se arma en 8 de 8 pisos 7.
+- ✅ **Agravantes del Ascenso, el primero** (2026-10-14, `js/towerLore.js`): desde el piso 20 los enemigos aparecen con
+  un escudo del 20% de su vida (el mismo de las reliquias: absorbe antes que la vida), y al llegar al piso un aviso lo
+  dice. Faltan el escudo que refleja (30) y el que cura a los cercanos (40).
 - ✅ **Ascenso infinito, paso 1** (2026-10-14): en la pantalla de la Cumbre, "⬆ Seguir subiendo (Lo No Escrito)" sigue
   la misma run en el piso 11 y más: biomas mezclados, el estado dice "Piso 11 · Lo No Escrito", y vencer a esos
   guardianes solo abre la escalera. El guardián crece lineal (+~1180 de vida por piso). Faltan los hitos (paso 2) y

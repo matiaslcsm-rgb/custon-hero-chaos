@@ -148,6 +148,19 @@ function towerInterior(g) {
     }
 }
 
+// --- AGRAVANTES DEL ASCENSO (ROADMAP T1, "Ascenso infinito, paso 2", 2026-10-14) ---
+// Cada 10 pisos de Lo No Escrito se suma uno a los enemigos. Paso 2a: el primero, desde el piso 20, un ESCUDO del 20% de su
+// vida que absorbe el daño antes (el mismo escudo que el de las reliquias, towerRelics.js). Faltan: que refleje (30) y que
+// cure a los cercanos (40).
+const AGGRAVANTS = [{ at: 20, key: 'escudo', name: 'Escudo', desc: 'los enemigos tienen un escudo del 20% de su vida', shield: 0.2 }];
+function floorAggravants(floor) { return AGGRAVANTS.filter(a => floor >= a.at); }
+function applyAggravants(level) {
+    const ag = floorAggravants(level.floor);
+    if (!ag.length || level.isCave) return;
+    const sh = ag.reduce((s, a) => s + (a.shield || 0), 0);
+    level.creeps.forEach(c => { if (sh) c.relicShield = Math.round(c.maxHp * sh); });
+}
+
 // --- CAMINOS QUE SE PIERDEN (TORRE-MUNDO.md, "cada piso, menos explorado") ---
 // Pisos 1-3, el camino entero; 4-6, solo hasta el pueblo; 7-9, tramos sueltos (uno de cada tres); 10 en adelante, ninguno. Solo cambia el
 // suelo (el paso que talló el camino sigue abierto), y se hace al final de armar el piso.

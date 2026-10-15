@@ -1973,6 +1973,14 @@ test('Torre: Ascenso infinito — en la Cumbre "Seguir subiendo" lleva al piso 1
         check(towerSnapshot().run.ascent === true && towerSnapshot().run.floor === 11, 'el guardado se acuerda del Ascenso y del piso');
     } finally { towerSavePersist = persist; const b = document.getElementById('run-summary'); if (b) b.style.display = 'none'; }
 }, { random: true });
+test('Torre: agravantes del Ascenso — desde el piso 20 los enemigos tienen escudo (antes no)', () => {
+    newTower();
+    const c19 = towerLevel(19).creeps.find(c => !c.isGuardian), c20 = towerLevel(20).creeps.find(c => !c.isGuardian);
+    check(!c19.relicShield, 'en el 19, sin escudo');
+    check(c20.relicShield === Math.round(c20.maxHp * 0.2), 'en el 20, escudo del 20% de su vida');
+    const hp = c20.hp; dealDamage(player, c20, 5, 'pure');
+    check(c20.hp === hp && c20.relicShield < Math.round(c20.maxHp * 0.2), 'el escudo absorbe el golpe antes que la vida');
+}, { random: true });
 test('Torre: misterio del piso 5 — los relojes dan vuelta las compuertas de arena del laberinto (siempre queda camino)', () => {
     newTower(); enterTowerFloor(5);
     const L = arenas[0], S = L.sandGates;
