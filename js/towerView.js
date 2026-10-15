@@ -109,5 +109,5 @@ function towerPauseHtml() {
         b('toggleBestiary(true)', '📖 Bestiario (K)') + b('toggleTowerLog(true)', '📓 Diario del piso (L)') + b('toggleTowerMap(true)', '🗺️ Mapa del piso (M)') + b('toggleNotebook(true)', '✏️ Cuaderno (N)') + `</div>` +
         `<div class="pause-zoom">🔍 Zoom <button class="secondary-btn" onclick="towerZoom(-1); renderPauseMenu()">−</button>` +
         `<span>${Math.round(VIEW.across)} casillas a lo ancho</span><button class="secondary-btn" onclick="towerZoom(1); renderPauseMenu()">+</button></div>` +
-        `<p class="subtitle pause-controls">${towerControlsText()}</p>`;
+        `<p class="subtitle pause-controls">${towerControlsText()}</p>` + towerGuideHtml(); // cómo funciona cada sistema (towerGuide.js)
 }

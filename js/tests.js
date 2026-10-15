@@ -1725,6 +1725,15 @@ test('Torre: penumbra — de día, el campo de los pisos 7-9 es más oscuro y el
     check(s5 === 0 && s8 < 0 && s10 < s8, `visión de día: piso 5 ${s5}, 8 ${s8.toFixed(2)}, 10 ${s10.toFixed(2)}`);
     check(!towerIsNight(), 'no cambia el día y la noche');
 }, { random: true });
+test('Torre: la pausa tiene "Cómo funciona" — una sección plegable por sistema, con las teclas configuradas', () => {
+    newTower();
+    setPaused(true);
+    const box = document.getElementById('pause-tower'), secs = box.querySelectorAll('.tower-guide details');
+    checkEq(secs.length, towerGuide().length, 'una sección por sistema');
+    check([...secs].every(d => d.querySelector('summary').textContent && d.querySelector('p').textContent.length > 60), 'cada una con su explicación');
+    check(box.textContent.includes(keyName(KEYMAP.interact)) && box.textContent.includes('Compuertas'.toLowerCase()), 'muestra las teclas y los sistemas nuevos');
+    setPaused(false);
+}, { random: true });
 test('Torre: misterio del piso 5 — los relojes dan vuelta las compuertas de arena del laberinto (siempre queda camino)', () => {
     newTower(); enterTowerFloor(5);
     const L = arenas[0], S = L.sandGates;

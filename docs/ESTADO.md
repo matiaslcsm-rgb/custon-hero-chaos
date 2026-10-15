@@ -59,6 +59,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   propias (REWORK.md §21).
 - **Reliquias (2026-10-14, fase T00):** 12 reliquias apilables al estilo Risk of Rain, con 4 etiquetas y bonus de
   conjunto; conviven con el equipo hasta que lleguen las clases fijas (REWORK.md §20).
+- **Cómo funciona (2026-10-14):** la pausa de la Torre explica cada sistema en secciones plegables (js/towerGuide.js).
+  Al agregar un sistema, sumarle su entrada.
 - **Transición de biomas (2026-10-14):** cerca de la escalera se ve el clima del piso de arriba si cambia de bioma.
 - **Pedidos que cruzan pisos (2026-10-14):** la llave del Guardián de Arena (piso 5) abre las compuertas del piso 3
   (sala con reja y cofre; js/towerQuests.js); al abrirlas baja el agua del piso y asoman 2 cofres hundidos (el misterio

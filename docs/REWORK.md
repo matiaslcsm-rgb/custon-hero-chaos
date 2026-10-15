@@ -838,6 +838,10 @@ también tiene que aprender a esquivar los ataques anunciados).
 - ✅ **Jefe escondido del piso 7: el Lobo de Escarcha** (2026-10-14; lo empezó la corrida automática que se detuvo y
   se completó acá): en el mirador cerrado (sala sellada con grieta), aviso de Isla la farolera; suelta las **Garras del
   Lobo de Escarcha** (guantes con crítico y velocidad de ataque). Verificado: la sala se arma en 8 de 8 pisos 7.
+- ✅ **"Cómo funciona" en la pausa** (2026-10-14, pedido del usuario para los testers, `js/towerGuide.js`): en la pausa
+  de la Torre, debajo de los controles, 15 secciones plegables (una por sistema: objetivo, combate y clases, niveles,
+  equipo, Códice, reliquias, pueblo, muerte, día y noche, caminos y mapa, cuevas, secretos, pedidos y misterios,
+  Cuaderno, guardado). Las teclas salen de la configuración. **Al sumar un sistema, agregarle su entrada.**
 - ✅ **Penumbra arriba** (2026-10-14, `js/towerWorld.js`): de día, el campo de los pisos 7-9 tiene 0,3 de oscuridad y
   el del 10 en adelante 0,5 (se ve el velo y las luces, y se ve menos: 6 casillas en el piso 5, 5,25 en el 8, 4,75 en
   el 10). No cambia el día y la noche ni lo que sale de noche.

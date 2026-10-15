@@ -982,3 +982,10 @@ body.on-title { overflow: hidden; }
 
 /* Récords de la Torre en el menú (towerSave.js) */
 .ts-records { text-align: center; color: #e8c872; font-size: 0.82rem; margin: 2px 0 6px; }
+
+/* Cómo funciona (pausa de la Torre, towerGuide.js): una sección plegable por sistema */
+.tower-guide { text-align: left; display: flex; flex-direction: column; gap: 4px; }
+.tower-guide details { background: #1d2027; border: 1px solid #333; border-radius: 4px; padding: 4px 8px; }
+.tower-guide summary { cursor: pointer; color: #ffd166; font-weight: bold; padding: 2px 0; }
+.tower-guide p { margin: 6px 0 4px; font-size: 0.85rem; line-height: 1.4; color: #ddd; }
+.tower-guide kbd { background: #2b2f38; border: 1px solid #555; border-radius: 3px; padding: 0 4px; font-size: 0.8rem; }
