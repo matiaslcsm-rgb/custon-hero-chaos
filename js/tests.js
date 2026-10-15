@@ -1215,6 +1215,7 @@ test('Torre: campeones con afijos, santuarios y objetivo del piso', () => {
     check(L.shrines[0].used && getEffect(player, 'SHRINE_FURY'), 'el santuario se usa una vez y da su efecto');
     check(towerObjective(L).text.includes('pueblo'), 'primero: ir al pueblo');
     L.visitedTown = true;
+    if (needsFloorKey(L)) { check(towerObjective(L).text.includes('llave'), 'después: la llave del piso'); L.floorKey.got = true; }
     check(towerObjective(L).text.includes('laberinto'), 'después: entrar al laberinto');
     L.enteredLab = true;
     check(towerObjective(L).text.includes('guardián'), 'adentro: vencer al guardián');
@@ -1833,6 +1834,7 @@ test('Torre: reliquias nuevas — los rayos saltan (la Bobina cada 5 golpes, uno
 test('Torre: arena del guardián — al entrar a su sala se cierran las rejas; se abren al vencerlo o si te vas del piso', () => {
     newTower();
     const L = arenas[0], g = L.guardian, r = guardianRoom(L);
+    if (L.floorKey) L.floorKey.got = true; // la llave se prueba aparte
     check(r && g, 'el guardián tiene su sala');
     const reachStart = () => bfsFrom(L, L.start.x, L.start.y)[Math.round(player.y) * COLS + Math.round(player.x)] >= 0;
     let p = null; for (let y = r.y; y < r.y + r.h && !p; y++) for (let x = r.x; x < r.x + r.w && !p; x++) if (walkable(L, x, y) && !unitAt(L, x, y)) p = { x, y };
@@ -1840,14 +1842,36 @@ test('Torre: arena del guardián — al entrar a su sala se cierran las rejas; s
     check(reachStart(), 'antes de entrar, hay salida');
     bossArenaTick(L);
     check(L.bossArena.closed && L.bossArena.gates.length > 0 && !reachStart(), 'al entrar se cierra: no hay salida');
+    Object.assign(player, { x: L.start.x, y: L.start.y }); bossArenaTick(L); // salió antes de que cerrara (por una entrada ocupada)
+    check(!L.bossArena.closed, 'si quedaste afuera, se abre (no te deja encerrado afuera)');
+    Object.assign(player, p); bossArenaTick(L);
+    check(L.bossArena.closed && !reachStart(), 'al volver a entrar, se cierra otra vez');
+    const gp = { x: g.x, y: g.y }; Object.assign(g, { x: L.start.x + 1, y: L.start.y }); bossArenaTick(L);
+    check(!L.bossArena.closed, 'si el guardián sale de su sala, se abre (no te deja encerrado sin él)'); Object.assign(g, gp);
     g.hp = 0; bossArenaTick(L);
     check(!L.bossArena.closed && reachStart(), 'vencido, se abre');
-    newTower(); const L1 = arenas[0], r1 = guardianRoom(L1);
+    newTower(); const L1 = arenas[0], r1 = guardianRoom(L1); if (L1.floorKey) L1.floorKey.got = true;
     let q = null; for (let y = r1.y; y < r1.y + r1.h && !q; y++) for (let x = r1.x; x < r1.x + r1.w && !q; x++) if (walkable(L1, x, y) && !unitAt(L1, x, y)) q = { x, y };
     Object.assign(player, { arena: L1 }, q); bossArenaTick(L1);
     check(L1.bossArena.closed, 'cerrada otra vez');
     enterTowerFloor(2); bossArenaTick(arenas[0]);
     check(!L1.bossArena.closed && L1.bossArena.gates.length === 0, 'si te vas del piso, se abre');
+}, { random: true });
+test('Torre: la llave del piso — la lleva el campeón más fuerte; hasta vencerlo, la sala del guardián está con rejas', () => {
+    let L = null;
+    for (let k = 0; k < 6 && !(L && L.floorKey); k++) { newTower(); L = arenas[0]; }
+    const K = L.floorKey, r = guardianRoom(L);
+    check(K && K.carrier.keyCarrier && K.carrier.champion.length, 'un campeón lleva la llave');
+    const champs = L.creeps.filter(c => c.champion && c.champion.length && !c.isGuardian && bfsFrom(L, L.start.x, L.start.y)[c.y * COLS + c.x] >= 0);
+    check(champs.every(c => c.maxHp <= K.carrier.maxHp), 'el más fuerte de los que se alcanzan');
+    Object.assign(player, { arena: L, x: L.start.x, y: L.start.y });
+    for (let i = 0; i < 3; i++) bossArenaTick(L);
+    const g = L.guardian, reachG = () => { const D = bfsFrom(L, L.start.x, L.start.y); return [[1,0],[-1,0],[0,1],[0,-1],[0,0]].some(([dx, dy]) => D[(g.y + dy) * COLS + g.x + dx] >= 0); };
+    check(L.bossArena.closed && !reachG(), 'sin la llave, no se llega al guardián');
+    L.visitedTown = true;
+    check(towerObjective(L).text.includes('llave'), 'el objetivo te manda a buscarla');
+    K.carrier.hp = 0; bossArenaTick(L);
+    check(K.got && !L.bossArena.closed && reachG(), 'vencido el campeón, las rejas se abren');
 }, { random: true });
 test('Torre: misterio del piso 5 — los relojes dan vuelta las compuertas de arena del laberinto (siempre queda camino)', () => {
     newTower(); enterTowerFloor(5);

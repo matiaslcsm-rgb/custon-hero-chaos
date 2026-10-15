@@ -24,7 +24,8 @@ const MAP_MARKS = [
     { key: 'event', label: 'Evento', color: '#e85d04', shape: 'star' },
     { key: 'chest', label: 'Cofre sin abrir', color: '#8b5a2b', shape: 'chest' },
     { key: 'corpse', label: 'Tus restos', color: '#c9a227', shape: 'cross' },
-    { key: 'carrier', label: 'Portador con tu equipo', color: '#c9a227', shape: 'bag' }
+    { key: 'carrier', label: 'Portador con tu equipo', color: '#c9a227', shape: 'bag' },
+    { key: 'key', label: 'Campeón con la llave del piso', color: '#ffd166', shape: 'diamond' }
 ];
 function drawMapMark(g, shape, x, y, color, r = 6) {
     g.save(); g.fillStyle = color; g.strokeStyle = INK.line; g.lineWidth = 1.5;
@@ -82,6 +83,7 @@ function drawTowerBigMap(level) {
     (level.chests || []).forEach(ch => { if (!ch.open && seen(ch.x, ch.y) && !chestUnderWater(level, ch)) mark('chest', ch.x, ch.y); });
     if (towerRun.corpse && towerRun.corpse.level === level) mark('corpse', towerRun.corpse.x, towerRun.corpse.y, 'Tus restos');
     carriersOn(level).forEach(c => mark('carrier', c.x, c.y, 'Portador'));
+    if (needsFloorKey(level) && level.floorKey.carrier.isAlive()) mark('key', level.floorKey.carrier.x, level.floorKey.carrier.y, 'Llave'); // siempre marcado (towerBosses.js)
     if (player.isAlive()) mark('you', player.x, player.y);
     // Leyenda
     const lx = W - m - legendW + 6;

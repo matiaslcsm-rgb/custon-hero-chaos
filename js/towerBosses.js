@@ -168,53 +168,86 @@ function drawBossExtras(level) {
 function bossAlpha(c) { return c.hiddenUntil && gameClock < c.hiddenUntil ? 0.22 : 1; }
 
 // --- ARENA DEL GUARDIÁN (ROADMAP T00, "Arenas de jefes, paso 1", 2026-10-14) ---
-// Al entrar a la sala del guardián con él vivo, las entradas se cierran con rejas hasta que gane alguien: se abren al
-// vencerlo, o si morís o te vas del piso. Una entrada con alguien parado encima se cierra cuando se corre.
+// La sala del guardián tiene rejas en sus entradas. Están cerradas por dos razones:
+//   · LA LLAVE DEL PISO (1b): la lleva el campeón más fuerte al que se llega desde la entrada (🗝️ sobre su cabeza, en el
+//     mapa y en el objetivo). Hasta que lo vencés, no se entra.
+//   · LA PELEA (1a): al entrar con el guardián vivo se cierran detrás tuyo hasta que gane alguien: se abren al vencerlo,
+//     o si morís, te vas del piso, salís antes de que cierre o el guardián sale de su sala. Una entrada con alguien
+//     parado encima se cierra cuando se corre.
+// Pisos sin campeones alcanzables: sin llave. Si el guardián ya cayó (o la escalera está abierta), nunca se cierran.
 function guardianRoom(level) {
     const g = level.guardian;
     if (!g || !level.rooms) return null;
     return level.guardRoom || (level.guardRoom = level.rooms.find(r => g.x >= r.x - 1 && g.x <= r.x + r.w && g.y >= r.y - 1 && g.y <= r.y + r.h) || null);
 }
 const inRoom = (r, x, y) => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h;
+const nearRoom = (r, x, y) => x >= r.x - 1 && x <= r.x + r.w && y >= r.y - 1 && y <= r.y + r.h; // la sala y sus entradas
+// Al armar el piso: el campeón más fuerte (alcanzable) lleva la llave
+function placeFloorKey(level, dist) {
+    level.floorKey = null;
+    if (level.isCave || !guardianRoom(level)) return;
+    const champs = level.creeps.filter(c => c.isAlive() && c.champion && c.champion.length && !c.isGuardian && dist[c.y * COLS + c.x] >= 0);
+    if (!champs.length) return;
+    const c = champs.reduce((a, b) => (b.maxHp > a.maxHp ? b : a));
+    c.keyCarrier = true;
+    level.floorKey = { carrier: c, got: false };
+}
+const needsFloorKey = level => !!(level.floorKey && !level.floorKey.got);
+function roomGateCells(level, r) {
+    const out = [];
+    for (let y = r.y - 1; y <= r.y + r.h; y++) for (let x = r.x - 1; x <= r.x + r.w; x++) {
+        if (inRoom(r, x, y) || !walkable(level, x, y)) continue;
+        if ([[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => inRoom(r, x + dx, y + dy))) out.push({ x, y });
+    }
+    return out;
+}
 function openBossArena(level) {
     const A = level.bossArena;
     if (!A || !A.closed) return;
     A.gates.forEach(p => { level.walls[p.y][p.x] = 0; });
-    if (!level.guardian.isAlive() && A.gates.length) log('🔓 Las rejas se levantan.');
-    Object.assign(A, { closed: false, gates: [], pending: [] });
+    Object.assign(A, { closed: false, fight: false, gates: [], pending: [] });
     if (towerRun && towerRun.arenaLevel === level) towerRun.arenaLevel = null;
 }
 function bossArenaTick(level) {
-    if (towerRun && towerRun.arenaLevel && towerRun.arenaLevel !== level) openBossArena(towerRun.arenaLevel); // te fuiste (o renaciste en otro piso)
+    if (towerRun && towerRun.arenaLevel && towerRun.arenaLevel !== level && !needsFloorKey(towerRun.arenaLevel)) openBossArena(towerRun.arenaLevel); // te fuiste (o renaciste en otro piso)
     const r = guardianRoom(level), g = level.guardian;
     if (!r) return;
-    const A = level.bossArena || (level.bossArena = { closed: false, gates: [], pending: [] });
-    const fight = g.isAlive() && player.isAlive() && player.arena === level;
-    if (!A.closed && fight && inRoom(r, Math.round(player.x), Math.round(player.y))) {
-        A.closed = true; A.gates = []; A.pending = []; towerRun.arenaLevel = level;
-        for (let y = r.y - 1; y <= r.y + r.h; y++) for (let x = r.x - 1; x <= r.x + r.w; x++) {
-            if (inRoom(r, x, y) || !walkable(level, x, y)) continue;
-            if ([[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => inRoom(r, x + dx, y + dy))) A.pending.push({ x, y });
-        }
+    const A = level.bossArena || (level.bossArena = { closed: false, fight: false, gates: [], pending: [] });
+    const K = level.floorKey, alive = g.isAlive() && !level.stairsOpen;
+    if (K && !K.got && (!K.carrier.isAlive() || !alive)) {
+        K.got = true;
+        if (alive) { log('🗝️ ¡La llave del piso! Las rejas de la sala del guardián se abren.'); sfx('levelup'); }
+    }
+    const here = player.isAlive() && player.arena === level;
+    const gHome = nearRoom(r, g.x, g.y); // si el guardián salió de su sala, no hay arena (y se abre)
+    if (!A.fight && alive && here && gHome && !needsFloorKey(level) && inRoom(r, Math.round(player.x), Math.round(player.y))) {
+        A.fight = true; towerRun.arenaLevel = level;
         log(`🔒 Las rejas se cierran detrás tuyo: de la sala de ${g.type.label} no sale nadie hasta que gane alguien.`); sfx('hit');
     }
-    if (A.closed && !fight) { openBossArena(level); return; } // ganaste, moriste o te fuiste
-    if (!A.closed) return;
+    if (A.fight && !(alive && here && gHome && nearRoom(r, Math.round(player.x), Math.round(player.y)))) A.fight = false; // ganaste, moriste, te fuiste o saliste antes de que cierre
+    const want = alive && (needsFloorKey(level) || A.fight);
+    if (!want) { if (A.closed) { if (!g.isAlive() && A.gates.length) log('🔓 Las rejas se levantan.'); openBossArena(level); } return; }
+    if (!A.closed) { A.closed = true; A.gates = []; A.pending = roomGateCells(level, r); }
     A.pending = A.pending.filter(p => { // cierra las que estén libres
-        if (unitAt(level, p.x, p.y) || (Math.round(player.x) === p.x && Math.round(player.y) === p.y)) return true;
+        if (unitAt(level, p.x, p.y) || (player.arena === level && Math.round(player.x) === p.x && Math.round(player.y) === p.y)) return true;
         level.walls[p.y][p.x] = WALL.stone; A.gates.push(p);
         return false;
     });
 }
 function drawBossArena(level) {
-    const A = level.bossArena;
+    const A = level.bossArena, K = level.floorKey;
+    if (K && !K.got && K.carrier.isAlive() && canSee(level, K.carrier.x, K.carrier.y)) { // la llave sobre el que la lleva
+        ctx.save(); ctx.font = '14px serif'; ctx.textAlign = 'center';
+        ctx.fillText('🗝️', K.carrier.x * TILE + TILE / 2, K.carrier.y * TILE - TILE * 0.9 + Math.sin(fxClock * 3) * 2);
+        ctx.restore();
+    }
     if (!A || !A.closed) return;
     ctx.save();
     A.gates.forEach(p => {
         if (!level.explored[p.y][p.x]) return;
         const x = p.x * TILE, y = p.y * TILE;
         ctx.fillStyle = 'rgba(12,10,9,0.8)'; ctx.fillRect(x + 2, y + 2, TILE - 4, TILE - 4);
-        ctx.fillStyle = '#9aa2ab';
+        ctx.fillStyle = needsFloorKey(level) ? '#c9a227' : '#9aa2ab'; // dorada: falta la llave
         for (let i = 0; i < 4; i++) ctx.fillRect(Math.round(x + 4 + i * (TILE - 10) / 3), y + 2, 2, TILE - 4);
         ctx.fillRect(x + 2, Math.round(y + TILE * 0.3), TILE - 4, 2); ctx.fillRect(x + 2, Math.round(y + TILE * 0.7), TILE - 4, 2);
     });

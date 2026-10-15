@@ -287,6 +287,7 @@ function generateTowerLevel(floor) {
     placeSandGates(level); // el misterio del piso 5: compuertas de arena que cambian el laberinto (towerMysteries.js)
     placeLanterns(level, dist); // y el del 7: faroles para prender de noche
     placeSigns(level, dist); // carteles en los caminos de los pisos de abajo (towerLore.js)
+    placeFloorKey(level, dist); // la llave del piso la lleva el campeón más fuerte (towerBosses.js)
     fadeRoads(level, dist); // y hacia arriba el camino se pierde (al final: todo lo de arriba ya se ubicó con el camino entero)
     level.creeps.forEach(c => { c.spawnTime = -1e9; }); // sin el oro extra por velocidad de las oleadas (no aplica en la Torre)
     return level;
@@ -510,6 +511,8 @@ function towerObjective(level) {
         return { text: 'Volvé a la superficie por la soga', x: level.exitUp.x, y: level.exitUp.y };
     }
     if (level.stairsOpen) return { text: 'Subí la escalera al piso siguiente', x: level.stairs.x, y: level.stairs.y };
+    const key = needsFloorKey(level) && level.floorKey.carrier; // la llave del piso (towerBosses.js)
+    if (key && key.isAlive() && (level.visitedTown || level.enteredLab)) return { text: `Vencé al campeón que lleva la llave del piso (🗝️ ${key.label})`, x: key.x, y: key.y };
     if (level.enteredLab) return { text: `Vencé al guardián (${level.guardian.label})`, x: level.guardian.x, y: level.guardian.y, inLab: true };
     if (!level.visitedTown) return { text: level.floor <= ROADS.toTown ? 'Seguí el camino hasta el pueblo' : 'Buscá el pueblo (el camino se pierde)', x: level.town.merchant.x, y: level.town.merchant.y };
     return { text: 'Entrá al laberinto de la torre', x: level.gate.x, y: level.gate.y };
