@@ -1957,6 +1957,21 @@ test('Torre: piso 1 — el muro del laberinto es la base de la torre y su entrad
     let ok = true; try { drawTowerGate(L); pxTowerBase(lab.x, lab.y); } catch (e) { ok = false; }
     check(ok, 'el portón y la base se dibujan');
 }, { random: true });
+test('Torre: Ascenso infinito — en la Cumbre "Seguir subiendo" lleva al piso 11 (biomas mezclados) y la run sigue', () => {
+    const persist = towerSavePersist; towerSavePersist = false;
+    try {
+        newTower('AXE', { weapon: 'ADVENTURER_SWORD' });
+        enterTowerFloor(10); towerRun.startedAt = gameClock - 600; towerVictory();
+        const up = document.getElementById('rs-ascend');
+        check(up, 'la Cumbre ofrece seguir subiendo');
+        up.click();
+        check(towerRun.ascent && towerRun.floor === 11 && gameState !== 'ENDED', 'sigue en el piso 11, la misma run');
+        check(towerStatusText().includes('Lo No Escrito'), 'el estado dice Lo No Escrito');
+        check(new Set([11, 12, 13, 14, 15].map(biomeFor)).size >= 3, 'los biomas se mezclan');
+        const L = arenas[0]; L.guardian.hp = 0; updateTower(0.05);
+        check(L.stairsOpen && gameState !== 'ENDED', 'vencer al guardián del 11 abre la escalera (no termina la run)');
+    } finally { towerSavePersist = persist; const b = document.getElementById('run-summary'); if (b) b.style.display = 'none'; }
+}, { random: true });
 test('Torre: misterio del piso 5 — los relojes dan vuelta las compuertas de arena del laberinto (siempre queda camino)', () => {
     newTower(); enterTowerFloor(5);
     const L = arenas[0], S = L.sandGates;

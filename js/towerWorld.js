@@ -71,7 +71,7 @@ const BIOMES = {
             ['ARMORED', 'Acorazado de Obsidiana', '#3d3b40', null, 1], ['DRUMMER', 'Tamborilero de Guerra', '#9b2226', null, 1]]
     }
 };
-function biomeFor(floor) { return BIOME_ORDER[Math.min(BIOME_ORDER.length - 1, Math.floor((floor - 1) / 2))]; }
+function biomeFor(floor) { return floor > 10 ? BIOME_ORDER[(floor * 3) % BIOME_ORDER.length] : BIOME_ORDER[Math.min(BIOME_ORDER.length - 1, Math.floor((floor - 1) / 2))]; } // 11+: Lo No Escrito, mezclados
 
 // Rasgos de los creeps de bioma: se aplican cuando su ataque pega.
 const CREEP_TRAITS = {

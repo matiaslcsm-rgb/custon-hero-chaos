@@ -125,7 +125,8 @@ function runSummaryHtml(o) {
         `${row('Nivel', player.level)}${row('Muertes', towerRun.deaths)}${row('Bajas', s.kills || 0)}${row('Campeones', s.champions || 0)}${row('Guardianes', s.guardians || 0)}${row('Oro juntado', (s.gold || 0) + 'g')}</div>` +
         `<div class="pause-section">💠 Tus reliquias</div><div class="rs-relics">${relics}</div>` +
         `<div class="pause-section">📜 Para siempre</div><p class="subtitle">${s.codex ? `${s.codex} poder${s.codex === 1 ? '' : 'es'} nuevo${s.codex === 1 ? '' : 's'} en el Códice · ` : ''}Esencia: ${(typeof codex !== 'undefined' && codex.essence) || 0} · el Bestiario y las páginas de Arén quedan guardados.</p>` +
-        `<button id="rs-again" class="primary-btn rs-again">▶ Otra run</button><button id="rs-menu" class="secondary-btn">🏠 Menú</button>`;
+        (o.won && !towerRun.ascent ? `<button id="rs-ascend" class="primary-btn rs-again">⬆ Seguir subiendo (Lo No Escrito)</button>` : '') +
+        `<button id="rs-again" class="${o.won && !towerRun.ascent ? 'secondary-btn' : 'primary-btn rs-again'}">▶ Otra run</button><button id="rs-menu" class="secondary-btn">🏠 Menú</button>`;
 }
 function showRunSummary(o) {
     let box = document.getElementById('run-summary');
@@ -133,5 +134,6 @@ function showRunSummary(o) {
     box.innerHTML = `<div class="modal-box pause-box run-summary">${runSummaryHtml(o)}</div>`;
     box.style.display = 'block';
     document.getElementById('rs-again').onclick = () => { box.style.display = 'none'; startTowerRun(); };
+    const up = document.getElementById('rs-ascend'); if (up) up.onclick = () => { box.style.display = 'none'; continueAscent(); };
     document.getElementById('rs-menu').onclick = () => { box.style.display = 'none'; const b = document.getElementById('restart-btn'); if (b) b.click(); };
 }

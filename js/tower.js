@@ -338,7 +338,7 @@ function updateTower(dt) {
         level.stairsOpen = true;
         log(`🗝️ ¡Venciste al guardián del nivel ${level.floor}! La escalera está abierta.`);
         sfx('win');
-        if (level.floor >= TOWER.floors) { towerVictory(); return; }
+        if (level.floor === TOWER.floors && !towerRun.ascent) { towerVictory(); return; } // la Cumbre (después se puede seguir subiendo)
     }
     if (player.isAlive() && player.x === level.stairs.x && player.y === level.stairs.y) {
         if (level.stairsOpen) enterTowerFloor(level.floor + 1);
@@ -458,6 +458,14 @@ function towerRespawn() {
     log(waystoneFloors().length ? `🪨 Renacés en el círculo de piedra. Tocá la piedra de regreso (${keyName(KEYMAP.interact)}) para volver a la entrada de un piso al que ya llegaste.` : '🪨 Renacés en el círculo de piedra. Los pisos siguen como los dejaste.');
 }
 
+// ASCENSO INFINITO (ROADMAP T1, paso 1, 2026-10-14): en la pantalla de la Cumbre, "Seguir subiendo" sigue la misma run por
+// los pisos 11 en adelante (Lo No Escrito: biomas mezclados, la fórmula del piso sube sola). Quedan guardados como cualquier piso.
+function continueAscent() {
+    towerRun.ascent = true; gameState = 'TOWER';
+    showPanel('restart-btn', false);
+    log('⬆ Seguís subiendo. Más arriba la torre todavía no está escrita: la crece la arena que cae.');
+    enterTowerFloor(TOWER.floors + 1);
+}
 function towerVictory() {
     gameState = 'ENDED';
     clearTowerSave(); // la run terminó: no hay nada que continuar (towerSave.js)
@@ -476,7 +484,7 @@ function towerStatusText() {
     if (!player.isAlive() && player.respawnAt) return `☠ Renacés en ${Math.max(0, player.respawnAt - gameClock).toFixed(1)}s`;
     const level = player.arena;
     if (level.isCave) return `🕳️ Piso ${level.floor} · cueva −${level.depth}/−${level.cave.max} · ${towerObjective(level).text}`;
-    return `${BIOMES[level.biome].icon} Piso ${level.floor}/${TOWER.floors} · ${towerDayLabel()} · ${towerObjective(level).text}`;
+    return `${BIOMES[level.biome].icon} Piso ${level.floor}${level.floor > TOWER.floors ? ' · Lo No Escrito' : '/' + TOWER.floors} · ${towerDayLabel()} · ${towerObjective(level).text}`;
 }
 function towerInfoHtml() {
     const level = player.arena;
