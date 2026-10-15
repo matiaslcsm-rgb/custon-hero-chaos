@@ -6,12 +6,14 @@
 //   etiqueta; juntar 3 de la misma (contando copias) prende el BONUS DE CONJUNTO de esa etiqueta.
 //   Paso 1: 12 reliquias en 4 etiquetas (fuego, sangrado, crítico, escudo). Se ganan al vencer campeones (a veces),
 //   al abrir cofres (a veces) y al vencer guardianes y jefes (siempre). Conviven con el equipo de siempre.
+//   Paso 2 (2026-10-14): +5 (17 en total): la etiqueta Rayo (Chispa, Pararrayos, Bobina) y Fuelle (fuego) y Costra (escudo).
 
 const RELIC_TAGS = {
     fuego: { name: 'Fuego', icon: '🔥', color: '#f77f00', set: 'Incendio: tus quemaduras pegan +50%.' },
     sangrado: { name: 'Sangrado', icon: '🩸', color: '#c1121f', set: 'Hemorragia: tus sangrados pegan +50%.' },
     critico: { name: 'Crítico', icon: '🎯', color: '#ffd166', set: 'Rebote: cada crítico tuyo salta a otro enemigo cercano (50% de tu daño).' },
-    escudo: { name: 'Escudo', icon: '🛡️', color: '#8ecae6', set: 'Bastión: tu escudo se recarga el doble de rápido.' }
+    escudo: { name: 'Escudo', icon: '🛡️', color: '#8ecae6', set: 'Bastión: tu escudo se recarga el doble de rápido.' },
+    rayo: { name: 'Rayo', icon: '⚡', color: '#9ad1ff', set: 'Tormenta: tus rayos saltan a un enemigo más.' }
 };
 const RELIC_SET_AT = 3;
 const RELIC_DROP = { champion: 0.05, chest: 0.1 }; // medido: con 0,25/0,35 el piloto juntaba 19 en 3 pisos (48 campeones); meta ~2-5 por piso
@@ -37,7 +39,16 @@ const RELICS = {
     EGIDA: { name: 'Égida', icon: '🛡️', tag: 'escudo', desc: n => `Escudo de ${8 * n}% de tu vida que se recarga si no te pegan por 5 s.`, shield: n => 0.08 * n },
     BROQUEL: { name: 'Broquel', icon: '🔰', tag: 'escudo', desc: n => `Al esquivar o parar: ganás un escudo de ${5 * n}% de tu vida.`,
         onDodge(h, p, n) { relicAddShield(h, h.maxHp * 0.05 * n); }, onParry(h, p, n) { relicAddShield(h, h.maxHp * 0.05 * n); } },
-    PIEDRA: { name: 'Piedra Firme', icon: '🗿', tag: 'escudo', desc: n => `Mientras tengas escudo: +${15 * n}% de daño.` }
+    PIEDRA: { name: 'Piedra Firme', icon: '🗿', tag: 'escudo', desc: n => `Mientras tengas escudo: +${15 * n}% de daño.` },
+    COSTRA: { name: 'Costra', icon: '🧱', tag: 'escudo', desc: n => `Al matar: ganás un escudo de ${3 * n}% de tu vida.`,
+        onKill(h, p, n) { relicAddShield(h, h.maxHp * 0.03 * n); } },
+    FUELLE: { name: 'Fuelle', icon: '🌬️', tag: 'fuego', desc: n => `Tus quemaduras duran ${n} s más.` },
+    CHISPA: { name: 'Chispa', icon: '⚡', tag: 'rayo', desc: n => `Al pegar: ${10 * n}% de soltar un rayo a un enemigo cercano (40% de tu daño).`,
+        onDealDamage(h, p, n) { if (Math.random() < 0.1 * n * relicProc(h)) relicZap(h, p.target, 0.4, 1); } },
+    PARARRAYOS: { name: 'Pararrayos', icon: '🌩️', tag: 'rayo', desc: n => `Al recibir un golpe: un rayo a quien te pegó (${40 * n}% de tu daño).`,
+        onDamaged(h, p, n) { if (p.source && p.source !== h && p.source.isAlive && p.source.isAlive()) relicZapAt(h, p.source, 0.4 * n); } },
+    BOBINA: { name: 'Bobina', icon: '🌀', tag: 'rayo', desc: n => `Cada 5 golpes: un rayo que salta entre ${1 + n} enemigos (25% de tu daño).`, // medido: con 35% sumaba +7% (las demás, 2-4%)
+        onDealDamage(h, p, n) { h.relicCoil = (h.relicCoil || 0) + 1; if (h.relicCoil >= 5) { h.relicCoil = 0; relicZap(h, p.target, 0.25, 1 + n); } } }
 };
 
 function relicCount(h, id) { return (h.relics && h.relics[id]) || 0; }
@@ -85,7 +96,23 @@ function relicDot(h, t, id, name, pct, dur, tag) {
         if (everyInterval(u, id, dt, 1)) dealDamage(h, u, Math.max(1, Math.round(effAttack(h) * pct * mult)), 'pure', { relic: true });
     } } });
 }
-function relicBurn(h, t) { relicDot(h, t, 'RELIC_BURN', 'Quemado', 0.3, 3, 'fuego'); }
+function relicBurn(h, t) { relicDot(h, t, 'RELIC_BURN', 'Quemado', 0.3, 3 + relicCount(h, 'FUELLE'), 'fuego'); }
+// Rayos: le pega a uno y salta a los más cercanos que no tocó (uno más con el conjunto de Rayo)
+function relicZapAt(h, t, mult) {
+    if (!t || !t.isAlive || !t.isAlive()) return;
+    dealDamage(h, t, Math.max(1, Math.round(effAttack(h) * mult)), 'magical', { relic: true });
+    const arena = fxArena(h);
+    if (arena) fxParticles(arena, t.x, t.y, 'lightning', 6, 2.5, { life: 0.25 });
+}
+function relicZap(h, from, mult, jumps) {
+    const hit = new Set([from]);
+    let at = from;
+    for (let j = 0; j < jumps + (relicSet(h, 'rayo') ? 1 : 0); j++) {
+        const next = relicNear(at, 4).filter(e => !hit.has(e)).sort((a, b) => Math.hypot(a.x - at.x, a.y - at.y) - Math.hypot(b.x - at.x, b.y - at.y))[0];
+        if (!next) return;
+        hit.add(next); relicZapAt(h, next, mult); at = next;
+    }
+}
 function relicBleed(h, t, n = 1) { relicDot(h, t, 'RELIC_BLEED', 'Sangrando', 0.2 * n, 4, 'sangrado'); }
 function relicBlast(h, at, r, mult, el) {
     if (!at) return;

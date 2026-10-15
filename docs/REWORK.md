@@ -838,6 +838,11 @@ también tiene que aprender a esquivar los ataques anunciados).
 - ✅ **Jefe escondido del piso 7: el Lobo de Escarcha** (2026-10-14; lo empezó la corrida automática que se detuvo y
   se completó acá): en el mirador cerrado (sala sellada con grieta), aviso de Isla la farolera; suelta las **Garras del
   Lobo de Escarcha** (guantes con crítico y velocidad de ataque). Verificado: la sala se arma en 8 de 8 pisos 7.
+- ✅ **5 reliquias nuevas (17 en total)** (2026-10-14, `js/towerRelics.js`): etiqueta nueva **Rayo** (⚡; conjunto
+  Tormenta: los rayos saltan a uno más) con **Chispa** (al pegar, a veces un rayo a uno cercano), **Pararrayos** (al
+  recibir un golpe, rayo a quien te pegó) y **Bobina** (cada 5 golpes, un rayo en cadena); **Fuelle** (fuego: las
+  quemaduras duran 1 s más por copia) y **Costra** (escudo: al matar, escudo del 3%). Medido con el Guerrero, 60 s
+  contra 3 muñecos y 1 copia: Brasa +4%, Colmillo +3%, Chispa +2%, Bobina +4% (con 35% del daño daba +7%: bajada a 25%).
 - ✅ **El piloto usa la especial y la dificultad de las clases quedó medida** (2026-10-14, `js/towerSpecials.js`): el
   piloto automático nunca tiraba la especial, así que las clases se medían con la mitad del kit. Ahora la tira con 2 o
   más enemigos a su alcance o contra un jefe, al medio del grupo. 45 min con reflejos humanos: Guerrero piso 4 a los

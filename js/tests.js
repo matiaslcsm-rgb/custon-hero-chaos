@@ -1809,6 +1809,27 @@ test('Torre: el piloto usa la especial de la clase con 2 o más enemigos cerca (
     check(aiClassSpecial(player) && player.specialReadyAt > gameClock, 'con dos, la tira');
     check(!aiClassSpecial(player), 'y espera a que se recargue');
 }, { random: true });
+test('Torre: reliquias nuevas — los rayos saltan (la Bobina cada 5 golpes, uno más con el conjunto), el Fuelle alarga la quemadura, la Costra da escudo', () => {
+    const level = newTower('AXE', { weapon: 'ADVENTURER_SWORD' });
+    level.creeps.forEach(c => { c.hp = 0; });
+    for (let y = -2; y <= 2; y++) for (let x = -2; x <= 4; x++) level.walls[player.y + y][player.x + x] = 0;
+    const a = towerDummy(level, 1, 0), b = towerDummy(level, 2, 0), c = towerDummy(level, 3, 0);
+    addRelic(player, 'BOBINA');
+    for (let i = 0; i < 4; i++) relicEmit(player, 'onDealDamage', { target: a, isCrit: false });
+    check(b.hp === 9999, 'antes del quinto golpe, nada');
+    relicEmit(player, 'onDealDamage', { target: a, isCrit: false });
+    check(b.hp < 9999 && c.hp < 9999, 'al quinto, el rayo salta a 2 (Bobina ×1)');
+    b.hp = c.hp = 9999; addRelic(player, 'CHISPA'); addRelic(player, 'PARARRAYOS');
+    check(relicSet(player, 'rayo'), 'con 3 de Rayo, el conjunto Tormenta');
+    relicZap(player, a, 0.4, 1);
+    check(b.hp < 9999 && c.hp < 9999, 'con el conjunto, un rayo de 1 salto pega a 2');
+    addRelic(player, 'FUELLE'); relicBurn(player, a);
+    checkEq(getEffect(a, 'RELIC_BURN').duration, 4, 'el Fuelle alarga la quemadura 1 s');
+    addRelic(player, 'COSTRA'); player.relicShield = 0;
+    relicEmit(player, 'onKill', { victim: c });
+    check(player.relicShield > 0, 'la Costra da escudo al matar');
+    checkEq(Object.keys(RELICS).length, 17, '17 reliquias');
+}, { random: true });
 test('Torre: misterio del piso 5 — los relojes dan vuelta las compuertas de arena del laberinto (siempre queda camino)', () => {
     newTower(); enterTowerFloor(5);
     const L = arenas[0], S = L.sandGates;

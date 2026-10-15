@@ -195,6 +195,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 - [ ] **Esencia que desbloquea reliquias** nuevas en el mazo; las piezas únicas de los jefes escondidos pasan a ser
       reliquias únicas.
 - [ ] **Más reliquias**, de a 5 por entrega y midiendo, hasta 40.
+  - [x] Entrega 1 (17): etiqueta Rayo (Chispa, Pararrayos, Bobina; conjunto Tormenta), Fuelle (fuego) y Costra (escudo). 2026-10-14.
 - [ ] **Arenas de jefes, paso 1:** la sala del guardián se cierra al entrar (rejas) hasta que gane alguien; la puerta
       pide la **llave del piso**, que lleva el campeón más fuerte (marcado en el mapa y en el objetivo del piso).
 - [ ] **Arenas, paso 2:** los jefes escondidos también pelean en arena cerrada; la llave puede salir del misterio del
@@ -368,6 +369,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 - 2026-10-14 · Subir de nivel, paso 2a (mejoras de clase) · 77d3fc7 · Eco del Orbe: 40 orbes contra 4 muñecos agrupados, 1801→2002 de daño (+11%; contra uno solo no suma); el remate aturde y el flechazo atraviesa (probados). Pruebas 260/260.
 - 2026-10-14 · Subir de nivel, paso 2b (mejoras de clase a las 8) · c5697c5 · tormenta contra 5 agrupados (promedio de 20): 87→145 de daño (+67%, de 3 a 5 rayos; enfriamiento de 7 s y llega tarde); la parada dura 0,45 s en vez de 0,3. Se arregló la prueba de la gente del pueblo (dejaba al héroe en casilla con decimales). Pruebas 260/260.
 - 2026-10-14 · Guerrero 1c (dificultad sin Q/E/R) · 04663cd · el piloto no usaba la especial: sin ella el Guerrero llegaba al piso 3 a los 33 min y no pasaba; con ella (80 usos), piso 4 a los 41 = igual que con Q/E/R. Arquero piso 4 a los 40 (121 usos), Mago a los 35 (112 usos). 0 muertes en las tres. Pruebas 261/261.
+- 2026-10-14 · Más reliquias, entrega 1 (12→17) · COMMIT · Guerrero 60 s contra 3 muñecos, 1 copia: Brasa +4%, Colmillo +3%, Chispa +2%, Bobina +7% con 35% → bajada a 25%: +4%. Pruebas 262/262.
 - 2026-10-14 · Reliquias, paso 1 (motor y 12 reliquias) · 8c1e664 · piloto con reflejos humanos, 45 min: sin reliquias piso 3 y 2 muertes; con 0,25/0,35 de chance, 19 reliquias en 3 pisos (demasiadas); con 0,05/0,10, 7 en 3 pisos (~2,3 por piso), piso 4 y 0 muertes. Pruebas 239/239.
 - 2026-10-14 · Subir de nivel: 1 de 3 mejoras · 6716de1 · piloto con reflejos humanos, 45 min: piso 4 a los 41 min, 0 muertes, nivel 15, 6 reliquias (igual que sin la elección: piso 4 a los 43 min); destrabó Piel de Roble, Golpe Pesado y Sangre Espesa. Pruebas 240/240.
 - 2026-10-14 · Guerrero, paso 1a (clases y Templanza) · 259f4bc · banco de 60 s contra un muñeco, 8 muestras: 119 de daño/s sin pasiva y 116 con ella (sin diferencia: el combo ya critea; el ruido es ±25). Pruebas 241/241; se arregló la prueba de visión que fallaba si el héroe quedaba en una meseta.
