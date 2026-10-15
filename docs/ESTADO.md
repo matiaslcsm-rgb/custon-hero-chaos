@@ -57,8 +57,15 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   habilidades del equipo (REWORK.md §22). Falta el Mago.
 - **Subir de nivel (2026-10-14, fase T00):** elegís 1 de 3 mejoras; repetir un stat 3 y 6 veces destraba mejoras
   propias (REWORK.md §21).
-- **Reliquias (2026-10-14, fase T00):** 12 reliquias apilables al estilo Risk of Rain, con 4 etiquetas y bonus de
+- **Reliquias (2026-10-14, fase T00):** 27 reliquias (6 etiquetas: fuego, sangrado, crítico, escudo, rayo, hielo, viento);
+  el mercader vende 3 por piso. Al principio eran 12 reliquias apilables al estilo Risk of Rain, con 4 etiquetas y bonus de
   conjunto; conviven con el equipo hasta que lleguen las clases fijas (REWORK.md §20).
+- **Arenas y llave del piso (2026-10-14):** la sala del guardián tiene rejas: hace falta la llave del piso (la lleva el
+  campeón más fuerte) y al entrar se cierra hasta que gane alguien; los jefes escondidos también pelean encerrados.
+- **Fin de run y Ascenso (2026-10-14):** escena de la Cumbre, resumen de la run con "Otra run" o "Seguir subiendo" (pisos
+  11+ con biomas mezclados; agravantes de escudo en 20, 30 y 40). El guardado recuerda el Ascenso.
+- **Mejoras de clase (2026-10-14):** a las 4 y 8 elecciones del stat de la clase (remate que aturde, parada espejo,
+  flechazo que atraviesa, esquive rápido, orbe con rebote, tormenta mayor). El piloto usa la especial.
 - **Sin mouse y con joystick (2026-10-14):** U ataca y O es el secundario, apuntando solos; joystick estándar
   (js/padControls.js). Los menús todavía se usan con mouse.
 - **Cómo funciona (2026-10-14):** la pausa de la Torre explica cada sistema en secciones plegables (js/towerGuide.js).
