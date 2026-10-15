@@ -1873,6 +1873,18 @@ test('Torre: la llave del piso — la lleva el campeón más fuerte; hasta vence
     K.carrier.hp = 0; bossArenaTick(L);
     check(K.got && !L.bossArena.closed && reachG(), 'vencido el campeón, las rejas se abren');
 }, { random: true });
+test('Torre: arena del jefe escondido — rota la grieta, al entrar bajan rejas sobre ella hasta que gane alguien', () => {
+    newTower(); enterTowerFloor(3);
+    const L = arenas[0], hb = L.hiddenBoss, g = hb.gate, k = L.cracks.find(c => c.x === g.x && c.y === g.y);
+    hiddenBossTick(L);
+    Object.assign(player, { arena: L, x: hb.room.x, y: hb.room.y });
+    hiddenArenaTick(L); check(!hb.locked, 'con la grieta sana no pasa nada');
+    for (let i = 0; i < SECRET.hp; i++) hitCrack(L, k.x, k.y, player);
+    hiddenArenaTick(L);
+    check(hb.locked && !walkable(L, g.x, g.y), 'adentro con el jefe vivo: rejas sobre la grieta');
+    hb.unit.hp = 0; hiddenArenaTick(L);
+    check(!hb.locked && walkable(L, g.x, g.y), 'vencido, se abren');
+}, { random: true });
 test('Torre: misterio del piso 5 — los relojes dan vuelta las compuertas de arena del laberinto (siempre queda camino)', () => {
     newTower(); enterTowerFloor(5);
     const L = arenas[0], S = L.sandGates;

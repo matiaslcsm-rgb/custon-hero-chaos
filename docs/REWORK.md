@@ -838,6 +838,9 @@ también tiene que aprender a esquivar los ataques anunciados).
 - ✅ **Jefe escondido del piso 7: el Lobo de Escarcha** (2026-10-14; lo empezó la corrida automática que se detuvo y
   se completó acá): en el mirador cerrado (sala sellada con grieta), aviso de Isla la farolera; suelta las **Garras del
   Lobo de Escarcha** (guantes con crítico y velocidad de ataque). Verificado: la sala se arma en 8 de 8 pisos 7.
+- ✅ **Los jefes escondidos pelean en arena** (2026-10-14, `js/towerSecrets.js`): en las salas tapiadas (pisos 2-9), una
+  vez rota la grieta, si entrás con el jefe vivo bajan rejas sobre la abertura hasta que gane alguien (se abren al
+  vencerlo, si morís, te vas del piso o el jefe sale de la sala).
 - ✅ **La llave del piso** (2026-10-14, `js/towerBosses.js`): la lleva el campeón más fuerte al que se llega desde la
   entrada (🗝️ flotando arriba suyo, marcado en el mapa siempre y en el objetivo con la flecha). Hasta vencerlo, la sala
   del guardián tiene rejas doradas. Sale en 19 de 20 pisos (sin campeones alcanzables, no hay llave). Arreglado con el

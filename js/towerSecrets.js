@@ -173,8 +173,9 @@ function placeHiddenBoss(level, dist) {
     if (H.sealed) { // la sala sellada: una cámara grande sin cofre, con su grieta; el jefe espera en el medio
         const p = findFieldRect(level, dist, H.sealed, true);
         if (!p) return;
-        buildChamber(level, p.x, p.y, p.side, H.sealed, false);
-        level.hiddenBoss = { x: p.x + 1 + (H.sealed[0] >> 1), y: p.y + 1 + (H.sealed[1] >> 1), floor: level.floor, unit: null, dead: false };
+        const crack = buildChamber(level, p.x, p.y, p.side, H.sealed, false);
+        level.hiddenBoss = { x: p.x + 1 + (H.sealed[0] >> 1), y: p.y + 1 + (H.sealed[1] >> 1), floor: level.floor, unit: null, dead: false,
+            room: { x: p.x + 1, y: p.y + 1, w: H.sealed[0], h: H.sealed[1] }, gate: { x: crack.x, y: crack.y } }; // para la arena (hiddenArenaTick)
         return;
     }
     let best = null, bestD = -1;
@@ -211,6 +212,31 @@ function hiddenBossTick(level) {
         level.creeps.push(c); hb.unit = c;
         if (!hb.hinted) { hb.hinted = true; log(H.hint); }
     } else if (!out && u && !u.aggro) { level.creeps = level.creeps.filter(o => o !== u); hb.unit = null; } // amanece: se va
+}
+// ARENA (ROADMAP T00, "Arenas, paso 2", 2026-10-14): si entrás a la sala tapiada con el jefe vivo, la abertura de la grieta
+// se cierra con rejas hasta que gane alguien (se abre al vencerlo, si morís, te vas del piso, o si el jefe sale de la sala).
+function hiddenArenaTick(level) {
+    const hb = level.hiddenBoss;
+    if (!hb || !hb.room || !hb.gate) return;
+    const u = hb.unit, g = hb.gate, k = (level.cracks || []).find(c => c.x === g.x && c.y === g.y);
+    if (k && k.hp > 0) return; // la grieta todavía no se rompió
+    const px = Math.round(player.x), py = Math.round(player.y), here = player.isAlive() && player.arena === level;
+    const fight = here && u && u.isAlive() && nearRoom(hb.room, u.x, u.y) && nearRoom(hb.room, px, py);
+    if (!hb.locked && fight && inRoom(hb.room, px, py) && !(px === g.x && py === g.y) && !unitAt(level, g.x, g.y)) {
+        hb.locked = true; level.walls[g.y][g.x] = WALL.stone;
+        log(`🔒 Unas rejas bajan sobre la grieta: ${u.type.label} y vos, hasta que gane alguien.`); sfx('hit');
+    } else if (hb.locked && !fight) {
+        hb.locked = false; level.walls[g.y][g.x] = 0;
+        if (u && !u.isAlive()) log('🔓 Las rejas de la grieta se levantan.');
+    }
+}
+function drawHiddenArena(level) {
+    const hb = level.hiddenBoss;
+    if (!hb || !hb.locked || !level.explored[hb.gate.y][hb.gate.x]) return;
+    const x = hb.gate.x * TILE, y = hb.gate.y * TILE;
+    ctx.save(); ctx.fillStyle = 'rgba(12,10,9,0.8)'; ctx.fillRect(x + 2, y + 2, TILE - 4, TILE - 4); ctx.fillStyle = '#9aa2ab';
+    for (let i = 0; i < 4; i++) ctx.fillRect(Math.round(x + 4 + i * (TILE - 10) / 3), y + 2, 2, TILE - 4);
+    ctx.fillRect(x + 2, Math.round(y + TILE * 0.5), TILE - 4, 2); ctx.restore();
 }
 // La pieza única que suelta (una rara de su ranura, con nombre propio y un afijo extra). Botas y anillo salen como
 // pieza de stats (no traen habilidad, como las del botín: towerCodex.js).

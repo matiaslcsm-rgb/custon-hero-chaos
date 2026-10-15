@@ -296,6 +296,7 @@ function updateTower(dt) {
     folkTick(level, dt); // la gente del pueblo pasea (towerFolk.js)
     sandClockTick(level, dt); // los relojes del piso 5 (towerMysteries.js)
     bossArenaTick(level); // la sala del guardián se cierra al entrar (towerBosses.js)
+    hiddenArenaTick(level); // y la del jefe escondido (towerSecrets.js)
     towerAutosave(); // cada 15 s (towerSave.js)
     unstickFromWall(player);
     // Cuaderno (REWORK.md §1): moverse y esquivar se detectan leyendo el estado, sin tocar el código compartido.
@@ -559,6 +560,7 @@ function renderTower(level, dt) {
     drawQuestDoors(level); // rejas de los pedidos (towerQuests.js)
     drawSandGates(level); // compuertas de arena del piso 5 (towerMysteries.js)
     drawBossArena(level); // las rejas de la sala del guardián (towerBosses.js)
+    drawHiddenArena(level); // y las de la grieta del jefe escondido (towerSecrets.js)
     drawLanterns(level); // faroles del piso 7
     drawSigns(level); // carteles de los caminos (towerLore.js)
     pxDrawLoot(level); // cofres y botín (towerPixelProps.js)
