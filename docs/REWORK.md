@@ -838,6 +838,10 @@ también tiene que aprender a esquivar los ataques anunciados).
 - ✅ **Jefe escondido del piso 7: el Lobo de Escarcha** (2026-10-14; lo empezó la corrida automática que se detuvo y
   se completó acá): en el mirador cerrado (sala sellada con grieta), aviso de Isla la farolera; suelta las **Garras del
   Lobo de Escarcha** (guantes con crítico y velocidad de ataque). Verificado: la sala se arma en 8 de 8 pisos 7.
+- ✅ **5 reliquias más (27)** (2026-10-14): etiqueta nueva **Viento** (🌪️; conjunto Ventarrón: después de esquivar, +30%
+  de daño por 2 s) con **Pluma** (+6% de velocidad), **Ráfaga** (al esquivar, empuja y pega a los cercanos) y **Remolino** (al
+  matar, a veces un torbellino alrededor); **Sangre Fría** (sangrado: al pegarle a uno que sangra, te curás 1%) y **Ascua**
+  (fuego: al recibir un golpe, 25% de quemar a quien te pegó).
 - ✅ **Cartas de nivel sin mouse** (2026-10-14): con la ventana de stats abierta, ← → (o la cruceta) marcan una carta
   (borde amarillo) y U / F / Enter (la A del joystick) la eligen; 1 2 3 eligen directo. En el joystick, apretar el stick
   izquierdo abre los stats y el derecho, el equipo. Antes, con joystick no se podía subir de nivel. La lista de stats

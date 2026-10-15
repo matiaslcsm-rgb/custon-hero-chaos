@@ -1908,7 +1908,7 @@ test('Torre: reliquias de hielo — frenan (el conjunto Glaciar lo duplica), el 
     check(getEffect(a, 'RELIC_BLEED'), 'el Garfio hace sangrar al esquivar');
     const hp = a.hp; addRelic(player, 'NUBE'); player.relicCloudAt = 0; relicTick(player);
     check(a.hp < hp && player.relicCloudAt > gameClock, 'la Nube tira su rayo y espera 8 s');
-    checkEq(Object.keys(RELICS).length, 22, '22 reliquias');
+    check(Object.keys(RELICS).length >= 22, 'al menos 22 reliquias');
 }, { random: true });
 test('Torre: el mercader vende 3 reliquias por piso y se pueden cambiar (cada cambio más caro)', () => {
     newTower(); const L = arenas[0]; Object.assign(player, { arena: L, gold: 2000 });
@@ -1933,6 +1933,22 @@ test('Torre: las cartas de nivel se eligen sin mouse (← → y la tecla de ataq
     window.dispatchEvent(new KeyboardEvent('keydown', { key: '3' }));
     checkEq(v(offer2[2]), b2 + LEVEL_PICK.points, 'el 3 elige la tercera');
     toggleStatsWindow(false);
+}, { random: true });
+test('Torre: reliquias de viento — Pluma da velocidad, Ráfaga empuja al esquivar, el conjunto Ventarrón da daño; Sangre Fría cura', () => {
+    const level = newTower('AXE', { weapon: 'ADVENTURER_SWORD' });
+    level.creeps.forEach(c => { c.hp = 0; });
+    for (let y = -3; y <= 3; y++) for (let x = -3; x <= 4; x++) level.walls[player.y + y][player.x + x] = 0;
+    const a = towerDummy(level, 1, 0);
+    const ms = effMoveMult(player); addRelic(player, 'PLUMA'); relicTick(player);
+    check(effMoveMult(player) > ms, 'la Pluma da velocidad');
+    const x0 = a.x; addRelic(player, 'RAFAGA'); relicEmit(player, 'onDodge', {});
+    check(a.x === x0 + 1 && a.hp < 9999, 'la Ráfaga empuja y pega al esquivar');
+    addRelic(player, 'REMOLINO'); check(relicSet(player, 'viento'), 'con 3 de Viento, el conjunto');
+    relicEmit(player, 'onDodge', {}); check(getEffect(player, 'RELIC_GALE'), 'Ventarrón: después de esquivar, más daño');
+    addRelic(player, 'SANGRE_FRIA'); relicBleed(player, a); player.hp = player.maxHp / 2; const hp = player.hp;
+    relicEmit(player, 'onDealDamage', { target: a, isCrit: false });
+    check(player.hp > hp, 'Sangre Fría cura al pegarle a uno que sangra');
+    checkEq(Object.keys(RELICS).length, 27, '27 reliquias');
 }, { random: true });
 test('Torre: misterio del piso 5 — los relojes dan vuelta las compuertas de arena del laberinto (siempre queda camino)', () => {
     newTower(); enterTowerFloor(5);

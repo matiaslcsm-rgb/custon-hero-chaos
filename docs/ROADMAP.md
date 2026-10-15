@@ -199,6 +199,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 - [ ] **Más reliquias**, de a 5 por entrega y midiendo, hasta 40.
   - [x] Entrega 1 (17): etiqueta Rayo (Chispa, Pararrayos, Bobina; conjunto Tormenta), Fuelle (fuego) y Costra (escudo). 2026-10-14.
   - [x] Entrega 2 (22): etiqueta Hielo (Escarcha, Copo, Carámbano; conjunto Glaciar), Garfio (sangrado), Nube Cargada (rayo). 2026-10-14.
+  - [x] Entrega 3 (27): etiqueta Viento (Pluma, Ráfaga, Remolino; conjunto Ventarrón), Sangre Fría (sangrado), Ascua (fuego). 2026-10-14.
 - [x] **Arenas de jefes, paso 1:** la sala del guardián se cierra al entrar (rejas) hasta que gane alguien; la puerta
       pide la **llave del piso**, que lleva el campeón más fuerte (marcado en el mapa y en el objetivo del piso).
   - [x] 1a: la sala del guardián se cierra al entrar y se abre al vencerlo, al morir o al irte del piso. 2026-10-14.
@@ -390,6 +391,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 - 2026-10-14 · Mercader: 3 reliquias por piso · 19872a2 · el piloto llega al piso 2 con ~830g: con 120+40 por reliquia compraba 4 (el doble de las que caen, ~2,3 por piso) → 200+60 (320 en el piso 2, como un Tomo). El piloto no las compra (no cambia sus mediciones). Columna "A la venta" más ancha. Pruebas 267/267.
 - 2026-10-14 · Joystick: B cierra las ventanas (pedido en el chat) · 4797cd0 · probado con un joystick simulado: en pausa B manda Esc, jugando esquiva. Pruebas 267/267.
 - 2026-10-14 · Cartas de nivel sin mouse y con joystick · 428656c · probado con teclas de verdad: → marca la segunda y U la elige (+5 al stat); el 3 elige la tercera; revisado en pantalla. La lista de stats filtra las mejoras por clase. Pruebas 268/268.
+- 2026-10-14 · Más reliquias, entrega 3 (22→27) · COMMIT · son de esquive, defensa y movimiento: probadas una por una (Pluma da velocidad, Ráfaga empuja y pega, Ventarrón da +30% tras esquivar, Sangre Fría cura); sin banco de daño (los muñecos no pegan). Pruebas 269/269.
 - 2026-10-14 · Reliquias, paso 1 (motor y 12 reliquias) · 8c1e664 · piloto con reflejos humanos, 45 min: sin reliquias piso 3 y 2 muertes; con 0,25/0,35 de chance, 19 reliquias en 3 pisos (demasiadas); con 0,05/0,10, 7 en 3 pisos (~2,3 por piso), piso 4 y 0 muertes. Pruebas 239/239.
 - 2026-10-14 · Subir de nivel: 1 de 3 mejoras · 6716de1 · piloto con reflejos humanos, 45 min: piso 4 a los 41 min, 0 muertes, nivel 15, 6 reliquias (igual que sin la elección: piso 4 a los 43 min); destrabó Piel de Roble, Golpe Pesado y Sangre Espesa. Pruebas 240/240.
 - 2026-10-14 · Guerrero, paso 1a (clases y Templanza) · 259f4bc · banco de 60 s contra un muñeco, 8 muestras: 119 de daño/s sin pasiva y 116 con ella (sin diferencia: el combo ya critea; el ruido es ±25). Pruebas 241/241; se arregló la prueba de visión que fallaba si el héroe quedaba en una meseta.

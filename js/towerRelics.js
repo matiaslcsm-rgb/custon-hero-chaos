@@ -8,6 +8,7 @@
 //   al abrir cofres (a veces) y al vencer guardianes y jefes (siempre). Conviven con el equipo de siempre.
 //   Paso 2 (2026-10-14): +5 (17 en total): la etiqueta Rayo (Chispa, Pararrayos, Bobina) y Fuelle (fuego) y Costra (escudo).
 //   Paso 3 (2026-10-14): +5 (22): la etiqueta Hielo (Escarcha, Copo, Carámbano), Garfio (sangrado) y Nube (rayo).
+//   Paso 4 (2026-10-14): +5 (27): la etiqueta Viento (Pluma, Ráfaga, Remolino), Sangre Fría (sangrado) y Ascua (fuego).
 
 const RELIC_TAGS = {
     fuego: { name: 'Fuego', icon: '🔥', color: '#f77f00', set: 'Incendio: tus quemaduras pegan +50%.' },
@@ -15,7 +16,8 @@ const RELIC_TAGS = {
     critico: { name: 'Crítico', icon: '🎯', color: '#ffd166', set: 'Rebote: cada crítico tuyo salta a otro enemigo cercano (50% de tu daño).' },
     escudo: { name: 'Escudo', icon: '🛡️', color: '#8ecae6', set: 'Bastión: tu escudo se recarga el doble de rápido.' },
     rayo: { name: 'Rayo', icon: '⚡', color: '#9ad1ff', set: 'Tormenta: tus rayos saltan a un enemigo más.' },
-    hielo: { name: 'Hielo', icon: '❄️', color: '#bde0fe', set: 'Glaciar: tus ralentizaciones duran el doble.' }
+    hielo: { name: 'Hielo', icon: '❄️', color: '#bde0fe', set: 'Glaciar: tus ralentizaciones duran el doble.' },
+    viento: { name: 'Viento', icon: '🌪️', color: '#b7e4c7', set: 'Ventarrón: después de esquivar, +30% de daño por 2 s.' }
 };
 const RELIC_SET_AT = 3;
 const RELIC_DROP = { champion: 0.05, chest: 0.1 }; // medido: con 0,25/0,35 el piloto juntaba 19 en 3 pisos (48 campeones); meta ~2-5 por piso
@@ -59,7 +61,16 @@ const RELICS = {
     CARAMBANO: { name: 'Carámbano', icon: '🧊', tag: 'hielo', desc: n => `Al matar: estalla en hielo (radio 2): ${40 * n}% de tu daño y frena.`,
         onKill(h, p, n) { relicBlast(h, p.victim, 2, 0.4 * n, 'ice'); relicNear(p.victim, 2).forEach(e => relicChill(h, e)); } },
     GARFIO: { name: 'Garfio', icon: '🪝', tag: 'sangrado', desc: n => `Al esquivar o parar: hacés sangrar a los enemigos a ${1 + n} casillas.`,
-        onDodge(h, p, n) { relicNear(h, 1 + n).forEach(e => relicBleed(h, e)); }, onParry(h, p, n) { relicNear(h, 1 + n).forEach(e => relicBleed(h, e)); } }
+        onDodge(h, p, n) { relicNear(h, 1 + n).forEach(e => relicBleed(h, e)); }, onParry(h, p, n) { relicNear(h, 1 + n).forEach(e => relicBleed(h, e)); } },
+    SANGRE_FRIA: { name: 'Sangre Fría', icon: '💧', tag: 'sangrado', desc: n => `Al pegarle a un enemigo que sangra: te curás ${n}% de tu vida.`,
+        onDealDamage(h, p, n) { if (p.target && getEffect(p.target, 'RELIC_BLEED')) h.hp = Math.min(h.maxHp, h.hp + h.maxHp * 0.01 * n); } },
+    ASCUA: { name: 'Ascua', icon: '🕯️', tag: 'fuego', desc: n => `Al recibir un golpe: ${25 * n}% de prenderle fuego a quien te pegó.`,
+        onDamaged(h, p, n) { if (p.source && p.source !== h && p.source.isAlive && p.source.isAlive() && Math.random() < 0.25 * n) relicBurn(h, p.source); } },
+    PLUMA: { name: 'Pluma', icon: '🪶', tag: 'viento', desc: n => `+${6 * n}% de velocidad de movimiento.`, mods: n => ({ moveSpeedPct: 0.06 * n }) },
+    RAFAGA: { name: 'Ráfaga', icon: '💨', tag: 'viento', desc: n => `Al esquivar: empujás y le pegás a los enemigos a 2 casillas (${30 * n}% de tu daño).`,
+        onDodge(h, p, n) { relicNear(h, 2).forEach(e => { dealDamage(h, e, Math.round(effAttack(h) * 0.3 * n), 'physical', { relic: true }); relicPush(h, e); }); } },
+    REMOLINO: { name: 'Remolino', icon: '🍃', tag: 'viento', desc: n => `Al matar: ${20 * n}% de dejar un torbellino que pega 50% de tu daño alrededor (radio 2).`,
+        onKill(h, p, n) { if (Math.random() < 0.2 * n) relicBlast(h, p.victim, 2, 0.5, 'holy'); } }
 };
 
 function relicCount(h, id) { return (h.relics && h.relics[id]) || 0; }
@@ -89,6 +100,7 @@ function relicEmit(h, event, p) {
         if (o) dealDamage(h, o, Math.round(effAttack(h) * 0.5), 'physical', { relic: true });
     }
     if (event === 'onDamaged') h.relicHitAt = gameClock;
+    if (event === 'onDodge' && relicSet(h, 'viento')) addEffect(h, { id: 'RELIC_GALE', name: 'Ventarrón', duration: 2, tags: ['MEJORA'], mods: { atkPct: 0.3 } });
 }
 // Stats que suman (Lente) y el daño extra con escudo (Piedra Firme): los lee recalculateStats / effAttack vía relicMods
 function relicMods(h) {
@@ -106,6 +118,11 @@ function relicDot(h, t, id, name, pct, dur, tag) {
     addEffect(t, { id, name, duration: dur, tags: ['PERJUICIO'], hooks: { onTick(u, { dt }) {
         if (everyInterval(u, id, dt, 1)) dealDamage(h, u, Math.max(1, Math.round(effAttack(h) * pct * mult)), 'pure', { relic: true });
     } } });
+}
+function relicPush(h, e) { // una casilla para afuera (no a los jefes)
+    if (!e.isAlive() || e.isGuardian || e.isCaveBoss || e.isBoss || e.isHiddenBoss) return;
+    const kx = Math.sign(Math.round(e.x - h.x)), ky = Math.sign(Math.round(e.y - h.y));
+    if ((kx || ky) && walkable(e.arena, e.x + kx, e.y + ky) && !unitAt(e.arena, e.x + kx, e.y + ky)) { e.x += kx; e.y += ky; }
 }
 function relicChill(h, t) {
     if (!t || !t.isAlive || !t.isAlive()) return;
