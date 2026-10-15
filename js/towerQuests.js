@@ -4,6 +4,7 @@
 //   El primero: la LLAVE DE LAS COMPUERTAS. La suelta el Guardián de Arena (jefe escondido del piso 5, towerSecrets.js);
 //   abre las compuertas del piso 3, una sala sellada con una reja de hierro (no se rompe a golpes) y un cofre adentro.
 //   Las llaves de la run se guardan con la run (towerSave.js).
+//   El tercero, hacia arriba: la llave del Archivo Sellado (Semilla Primera, piso 4) abre el archivo del piso 6.
 //   El segundo: la llave del almacén de los faroleros (Vigía Perdido, piso 8) abre el almacén del piso 7 y prende sus faroles.
 //   EL MISTERIO DEL PISO 3 (jugable): al abrir las compuertas baja el agua de todo el piso. Los pozos hondos se secan y se
 //   cruzan (atajos), y en el fondo de los dos más grandes asoman cofres hundidos que antes no se veían.
@@ -18,7 +19,12 @@ const QUESTS = {
     almacen: { keyFloor: 8, doorFloor: 7, key: 'Llave del Almacén de Faroles', inner: [5, 4],
         locked: '🔒 Una reja con candado: el almacén de los faroleros. Isla dice que la llave la tenía un vigía que subió al piso 8 y no bajó.',
         got: '🗝️ El Vigía Perdido tenía colgada una llave con una etiqueta: «Almacén de faroles, piso 7» (la piedra de regreso te lleva).',
-        open: '🗝️ Abrís el almacén de los faroleros: hay aceite para todos los faroles. Isla los prende de una punta a la otra de la galería.', lightsAll: true }
+        open: '🗝️ Abrís el almacén de los faroleros: hay aceite para todos los faroles. Isla los prende de una punta a la otra de la galería.', lightsAll: true },
+    // El tercero va hacia arriba: la Semilla Primera (piso 4) tenía enredada la llave del Archivo Sellado de la biblioteca (piso 6).
+    archivo: { keyFloor: 4, doorFloor: 6, key: 'Llave del Archivo Sellado', inner: [5, 4],
+        locked: '🔒 Una reja con candado de bronce: el Archivo Sellado. La archivista Sela dice que la llave se la llevó la raíz, dos pisos más abajo.',
+        got: '🗝️ Entre las raíces de la Semilla Primera, una llave de bronce con una etiqueta: «Archivo Sellado, piso 6».',
+        open: '🗝️ El Archivo Sellado se abre. La archivista Sela: «Acá guardamos lo que la expedición no quiso que leyéramos. Hay una lista de siete nombres... y el octavo está tachado.»' }
 };
 const SUNKEN = { chests: 2, minPool: 5 };
 const chestUnderWater = (level, ch) => !!(ch.sunken && level.deep && level.deep[ch.y * COLS + ch.x]);

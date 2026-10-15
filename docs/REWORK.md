@@ -838,6 +838,9 @@ también tiene que aprender a esquivar los ataques anunciados).
 - ✅ **Jefe escondido del piso 7: el Lobo de Escarcha** (2026-10-14; lo empezó la corrida automática que se detuvo y
   se completó acá): en el mirador cerrado (sala sellada con grieta), aviso de Isla la farolera; suelta las **Garras del
   Lobo de Escarcha** (guantes con crítico y velocidad de ataque). Verificado: la sala se arma en 8 de 8 pisos 7.
+- ✅ **Pedidos que cruzan pisos, el tercero (hacia arriba)** (2026-10-14): la Semilla Primera (piso 4) suelta la **Llave
+  del Archivo Sellado**, que abre una reja en la biblioteca del piso 6: cofre y una línea de la archivista Sela (la lista
+  de siete nombres con el octavo tachado).
 - ✅ **"Cómo funciona" en la pausa** (2026-10-14, pedido del usuario para los testers, `js/towerGuide.js`): en la pausa
   de la Torre, debajo de los controles, 15 secciones plegables (una por sistema: objetivo, combate y clases, niveles,
   equipo, Códice, reliquias, pueblo, muerte, día y noche, caminos y mapa, cuevas, secretos, pedidos y misterios,

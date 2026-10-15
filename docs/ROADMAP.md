@@ -115,13 +115,14 @@ El orden de la lista **es** la prioridad: primero lo que destraba el loop comple
         cola blanca), solo para el Ciervo Blanco. 2026-10-14.
 - [x] **La gente del pueblo se ve:** 2 o 3 personajes en pixel art que caminan por el pueblo, con el aspecto de su
       gente (barqueros, relojeros, faroleros…). Hablás con F y cada run dicen algo nuevo.
-- [ ] **Pedidos que cruzan pisos:** ej. la llave de las compuertas (piso 5) abre la sala de bombas del piso 3.
+- [x] **Pedidos que cruzan pisos:** ej. la llave de las compuertas (piso 5) abre la sala de bombas del piso 3.
       La piedra de regreso permite volver.
   - [x] Paso 1: la Llave de las Compuertas (la suelta el Guardián de Arena, piso 5) abre las compuertas del piso 3, una
         sala con reja de hierro y un cofre (js/towerQuests.js). 2026-10-14.
   - [x] Paso 2: la llave del almacén de los faroleros (la suelta el Vigía Perdido, piso 8) abre el almacén del piso 7:
         cofre y se prenden todos los faroles de la galería. 2026-10-14.
-  - [ ] Paso 3: un pedido que vaya hacia arriba (algo de un piso bajo que sirva más arriba).
+  - [x] Paso 3: hacia arriba: la llave del Archivo Sellado (la suelta la Semilla Primera, piso 4) abre el archivo del
+        piso 6 (reja, cofre y una línea de la historia). 2026-10-14.
 - [x] **El misterio de cada piso, jugable:** compuertas que bajan el agua (3), relojes que cambian el laberinto (5),
       faroles que hay que encender de noche (7). De a uno, empezando por el 3.
   - [x] Piso 3: al abrir las compuertas baja el agua de todo el piso (fondo seco) y asoman 2 cofres hundidos. 2026-10-14.
@@ -358,6 +359,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 - 2026-10-14 · Menos explorado, paso 2 (el camino se pierde) · e48d717 · casillas de camino en 5 torres: piso 1 638-930, 4-6 204-403, 7-9 158-265 (primero con tramos de 1 cada 2 quedaba más que en 4-6: pasé a 1 cada 3), 10: 0; escalera alcanzable; faroles del 7 siguen en 8. Pruebas 255/255.
 - 2026-10-14 · Menos explorado, paso 4a (penumbra) · ee1ca59 · visión de día en el campo: piso 5 6 casillas, piso 8 5,25, piso 10 4,75; de noche igual que antes. Se arregló de paso la prueba de la gente del pueblo (a veces contestaba el otro vecino). Pruebas 256/256.
 - 2026-10-14 · Cómo funciona en la pausa (pedido en el chat, para los testers) · 7accf65 · 15 secciones plegables, una por sistema, con las teclas configuradas; revisado en pantalla. Pruebas 257/257.
+- 2026-10-14 · Pedidos que cruzan pisos, paso 3 (el Archivo Sellado) · COMMIT · 20/20 pisos 6 con el archivo, alcanzable en los 20; la sala del Lector Sin Ojos sigue en 20/20; prueba nueva que recorre todos los pedidos. Pruebas 258/258.
 - 2026-10-14 · Reliquias, paso 1 (motor y 12 reliquias) · 8c1e664 · piloto con reflejos humanos, 45 min: sin reliquias piso 3 y 2 muertes; con 0,25/0,35 de chance, 19 reliquias en 3 pisos (demasiadas); con 0,05/0,10, 7 en 3 pisos (~2,3 por piso), piso 4 y 0 muertes. Pruebas 239/239.
 - 2026-10-14 · Subir de nivel: 1 de 3 mejoras · 6716de1 · piloto con reflejos humanos, 45 min: piso 4 a los 41 min, 0 muertes, nivel 15, 6 reliquias (igual que sin la elección: piso 4 a los 43 min); destrabó Piel de Roble, Golpe Pesado y Sangre Espesa. Pruebas 240/240.
 - 2026-10-14 · Guerrero, paso 1a (clases y Templanza) · 259f4bc · banco de 60 s contra un muñeco, 8 muestras: 119 de daño/s sin pasiva y 116 con ella (sin diferencia: el combo ya critea; el ruido es ±25). Pruebas 241/241; se arregló la prueba de visión que fallaba si el héroe quedaba en una meseta.

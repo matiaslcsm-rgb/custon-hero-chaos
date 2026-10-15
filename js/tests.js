@@ -1734,6 +1734,19 @@ test('Torre: la pausa tiene "Cómo funciona" — una sección plegable por siste
     check(box.textContent.includes(keyName(KEYMAP.interact)) && box.textContent.includes('Compuertas'.toLowerCase()), 'muestra las teclas y los sistemas nuevos');
     setPaused(false);
 }, { random: true });
+test('Torre: todos los pedidos entre pisos — su reja en su piso, la llave la da el jefe escondido de otro, y se abre', () => {
+    Object.entries(QUESTS).forEach(([id, Q]) => {
+        newTower(); enterTowerFloor(Q.doorFloor);
+        const L = arenas[0], door = L.cracks.find(c => c.lock === id), chest = L.chests.find(c => c.quest === id);
+        check(door && chest && Q.keyFloor !== Q.doorFloor, `${id}: reja y cofre en el piso ${Q.doorFloor}`);
+        hitQuestDoor(L, door); check(door.hp > 0, `${id}: sin la llave no abre`);
+        enterTowerFloor(Q.keyFloor); const K = arenas[0]; hiddenBossTick(K);
+        dealDamage(player, K.hiddenBoss.unit, K.hiddenBoss.unit.hp * 10, 'pure');
+        check(hasQuestKey(id), `${id}: la suelta el jefe escondido del piso ${Q.keyFloor}`);
+        Object.assign(player, { arena: L }); hitQuestDoor(L, door);
+        check(door.hp <= 0 && bfsFrom(L, L.start.x, L.start.y)[chest.y * COLS + chest.x] >= 0, `${id}: con la llave se abre y se llega al cofre`);
+    });
+}, { random: true });
 test('Torre: misterio del piso 5 — los relojes dan vuelta las compuertas de arena del laberinto (siempre queda camino)', () => {
     newTower(); enterTowerFloor(5);
     const L = arenas[0], S = L.sandGates;
