@@ -29,7 +29,7 @@ function archerSnipe(h, aim) {
     const dx = aim.x - h.x, dy = aim.y - h.y, d = Math.hypot(dx, dy) || 1, reach = effRange(h) + 3;
     h.snipeReadyAt = gameClock + ARCHER.snipeCd * archerHaste(h);
     fireSkillProjectile(h, { tx: h.x + dx / d * reach, ty: h.y + dy / d * reach, speed: ARCHER.snipeSpeed, radius: 0.6, dmg: Math.round(effAttack(h) * ARCHER.snipeMult * 2), isCrit: true,
-        dmgType: 'physical', stopOnHit: true, solid: true, quietMiss: true, arrow: 'full', skillName: 'Flechazo',
+        dmgType: 'physical', stopOnHit: !hasLevelFlag(h, 'snipePierce'), solid: true, quietMiss: true, arrow: 'full', skillName: 'Flechazo', // Flechazo Perforante (towerLevelUp.js)
         onHit: t => { if (t.isAlive()) addEffect(t, { id: 'STUN_SNIPE', name: 'Aturdido', duration: ARCHER.snipeStun, flags: ['stun'], tags: ['PERJUICIO', 'CONTROL'] }); } });
     if (Math.abs(dx) > 0.2) h.facing = Math.sign(dx);
     if (fxArena(h)) fxText(h, '¡Flechazo!', '#ffd166', 11, 0.7);

@@ -5,14 +5,20 @@
 //   una con los 5 puntos del nivel juntos, y cada stat tiene UMBRALES: elegirlo 3 y 6 veces destraba una mejora propia
 //   (como las bendiciones de Hades que cambian cómo jugás). Los puntos siguen siendo puntos, así que los restos al morir
 //   (DEATH, tower.js) y el piloto automático (aiSpendStatPoints) funcionan igual.
+//   MEJORAS DE CLASE (paso 2, 2026-10-14): a las 4 elecciones del stat principal de tu clase, una mejora que cambia cómo
+//   se juega (no solo números): el remate del Guerrero aturde, el flechazo del Arquero atraviesa, el orbe del Mago rebota
+//   una vez más. Solo la ve y la destraba esa clase (cls).
 
 const LEVEL_PICK = { points: 5, offer: 3 };
 const LEVEL_PERKS = {
     str: [{ at: 3, name: 'Piel de Roble', desc: '−10% de daño recibido', mods: { dmgReduction: 0.1 } },
+        { at: 4, cls: 'warrior', name: 'Remate Aturdidor', desc: 'el tercer tajo del combo aturde 0,8 s (no a los jefes)', flag: 'finisherStun' },
         { at: 6, name: 'Golpe Pesado', desc: '+15% de daño', mods: { atkPct: 0.15 } }],
     agi: [{ at: 3, name: 'Pies Ligeros', desc: '+8% de velocidad de movimiento', mods: { moveSpeedPct: 0.08 } },
+        { at: 4, cls: 'archer', name: 'Flechazo Perforante', desc: 'el flechazo atraviesa y aturde a todos los de la línea', flag: 'snipePierce' },
         { at: 6, name: 'Ojo Certero', desc: '+10% de crítico', mods: { critChance: 10 } }],
     int: [{ at: 3, name: 'Fuente Arcana', desc: '+2 de maná por segundo', mods: { manaRegen: 2 } },
+        { at: 4, cls: 'mage', name: 'Eco del Orbe', desc: 'el orbe rebota una vez más', flag: 'orbBounce' },
         { at: 6, name: 'Mente Afilada', desc: '+20% de amplificación de hechizo', mods: { spellAmp: 20 } }],
     vit: [{ at: 3, name: 'Sangre Espesa', desc: '+6% de robo de vida', mods: { lifesteal: 6 } },
         { at: 6, name: 'Coraza Viva', desc: '−15% de daño recibido (no se suma con Piel de Roble: vale la mayor)', mods: { dmgReduction: 0.15 } }],
@@ -21,7 +27,9 @@ const LEVEL_PERKS = {
 };
 // Cuántas veces elegiste un stat (cada carta son 5 puntos)
 function levelPicks(h, k) { return Math.floor(((h.towerStats && h.towerStats[k]) || 0) / LEVEL_PICK.points); }
-function levelPerksOf(h) { return Object.entries(LEVEL_PERKS).flatMap(([k, list]) => list.filter(p => levelPicks(h, k) >= p.at)); }
+const perkFits = (h, p) => !p.cls || p.cls === h.heroClass;
+function levelPerksOf(h) { return Object.entries(LEVEL_PERKS).flatMap(([k, list]) => list.filter(p => levelPicks(h, k) >= p.at && perkFits(h, p))); }
+const hasLevelFlag = (h, flag) => levelPerksOf(h).some(p => p.flag === flag);
 function relicLuck(h) { return Math.max(1, ...levelPerksOf(h).map(p => p.relicLuck || 1)); }
 // Las 3 cartas que se ofrecen (quedan fijas hasta que elijas una, así no se "rerollea" cerrando la ventana)
 function levelOffer(h) {
@@ -50,7 +58,7 @@ function renderLevelCards(box) {
     const offer = levelOffer(player);
     if (!offer) { box.innerHTML = ''; return; }
     box.innerHTML = `<p class="subtitle">Elegí una mejora (${Math.min(LEVEL_PICK.points, player.statPoints)} puntos):</p>` + offer.map(k => {
-        const st = TOWER_STATS[k], n = levelPicks(player, k), next = LEVEL_PERKS[k].find(p => p.at > n);
+        const st = TOWER_STATS[k], n = levelPicks(player, k), next = LEVEL_PERKS[k].find(p => p.at > n && perkFits(player, p));
         return `<button class="level-card" data-k="${k}" style="border-color:${st.color}"><b style="color:${st.color}">${st.icon} ${st.name}</b>` +
             `<small>${st.gives()}</small>${next ? `<span class="perk">${n + 1}/${next.at} → <b>${next.name}</b>: ${next.desc}</span>` : '<span class="perk">Ya destrabaste todo</span>'}</button>`;
     }).join('');

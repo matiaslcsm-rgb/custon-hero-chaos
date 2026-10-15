@@ -838,6 +838,10 @@ también tiene que aprender a esquivar los ataques anunciados).
 - ✅ **Jefe escondido del piso 7: el Lobo de Escarcha** (2026-10-14; lo empezó la corrida automática que se detuvo y
   se completó acá): en el mirador cerrado (sala sellada con grieta), aviso de Isla la farolera; suelta las **Garras del
   Lobo de Escarcha** (guantes con crítico y velocidad de ataque). Verificado: la sala se arma en 8 de 8 pisos 7.
+- ✅ **Mejoras de clase al subir de nivel** (2026-10-14, `js/towerLevelUp.js`): a las 4 elecciones del stat principal de
+  tu clase, una mejora que cambia cómo jugás: **Remate Aturdidor** (Guerrero, Fuerza: el tercer tajo aturde 0,8 s, no a
+  los jefes), **Flechazo Perforante** (Arquero, Agilidad: el flechazo atraviesa y aturde a toda la línea), **Eco del
+  Orbe** (Mago, Inteligencia: un rebote más; +11% de daño contra 4 agrupados). La carta muestra la de tu clase.
 - ✅ **Jugar sin mouse y con joystick** (2026-10-14, pedido del usuario, `js/padControls.js`): dos teclas nuevas en ⌨️
   Teclas: **U** ataca (mantenela) y **O** es el secundario (parada, flechazo o tormenta). Apuntan solas al enemigo
   visible más cercano (a 9 casillas) o, si no hay, hacia donde caminás; se ve una mira amarilla. Es un cursor virtual:

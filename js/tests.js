@@ -1768,6 +1768,31 @@ test('Torre: sin mouse — la tecla de ataque apunta sola al más cercano, pega,
     checkEq(sent.join(' '), `keydown:${KEYMAP.dash} keydown:Escape`, 'los botones del joystick mandan las teclas configuradas');
     clickAttack = was; aimMode = 'mouse'; Object.assign(mouse, mouse0, { over: false }); player.parry = null; // que no le quede apuntado a las otras pruebas
 }, { random: true });
+test('Torre: mejoras de clase al subir de nivel — remate que aturde, flechazo que atraviesa, orbe con un rebote más (solo su clase)', () => {
+    // Guerrero: con 4 elecciones de Fuerza, el tercer tajo aturde
+    let level = newTower('AXE', { weapon: 'ADVENTURER_SWORD' });
+    level.creeps.forEach(c => { c.hp = 0; });
+    for (let x = -3; x <= 3; x++) level.walls[player.y][player.x + x] = 0;
+    const d = towerDummy(level, 1, 0);
+    player.towerStats.str = 20;
+    check(hasLevelFlag(player, 'finisherStun') && !hasLevelFlag(player, 'snipePierce'), 'el Guerrero destraba la suya y no la del Arquero');
+    const aim = { x: d.x, y: d.y };
+    for (let i = 0; i < 3; i++) { player.comboAt = gameClock; towerSwordAttack(player, aim); }
+    check(hasFlag(d, 'stun'), 'el remate aturde');
+    // Arquero: con 4 de Agilidad, el flechazo atraviesa y aturde a los dos
+    level = newTower('AXE', { weapon: 'ADVENTURER_BOW' });
+    level.creeps.forEach(c => { c.hp = 0; });
+    for (let x = 1; x <= 8; x++) level.walls[player.y][player.x + x] = 0;
+    const a = towerDummy(level, 2, 0), b = towerDummy(level, 4, 0);
+    player.towerStats.agi = 20; player.snipeReadyAt = 0;
+    archerSnipe(player, { x: player.x + 6, y: player.y }); flyProjectiles(level);
+    check(a.hp < 9999 && b.hp < 9999 && hasFlag(b, 'stun'), 'el flechazo atraviesa');
+    player.towerStats.agi = 0;
+    check(!hasLevelFlag(player, 'snipePierce'), 'sin las 4 elecciones, no');
+    // Mago: con 4 de Inteligencia
+    newTower('AXE', { weapon: 'ADVENTURER_STAFF' }); player.towerStats.int = 20;
+    check(hasLevelFlag(player, 'orbBounce') && !hasLevelFlag(player, 'finisherStun'), 'el Mago destraba el Eco del Orbe');
+}, { random: true });
 test('Torre: misterio del piso 5 — los relojes dan vuelta las compuertas de arena del laberinto (siempre queda camino)', () => {
     newTower(); enterTowerFloor(5);
     const L = arenas[0], S = L.sandGates;

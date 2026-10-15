@@ -71,6 +71,7 @@ function swingArc(c, dir, step, reach, mult, basic = false) {
         if (step === 2 && e.isAlive() && !(e.isGuardian || e.isCaveBoss || e.isBoss)) { // el remate empuja
             const kx = Math.sign(Math.round(e.x - c.x)), ky = Math.sign(Math.round(e.y - c.y));
             if ((kx || ky) && walkable(e.arena, e.x + kx, e.y + ky) && !unitAt(e.arena, e.x + kx, e.y + ky)) { e.x += kx; e.y += ky; }
+            if (hasLevelFlag(c, 'finisherStun')) addEffect(e, { id: 'STUN_FINISHER', name: 'Aturdido', duration: 0.8, flags: ['stun'], tags: ['PERJUICIO', 'CONTROL'] }); // Remate Aturdidor (towerLevelUp.js)
         }
     });
     deflectBullets(c, dir, reach, SWORD_COMBO.halfArc); // el tajo desvía los proyectiles que agarra (towerBullets.js)

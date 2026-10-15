@@ -52,7 +52,7 @@ function mageOrb(h, dir, perks = []) {
     const reach = effRange(h) + CLICK_ATTACK.shotReach, aim = { x: h.x + dir.dx * reach, y: h.y + dir.dy * reach };
     const { dmg, isCrit } = rollAttackDamage(h, aim);
     fxAttack(h, aim, 'ranged', heroColor(h));
-    mageOrbShot(h, h, aim, Math.round(dmg * MAGE.orbMult * (1 + MAGE.perk * perkCount(perks, 'dmg') + MAGE.stageDmg * perks.length)), isCrit, 1 + perkCount(perks, 'bounce'), perks, true, new Set());
+    mageOrbShot(h, h, aim, Math.round(dmg * MAGE.orbMult * (1 + MAGE.perk * perkCount(perks, 'dmg') + MAGE.stageDmg * perks.length)), isCrit, 1 + perkCount(perks, 'bounce') + (hasLevelFlag(h, 'orbBounce') ? 1 : 0), perks, true, new Set()) // Eco del Orbe (towerLevelUp.js);
 }
 function mageOrbShot(h, from, aim, dmg, isCrit, bounces, perks, basic, hit) {
     const area = perkCount(perks, 'area');
