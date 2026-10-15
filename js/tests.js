@@ -1830,6 +1830,25 @@ test('Torre: reliquias nuevas — los rayos saltan (la Bobina cada 5 golpes, uno
     check(player.relicShield > 0, 'la Costra da escudo al matar');
     checkEq(Object.keys(RELICS).length, 17, '17 reliquias');
 }, { random: true });
+test('Torre: arena del guardián — al entrar a su sala se cierran las rejas; se abren al vencerlo o si te vas del piso', () => {
+    newTower();
+    const L = arenas[0], g = L.guardian, r = guardianRoom(L);
+    check(r && g, 'el guardián tiene su sala');
+    const reachStart = () => bfsFrom(L, L.start.x, L.start.y)[Math.round(player.y) * COLS + Math.round(player.x)] >= 0;
+    let p = null; for (let y = r.y; y < r.y + r.h && !p; y++) for (let x = r.x; x < r.x + r.w && !p; x++) if (walkable(L, x, y) && !unitAt(L, x, y)) p = { x, y };
+    Object.assign(player, { arena: L }, p);
+    check(reachStart(), 'antes de entrar, hay salida');
+    bossArenaTick(L);
+    check(L.bossArena.closed && L.bossArena.gates.length > 0 && !reachStart(), 'al entrar se cierra: no hay salida');
+    g.hp = 0; bossArenaTick(L);
+    check(!L.bossArena.closed && reachStart(), 'vencido, se abre');
+    newTower(); const L1 = arenas[0], r1 = guardianRoom(L1);
+    let q = null; for (let y = r1.y; y < r1.y + r1.h && !q; y++) for (let x = r1.x; x < r1.x + r1.w && !q; x++) if (walkable(L1, x, y) && !unitAt(L1, x, y)) q = { x, y };
+    Object.assign(player, { arena: L1 }, q); bossArenaTick(L1);
+    check(L1.bossArena.closed, 'cerrada otra vez');
+    enterTowerFloor(2); bossArenaTick(arenas[0]);
+    check(!L1.bossArena.closed && L1.bossArena.gates.length === 0, 'si te vas del piso, se abre');
+}, { random: true });
 test('Torre: misterio del piso 5 — los relojes dan vuelta las compuertas de arena del laberinto (siempre queda camino)', () => {
     newTower(); enterTowerFloor(5);
     const L = arenas[0], S = L.sandGates;

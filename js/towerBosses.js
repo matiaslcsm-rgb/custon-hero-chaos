@@ -166,3 +166,57 @@ function drawBossExtras(level) {
     });
 }
 function bossAlpha(c) { return c.hiddenUntil && gameClock < c.hiddenUntil ? 0.22 : 1; }
+
+// --- ARENA DEL GUARDIÁN (ROADMAP T00, "Arenas de jefes, paso 1", 2026-10-14) ---
+// Al entrar a la sala del guardián con él vivo, las entradas se cierran con rejas hasta que gane alguien: se abren al
+// vencerlo, o si morís o te vas del piso. Una entrada con alguien parado encima se cierra cuando se corre.
+function guardianRoom(level) {
+    const g = level.guardian;
+    if (!g || !level.rooms) return null;
+    return level.guardRoom || (level.guardRoom = level.rooms.find(r => g.x >= r.x - 1 && g.x <= r.x + r.w && g.y >= r.y - 1 && g.y <= r.y + r.h) || null);
+}
+const inRoom = (r, x, y) => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h;
+function openBossArena(level) {
+    const A = level.bossArena;
+    if (!A || !A.closed) return;
+    A.gates.forEach(p => { level.walls[p.y][p.x] = 0; });
+    if (!level.guardian.isAlive() && A.gates.length) log('🔓 Las rejas se levantan.');
+    Object.assign(A, { closed: false, gates: [], pending: [] });
+    if (towerRun && towerRun.arenaLevel === level) towerRun.arenaLevel = null;
+}
+function bossArenaTick(level) {
+    if (towerRun && towerRun.arenaLevel && towerRun.arenaLevel !== level) openBossArena(towerRun.arenaLevel); // te fuiste (o renaciste en otro piso)
+    const r = guardianRoom(level), g = level.guardian;
+    if (!r) return;
+    const A = level.bossArena || (level.bossArena = { closed: false, gates: [], pending: [] });
+    const fight = g.isAlive() && player.isAlive() && player.arena === level;
+    if (!A.closed && fight && inRoom(r, Math.round(player.x), Math.round(player.y))) {
+        A.closed = true; A.gates = []; A.pending = []; towerRun.arenaLevel = level;
+        for (let y = r.y - 1; y <= r.y + r.h; y++) for (let x = r.x - 1; x <= r.x + r.w; x++) {
+            if (inRoom(r, x, y) || !walkable(level, x, y)) continue;
+            if ([[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => inRoom(r, x + dx, y + dy))) A.pending.push({ x, y });
+        }
+        log(`🔒 Las rejas se cierran detrás tuyo: de la sala de ${g.type.label} no sale nadie hasta que gane alguien.`); sfx('hit');
+    }
+    if (A.closed && !fight) { openBossArena(level); return; } // ganaste, moriste o te fuiste
+    if (!A.closed) return;
+    A.pending = A.pending.filter(p => { // cierra las que estén libres
+        if (unitAt(level, p.x, p.y) || (Math.round(player.x) === p.x && Math.round(player.y) === p.y)) return true;
+        level.walls[p.y][p.x] = WALL.stone; A.gates.push(p);
+        return false;
+    });
+}
+function drawBossArena(level) {
+    const A = level.bossArena;
+    if (!A || !A.closed) return;
+    ctx.save();
+    A.gates.forEach(p => {
+        if (!level.explored[p.y][p.x]) return;
+        const x = p.x * TILE, y = p.y * TILE;
+        ctx.fillStyle = 'rgba(12,10,9,0.8)'; ctx.fillRect(x + 2, y + 2, TILE - 4, TILE - 4);
+        ctx.fillStyle = '#9aa2ab';
+        for (let i = 0; i < 4; i++) ctx.fillRect(Math.round(x + 4 + i * (TILE - 10) / 3), y + 2, 2, TILE - 4);
+        ctx.fillRect(x + 2, Math.round(y + TILE * 0.3), TILE - 4, 2); ctx.fillRect(x + 2, Math.round(y + TILE * 0.7), TILE - 4, 2);
+    });
+    ctx.restore();
+}

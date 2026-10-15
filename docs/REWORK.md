@@ -838,6 +838,10 @@ también tiene que aprender a esquivar los ataques anunciados).
 - ✅ **Jefe escondido del piso 7: el Lobo de Escarcha** (2026-10-14; lo empezó la corrida automática que se detuvo y
   se completó acá): en el mirador cerrado (sala sellada con grieta), aviso de Isla la farolera; suelta las **Garras del
   Lobo de Escarcha** (guantes con crítico y velocidad de ataque). Verificado: la sala se arma en 8 de 8 pisos 7.
+- ✅ **Arena del guardián** (2026-10-14, `js/towerBosses.js`): al entrar a la sala del guardián con él vivo, sus
+  entradas se cierran con rejas (barrotes grises) hasta que gane alguien: se abren al vencerlo, al morir o al irte del
+  piso; si hay alguien parado en una entrada, esa se cierra cuando se corre. Con el piloto: 48 s encerrado en el piso 1,
+  todo peleando; no se traba.
 - ✅ **5 reliquias nuevas (17 en total)** (2026-10-14, `js/towerRelics.js`): etiqueta nueva **Rayo** (⚡; conjunto
   Tormenta: los rayos saltan a uno más) con **Chispa** (al pegar, a veces un rayo a uno cercano), **Pararrayos** (al
   recibir un golpe, rayo a quien te pegó) y **Bobina** (cada 5 golpes, un rayo en cadena); **Fuelle** (fuego: las
