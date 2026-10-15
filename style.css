@@ -990,3 +990,11 @@ body.on-title { overflow: hidden; }
 .tower-guide summary { cursor: pointer; color: #ffd166; font-weight: bold; padding: 2px 0; }
 .tower-guide p { margin: 6px 0 4px; font-size: 0.85rem; line-height: 1.4; color: #ddd; }
 .tower-guide kbd { background: #2b2f38; border: 1px solid #555; border-radius: 3px; padding: 0 4px; font-size: 0.8rem; }
+
+/* Pantalla de fin de run (towerView.js) */
+.run-summary { text-align: center; }
+.run-summary .rs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; text-align: left; }
+.run-summary .rs-row { display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding: 2px 0; }
+.run-summary .rs-record { color: #ffd166; font-weight: bold; }
+.run-summary .rs-relics { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; font-size: 1.3rem; }
+.run-summary .rs-again { font-size: 1.3rem; padding: 10px; }

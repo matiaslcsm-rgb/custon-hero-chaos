@@ -111,3 +111,27 @@ function towerPauseHtml() {
         `<span>${Math.round(VIEW.across)} casillas a lo ancho</span><button class="secondary-btn" onclick="towerZoom(1); renderPauseMenu()">+</button></div>` +
         `<p class="subtitle pause-controls">${towerControlsText()}</p>` + towerGuideHtml(); // cómo funciona cada sistema (towerGuide.js)
 }
+
+// --- PANTALLA DE FIN DE RUN (ROADMAP T1, 2026-10-14) ---
+// Al conquistar la torre: un resumen claro (piso, tiempo, muertes, bajas, nivel, tus reliquias y lo que quedó para siempre)
+// y un botón grande "▶ Otra run". Es el puente entre la run y la metaprogresión.
+function runSummaryHtml(o) {
+    const s = towerRun.stats || {}, min = Math.floor(o.runTime / 60), sec = Math.floor(o.runTime % 60);
+    const relics = Object.entries(player.relics || {}).map(([id, n]) => `<span class="relic" title="${RELICS[id].name}">${RELICS[id].icon}${n > 1 ? `<b>${n}</b>` : ''}</span>`).join('') || '<span class="subtitle">ninguna</span>';
+    const row = (k, v) => `<div class="rs-row"><span>${k}</span><b>${v}</b></div>`;
+    return `<h2>${o.won ? '🏆 ¡Conquistaste la Torre!' : '🗼 Fin de la run'}</h2>` +
+        (o.record ? '<p class="rs-record">🏅 ¡Nuevo récord: tu cumbre más rápida!</p>' : '') +
+        `<div class="rs-grid">${row('Piso', `${Math.max(towerRun.floor, s.bestFloor || 1)} de ${TOWER.floors}`)}${row('Tiempo', `${min} min ${String(sec).padStart(2, '0')} s`)}` +
+        `${row('Nivel', player.level)}${row('Muertes', towerRun.deaths)}${row('Bajas', s.kills || 0)}${row('Campeones', s.champions || 0)}${row('Guardianes', s.guardians || 0)}${row('Oro juntado', (s.gold || 0) + 'g')}</div>` +
+        `<div class="pause-section">💠 Tus reliquias</div><div class="rs-relics">${relics}</div>` +
+        `<div class="pause-section">📜 Para siempre</div><p class="subtitle">${s.codex ? `${s.codex} poder${s.codex === 1 ? '' : 'es'} nuevo${s.codex === 1 ? '' : 's'} en el Códice · ` : ''}Esencia: ${(typeof codex !== 'undefined' && codex.essence) || 0} · el Bestiario y las páginas de Arén quedan guardados.</p>` +
+        `<button id="rs-again" class="primary-btn rs-again">▶ Otra run</button><button id="rs-menu" class="secondary-btn">🏠 Menú</button>`;
+}
+function showRunSummary(o) {
+    let box = document.getElementById('run-summary');
+    if (!box) { box = document.createElement('div'); box.id = 'run-summary'; box.className = 'modal'; document.body.appendChild(box); }
+    box.innerHTML = `<div class="modal-box pause-box run-summary">${runSummaryHtml(o)}</div>`;
+    box.style.display = 'block';
+    document.getElementById('rs-again').onclick = () => { box.style.display = 'none'; startTowerRun(); };
+    document.getElementById('rs-menu').onclick = () => { box.style.display = 'none'; const b = document.getElementById('restart-btn'); if (b) b.click(); };
+}

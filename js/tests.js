@@ -2147,7 +2147,11 @@ test('Torre: récords entre runs — runs, piso más alto, cumbres y la cumbre m
     r = towerRecords();
     check(r.summits === 1 && Math.round(r.bestTime) === 600, 'la cumbre y su tiempo');
     check(towerRecordsSummary().includes('Piso más alto: 3'), 'el resumen del menú');
-    } finally { towerSavePersist = persist; }
+    const box = document.getElementById('run-summary');
+    check(box && box.style.display === 'block' && box.textContent.includes('Conquistaste') && box.textContent.includes('Bajas') && box.textContent.includes('récord'), 'la pantalla de fin de run, con el récord');
+    document.getElementById('rs-again').click();
+    check(box.style.display === 'none' && gameMode === 'tower' && gameState !== 'ENDED' && towerRun.floor === 1, '"Otra run" arranca una nueva');
+    } finally { towerSavePersist = persist; const b = document.getElementById('run-summary'); if (b) b.style.display = 'none'; }
 });
 test('Torre: al recibir daño el borde de la pantalla se pone rojo, más fuerte cuanto más te sacan', () => {
     newTower('AXE');

@@ -217,7 +217,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
       fogatas, balas, noche) y medir cuadros por segundo antes y después. Si anda, migrar de a capas.
 
 ## Fase T1 — Cerrar el loop (lo que falta para que sea un juego completo)
-- [ ] **Pantalla de fin de run:** al morir o ganar, un resumen claro con el piso alcanzado, el tiempo, las bajas,
+- [x] **Pantalla de fin de run** (2026-10-14: al conquistar la torre; morir no termina la run):** al morir o ganar, un resumen claro con el piso alcanzado, el tiempo, las bajas,
       quién te mató, la build final (íconos de las piezas), lo que ganaste para siempre (Esencia, entradas del
       Códice) y un botón grande "▶ Otra run". Es el puente entre la run y la metaprogresión.
 - [x] **Mejor marca y estadísticas guardadas** (2026-10-14: piso más alto, runs, cumbres y mejor tiempo en el menú): piso más alto, runs jugadas, Cumbres, mejor tiempo. Se muestran en
@@ -400,6 +400,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 - 2026-10-14 · Cartas de nivel sin mouse y con joystick · 428656c · probado con teclas de verdad: → marca la segunda y U la elige (+5 al stat); el 3 elige la tercera; revisado en pantalla. La lista de stats filtra las mejoras por clase. Pruebas 268/268.
 - 2026-10-14 · Más reliquias, entrega 3 (22→27) · 8b0b958 · son de esquive, defensa y movimiento: probadas una por una (Pluma da velocidad, Ráfaga empuja y pega, Ventarrón da +30% tras esquivar, Sangre Fría cura); sin banco de daño (los muñecos no pegan). Pruebas 269/269.
 - 2026-10-14 · Piso 1: base de la torre y portón · 046b76e · revisado en pantalla (los pilares primero quedaban oscuros como el muro: aclarados). Pruebas 270/270.
+- 2026-10-14 · Pantalla de fin de run · COMMIT · al conquistar la torre: piso, tiempo, nivel, muertes, bajas, campeones, guardianes, oro, reliquias, Códice/Esencia, récord y "▶ Otra run" (probado: arranca una run nueva); revisada en pantalla. Pruebas 270/270.
 - 2026-10-14 · Reliquias, paso 1 (motor y 12 reliquias) · 8c1e664 · piloto con reflejos humanos, 45 min: sin reliquias piso 3 y 2 muertes; con 0,25/0,35 de chance, 19 reliquias en 3 pisos (demasiadas); con 0,05/0,10, 7 en 3 pisos (~2,3 por piso), piso 4 y 0 muertes. Pruebas 239/239.
 - 2026-10-14 · Subir de nivel: 1 de 3 mejoras · 6716de1 · piloto con reflejos humanos, 45 min: piso 4 a los 41 min, 0 muertes, nivel 15, 6 reliquias (igual que sin la elección: piso 4 a los 43 min); destrabó Piel de Roble, Golpe Pesado y Sangre Espesa. Pruebas 240/240.
 - 2026-10-14 · Guerrero, paso 1a (clases y Templanza) · 259f4bc · banco de 60 s contra un muñeco, 8 muestras: 119 de daño/s sin pasiva y 116 con ella (sin diferencia: el combo ya critea; el ruido es ±25). Pruebas 241/241; se arregló la prueba de visión que fallaba si el héroe quedaba en una meseta.

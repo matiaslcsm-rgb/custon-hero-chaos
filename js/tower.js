@@ -466,6 +466,7 @@ function towerVictory() {
     if (prevBest != null && runTime < prevBest) log('🏅 ¡Tu cumbre más rápida!');
     setStateText('¡CONQUISTASTE LA TORRE!');
     const s = towerRun.stats;
+    showRunSummary({ won: true, runTime, record: prevBest == null || runTime < prevBest }); // la pantalla de fin de run (towerView.js)
     log(`🏆 ¡Venciste al guardián del último piso! ${player.displayName} conquistó la Torre: nivel ${player.level}, ${Math.floor((gameClock - towerRun.startedAt) / 60)} minutos, ${towerRun.deaths} muerte${towerRun.deaths === 1 ? '' : 's'}, ${s.kills} bajas (${s.champions} campeones), ${s.shrines} santuarios.`);
     showPanel('restart-btn', true);
 }

@@ -838,6 +838,10 @@ también tiene que aprender a esquivar los ataques anunciados).
 - ✅ **Jefe escondido del piso 7: el Lobo de Escarcha** (2026-10-14; lo empezó la corrida automática que se detuvo y
   se completó acá): en el mirador cerrado (sala sellada con grieta), aviso de Isla la farolera; suelta las **Garras del
   Lobo de Escarcha** (guantes con crítico y velocidad de ataque). Verificado: la sala se arma en 8 de 8 pisos 7.
+- ✅ **Pantalla de fin de run** (2026-10-14, `js/towerView.js`): al conquistar la torre aparece un resumen: piso, tiempo,
+  nivel, muertes, bajas, campeones, guardianes y oro; tus reliquias; lo que queda para siempre (poderes nuevos del
+  Códice, Esencia, Bestiario y páginas); si fue récord, lo dice. Botón grande "▶ Otra run" (y "Menú"). Morir no termina
+  la run (renacés), así que por ahora sale solo al ganar.
 - ✅ **Piso 1: la base de la torre y su portón** (2026-10-14, `js/towerPixel.js`): el muro exterior del laberinto se
   dibuja como la base de la torre (piedra más oscura, junta ancha, un contrafuerte cada 6 casillas) y la entrada tiene dos
   pilares altos de piedra clara con un emblema dorado; cerca, el cartel "Puerta de la Torre".
