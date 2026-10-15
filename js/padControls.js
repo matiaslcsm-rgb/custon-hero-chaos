@@ -5,7 +5,8 @@
 //   hacia donde caminás. Por dentro es un "cursor virtual": se mueve el punto del mouse, así que todo lo que apunta al
 //   cursor (golpes, flechas, especiales, habilidades) anda igual. Si movés el mouse de verdad, vuelve a mandar el mouse.
 //   JOYSTICK (mapeo estándar): stick izquierdo o cruceta, mover · stick derecho, apuntar a mano · A o RT, atacar · B,
-//   esquivar · X, interactuar · Y, especial · LB y LT, habilidades · RB, secundario · Select, mapa · Start, pausa.
+//   esquivar (con una ventana abierta, la cierra) · X, interactuar · Y, especial · LB y LT, habilidades · RB, secundario ·
+//   Select, mapa · Start, pausa.
 //   El joystick "aprieta" las mismas teclas configuradas (eventos de teclado), así no hay un camino aparte que mantener.
 
 const PAD = { autoAim: 9, ahead: 3, stickAim: 4, dead: 0.35 };
@@ -64,7 +65,8 @@ function pollGamepad() {
     const gp = navigator.getGamepads ? [...navigator.getGamepads()].find(g => g && g.connected) : null;
     if (!gp) return;
     const now = {}, ax = gp.axes[0] || 0, ay = gp.axes[1] || 0, rx = gp.axes[2] || 0, ry = gp.axes[3] || 0, r = Math.hypot(rx, ry);
-    Object.entries(PAD_BUTTONS).forEach(([b, act]) => { if (gp.buttons[b] && gp.buttons[b].pressed) now[act] = true; });
+    const menu = paused || (typeof towerModalOpen === 'function' && towerModalOpen()) || (typeof towerMapOpen !== 'undefined' && towerMapOpen); // con una ventana abierta, B la cierra (como Esc)
+    Object.entries(PAD_BUTTONS).forEach(([b, act]) => { if (gp.buttons[b] && gp.buttons[b].pressed) now[menu && act === 'dash' ? 'escape' : act] = true; });
     if (ax < -PAD.dead) now.left = true; if (ax > PAD.dead) now.right = true;
     if (ay < -PAD.dead) now.up = true; if (ay > PAD.dead) now.down = true;
     stickAim = r > PAD.dead + 0.1 ? { dx: rx / r, dy: ry / r } : null;

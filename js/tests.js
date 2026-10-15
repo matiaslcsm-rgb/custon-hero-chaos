@@ -1767,6 +1767,15 @@ test('Torre: sin mouse — la tecla de ataque apunta sola al más cercano, pega,
     let sent = []; const orig = window.dispatchEvent; window.dispatchEvent = e => { sent.push(e.type + ':' + e.key); return true; };
     padSend('keydown', 'dash'); padSend('keydown', 'escape'); window.dispatchEvent = orig;
     checkEq(sent.join(' '), `keydown:${KEYMAP.dash} keydown:Escape`, 'los botones del joystick mandan las teclas configuradas');
+    // con una ventana abierta, B la cierra (manda Esc) en vez de esquivar
+    const fake = pressed => ({ connected: true, axes: [0, 0, 0, 0], buttons: Array.from({ length: 16 }, (_, i) => ({ pressed: pressed.includes(i) })) });
+    const gp0 = navigator.getGamepads; sent = []; padPrev = {}; window.dispatchEvent = e => { sent.push(e.type + ':' + e.key); return true; };
+    try {
+        navigator.getGamepads = () => [fake([1])]; paused = true; pollGamepad();
+        navigator.getGamepads = () => [fake([])]; pollGamepad(); paused = false;
+        navigator.getGamepads = () => [fake([1])]; pollGamepad();
+    } finally { navigator.getGamepads = gp0; window.dispatchEvent = orig; padPrev = {}; paused = false; }
+    checkEq(sent.join(' '), `keydown:Escape keyup:Escape keydown:${KEYMAP.dash}`, 'B en una ventana cierra; jugando, esquiva');
     clickAttack = was; aimMode = 'mouse'; Object.assign(mouse, mouse0, { over: false }); player.parry = null; // que no le quede apuntado a las otras pruebas
 }, { random: true });
 test('Torre: mejoras de clase al subir de nivel — remate que aturde, flechazo que atraviesa, orbe con un rebote más (solo su clase)', () => {

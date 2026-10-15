@@ -881,7 +881,8 @@ también tiene que aprender a esquivar los ataques anunciados).
   todo lo que apunta al mouse anda igual, y si movés el mouse vuelve a mandar el mouse. **Joystick** (mapeo estándar):
   stick izquierdo o cruceta mueven, stick derecho apunta a mano, A/RT atacan, B esquiva, X interactúa, Y especial, LB y LT
   habilidades, RB secundario, Select mapa, Start pausa; manda las mismas teclas configuradas. Falta: moverse por los
-  menús (inventario, tienda) con el joystick; probarlo con un joystick de verdad.
+  menús (inventario, tienda) con el joystick; probarlo con un joystick de verdad. (2026-10-14: con una ventana abierta
+  —pausa, tienda, equipo, stats, mapa— la B la cierra en vez de esquivar.)
 - ✅ **Pedidos que cruzan pisos, el tercero (hacia arriba)** (2026-10-14): la Semilla Primera (piso 4) suelta la **Llave
   del Archivo Sellado**, que abre una reja en la biblioteca del piso 6: cofre y una línea de la archivista Sela (la lista
   de siete nombres con el octavo tachado).
