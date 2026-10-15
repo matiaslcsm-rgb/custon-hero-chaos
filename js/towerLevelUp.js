@@ -56,13 +56,26 @@ function levelPerkTick(h) {
     const e = getEffect(h, 'LEVEL_PERKS');
     if (e) e.mods = mods; else addEffect(h, { id: 'LEVEL_PERKS', name: 'Mejoras', duration: Infinity, flags: ['persistent'], tags: ['MEJORA'], mods });
 }
+// Sin mouse (teclado solo o joystick, padControls.js): izquierda/derecha mueven la carta marcada; 1, 2, 3 eligen directo;
+// Enter, F (interactuar) o U (atacar; la A del joystick) eligen la marcada. Lo llama game.js con la ventana de stats abierta.
+let levelCardFocus = 0;
+function levelCardKey(k) {
+    const offer = player && levelOffer(player);
+    if (!offer) return false;
+    const pick = i => { if (offer[i]) { chooseLevelPick(player, offer[i]); levelCardFocus = 0; } return true; };
+    if (k === '1' || k === '2' || k === '3') return pick(Number(k) - 1);
+    if (k === 'arrowleft' || k === KEYMAP.left) { levelCardFocus = (levelCardFocus + offer.length - 1) % offer.length; renderStatsWindow(); return true; }
+    if (k === 'arrowright' || k === KEYMAP.right) { levelCardFocus = (levelCardFocus + 1) % offer.length; renderStatsWindow(); return true; }
+    if (k === 'enter' || k === KEYMAP.interact || k === KEYMAP.attack) return pick(levelCardFocus);
+    return false;
+}
 // Las cartas en la ventana de stats: qué da, cuánto falta para su próxima mejora
 function renderLevelCards(box) {
     const offer = levelOffer(player);
     if (!offer) { box.innerHTML = ''; return; }
-    box.innerHTML = `<p class="subtitle">Elegí una mejora (${Math.min(LEVEL_PICK.points, player.statPoints)} puntos):</p>` + offer.map(k => {
+    box.innerHTML = `<p class="subtitle">Elegí una mejora (${Math.min(LEVEL_PICK.points, player.statPoints)} puntos) · sin mouse: ← → y ${keyName(KEYMAP.attack)}, o 1 2 3:</p>` + offer.map(k => {
         const st = TOWER_STATS[k], n = levelPicks(player, k), next = LEVEL_PERKS[k].find(p => p.at > n && perkFits(player, p));
-        return `<button class="level-card" data-k="${k}" style="border-color:${st.color}"><b style="color:${st.color}">${st.icon} ${st.name}</b>` +
+        return `<button class="level-card${offer.indexOf(k) === levelCardFocus % offer.length ? ' focused' : ''}" data-k="${k}" style="border-color:${st.color}"><b style="color:${st.color}">${st.icon} ${st.name}</b>` +
             `<small>${st.gives()}</small>${next ? `<span class="perk">${n + 1}/${next.at} → <b>${next.name}</b>: ${next.desc}</span>` : '<span class="perk">Ya destrabaste todo</span>'}</button>`;
     }).join('');
     box.querySelectorAll('.level-card').forEach(b => { b.onclick = () => chooseLevelPick(player, b.dataset.k); });

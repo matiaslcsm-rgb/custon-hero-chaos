@@ -6,11 +6,11 @@
 //   cursor (golpes, flechas, especiales, habilidades) anda igual. Si movés el mouse de verdad, vuelve a mandar el mouse.
 //   JOYSTICK (mapeo estándar): stick izquierdo o cruceta, mover · stick derecho, apuntar a mano · A o RT, atacar · B,
 //   esquivar (con una ventana abierta, la cierra) · X, interactuar · Y, especial · LB y LT, habilidades · RB, secundario ·
-//   Select, mapa · Start, pausa.
+//   Select, mapa · Start, pausa · apretar el stick izquierdo, stats (y las cartas de nivel: cruceta y A) · el derecho, equipo.
 //   El joystick "aprieta" las mismas teclas configuradas (eventos de teclado), así no hay un camino aparte que mantener.
 
 const PAD = { autoAim: 9, ahead: 3, stickAim: 4, dead: 0.35 };
-const PAD_BUTTONS = { 0: 'attack', 1: 'dash', 2: 'interact', 3: 'skill3', 4: 'skill1', 5: 'attack2', 6: 'skill2', 7: 'attack', 8: 'map', 9: 'escape', 12: 'up', 13: 'down', 14: 'left', 15: 'right' };
+const PAD_BUTTONS = { 0: 'attack', 1: 'dash', 2: 'interact', 3: 'skill3', 4: 'skill1', 5: 'attack2', 6: 'skill2', 7: 'attack', 8: 'map', 9: 'escape', 10: 'stats', 11: 'inventory', 12: 'up', 13: 'down', 14: 'left', 15: 'right' };
 let aimMode = 'mouse', lastMoveDir = { dx: 1, dy: 0 }, stickAim = null, padPrev = {};
 
 // Hacia dónde se camina con las teclas (o null)

@@ -975,7 +975,8 @@ body.on-title { overflow: hidden; }
 #level-cards { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
 #level-cards .subtitle { width: 100%; margin: 0; }
 #level-cards .level-card { flex: 1 1 150px; display: flex; flex-direction: column; gap: 4px; text-align: left; padding: 8px; background: rgba(0,0,0,0.25); border: 2px solid; border-radius: 6px; color: inherit; cursor: pointer; font: inherit; }
-#level-cards .level-card:hover { background: rgba(255,255,255,0.08); }
+#level-cards .level-card:hover, #level-cards .level-card.focused { background: rgba(255,255,255,0.08); }
+#level-cards .level-card.focused { box-shadow: 0 0 0 2px #ffd166; } /* la marcada, para elegir sin mouse */
 #level-cards .level-card small { opacity: 0.85; }
 .perk { font-size: 11px; opacity: 0.6; }
 .perk.on, #level-cards .perk { opacity: 1; color: #ffd166; }

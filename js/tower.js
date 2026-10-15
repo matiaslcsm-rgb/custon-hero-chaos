@@ -401,7 +401,7 @@ function renderStatsWindow() {
         row.innerHTML = `<span class="stat-icon">${st.icon}</span><span class="stat-name" style="color:${st.color}">${st.name}</span>` +
             `<span class="stat-value">${k === 'vis' ? towerStatValue(player, k).toFixed(1) : towerStatValue(player, k)}</span>` +
             `<span class="stat-spent">${levelPicks(player, k) ? `elegido ${levelPicks(player, k)} ${levelPicks(player, k) === 1 ? 'vez' : 'veces'}` : ''}</span>` +
-            `<span class="stat-gives">${st.gives()}${LEVEL_PERKS[k].map(p => `<br><span class="perk ${levelPicks(player, k) >= p.at ? 'on' : ''}">${p.at}: ${p.name} — ${p.desc}</span>`).join('')}</span>`;
+            `<span class="stat-gives">${st.gives()}${LEVEL_PERKS[k].filter(p => perkFits(player, p)).map(p => `<br><span class="perk ${levelPicks(player, k) >= p.at ? 'on' : ''}">${p.at}: ${p.name} — ${p.desc}</span>`).join('')}</span>`;
         rows.appendChild(row);
     });
 }

@@ -36,6 +36,7 @@ window.addEventListener('keydown', e => {
     keys[k] = true;
     if (keysOpen) { if (k === 'escape') toggleKeys(false); return; } // con la ventana de teclas abierta no se juega (keymap.js)
     const act = actionForKey(k), tower = gameMode === 'tower'; // teclas configurables (keymap.js)
+    if (tower && statsOpen && act !== 'stats' && levelCardKey(k)) return; // elegir la carta de nivel sin mouse (towerLevelUp.js)
     if (act === 'autopilot') { setAutopilot(!autopilot); return; }
     if (act === 'shop') { if (tower) towerShopKey(); else toggleShop(); return; }
     if (act === 'map') { if (tower) toggleTowerMap(); else toggleBigMap(); return; } // en la Torre, el mapa del piso (towerMap.js)

@@ -1920,6 +1920,20 @@ test('Torre: el mercader vende 3 reliquias por piso y se pueden cambiar (cada ca
     check(relicRerollPrice(L) > r1, 'el próximo cambio cuesta más');
     player.gold = 0; check(!buyRelic(player, relicStock(L)[0]), 'sin oro no se compra');
 }, { random: true });
+test('Torre: las cartas de nivel se eligen sin mouse (← → y la tecla de ataque, o 1 2 3)', () => {
+    newTower('AXE', { weapon: 'ADVENTURER_SWORD' });
+    player.statPoints = 10; const offer = levelOffer(player).slice();
+    toggleStatsWindow(true);
+    const v = k => player.towerStats[k] || 0, before = v(offer[1]);
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+    check(document.querySelectorAll('#level-cards .level-card')[1].classList.contains('focused'), '→ marca la segunda carta');
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: KEYMAP.attack })); window.dispatchEvent(new KeyboardEvent('keyup', { key: KEYMAP.attack }));
+    checkEq(v(offer[1]), before + LEVEL_PICK.points, 'la tecla de ataque elige la marcada');
+    const offer2 = levelOffer(player).slice(), b2 = v(offer2[2]);
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: '3' }));
+    checkEq(v(offer2[2]), b2 + LEVEL_PICK.points, 'el 3 elige la tercera');
+    toggleStatsWindow(false);
+}, { random: true });
 test('Torre: misterio del piso 5 — los relojes dan vuelta las compuertas de arena del laberinto (siempre queda camino)', () => {
     newTower(); enterTowerFloor(5);
     const L = arenas[0], S = L.sandGates;
