@@ -1687,6 +1687,14 @@ test('Torre: transición de biomas — cerca de la escalera ya se ve el clima de
     check(!upstairsWeather(L1), 'si arriba es el mismo bioma, no cambia');
     weatherOn = was;
 }, { random: true });
+test('Torre: carteles — en los pisos 1 a 3 hay carteles al costado del camino (al pueblo y al laberinto); más arriba no', () => {
+    newTower();
+    [1, 2, 3].forEach(f => {
+        const L = towerLevel(f), D = bfsFrom(L, L.start.x, L.start.y);
+        check(L.signs.length === 2 && L.signs.every(s => walkable(L, s.x, s.y) && D[s.y * COLS + s.x] >= 0 && L.ground[s.y * COLS + s.x] !== GROUND.road), `piso ${f}: 2 carteles al costado del camino`);
+    });
+    checkEq(towerLevel(4).signs.length, 0, 'en el piso 4 ya no hay carteles');
+}, { random: true });
 test('Torre: misterio del piso 5 — los relojes dan vuelta las compuertas de arena del laberinto (siempre queda camino)', () => {
     newTower(); enterTowerFloor(5);
     const L = arenas[0], S = L.sandGates;

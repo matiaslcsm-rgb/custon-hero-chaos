@@ -838,6 +838,9 @@ también tiene que aprender a esquivar los ataques anunciados).
 - ✅ **Jefe escondido del piso 7: el Lobo de Escarcha** (2026-10-14; lo empezó la corrida automática que se detuvo y
   se completó acá): en el mirador cerrado (sala sellada con grieta), aviso de Isla la farolera; suelta las **Garras del
   Lobo de Escarcha** (guantes con crítico y velocidad de ataque). Verificado: la sala se arma en 8 de 8 pisos 7.
+- ✅ **Carteles en los caminos** (2026-10-14, `js/towerLore.js`): en los pisos 1 a 3 hay un cartel de madera al costado
+  del camino cerca de la entrada ("→ Pueblo · zona segura") y otro a la salida del pueblo ("→ Laberinto · guardián y
+  escalera"). Se leen al acercarte (4 casillas). Más arriba no hay (la torre se conoce menos).
 - ✅ **Transición de biomas** (2026-10-14, `js/towerAtmos.js`): cuando el piso de arriba es de otro bioma (pisos 2, 4,
   6 y 8), a 14 casillas de la escalera ya se ve su clima, también adentro del laberinto: lluvia de las cisternas, arena
   que cae, nieve que entra, ceniza. Va de 0,25 a 1 de intensidad según lo cerca que estés. A 8 casillas, un aviso

@@ -286,6 +286,7 @@ function generateTowerLevel(floor) {
     placeHiddenBoss(level, dist); // y el jefe escondido del piso
     placeSandGates(level); // el misterio del piso 5: compuertas de arena que cambian el laberinto (towerMysteries.js)
     placeLanterns(level, dist); // y el del 7: faroles para prender de noche
+    placeSigns(level, dist); // carteles en los caminos de los pisos de abajo (towerLore.js)
     level.creeps.forEach(c => { c.spawnTime = -1e9; }); // sin el oro extra por velocidad de las oleadas (no aplica en la Torre)
     return level;
 }

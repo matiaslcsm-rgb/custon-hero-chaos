@@ -147,3 +147,39 @@ function towerInterior(g) {
         n++;
     }
 }
+
+// --- CARTELES (TORRE-MUNDO.md, "cada piso, menos explorado": abajo los caminos tienen carteles) ---
+// Pisos 1 a 3: un cartel de madera al costado del camino cerca de la entrada (al pueblo) y otro a la salida del pueblo
+// (al laberinto). Se leen al acercarte. Más arriba nadie los puso.
+const SIGNS = { maxFloor: 3, read: 4 };
+function placeSigns(level, dist) {
+    level.signs = [];
+    if (level.isCave || level.floor > SIGNS.maxFloor || !level.town) return;
+    const t = level.town, midY = t.y + (t.h >> 1);
+    const roadSide = (tx, ty) => { // la casilla libre al costado del camino más cerca de (tx, ty)
+        let best = null, bestD = 1e9;
+        for (let y = ty - 8; y <= ty + 8; y++) for (let x = tx - 8; x <= tx + 8; x++) {
+            if (x < 1 || y < 1 || x >= COLS - 1 || y >= ROWS - 1 || !walkable(level, x, y) || level.ground[y * COLS + x] === GROUND.road || towerZoneAt(level, x, y) !== ZONE.field) continue;
+            if (![[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => level.ground[(y + dy) * COLS + x + dx] === GROUND.road)) continue;
+            const d = Math.hypot(x - tx, y - ty);
+            if (d < bestD && dist[y * COLS + x] >= 0) { bestD = d; best = { x, y }; }
+        }
+        return best;
+    };
+    const a = roadSide(level.start.x + 7, level.start.y), b = roadSide(t.x + t.w + 3, midY);
+    if (a) level.signs.push(Object.assign(a, { text: '→ Pueblo · zona segura' }));
+    if (b) level.signs.push(Object.assign(b, { text: '→ Laberinto · guardián y escalera' }));
+}
+function drawSigns(level) {
+    (level.signs || []).forEach(s => {
+        if (!level.explored[s.y][s.x]) return;
+        const x = s.x * TILE + TILE / 2, by = s.y * TILE + TILE - 3;
+        ctx.save();
+        ctx.fillStyle = '#4a3324'; ctx.fillRect(Math.round(x - 1), Math.round(by - TILE * 0.8), 3, Math.round(TILE * 0.8)); // el poste
+        ctx.fillStyle = '#7a5a3c'; ctx.fillRect(Math.round(x - 9), Math.round(by - TILE * 0.95), 18, 8);                     // la tabla
+        ctx.fillStyle = '#a07a52'; ctx.fillRect(Math.round(x - 9), Math.round(by - TILE * 0.95), 18, 2);
+        ctx.fillStyle = '#2a1d14'; ctx.fillRect(Math.round(x - 6), Math.round(by - TILE * 0.95 + 4), 12, 1);
+        ctx.restore();
+        if (player && player.arena === level && Math.hypot(player.x - s.x, player.y - s.y) <= SIGNS.read) pxLabel(s.text, x, by - TILE * 1.3, '#f2e6c8');
+    });
+}

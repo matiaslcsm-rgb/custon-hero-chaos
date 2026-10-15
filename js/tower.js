@@ -558,6 +558,7 @@ function renderTower(level, dt) {
     drawQuestDoors(level); // rejas de los pedidos (towerQuests.js)
     drawSandGates(level); // compuertas de arena del piso 5 (towerMysteries.js)
     drawLanterns(level); // faroles del piso 7
+    drawSigns(level); // carteles de los caminos (towerLore.js)
     pxDrawLoot(level); // cofres y botín (towerPixelProps.js)
     const underFx = () => {
         drawTowerZones(level); // lo que dejan los jefes en el piso (towerBosses.js)
