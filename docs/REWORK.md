@@ -827,6 +827,10 @@ Las fases 3 y 4 son las más grandes: hay que rehacer pruebas y volver a medir e
 también tiene que aprender a esquivar los ataques anunciados).
 
 ## Interfaz y calidad de vida (lista viva)
+- ✅ **Custom Hero: muerte súbita** (2026-10-15, `js/roundEconomy.js`): desde la ronda 15 los héroes reciben +50% de
+  daño por ronda (de creeps, duelos y jefes) hasta que quede uno. Se anuncia en el registro al empezar cada ronda y se
+  ve en la barra de arriba al lado de la ronda ("15 ☠+50%"). En la Torre no corre. Medido con el piloto: las partidas
+  pasaron de 33-39 min (33-46 rondas) a 16-21 min (20-26 rondas), con 6 ganadores distintos en 8 partidas.
 - ✅ **Custom Hero: resumen de ronda, interés y racha** (2026-10-15, `js/roundEconomy.js`): al terminar cada ronda,
   una tarjeta arriba con el oro y de dónde salió (bajas, interés, racha, apuesta, jefe, ventas), si perdiste vida, tu
   puesto y cuánto interés cobrás la próxima ("con 6g más, +16"). Al lado del oro, lo que vas a cobrar: "+15 🔥3".

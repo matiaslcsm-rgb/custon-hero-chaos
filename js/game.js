@@ -244,7 +244,7 @@ function returnFromRestArea(hero) {
 function isDuelRound() { return waveNumber >= DUEL_START_ROUND && aliveHeroes().length >= 2; }
 
 function startWave(plan) {
-    if (plan === undefined) ledgerStart(); // la cuenta de la ronda (roundEconomy.js)
+    if (plan === undefined) { ledgerStart(); announceSuddenDeath(); } // la cuenta de la ronda y la muerte súbita (roundEconomy.js)
     if (plan === undefined && isDuelRound()) { showPanel('shop-container', false); startBetting(); return; }
     showPanel('shop-container', false);
     gameState = 'WAVE';

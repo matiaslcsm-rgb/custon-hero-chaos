@@ -78,3 +78,17 @@ function incomeHint(h) {
     const s = h.streak || 0, i = interestFor(h);
     return `+${i}${Math.abs(s) >= 1 ? ` ${s > 0 ? '🔥' : '🧊'}${Math.abs(s)}` : ''}`;
 }
+
+// --- MUERTE SÚBITA (ROADMAP C1, 2026-10-15) ---
+// Para que la partida siempre termine en 15-25 minutos: desde la ronda SUDDEN.from los héroes reciben cada ronda más daño
+// (de creeps, duelos y jefes) hasta que quede uno. Se anuncia al empezar cada ronda y se ve en la barra de arriba.
+// Medido con el piloto (8 partidas cada uno): sin muerte súbita 33-46 rondas y 33-39 min; desde la 15 con +50% por
+// ronda, 20-26 rondas y 16-21 min, con 6 ganadores distintos (con +20% eran 23-32 rondas y el Sniper ganaba 5 de 8).
+const SUDDEN = { from: 15, perRound: 0.5 };
+function suddenDeathBonus() { return gameMode !== 'tower' && waveNumber >= SUDDEN.from ? SUDDEN.perRound * (waveNumber - SUDDEN.from + 1) : 0; }
+function announceSuddenDeath() {
+    const b = suddenDeathBonus();
+    if (!b) return;
+    log(waveNumber === SUDDEN.from ? `☠️ ¡MUERTE SÚBITA! Desde ahora cada ronda los héroes reciben más daño: +${Math.round(b * 100)}% y subiendo hasta que quede uno.`
+        : `☠️ Muerte súbita: los héroes reciben +${Math.round(b * 100)}% de daño esta ronda.`);
+}

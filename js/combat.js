@@ -130,6 +130,7 @@ function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     if (source && target.arena && target.arena.height) final *= heightDamageMult(source, target); // Torre: altura (towerWorld.js)
     final = mitigate(target, final * (1 - effDmgReduction(target)), type);
     let takenPct = sumMod(target, 'dmgTakenPct'); // ej: Condenado
+    if (target.isHero && typeof suddenDeathBonus === 'function') takenPct += suddenDeathBonus(); // muerte súbita (roundEconomy.js; en la Torre es 0)
     // La maldición (Condenado) solo amplifica el daño de creeps y de héroes sin maldición
     if (source && source.isHero && isCondemned(source)) takenPct -= (getEffect(target, 'CONDEMNED') || { mods: {} }).mods.dmgTakenPct || 0;
     final = Math.round(final * (1 + takenPct));

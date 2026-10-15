@@ -19,6 +19,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 | F2. Duelos 1v1, maldición con la mitad o menos, duelos a muerte con 3 o menos | ✅ |
 | F3. Previa de duelos con apuestas (×2, tope 25% del oro); Fragmentos a la mitad de abajo y Libro al último | ✅ |
 | G. Jefes de ronda cada 5 rondas (todos contra uno) y objetos neutrales (elegís 1 de 3) | ✅ |
+| Muerte súbita (2026-10-15): desde la ronda 15, +50% de daño recibido por ronda; partidas de 16-21 min (antes 33-39) | ✅ |
 | Menú de inicio, tutorial, elección de héroe (3 opciones + al azar, sin repetir) y códice de ítems con colores | ✅ |
 | Gráficos paso 1: efectos de combate (números, partículas, temblor, fondos) | ✅ |
 | Gráficos paso 2: HUD estilo MOBA (barra superior, ranking, mapa grande, barra del héroe, panel de fase) | ✅ |

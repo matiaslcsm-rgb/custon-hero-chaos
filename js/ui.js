@@ -702,7 +702,7 @@ function updateHud() {
     document.getElementById('player-gold').textContent = player.gold;
     document.getElementById('player-income').textContent = incomeHint(player); // interés y racha (roundEconomy.js)
     document.getElementById('essence-text').textContent = gameMode === 'tower' ? `✦ ${essence()}` : '';
-    document.getElementById('round-num').textContent = `${waveNumber}${isRoundBossRound() ? ' 👹' : ''}`; // sin límite fijo: hasta que quede uno
+    document.getElementById('round-num').textContent = `${waveNumber}${isRoundBossRound() ? ' 👹' : ''}${suddenDeathBonus() ? ` ☠+${Math.round(suddenDeathBonus() * 100)}%` : ''}`; // sin límite fijo: hasta que quede uno (☠: muerte súbita)
     document.getElementById('pause-btn').style.visibility = canPause() ? 'visible' : 'hidden';
     document.getElementById('lives-text').innerHTML = `<span class="hearts">${'♥'.repeat(Math.max(0, player.lives))}${'♡'.repeat(Math.max(0, 2 - player.lives))}</span>` +
         (isCondemned(player) ? ` <span class="cursed" title="Condenado: recibís más daño">☠ +${Math.round(player.condemnPct * 100)}%</span>` : '');

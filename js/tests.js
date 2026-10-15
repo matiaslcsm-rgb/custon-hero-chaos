@@ -4268,6 +4268,19 @@ test('Economía de la ronda — interés al terminar la ronda, racha (ganada o p
     check(player.streak === -2 && player.gold === before + interestFor({ gold: before }) + ECON.streakGold[2], 'perder seguido también paga la racha');
     player.gold = 999; checkEq(interestFor(player), ECON.interestMax, 'el interés tiene tope');
 }, { random: true });
+test('Muerte súbita — desde la ronda SUDDEN.from los héroes reciben cada ronda más daño (no en la Torre)', () => {
+    newGame('AXE');
+    waveNumber = SUDDEN.from - 1;
+    checkEq(suddenDeathBonus(), 0, 'antes de la ronda fija no hay');
+    const hit = () => { player.hp = player.maxHp; const hp = player.hp; dealDamage(null, player, 100, 'pure'); return hp - player.hp; };
+    const base = hit();
+    waveNumber = SUDDEN.from + 1;
+    checkNear(suddenDeathBonus(), SUDDEN.perRound * 2, 'sube cada ronda');
+    checkEq(hit(), Math.round(base * (1 + SUDDEN.perRound * 2)), 'el héroe recibe más daño');
+    updateHud();
+    check(document.getElementById('round-num').textContent.includes('☠'), 'se ve en la barra de arriba');
+    gameMode = 'tower'; checkEq(suddenDeathBonus(), 0, 'en la Torre no corre'); gameMode = 'normal';
+});
 test('Nueva Partida deja todo como al empezar', () => {
     newGame('AXE');
     resetGame();
