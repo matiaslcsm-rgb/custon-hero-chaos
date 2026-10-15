@@ -214,6 +214,26 @@ function buyTowerTome(hero) {
     log(`📘 Tomo de Talento: +1 punto de stats (C para repartir). El próximo cuesta ${towerTomePrice(hero)}g.`); sfx('levelup');
     return true;
 }
+// Mapa del piso (TORRE-MUNDO.md, "menos explorado hacia arriba"): en los pisos 1 a 6 el mercader lo vende. Muestra todo lo
+// que se alcanza desde la entrada (y sus paredes); las salas selladas no figuran, siguen siendo secretas.
+const FLOOR_MAP = { maxFloor: 6, base: 40, perFloor: 20 };
+const floorMapPrice = level => FLOOR_MAP.base + FLOOR_MAP.perFloor * level.floor;
+const floorMapForSale = level => !level.isCave && level.floor <= FLOOR_MAP.maxFloor && !level.mapBought;
+function buyFloorMap(hero) {
+    const level = hero.arena, price = floorMapPrice(level);
+    if (!floorMapForSale(level)) return false;
+    if (hero.gold < price) { log(`🛒 Te faltan ${price - hero.gold}g para el mapa del piso.`); return false; }
+    hero.gold -= price; level.mapBought = true;
+    const D = bfsFrom(level, level.start.x, level.start.y);
+    for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) {
+        if (level.explored[y][x]) continue;
+        let near = D[y * COLS + x] >= 0;
+        for (let dy = -1; dy <= 1 && !near; dy++) for (let dx = -1; dx <= 1 && !near; dx++) near = x + dx >= 0 && x + dx < COLS && D[(y + dy) * COLS + x + dx] >= 0;
+        if (near) { level.explored[y][x] = 1; markMinimap(level, x, y); }
+    }
+    log(`🗺️ Compraste el mapa del piso (${price}g): se ve todo lo que se puede caminar (M para verlo grande). Las salas tapiadas no figuran.`); sfx('coin');
+    return true;
+}
 function sellTowerItem(hero, item) {
     const price = towerSellPrice(item);
     hero.bag = hero.bag.filter(b => b.item !== item);
@@ -261,6 +281,14 @@ function renderTowerShop() {
     tome.onmouseenter = () => { tip.innerHTML = `<div class="tt-name">📘 Tomo de Talento</div><div>+1 punto de stats para repartir (tecla C). Siempre a la venta; cada uno cuesta 25% más que el anterior. Al morir cuenta como cualquier punto puesto (la mitad queda en tus restos).</div>`; };
     tome.querySelector('button').onclick = () => { buyTowerTome(player); renderTowerShop(); };
     if (inTown) stock.appendChild(tome); // los tomos, solo en el pueblo
+    if (inTown && floorMapForSale(level)) { // el mapa del piso, en los pisos de abajo
+        const mp = floorMapPrice(level), map = document.createElement('div'); map.className = 'tshop-row';
+        map.innerHTML = `<span class="tshop-tome">🗺️</span><span class="tshop-name"><b>Mapa del piso</b> · todo lo que se camina</span>` +
+            `<button class="${player.gold >= mp ? 'primary-btn' : 'secondary-btn'}" ${player.gold >= mp ? '' : 'disabled'}>Comprar · ${mp}g</button>`;
+        map.onmouseenter = () => { tip.innerHTML = `<div class="tt-name">🗺️ Mapa del piso</div><div>Muestra en el mapa todo lo que se puede caminar de este piso: campo, pueblo y laberinto. Las salas tapiadas no figuran. Solo lo venden en los pisos 1 a ${FLOOR_MAP.maxFloor}: más arriba nadie los dibujó.</div>`; };
+        map.querySelector('button').onclick = () => { buyFloorMap(player); renderTowerShop(); };
+        stock.appendChild(map);
+    }
     const bag = document.getElementById('tshop-bag'); bag.innerHTML = '';
     player.bag.forEach(b => bag.appendChild(row(b.item, 'Vender', towerSellPrice(b.item), true, () => sellTowerItem(player, b.item))));
     if (!player.bag.length) bag.innerHTML = '<p class="subtitle">La bolsa está vacía (lo equipado no se vende).</p>';

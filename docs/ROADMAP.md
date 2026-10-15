@@ -134,7 +134,8 @@ El orden de la lista **es** la prioridad: primero lo que destraba el loop comple
   - [x] Paso 1: carteles en los pisos 1 a 3 (al pueblo, cerca de la entrada, y al laberinto, a la salida del pueblo). 2026-10-14.
   - [ ] Paso 2: caminos que se cortan hacia arriba (4-6 hasta el pueblo, 7-9 tramos sueltos, 10+ ninguno). Ojo: el
         camino es lo que garantiza el paso y los faroles del 7 van a su costado: recortar solo el dibujo del suelo.
-  - [ ] Paso 3: el mercader vende el mapa del piso (pisos 1-6). Paso 4: pueblos más chicos arriba y más oscuro en 7-9.
+  - [x] Paso 3: el mercader vende el mapa del piso (pisos 1-6): 40g + 20 por piso; muestra lo que se camina. 2026-10-14.
+  - [ ] Paso 4: pueblos más chicos arriba y más oscuro en 7-9.
 - [x] **Transición de biomas:** cerca de la escalera ya se ve el bioma de arriba (arena que cae, nieve que entra).
       Hecho con el clima: a 14 casillas de la escalera, el del piso de arriba (más fuerte cuanto más cerca) y un aviso. 2026-10-14.
 - [ ] **El piso 1 afuera:** la torre gigante se ve desde el bosque (silueta al fondo) y el laberinto es su puerta.
@@ -347,6 +348,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 - 2026-10-14 · Pedidos que cruzan pisos, paso 2 (el almacén de faroles) · 998cdfa · 20/20 pisos 7 con el almacén, alcanzable en los 20 (36-376 pasos); la sala del Lobo de Escarcha sigue en 20/20. Pruebas 251/251.
 - 2026-10-14 · Transición de biomas (pedido en el chat) · fbb63d5 · pisos 2, 4, 6 y 8: a 14 casillas de la escalera, clima de arriba con intensidad 0,25 a 1 según la distancia y aviso a 8; revisado en pantalla en el piso 6 (nieve en el laberinto del desierto). Pruebas 252/252.
 - 2026-10-14 · Menos explorado, paso 1 (carteles) · f1829d0 · 20/20 pisos 1-3 con los 2 carteles, el primero a 3-8 casillas de la entrada; piso 4 sin carteles. Pruebas 253/253.
+- 2026-10-14 · Menos explorado, paso 3 (el mapa del piso) · COMMIT · pisos 1/3/6: 60/100/160g, muestra el 84/87/90% del mapa, tarda ~20 ms; las salas tapiadas no figuran; comprado desde la tienda en pantalla. Pruebas 254/254.
 - 2026-10-14 · Reliquias, paso 1 (motor y 12 reliquias) · 8c1e664 · piloto con reflejos humanos, 45 min: sin reliquias piso 3 y 2 muertes; con 0,25/0,35 de chance, 19 reliquias en 3 pisos (demasiadas); con 0,05/0,10, 7 en 3 pisos (~2,3 por piso), piso 4 y 0 muertes. Pruebas 239/239.
 - 2026-10-14 · Subir de nivel: 1 de 3 mejoras · 6716de1 · piloto con reflejos humanos, 45 min: piso 4 a los 41 min, 0 muertes, nivel 15, 6 reliquias (igual que sin la elección: piso 4 a los 43 min); destrabó Piel de Roble, Golpe Pesado y Sangre Espesa. Pruebas 240/240.
 - 2026-10-14 · Guerrero, paso 1a (clases y Templanza) · 259f4bc · banco de 60 s contra un muñeco, 8 muestras: 119 de daño/s sin pasiva y 116 con ella (sin diferencia: el combo ya critea; el ruido es ±25). Pruebas 241/241; se arregló la prueba de visión que fallaba si el héroe quedaba en una meseta.

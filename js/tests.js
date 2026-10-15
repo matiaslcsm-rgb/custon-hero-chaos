@@ -1695,6 +1695,18 @@ test('Torre: carteles — en los pisos 1 a 3 hay carteles al costado del camino 
     });
     checkEq(towerLevel(4).signs.length, 0, 'en el piso 4 ya no hay carteles');
 }, { random: true });
+test('Torre: el mercader vende el mapa del piso (pisos 1 a 6) — muestra lo que se camina, no las salas tapiadas', () => {
+    newTower(); enterTowerFloor(2);
+    const L = arenas[0], hb = L.hiddenBoss, seen = () => L.explored.reduce((a, r) => a + r.reduce((b, v) => b + (v ? 1 : 0), 0), 0);
+    Object.assign(player, { arena: L, gold: 1000 });
+    const before = seen();
+    check(floorMapForSale(L) && buyFloorMap(player), 'se compra');
+    check(seen() > before * 3 && L.explored[L.stairs.y][L.stairs.x] && L.explored[L.town.merchant.y][L.town.merchant.x], 'se ve el piso: pueblo y escalera');
+    check(!hb || !L.explored[hb.y][hb.x], 'la sala tapiada del jefe escondido no figura');
+    checkEq(player.gold, 1000 - floorMapPrice(L), 'cobra su precio');
+    check(!floorMapForSale(L) && !buyFloorMap(player), 'una sola vez por piso');
+    enterTowerFloor(7); check(!floorMapForSale(arenas[0]), 'en el piso 7 ya no lo venden');
+}, { random: true });
 test('Torre: misterio del piso 5 — los relojes dan vuelta las compuertas de arena del laberinto (siempre queda camino)', () => {
     newTower(); enterTowerFloor(5);
     const L = arenas[0], S = L.sandGates;
