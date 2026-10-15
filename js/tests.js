@@ -1799,6 +1799,16 @@ test('Torre: mejoras de clase al subir de nivel — remate que aturde, flechazo 
     swordParry(player, { x: player.x + 3, y: player.y });
     check(Math.abs(player.parry.until - player.parry.start - PARRY.window * 1.5) < 1e-6, 'Espejo de Acero: la parada dura más');
 }, { random: true });
+test('Torre: el piloto usa la especial de la clase con 2 o más enemigos cerca (no con uno solo)', () => {
+    const level = newTower('AXE', { weapon: 'ADVENTURER_SWORD' });
+    level.creeps.forEach(c => { c.hp = 0; });
+    for (let x = -3; x <= 3; x++) level.walls[player.y][player.x + x] = 0;
+    towerDummy(level, 1, 0); player.specialReadyAt = 0;
+    check(!aiClassSpecial(player), 'con uno solo, no');
+    towerDummy(level, -1, 0);
+    check(aiClassSpecial(player) && player.specialReadyAt > gameClock, 'con dos, la tira');
+    check(!aiClassSpecial(player), 'y espera a que se recargue');
+}, { random: true });
 test('Torre: misterio del piso 5 — los relojes dan vuelta las compuertas de arena del laberinto (siempre queda camino)', () => {
     newTower(); enterTowerFloor(5);
     const L = arenas[0], S = L.sandGates;

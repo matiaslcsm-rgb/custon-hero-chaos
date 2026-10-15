@@ -838,6 +838,11 @@ también tiene que aprender a esquivar los ataques anunciados).
 - ✅ **Jefe escondido del piso 7: el Lobo de Escarcha** (2026-10-14; lo empezó la corrida automática que se detuvo y
   se completó acá): en el mirador cerrado (sala sellada con grieta), aviso de Isla la farolera; suelta las **Garras del
   Lobo de Escarcha** (guantes con crítico y velocidad de ataque). Verificado: la sala se arma en 8 de 8 pisos 7.
+- ✅ **El piloto usa la especial y la dificultad de las clases quedó medida** (2026-10-14, `js/towerSpecials.js`): el
+  piloto automático nunca tiraba la especial, así que las clases se medían con la mitad del kit. Ahora la tira con 2 o
+  más enemigos a su alcance o contra un jefe, al medio del grupo. 45 min con reflejos humanos: Guerrero piso 4 a los
+  41 min (sin la especial: piso 3 a los 33 y no pasaba), Arquero a los 40, Mago a los 35; 0 muertes. El Guerrero con
+  las Q/E/R viejas llegaba a los 41: la dificultad volvió a la de antes. Vigilar al Mago (~15% más rápido).
 - ✅ **Segunda mejora de clase, a las 8 elecciones** (2026-10-14): **Espejo de Acero** (Guerrero: la parada devuelve el
   doble y su ventana pasa de 0,3 a 0,45 s), **Paso de Viento** (Arquero: el esquive se recarga 40% más rápido),
   **Tormenta Mayor** (Mago: 5 rayos en vez de 3; +67% de daño de la tormenta contra un grupo — vigilar).

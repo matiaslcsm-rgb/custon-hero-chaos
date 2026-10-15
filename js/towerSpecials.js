@@ -22,6 +22,15 @@ function classSpecial(h, aim = cursorWorld()) {
     emit(h, 'onCast', { skill: { id: 'CLASS_SPECIAL', name: SPECIAL_NAME[h.heroClass] } });
     return true;
 }
+// El piloto automático (updateTower): la tira con 2 o más enemigos al alcance, o contra un jefe. Sin esto, el piloto
+// medía las clases sin su especial (2026-10-14).
+function aiClassSpecial(h) {
+    if (!hasSpecial(h) || gameClock < (h.specialReadyAt || 0) || h.mageCharge || hasFlag(h, 'stun')) return false;
+    const r = h.heroClass === 'warrior' ? SPECIAL.whirl.radius : effRange(h) + 1, foes = foesNear(h, h, r);
+    if (foes.length < 2 && !foes.some(e => e.isGuardian || e.isCaveBoss || e.isBoss || e.isHiddenBoss)) return false;
+    const c = foes.reduce((a, e) => ({ x: a.x + e.x / foes.length, y: a.y + e.y / foes.length }), { x: 0, y: 0 }); // al medio del grupo
+    return classSpecial(h, c);
+}
 // Lo que pasa después (los golpes de la lluvia, el meteoro que cae, el suelo que arde): se corre cada cuadro
 function specialTick(h) {
     if (!h.specialLater || !h.specialLater.length) return;

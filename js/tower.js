@@ -284,7 +284,7 @@ function updateTower(dt) {
     if (!player.isAlive() && player.respawnAt && gameClock >= player.respawnAt) { towerRespawn(); return; }
     if (towerModalOpen()) return; // con stats, inventario, forja o la elección de arma abiertos, la partida espera
     aiWaystone(); // el piloto, al renacer, vuelve con la piedra (towerWaystone.js)
-    if (autopilot) { if (player.statPoints) aiSpendStatPoints(player); aiManageGear(player); aiTowerShop(player); if (player.isAlive()) aiTelegraphDash(player); }
+    if (autopilot) { if (player.statPoints) aiSpendStatPoints(player); aiManageGear(player); aiTowerShop(player); if (player.isAlive()) { aiTelegraphDash(player); aiClassSpecial(player); } }
     else if (pendingForge(player) && !towerInFight(level)) { openForge(pendingForge(player)); return; } // en plena pelea, solo el aviso (towerView.js)
     const from = { x: player.x, y: player.y };
     updateHero(player, level, dt);
