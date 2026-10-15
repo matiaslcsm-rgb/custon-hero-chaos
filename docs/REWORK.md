@@ -838,6 +838,10 @@ también tiene que aprender a esquivar los ataques anunciados).
 - ✅ **Jefe escondido del piso 7: el Lobo de Escarcha** (2026-10-14; lo empezó la corrida automática que se detuvo y
   se completó acá): en el mirador cerrado (sala sellada con grieta), aviso de Isla la farolera; suelta las **Garras del
   Lobo de Escarcha** (guantes con crítico y velocidad de ataque). Verificado: la sala se arma en 8 de 8 pisos 7.
+- ✅ **El camino se pierde hacia arriba** (2026-10-14, `js/towerLore.js`): pisos 1-3, el camino entero; 4-6, solo hasta
+  el pueblo; 7-9, tramos sueltos (uno de cada tres tramos de 12 pasos); 10 en adelante, ninguno. Solo cambia el suelo:
+  el paso que tallaba el camino sigue abierto. El aviso al llegar al piso y el objetivo lo dicen ("Buscá el pueblo (el
+  camino se pierde)"). Medido: 638-930 casillas de camino en el piso 1, 204-403 en 4-6, 158-265 en 7-9, 0 en el 10.
 - ✅ **El mercader vende el mapa del piso** (2026-10-14, `js/towerUI.js`): en los pisos 1 a 6, la tienda del pueblo
   tiene una fila más, "🗺️ Mapa del piso", a 40g + 20 por piso (60 en el 1, 160 en el 6). Muestra en el mapa todo lo
   que se camina desde la entrada (84-90% del piso), con sus paredes; las salas tapiadas no figuran. Una vez por piso.

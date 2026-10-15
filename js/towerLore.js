@@ -148,6 +148,27 @@ function towerInterior(g) {
     }
 }
 
+// --- CAMINOS QUE SE PIERDEN (TORRE-MUNDO.md, "cada piso, menos explorado") ---
+// Pisos 1-3, el camino entero; 4-6, solo hasta el pueblo; 7-9, tramos sueltos (uno de cada tres); 10 en adelante, ninguno. Solo cambia el
+// suelo (el paso que talló el camino sigue abierto), y se hace al final de armar el piso.
+const ROADS = { full: 3, toTown: 6, pieces: 9, piece: 12 };
+function roadHint(floor) {
+    return floor <= ROADS.full ? 'Seguí el camino al pueblo y, más allá, al laberinto donde el guardián cuida la escalera.'
+        : floor <= ROADS.toTown ? 'El camino llega hasta el pueblo; de ahí al laberinto (donde el guardián cuida la escalera) hay que buscarlo.'
+        : floor <= ROADS.pieces ? 'Del camino quedan tramos sueltos: el pueblo y el laberinto hay que encontrarlos.'
+        : 'Acá no hay caminos: nadie pisó este piso.';
+}
+function fadeRoads(level, dist) {
+    const f = level.floor, t = level.town;
+    if (level.isCave || f <= ROADS.full) return;
+    for (let i = 0; i < level.ground.length; i++) {
+        if (level.ground[i] !== GROUND.road) continue;
+        const x = i % COLS;
+        const keep = f <= ROADS.toTown ? !t || x < t.x + t.w : f <= ROADS.pieces ? Math.floor(Math.max(0, dist[i]) / ROADS.piece) % 3 === 0 : false;
+        if (!keep) level.ground[i] = GROUND.plain;
+    }
+}
+
 // --- CARTELES (TORRE-MUNDO.md, "cada piso, menos explorado": abajo los caminos tienen carteles) ---
 // Pisos 1 a 3: un cartel de madera al costado del camino cerca de la entrada (al pueblo) y otro a la salida del pueblo
 // (al laberinto). Se leen al acercarte. Más arriba nadie los puso.

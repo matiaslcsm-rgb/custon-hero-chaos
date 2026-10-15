@@ -1707,6 +1707,16 @@ test('Torre: el mercader vende el mapa del piso (pisos 1 a 6) — muestra lo que
     check(!floorMapForSale(L) && !buyFloorMap(player), 'una sola vez por piso');
     enterTowerFloor(7); check(!floorMapForSale(arenas[0]), 'en el piso 7 ya no lo venden');
 }, { random: true });
+test('Torre: el camino se pierde hacia arriba (entero en 1-3, hasta el pueblo en 4-6, tramos en 7-9, nada en 10) y siempre hay paso', () => {
+    newTower();
+    const road = f => towerLevel(f).ground.reduce((a, g) => a + (g === GROUND.road ? 1 : 0), 0);
+    const r = [2, 5, 8, 10].map(road);
+    check(r[0] > r[1] && r[1] > 0 && r[2] > 0 && r[2] < r[0] && r[3] === 0, `casillas de camino: piso 2 ${r[0]}, 5 ${r[1]}, 8 ${r[2]}, 10 ${r[3]}`);
+    const L5 = towerLevel(5);
+    check(!L5.ground.some((g, i) => g === GROUND.road && i % COLS >= L5.town.x + L5.town.w), 'en el 5 el camino no pasa del pueblo');
+    [5, 8, 10].forEach(f => { const L = towerLevel(f); check(bfsFrom(L, L.start.x, L.start.y)[L.stairs.y * COLS + L.stairs.x] >= 0, `piso ${f}: se llega a la escalera`); });
+    check(roadHint(9).includes('tramos') && roadHint(10).includes('no hay caminos'), 'el aviso del piso lo dice');
+}, { random: true });
 test('Torre: misterio del piso 5 — los relojes dan vuelta las compuertas de arena del laberinto (siempre queda camino)', () => {
     newTower(); enterTowerFloor(5);
     const L = arenas[0], S = L.sandGates;
