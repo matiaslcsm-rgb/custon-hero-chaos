@@ -61,7 +61,7 @@ const MUNECO_COMBO = ['swing0', 'swing1', 'swing2'];
 const MUNECO_COMBO_GAP = 0.3; // si volvés a atacar antes de esto, sigue el combo; si no, arranca de nuevo
 // El terreno: rectángulos que no se pueden atravesar (además de los bordes)
 const MUNECO_SOLIDS = [
-    { x: 92, y: 70, w: 22, h: 14, kind: 'crate' },     // un cajón
+    { x: 92, y: 96, w: 22, h: 14, kind: 'crate' },     // un cajón (fuera de la línea entre el héroe y el muñeco)
     { x: 40, y: 104, w: 12, h: 10, kind: 'pillar' },   // una columna baja
     { x: 150, y: 116, w: 56, h: 12, kind: 'step' }      // un escalón de piedra (por ahora, de costado no se sube)
 ];
@@ -326,8 +326,9 @@ function munecoDrawShot(M, ctx, p) {
 }
 // La estela del tajo (en el activo y apagándose al empezar la recuperación) y el arco celeste de la parada
 function munecoDrawSwingFx(M, ctx) {
-    const h = M.hero, mv = h.move; if (!mv || mv.id === 'dash') return;
-    const d = MUNECO_MOVES[mv.id], ph = munecoPhase(mv, mv.t); if (!ph || ph.phase === 'startup') return;
+    const h = M.hero, mv = h.move, d = mv && MUNECO_MOVES[mv.id];
+    if (!d || (!d.arc && mv.id !== 'parry')) return; // solo los tajos dejan estela (y la parada su arco)
+    const ph = munecoPhase(mv, mv.t); if (!ph || ph.phase === 'startup') return;
     const fade = ph.phase === 'active' ? 1 : 1 - ph.pu * 3; if (fade <= 0) return;
     const base = Math.atan2(mv.dy, mv.dx), cx = h.x, cy = h.y - 14, dot = (a, r, col) => { ctx.fillStyle = col; ctx.fillRect(Math.round(cx + Math.cos(a) * r), Math.round(cy + Math.sin(a) * r), 1, 1); };
     ctx.globalAlpha = fade;

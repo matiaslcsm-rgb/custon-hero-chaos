@@ -4402,6 +4402,19 @@ test('El muñeco: la onda de corte viaja con su caja, el muñeco tira bolas, el 
     check(!h.move, 'y vuelve a quedar libre');
 });
 
+test('El muñeco: se dibuja sin errores en cada tiempo de cada movimiento, con disparos y cajas a la vista', () => {
+    const M = munecoNew(), h = M.hero, c = document.createElement('canvas'); c.width = MUNECO.W; c.height = MUNECO.H;
+    const ctx = c.getContext('2d'); M.showBoxes = true;
+    munecoFire(M, 'hero', 100, 60, 1, 0, MUNECO_MOVES.shoot.shot); munecoFire(M, 'dummy', 150, 60, -1, 0, MUNECO.ball);
+    Object.keys(MUNECO_MOVES).forEach(id => ['startup', 'active', 'recovery'].forEach(phase => {
+        const d = MUNECO_MOVES[id], at = { startup: d.startup / 2, active: d.startup + d.active / 2, recovery: d.startup + d.active + d.recovery / 2 }[phase];
+        ['side', 'down', 'up'].forEach(dir => {
+            h.move = { id, t: at, dx: 1, dy: 0, hit: false }; h.dir = dir;
+            try { munecoDraw(M, ctx); munecoHud(M); } catch (e) { throw new Error(`${id} · ${phase} · ${dir}: ${e.message}`); }
+        });
+    }));
+});
+
 test('Banco de balance: la misma semilla juega la misma partida y la tabla cuenta a los 8 de la mesa', () => {
     const a = benchGame(7, 6), b = benchGame(7, 6);
     checkEq(JSON.stringify(b), JSON.stringify(a), 'misma semilla, mismo resultado');
