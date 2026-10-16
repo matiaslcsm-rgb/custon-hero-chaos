@@ -81,11 +81,14 @@ solo cuando un cambio en un modo rompe el otro de verdad, y de a un paso que pas
 - [x] **Arreglar la prueba de las raíces de la Raíz Madre que falla sola:** encontrar por qué a veces falla (azar sin
       semilla, tiempo, orden) y dejarla estable. Criterio: 20 corridas seguidas de `index.html?test` sin fallos.
       Hecho 2026-10-16: eran dos causas (una de la prueba y un error chico del juego), ver REWORK.md §9.
-- [ ] **Banco de balance de Custom Hero que se pueda repetir:** partidas de la IA contra la IA con semilla fija, que
+- [x] **Banco de balance de Custom Hero que se pueda repetir:** partidas de la IA contra la IA con semilla fija, que
       salga una tabla de victorias, ronda promedio de muerte y daño por héroe. Que se pueda correr con un parámetro de
       la URL y guardar los números en `docs/BALANCE-CH.md`. Medir la base actual (¿el Sniper sigue ganando 8 de 14?).
+      Hecho 2026-10-16: `index.html?banco=66`. Sin daño por héroe (el juego no lo cuenta todavía).
 - [ ] **Balance de Custom Hero con números:** con el banco, acercar a los héroes que más ganan y a los que menos
-      (Sniper arriba, Vampiro y Nigromante abajo según ESTADO.md). Un héroe por ítem, números de antes y después.
+      Un héroe por ítem, números de antes y después con `?banco=66`. Según la base (BALANCE-CH.md, lo parejo es 12,5%):
+      Sniper 59% y Zeus 29% arriba; Sabio del Vacío y Alquimista 0%, Axe y Bruja del Hielo 2%, Arcanista 4% abajo.
+      Empezar por bajar al Sniper y volver a medir antes de tocar a los de abajo (al bajar al que gana todo, suben los demás).
 - [ ] **Prueba de ida y vuelta entre modos** (riesgo 1 del mapa): jugar un rato la Torre, volver a la portada y
       empezar Custom Hero (y al revés), y revisar que `player`, `COLS`/`ROWS`, `camera`, `autopilot`, `paused`,
       `gameState` y `towerRun` queden limpios. Si algo queda sucio, arreglarlo en un solo lugar (una función que
@@ -420,6 +423,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 
 ## Hecho por el modo automático
 (Fecha · ítem · commit · qué se midió.)
+- 2026-10-16 · Banco de balance de Custom Hero (a pedido, en el chat) · COMMIT · 66 partidas con semilla fija (~2,5 s cada una): Sniper gana 59% (26/44), Zeus 29%, Sabio del Vacío y Alquimista 0%; ronda final promedio 24 (20-30). La misma semilla repite la partida (3/3). Hubo que apagar los sonidos en el banco: usaban Math.random según el tiempo real. Pruebas 276/276.
 - 2026-10-16 · Prueba de las raíces de la Raíz Madre estable (a pedido, en el chat) · 3ab3ca4 · antes fallaba ~1 de cada 40-100 corridas de esa prueba; la fase 2 plantaba 2 raíces en vez de 3 en 1 de 300 pisos. Después: 487/487 corridas de la prueba, 300/300 pisos con las 3 raíces y 20/20 corridas completas en verde. Pruebas 275/275.
 - 2026-10-16 · Mapa de lo compartido entre los modos (a pedido, en el chat) · f841f7e · 97 scripts; Torre 9.867 líneas y resto 8.396; el núcleo usa 174 globales de la Torre; 15 variables que cambian compartidas (`player` en 36 archivos de la Torre y 21 del resto); `ui.js` con 21 preguntas por el modo; ningún nombre declarado dos veces.
 - 2026-10-14 · Las Páginas de Arén · 696aecb · 3 torres × 10 pisos: siempre aparece y se alcanza; 280-400 pasos de la entrada (87-100% del máximo del campo). Pruebas 234/234.

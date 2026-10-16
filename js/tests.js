@@ -4253,6 +4253,55 @@ function simulateGame(heroIndex, godMode = true, rounds = 4) {
     return { state: gameState, eliminated: player.eliminated, skills: player.skills.length, level: player.level, rank: heroRank(player), round: waveNumber };
 }
 
+// --- BANCO DE BALANCE DE CUSTOM HERO (index.html?banco=N, fase B0 del roadmap) ---
+// Juega partidas completas con la IA (60 rondas como tope), con semilla fija: la misma semilla da la misma partida.
+// Cada partida rota el héroe del jugador (también lo juega la IA) y cuenta a los 8 de la mesa.
+// Devuelve una fila por partida: ganador, ronda final y, por héroe, puesto y ronda en que quedó afuera.
+function benchGame(seed, rounds = 60) {
+    const keys = Object.keys(HERO_TEMPLATES), out = {};
+    const realEliminate = eliminateHero, realSound = soundOn;
+    eliminateHero = (h, cause) => { h.benchOut = waveNumber; return realEliminate(h, cause); };
+    soundOn = false; // los sonidos usan Math.random y se saltean según el tiempo real: con sonido, la semilla no repite
+    try {
+        withRandom(seededRandom(seed), () => quietly(() => simulateGame(seed % keys.length, false, rounds)));
+    } finally { eliminateHero = realEliminate; soundOn = realSound; }
+    rankedHeroes().forEach((h, i) => { out[h.name] = { place: i + 1, out: h.benchOut || null }; });
+    return { seed, winner: rankedHeroes()[0].name, round: waveNumber, heroes: out };
+}
+// Junta las partidas en una tabla por héroe: partidas jugadas, ganadas, puesto promedio y ronda promedio de eliminación.
+function benchTable(games) {
+    const t = {};
+    games.forEach(g => Object.entries(g.heroes).forEach(([name, r]) => {
+        const s = t[name] || (t[name] = { name, games: 0, wins: 0, place: 0, outs: 0, outRound: 0 });
+        s.games++; s.place += r.place; if (g.winner === name) s.wins++;
+        if (r.out) { s.outs++; s.outRound += r.out; }
+    }));
+    return Object.values(t).map(s => ({ name: s.name, games: s.games, wins: s.wins, winPct: Math.round(100 * s.wins / s.games),
+        place: +(s.place / s.games).toFixed(1), outRound: s.outs ? Math.round(s.outRound / s.outs) : null }))
+        .sort((a, b) => b.winPct - a.winPct || a.place - b.place);
+}
+// Corre el banco de a una partida por vez (sin trabar la página) y muestra la tabla. Semillas 1..n.
+function runBench(n) {
+    testSandbox();
+    const games = [], panel = document.createElement('div');
+    panel.id = 'test-report'; document.body.appendChild(panel);
+    const step = () => {
+        if (games.length < n) {
+            games.push(benchGame(games.length + 1));
+            document.title = `📊 banco ${games.length}/${n}`;
+            return setTimeout(step, 0);
+        }
+        resetGame();
+        const rows = benchTable(games), avgRound = Math.round(games.reduce((a, g) => a + g.round, 0) / n);
+        window.benchResult = { n, avgRound, rows, games };
+        panel.innerHTML = `<h3>📊 Banco de Custom Hero: ${n} partidas, ronda final promedio ${avgRound}</h3>` +
+            rows.map(r => `<div>${r.name}: ${r.wins}/${r.games} ganadas (${r.winPct}%), puesto ${r.place}, afuera en la ronda ${r.outRound ?? '—'}</div>`).join('');
+        document.title = `📊 banco ${n}/${n} listo`;
+        console.log('Banco de Custom Hero', window.benchResult);
+    };
+    step();
+}
+
 Object.keys(HERO_TEMPLATES).forEach((key, i) => {
     test(`Partida completa (4 rondas) con ${HERO_TEMPLATES[key].name}`, () => {
         const r = simulateGame(i);
@@ -4262,6 +4311,15 @@ Object.keys(HERO_TEMPLATES).forEach((key, i) => {
         check(r.level > 1, 'subió de nivel');
     }, { random: true });
 });
+
+test('Banco de balance: la misma semilla juega la misma partida y la tabla cuenta a los 8 de la mesa', () => {
+    const a = benchGame(7, 6), b = benchGame(7, 6);
+    checkEq(JSON.stringify(b), JSON.stringify(a), 'misma semilla, mismo resultado');
+    checkEq(Object.keys(a.heroes).length, 8, 'los 8 héroes de la mesa');
+    const rows = benchTable([a, b]);
+    checkEq(rows.reduce((s, r) => s + r.wins, 0), 2, 'un ganador por partida');
+    resetGame();
+}, { random: true });
 
 test('Economía de la ronda — interés al terminar la ronda, racha (ganada o perdida) y la cuenta de dónde salió el oro', () => {
     newGame('AXE');
@@ -4302,12 +4360,17 @@ test('Nueva Partida deja todo como al empezar', () => {
 });
 
 // ============================================================ EJECUCIÓN
-function runTests() {
+// Lo guardado del jugador no se toca mientras corren las pruebas o el banco
+function testSandbox() {
     codexPersist = false; codex = { unlocked: {}, best: {} }; // el Códice guardado no se toca
     notebookPersist = false; notebookState = { seen: {} }; // el cuaderno guardado tampoco
     bestiaryPersist = false; bestiaryStore = { beasts: {} }; // ni la colección del Bestiario
     arenPersist = false; arenStore = { found: {} }; // ni las Páginas de Arén
     autoCast = false; // las pruebas controlan a mano cuándo se lanza cada habilidad (la de habilidades automáticas lo prende)
+}
+
+function runTests() {
+    testSandbox();
     const results = TESTS.map(t => {
         try {
             if (t.opts.random) t.fn(); else withRandom(0.99, t.fn);
@@ -4331,3 +4394,5 @@ function runTests() {
 }
 
 if (/[?&]test\b/.test(location.search)) window.addEventListener('load', () => setTimeout(runTests, 0));
+const benchN = +new URLSearchParams(location.search).get('banco');
+if (benchN > 0) window.addEventListener('load', () => setTimeout(() => runBench(benchN), 0));

@@ -34,7 +34,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 | Ataque libre al moverse + balance por stats, curación y control −50/60% en duelo | ✅ (Vampiro y Nigromante siguen abajo) |
 | Retoques de kits (Vampiro, Nigromante), pausa con glosario y opciones, sin barras arriba, tutorial rediseñado | ✅ |
 | Presión al líder en creeps y jefes; balance por habilidades; escenarios en pixel art animados | ✅ |
-| Un duelo por ronda con pozo compartido, maldición solo por duelos, sin límite de 20 rondas | ✅ (Sniper gana 8/14 partidas largas: revisar) |
+| Un duelo por ronda con pozo compartido, maldición solo por duelos, sin límite de 20 rondas | ✅ (Sniper gana 59% en el banco `?banco=66`: revisar, ver BALANCE-CH.md) |
 | PDFs de héroes e ítems con requisitos para sumar nuevos (`docs/heroes-pdf.html`, `docs/items-pdf.html` → `docs/*.pdf`) | ✅ |
 | Cámara fija en tu héroe en cada fase y 🔥 en el ranking para quien está peleando | ✅ |
 | Libros de Talento (+5 a un atributo, 500g y +250g por cada uno) | ✅ |
@@ -268,7 +268,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   `http://localhost:8766/index.html` (o `?test`). Con Node instalado, `npx http-server -c-1` hace lo mismo. El panel del
   navegador puede estar oculto y frenar `requestAnimationFrame`: para probar en "tiempo real" se reproduce el cuerpo de
   `loop()` a mano a 60 cuadros por segundo.
-- **Medir balance:** `simulateGame(índiceDeHéroe, godMode, rondas)` (en tests.js) juega partidas completas con la IA.
+- **Medir balance:** `index.html?banco=66` juega 66 partidas con semilla fija y muestra la tabla por héroe (ver
+  [`BALANCE-CH.md`](BALANCE-CH.md)). Por dentro usa `simulateGame(índiceDeHéroe, godMode, rondas)` (en tests.js), que juega partidas completas con la IA.
   Para diagnosticar, se registran muertes/duelos envolviendo funciones (`resolveDuel`, `handlePlayerDeath`, `endRound`) y se
   prueba **cambiando una cosa por vez** (ablación). Con 8-16 partidas por variante hay bastante ruido: repetir antes de concluir.
 - **Medir la Torre con el piloto (2026-10-08):** `startTowerRun(); chooseStarterWeapon('ADVENTURER_SWORD'); setAutopilot(true)` y

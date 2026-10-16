@@ -349,6 +349,12 @@ no corta las raíces que la curan). Sin muertes en las 3: el piloto esquiva bien
 mejor que encuentra (en el piso 1), así que las partidas completas miden más el equipo que el arma inicial; por eso
 la medición de arriba contra muñecos.
 
+## Herramientas: banco de balance de Custom Hero (2026-10-16, fase B0)
+`index.html?banco=N` juega N partidas completas con la IA y semilla fija, y muestra una tabla por héroe (ganadas,
+puesto promedio, ronda en que quedó afuera). La misma semilla repite la partida, así que sirve para medir antes y
+después de cada ajuste. Los números y cómo leerlos están en [`BALANCE-CH.md`](BALANCE-CH.md). Base: Sniper 59%,
+Zeus 29%, los magos y Axe entre 0% y 4% (lo parejo es 12,5%).
+
 ## 9. Jefes lentos: las raíces y el piloto (2026-10-08)
 Pedido: arreglar los jefes que tardaban (Gran Raíz Madre 1366 s con bastón, Bruja del Fango 250-500 s).
 
