@@ -23,7 +23,7 @@ Mirando a la derecha; a la izquierda se espeja. De frente y de espaldas hay quie
 | Esquive | 4 | se agacha, rueda y se levanta |
 | Golpe recibido | 2 | la cabeza y el cuerpo van para atrás |
 | Caída | 5 | se tambalea, cae de rodillas y queda tendido |
-| Parada | — | **falta**: hoy reusa el revés del combo (paso 1b del muñeco) |
+| Parada | 4 | preparación `ready` → activo `block` (con destello y arco celeste) → recuperación `recover`, `idle` (muñeco 1b) |
 
 ## Los tres tiempos de cada movimiento
 Todo movimiento que hace algo (esquive, tajo, parada, disparo) se divide en **preparación**, **activo** y

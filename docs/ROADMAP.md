@@ -83,7 +83,8 @@ Hoy el juego **no tiene cajas de golpe**: el daño se decide por distancia (si e
       Partirlo en pasos chicos:
   - [x] 1a: la sala con el terreno (pared, cajón, columna, escalón), el muñeco de práctica y el héroe que camina y
         esquiva (tres tiempos), con cámara lenta, pausa, avance de a un cuadro y las cajas a la vista (H). 2026-10-16.
-  - [ ] 1b: combo de ataque y parada (con su animación propia) que le pegan al muñeco en el tiempo activo.
+  - [x] 1b: combo de 3 tajos y parada (levanta, bloquea con destello y vuelve) que le pegan al muñeco solo en el
+        tiempo activo, con lo apretado antes guardado, congelado al impacto, estela y sacudón en el remate. 2026-10-16.
   - [ ] 1c: recibir golpe, disparo con proyectil y caída.
 - [ ] **Capturas en los informes:** si una corrida cambia algo que se ve, el informe trae captura de antes y después
       (`docs/informes/img/`, PNG chicos) para aprobarlo sin abrir el juego.
@@ -453,6 +454,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 
 ## Hecho por el modo automático
 (Fecha · ítem · commit · qué se midió.)
+- 2026-10-16 · Muñeco, paso 1b (a pedido, en el chat) · COMMIT · Tajo 1 70/80/220 ms (10 de daño), revés 60/80/220 (12), remate 160/100/320 (22, congelado 90 ms y sacudón), parada 40/300/180 (5); el combo entero le hace 44 al muñeco y nunca pega en la preparación. Pruebas 278/278.
 - 2026-10-16 · Muñeco, paso 1a (a pedido, en el chat) · 2c1a4ca · `index.html?muneco`: sala de 240×150, caminar a 62 px/s, esquive 50/160/120 ms que recorre 35 px (210 px/s en el tiempo activo); choca con bordes, cajón, columna, escalón y el muñeco. Pruebas 277/277.
 - 2026-10-16 · Banco de balance de Custom Hero (a pedido, en el chat) · 4ce62c0 · 66 partidas con semilla fija (~2,5 s cada una): Sniper gana 59% (26/44), Zeus 29%, Sabio del Vacío y Alquimista 0%; ronda final promedio 24 (20-30). La misma semilla repite la partida (3/3). Hubo que apagar los sonidos en el banco: usaban Math.random según el tiempo real. Pruebas 276/276.
 - 2026-10-16 · Prueba de las raíces de la Raíz Madre estable (a pedido, en el chat) · 3ab3ca4 · antes fallaba ~1 de cada 40-100 corridas de esa prueba; la fase 2 plantaba 2 raíces en vez de 3 en 1 de 300 pisos. Después: 487/487 corridas de la prueba, 300/300 pisos con las 3 raíces y 20/20 corridas completas en verde. Pruebas 275/275.

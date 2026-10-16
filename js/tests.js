@@ -4334,6 +4334,35 @@ test('El muñeco: camina, choca con el terreno, el esquive pasa por sus tres tie
     M.showBoxes = true; munecoDraw(M, c.getContext('2d')); // se dibuja sin errores, con las cajas a la vista
 });
 
+test('El muñeco: el combo de 3 tajos pega solo en el tiempo activo, encadena lo apretado antes y la parada tiene su cuadro propio', () => {
+    const M = munecoNew(), h = M.hero, d = M.dummy, run = (secs, input = {}) => { for (let i = 0; i < secs * 120; i++) munecoStep(M, 1 / 120, i ? {} : input); };
+    h.x = d.x - 22; h.y = d.y; h.flip = false;
+    munecoStep(M, 1 / 120, { attack: true });
+    checkEq(h.move.id, 'swing0', 'arranca el tajo 1');
+    run(MUNECO_MOVES.swing0.startup * 0.8);
+    checkEq(d.hits, 0, 'en la preparación todavía no pega');
+    run(MUNECO_MOVES.swing0.active);
+    checkEq(d.hits, 1, 'pega en el tiempo activo');
+    checkEq(d.total, MUNECO_MOVES.swing0.dmg, 'con su daño');
+    run(MUNECO_MOVES.swing0.active, { attack: true }); // apretado antes de terminar: queda guardado
+    checkEq(h.move.id, 'swing1', 'el tajo guardado sale al empezar la recuperación');
+    run(0.4);
+    checkEq(d.hits, 2, 'el revés también pega, una sola vez');
+    run(0.1, { attack: true }); run(0.6);
+    checkEq(d.hits, 3, 'y el remate');
+    checkEq(d.total, MUNECO_MOVES.swing0.dmg + MUNECO_MOVES.swing1.dmg + MUNECO_MOVES.swing2.dmg, 'el daño de los tres');
+    run(1);
+    munecoStep(M, 1 / 120, { attack: true });
+    checkEq(h.move.id, 'swing0', 'después de una pausa el combo arranca de nuevo');
+    run(1);
+    munecoStep(M, 1 / 120, { parry: true }); run(MUNECO_MOVES.parry.startup + 0.05);
+    const f = munecoHeroFrame(M);
+    checkEq(HERO_ART_SEQ.swing3[f.k % 6], 'block', 'la parada se dibuja bloqueando en su tiempo activo');
+    h.x = 40; h.y = 60; h.move = null; const before = d.hits;
+    munecoStep(M, 1 / 120, { attack: true }); run(0.5);
+    checkEq(d.hits, before, 'lejos del muñeco no le pega (la caja no lo toca)');
+});
+
 test('Banco de balance: la misma semilla juega la misma partida y la tabla cuenta a los 8 de la mesa', () => {
     const a = benchGame(7, 6), b = benchGame(7, 6);
     checkEq(JSON.stringify(b), JSON.stringify(a), 'misma semilla, mismo resultado');

@@ -365,6 +365,13 @@ terreno básico". Se eligió **2D** (los dos juegos lo son y el arte del héroe 
 - Dato que lo motivó: en el juego el tajo **pega en el clic** y la animación viene después; el muñeco es para invertirlo
   (que pegue en el tiempo activo) antes de llevarlo a la Torre.
 - Arranque de la guía de estilo en [`ESTILO.md`](ESTILO.md): tamaños y cuadros por animación del héroe.
+- **Paso 1b, combo y parada:** J o clic ataca (3 tajos: tajo, revés y remate), K o clic derecho para. Los tajos pegan
+  **solo en el tiempo activo**, una vez cada uno, con la caja roja que se ve con H. Lo que apretás antes queda guardado
+  y sale apenas empieza la recuperación (el combo fluye sin tener que clavar el momento); si pasan 0,3 s sin atacar,
+  el combo arranca de nuevo. Al pegar: congelado de 50 ms (90 en el remate), el muñeco parpadea y se sacude, y el
+  remate sacude la pantalla. Estela de la hoja en el activo. La parada tiene su animación: levanta la espada, bloquea
+  (el dibujo `block`) con un destello y un arco celeste durante la ventana de 0,3 s, y vuelve. Con el mouse, todo
+  apunta hacia el cursor. R reinicia la cuenta del muñeco.
 
 ## Herramientas: banco de balance de Custom Hero (2026-10-16, fase B0)
 `index.html?banco=N` juega N partidas completas con la IA y semilla fija, y muestra una tabla por héroe (ganadas,
