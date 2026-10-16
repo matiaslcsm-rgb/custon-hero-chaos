@@ -50,6 +50,9 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 | Duelo simultáneo con las oleadas de los demás; enfriamientos en el descanso; contador central con pitidos; cartel de apuestas; nombres de jugadores; sonidos propios (`sounds/`) | ✅ |
 
 ## Pendientes y temas abiertos
+- **El muñeco (2026-10-16, fase B2, lo primero del roadmap):** `index.html?muneco`, laboratorio 2D para pulir cómo se
+  siente pegar: terreno, muñeco de práctica y el héroe que camina y esquiva, con los tres tiempos de cada movimiento
+  a la vista (REWORK.md). Sigue: combo y parada que pegan en el tiempo activo (1b), y después las cajas de golpe.
 - **Base sólida (2026-10-16, fases B0 y B1 del roadmap):** antes de sumar contenido, entender y estabilizar. Mapa de
   lo que comparten los dos modos en [`MAPA-CODIGO.md`](MAPA-CODIGO.md) (se vuelve a medir con
   `python docs/mapa-codigo.py`): la Torre corre arriba del motor de Custom Hero, el núcleo usa 174 globales de la

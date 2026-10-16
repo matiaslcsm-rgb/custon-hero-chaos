@@ -4312,6 +4312,28 @@ Object.keys(HERO_TEMPLATES).forEach((key, i) => {
     }, { random: true });
 });
 
+test('El muñeco: camina, choca con el terreno, el esquive pasa por sus tres tiempos y el muñeco de práctica recibe golpes', () => {
+    const M = munecoNew(), h = M.hero, x0 = h.x;
+    for (let i = 0; i < 30; i++) munecoStep(M, 1 / 60, { x: 1, y: 0 });
+    check(h.x > x0 + 20, 'camina a la derecha');
+    checkEq(munecoHeroFrame(M).kind, 'walk', 'con la animación de caminar');
+    for (let i = 0; i < 600; i++) munecoStep(M, 1 / 60, { x: 0, y: 1 });
+    check(h.y <= MUNECO.H - 4, 'no atraviesa el borde de abajo');
+    const crate = MUNECO_SOLIDS[0]; h.x = crate.x - 10; h.y = crate.y + 8;
+    for (let i = 0; i < 120; i++) munecoStep(M, 1 / 60, { x: 1, y: 0 });
+    check(h.x + MUNECO.feet.w / 2 <= crate.x + 0.01, 'el cajón lo frena');
+    h.x = 60; h.y = 50; const d = MUNECO_MOVES.dash, seen = [];
+    munecoStep(M, 1 / 120, { x: 1, y: 0, dash: true });
+    while (h.move) { const ph = munecoPhase(h.move, h.move.t); if (seen[seen.length - 1] !== ph.phase) seen.push(ph.phase); munecoStep(M, 1 / 120, {}); }
+    checkEq(seen.join(','), 'startup,active,recovery', 'preparación, activo y recuperación, en orden');
+    check(h.x - 60 > d.speed * d.active * 0.8, 'el esquive lo lleva lejos en el tiempo activo');
+    munecoHitDummy(M, 12);
+    checkEq(M.numbers.length, 1, 'muestra el número del golpe');
+    checkEq(M.dummy.total, 12, 'suma el daño');
+    const c = document.createElement('canvas'); c.width = MUNECO.W; c.height = MUNECO.H;
+    M.showBoxes = true; munecoDraw(M, c.getContext('2d')); // se dibuja sin errores, con las cajas a la vista
+});
+
 test('Banco de balance: la misma semilla juega la misma partida y la tabla cuenta a los 8 de la mesa', () => {
     const a = benchGame(7, 6), b = benchGame(7, 6);
     checkEq(JSON.stringify(b), JSON.stringify(a), 'misma semilla, mismo resultado');

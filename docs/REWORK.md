@@ -349,6 +349,23 @@ no corta las raíces que la curan). Sin muertes en las 3: el piloto esquiva bien
 mejor que encuentra (en el piso 1), así que las partidas completas miden más el equipo que el arma inicial; por eso
 la medición de arriba contra muñecos.
 
+## El muñeco: laboratorio de animaciones y cajas de golpe (2026-10-16, fase B2)
+Pedido: "armar un muñeco con todos los movimientos animados, cada golpe con su animación, cajas de golpe claras y un
+terreno básico". Se eligió **2D** (los dos juegos lo son y el arte del héroe ya existe; el 3D sería empezar de cero).
+`index.html?muneco` abre una sala aparte del juego (`js/muneco.js`, su propio lienzo, bucle y teclas):
+- **Terreno:** pared de ladrillos al fondo, baldosas, un cajón, una columna y un escalón de piedra, todos sólidos.
+- **Muñeco de práctica:** poste con bolsa de paja que se sacude, parpadea en blanco y muestra el daño (lo usan los golpes
+  del paso 1b).
+- **El héroe** con los cuadros dibujados de la espada: quieto (respira y parpadea), caminar (los pasos van con la
+  distancia) y esquive. Mira de costado, de frente o de espaldas y se espeja a la izquierda.
+- **Tres tiempos por movimiento** (preparación, activo, recuperación) en una tabla de datos (`MUNECO_MOVES`); abajo de la
+  sala, una barra muestra en qué tiempo va el movimiento y cuánto dura cada uno.
+- **Para mirar con lupa:** T cámara lenta (×0,25), P pausa, punto avanza un cuadro, H muestra las cajas (azul: choque con
+  el terreno; verde: donde te pueden golpear).
+- Dato que lo motivó: en el juego el tajo **pega en el clic** y la animación viene después; el muñeco es para invertirlo
+  (que pegue en el tiempo activo) antes de llevarlo a la Torre.
+- Arranque de la guía de estilo en [`ESTILO.md`](ESTILO.md): tamaños y cuadros por animación del héroe.
+
 ## Herramientas: banco de balance de Custom Hero (2026-10-16, fase B0)
 `index.html?banco=N` juega N partidas completas con la IA y semilla fija, y muestra una tabla por héroe (ganadas,
 puesto promedio, ronda en que quedó afuera). La misma semilla repite la partida, así que sirve para medir antes y

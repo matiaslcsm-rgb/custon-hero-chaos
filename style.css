@@ -1017,3 +1017,14 @@ body.on-title { overflow: hidden; }
 #round-summary .rsum-line { font-size: 0.85rem; margin-top: 4px; }
 #round-summary .rsum-tip { font-size: 0.8rem; color: #95d5b2; margin-top: 6px; }
 #round-summary .up { color: #52b788; } #round-summary .down { color: #ef476f; }
+
+/* El muñeco (index.html?muneco): laboratorio de animaciones y cajas de golpe */
+#muneco { position: fixed; inset: 0; z-index: 9999; background: #15141a; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: #ddd; font-family: monospace; }
+#mu-canvas { image-rendering: pixelated; border: 2px solid #2b2a33; }
+#mu-hud { min-height: 44px; width: min(720px, 94vw); font-size: 0.9rem; }
+#mu-help { font-size: 0.8rem; color: #8d8b99; text-align: center; padding: 0 16px; }
+.mu-bar { position: relative; display: flex; height: 18px; margin-top: 4px; border: 1px solid #2b2a33; font-size: 0.7rem; }
+.mu-bar span { display: flex; align-items: center; justify-content: center; overflow: hidden; white-space: nowrap; opacity: 0.55; }
+.mu-bar span.on { opacity: 1; }
+.mu-bar .mu-startup { background: #8a6d1f; } .mu-bar .mu-active { background: #a33a3a; } .mu-bar .mu-recovery { background: #2f5d8a; }
+.mu-bar i { position: absolute; top: -2px; bottom: -2px; width: 2px; background: #fff; }
