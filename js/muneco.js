@@ -369,7 +369,7 @@ function munecoStart() {
     document.body.classList.add('muneco-on');
     const wrap = document.createElement('div'); wrap.id = 'muneco';
     wrap.innerHTML = `<canvas id="mu-canvas"></canvas><div id="mu-hud"></div>
-        <div id="mu-help">WASD / flechas: caminar · J o clic: atacar (3 tajos) · K o clic derecho: parada · L: onda de corte · Espacio: esquive<br>G: el muñeco ataca · H: cajas · T: cámara lenta · P: pausa · . : un cuadro · R: reiniciar el muñeco</div>`;
+        <div id="mu-help">WASD / flechas: caminar · J o clic: atacar (3 tajos) · K o clic derecho: parada · L: onda de corte · Espacio: esquive<br>G: el muñeco ataca · H: cajas · T: cámara lenta · P: pausa · . : un cuadro · R: reiniciar el muñeco<br><small>versión: ${GAME_VERSION}</small></div>`;
     document.body.appendChild(wrap);
     const cv = wrap.querySelector('#mu-canvas'), ctx = cv.getContext('2d'), hud = wrap.querySelector('#mu-hud');
     cv.width = MUNECO.W; cv.height = MUNECO.H;
