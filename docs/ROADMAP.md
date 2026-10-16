@@ -68,6 +68,46 @@ El orden de la lista **es** la prioridad: primero lo que destraba el loop comple
 ---
 
 # BASE SÓLIDA (los dos juegos) — va antes que todo lo demás
+Orden decidido por el usuario el 2026-10-16: primero cómo se siente el combate (el muñeco y las cajas de golpe),
+después las herramientas de arte, después el orden del código y **el balance al final** (con el combate nuevo,
+los números cambian todos). El modo automático sigue este orden de arriba hacia abajo.
+
+## Fase B2 — El muñeco: animaciones y cajas de golpe (pedido del usuario 2026-10-16)
+Un laboratorio (`index.html?muneco`) para pulir cómo se siente pegar, antes de llevarlo al juego. En **2D**, con el
+arte del héroe de la Torre (`towerHeroArt.js`, `towerPixelHero.js`): el 3D sería empezar de cero (ver REWORK.md §17).
+Hoy el juego **no tiene cajas de golpe**: el daño se decide por distancia (si está a tiro, pega).
+- [ ] **Muñeco, paso 1:** terreno básico (piso, pared, un escalón u obstáculo), un muñeco de práctica que recibe
+      golpes y muestra el daño, y el héroe con cada movimiento animado en tres tiempos (preparación, golpe activo,
+      recuperación): quieto, caminar, esquive, combo de ataque básico, parada, recibir golpe, disparo y caída.
+      Antes de animar, fijar tamaños y cuántos cuadros lleva cada movimiento (arranque de `docs/ESTILO.md`).
+      Partirlo en pasos chicos: 1a la sala con el terreno, el muñeco y el héroe caminando; 1b ataque y parada; 1c el resto.
+- [ ] **Capturas en los informes:** si una corrida cambia algo que se ve, el informe trae captura de antes y después
+      (`docs/informes/img/`, PNG chicos) para aprobarlo sin abrir el juego.
+- [ ] **Muñeco, paso 2:** cajas de golpe a la vista con una tecla (rojo: lo que pega, solo en los cuadros activos;
+      verde: lo que puede ser golpeado; los proyectiles con su propia caja que viaja con la animación) y un panel para
+      ajustar en vivo los tiempos, el tamaño de las cajas, el congelado al impacto y el empujón. Lo ajustado se guarda
+      en un archivo de datos.
+- [ ] **Prueba de ida y vuelta entre modos** (riesgo 1 del mapa): jugar un rato la Torre, volver a la portada y
+      empezar Custom Hero (y al revés), y revisar que `player`, `COLS`/`ROWS`, `camera`, `autopilot`, `paused`,
+      `gameState` y `towerRun` queden limpios. Si algo queda sucio, arreglarlo en un solo lugar (una función que
+      deje el estado como al cargar la página).
+- [ ] **Cajas de golpe en la Torre:** pasar el sistema del muñeco al juego, primero la espada, después el arco y el
+      bastón; después Custom Hero. Que se sienta igual que en el muñeco y que pasen todas las pruebas.
+
+## Fase B1 — Herramientas de arte, animación y menús (pedido del usuario 2026-10-16)
+Herramientas para ver, revisar y mantener coherente lo gráfico. No cambian el estilo elegido: lo ordenan.
+- [ ] **Galería de arte en el juego** (`index.html?galeria`): todos los sprites (héroe, enemigos, jefes, gente,
+      objetos, props) y sus animaciones, ampliados, con pausa y avance cuadro por cuadro. Primero la Torre
+      (`pxSprite`); después ver cómo se dibuja Custom Hero y sumarlo. Agregar una prueba que abra la galería sin errores.
+- [ ] **Guía de estilo** (`docs/ESTILO.md`): paleta, tamaños, contornos, cuántos cuadros lleva cada animación
+      (caminar, golpe, muerte), tipografías (`docs/arte/tipografias.html`) y colores, espaciados y botones de los
+      menús. Pasar los colores de `style.css` a variables CSS sin cambiar cómo se ve.
+- [ ] **La guía como skill del proyecto** (`.claude/skills/arte-chc/SKILL.md`): que cada corrida la lea antes de tocar
+      algo gráfico y revise contra la galería.
+- [ ] **Repaso de menús e interfaz** con la guía en la mano: portada, tienda, inventario, pausa y muerte de los dos
+      juegos. Jerarquía, espaciados, botones y que se lea bien en pantallas chicas. Una pantalla por ítem, con captura.
+- [ ] **(decisión) Editor externo de pixel art** (Aseprite o Piskel, exportando imágenes que carga el juego): ver
+      "Esperando al usuario".
 
 ## Fase B0 — Entender y estabilizar antes de agregar (pedido del usuario 2026-10-16)
 Regla: no agregar cosas por agregar. Primero entender, estabilizar y medir lo que ya existe. Las fases T0 y T00 (y
@@ -85,14 +125,6 @@ solo cuando un cambio en un modo rompe el otro de verdad, y de a un paso que pas
       salga una tabla de victorias, ronda promedio de muerte y daño por héroe. Que se pueda correr con un parámetro de
       la URL y guardar los números en `docs/BALANCE-CH.md`. Medir la base actual (¿el Sniper sigue ganando 8 de 14?).
       Hecho 2026-10-16: `index.html?banco=66`. Sin daño por héroe (el juego no lo cuenta todavía).
-- [ ] **Balance de Custom Hero con números:** con el banco, acercar a los héroes que más ganan y a los que menos
-      Un héroe por ítem, números de antes y después con `?banco=66`. Según la base (BALANCE-CH.md, lo parejo es 12,5%):
-      Sniper 59% y Zeus 29% arriba; Sabio del Vacío y Alquimista 0%, Axe y Bruja del Hielo 2%, Arcanista 4% abajo.
-      Empezar por bajar al Sniper y volver a medir antes de tocar a los de abajo (al bajar al que gana todo, suben los demás).
-- [ ] **Prueba de ida y vuelta entre modos** (riesgo 1 del mapa): jugar un rato la Torre, volver a la portada y
-      empezar Custom Hero (y al revés), y revisar que `player`, `COLS`/`ROWS`, `camera`, `autopilot`, `paused`,
-      `gameState` y `towerRun` queden limpios. Si algo queda sucio, arreglarlo en un solo lugar (una función que
-      deje el estado como al cargar la página).
 - [ ] **Partir `ui.js`** (riesgo 2): 1.113 líneas con 21 preguntas por el modo. Pasar lo que solo dibuja la Torre a
       `towerView.js` (ya existe), una función por paso, sin cambiar cómo se ve. Medir antes y después con el script del mapa.
 - [ ] **Ganchos de la Torre en el núcleo** (riesgo 3): que `combat.js`, `creeps.js`, `effects.js`, `hero.js` y
@@ -100,25 +132,14 @@ solo cuando un cambio en un modo rompe el otro de verdad, y de a un paso que pas
       el piloto sin errores aunque falte un gancho de la Torre; después juntar los ganchos detrás de un solo objeto.
 - [ ] **Atajos de teclado de los dos modos en un solo lugar** (riesgo 5): `pause.js` y `game.js` mezclan las teclas de
       los dos juegos. Una prueba que avise si dos acciones del mismo modo usan la misma tecla.
+- [ ] **Balance de Custom Hero con números** (al final, con el combate nuevo): con el banco (`?banco=66` o más),
+      acercar a los héroes que más ganan y a los que menos, un héroe por ítem, con números de antes y después.
+      Ojo con el ruido: cualquier cambio da otras partidas, así que con 66 partidas el margen es de unos ±8 puntos;
+      para decidir, usar 132 o más. Medido el 2026-10-16 con 132 partidas: Sniper 65% (alcance 4,5: 62%; alcance 4: 49%;
+      Disparo Congelante que frena menos: 66%; menos bonus por distancia y menos crítico de la definitiva: sin bajar).
+      Ver "Esperando al usuario" para qué hacer con el Sniper mientras tanto.
 - Regla para el balance (riesgo 4): `data/creeps.js`, `data/bosses.js`, `effects.js` y `combat.js` los usan los dos
   modos. Todo ajuste ahí se mide en Custom Hero **y** en la Torre (piloto), con números de los dos.
-
-## Fase B1 — Herramientas de arte, animación y menús (pedido del usuario 2026-10-16)
-Herramientas para ver, revisar y mantener coherente lo gráfico. No cambian el estilo elegido: lo ordenan.
-- [ ] **Galería de arte en el juego** (`index.html?galeria`): todos los sprites (héroe, enemigos, jefes, gente,
-      objetos, props) y sus animaciones, ampliados, con pausa y avance cuadro por cuadro. Primero la Torre
-      (`pxSprite`); después ver cómo se dibuja Custom Hero y sumarlo. Agregar una prueba que abra la galería sin errores.
-- [ ] **Guía de estilo** (`docs/ESTILO.md`): paleta, tamaños, contornos, cuántos cuadros lleva cada animación
-      (caminar, golpe, muerte), tipografías (`docs/arte/tipografias.html`) y colores, espaciados y botones de los
-      menús. Pasar los colores de `style.css` a variables CSS sin cambiar cómo se ve.
-- [ ] **La guía como skill del proyecto** (`.claude/skills/arte-chc/SKILL.md`): que cada corrida la lea antes de tocar
-      algo gráfico y revise contra la galería.
-- [ ] **Capturas en los informes:** si una corrida cambia algo que se ve, el informe trae captura de antes y después
-      (`docs/informes/img/`, PNG chicos) para aprobarlo sin abrir el juego.
-- [ ] **Repaso de menús e interfaz** con la guía en la mano: portada, tienda, inventario, pausa y muerte de los dos
-      juegos. Jerarquía, espaciados, botones y que se lea bien en pantallas chicas. Una pantalla por ítem, con captura.
-- [ ] **(decisión) Editor externo de pixel art** (Aseprite o Piskel, exportando imágenes que carga el juego): ver
-      "Esperando al usuario".
 
 ---
 
@@ -402,6 +423,11 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 
 ## Esperando al usuario
 (El modo automático anota acá las opciones de los ítems **(decisión)**, con una marcada como recomendada.)
+
+- **El Sniper mientras tanto (Custom Hero):** gana 65% de sus partidas (lo parejo es 12,5%) y ningún ajuste chico lo
+  baja lo suficiente. Opciones: (a) **dejarlo como está hasta el balance del final (recomendada: el combate nuevo va a
+  cambiar los números igual)**; (b) sacarlo de la elección y de los rivales por ahora, sin borrar su código (una marca en su
+  ficha; la Torre lo sigue usando); (c) alcance 4 ya (baja a ~49%).
 
 - **Editor externo de pixel art (Fase B1):** hoy el arte se dibuja con código (`pxSprite`). Opciones: (a) **seguir con
   código y usar la galería y la guía de estilo (recomendada por ahora: no cambia nada de cómo se hace y ya funciona)**;
