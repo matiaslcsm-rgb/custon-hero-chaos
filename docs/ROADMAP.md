@@ -73,10 +73,11 @@ El orden de la lista **es** la prioridad: primero lo que destraba el loop comple
 Regla: no agregar cosas por agregar. Primero entender, estabilizar y medir lo que ya existe. Las fases T0 y T00 (y
 el resto) esperan hasta cerrar esta. **Nada de refactor grande ni de "motor compartido" de una:** se mueve código
 solo cuando un cambio en un modo rompe el otro de verdad, y de a un paso que pase las pruebas.
-- [ ] **Mapa de lo compartido entre los modos:** escribir `docs/MAPA-CODIGO.md` con qué archivos usa cada modo (Custom
+- [x] **Mapa de lo compartido entre los modos:** escribir `docs/MAPA-CODIGO.md` con qué archivos usa cada modo (Custom
       Hero, Torre, los dos), qué variables globales tocan los dos y los puntos donde un cambio en uno puede romper el
       otro. Solo documentar, sin tocar código. Al final, una lista corta de los 3-5 riesgos más grandes como ítems nuevos
       en esta fase.
+      Hecho 2026-10-16: `docs/MAPA-CODIGO.md` y `docs/mapa-codigo.py` (lo vuelve a medir).
 - [ ] **Arreglar la prueba de las raíces de la Raíz Madre que falla sola:** encontrar por qué a veces falla (azar sin
       semilla, tiempo, orden) y dejarla estable. Criterio: 20 corridas seguidas de `index.html?test` sin fallos.
 - [ ] **Banco de balance de Custom Hero que se pueda repetir:** partidas de la IA contra la IA con semilla fija, que
@@ -84,9 +85,19 @@ solo cuando un cambio en un modo rompe el otro de verdad, y de a un paso que pas
       la URL y guardar los números en `docs/BALANCE-CH.md`. Medir la base actual (¿el Sniper sigue ganando 8 de 14?).
 - [ ] **Balance de Custom Hero con números:** con el banco, acercar a los héroes que más ganan y a los que menos
       (Sniper arriba, Vampiro y Nigromante abajo según ESTADO.md). Un héroe por ítem, números de antes y después.
-- [ ] **Partir el resto:** según lo que salga del mapa, sumar acá los pasos chicos para separar lo compartido (daño,
-      efectos, entidades) de lo propio de cada modo. Cada paso tiene que pasar todas las pruebas y no cambiar cómo
-      se juega.
+- [ ] **Prueba de ida y vuelta entre modos** (riesgo 1 del mapa): jugar un rato la Torre, volver a la portada y
+      empezar Custom Hero (y al revés), y revisar que `player`, `COLS`/`ROWS`, `camera`, `autopilot`, `paused`,
+      `gameState` y `towerRun` queden limpios. Si algo queda sucio, arreglarlo en un solo lugar (una función que
+      deje el estado como al cargar la página).
+- [ ] **Partir `ui.js`** (riesgo 2): 1.113 líneas con 21 preguntas por el modo. Pasar lo que solo dibuja la Torre a
+      `towerView.js` (ya existe), una función por paso, sin cambiar cómo se ve. Medir antes y después con el script del mapa.
+- [ ] **Ganchos de la Torre en el núcleo** (riesgo 3): que `combat.js`, `creeps.js`, `effects.js`, `hero.js` y
+      `death.js` no llamen a funciones `tower*` sueltas. Una prueba que verifique que Custom Hero juega una ronda con
+      el piloto sin errores aunque falte un gancho de la Torre; después juntar los ganchos detrás de un solo objeto.
+- [ ] **Atajos de teclado de los dos modos en un solo lugar** (riesgo 5): `pause.js` y `game.js` mezclan las teclas de
+      los dos juegos. Una prueba que avise si dos acciones del mismo modo usan la misma tecla.
+- Regla para el balance (riesgo 4): `data/creeps.js`, `data/bosses.js`, `effects.js` y `combat.js` los usan los dos
+  modos. Todo ajuste ahí se mide en Custom Hero **y** en la Torre (piloto), con números de los dos.
 
 ## Fase B1 — Herramientas de arte, animación y menús (pedido del usuario 2026-10-16)
 Herramientas para ver, revisar y mantener coherente lo gráfico. No cambian el estilo elegido: lo ordenan.
@@ -408,6 +419,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 
 ## Hecho por el modo automático
 (Fecha · ítem · commit · qué se midió.)
+- 2026-10-16 · Mapa de lo compartido entre los modos (a pedido, en el chat) · COMMIT · 97 scripts; Torre 9.867 líneas y resto 8.396; el núcleo usa 174 globales de la Torre; 15 variables que cambian compartidas (`player` en 36 archivos de la Torre y 21 del resto); `ui.js` con 21 preguntas por el modo; ningún nombre declarado dos veces.
 - 2026-10-14 · Las Páginas de Arén · 696aecb · 3 torres × 10 pisos: siempre aparece y se alcanza; 280-400 pasos de la entrada (87-100% del máximo del campo). Pruebas 234/234.
 - 2026-10-14 · Salas secretas, paso 1 (cámaras con pared agrietada) · ccfc343 · 3 torres × pisos 2-10: 2 cámaras por piso siempre, laberinto alcanzable, grieta a 51-311 pasos de la entrada. Pruebas 235/235.
 - 2026-10-14 · Salas secretas, paso 2 (sala escondida en el laberinto) · 5cb0dc5 · 3 torres × 10 pisos: entra en 30/30, guardián alcanzable en todos, grieta a 187-323 pasos. Pruebas 235/235.

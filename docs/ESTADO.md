@@ -50,6 +50,10 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 | Duelo simultáneo con las oleadas de los demás; enfriamientos en el descanso; contador central con pitidos; cartel de apuestas; nombres de jugadores; sonidos propios (`sounds/`) | ✅ |
 
 ## Pendientes y temas abiertos
+- **Base sólida (2026-10-16, fases B0 y B1 del roadmap):** antes de sumar contenido, entender y estabilizar. Mapa de
+  lo que comparten los dos modos en [`MAPA-CODIGO.md`](MAPA-CODIGO.md) (se vuelve a medir con
+  `python docs/mapa-codigo.py`): la Torre corre arriba del motor de Custom Hero, el núcleo usa 174 globales de la
+  Torre y `ui.js` es el punto más mezclado. Los riesgos pasaron como ítems a B0.
 - **Equipo de desarrollo (2026-10-14):** agentes del proyecto en `.claude/agents/` (director-de-juego,
   disenador-de-sistemas, disenador-de-niveles, narrativa, arte-pixel, qa-jugador) y el comando `/equipo <tema>`
   (`.claude/skills/equipo/`) que los coordina: diseño → especialistas → integración → QA → cierre.
