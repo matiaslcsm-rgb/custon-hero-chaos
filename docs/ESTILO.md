@@ -26,6 +26,8 @@ Mirando a la derecha; a la izquierda se espeja. De frente y de espaldas hay quie
 | Parada | 4 | preparación `ready` → activo `block` (con destello y arco celeste) → recuperación `recover`, `idle` (muñeco 1b) |
 
 ## Los tres tiempos de cada movimiento
+Las reacciones (golpe recibido y caída) también tienen sus tiempos, pero no se pueden cortar con nada.
+
 Todo movimiento que hace algo (esquive, tajo, parada, disparo) se divide en **preparación**, **activo** y
 **recuperación**, con su duración en segundos en una tabla de datos (`MUNECO_MOVES` en `js/muneco.js`). La animación
 se reparte entre los tres: la preparación avisa, el activo es cuando pasa (el golpe pega, el esquive mueve) y la

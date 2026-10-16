@@ -4363,6 +4363,45 @@ test('El muñeco: el combo de 3 tajos pega solo en el tiempo activo, encadena lo
     checkEq(d.hits, before, 'lejos del muñeco no le pega (la caja no lo toca)');
 });
 
+test('El muñeco: la onda de corte viaja con su caja, el muñeco tira bolas, el esquive las pasa, la parada las devuelve y se cae y se levanta', () => {
+    const M = munecoNew(), h = M.hero, d = M.dummy, run = (secs, input = {}) => { for (let i = 0; i < secs * 120; i++) munecoStep(M, 1 / 120, i ? {} : input); };
+    h.x = d.x - 60; h.y = d.y; h.flip = false;
+    munecoStep(M, 1 / 120, { shoot: true, aim: { dx: 1, dy: 0 } }); run(MUNECO_MOVES.shoot.startup + 0.02);
+    checkEq(M.shots.length, 1, 'larga la onda en el tiempo activo');
+    run(0.6);
+    checkEq(d.hits, 1, 'la onda viaja y le pega al muñeco');
+    checkEq(M.shots.length, 0, 'y se apaga al pegar');
+    // el muñeco tira: la bola llega y el héroe la recibe
+    run(1); h.x = d.x - 40; // lejos del cajón, que si no frena el empujón
+    d.attacking = true; d.cycle = MUNECO.dummyEvery - 0.01; run(0.02);
+    checkEq(M.shots.length, 1, 'el muñeco tira una bola');
+    for (let i = 0; i < 400 && h.hp === MUNECO.hp; i++) munecoStep(M, 1 / 120, {});
+    checkEq(h.hp, MUNECO.hp - MUNECO.ball.dmg, 'la bola le saca vida');
+    checkEq(munecoHeroFrame(M).kind, 'hurt', 'con la animación de golpe recibido');
+    const xHit = h.x; run(MUNECO_MOVES.hurt.active + 0.1); // + el congelado al impacto
+    check(h.x < xHit - MUNECO_MOVES.hurt.knock * 0.8, 'y lo empuja para atrás');
+    d.attacking = false; run(1);
+    // en el tiempo activo del esquive, la bola le pasa por al lado
+    const hp = h.hp; M.shots = []; munecoFire(M, 'dummy', h.x, h.y, -1, 0, MUNECO.ball);
+    h.move = { id: 'dash', t: MUNECO_MOVES.dash.startup + 0.01, dx: 0, dy: 1, hit: false }; munecoStep(M, 1 / 120, {});
+    checkEq(h.hp, hp, 'el esquive es intocable en su tiempo activo');
+    // la parada mirando a la bola la devuelve, el doble de fuerte, y le pega al muñeco
+    M.shots = []; h.move = null; run(0.5); h.x = d.x - 50; h.y = d.y;
+    munecoStep(M, 1 / 120, { parry: true, aim: { dx: 1, dy: 0 } }); run(MUNECO_MOVES.parry.startup + 0.01);
+    munecoFire(M, 'dummy', h.x + 4, h.y, -1, 0, MUNECO.ball); const hits = d.hits; run(1.2);
+    checkEq(M.parried, 1, 'la parada la agarra');
+    checkEq(h.hp, hp, 'y no le saca vida');
+    checkEq(d.hits, hits + 1, 'la bola devuelta le pega al muñeco');
+    // sin vida: cae, queda tendido y se levanta con toda
+    h.move = null; h.hp = 5; munecoHurtHero(M, 20, 1, 0);
+    checkEq(h.move.id, 'death', 'sin vida, cae');
+    munecoStep(M, 1 / 120, { attack: true });
+    checkEq(h.move.id, 'death', 'en el piso no puede atacar');
+    run(2.2);
+    checkEq(h.hp, MUNECO.hp, 'se levanta con toda la vida');
+    check(!h.move, 'y vuelve a quedar libre');
+});
+
 test('Banco de balance: la misma semilla juega la misma partida y la tabla cuenta a los 8 de la mesa', () => {
     const a = benchGame(7, 6), b = benchGame(7, 6);
     checkEq(JSON.stringify(b), JSON.stringify(a), 'misma semilla, mismo resultado');

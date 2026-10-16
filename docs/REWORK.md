@@ -372,6 +372,13 @@ terreno básico". Se eligió **2D** (los dos juegos lo son y el arte del héroe 
   remate sacude la pantalla. Estela de la hoja en el activo. La parada tiene su animación: levanta la espada, bloquea
   (el dibujo `block`) con un destello y un arco celeste durante la ventana de 0,3 s, y vuelve. Con el mouse, todo
   apunta hacia el cursor. R reinicia la cuenta del muñeco.
+- **Paso 1c, disparos, golpes y caída:** L larga una **onda de corte** (un tajo al aire que suelta una media luna). G hace
+  que el **muñeco ataque**: se sacude y muestra un "!" medio segundo antes y tira una bola de paja que gira. Cada
+  disparo vuela a la altura del pecho con su sombra en el piso, se apaga contra paredes y cajones, y tiene **su caja
+  roja que viaja con el dibujo** (H). Si la bola te pega: parpadeás en blanco, perdés vida (arriba, ❤), retrocedés y
+  hacés la animación de golpe recibido, que no se puede cortar. En el tiempo activo del **esquive** la bola te pasa
+  de largo. La **parada** mirando a la bola la devuelve, más rápida y el doble de fuerte ("¡PARADA!"), y le pega al
+  muñeco. Sin vida, **caés** (se tambalea, cae de rodillas, queda tendido) y te levantás con toda la vida.
 
 ## Herramientas: banco de balance de Custom Hero (2026-10-16, fase B0)
 `index.html?banco=N` juega N partidas completas con la IA y semilla fija, y muestra una tabla por héroe (ganadas,

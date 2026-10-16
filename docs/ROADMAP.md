@@ -76,7 +76,7 @@ los números cambian todos). El modo automático sigue este orden de arriba haci
 Un laboratorio (`index.html?muneco`) para pulir cómo se siente pegar, antes de llevarlo al juego. En **2D**, con el
 arte del héroe de la Torre (`towerHeroArt.js`, `towerPixelHero.js`): el 3D sería empezar de cero (ver REWORK.md §17).
 Hoy el juego **no tiene cajas de golpe**: el daño se decide por distancia (si está a tiro, pega).
-- [ ] **Muñeco, paso 1:** terreno básico (piso, pared, un escalón u obstáculo), un muñeco de práctica que recibe
+- [x] **Muñeco, paso 1:** terreno básico (piso, pared, un escalón u obstáculo), un muñeco de práctica que recibe
       golpes y muestra el daño, y el héroe con cada movimiento animado en tres tiempos (preparación, golpe activo,
       recuperación): quieto, caminar, esquive, combo de ataque básico, parada, recibir golpe, disparo y caída.
       Antes de animar, fijar tamaños y cuántos cuadros lleva cada movimiento (arranque de `docs/ESTILO.md`).
@@ -85,7 +85,8 @@ Hoy el juego **no tiene cajas de golpe**: el daño se decide por distancia (si e
         esquiva (tres tiempos), con cámara lenta, pausa, avance de a un cuadro y las cajas a la vista (H). 2026-10-16.
   - [x] 1b: combo de 3 tajos y parada (levanta, bloquea con destello y vuelve) que le pegan al muñeco solo en el
         tiempo activo, con lo apretado antes guardado, congelado al impacto, estela y sacudón en el remate. 2026-10-16.
-  - [ ] 1c: recibir golpe, disparo con proyectil y caída.
+  - [x] 1c: onda de corte (disparo del héroe), el muñeco que tira bolas de paja con aviso, recibir golpe con empujón,
+        esquive intocable en su tiempo activo, parada que devuelve el disparo y caída con levantarse. 2026-10-16.
 - [ ] **Capturas en los informes:** si una corrida cambia algo que se ve, el informe trae captura de antes y después
       (`docs/informes/img/`, PNG chicos) para aprobarlo sin abrir el juego.
 - [ ] **Muñeco, paso 2:** cajas de golpe a la vista con una tecla (rojo: lo que pega, solo en los cuadros activos;
@@ -454,6 +455,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 
 ## Hecho por el modo automático
 (Fecha · ítem · commit · qué se midió.)
+- 2026-10-16 · Muñeco, paso 1c (a pedido, en el chat) · COMMIT · Onda de corte 120/50/250 ms a 160 px/s (8 de daño); bola del muñeco cada 1,8 s con aviso de 0,5 s, 85 px/s y 20 de daño; golpe recibido 0/120/140 ms con 9 px de empujón; la parada devuelve la bola ×1,5 de rápido y ×2 de daño; caída 200/500/1400 ms y se levanta con 100. Pruebas 279/279.
 - 2026-10-16 · Muñeco, paso 1b (a pedido, en el chat) · 99672a8 · Tajo 1 70/80/220 ms (10 de daño), revés 60/80/220 (12), remate 160/100/320 (22, congelado 90 ms y sacudón), parada 40/300/180 (5); el combo entero le hace 44 al muñeco y nunca pega en la preparación. Pruebas 278/278.
 - 2026-10-16 · Muñeco, paso 1a (a pedido, en el chat) · 2c1a4ca · `index.html?muneco`: sala de 240×150, caminar a 62 px/s, esquive 50/160/120 ms que recorre 35 px (210 px/s en el tiempo activo); choca con bordes, cajón, columna, escalón y el muñeco. Pruebas 277/277.
 - 2026-10-16 · Banco de balance de Custom Hero (a pedido, en el chat) · 4ce62c0 · 66 partidas con semilla fija (~2,5 s cada una): Sniper gana 59% (26/44), Zeus 29%, Sabio del Vacío y Alquimista 0%; ronda final promedio 24 (20-30). La misma semilla repite la partida (3/3). Hubo que apagar los sonidos en el banco: usaban Math.random según el tiempo real. Pruebas 276/276.
