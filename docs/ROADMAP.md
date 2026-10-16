@@ -67,6 +67,29 @@ El orden de la lista **es** la prioridad: primero lo que destraba el loop comple
 
 ---
 
+# BASE SÓLIDA (los dos juegos) — va antes que todo lo demás
+
+## Fase B0 — Entender y estabilizar antes de agregar (pedido del usuario 2026-10-16)
+Regla: no agregar cosas por agregar. Primero entender, estabilizar y medir lo que ya existe. Las fases T0 y T00 (y
+el resto) esperan hasta cerrar esta. **Nada de refactor grande ni de "motor compartido" de una:** se mueve código
+solo cuando un cambio en un modo rompe el otro de verdad, y de a un paso que pase las pruebas.
+- [ ] **Mapa de lo compartido entre los modos:** escribir `docs/MAPA-CODIGO.md` con qué archivos usa cada modo (Custom
+      Hero, Torre, los dos), qué variables globales tocan los dos y los puntos donde un cambio en uno puede romper el
+      otro. Solo documentar, sin tocar código. Al final, una lista corta de los 3-5 riesgos más grandes como ítems nuevos
+      en esta fase.
+- [ ] **Arreglar la prueba de las raíces de la Raíz Madre que falla sola:** encontrar por qué a veces falla (azar sin
+      semilla, tiempo, orden) y dejarla estable. Criterio: 20 corridas seguidas de `index.html?test` sin fallos.
+- [ ] **Banco de balance de Custom Hero que se pueda repetir:** partidas de la IA contra la IA con semilla fija, que
+      salga una tabla de victorias, ronda promedio de muerte y daño por héroe. Que se pueda correr con un parámetro de
+      la URL y guardar los números en `docs/BALANCE-CH.md`. Medir la base actual (¿el Sniper sigue ganando 8 de 14?).
+- [ ] **Balance de Custom Hero con números:** con el banco, acercar a los héroes que más ganan y a los que menos
+      (Sniper arriba, Vampiro y Nigromante abajo según ESTADO.md). Un héroe por ítem, números de antes y después.
+- [ ] **Partir el resto:** según lo que salga del mapa, sumar acá los pasos chicos para separar lo compartido (daño,
+      efectos, entidades) de lo propio de cada modo. Cada paso tiene que pasar todas las pruebas y no cambiar cómo
+      se juega.
+
+---
+
 # INFINITE TOWER
 
 ## Visión 1.0
