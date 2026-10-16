@@ -88,6 +88,23 @@ solo cuando un cambio en un modo rompe el otro de verdad, y de a un paso que pas
       efectos, entidades) de lo propio de cada modo. Cada paso tiene que pasar todas las pruebas y no cambiar cómo
       se juega.
 
+## Fase B1 — Herramientas de arte, animación y menús (pedido del usuario 2026-10-16)
+Herramientas para ver, revisar y mantener coherente lo gráfico. No cambian el estilo elegido: lo ordenan.
+- [ ] **Galería de arte en el juego** (`index.html?galeria`): todos los sprites (héroe, enemigos, jefes, gente,
+      objetos, props) y sus animaciones, ampliados, con pausa y avance cuadro por cuadro. Primero la Torre
+      (`pxSprite`); después ver cómo se dibuja Custom Hero y sumarlo. Agregar una prueba que abra la galería sin errores.
+- [ ] **Guía de estilo** (`docs/ESTILO.md`): paleta, tamaños, contornos, cuántos cuadros lleva cada animación
+      (caminar, golpe, muerte), tipografías (`docs/arte/tipografias.html`) y colores, espaciados y botones de los
+      menús. Pasar los colores de `style.css` a variables CSS sin cambiar cómo se ve.
+- [ ] **La guía como skill del proyecto** (`.claude/skills/arte-chc/SKILL.md`): que cada corrida la lea antes de tocar
+      algo gráfico y revise contra la galería.
+- [ ] **Capturas en los informes:** si una corrida cambia algo que se ve, el informe trae captura de antes y después
+      (`docs/informes/img/`, PNG chicos) para aprobarlo sin abrir el juego.
+- [ ] **Repaso de menús e interfaz** con la guía en la mano: portada, tienda, inventario, pausa y muerte de los dos
+      juegos. Jerarquía, espaciados, botones y que se lea bien en pantallas chicas. Una pantalla por ítem, con captura.
+- [ ] **(decisión) Editor externo de pixel art** (Aseprite o Piskel, exportando imágenes que carga el juego): ver
+      "Esperando al usuario".
+
 ---
 
 # INFINITE TOWER
@@ -370,6 +387,11 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 
 ## Esperando al usuario
 (El modo automático anota acá las opciones de los ítems **(decisión)**, con una marcada como recomendada.)
+
+- **Editor externo de pixel art (Fase B1):** hoy el arte se dibuja con código (`pxSprite`). Opciones: (a) **seguir con
+  código y usar la galería y la guía de estilo (recomendada por ahora: no cambia nada de cómo se hace y ya funciona)**;
+  (b) Piskel (gratis, en el navegador) para sprites nuevos o retoques, exportando PNG que carga el juego, conviviendo con
+  los de código; (c) Aseprite (unos US$20, el estándar de pixel art y animación) para pasar de a poco el arte a imágenes.
 
 - **La silueta de la torre en el piso 1:** la vista es de arriba, así que no hay un "fondo" donde verla. Opciones: (a) **una
   sombra gigante de la torre sobre el bosque que se mueve con el día (recomendada: se ve desde todo el piso sin tapar nada)**;
