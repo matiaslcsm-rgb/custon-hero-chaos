@@ -112,9 +112,10 @@ function bossSignatureTick(c, ph) {
 }
 // Raíz Madre: raíces quietas alrededor que la curan mientras vivan
 function plantRoots(c, ph = c.bossPhase || 0) {
-    const L = c.arena, n = BOSS_SIG.roots + ph;
+    const L = c.arena, n = BOSS_SIG.roots + ph, a0 = Math.random() * Math.PI * 2;
     for (let i = 0, made = 0; i < 24 && made < n; i++) {
-        const a = Math.random() * Math.PI * 2, x = Math.round(c.x + Math.cos(a) * 3.5), y = Math.round(c.y + Math.sin(a) * 3.5);
+        // recorre los 24 ángulos del círculo salteando de a 7 (repartidas, y sin quedarse cortas si hay lugar)
+        const a = a0 + (i * 7 % 24) * Math.PI / 12, x = Math.round(c.x + Math.cos(a) * 3.5), y = Math.round(c.y + Math.sin(a) * 3.5);
         if (!walkable(L, x, y) || L.creeps.some(o => o.isAlive() && o.x === x && o.y === y)) continue;
         const r = makeCreep(CREEP_TYPES.ARMORED, x, y, TOWER.creepMult(L.floor), false, 0);
         Object.assign(r, { arena: L, label: 'Raíz (cura al jefe)', isRoot: true, atk: 0, armor: BOSS_SIG.rootArmor, priority: 2, witherAt: gameClock + BOSS_SIG.rootLife, // madera: se corta fácil; el ataque automático le pega primero

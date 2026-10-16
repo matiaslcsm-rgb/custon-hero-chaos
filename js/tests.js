@@ -10,8 +10,10 @@ function test(name, fn, opts = {}) { TESTS.push({ name, fn, opts }); }
 
 function check(cond, msg) { if (!cond) throw new Error(msg); }
 function checkEq(actual, expected, msg) {
-    if (actual !== expected) throw new Error(`${msg}: se esperaba ${JSON.stringify(expected)} y dio ${JSON.stringify(actual)}`);
+    if (actual !== expected) throw new Error(`${msg}: se esperaba ${show(expected)} y dio ${show(actual)}`);
 }
+// Bichos y héroes tienen referencias circulares (arena ↔ creeps): se muestran por su nombre
+function show(v) { try { return JSON.stringify(v); } catch (e) { return v.label || v.name || String(v); } }
 function checkNear(actual, expected, msg, tolerance = 0.001) {
     if (Math.abs(actual - expected) > tolerance) throw new Error(`${msg}: se esperaba ${expected} y dio ${actual}`);
 }
@@ -3264,7 +3266,8 @@ test('Torre: las raíces de la Raíz Madre se cortan fácil, son el blanco prime
     check(roots().length >= 2, 'brotan al empezar');
     const r = roots()[0];
     checkEq(r.armor, BOSS_SIG.rootArmor, 'madera: poca armadura');
-    player.x = r.x - 1; player.y = r.y; L.creeps.filter(o => o !== r && !o.isRoot && o.isAlive() && o !== g).forEach(o => { o.hp = 0; });
+    // las otras raíces también afuera: a veces brota una justo en la casilla de al lado y es la más cercana
+    player.x = r.x - 1; player.y = r.y; L.creeps.filter(o => o !== r && o.isAlive() && o !== g).forEach(o => { o.hp = 0; });
     checkEq(pickAttackTarget(player, 5), r, 'el ataque automático le pega primero a la raíz');
     roots().forEach(o => { o.hp = 0; });
     g.sigNext = 0; bossSignatureTick(g, 0);
@@ -3273,6 +3276,15 @@ test('Torre: las raíces de la Raíz Madre se cortan fácil, son el blanco prime
     check(roots().length >= 3, 'con la fase 2, brotan de nuevo (más)');
     gameClock += BOSS_SIG.rootLife + 0.5; rootsHeal(g);
     checkEq(roots().length, 0, 'se secan solas');
+}, { random: true });
+
+test('Torre: la Raíz Madre siempre planta todas sus raíces si hay lugar (antes, 1 de cada 300 se quedaba corta)', () => {
+    for (let i = 0; i < 40; i++) {
+        newTower(); enterTowerFloor(1); const L = player.arena, g = L.guardian;
+        plantRoots(g, 0); L.creeps.forEach(o => { if (o.isRoot) o.hp = 0; });
+        plantRoots(g, 1);
+        checkEq(L.creeps.filter(o => o.isRoot && o.isAlive()).length, BOSS_SIG.roots + 1, `brotan todas en la fase 2 (vuelta ${i})`);
+    }
 }, { random: true });
 
 test('Ancla: cada golpe ralentiza y quita evasión', () => {

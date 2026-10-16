@@ -78,8 +78,9 @@ solo cuando un cambio en un modo rompe el otro de verdad, y de a un paso que pas
       otro. Solo documentar, sin tocar código. Al final, una lista corta de los 3-5 riesgos más grandes como ítems nuevos
       en esta fase.
       Hecho 2026-10-16: `docs/MAPA-CODIGO.md` y `docs/mapa-codigo.py` (lo vuelve a medir).
-- [ ] **Arreglar la prueba de las raíces de la Raíz Madre que falla sola:** encontrar por qué a veces falla (azar sin
+- [x] **Arreglar la prueba de las raíces de la Raíz Madre que falla sola:** encontrar por qué a veces falla (azar sin
       semilla, tiempo, orden) y dejarla estable. Criterio: 20 corridas seguidas de `index.html?test` sin fallos.
+      Hecho 2026-10-16: eran dos causas (una de la prueba y un error chico del juego), ver REWORK.md §9.
 - [ ] **Banco de balance de Custom Hero que se pueda repetir:** partidas de la IA contra la IA con semilla fija, que
       salga una tabla de victorias, ronda promedio de muerte y daño por héroe. Que se pueda correr con un parámetro de
       la URL y guardar los números en `docs/BALANCE-CH.md`. Medir la base actual (¿el Sniper sigue ganando 8 de 14?).
@@ -419,6 +420,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 
 ## Hecho por el modo automático
 (Fecha · ítem · commit · qué se midió.)
+- 2026-10-16 · Prueba de las raíces de la Raíz Madre estable (a pedido, en el chat) · COMMIT · antes fallaba ~1 de cada 40-100 corridas de esa prueba; la fase 2 plantaba 2 raíces en vez de 3 en 1 de 300 pisos. Después: 487/487 corridas de la prueba, 300/300 pisos con las 3 raíces y 20/20 corridas completas en verde. Pruebas 275/275.
 - 2026-10-16 · Mapa de lo compartido entre los modos (a pedido, en el chat) · f841f7e · 97 scripts; Torre 9.867 líneas y resto 8.396; el núcleo usa 174 globales de la Torre; 15 variables que cambian compartidas (`player` en 36 archivos de la Torre y 21 del resto); `ui.js` con 21 preguntas por el modo; ningún nombre declarado dos veces.
 - 2026-10-14 · Las Páginas de Arén · 696aecb · 3 torres × 10 pisos: siempre aparece y se alcanza; 280-400 pasos de la entrada (87-100% del máximo del campo). Pruebas 234/234.
 - 2026-10-14 · Salas secretas, paso 1 (cámaras con pared agrietada) · ccfc343 · 3 torres × pisos 2-10: 2 cámaras por piso siempre, laberinto alcanzable, grieta a 51-311 pasos de la entrada. Pruebas 235/235.

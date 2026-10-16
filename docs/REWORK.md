@@ -370,6 +370,14 @@ Pedido: arreglar los jefes que tardaban (Gran Raíz Madre 1366 s con bastón, Br
 
 **Después:** Raíz Madre 21-58 s y 10-24% curado; Bruja del Fango 64-106 s; Reina Escorpión 31-85 s. Sin muertes.
 
+**La prueba que fallaba sola (2026-10-16, fase B0):** eran dos cosas.
+- **De la prueba:** ponía al jugador al lado de una raíz, pero a veces otra raíz había brotado justo en esa casilla y
+  el ataque automático (bien) elegía la más cercana. Ahora la prueba saca las otras raíces antes de mirar a quién le pega.
+- **Del juego:** `plantRoots` probaba 24 ángulos al azar y a veces no encontraba lugar para todas aunque lo hubiera
+  (en 1 de cada 300 pisos, la fase 2 plantaba 2 raíces en vez de 3). Ahora recorre los 24 ángulos del círculo
+  salteando de a 7 desde un punto al azar: siguen repartidas y no se quedan cortas (300/300).
+- Además, `checkEq` ya no se rompe al mostrar un bicho (referencias circulares): muestra su nombre.
+
 ## 10. Dificultad medida con reflejos humanos (2026-10-08)
 El piloto esquivaba casi todo y no moría nunca: servía para medir tiempos, no dificultad. Nuevo modo **`aiReflex =
 'human'`** (`js/towerTelegraph.js`): reacciona 0,35 s tarde a cada aviso o bala (reacción visual con la pantalla
