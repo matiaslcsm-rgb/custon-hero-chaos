@@ -85,6 +85,8 @@ Hoy el juego **no tiene cajas de golpe**: el daño se decide por distancia (si e
         esquiva (tres tiempos), con cámara lenta, pausa, avance de a un cuadro y las cajas a la vista (H). 2026-10-16.
   - [x] 1b: combo de 3 tajos y parada (levanta, bloquea con destello y vuelve) que le pegan al muñeco solo en el
         tiempo activo, con lo apretado antes guardado, congelado al impacto, estela y sacudón en el remate. 2026-10-16.
+  - [ ] 1d (arte): cuadros de ataque, parada y esquive de frente y de espaldas para la espada (hoy hacia arriba y abajo
+        se usa el dibujo de costado).
   - [x] 1c: onda de corte (disparo del héroe), el muñeco que tira bolas de paja con aviso, recibir golpe con empujón,
         esquive intocable en su tiempo activo, parada que devuelve el disparo y caída con levantarse. 2026-10-16.
 - [ ] **Capturas en los informes:** si una corrida cambia algo que se ve, el informe trae captura de antes y después

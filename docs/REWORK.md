@@ -379,6 +379,12 @@ terreno básico". Se eligió **2D** (los dos juegos lo son y el arte del héroe 
   hacés la animación de golpe recibido, que no se puede cortar. En el tiempo activo del **esquive** la bola te pasa
   de largo. La **parada** mirando a la bola la devuelve, más rápida y el doble de fuerte ("¡PARADA!"), y le pega al
   muñeco. Sin vida, **caés** (se tambalea, cae de rodillas, queda tendido) y te levantás con toda la vida.
+- **Primeras impresiones del usuario (2026-10-16):** "se siente mucho más cómodo". Arreglado lo que marcó: la onda y
+  los golpes ahora van en las **8 direcciones** (quieto, apuntan hacia tu último paso; antes, mirando arriba o abajo,
+  salían en diagonal) y la caja roja se corre hacia donde apunta el golpe; el **cajón, la columna y el escalón tapan al
+  héroe** cuando pasa por detrás (antes estaban pintados en el piso). La portada tiene el botón **🧪 Muñeco de
+  prueba** y Esc vuelve. Falta: los tajos hacia arriba y abajo todavía usan el dibujo de costado (no hay cuadros de
+  ataque de frente y de espaldas).
 
 ## Herramientas: banco de balance de Custom Hero (2026-10-16, fase B0)
 `index.html?banco=N` juega N partidas completas con la IA y semilla fija, y muestra una tabla por héroe (ganadas,

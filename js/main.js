@@ -1,7 +1,7 @@
 // Punto de entrada: conecta los botones y arranca el bucle principal.
 
 // Versión visible en el menú: si no coincide con la última subida, el navegador muestra una copia vieja (Ctrl+F5).
-const GAME_VERSION = '2026-10-16 · El muñeco ya no se tilda con la onda ni al recibir golpes';
+const GAME_VERSION = '2026-10-16 · Muñeco: golpes en 8 direcciones, el cajón tapa y botón en la portada';
 document.getElementById('game-version').textContent = `Versión ${GAME_VERSION}`;
 
 document.getElementById('start-wave-btn').onclick = () => startWave(); // sin argumentos: si recibe el clic, lo toma como plan de duelo y la oleada no arranca (arreglado 2026-10-13)

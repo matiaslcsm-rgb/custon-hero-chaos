@@ -4402,6 +4402,23 @@ test('El muñeco: la onda de corte viaja con su caja, el muñeco tira bolas, el 
     check(!h.move, 'y vuelve a quedar libre');
 });
 
+test('El muñeco: el tajo pega en las 8 direcciones y, quieto, la onda sale hacia el último paso', () => {
+    for (let k = 0; k < 8; k++) {
+        const a = k * Math.PI / 4, ax = Math.round(Math.cos(a) * 100) / 100, ay = Math.round(Math.sin(a) * 100) / 100;
+        const M = munecoNew(), h = M.hero, d = M.dummy;
+        h.x = 120; h.y = 80; d.x = h.x + ax * 16; d.y = h.y + ay * 16; // el muñeco a un paso, en esa dirección
+        munecoStep(M, 1 / 120, { x: ax, y: ay }); h.x = 120; h.y = 80; // da un paso hacia ahí (y vuelve al lugar)
+        munecoStep(M, 1 / 120, { attack: true });
+        for (let i = 0; i < 60; i++) munecoStep(M, 1 / 120, {});
+        checkEq(d.hits, 1, `le pega hacia ${['la derecha', 'abajo a la derecha', 'abajo', 'abajo a la izquierda', 'la izquierda', 'arriba a la izquierda', 'arriba', 'arriba a la derecha'][k]}`);
+    }
+    const M = munecoNew(), h = M.hero; h.x = 120; h.y = 100;
+    munecoStep(M, 1 / 120, { x: 0, y: -1 }); munecoStep(M, 1 / 120, { shoot: true });
+    for (let i = 0; i < 20; i++) munecoStep(M, 1 / 120, {});
+    const p = M.shots[0];
+    check(p && Math.abs(p.vx) < 0.01 && p.vy < 0, 'la onda sale derecho hacia arriba');
+});
+
 test('El muñeco: se dibuja sin errores en cada tiempo de cada movimiento, con disparos y cajas a la vista', () => {
     const M = munecoNew(), h = M.hero, c = document.createElement('canvas'); c.width = MUNECO.W; c.height = MUNECO.H;
     const ctx = c.getContext('2d'); M.showBoxes = true;
