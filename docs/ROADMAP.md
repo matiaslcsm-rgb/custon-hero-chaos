@@ -324,6 +324,8 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
       escribe la última página) antes de ofrecer seguir subiendo.
 
 ## Fase T2 — Sensación de juego y claridad
+- [ ] **Prueba que falla a veces: "pedidos que cruzan pisos"** (la llave del Guardián de Arena abre las compuertas del piso 3,
+      "los cofres hundidos quedan al alcance"): falló 1 de 2 corridas el 2026-10-17 sin cambios en esa parte. Buscar qué depende del azar.
 - [ ] **Las pruebas escriben en el guardado real de localhost:** al correr toda la batería en `index.html?test`,
       `towerSavePersist` termina en `true` (ninguna prueba sola lo hace; pasa con `runTests`). Solo afecta a la dirección de
       pruebas, no al juego publicado. Encontrar quién lo cambia y forzarlo en falso en `runTests`.
@@ -460,6 +462,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 
 ## Hecho por el modo automático
 (Fecha · ítem · commit · qué se midió.)
+- 2026-10-17 · El caballero jugable en el muñeco (a pedido, en el chat) · ver git log · tecla V lo cambia; corre (10 cuadros), combo de 2 golpes (tajo 10 de daño, barrido 12), rueda en el esquive, C agacha (camina al 45% y la caja baja de 22 a 10: las bolas a 14 pasan por arriba), tajo agachado 9; golpe y muerte con sus cuadros. Pruebas 282/282.
 - 2026-10-17 · Caballero con todas las animaciones del pack FreeKnight (a pedido, en el chat) · ver git log · se midió cada cuadro del pack (alto, cabeza, ángulo de la espada) y se pasó a poses del muñeco ×0,54; 23 animaciones, 105 cuadros, mismo conteo que el pack; dibujo propio (yelmo con penacho, capa azul). Por ahora solo en la galería. Pruebas 281/281.
 - 2026-10-17 · Galería de personajes (a pedido, en el chat) · ver git log · `index.html?galeria` y botón en la portada: 13 héroes (el de la Torre con sus 3 vistas) con quieto, caminar, combo, parada, esquive, golpe y caída; 21 criaturas y 5 guardianes caminando y quietos; 150 recuadros en loop. Pruebas 281/281.
 - 2026-10-17 · Orco, demonio, engendro de sangre y gólem con cristales (a pedido, en el chat) · ver git log · 3 cuerpos nuevos (pixel art y tinta): orco peleador/pegador en todos los biomas, demonio hechicero/maldecidor en volcán, pantano y desierto, engendro pegador/tanque en pantano y volcán; el gólem suma cristales que brillan. Pruebas 281/281.

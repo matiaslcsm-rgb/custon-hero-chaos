@@ -105,7 +105,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   **engendro de sangre** (`blob`), y el gólem con cristales. Regla: los packs de assets (MonoPixelArt, Tiny Swords,
   Tiny RPG, Raven Icons) se usan solo de referencia; el repo es público y ninguna licencia deja subir sus archivos.
 - **Caballero (2026-10-17, pedido):** personaje propio (yelmo con visera y penacho) con las 23 animaciones del pack FreeKnight
-  copiadas en movimiento, no en dibujo (`js/caballero.js`, poses del muñeco). Se ve en la galería; todavía no se juega.
+  copiadas en movimiento, no en dibujo (`js/caballero.js`, poses del muñeco). Se ve en la galería y se juega en el muñeco
+  (tecla V; C mantenida para agacharse).
 - **La Torre por dentro (2026-10-14, pedido del usuario):** el piso 1 es afuera (el bosque al pie de la torre); del 2
   en adelante estás adentro: muro exterior, salones con portones y columnas (más enteros arriba). Cada piso tiene su
   lugar, su gente y un anciano que cuenta su parte de la historia (la Expedición de Arén, los Ecos, la torre que crece).

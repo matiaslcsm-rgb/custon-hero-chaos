@@ -25,7 +25,8 @@ const MUNECO = {
     dummyEvery: 1.8,          // el muñeco tira una bola cada tanto (tecla G); avisa 0,5 s antes
     dummyWarn: 0.5,
     ball: { speed: 85, dmg: 20, w: 7, h: 7, life: 3 },
-    shotZ: 14                 // los disparos vuelan a esta altura sobre el piso (la sombra marca dónde van)
+    shotZ: 14,                // los disparos vuelan a esta altura sobre el piso (la sombra marca dónde van)
+    crouchHurt: 10            // agachado, la caja donde te pegan baja a esto: las bolas (a 14 de alto) pasan por arriba
 };
 // Datos de cada movimiento: los tres tiempos (s) y qué cuadros del dibujo van en cada uno ([tipo, número] de
 // pxbHeroFrame; se reparten parejo dentro del tiempo). hit: la caja que pega mirando a la derecha, desde los pies
@@ -57,7 +58,24 @@ const MUNECO_MOVES = {
     death: { name: 'Caída', startup: 0.2, active: 0.5, recovery: 1.4, knock: 6, locked: true, keepFace: true,
         frames: { startup: [['death', 0]], active: [['death', 1], ['death', 2], ['death', 3]], recovery: [['death', 4]] } }
 };
+// el tajo agachado (solo el caballero, tecla C + atacar): pega bajo y corto
+MUNECO_MOVES.crouchSwing = { name: 'Tajo agachado', startup: 0.06, active: 0.08, recovery: 0.2, dmg: 9, lunge: 3, hitstop: 0.04, shake: 0,
+    hit: { x: 2, y: -16, w: 22, h: 12 }, arc: [-150, 10], frames: { startup: [['swing', 0]], active: [['swing', 1]], recovery: [['swing', 3]] } };
 const MUNECO_COMBO = ['swing0', 'swing1', 'swing2'];
+// El caballero (tecla V, js/caballero.js): los mismos movimientos con sus animaciones; cada tiempo usa estos cuadros
+// de su animación. Su combo es de dos golpes, como el del pack de referencia (tajo y barrido).
+const MUNECO_KNIGHT_COMBO = ['swing0', 'swing1'];
+const MUNECO_KNIGHT_FRAMES = {
+    dash: ['roll', [0], [1, 2, 3, 4, 5, 6, 7, 8, 9], [10, 11]],
+    swing0: ['attack', [0], [1, 2], [3]],
+    swing1: ['attack2', [0, 1], [2, 3], [4, 5]],
+    swing2: ['attack2', [0, 1], [2, 3], [4, 5]],
+    parry: ['crouchTransition', [0], [0], [0]],
+    shoot: ['attack', [0], [1], [2, 3]],
+    crouchSwing: ['crouchAttack', [0], [1, 2], [3]],
+    hurt: ['hit', [0], [0], [0]],
+    death: ['death', [0, 1], [2, 3, 4, 5], [6, 7, 8, 9]]
+};
 const MUNECO_COMBO_GAP = 0.3; // si volvés a atacar antes de esto, sigue el combo; si no, arranca de nuevo
 // El terreno: rectángulos que no se pueden atravesar (además de los bordes)
 const MUNECO_SOLIDS = [
@@ -122,6 +140,7 @@ function munecoStep(M, dt, input) {
     let ix = input.x || 0, iy = input.y || 0;
     const len = Math.hypot(ix, iy); if (len > 1) { ix /= len; iy /= len; }
     if (len) { h.lastDx = ix; h.lastDy = iy; }
+    h.crouch = !!(M.knight && input.crouch && !(h.move && ['dash', 'hurt', 'death'].includes(h.move.id)));
     if (input.dash) h.queued = 'dash'; if (input.attack) h.queued = 'attack'; if (input.parry) h.queued = 'parry'; if (input.shoot) h.queued = 'shoot';
     const aim = input.aim || (len ? { dx: ix, dy: iy } : h.move && h.move.id !== 'dash' ? { dx: h.move.dx, dy: h.move.dy } : { dx: h.lastDx, dy: h.lastDy }); // quieto: hacia el último paso (8 direcciones)
     const cur = h.move && munecoPhase(h.move, h.move.t);
@@ -129,9 +148,11 @@ function munecoStep(M, dt, input) {
         const q = h.queued; h.queued = null;
         if (q === 'dash') munecoBegin(h, 'dash', len ? ix : h.lastDx, len ? iy : h.lastDy);
         else if (q === 'parry' || q === 'shoot') munecoBegin(h, q, aim.dx, aim.dy);
+        else if (h.crouch) munecoBegin(h, 'crouchSwing', aim.dx, aim.dy);
         else {
-            const i = h.move && MUNECO_COMBO.includes(h.move.id) ? MUNECO_COMBO.indexOf(h.move.id) + 1 : M.t < h.comboUntil ? h.comboNext : 0;
-            munecoBegin(h, MUNECO_COMBO[i % MUNECO_COMBO.length], aim.dx, aim.dy);
+            const combo = M.knight ? MUNECO_KNIGHT_COMBO : MUNECO_COMBO;
+            const i = h.move && combo.includes(h.move.id) ? combo.indexOf(h.move.id) + 1 : M.t < h.comboUntil ? h.comboNext : 0;
+            munecoBegin(h, combo[i % combo.length], aim.dx, aim.dy);
         }
     }
     h.moving = false;
@@ -139,8 +160,8 @@ function munecoStep(M, dt, input) {
         h.move.t += dt;
         const ph = munecoPhase(h.move, h.move.t), d = MUNECO_MOVES[h.move.id];
         if (!ph) {
-            const i = MUNECO_COMBO.indexOf(h.move.id);
-            if (i >= 0) { h.comboNext = (i + 1) % MUNECO_COMBO.length; h.comboUntil = M.t + MUNECO_COMBO_GAP; }
+            const combo = M.knight ? MUNECO_KNIGHT_COMBO : MUNECO_COMBO, i = combo.indexOf(h.move.id);
+            if (i >= 0) { h.comboNext = (i + 1) % combo.length; h.comboUntil = M.t + MUNECO_COMBO_GAP; }
             if (h.move.id === 'death') h.hp = MUNECO.hp; // se levanta con toda la vida
             h.move = null;
         } else if (ph.phase === 'active') {
@@ -156,7 +177,8 @@ function munecoStep(M, dt, input) {
     }
     if (!h.move && len) {
         const x0 = h.x, y0 = h.y;
-        munecoMoveBy(M, ix * MUNECO.walk * dt, iy * MUNECO.walk * dt);
+        const sp = MUNECO.walk * (h.crouch ? 0.45 : 1); // agachado camina más lento
+        munecoMoveBy(M, ix * sp * dt, iy * sp * dt);
         const moved = Math.hypot(h.x - x0, h.y - y0);
         h.walked += moved; h.moving = moved > 0.01;
     }
@@ -174,7 +196,7 @@ function munecoFire(M, owner, x, y, dx, dy, spec) {
     M.shots.push({ owner, x, y, vx: dx * spec.speed, vy: dy * spec.speed, w: spec.w, h: spec.h, dmg: spec.dmg, life: spec.life, age: 0, kind: owner === 'hero' ? 'wave' : 'ball' });
 }
 function munecoShotBox(p) { return { x: p.x - p.w / 2, y: p.y - MUNECO.shotZ - p.h / 2, w: p.w, h: p.h }; }
-function munecoHeroBox(h) { return { x: h.x - MUNECO.hurt.w / 2, y: h.y - MUNECO.hurt.h, w: MUNECO.hurt.w, h: MUNECO.hurt.h }; }
+function munecoHeroBox(h) { const hh = h.crouch ? MUNECO.crouchHurt : MUNECO.hurt.h; return { x: h.x - MUNECO.hurt.w / 2, y: h.y - hh, w: MUNECO.hurt.w, h: hh }; }
 function munecoShotsStep(M, dt) {
     const h = M.hero;
     M.shots = M.shots.filter(p => {
@@ -227,6 +249,7 @@ function munecoHitDummy(M, dmg, shake = 1) {
 // Qué cuadro del héroe toca ahora
 function munecoHeroFrame(M) {
     const h = M.hero;
+    if (M.knight) return munecoKnightFrame(M);
     if (h.move) {
         const ph = munecoPhase(h.move, h.move.t), list = MUNECO_MOVES[h.move.id].frames[ph.phase];
         const [kind, k] = list[Math.min(list.length - 1, Math.floor(ph.pu * list.length))];
@@ -235,6 +258,20 @@ function munecoHeroFrame(M) {
     if (h.moving) return { kind: 'walk', k: Math.floor((h.walked / MUNECO.walkCycle % 1) * 8) };
     let k = Math.floor((M.t / 1.6 % 1) * 4); if (M.t % 3.3 < 0.14) k += 4; // respira y parpadea, como en el juego
     return { kind: 'idle', k };
+}
+
+// El caballero: cada tiempo del movimiento recorre sus cuadros; caminando corre (10 cuadros por ciclo), agachado
+// camina agachado, y quieto respira (10 cuadros)
+function munecoKnightFrame(M) {
+    const h = M.hero;
+    if (h.move) {
+        const ph = munecoPhase(h.move, h.move.t), [anim, ...lists] = MUNECO_KNIGHT_FRAMES[h.move.id];
+        const list = lists[['startup', 'active', 'recovery'].indexOf(ph.phase)];
+        return { kind: 'cab:' + anim, k: list[Math.min(list.length - 1, Math.floor(ph.pu * list.length))] };
+    }
+    if (h.crouch) return h.moving ? { kind: 'cab:crouchWalk', k: Math.floor((h.walked / (MUNECO.walkCycle * 0.6) % 1) * 8) } : { kind: 'cab:crouch', k: 0 };
+    if (h.moving) return { kind: 'cab:run', k: Math.floor((h.walked / MUNECO.walkCycle % 1) * 10) };
+    return { kind: 'cab:idle', k: Math.floor((M.t / 1.6 % 1) * 10) };
 }
 
 // --- DIBUJO ---
@@ -299,7 +336,7 @@ function munecoDraw(M, ctx) {
             if (warn) { ctx.fillStyle = '#ef476f'; ctx.fillRect(Math.round(d.x), Math.round(d.y - 42), 2, 5); ctx.fillRect(Math.round(d.x), Math.round(d.y - 35), 2, 2); } // "!": ahí viene
         } },
         { y: h.y, draw: () => {
-            const f = munecoHeroFrame(M), fr = pxbHeroFrame(MUNECO_LOOK, f.kind, f.k, h.dir), img = M.t - h.hurtAt < 0.07 ? fr.white : fr.img;
+            const f = munecoHeroFrame(M), fr = pxbHeroFrame(M.knight ? CABALLERO_LOOK : MUNECO_LOOK, f.kind, f.k, h.dir), img = M.t - h.hurtAt < 0.07 ? fr.white : fr.img;
             const ox = Math.round(h.x - img.width / 2), oy = Math.round(h.y - img.height + 2);
             if (h.flip && h.dir === 'side') { ctx.save(); ctx.translate(Math.round(h.x) * 2, 0); ctx.scale(-1, 1); ctx.drawImage(img, ox, oy); ctx.restore(); }
             else ctx.drawImage(img, ox, oy);
@@ -332,7 +369,7 @@ function munecoDrawSwingFx(M, ctx) {
     if (!d || (!d.arc && mv.id !== 'parry')) return; // solo los tajos dejan estela (y la parada su arco)
     const ph = munecoPhase(mv, mv.t); if (!ph || ph.phase === 'startup') return;
     const fade = ph.phase === 'active' ? 1 : 1 - ph.pu * 3; if (fade <= 0) return;
-    const base = Math.atan2(mv.dy, mv.dx), cx = h.x, cy = h.y - 14, dot = (a, r, col) => { ctx.fillStyle = col; ctx.fillRect(Math.round(cx + Math.cos(a) * r), Math.round(cy + Math.sin(a) * r), 1, 1); };
+    const base = Math.atan2(mv.dy, mv.dx), cx = h.x, cy = h.y - (mv.id === 'crouchSwing' ? 8 : 14), dot = (a, r, col) => { ctx.fillStyle = col; ctx.fillRect(Math.round(cx + Math.cos(a) * r), Math.round(cy + Math.sin(a) * r), 1, 1); };
     ctx.globalAlpha = fade;
     if (mv.id === 'parry') { // un arco de 1 píxel, con un destello blanco al abrir la ventana
         const flash = ph.phase === 'active' && ph.pu < 0.2;
@@ -351,7 +388,7 @@ function munecoDrawSwingFx(M, ctx) {
 function munecoDrawBoxes(M, ctx) {
     const h = M.hero, d = M.dummy, rect = (b, c) => { ctx.strokeStyle = c; ctx.lineWidth = 1; ctx.strokeRect(Math.round(b.x) + 0.5, Math.round(b.y) + 0.5, Math.round(b.w) - 1, Math.round(b.h) - 1); };
     rect(munecoFeetBox(h.x, h.y), '#4cc9f0');
-    rect({ x: h.x - MUNECO.hurt.w / 2, y: h.y - MUNECO.hurt.h, w: MUNECO.hurt.w, h: MUNECO.hurt.h }, '#52b788');
+    rect(munecoHeroBox(h), '#52b788');
     rect(munecoDummyBox(d), '#52b788');
     MUNECO_SOLIDS.forEach(s => rect(s, '#4cc9f0'));
     const mv = h.move, ph = mv && munecoPhase(mv, mv.t), spec = mv && MUNECO_MOVES[mv.id].hit;
@@ -365,13 +402,13 @@ function munecoHud(M) {
     const names = { startup: 'preparación', active: 'activo', recovery: 'recuperación' };
     const bar = d ? `<div class="mu-bar">${['startup', 'active', 'recovery'].map(p => `<span class="mu-${p}${ph.phase === p ? ' on' : ''}" style="flex:${d[p]}">${names[p]} ${Math.round(d[p] * 1000)}ms</span>`).join('')}<i style="left:${ph.u * 100}%"></i></div>` : '';
     const dd = M.dummy, score = dd.hits ? ` · muñeco: ${dd.hits} golpes, ${dd.total} de daño` : '';
-    return `<b>❤ ${h.hp}/${MUNECO.hp}</b> · ${dd.attacking ? '🎯 el muñeco ataca · ' : ''}<b>${mv ? d.name : h.moving ? 'Caminar' : 'Quieto'}</b>${mv ? ` · ${names[ph.phase]}` : ''}${M.slow ? ' · 🐢 cámara lenta' : ''}${M.paused ? ' · ⏸ pausa' : ''}${score}${bar}`;
+    return `<b>❤ ${h.hp}/${MUNECO.hp}</b> · ${dd.attacking ? '🎯 el muñeco ataca · ' : ''}${M.knight ? '🛡️ caballero · ' : ''}<b>${mv ? d.name : h.crouch ? (h.moving ? 'Caminar agachado' : 'Agachado') : h.moving ? (M.knight ? 'Correr' : 'Caminar') : 'Quieto'}</b>${mv ? ` · ${names[ph.phase]}` : ''}${M.slow ? ' · 🐢 cámara lenta' : ''}${M.paused ? ' · ⏸ pausa' : ''}${score}${bar}`;
 }
 function munecoStart() {
     document.body.classList.add('muneco-on');
     const wrap = document.createElement('div'); wrap.id = 'muneco';
     wrap.innerHTML = `<canvas id="mu-canvas"></canvas><div id="mu-hud"></div>
-        <div id="mu-help">WASD / flechas: caminar · J o clic: atacar (3 tajos) · K o clic derecho: parada · L: onda de corte · Espacio: esquive<br>G: el muñeco ataca · H: cajas · T: cámara lenta · P: pausa · . : un cuadro · R: reiniciar el muñeco · Esc: volver a la portada<br><small>versión: ${GAME_VERSION}</small></div>`;
+        <div id="mu-help">WASD / flechas: caminar · J o clic: atacar (3 tajos) · K o clic derecho: parada · L: onda de corte · Espacio: esquive<br>V: cambiar al caballero · C (mantener): agacharse (caballero) · G: el muñeco ataca · H: cajas · T: cámara lenta · P: pausa · . : un cuadro · R: reiniciar el muñeco · Esc: volver a la portada<br><small>versión: ${GAME_VERSION}</small></div>`;
     document.body.appendChild(wrap);
     const cv = wrap.querySelector('#mu-canvas'), ctx = cv.getContext('2d'), hud = wrap.querySelector('#mu-hud');
     cv.width = MUNECO.W; cv.height = MUNECO.H;
@@ -379,7 +416,7 @@ function munecoStart() {
     fit(); addEventListener('resize', fit);
     const M = (window.muneco = munecoNew()), down = {};
     let dash = false, attack = false, parry = false, shoot = false, aim = null, stepOnce = false;
-    const mine = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'KeyJ', 'KeyK', 'KeyH', 'KeyT', 'KeyP', 'Period', 'KeyR', 'KeyL', 'KeyG', 'Escape'];
+    const mine = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'KeyJ', 'KeyK', 'KeyH', 'KeyT', 'KeyP', 'Period', 'KeyR', 'KeyL', 'KeyG', 'KeyV', 'KeyC', 'Escape'];
     // con el mouse: el clic apunta hacia el cursor
     cv.addEventListener('mousedown', e => {
         const r = cv.getBoundingClientRect(), x = (e.clientX - r.left) * MUNECO.W / r.width, y = (e.clientY - r.top) * MUNECO.H / r.height;
@@ -392,14 +429,14 @@ function munecoStart() {
     addEventListener('keydown', e => {
         if (!mine.includes(e.code)) return;
         e.preventDefault(); e.stopImmediatePropagation();
-        if (!e.repeat) { if (e.code === 'Space') dash = true; if (e.code === 'KeyJ') { attack = true; aim = null; } if (e.code === 'KeyK') { parry = true; aim = null; } if (e.code === 'Escape') location.href = location.pathname; if (e.code === 'KeyL') { shoot = true; aim = null; } if (e.code === 'KeyG') M.dummy.attacking = !M.dummy.attacking; if (e.code === 'KeyR') Object.assign(M.dummy, { total: 0, hits: 0 }); if (e.code === 'KeyH') M.showBoxes = !M.showBoxes; if (e.code === 'KeyT') M.slow = !M.slow; if (e.code === 'KeyP') M.paused = !M.paused; if (e.code === 'Period') stepOnce = true; }
+        if (!e.repeat) { if (e.code === 'Space') dash = true; if (e.code === 'KeyJ') { attack = true; aim = null; } if (e.code === 'KeyK') { parry = true; aim = null; } if (e.code === 'Escape') location.href = location.pathname; if (e.code === 'KeyL') { shoot = true; aim = null; } if (e.code === 'KeyG') M.dummy.attacking = !M.dummy.attacking; if (e.code === 'KeyV') { M.knight = !M.knight; M.hero.move = null; M.hero.comboNext = 0; } if (e.code === 'KeyR') Object.assign(M.dummy, { total: 0, hits: 0 }); if (e.code === 'KeyH') M.showBoxes = !M.showBoxes; if (e.code === 'KeyT') M.slow = !M.slow; if (e.code === 'KeyP') M.paused = !M.paused; if (e.code === 'Period') stepOnce = true; }
         down[e.code] = true;
     }, true);
     addEventListener('keyup', e => { if (mine.includes(e.code)) { e.stopImmediatePropagation(); down[e.code] = false; } }, true);
     let last = performance.now();
     const frame = now => {
         const real = Math.min(0.05, (now - last) / 1000); last = now;
-        const input = { x: (down.KeyD || down.ArrowRight ? 1 : 0) - (down.KeyA || down.ArrowLeft ? 1 : 0), y: (down.KeyS || down.ArrowDown ? 1 : 0) - (down.KeyW || down.ArrowUp ? 1 : 0), dash, attack, parry, shoot, aim };
+        const input = { x: (down.KeyD || down.ArrowRight ? 1 : 0) - (down.KeyA || down.ArrowLeft ? 1 : 0), y: (down.KeyS || down.ArrowDown ? 1 : 0) - (down.KeyW || down.ArrowUp ? 1 : 0), dash, attack, parry, shoot, aim, crouch: !!down.KeyC };
         const dt = M.paused ? (stepOnce ? 1 / 60 : 0) : real * (M.slow ? MUNECO.slow : 1);
         if (dt > 0) { munecoStep(M, dt, input); dash = attack = parry = shoot = false; aim = null; }
         stepOnce = false;
