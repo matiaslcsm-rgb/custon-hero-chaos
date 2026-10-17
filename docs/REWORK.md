@@ -1161,6 +1161,14 @@ el mismo paso; lo grande queda acá, ordenado por impacto.
     ojos rojos, el tabardo, los brazos y la espada colgando; de espaldas la capa con pliegues, la costura de la capucha
     y la espada al costado; quieto (respira) y caminando (4 pasos con rebote). Los ataques, la parada y el esquive
     siguen de costado (de la hoja). Sin mouse, mira hacia su último paso.
+    **Por piezas** (2026-10-17, "diseñar cada cosa por separado y después unirlas"; "ninguno conserva rasgos
+    iguales"): de frente y de espaldas ya no son dibujos enteros sino piezas que se encastran (`HERO_PARTS` en
+    `js/towerHeroArt.js`): cabeza de frente y de espaldas (capucha + esclavina), torso, capa abierta (atrás),
+    capa cerrada (adelante, todavía sin usar), capa de espaldas, piernas quietas y con el paso de cada pie, y la
+    espada con su punto de agarre (recta y balanceándose). Copian al de costado: 24 filas, capucha redonda con
+    los ojos juntos, broche y cinturón dorados, capa hasta la rodilla y luz desde la izquierda. Al caminar, con el
+    paso abierto el cuerpo baja un píxel y la espada se balancea. Un arma nueva se dibuja una vez con su agarre y
+    usa todas las poses. Hoja con las piezas sueltas y los cuadros: `docs/arte/heroe-piezas.py` → `.png`.
     **Caminar sin parpadeo** (2026-10-14, "parpadea mucho cuando se mueve, como que le faltan cuadros"). Medido cuadro
     por cuadro, eran tres cosas: (1) caminando de seguido llegaba a su casilla un instante antes del paso siguiente y se
     colaba un cuadro de quieto cada 2-3 pasos → ahora sigue "caminando" 0,12 s después de frenar (`PXG.walkGrace`, vale

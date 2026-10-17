@@ -85,6 +85,9 @@ Hoy el juego **no tiene cajas de golpe**: el daño se decide por distancia (si e
         esquiva (tres tiempos), con cámara lenta, pausa, avance de a un cuadro y las cajas a la vista (H). 2026-10-16.
   - [x] 1b: combo de 3 tajos y parada (levanta, bloquea con destello y vuelve) que le pegan al muñeco solo en el
         tiempo activo, con lo apretado antes guardado, congelado al impacto, estela y sacudón en el remate. 2026-10-16.
+  - [x] 1d-0 (arte, a pedido en el chat 2026-10-17): el héroe de frente y de espaldas se arma por piezas
+        (`HERO_PARTS` en `js/towerHeroArt.js`: cabeza, torso, capa abierta/cerrada/espalda, piernas y la espada con
+        su punto de agarre), con los mismos rasgos y alto que el de costado. Quieto y caminar ya lo usan.
   - [ ] 1d (arte): cuadros de ataque, parada y esquive de frente y de espaldas para la espada (hoy hacia arriba y abajo
         se usa el dibujo de costado).
   - [x] 1c: onda de corte (disparo del héroe), el muñeco que tira bolas de paja con aviso, recibir golpe con empujón,
@@ -457,6 +460,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 
 ## Hecho por el modo automático
 (Fecha · ítem · commit · qué se midió.)
+- 2026-10-17 · Héroe por piezas de frente y de espaldas (a pedido, en el chat) · ver git log · 10 cuadros (quieto + 4 de caminar por vista) armados con 11 piezas y 2 espadas; todos 17×24 como el de costado y con la empuñadura en la mano que marca el cuadro. Pruebas 281/281.
 - 2026-10-16 · Muñeco, paso 1c (a pedido, en el chat) · 2bd9076 · Onda de corte 120/50/250 ms a 160 px/s (8 de daño); bola del muñeco cada 1,8 s con aviso de 0,5 s, 85 px/s y 20 de daño; golpe recibido 0/120/140 ms con 9 px de empujón; la parada devuelve la bola ×1,5 de rápido y ×2 de daño; caída 200/500/1400 ms y se levanta con 100. Pruebas 279/279.
 - 2026-10-16 · Muñeco, paso 1b (a pedido, en el chat) · 99672a8 · Tajo 1 70/80/220 ms (10 de daño), revés 60/80/220 (12), remate 160/100/320 (22, congelado 90 ms y sacudón), parada 40/300/180 (5); el combo entero le hace 44 al muñeco y nunca pega en la preparación. Pruebas 278/278.
 - 2026-10-16 · Muñeco, paso 1a (a pedido, en el chat) · 2c1a4ca · `index.html?muneco`: sala de 240×150, caminar a 62 px/s, esquive 50/160/120 ms que recorre 35 px (210 px/s en el tiempo activo); choca con bordes, cajón, columna, escalón y el muñeco. Pruebas 277/277.

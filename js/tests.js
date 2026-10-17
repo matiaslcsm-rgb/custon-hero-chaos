@@ -1595,6 +1595,12 @@ test('Torre: el héroe en pixel art se anima por poses — cada movimiento elige
     walkNames.forEach(n => { const F = HERO_ART.frames[n], xs = []; F.rows.slice(0, 8).forEach(r => [...r].forEach((c, x) => { if (c !== '.') xs.push(x); }));
         const head = Math.round(HERO_ART_BOX.w / 2 - heroArtAnchor(n)) + xs.reduce((a, b) => a + b, 0) / xs.length;
         check(Math.abs(head - HERO_ART_BOX.w / 2) <= 1, `${n}: la cabeza queda centrada`); });
+    // de frente y de espaldas se arman por piezas: mismo alto que el de costado y la espada en la mano que dice el cuadro
+    Object.entries(HERO_PARTS.frames).forEach(([n, layers]) => {
+        const R = HERO_ART.frames[n].rows, [, gx, gy] = layers[layers.length - 1];
+        check(R.length === HERO_ART.frames.idle.rows.length && R.every(r => r.length === 17), `${n}: 17 × 24 como el de costado`);
+        checkEq(R[gy][gx], 'c', `${n}: la empuñadura está donde va la mano`);
+    });
     check(PXG.walkGrace > 0.05, 'llegar a la casilla un instante antes del paso siguiente no pone el cuadro de quieto');
 });
 test('Torre por dentro: el piso 1 es afuera; del 2 en adelante, muro exterior y salones de piedra; cada piso con su lugar y su gente', () => {
