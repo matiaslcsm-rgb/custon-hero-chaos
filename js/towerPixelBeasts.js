@@ -116,6 +116,18 @@ const PXB = {
         S.ball(5, 4.5 + b, 1.7, 1.7, P); S.ball(11, 4.5 + b, 1.7, 1.7, P); S.set(4, 4 + b, '#f4f0e0'); S.set(5, 4 + b, '#1a1412'); S.set(10, 4 + b, '#f4f0e0'); S.set(11, 4 + b, '#1a1412');
         for (let x = 4; x <= 12; x++) S.set(x, 8 + b, P[0]);
     } },
+    mushroom: { w: 16, h: 18, head: [10, 5], back: [8, 4], draw(S, P, f) { // hongo con patas (2026-10-17): dibujo propio; el pack que lo inspiró no deja subir sus archivos
+        const b = f.bob, ph = f.ph, cb = b + f.br, STEM = ['#8a7560', '#b39c80', '#d9c4a5', '#eadbc0', '#f6ecd8'];
+        pxbShadow(S, 8, 17, 6);
+        S.rect(5 - ph, 15 + b, 2, 3 - b, STEM[0]); S.rect(9 + ph, 15 + b, 2, 3 - b, STEM[1]); // patitas
+        S.ball(8, 12.5 + b, 3.6, 3.2, STEM);                                                  // el tronco, panzón
+        S.set(4, 12 + b - ph, STEM[2]); S.set(12, 13 + b + ph, STEM[1]);                       // bracitos
+        S.set(9, 12 + b, '#1a1412'); S.set(11, 12 + b, '#1a1412'); S.set(10, 14 + b, '#5a3a2a'); // cara (mira a la derecha)
+        S.ball(8, 6 + cb, 7, 4, P);                                                           // el sombrero
+        S.line(2, 9 + cb, 14, 9 + cb, P[0]); for (let x = 3; x <= 13; x += 2) S.set(x, 9 + cb, STEM[1]); // borde con laminillas
+        [[4, 6], [7, 3], [10, 5], [12, 7], [6, 7]].forEach(([x, y]) => S.set(x, y + cb, '#f4efe6')); // lunares
+        S.set(8, 4 + cb, '#ffffff');
+    } },
     footman: { w: 14, h: 22, head: [6, 2], back: [6, 9], draw(S, P, f) { pxbHumanoid(S, P, f, { head: 'helm', weapon: 'sword', belt: '#3a2a1c' }); } },
     archer: { w: 14, h: 22, head: [6, 2], back: [6, 9], draw(S, P, f) { pxbHumanoid(S, P, f, { head: 'hood', weapon: 'bow', belt: '#4a3524' }); } },
     mage: { w: 14, h: 22, head: [7, 0], back: [6, 9], draw(S, P, f) { pxbHumanoid(S, P, f, { robe: true, head: 'hat', weapon: 'staff', orb: [shade(P[3], -0.25), P[3], P[4], shade(P[4], 0.35), '#ffffff'] }); } },

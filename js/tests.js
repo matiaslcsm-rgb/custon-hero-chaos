@@ -1294,6 +1294,10 @@ test('Torre: generador de criaturas (bestiario amplio y fijo, nombres, rasgos de
     check(list.every(t => t.traits.every(k => BEAST_TRAITS[k].biomes.includes('swamp'))), 'rasgos con afinidad por el bioma');
     check(list.every(t => INK_PLANS[t.plan] && CREEP_TYPES[t.key]), 'cuerpo dibujable y mecánica de un creep conocido');
     list.forEach(t => inkFigure(t.plan, inkLookFor({ type: t, color: t.color }), 'walk', 3));
+    // el hongo: solo en bosque y pantano, con su dibujo en pixel art y en tinta
+    const bodiesIn = b => new Set(Array.from({ length: 120 }, () => generateBeast(b, 'brawler', 0).genome.body));
+    check(bodiesIn('forest').has('mushroom') && !bodiesIn('snow').has('mushroom'), 'el hongo sale en el bosque y no en la nieve');
+    check(pxbFrame('mushroom', '#9c6644', ['spots'], 'walk', 2).img.width > 0 && inkFigure('mushroom', inkLookFor({ type: { plan: 'mushroom' }, color: '#9c6644' }), 'walk', 1).img.width > 0, 'el hongo se dibuja');
     check(towerCreepPool(1).every(t => t.genome && t.biome === 'forest'), 'los pisos usan el bestiario generado de la run');
     check(towerCreepPool(1)[0] === towerCreepPool(1)[0] && towerBestiary('forest') === towerBestiary('forest'), 'el bestiario queda fijo durante la run');
     // Espinas

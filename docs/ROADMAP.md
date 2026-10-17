@@ -460,6 +460,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 
 ## Hecho por el modo automático
 (Fecha · ítem · commit · qué se midió.)
+- 2026-10-17 · Hongo con patas (a pedido, en el chat) · ver git log · cuerpo nuevo `mushroom` (pixel art y tinta), peleador o aturdidor solo en bosque y pantano (~1 de cada 6 peleadores). Pruebas 281/281.
 - 2026-10-17 · Héroe de frente y de espaldas calcado de la hoja del usuario (a pedido, en el chat) · ver git log · figuras S y N de la hoja (184 px de alto) llevadas a 24 filas; 12 piezas + 3 espadas arman 10 cuadros; quieto de frente con la capa cerrada. En el muñeco las cajas de golpe calzan sin cambios. Pruebas 281/281.
 - 2026-10-17 · Héroe por piezas de frente y de espaldas (a pedido, en el chat) · ver git log · 10 cuadros (quieto + 4 de caminar por vista) armados con 11 piezas y 2 espadas; todos 17×24 como el de costado y con la empuñadura en la mano que marca el cuadro. Pruebas 281/281.
 - 2026-10-16 · Muñeco, paso 1c (a pedido, en el chat) · 2bd9076 · Onda de corte 120/50/250 ms a 160 px/s (8 de daño); bola del muñeco cada 1,8 s con aviso de 0,5 s, 85 px/s y 20 de daño; golpe recibido 0/120/140 ms con 9 px de empujón; la parada devuelve la bola ×1,5 de rápido y ×2 de daño; caída 200/500/1400 ms y se levanta con 100. Pruebas 279/279.

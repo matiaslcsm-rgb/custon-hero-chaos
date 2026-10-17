@@ -8,7 +8,7 @@
 // Roles: tipo base (mecánica e IA), cuerpos posibles y descripción para el bestiario. tier 1 = solo en el segundo
 // piso de cada bioma (los más difíciles).
 const BEAST_ROLES = {
-    brawler: { base: 'GRUNT', bodies: ['wolf', 'boar', 'footman', 'lizard', 'scorpion'], desc: 'pelea cuerpo a cuerpo' },
+    brawler: { base: 'GRUNT', bodies: ['wolf', 'boar', 'footman', 'lizard', 'scorpion', 'mushroom'], desc: 'pelea cuerpo a cuerpo' },
     skirmisher: { base: 'SCOUT', bodies: ['wolf', 'lizard', 'chusma'], desc: 'rápido y escurridizo' },
     archer: { base: 'ARCHER', bodies: ['archer', 'toad', 'scorpion'], desc: 'ataca a distancia' },
     caster: { base: 'SHAMAN', bodies: ['mage', 'wraith', 'plague'], desc: 'lanza hechizos (daño mágico)' },
@@ -16,7 +16,7 @@ const BEAST_ROLES = {
     tank: { base: 'ARMORED', bodies: ['golem', 'brute'], desc: 'muy resistente', tier: 1 },
     hexer: { base: 'WARLOCK', bodies: ['mage', 'wraith'], desc: 'maldice a distancia', tier: 1 },
     healer: { base: 'HEALER', bodies: ['plague', 'mage'], desc: 'cura a los suyos', tier: 1 },
-    stunner: { base: 'STUNNER', bodies: ['brute', 'golem', 'scorpion'], desc: 'aturde con sus golpes', tier: 1 },
+    stunner: { base: 'STUNNER', bodies: ['brute', 'golem', 'scorpion', 'mushroom'], desc: 'aturde con sus golpes', tier: 1 },
     ghost: { base: 'SPECTER', bodies: ['wraith', 'phantom'], desc: 'esquiva muchos golpes', tier: 1 },
     swarm: { base: 'SWARM', bodies: ['swarm'], desc: 'viene en enjambre' },
     bomber: { base: 'KAMIKAZE', bodies: ['kamikaze'], desc: 'explota al alcanzarte', tier: 1 }
@@ -30,8 +30,11 @@ const BEAST_NOUNS = {
     archer: [['Cazador', 'm'], ['Arquera', 'f'], ['Hondero', 'm']], mage: [['Chamán', 'm'], ['Bruja', 'f'], ['Hechicero', 'm']],
     wraith: [['Espectro', 'm'], ['Ánima', 'f'], ['Sombra', 'f']], plague: [['Curandero', 'm'], ['Sanadora', 'f']],
     phantom: [['Fantasma', 'm'], ['Aparición', 'f']], chusma: [['Duende', 'm'], ['Trasgo', 'm']],
-    swarm: [['Enjambre', 'm'], ['Plaga', 'f']], kamikaze: [['Escarabajo Bomba', 'm'], ['Bola de Pus', 'f']]
+    swarm: [['Enjambre', 'm'], ['Plaga', 'f']], kamikaze: [['Escarabajo Bomba', 'm'], ['Bola de Pus', 'f']],
+    mushroom: [['Hongo', 'm'], ['Seta', 'f'], ['Champiñón', 'm']]
 };
+// Cuerpos que solo salen en algunos biomas (el resto, en todos)
+const BEAST_BODY_BIOMES = { mushroom: ['forest', 'swamp'] };
 // Rasgos: adjetivo (m, f), afinidad por bioma
 const BEAST_TRAITS = {
     poison: { adj: ['Venenoso', 'Venenosa'], biomes: ['forest', 'swamp', 'desert'] },
@@ -69,7 +72,7 @@ const pickW = (arr, rnd = Math.random) => arr[Math.floor(rnd() * arr.length)];
 // Arma un tipo de criatura (mismo formato que CREEP_TYPES, más los datos del genoma).
 function generateBeast(biome, roleKey, from) {
     const role = BEAST_ROLES[roleKey], base = CREEP_TYPES[role.base];
-    const body = pickW(role.bodies), [noun, g] = pickW(BEAST_NOUNS[body]), gi = g === 'f' ? 1 : 0;
+    const body = pickW(role.bodies.filter(b => !BEAST_BODY_BIOMES[b] || BEAST_BODY_BIOMES[b].includes(biome))), [noun, g] = pickW(BEAST_NOUNS[body]), gi = g === 'f' ? 1 : 0;
     const sizeKey = roleKey === 'swarm' || roleKey === 'bomber' ? 'normal' : pickW(['small', 'normal', 'normal', 'big']);
     const size = BEAST_SIZES[sizeKey];
     const pool = Object.keys(BEAST_TRAITS).filter(k => BEAST_TRAITS[k].biomes.includes(biome));

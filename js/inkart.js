@@ -449,6 +449,16 @@ Object.assign(INK_PLANS, {
         inkEye(g, 24, 69 - up, '#1d1712', 2); inkEye(g, 40, 69 - up, '#1d1712', 2);
         inkShape(g, [[18, 80 - up], [32, 83 - up], [46, 80 - up]], INK.line, rnd, { open: true, width: 1.6 });
     },
+    // Hongo (2026-10-17): sombrero con lunares sobre un tronco panzón con patitas
+    mushroom(g, c, rnd) {
+        const up = Math.abs(INK_A.step) * 4, stem = '#e6d5b8';
+        inkShape(g, [[24, FOOT], [26, 84 - up], [30, FOOT]], c.dark, rnd, { width: 1.6 }); inkShape(g, [[34, FOOT], [38, 84 - up], [40, FOOT]], c.dark, rnd, { width: 1.6 });
+        inkShape(g, [[22, 86 - up], [20, 74 - up], [26, 64 - up], [38, 64 - up], [44, 74 - up], [42, 86 - up]], stem, rnd);
+        inkEye(g, 34, 74 - up, '#1d1712', 1.8); inkEye(g, 40, 74 - up, '#1d1712', 1.8);
+        const cap = []; for (let a = Math.PI; a <= Math.PI * 2.001; a += Math.PI / 10) cap.push([32 + Math.cos(a) * 24, 66 - up + Math.sin(a) * 18]);
+        inkShape(g, cap, c.main, rnd);
+        g.fillStyle = '#f4efe6'; [[20, 60], [30, 54], [40, 58], [48, 63], [26, 63]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y - up, 2.2, 0, Math.PI * 2); g.fill(); });
+    },
     // Escorpión: tenazas adelante y la cola con aguijón por encima del lomo
     scorpion(g, c, rnd) {
         for (let i = 0; i < 3; i++) { const x = 22 + i * 7, d = (i % 2 ? 1 : -1) * INK_A.step * 2; inkShape(g, [[x, 80], [x - 4 + d, 86], [x - 6 + d, FOOT]], INK.line, rnd, { open: true, width: 1.6 }); }
