@@ -128,6 +128,16 @@ const PXB = {
         [[4, 6], [7, 3], [10, 5], [12, 7], [6, 7]].forEach(([x, y]) => S.set(x, y + cb, '#f4efe6')); // lunares
         S.set(8, 4 + cb, '#ffffff');
     } },
+    bat: { w: 18, h: 15, head: [10, 4], back: [9, 5], draw(S, P, f) { // murciélago que aletea (2026-10-17, dibujo propio)
+        const k = f.walk >= 0 ? f.walk : f.idle, fl = f.walk >= 0 ? [0, -1, -2, -1][f.walk] : -f.br, up = k % 2 === 0;
+        pxShadow(S, 9, 14, 3, 0.8);
+        if (up) { S.tri([7, 6 + fl], [0, 0 + fl], [3, 8 + fl], P[1]); S.tri([11, 6 + fl], [17, 0 + fl], [15, 8 + fl], P[1]); S.line(7, 6 + fl, 0, 0 + fl, P[0]); S.line(11, 6 + fl, 17, 0 + fl, P[0]); }
+        else { S.tri([7, 6 + fl], [0, 10 + fl], [5, 11 + fl], P[1]); S.tri([11, 6 + fl], [17, 10 + fl], [13, 11 + fl], P[1]); S.line(7, 6 + fl, 0, 10 + fl, P[0]); S.line(11, 6 + fl, 17, 10 + fl, P[0]); }
+        S.ball(9, 6.5 + fl, 2.6, 3, P);                                                     // el cuerpo
+        S.set(8, 3 + fl, P[2]); S.set(8, 2 + fl, P[3]); S.set(11, 3 + fl, P[2]); S.set(11, 2 + fl, P[3]); // orejas
+        S.set(10, 5 + fl, '#ff7ab8'); S.set(12, 5 + fl, '#ff7ab8'); S.set(11, 8 + fl, '#f4efe6'); // ojos y colmillo (mira a la derecha)
+        S.set(8, 10 + fl, P[0]); S.set(10, 10 + fl, P[0]);                                 // patitas
+    } },
     footman: { w: 14, h: 22, head: [6, 2], back: [6, 9], draw(S, P, f) { pxbHumanoid(S, P, f, { head: 'helm', weapon: 'sword', belt: '#3a2a1c' }); } },
     archer: { w: 14, h: 22, head: [6, 2], back: [6, 9], draw(S, P, f) { pxbHumanoid(S, P, f, { head: 'hood', weapon: 'bow', belt: '#4a3524' }); } },
     mage: { w: 14, h: 22, head: [7, 0], back: [6, 9], draw(S, P, f) { pxbHumanoid(S, P, f, { robe: true, head: 'hat', weapon: 'staff', orb: [shade(P[3], -0.25), P[3], P[4], shade(P[4], 0.35), '#ffffff'] }); } },

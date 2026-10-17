@@ -1298,6 +1298,7 @@ test('Torre: generador de criaturas (bestiario amplio y fijo, nombres, rasgos de
     const bodiesIn = b => new Set(Array.from({ length: 120 }, () => generateBeast(b, 'brawler', 0).genome.body));
     check(bodiesIn('forest').has('mushroom') && !bodiesIn('snow').has('mushroom'), 'el hongo sale en el bosque y no en la nieve');
     check(pxbFrame('mushroom', '#9c6644', ['spots'], 'walk', 2).img.width > 0 && inkFigure('mushroom', inkLookFor({ type: { plan: 'mushroom' }, color: '#9c6644' }), 'walk', 1).img.width > 0, 'el hongo se dibuja');
+    check(pxbFrame('bat', '#6a4c93', [], 'walk', 1).img.width > 0 && inkFigure('bat', inkLookFor({ type: { plan: 'bat' }, color: '#6a4c93' }), 'walk', 1).img.width > 0 && new Set(Array.from({ length: 120 }, () => generateBeast('volcano', 'skirmisher', 0).genome.body)).has('bat'), 'el murciélago se dibuja y sale como escurridizo');
     check(towerCreepPool(1).every(t => t.genome && t.biome === 'forest'), 'los pisos usan el bestiario generado de la run');
     check(towerCreepPool(1)[0] === towerCreepPool(1)[0] && towerBestiary('forest') === towerBestiary('forest'), 'el bestiario queda fijo durante la run');
     // Espinas

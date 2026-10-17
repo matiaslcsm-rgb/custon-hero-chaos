@@ -459,6 +459,14 @@ Object.assign(INK_PLANS, {
         inkShape(g, cap, c.main, rnd);
         g.fillStyle = '#f4efe6'; [[20, 60], [30, 54], [40, 58], [48, 63], [26, 63]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y - up, 2.2, 0, Math.PI * 2); g.fill(); });
     },
+    // Murciélago (2026-10-17): cuerpo chico, orejas y dos alas que suben y bajan
+    bat(g, c, rnd) {
+        const fl = INK_A.step * 4, w = INK_A.sway > 0 ? -10 : 8;
+        inkShape(g, [[28, 62 + fl], [6, 50 + fl + w], [10, 66 + fl], [18, 62 + fl], [22, 72 + fl]], c.dark, rnd);
+        inkShape(g, [[36, 62 + fl], [58, 50 + fl + w], [54, 66 + fl], [46, 62 + fl], [42, 72 + fl]], c.dark, rnd);
+        inkShape(g, [[26, 58 + fl], [28, 50 + fl], [31, 56 + fl], [33, 56 + fl], [36, 50 + fl], [38, 58 + fl], [36, 72 + fl], [28, 72 + fl]], c.main, rnd);
+        inkEye(g, 30, 61 + fl, '#ff7ab8', 1.6); inkEye(g, 35, 61 + fl, '#ff7ab8', 1.6);
+    },
     // Escorpión: tenazas adelante y la cola con aguijón por encima del lomo
     scorpion(g, c, rnd) {
         for (let i = 0; i < 3; i++) { const x = 22 + i * 7, d = (i % 2 ? 1 : -1) * INK_A.step * 2; inkShape(g, [[x, 80], [x - 4 + d, 86], [x - 6 + d, FOOT]], INK.line, rnd, { open: true, width: 1.6 }); }

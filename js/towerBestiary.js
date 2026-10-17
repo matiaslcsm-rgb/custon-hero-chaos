@@ -9,7 +9,7 @@
 // piso de cada bioma (los más difíciles).
 const BEAST_ROLES = {
     brawler: { base: 'GRUNT', bodies: ['wolf', 'boar', 'footman', 'lizard', 'scorpion', 'mushroom'], desc: 'pelea cuerpo a cuerpo' },
-    skirmisher: { base: 'SCOUT', bodies: ['wolf', 'lizard', 'chusma'], desc: 'rápido y escurridizo' },
+    skirmisher: { base: 'SCOUT', bodies: ['wolf', 'lizard', 'chusma', 'bat'], desc: 'rápido y escurridizo' },
     archer: { base: 'ARCHER', bodies: ['archer', 'toad', 'scorpion'], desc: 'ataca a distancia' },
     caster: { base: 'SHAMAN', bodies: ['mage', 'wraith', 'plague'], desc: 'lanza hechizos (daño mágico)' },
     bruiser: { base: 'BRUTE', bodies: ['brute', 'golem', 'boar'], desc: 'pega muy fuerte', tier: 1 },
@@ -31,7 +31,7 @@ const BEAST_NOUNS = {
     wraith: [['Espectro', 'm'], ['Ánima', 'f'], ['Sombra', 'f']], plague: [['Curandero', 'm'], ['Sanadora', 'f']],
     phantom: [['Fantasma', 'm'], ['Aparición', 'f']], chusma: [['Duende', 'm'], ['Trasgo', 'm']],
     swarm: [['Enjambre', 'm'], ['Plaga', 'f']], kamikaze: [['Escarabajo Bomba', 'm'], ['Bola de Pus', 'f']],
-    mushroom: [['Hongo', 'm'], ['Seta', 'f'], ['Champiñón', 'm']]
+    mushroom: [['Hongo', 'm'], ['Seta', 'f'], ['Champiñón', 'm']], bat: [['Murciélago', 'm'], ['Rata Alada', 'f']]
 };
 // Cuerpos que solo salen en algunos biomas (el resto, en todos)
 const BEAST_BODY_BIOMES = { mushroom: ['forest', 'swamp'] };
