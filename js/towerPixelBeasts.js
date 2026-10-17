@@ -138,6 +138,40 @@ const PXB = {
         S.set(10, 5 + fl, '#ff7ab8'); S.set(12, 5 + fl, '#ff7ab8'); S.set(11, 8 + fl, '#f4efe6'); // ojos y colmillo (mira a la derecha)
         S.set(8, 10 + fl, P[0]); S.set(10, 10 + fl, P[0]);                                 // patitas
     } },
+    // Orco, demonio y engendro de sangre (2026-10-17): dibujos propios, inspirados en packs que solo usamos de referencia
+    orc: { w: 16, h: 22, head: [9, 2], back: [8, 10], draw(S, P, f) { // orco grandote con hacha y colmillos
+        const b = f.bob, ph = f.ph, hb = b + f.br;
+        pxbShadow(S, 8, 21, 6);
+        S.rect(5 - ph, 16 + b, 3, 6 - b, PXB_WOOD[0]); S.rect(9 + ph, 16 + b, 3, 6 - b, PXB_WOOD[1]);    // piernas
+        S.rect(2, 9 + b, 3, 6, P[1]); S.ball(3.5, 15.5 + b, 1.5, 1.4, P);                              // brazo de atrás
+        S.ball(8, 12 + b, 5, 4.5, P); S.line(5, 9 + b, 11, 15 + b, PXB_WOOD[2]); S.rect(4, 15 + b, 9, 1, '#4a3524'); // torso, correa y cinto
+        S.ball(9, 5 + hb, 3.4, 3.2, P); S.rect(9, 7 + hb, 4, 2, P[2]);                                  // cabeza y quijada
+        S.line(9, 3 + hb, 12, 3 + hb, P[0]); S.set(11, 4 + hb, '#ffd166'); S.set(5, 4 + hb, P[3]);      // ceño, ojo y oreja
+        S.set(10, 8 + hb, PXB_BONE); S.set(12, 8 + hb, PXB_BONE);                                     // colmillos
+        S.rect(12, 9 + b, 3, 5, P[2]); S.ball(13.5, 14.5 + b, 1.5, 1.4, P);                             // brazo de adelante
+        S.line(14, 17 + b, 14, 6 + b, PXB_WOOD[1]); S.rect(15, 6 + b, 2, 4, PXB_STEEL[2]); S.set(16, 6 + b, PXB_STEEL[3]); S.set(16, 9 + b, PXB_STEEL[1]); // el hacha
+    } },
+    demon: { w: 16, h: 22, head: [9, 3], back: [7, 9], draw(S, P, f) { // diablillo con cuernos, cola y una bola de fuego
+        const b = f.bob, ph = f.ph, hb = b + f.br, flap = (f.walk >= 0 ? f.walk : f.idle) % 2;
+        pxbShadow(S, 8, 21, 5);
+        S.tri([6, 9 + b], [1, 3 + b + flap], [3, 11 + b], shade(P[0], -0.2));                         // ala
+        S.line(4, 15 + b, 1, 12 + b - f.br, P[1]); S.set(0, 11 + b - f.br, P[3]); S.set(1, 11 + b - f.br, P[3]); // cola con punta
+        S.rect(5 - ph, 15 + b, 2, 6 - b, P[1]); S.rect(9 + ph, 15 + b, 2, 6 - b, P[0]);                 // patas
+        S.set(5 - ph, 21, '#1a1412'); S.set(6 - ph, 21, '#1a1412'); S.set(9 + ph, 21, '#1a1412'); S.set(10 + ph, 21, '#1a1412'); // pezuñas
+        S.ball(8, 11 + b, 4, 4.5, P);                                                                 // cuerpo
+        S.ball(9, 5 + hb, 3, 3, P); S.line(7, 3 + hb, 5, 0 + hb, PXB_BONE); S.line(10, 2 + hb, 12, -1 + hb, PXB_BONE); // cabeza y cuernos
+        S.set(10, 5 + hb, '#ffe066'); S.set(12, 5 + hb, '#ffe066'); S.line(10, 7 + hb, 12, 7 + hb, '#1a1412'); // ojos y boca
+        S.rect(12, 9 + b, 2, 4, P[2]); S.ball(14, 8 + hb, 1.6, 1.6, PXG_FIRE);                        // brazo y la bola de fuego
+    } },
+    blob: { w: 18, h: 16, head: [11, 6], back: [9, 4], draw(S, P, f) { // engendro de sangre: masa que chorrea, con ojo y dientes
+        const k = f.walk >= 0 ? f.walk : f.idle, sq = f.walk >= 0 ? [0, 1, 0, -1][f.walk] : f.br;
+        pxbShadow(S, 9, 15, 8);
+        S.ball(9, 9.5 + sq * 0.5, 7.5 + sq * 0.5, 5.5 - sq * 0.5, P);
+        [3, 7, 12, 15].forEach(x => S.line(x, 12, x, 13 + ((x + k) % 3), P[1]));                        // chorreadas
+        S.rect(10, 6 + sq, 3, 2, '#f4efe6'); S.set(12, 6 + sq, '#1a1412');                              // el ojo (mira a la derecha)
+        S.line(8, 11, 15, 11, '#2a0a0a'); [9, 11, 13].forEach(x => S.set(x, 10, PXB_BONE));            // boca con dientes
+        S.set(5, 6 + sq, P[4]); S.set(6, 5 + sq, P[4]);                                                 // brillo
+    } },
     footman: { w: 14, h: 22, head: [6, 2], back: [6, 9], draw(S, P, f) { pxbHumanoid(S, P, f, { head: 'helm', weapon: 'sword', belt: '#3a2a1c' }); } },
     archer: { w: 14, h: 22, head: [6, 2], back: [6, 9], draw(S, P, f) { pxbHumanoid(S, P, f, { head: 'hood', weapon: 'bow', belt: '#4a3524' }); } },
     mage: { w: 14, h: 22, head: [7, 0], back: [6, 9], draw(S, P, f) { pxbHumanoid(S, P, f, { robe: true, head: 'hat', weapon: 'staff', orb: [shade(P[3], -0.25), P[3], P[4], shade(P[4], 0.35), '#ffffff'] }); } },
@@ -174,6 +208,9 @@ const PXB = {
         S.set(8, 4 + b + br, '#ffd166'); S.set(11, 4 + b + br, '#ffd166');
         S.line(7, 9 + b, 9, 13 + b, P[0]); S.line(13, 10 + b, 12, 14 + b, P[0]);
         S.rect(15, 8 + b + br, 4, 9, P[2]); S.rect(18, 8 + b + br, 1, 9, P[1]);
+        // cristales que brillan en hombros y cabeza (2026-10-17, como los gólems del pack de referencia)
+        const CR = ['#a8650f', '#ffd166', '#fff3c4'], cy = b + br;
+        [[2, 7, -1], [4, 6, 0], [16, 7, 1], [18, 6, 0], [10, 1, 0]].forEach(([x, y, d]) => { S.set(x, y + cy, CR[0]); S.set(x + d, y - 1 + cy, CR[1]); S.set(x + d, y - 2 + cy, CR[2]); });
     } },
     wraith: { w: 14, h: 22, head: [7, 2], back: [7, 9], draw(S, P, f) { // espectro encapuchado que flota
         const fl = f.walk >= 0 ? [0, -1, 0, 1][f.walk] : -f.br;

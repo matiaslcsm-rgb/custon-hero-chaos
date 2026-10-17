@@ -467,6 +467,32 @@ Object.assign(INK_PLANS, {
         inkShape(g, [[26, 58 + fl], [28, 50 + fl], [31, 56 + fl], [33, 56 + fl], [36, 50 + fl], [38, 58 + fl], [36, 72 + fl], [28, 72 + fl]], c.main, rnd);
         inkEye(g, 30, 61 + fl, '#ff7ab8', 1.6); inkEye(g, 35, 61 + fl, '#ff7ab8', 1.6);
     },
+    // Orco (2026-10-17): grandote, colmillos y hacha
+    orc(g, c, rnd) {
+        const st = INK_A.step * 4;
+        inkShape(g, [[24, 70], [22, FOOT - st], [28, FOOT - st], [30, 72]], c.dark, rnd); inkShape(g, [[34, 72], [36, FOOT + st], [42, FOOT + st], [40, 70]], c.dark, rnd);
+        inkShape(g, [[18, 48], [46, 48], [48, 72], [16, 72]], c.main, rnd);
+        inkCircle(g, 34, 38, 9, c.main); inkEye(g, 37, 36, '#ffd166', 1.6);
+        g.fillStyle = '#e6dcc4'; g.fillRect(34, 43, 2, 3); g.fillRect(39, 43, 2, 3);
+        inkShape(g, [[50, 40], [50, 78]], INK.line, rnd, { open: true, width: 2.4 }); inkShape(g, [[50, 40], [58, 36], [58, 50], [50, 48]], '#9aa2ab', rnd);
+    },
+    // Demonio (2026-10-17): cuernos, cola y una bola de fuego en la mano
+    demon(g, c, rnd) {
+        const st = INK_A.step * 4;
+        inkShape(g, [[26, 70], [24, FOOT - st], [30, FOOT - st]], c.dark, rnd); inkShape(g, [[36, 70], [38, FOOT + st], [44, FOOT + st]], c.dark, rnd);
+        inkShape(g, [[22, 70], [12, 66], [8, 58]], c.dark, rnd, { open: true, width: 2 });
+        inkShape(g, [[22, 48], [42, 48], [44, 72], [20, 72]], c.main, rnd);
+        inkCircle(g, 33, 38, 8, c.main); inkShape(g, [[28, 32], [22, 20], [30, 30]], '#e6dcc4', rnd); inkShape(g, [[38, 31], [44, 19], [40, 32]], '#e6dcc4', rnd);
+        inkEye(g, 35, 37, '#ffe066', 1.5); inkEye(g, 40, 37, '#ffe066', 1.5);
+        inkCircle(g, 52, 50, 4, '#ff7a1a');
+    },
+    // Engendro de sangre (2026-10-17): masa que chorrea, con un ojo y dientes
+    blob(g, c, rnd) {
+        const sq = INK_A.step * 3, pts = []; for (let a = Math.PI; a <= Math.PI * 2.001; a += Math.PI / 12) pts.push([32 + Math.cos(a) * (24 + sq), FOOT - 2 + Math.sin(a) * (24 - sq)]);
+        inkShape(g, pts, c.main, rnd);
+        inkCircle(g, 38, 66, 5, '#f4efe6'); inkEye(g, 40, 66, '#1d1712', 2);
+        inkShape(g, [[22, 78], [46, 78]], INK.line, rnd, { open: true, width: 1.8 });
+    },
     // Escorpión: tenazas adelante y la cola con aguijón por encima del lomo
     scorpion(g, c, rnd) {
         for (let i = 0; i < 3; i++) { const x = 22 + i * 7, d = (i % 2 ? 1 : -1) * INK_A.step * 2; inkShape(g, [[x, 80], [x - 4 + d, 86], [x - 6 + d, FOOT]], INK.line, rnd, { open: true, width: 1.6 }); }

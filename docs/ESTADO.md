@@ -101,7 +101,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   ataques, parada y esquive de frente y de espaldas (ROADMAP 1d) y las otras armas como piezas.
 - **Hongo (2026-10-17, pedido del usuario):** cuerpo nuevo de criatura (`mushroom` en js/towerPixelBeasts.js e inkart.js),
   dibujo propio inspirado en el pack de MonoPixelArt (su licencia no deja subir los archivos). Sale en bosque y pantano.
-  También el **murciélago** (`bat`), escurridizo en todos los biomas. Regla: los packs de assets (MonoPixelArt, Tiny Swords,
+  También el **murciélago** (`bat`), escurridizo en todos los biomas; el **orco** (`orc`), el **demonio** (`demon`) y el
+  **engendro de sangre** (`blob`), y el gólem con cristales. Regla: los packs de assets (MonoPixelArt, Tiny Swords,
   Tiny RPG, Raven Icons) se usan solo de referencia; el repo es público y ninguna licencia deja subir sus archivos.
 - **La Torre por dentro (2026-10-14, pedido del usuario):** el piso 1 es afuera (el bosque al pie de la torre); del 2
   en adelante estás adentro: muro exterior, salones con portones y columnas (más enteros arriba). Cada piso tiene su
