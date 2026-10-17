@@ -39,6 +39,10 @@ function galeriaStart() {
             card(grid, label, i => pxbHeroFrame(L, kind, k0 + i, dir).img, n));
     });
 
+    // El caballero: todas las animaciones del pack de referencia, con nuestro dibujo (js/caballero.js)
+    const cab = section('🛡️ Caballero (movimientos del pack FreeKnight, dibujo propio)');
+    Object.keys(CABALLERO_ANIMS).forEach(a => card(cab, CABALLERO_NAMES[a] + ' · ' + CABALLERO_ANIMS[a].length, i => pxbHeroFrame(CABALLERO_LOOK, 'cab:' + a, i).img, CABALLERO_ANIMS[a].length));
+
     // Criaturas de la Torre (también los creeps de Custom Hero) y guardianes: caminar y quieto
     const colors = ['#8d8d8d', '#8b5e3c', '#6a994e', '#c08552', '#90caf9', '#9d0208', '#6a4c93'];
     const bodies = Object.keys(PXB).filter(b => !b.startsWith('boss:') && b !== 'hero'), bosses = Object.keys(PXB).filter(b => b.startsWith('boss:'));

@@ -1300,6 +1300,11 @@ test('Torre: generador de criaturas (bestiario amplio y fijo, nombres, rasgos de
     check(pxbFrame('mushroom', '#9c6644', ['spots'], 'walk', 2).img.width > 0 && inkFigure('mushroom', inkLookFor({ type: { plan: 'mushroom' }, color: '#9c6644' }), 'walk', 1).img.width > 0, 'el hongo se dibuja');
     check(pxbFrame('bat', '#6a4c93', [], 'walk', 1).img.width > 0 && inkFigure('bat', inkLookFor({ type: { plan: 'bat' }, color: '#6a4c93' }), 'walk', 1).img.width > 0 && new Set(Array.from({ length: 120 }, () => generateBeast('volcano', 'skirmisher', 0).genome.body)).has('bat'), 'el murciélago se dibuja y sale como escurridizo');
     check(galeriaHeroAnims(true).length === 11 && galeriaHeroAnims(false).every(([, kind, n]) => n > 0 && pxbHeroFrame(pxHeroLook({ key: 'AXE' }), kind, n - 1).img.width > 0), 'galería: cada animación del héroe se dibuja');
+    // el caballero: la misma cantidad de cuadros que cada animación del pack de referencia, y todos se dibujan
+    const cabPack = { idle: 10, run: 10, attack: 4, attack2: 6, combo: 10, dash: 2, roll: 12, hit: 1, death: 10, jump: 3, jumpFall: 2, fall: 3, crouch: 1, crouchTransition: 1,
+        crouchAttack: 4, crouchWalk: 8, slide: 2, slideStart: 1, slideEnd: 1, turnAround: 3, wallSlide: 3, wallHang: 1, wallClimb: 7 };
+    check(Object.entries(cabPack).every(([a, n]) => CABALLERO_ANIMS[a] && CABALLERO_ANIMS[a].length === n), 'caballero: las 23 animaciones con sus cuadros');
+    check(Object.keys(CABALLERO_ANIMS).every(a => CABALLERO_ANIMS[a].every((_, i) => pxbHeroFrame(CABALLERO_LOOK, 'cab:' + a, i).img.width > 0)) && !heroUsesArt(CABALLERO_LOOK), 'caballero: cada cuadro se dibuja con su yelmo');
     ['orc', 'demon', 'blob', 'golem'].forEach(b => check(pxbFrame(b, '#9d0208', [], 'walk', 1).img.width > 0 && inkFigure(b, inkLookFor({ type: { plan: b }, color: '#9d0208' }), 'walk', 1).img.width > 0, `${b}: se dibuja en pixel art y en tinta`));
     check(Object.values(BEAST_ROLES).some(r => r.bodies.includes('orc')) && Object.values(BEAST_ROLES).some(r => r.bodies.includes('demon')) && Object.values(BEAST_ROLES).some(r => r.bodies.includes('blob')), 'orco, demonio y engendro están en el bestiario');
     check(towerCreepPool(1).every(t => t.genome && t.biome === 'forest'), 'los pisos usan el bestiario generado de la run');

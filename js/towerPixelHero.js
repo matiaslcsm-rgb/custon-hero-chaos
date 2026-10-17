@@ -88,7 +88,7 @@ function pxhPose(S, L, f) {
     const eyeOn = !(f.blink || P.closed), eye = eyeOn ? (P.dim ? '#8a1a14' : '#ff2a1f') : '#2a0806', eye2 = eyeOn ? (P.dim ? '#6a120e' : '#e0180e') : '#2a0806';
     if (P.lie !== undefined && P.lie > 0) { pxhLying(S, L, P, C, H, T, cloth, eye, eye2); return; }
     if (P.roll !== undefined) { pxhRoll(S, L, P, C, H, T, eye); return; }
-    if (f.dir === 'down' || f.dir === 'up') { pxhPoseFacing(S, L, f, P, f.dir === 'down' ? 1 : -1, C, H, T, cloth, eye, eye2); return; }
+    if (f.dir === 'down' || f.dir === 'up' || P.face) { pxhPoseFacing(S, L, f, P, (P.face || f.dir) === 'down' ? 1 : -1, C, H, T, cloth, eye, eye2); return; }
     const bx = P.bx, by = P.by, lean = P.lean;
     const shX = 8.5 + bx + lean, shY = 9.5 + by + (P.sh || 0), hipX = 8.5 + bx, hipY = 15.5 + by;
     pxbShadow(S, 8.5 + bx * 0.5, 23, 5.5);
@@ -124,9 +124,12 @@ function pxhPose(S, L, f) {
     if (overhead) swordArm();
     // Capucha, la cara en sombra y los dos ojos rojos (se encienden en el golpe)
     const hx = shX + P.hd[0], hy = shY - 4 + P.hd[1];
+    if (L.helm) pxhHelm(S, L, P, hx, hy, H, eye);
+    else {
     S.ball(hx, hy, 3.5, 3.4, H); S.set(hx - 3.5, hy - 2, H[1]); S.set(hx - 4.5, hy - 1 + (P.lift > 0.5 ? 1 : 0), H[1]);
     S.ball(hx + 1.7, hy + 0.6, 1.9, 1.8, ['#0c0a09', '#15110f', '#1d1815', '#241e1a', '#2b2420']);
     S.dot(hx + 1.5, hy + 0.4, eye2); S.dot(hx + 3.5, hy + 0.4, eye);
+    }
     if (eyeOn && (P.glint || P.impact)) { S.dot(hx + 1.5, hy - 0.6, '#ff6a50'); S.dot(hx + 3.5, hy - 0.6, '#ff6a50'); }
     if (P.hurt) S.set(hx + 2.5, hy + 1.5, '#ff2a1f');
     // Brazo de adelante y el arma
@@ -187,21 +190,32 @@ function pxhPoseFacing(S, L, f, P, side, C, H, T, cloth, eye, eye2) {
     // Capucha: de frente, la cara en sombra con los dos ojos rojos; de espaldas, la punta de la capucha
     const hx = cx + P.hd[0] * 0.3, hy = shY - 4 + P.hd[1];
     S.ball(hx, hy, 3.6, 3.4, H);
-    if (side > 0) {
+    if (L.helm) { S.line(hx - 3, hy - 3.5, hx + (side > 0 ? 0 : 0), hy - 6, L.helm); S.set(hx - 1, hy - 5, L.helm); if (side > 0) { S.line(hx - 2.5, hy + 0.5, hx + 2.5, hy + 0.5, '#14110f'); S.dot(hx + 1, hy + 0.5, eye); } }
+    else if (side > 0) {
         S.ball(hx, hy + 0.9, 2.3, 1.9, ['#0c0a09', '#15110f', '#1d1815', '#241e1a', '#2b2420']);
         S.dot(hx - 1, hy + 0.6, eye2); S.dot(hx + 1, hy + 0.6, eye);
         if (eyeOn && (P.glint || P.impact)) { S.dot(hx - 1, hy - 0.4, '#ff6a50'); S.dot(hx + 1, hy - 0.4, '#ff6a50'); }
     } else { S.set(hx, hy - 3.5, H[3]); S.line(hx, hy - 2.5, hx, hy + 2.5, H[1]); } // la costura de atrás
     if (!behind) drawWeapon();
 }
+// Yelmo (el caballero, js/caballero.js): casco de acero con visera, un ojo que brilla por la ranura y penacho del color L.helm
+function pxhHelm(S, L, P, hx, hy, H, eye) {
+    S.ball(hx, hy, 3.4, 3.3, H); S.rect(Math.round(hx - 3), Math.round(hy + 2), 7, 1, H[1]);  // casco y el borde de abajo
+    S.line(hx, hy + 0.4, hx + 3.5, hy + 0.4, '#14110f'); S.dot(hx + 2.5, hy + 0.4, eye);      // la ranura de la visera
+    S.set(hx + 3, hy - 1.5, H[4]);                                                               // brillo
+    const w = P.lift > 0.5 || P.lean < -1 ? 1 : 0;                                               // el penacho flamea para atrás
+    S.line(hx, hy - 3.4, hx - 4 - w, hy - 4.5 + w, L.helm, 2); S.set(hx - 5 - w, hy - 3.5 + w, shade(L.helm, -0.3));
+}
 // Rodando (esquive): un ovillo de capa con la capucha que gira
 function pxhRoll(S, L, P, C, H, T, eye) {
     pxbShadow(S, 9, 23, 5);
-    S.ball(9, 18, 4.6, 4.2, C);
-    const a = P.roll ? 0.9 : -1.4, hx = 9 + Math.cos(a) * 3.2, hy = 18 + Math.sin(a) * 3.2;
-    S.ball(hx, hy, 2.8, 2.6, H); S.set(hx + 1, hy + 0.5, eye);
-    S.rect(P.roll ? 5 : 11, P.roll ? 21 : 15, 2, 2, T[1]); // una bota que asoma
-    S.line(9 - Math.cos(a) * 2, 18 - Math.sin(a) * 2, 9 - Math.cos(a) * 6, 18 - Math.sin(a) * 6, PXB_STEEL[3]); // la espada pegada al cuerpo
+    const cy = 18 + (P.ry || 0);
+    S.ball(9, cy, 4.6, 4.2, C);
+    const a = -1.4 + P.roll * 2.3, hx = 9 + Math.cos(a) * 3.2, hy = cy + Math.sin(a) * 3.2;
+    S.ball(hx, hy, 2.8, 2.6, H); S.set(hx + 1, hy + 0.5, L.helm ? '#14110f' : eye);
+    if (L.helm) S.set(hx - Math.cos(a) * 3, hy - Math.sin(a) * 3, L.helm);
+    S.rect(9 - Math.cos(a) * 3.5 - 1, cy - Math.sin(a) * 3.5 - 1, 2, 2, T[1]); // una bota que asoma (del lado contrario a la cabeza)
+    S.line(9 - Math.cos(a + 1) * 2, cy - Math.sin(a + 1) * 2, 9 - Math.cos(a + 1) * 6, cy - Math.sin(a + 1) * 6, PXB_STEEL[3]); // la espada pegada al cuerpo
 }
 // Tendido (muerte): de costado en el piso, la espada al lado, los ojos que se apagan
 function pxhLying(S, L, P, C, H, T, cloth, eye, eye2) {
@@ -240,7 +254,7 @@ PXH_ANIM.swing3 = PXH_ANIM.swing1;
 PXB.hero = { w: Math.round(18 * PXH_RES), h: Math.round(24 * PXH_RES), head: [8, 2], back: [8, 9], draw() {} };
 function pxbHeroFrame(L, kind, k, dir = 'side') {
     if (heroUsesArt(L)) return heroArtSprite(kind, k, dir); // con espada: los cuadros dibujados (de frente y de espaldas para quieto y caminar)
-    const key = ['hero', L.cape, L.hood, L.trim, L.glow, L.weapon, kind, k, dir].join('|');
+    const key = ['hero', L.cape, L.hood, L.trim, L.glow, L.weapon, L.helm || '', kind, k, dir].join('|');
     if (pxbCache[key]) return pxbCache[key];
     const f = { pose: pxhFramePose(kind, k), blink: kind === 'idle' && k >= 4, idle: kind === 'idle' ? k % 4 : 0, dir, kind };
     const ex = kind === 'idle' || kind === 'walk' ? 0 : 8; // los tajos, el esquive y la caída salen del cuerpo: más lienzo (sigue centrado)
@@ -344,7 +358,7 @@ const HERO_ART_SEQ = {
     swing3: ['block', 'block', 'block', 'block', 'block', 'block'],    // la parada (towerParry.js)
     dash: ['walk1', 'walk1', 'walk1', 'walk3']
 };
-function heroUsesArt(L) { return typeof HERO_ART !== 'undefined' && L && L.weapon === 'sword'; }
+function heroUsesArt(L) { return typeof HERO_ART !== 'undefined' && L && L.weapon === 'sword' && !L.helm; }
 // Cuál dibujo y cómo: corrimiento del cuerpo (respirar), parpadeo, retroceso, tendido
 function heroArtPick(kind, k, dir = 'side') {
     const view = dir === 'down' ? 'front' : dir === 'up' ? 'back' : null; // de frente o de espaldas: quieto, caminar y el golpe recibido
