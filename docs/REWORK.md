@@ -878,6 +878,8 @@ Las fases 3 y 4 son las más grandes: hay que rehacer pruebas y volver a medir e
 también tiene que aprender a esquivar los ataques anunciados).
 
 ## Interfaz y calidad de vida (lista viva)
+- **Galería de personajes** (2026-10-17, pedido): botón 🎞️ en la portada (`index.html?galeria`, js/galeria.js) con cada
+  personaje y cada animación en loop, para revisar el arte de un vistazo. Esc vuelve a la portada.
 - ✅ **Custom Hero: muerte súbita** (2026-10-15, `js/roundEconomy.js`): desde la ronda 15 los héroes reciben +50% de
   daño por ronda (de creeps, duelos y jefes) hasta que quede uno. Se anuncia en el registro al empezar cada ronda y se
   ve en la barra de arriba al lado de la ronda ("15 ☠+50%"). En la Torre no corre. Medido con el piloto: las partidas

@@ -1018,6 +1018,16 @@ body.on-title { overflow: hidden; }
 #round-summary .rsum-tip { font-size: 0.8rem; color: #95d5b2; margin-top: 6px; }
 #round-summary .up { color: #52b788; } #round-summary .down { color: #ef476f; }
 
+/* La galería de personajes (index.html?galeria): todas las animaciones en loop */
+#galeria { position: fixed; inset: 0; z-index: 9999; overflow-y: auto; background: #15141a; color: #ddd; font-family: monospace; padding: 0 16px 32px; }
+#galeria .ga-top { position: sticky; top: 0; background: #15141a; padding: 12px 0; border-bottom: 1px solid #2b2a33; z-index: 1; }
+#galeria .ga-top span { color: #8d8b99; font-size: 0.8rem; margin-left: 8px; }
+#galeria h3 { margin: 18px 0 8px; font-size: 1rem; color: #e0b44d; }
+#galeria .ga-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+#galeria .ga-card { background: #1f1d26; border: 1px solid #2b2a33; padding: 4px; text-align: center; }
+#galeria .ga-card canvas { display: block; image-rendering: pixelated; max-width: 100%; }
+#galeria .ga-card p { margin: 4px 0 0; font-size: 0.7rem; color: #a9a6b5; }
+
 /* El muñeco (index.html?muneco): laboratorio de animaciones y cajas de golpe */
 #muneco { position: fixed; inset: 0; z-index: 9999; background: #15141a; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: #ddd; font-family: monospace; }
 #mu-canvas { image-rendering: pixelated; border: 2px solid #2b2a33; }

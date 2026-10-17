@@ -460,6 +460,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 
 ## Hecho por el modo automático
 (Fecha · ítem · commit · qué se midió.)
+- 2026-10-17 · Galería de personajes (a pedido, en el chat) · ver git log · `index.html?galeria` y botón en la portada: 13 héroes (el de la Torre con sus 3 vistas) con quieto, caminar, combo, parada, esquive, golpe y caída; 21 criaturas y 5 guardianes caminando y quietos; 150 recuadros en loop. Pruebas 281/281.
 - 2026-10-17 · Orco, demonio, engendro de sangre y gólem con cristales (a pedido, en el chat) · ver git log · 3 cuerpos nuevos (pixel art y tinta): orco peleador/pegador en todos los biomas, demonio hechicero/maldecidor en volcán, pantano y desierto, engendro pegador/tanque en pantano y volcán; el gólem suma cristales que brillan. Pruebas 281/281.
 - 2026-10-17 · Murciélago (a pedido, en el chat) · ver git log · cuerpo nuevo `bat` (pixel art y tinta) que aletea y flota; sale como escurridizo en todos los biomas (~1 de cada 4). Los packs bajados se usan solo de referencia: el repo es público y sus licencias no dejan subir los archivos.
 - 2026-10-17 · Hongo con patas (a pedido, en el chat) · ver git log · cuerpo nuevo `mushroom` (pixel art y tinta), peleador o aturdidor solo en bosque y pantano (~1 de cada 6 peleadores). Pruebas 281/281.

@@ -1,7 +1,7 @@
 // Punto de entrada: conecta los botones y arranca el bucle principal.
 
 // Versión visible en el menú: si no coincide con la última subida, el navegador muestra una copia vieja (Ctrl+F5).
-const GAME_VERSION = '2026-10-17 · Orco, demonio, engendro y gólem con cristales';
+const GAME_VERSION = '2026-10-17 · Galería de personajes con todas sus animaciones';
 document.getElementById('game-version').textContent = `Versión ${GAME_VERSION}`;
 
 document.getElementById('start-wave-btn').onclick = () => startWave(); // sin argumentos: si recibe el clic, lo toma como plan de duelo y la oleada no arranca (arreglado 2026-10-13)
