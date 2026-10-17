@@ -304,76 +304,93 @@ const HERO_ART = {
 };
 
 // --- DE FRENTE Y DE ESPALDAS, POR PIEZAS (2026-10-17, pedido: "diseñar cada cosa por separado y después unirlas") ---
-// Copian los rasgos del de costado (idle): 24 filas de alto, capucha redonda con los dos ojos juntos, esclavina, broche
-// y cinturón dorados, capa hasta la rodilla y botas doradas; luz desde la izquierda. Cada pieza ocupa el ancho del
-// cuadro (17) y empieza en su fila y; las armas van aparte con su punto de agarre (gx, gy), así un arma nueva se
-// dibuja una vez y usa todas las poses. Cada cuadro es una lista de capas, de atrás para adelante:
+// Calcadas de la hoja que pasó el usuario (docs/arte/heroe-hoja-8-direcciones.png, figuras S y N), llevadas a 24 filas
+// como el de costado con docs/arte/hoja-8-direcciones.py y limpiadas a mano: capucha en punta, armadura dorada de
+// frente, la capa que cae más de un lado y abre en campana de espaldas, la espada cruzada adelante. Cada pieza ocupa el
+// ancho del cuadro (17) y empieza en su fila y; las armas van aparte con su punto de agarre (gx, gy), así un arma
+// nueva se dibuja una vez y usa todas las poses. Cada cuadro es una lista de capas, de atrás para adelante:
 // [pieza, dx, dy] (el cuerpo) o [arma, x, y] (dónde está la mano).
 const HERO_PARTS = {
     body: {
         cabezaFrente: { y: 0, rows: [
-            '......AAAAA......',
-            '.....AZZZZXA.....',
-            '....AZZZZZXWA....',
-            '...AZZZZZZXWUA...',
-            '...AZZAAAAAXUA...',
-            '..AZZAAAAAAAXUA..',
-            '..AZZAA!A!AAXUA..',
-            '..AWZAAAAAAAXUA..',
-            '..AWZXAAAAAXWUA..',
-            '.AWZXXXAAAXXWUSA.',  // la esclavina sobre los hombros
-            'AWZXXWWXXXWWUUSRA',
+            '.......AAAA......',  // la punta de la capucha
+            '......AZXXXA.....',
+            '.....AZXXXXWA....',
+            '....AZXXAAAXWA...',
+            '....AZXAAAAAWUA..',  // la abertura de la cara
+            '....AZAAAAAAAUA..',
+            '...AZXAA!A!AAUA..',  // los ojos
+            '...AZXAAAAAAAUA..',
+            '..AWZXXAAAAAXUSA.',
+            '.AWZXXXXWWXXXUSRA',  // la capa sobre los hombros
         ] },
         cabezaEspalda: { y: 0, rows: [
-            '......AAAAA......',
-            '.....AXZZZXA.....',
-            '....AXZZZZZXA....',
-            '...AWZZZZZZZWA...',
-            '...AWZZZZZZZWA...',
-            '..AWZZZZWZZZZWA..',  // la costura de la capucha
-            '..AUWZZZWZZZXWA..',
-            '..AUWXZZWZZXWUA..',
-            '..ASUWWWWWWWUSA..',
-            '.AWZXXXXWXXXXZWA.',
-            'AWZXXWUWUWUWXXWSA',
+            '.......AA........',
+            '......AXXA.......',
+            '.....AXZXXA......',
+            '.....AXZZXUA.....',
+            '....AXZZZXXUA....',
+            '....AXZZXXXUA....',
+            '....AXZXWXXSA....',
+            '....AUXXWXUSA....',
+            '.....AUSWUSA.....',
+            '...AAXSUUUSXAA...',
         ] },
-        torsoFrente: { y: 11, rows: [  // la túnica gris con el broche y el cinturón
-            '....AVYbcbYVA....',
-            '....AVYYcYYVA....',
-            '....AVYYcYYVA....',
-            '....AOObcbOOA....',
-            '.....AYYYYYA.....',
+        torsoFrente: { y: 10, rows: [  // la armadura dorada sobre la túnica, con el cinturón
+            '....AYbbcbbYA....',
+            '...AVYYbcbYYVA...',
+            '...AVTYYcYYTVA...',
+            '...AVOObcbOOVA...',
+            '....AYYYYYYYA....',
             '.....AYTATYA.....',
         ] },
-        capaAbierta: { y: 11, rows: [  // de frente, por detrás del cuerpo: se ve a los costados
+        capaAbierta: { y: 10, rows: [  // de frente, por detrás del cuerpo: cae más larga del lado izquierdo
             'AZXWPPPPPPPPPUSRA',
-            'AXWRPPPPPPPPPRSRA',
-            'AXRPPPPPPPPPPPRPA',
-            'ARRPPPPPPPPPPPRPA',
-            'ARPA.........APPA',
-            '.APA.........APA.',
-            '.APA.........APA.',
-            '.AA...........AA.',
+            'AXWRPPPPPPPPPURRA',
+            'AXRRPPPPPPPPPRRPA',
+            'AWRRPPPPPPPPPRPPA',
+            'AWRRP.......PRPA.',
+            'AXRRA.......APA..',
+            'AXRRA.......APA..',
+            'AWRA.........AA..',
+            'AXRA.............',
+            '.AA..............',
         ] },
-        capaCerrada: { y: 11, rows: [  // de frente, por delante: tapa la túnica (abrochada arriba)
-            'AZXWXXWbcbWUUUSRA',
-            'AXWXXWWWAUUUUSSRA',
-            'AXWXWWWWAUUUSSRRA',
-            'AXWWWWWUAUUSSRRPA',
-            'AWWWWWUUASSSRRRPA',
+        capaCerrada: { y: 10, rows: [  // de frente, por delante: quieto se cierra (abrochada arriba) y tapa la armadura
+            '.AZXWXWbcbWUUSRA.',
+            '.AXWXWWWAUUUSSRA.',
+            '.AXWXWWWAUUUSRRA.',
+            '.AXWWWWUAUUSSRPA.',
+            '.AWWWWUUASSSRRPA.',
             '.AWWWUUUASSRRRPA.',
-            '.AWUUUUSASRRRPPA.',
-            '..AAAAAAAAAAAAA..',
+            '.AXWUUUSASRRRPA..',
+            '.AXWUUSSASRRPPA..',
+            '.AXRAAAAAAAAAA...',
+            '..AA.............',
         ] },
-        capaEspalda: { y: 11, rows: [  // de espaldas: la capa tapa todo, con sus pliegues
-            'AXWUWURURURUWUWSA',
-            'AXWUSURURURUSUWSA',
-            'AWUURURURURURUUSA',
-            'AUUSRURURURURSUSA',
-            'ARUSRPRPRPRPRSURA',
-            'ARSRPRPRPRPRPRSRA',
-            '.ARSPRPRPRPRPSRA.',
-            '.AARPAPAPAPAPRAA.',
+        capaEspalda: { y: 10, rows: [  // de espaldas: la capa tapa todo y abre en campana
+            '..AXXUUXUXUUUSA..',
+            '.AVAXUUXUXUUSAVA.',
+            '.AVAXUSXUXUSUAVA.',
+            '.AbAXUSURUSUSAbA.',
+            '..AXXUSURURUSRA..',
+            '..AXUSRURURUSRA..',
+            '..AXUSRPRURPSRA..',
+            '..AXUSRPRPRPSRA..',
+            '..ARSRPRPRPRSRA..',
+            '..AAAPAPAPAPAAA..',
+        ] },
+        capaEspaldaVuelo: { y: 10, rows: [  // al caminar el ruedo se va para un costado
+            '..AXXUUXUXUUUSA..',
+            '.AVAXUUXUXUUSAVA.',
+            '.AVAXUSXUXUSUAVA.',
+            '.AbAXUSURUSUSAbA.',
+            '..AXXUSURURUSRA..',
+            '..AXUSRURURUSRA..',
+            '...AXUSRPRURPSRA.',
+            '...AXUSRPRPRPSRA.',
+            '...ARSRPRPRPRSRA.',
+            '...AAAPAPAPAPAAA.',
         ] },
         piernas: { y: 17, rows: [
             '.....AQQAQQA.....',
@@ -404,20 +421,22 @@ const HERO_PARTS = {
         ] },
     },
     weapons: {
-        espada: { gx: 1, gy: 0, rows: ['bcb', '.d.', '.e.', '.e.', '.e.', '.e.', '.a.'] },   // colgando, la punta abajo
-        espadaVaiven: { gx: 1, gy: 0, rows: ['bcb', '.d.', '.e.', '.e.', '..e', '..e', '..a'] } // al caminar se balancea
+        espada: { gx: 0, gy: 0, rows: ['cb....', '.bd...', '..e...', '...e..', '....e.', '.....a'] },  // cruzada adelante, la punta abajo
+        espadaVaiven: { gx: 0, gy: 0, rows: ['cb...', '.bd..', '..e..', '..e..', '...e.', '...a.'] },  // al caminar se balancea
+        espadaEspalda: { gx: 0, gy: 0, rows: ['c', 'd', 'e', 'e', 'e', 'a'] },                         // de espaldas, al costado
     },
-    // Las capas de cada cuadro. Caminar: con el paso abierto el cuerpo baja un píxel y la espada se balancea.
+    // Las capas de cada cuadro. Quieto de frente con la capa cerrada (la espada asoma por abajo). Caminar: con el paso
+    // abierto el cuerpo baja un píxel, la espada se balancea y de espaldas el ruedo de la capa se va para un costado.
     frames: (() => {
-        const front = (legs, dy, sword) => [['capaAbierta', 0, dy], [legs, 0, 0], ['torsoFrente', 0, dy], ['cabezaFrente', 0, dy], [sword, 4, 14 + dy]];
-        const back = (legs, dy, sword) => [[legs, 0, 0], ['cabezaEspalda', 0, dy], ['capaEspalda', 0, dy], [sword, 15, 13 + dy]];
+        const front = (legs, dy, sword) => [['capaAbierta', 0, dy], [legs, 0, 0], ['torsoFrente', 0, dy], ['cabezaFrente', 0, dy], [sword, 5, 14 + dy]];
+        const back = (legs, dy, cape) => [[legs, 0, 0], ['cabezaEspalda', 0, dy], [cape, 0, dy], ['espadaEspalda', 15, 14 + dy]];
         return {
-            frontIdle: front('piernas', 0, 'espada'),
+            frontIdle: [['piernas', 0, 0], ['espada', 8, 16], ['cabezaFrente', 0, 0], ['capaCerrada', 0, 0]],
             frontWalk0: front('pasoIzq', 1, 'espadaVaiven'), frontWalk1: front('piernas', 0, 'espada'),
             frontWalk2: front('pasoDer', 1, 'espadaVaiven'), frontWalk3: front('piernas', 0, 'espada'),
-            backIdle: back('piernas', 0, 'espada'),
-            backWalk0: back('pasoIzq', 1, 'espadaVaiven'), backWalk1: back('piernas', 0, 'espada'),
-            backWalk2: back('pasoDer', 1, 'espadaVaiven'), backWalk3: back('piernas', 0, 'espada'),
+            backIdle: back('piernas', 0, 'capaEspalda'),
+            backWalk0: back('pasoIzq', 1, 'capaEspaldaVuelo'), backWalk1: back('piernas', 0, 'capaEspalda'),
+            backWalk2: back('pasoDer', 1, 'capaEspaldaVuelo'), backWalk3: back('piernas', 0, 'capaEspalda'),
         };
     })()
 };

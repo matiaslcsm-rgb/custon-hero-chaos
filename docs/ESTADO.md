@@ -96,7 +96,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   piso 1, en el rincón más apartado del bosque); se juntan al
   pisarlas, quedan para siempre y el Cuaderno (N) cuenta la historia de la expedición en orden (REWORK.md §6).
 - **Héroe por piezas (2026-10-17, pedido del usuario):** de frente y de espaldas se arma con piezas (cabeza, torso,
-  capas, piernas y la espada con su agarre; `HERO_PARTS` en js/towerHeroArt.js) con los rasgos del de costado. Faltan
+  capas, piernas y la espada con su agarre; `HERO_PARTS` en js/towerHeroArt.js), calcado de la hoja de 8 direcciones
+  del usuario (`docs/arte/heroe-hoja-8-direcciones.png`); quieto de frente con la capa cerrada. Faltan
   ataques, parada y esquive de frente y de espaldas (ROADMAP 1d) y las otras armas como piezas.
 - **La Torre por dentro (2026-10-14, pedido del usuario):** el piso 1 es afuera (el bosque al pie de la torre); del 2
   en adelante estás adentro: muro exterior, salones con portones y columnas (más enteros arriba). Cada piso tiene su

@@ -1169,6 +1169,14 @@ el mismo paso; lo grande queda acá, ordenado por impacto.
     los ojos juntos, broche y cinturón dorados, capa hasta la rodilla y luz desde la izquierda. Al caminar, con el
     paso abierto el cuerpo baja un píxel y la espada se balancea. Un arma nueva se dibuja una vez con su agarre y
     usa todas las poses. Hoja con las piezas sueltas y los cuadros: `docs/arte/heroe-piezas.py` → `.png`.
+    **Calcado de la hoja del usuario** (2026-10-17, "se ve muy redondo y feo"; pasó una hoja de 8 direcciones,
+    `docs/arte/heroe-hoja-8-direcciones.png`): `docs/arte/hoja-8-direcciones.py` lleva las figuras S y N a 24 filas
+    con la paleta (la hoja no tiene grilla pareja: ~5 px por píxel el quieto, ~2,7 el caminar) y las piezas se
+    limpiaron a mano encima: capucha en punta, armadura dorada de frente, capa que cae más larga de un lado, la
+    espada cruzada adelante; de espaldas la capucha se cierra en el cuello, asoman brazos y guanteletes y al
+    caminar el ruedo se va para un costado. Quieto de frente la capa se cierra (pedido) y asoma la punta de la
+    espada; al caminar se abre. El caminar de frente de la hoja está de tres cuartos: de frente se usa el quieto
+    con las piernas por piezas.
     **Caminar sin parpadeo** (2026-10-14, "parpadea mucho cuando se mueve, como que le faltan cuadros"). Medido cuadro
     por cuadro, eran tres cosas: (1) caminando de seguido llegaba a su casilla un instante antes del paso siguiente y se
     colaba un cuadro de quieto cada 2-3 pasos → ahora sigue "caminando" 0,12 s después de frenar (`PXG.walkGrace`, vale
