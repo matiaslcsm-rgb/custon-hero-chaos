@@ -462,6 +462,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 
 ## Hecho por el modo automático
 (Fecha · ítem · commit · qué se midió.)
+- 2026-10-17 · El juego se actualiza solo (a pedido, en el chat) · ver git log · al abrir compara GAME_VERSION con el main.js del servidor y, si cambió, rebaja la página y sus ~100 archivos y recarga una vez por versión. No corre en ?test.
 - 2026-10-17 · El caballero jugable en el muñeco (a pedido, en el chat) · ver git log · tecla V lo cambia; corre (10 cuadros), combo de 2 golpes (tajo 10 de daño, barrido 12), rueda en el esquive, C agacha (camina al 45% y la caja baja de 22 a 10: las bolas a 14 pasan por arriba), tajo agachado 9; golpe y muerte con sus cuadros. Pruebas 282/282.
 - 2026-10-17 · Caballero con todas las animaciones del pack FreeKnight (a pedido, en el chat) · ver git log · se midió cada cuadro del pack (alto, cabeza, ángulo de la espada) y se pasó a poses del muñeco ×0,54; 23 animaciones, 105 cuadros, mismo conteo que el pack; dibujo propio (yelmo con penacho, capa azul). Por ahora solo en la galería. Pruebas 281/281.
 - 2026-10-17 · Galería de personajes (a pedido, en el chat) · ver git log · `index.html?galeria` y botón en la portada: 13 héroes (el de la Torre con sus 3 vistas) con quieto, caminar, combo, parada, esquive, golpe y caída; 21 criaturas y 5 guardianes caminando y quietos; 150 recuadros en loop. Pruebas 281/281.

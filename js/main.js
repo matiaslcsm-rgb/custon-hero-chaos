@@ -1,8 +1,21 @@
 // Punto de entrada: conecta los botones y arranca el bucle principal.
 
 // Versión visible en el menú: si no coincide con la última subida, el navegador muestra una copia vieja (Ctrl+F5).
-const GAME_VERSION = '2026-10-17 · El caballero se juega en el muñeco (V; C para agacharse)';
+const GAME_VERSION = '2026-10-17 · El juego se actualiza solo al abrirlo';
 document.getElementById('game-version').textContent = `Versión ${GAME_VERSION}`;
+// Se actualiza solo (2026-10-17, "no se actualizó"): GitHub Pages deja el juego en la caché del navegador hasta 10 min.
+// Si el main.js del servidor trae otra versión, se vuelven a bajar la página y sus archivos y se recarga (una vez por versión).
+(async () => {
+    if (/[?&]test\b/.test(location.search) || location.protocol === 'file:') return;
+    try {
+        const live = ((await (await fetch('js/main.js', { cache: 'no-store' })).text()).match(/GAME_VERSION = '([^']*)'/) || [])[1];
+        if (!live || live === GAME_VERSION || sessionStorage.getItem('chc-actualizado') === live) return;
+        sessionStorage.setItem('chc-actualizado', live);
+        const html = await (await fetch('index.html', { cache: 'reload' })).text();
+        await Promise.all([...html.matchAll(/(?:src|href)="([^":]+\.(?:js|css))"/g)].map(m => fetch(m[1], { cache: 'reload' })).concat([fetch(location.href, { cache: 'reload' })]));
+        location.reload();
+    } catch (e) { /* sin red o sin sessionStorage: sigue con lo que hay */ }
+})();
 
 document.getElementById('start-wave-btn').onclick = () => startWave(); // sin argumentos: si recibe el clic, lo toma como plan de duelo y la oleada no arranca (arreglado 2026-10-13)
 document.getElementById('restart-btn').onclick = resetGame;
