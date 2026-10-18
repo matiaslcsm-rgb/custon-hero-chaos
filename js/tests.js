@@ -4334,7 +4334,8 @@ Object.keys(HERO_TEMPLATES).forEach((key, i) => {
 });
 
 test('Custom Hero: pantalla de fin de partida — puesto, rondas, duelos, oro, build y otra partida', () => {
-    const r = simulateGame(0, true, 3); // con dios: llega al final de la ronda 3
+    chProfileMemory = null; check(!chProfilePersist, 'en las pruebas el perfil no toca lo guardado');
+    const r = simulateGame(1, true, 3); // el Sniper, con dios: llega al final de la ronda 3
     checkEq(r.state, 'ENDED', 'la partida termina');
     const box = document.getElementById('match-summary');
     check(box && box.style.display === 'block', 'se ve el resumen');
@@ -4347,13 +4348,21 @@ test('Custom Hero: pantalla de fin de partida — puesto, rondas, duelos, oro, b
     check(!box.querySelector('#ms-watch'), 'terminada la partida, no hay "seguir mirando"');
     box.querySelector('#ms-again').click();
     checkEq(gameState, 'HERO_SELECT', '"Otra partida" lleva a elegir héroe');
+    const rsum = document.getElementById('round-summary'); check(!rsum || rsum.style.display === 'none', 'sin la tarjeta de la última ronda');
     check(box.style.display === 'none', 'y cierra el resumen');
     // eliminado a mitad de partida: el resumen con "seguir mirando"
     newGame('AXE'); eliminateHero(player, 'Prueba');
     check(box.style.display === 'block' && box.querySelector('#ms-watch'), 'eliminado: resumen con "seguir mirando"');
     box.querySelector('#ms-watch').click();
     check(box.style.display === 'none', 'seguir mirando lo cierra');
-    resetGame();
+    endGame(); // la partida termina después: no se cuenta dos veces
+    // el perfil: 2 partidas, una con el Sniper y otra con Axe (eliminado), sin contar dos veces
+    const p = chProfile(), k0 = 'SNIPER';
+    checkEq(p.games, 2, 'el perfil cuenta las 2 partidas');
+    checkEq(p.heroes.AXE.games, 1, 'Axe, una sola vez aunque después terminó la partida');
+    check(p.heroes[k0].best >= 1 && p.heroes[k0].best <= 8, 'guarda el mejor puesto con cada héroe');
+    check(chProfileSummary().includes('2 partidas') && chProfileHeroesHtml().includes(chHeroName('AXE')), 'y se resume para el menú');
+    resetGame(); chProfileMemory = null;
 });
 
 // Riesgo 1 del mapa (docs/MAPA-CODIGO.md): lo que un modo deja escrito no le puede llegar al otro

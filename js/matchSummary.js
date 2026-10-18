@@ -31,8 +31,42 @@ function matchSummaryHtml(h) {
         `<button id="ms-menu" class="secondary-btn">🏠 Menú</button>`;
 }
 
+// --- HISTORIAL Y PERFIL (ROADMAP C1, 2026-10-18): partidas, victorias, top 3 y el mejor puesto con cada héroe ---
+// Clave propia, aparte de todo lo demás (como los récords de la Torre); en pruebas y demos queda en memoria.
+const CH_PROFILE_KEY = 'chc-perfil-ch';
+let chProfilePersist = !/[?&](test|demo|banco)/.test(location.search), chProfileMemory = null;
+const chProfileEmpty = () => ({ games: 0, wins: 0, top3: 0, heroes: {} });
+function chProfile() {
+    try { return Object.assign(chProfileEmpty(), JSON.parse((chProfilePersist ? localStorage.getItem(CH_PROFILE_KEY) : chProfileMemory) || '{}')); }
+    catch (e) { return chProfileEmpty(); }
+}
+// Una vez por partida: al terminar o al quedar eliminado (con el puesto de ese momento)
+function noteMatchProfile(h = player) {
+    if (!h || h.profileNoted || gameMode !== 'normal' || matchSummaryOff || !(gameState === 'ENDED' || h.eliminated)) return null;
+    h.profileNoted = true;
+    const p = chProfile(), rank = heroRank(h), hp = p.heroes[h.key] || (p.heroes[h.key] = { games: 0, wins: 0, best: 99 });
+    p.games++; hp.games++; hp.best = Math.min(hp.best, rank);
+    if (rank === 1) { p.wins++; hp.wins++; }
+    if (rank <= 3) p.top3++;
+    try { const s = JSON.stringify(p); if (chProfilePersist) localStorage.setItem(CH_PROFILE_KEY, s); else chProfileMemory = s; } catch (e) { /* sin lugar: no pasa nada */ }
+    return p;
+}
+const chHeroName = k => (HERO_TEMPLATES[k] || {}).name || k;
+function chProfileSummary(p = chProfile()) {
+    if (!p.games) return null;
+    const [favKey, fav] = Object.entries(p.heroes).sort((a, b) => b[1].games - a[1].games)[0];
+    const s = n => n === 1 ? '' : 's';
+    return `🏅 ${p.games} partida${s(p.games)} · ${p.wins} victoria${s(p.wins)} · ${p.top3} en el top 3 · favorito: ${chHeroName(favKey)} (${fav.games})`;
+}
+// el mejor puesto con cada héroe jugado, del mejor al peor
+function chProfileHeroesHtml(p = chProfile()) {
+    return Object.entries(p.heroes).sort((a, b) => a[1].best - b[1].best || b[1].games - a[1].games)
+        .map(([k, v]) => `<span title="${v.games} partida${v.games === 1 ? '' : 's'}, ${v.wins} ganada${v.wins === 1 ? '' : 's'}">${chHeroName(k)} ${v.best === 1 ? '🏆' : v.best + 'º'}</span>`).join(' · ');
+}
+
 function showMatchSummary(h = player) {
     if (typeof document === 'undefined' || !h || gameMode !== 'normal' || matchSummaryOff) return;
+    noteMatchProfile(h);
     let box = document.getElementById('match-summary');
     if (!box) { box = document.createElement('div'); box.id = 'match-summary'; box.className = 'modal'; document.body.appendChild(box); }
     box.innerHTML = `<div class="modal-box pause-box run-summary">${matchSummaryHtml(h)}</div>`;

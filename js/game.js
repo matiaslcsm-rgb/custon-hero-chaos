@@ -333,7 +333,7 @@ function resetGame() {
     duelPlan = null; currentBet = null; duelBets = []; nextRoundBoss = null; lastRoundBoss = null; lastDuelPair = [];
     cancelTargeting();
     paused = false; showPanel('pause-menu', false);
-    hideMatchSummary();
+    hideMatchSummary(); const rsum = document.getElementById('round-summary'); if (rsum) rsum.style.display = 'none'; // la tarjeta de la última ronda
     if (autopilot) setAutopilot(false); // el piloto de una partida no juega la siguiente (ni pasa de la Torre a Custom Hero)
     setPhaseTimer(PHASE_TIMES.heroSelect);
     resetHud();

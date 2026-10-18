@@ -421,7 +421,8 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
       los duelos y las oleadas pegan cada vez más fuerte hasta que quede uno.
 - [x] **Pantalla de fin de partida:** puesto, rondas, duelos ganados, oro total, build final y "▶ Otra partida".
       2026-10-18: `js/matchSummary.js`; también al quedar eliminado, con "👁 Seguir mirando".
-- [ ] **Historial y perfil:** partidas jugadas, victorias, top 3, héroe favorito, mejor puesto con cada héroe.
+- [x] **Historial y perfil:** partidas jugadas, victorias, top 3, héroe favorito, mejor puesto con cada héroe.
+      2026-10-18: en el menú de Custom Hero (clave nueva `chc-perfil-ch`; no toca nada de lo guardado antes).
 
 ## Fase C2 — Balance medido
 - [ ] **Sniper gana 8 de 14 partidas largas:** medir con `simulateGame` y bajarlo hasta ≤20%.
@@ -488,6 +489,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 
 ## Hecho por el modo automático
 (Fecha · ítem · commit · qué se midió.)
+- 2026-10-18 · Custom Hero C1: historial y perfil · ver git log · 3 partidas del piloto a 30 rondas (en memoria): "3 partidas · 0 victorias · 1 en el top 3 · favorito: Danzante Cinético (2)" y "Mejor puesto: Zeus 3º · Danzante Cinético 6º". Se anota una vez por partida (eliminado y después terminada: 1). De paso, la tarjeta de la última ronda ya no queda arriba en el menú. Pruebas 287/287.
 - 2026-10-18 · Custom Hero C1: pantalla de fin de partida · ver git log · 2 partidas del piloto a 30 rondas con el Danzante: 7º (eliminado en la 25, 0-7 en duelos, 5330g ganados, nivel 22) y 5º (eliminado en la 20, 3-2, 4572g, nivel 19); "Otra partida" lleva a elegir héroe; el banco no la muestra. Pruebas 287/287.
 - 2026-10-18 · Prueba de ida y vuelta entre modos · ver git log · Torre → portada → Custom Hero → portada → Torre revisando 11 ventanas, 6 paneles, modo, estado, mundo (20×12 en Custom Hero), cámara, pausa, piloto y tema. Salieron 2 cosas sucias: el piloto prendido en la Torre seguía jugando Custom Hero, y el inventario (y la tienda, el herrero, la Bitácora) quedaban abiertos porque `resetGame` soltaba al jugador antes de cerrarlos. Arreglado en `resetGame`. Pruebas 286/286.
 - 2026-10-18 · Muñeco, paso 2c (lo general al panel) · ver git log · 14 números más en "⚙️ General" (caminar, bola del muñeco, congelados del disparo 0,04, de la parada que devuelve 0,06 y del golpe recibido 0,05, × velocidad 1,5 y × daño 2 de la bola devuelta, sacudón 1,5); mismos valores que antes. Con el congelado al recibir en 0,2 el golpe congela 0,2 (prueba). Pruebas 285/285.

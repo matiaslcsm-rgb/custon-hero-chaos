@@ -220,6 +220,7 @@ function openLobby(mode) {
         <h2>${L.title}</h2><em>${L.tag}</em><p class="ts-lobby-desc">${L.desc}</p>
         <ul class="ts-facts">${L.facts().map(f => `<li>${f}</li>`).join('')}</ul>
         ${mode === 'tower' && towerRecordsSummary() ? `<div class="ts-records">${towerRecordsSummary()}</div>` : ''}
+        ${mode !== 'tower' && chProfileSummary() ? `<div class="ts-records">${chProfileSummary()}<br><small>Mejor puesto: ${chProfileHeroesHtml()}</small></div>` : ''}
         ${mode === 'tower' && towerSaveSummary() ? `<div class="ts-continue"><button class="ts-cont">▶ Continuar</button><small>${towerSaveSummary()}</small></div>` : ''}
         <div class="ts-lobby-actions"><button class="ts-play">${mode === 'tower' && towerSaveSummary() ? '✦ Nueva run' : '▶ Jugar'}</button><button class="ts-tut secondary-btn">📖 Tutorial</button>
             ${L.extra().map((x, i) => `<button class="secondary-btn" data-extra="${i}">${x[0]}</button>`).join('')}</div>
