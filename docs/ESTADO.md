@@ -55,7 +55,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   a la vista (REWORK.md). Ya tiene el combo de 3 tajos y la parada (1b), la onda de corte, el muñeco que tira bolas, recibir golpe, la
   parada que devuelve y la caída (1c). Los informes ya pueden traer capturas (`python docs/captura.py`, 2026-10-18).
   Con O se abre el panel para ajustar en vivo tiempos, cajas, congelado y empujón (2a, 2026-10-18). Lo ajustado se pega en
-  `js/munecoDatos.js` (2b). Sigue: pasar al panel los congelados fijos (2c). Los cuadros de frente y de espaldas esperan el arte del caballero.
+  `js/munecoDatos.js` (2b). El paso 2 quedó completo
+  (2c: lo general, la bola y los congelados fijos, también en el panel). Sigue: llevar las cajas de golpe a la Torre. Los cuadros de frente y de espaldas esperan el arte del caballero.
 - **Base sólida (2026-10-16, fases B0 y B1 del roadmap):** antes de sumar contenido, entender y estabilizar. Mapa de
   lo que comparten los dos modos en [`MAPA-CODIGO.md`](MAPA-CODIGO.md) (se vuelve a medir con
   `python docs/mapa-codigo.py`): la Torre corre arriba del motor de Custom Hero, el núcleo usa 174 globales de la

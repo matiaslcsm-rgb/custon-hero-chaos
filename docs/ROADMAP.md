@@ -96,7 +96,7 @@ Hoy el juego **no tiene cajas de golpe**: el daño se decide por distancia (si e
 - [x] **Capturas en los informes:** si una corrida cambia algo que se ve, el informe trae captura de antes y después
       (`docs/informes/img/`, PNG chicos) para aprobarlo sin abrir el juego. 2026-10-18: `python docs/captura.py`
       sirve el juego sin caché y guarda los PNG que le manda el navegador (cómo, en el mismo archivo).
-- [ ] **Muñeco, paso 2:** cajas de golpe a la vista con una tecla (rojo: lo que pega, solo en los cuadros activos;
+- [x] **Muñeco, paso 2:** cajas de golpe a la vista con una tecla (rojo: lo que pega, solo en los cuadros activos;
       verde: lo que puede ser golpeado; los proyectiles con su propia caja que viaja con la animación) y un panel para
       ajustar en vivo los tiempos, el tamaño de las cajas, el congelado al impacto y el empujón. Lo ajustado se guarda
       en un archivo de datos. (Las cajas a la vista ya estaban desde el 1a, tecla H.)
@@ -104,8 +104,8 @@ Hoy el juego **no tiene cajas de golpe**: el daño se decide por distancia (si e
         congelado, sacudón y la caja que pega (o el disparo); "Copiar datos" saca todo en JSON. 2026-10-18.
   - [x] 2b: el archivo de datos (`js/munecoDatos.js`) que el muñeco carga al empezar, con lo copiado del panel, y que el
         panel marque lo que cambió respecto de ese archivo. 2026-10-18.
-  - [ ] 2c: los golpes fijos que hoy no se ajustan (congelado de la parada que devuelve 0,06, de la onda 0,04 y del golpe
-        recibido 0,05; la bola del muñeco) pasan a los datos y al panel.
+  - [x] 2c: los golpes fijos que hoy no se ajustan (congelado de la parada que devuelve 0,06, de la onda 0,04 y del golpe
+        recibido 0,05; la bola del muñeco) pasan a los datos y al panel. 2026-10-18: entrada "⚙️ General" del panel.
 - [ ] **Prueba de ida y vuelta entre modos** (riesgo 1 del mapa): jugar un rato la Torre, volver a la portada y
       empezar Custom Hero (y al revés), y revisar que `player`, `COLS`/`ROWS`, `camera`, `autopilot`, `paused`,
       `gameState` y `towerRun` queden limpios. Si algo queda sucio, arreglarlo en un solo lugar (una función que
@@ -475,7 +475,8 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 
 ## Hecho por el modo automático
 (Fecha · ítem · commit · qué se midió.)
-- 2026-10-18 · Muñeco, paso 2b (archivo de datos) · ver git log · `js/munecoDatos.js` con los 9 movimientos y 75 números (los mismos de antes: el muñeco no cambia); "Copiar datos" da el archivo entero e idéntico si no tocaste nada (prueba); lo distinto del archivo se ve en amarillo (probado con la velocidad del esquive 210→250). Pruebas 285/285.
+- 2026-10-18 · Muñeco, paso 2c (lo general al panel) · ver git log · 14 números más en "⚙️ General" (caminar, bola del muñeco, congelados del disparo 0,04, de la parada que devuelve 0,06 y del golpe recibido 0,05, × velocidad 1,5 y × daño 2 de la bola devuelta, sacudón 1,5); mismos valores que antes. Con el congelado al recibir en 0,2 el golpe congela 0,2 (prueba). Pruebas 285/285.
+- 2026-10-18 · Muñeco, paso 2b (archivo de datos) · ver git log · `js/munecoDatos.js` con los 9 movimientos y 71 números (los mismos de antes: el muñeco no cambia); "Copiar datos" da el archivo entero e idéntico si no tocaste nada (prueba); lo distinto del archivo se ve en amarillo (probado con la velocidad del esquive 210→250). Pruebas 285/285.
 - 2026-10-18 · Muñeco, paso 2a (panel de ajustes) · ver git log · 10 movimientos con 4-10 números cada uno; probado escribiendo 0.15 en el congelado del remate (antes el punto lo agarraba el muñeco como "un cuadro"); un tajo con el daño en 33 le pega 33; no acepta negativos ni vacío. Pruebas 283/283.
 - 2026-10-18 · Capturas en los informes · ver git log · `docs/captura.py`: servidor sin caché que acepta PUT de PNG solo en `docs/informes/img/` (hasta 2 MB, revisa la firma PNG; un nombre con `..` da 400). Probado: captura del muñeco ×3 = 31 KB. Pruebas sin cambios de código del juego.
 - 2026-10-17 · El juego se actualiza solo (a pedido, en el chat) · ver git log · al abrir compara GAME_VERSION con el main.js del servidor y, si cambió, rebaja la página y sus ~100 archivos y recarga una vez por versión. No corre en ?test.

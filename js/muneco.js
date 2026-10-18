@@ -27,7 +27,11 @@ const MUNECO = {
     dummyWarn: 0.5,
     ball: { speed: 85, dmg: 20, w: 7, h: 7, life: 3 },
     shotZ: 14,                // los disparos vuelan a esta altura sobre el piso (la sombra marca dónde van)
-    crouchHurt: 10            // agachado, la caja donde te pegan baja a esto: las bolas (a 14 de alto) pasan por arriba
+    crouchHurt: 10,           // agachado, la caja donde te pegan baja a esto: las bolas (a 14 de alto) pasan por arriba
+    shotHitstop: 0.04,        // congelado cuando un disparo le pega al muñeco
+    parryHitstop: 0.06,       // congelado al devolver una bola con la parada
+    parryBack: 1.5, parryDmg: 2, // la bola devuelta vuelve así de rápida y pega así de fuerte (multiplicadores)
+    hurtHitstop: 0.05, hurtShake: 1.5 // al recibir un golpe: congelado y sacudón de la pantalla
 };
 // Datos de cada movimiento: los tres tiempos (s) y qué cuadros del dibujo van en cada uno ([tipo, número] de
 // pxbHeroFrame; se reparten parejo dentro del tiempo). hit: la caja que pega mirando a la derecha, desde los pies
@@ -204,7 +208,7 @@ function munecoShotsStep(M, dt) {
         p.age += dt; p.x += p.vx * dt; p.y += p.vy * dt;
         if (p.age > p.life || munecoBlocked(M, p.x, p.y, true)) return false; // se apaga contra paredes y cajones
         if (p.owner === 'hero') {
-            if (munecoOverlap(munecoShotBox(p), munecoDummyBox(M.dummy))) { munecoHitDummy(M, p.dmg); M.freeze = 0.04; return false; }
+            if (munecoOverlap(munecoShotBox(p), munecoDummyBox(M.dummy))) { munecoHitDummy(M, p.dmg); M.freeze = MUNECO.shotHitstop; return false; }
             return true;
         }
         if (!munecoOverlap(munecoShotBox(p), munecoHeroBox(h))) return true;
@@ -212,8 +216,8 @@ function munecoShotsStep(M, dt) {
         if (mv && mv.id === 'death') return true;                              // ya en el piso: le pasa por arriba
         if (mv && mv.id === 'dash' && ph.phase === 'active') return true;       // el esquive en su tiempo activo es intocable
         if (mv && mv.id === 'parry' && ph.phase === 'active' && mv.dx * -p.vx + mv.dy * -p.vy > 0) { // la parada mirando al disparo: lo devuelve
-            p.owner = 'hero'; p.kind = 'ball'; p.vx *= -1.5; p.vy *= -1.5; p.dmg *= 2; p.age = 0;
-            M.freeze = 0.06; M.parried = (M.parried || 0) + 1; M.numbers.push({ x: h.x, y: h.y - 30, v: '¡PARADA!', age: 0, col: '#7fd8ff' });
+            p.owner = 'hero'; p.kind = 'ball'; p.vx *= -MUNECO.parryBack; p.vy *= -MUNECO.parryBack; p.dmg *= MUNECO.parryDmg; p.age = 0;
+            M.freeze = MUNECO.parryHitstop; M.parried = (M.parried || 0) + 1; M.numbers.push({ x: h.x, y: h.y - 30, v: '¡PARADA!', age: 0, col: '#7fd8ff' });
             return true;
         }
         munecoHurtHero(M, p.dmg, p.vx, p.vy);
@@ -226,7 +230,7 @@ function munecoHurtHero(M, dmg, fromVx, fromVy) {
     h.hp = Math.max(0, h.hp - dmg); h.hurtAt = M.t; h.queued = null;
     const id = h.hp > 0 ? 'hurt' : 'death';
     h.move = { id, t: 0, dx: fromVx / n, dy: fromVy / n, hit: true };
-    M.freeze = 0.05; M.shake = Math.max(M.shake, 1.5);
+    M.freeze = MUNECO.hurtHitstop; M.shake = Math.max(M.shake, MUNECO.hurtShake);
     M.numbers.push({ x: h.x, y: h.y - 28, v: dmg, age: 0, col: '#ef476f' });
 }
 // El muñeco que ataca (tecla G): avisa (se sacude y muestra un "!") y tira una bola de paja hacia el héroe
@@ -410,12 +414,21 @@ const MUNECO_TUNE_NAMES = {
     startup: 'preparación (s)', active: 'activo (s)', recovery: 'recuperación (s)', dmg: 'daño', lunge: 'avance (px)',
     knock: 'empujón (px)', hitstop: 'congelado al impacto (s)', shake: 'sacudón', speed: 'velocidad (px/s)',
     'hit.x': 'caja que pega: distancia', 'hit.w': 'caja que pega: ancho', 'hit.h': 'caja que pega: alto',
-    'shot.speed': 'disparo: velocidad', 'shot.dmg': 'disparo: daño', 'shot.w': 'disparo: ancho', 'shot.h': 'disparo: alto', 'shot.life': 'disparo: dura (s)'
+    'shot.speed': 'disparo: velocidad', 'shot.dmg': 'disparo: daño', 'shot.w': 'disparo: ancho', 'shot.h': 'disparo: alto', 'shot.life': 'disparo: dura (s)',
+    // 2c: lo general (MUNECO)
+    walk: 'caminar (px/s)', dummyEvery: 'el muñeco tira cada (s)', dummyWarn: 'avisa antes (s)',
+    'ball.speed': 'bola: velocidad', 'ball.dmg': 'bola: daño', 'ball.w': 'bola: ancho', 'ball.h': 'bola: alto', 'ball.life': 'bola: dura (s)',
+    shotHitstop: 'congelado del disparo (s)', parryHitstop: 'congelado al devolver (s)', parryBack: 'devuelta: × velocidad',
+    parryDmg: 'devuelta: × daño', hurtHitstop: 'congelado al recibir (s)', hurtShake: 'sacudón al recibir'
 };
+const MUNECO_TUNE_TIME = /^(startup|active|recovery|hitstop|shot\.life|ball\.life|dummyEvery|dummyWarn|\w+Hitstop|parryBack|parryDmg|hurtShake)$/; // pasos de 0,01
+// qué se ajusta: cada movimiento, más "general" (la bola del muñeco y los congelados fijos)
+function munecoTuneIds() { return Object.keys(MUNECO_MOVES).concat('general'); }
+function munecoTuneTarget(id) { return id === 'general' ? MUNECO : MUNECO_MOVES[id]; }
 // los números ajustables de un movimiento, como [ruta, valor] (un nivel adentro: hit, shot)
 function munecoTuneFields(id) {
     const out = [];
-    for (const [k, v] of Object.entries(MUNECO_MOVES[id])) {
+    for (const [k, v] of Object.entries(munecoTuneTarget(id))) {
         if (typeof v === 'number' && MUNECO_TUNE_NAMES[k]) out.push([k, v]);
         else if (v && typeof v === 'object' && !Array.isArray(v)) for (const [k2, v2] of Object.entries(v)) if (typeof v2 === 'number' && MUNECO_TUNE_NAMES[k + '.' + k2]) out.push([k + '.' + k2, v2]);
     }
@@ -424,26 +437,26 @@ function munecoTuneFields(id) {
 // cambia un valor; solo números finitos y no negativos (la distancia de la caja sí puede ser negativa)
 function munecoTuneSet(id, path, value) {
     if (!Number.isFinite(value) || (value < 0 && path !== 'hit.x') || !MUNECO_TUNE_NAMES[path]) return false;
-    const [a, b] = path.split('.'), d = MUNECO_MOVES[id];
+    const [a, b] = path.split('.'), d = munecoTuneTarget(id);
     if (b) d[a][b] = value; else d[a] = value;
     return true;
 }
 function munecoTuneJSON() {
     const out = {};
-    for (const id of Object.keys(MUNECO_MOVES)) out[id] = Object.fromEntries(munecoTuneFields(id));
+    for (const id of munecoTuneIds()) out[id] = Object.fromEntries(munecoTuneFields(id));
     return JSON.stringify(out, null, 1);
 }
 // 2b: carga los números del archivo de datos (js/munecoDatos.js); devuelve cuántos no pudo usar (movimiento o número que no existe)
 function munecoTuneLoad(data) {
     let bad = 0;
-    for (const [id, vals] of Object.entries(data || {})) for (const [k, v] of Object.entries(vals)) if (!MUNECO_MOVES[id] || !munecoTuneSet(id, k, v)) bad++;
+    for (const [id, vals] of Object.entries(data || {})) for (const [k, v] of Object.entries(vals)) if (!munecoTuneTarget(id) || !munecoTuneSet(id, k, v)) bad++;
     return bad;
 }
 // el archivo entero, listo para pegar en js/munecoDatos.js (mismo encabezado, un movimiento por línea)
 function munecoTuneFile() {
-    const lines = Object.keys(MUNECO_MOVES).map(id => `    ${id}: ${JSON.stringify(Object.fromEntries(munecoTuneFields(id)))}`);
+    const lines = munecoTuneIds().map(id => `    ${id}: ${JSON.stringify(Object.fromEntries(munecoTuneFields(id)))}`);
     return `// Los números del muñeco (index.html?muneco, fase B2 paso 2b): tiempos, daño, avance, empujón, congelado, sacudón y
-// cajas de cada movimiento. Mandan sobre los de MUNECO_MOVES (js/muneco.js). Para cambiarlos: en el muñeco, O abre el
+// cajas de cada movimiento, y "general": la bola del muñeco y los congelados fijos. Mandan sobre los de js/muneco.js. Para cambiarlos: en el muñeco, O abre el
 // panel, ajustás jugando, "📋 Copiar datos" y pegás acá el texto entero (reemplaza este archivo).
 const MUNECO_DATOS = {\n${lines.join(',\n')}\n};\n`;
 }
@@ -451,10 +464,10 @@ const MUNECO_DATOS = {\n${lines.join(',\n')}\n};\n`;
 function munecoTuneChanged(id, k, v) { const f = typeof MUNECO_DATOS !== 'undefined' && MUNECO_DATOS[id]; return !f || f[k] !== v; }
 function munecoPanel(wrap) {
     const p = document.createElement('div'); p.id = 'mu-panel'; p.hidden = true;
-    p.innerHTML = `<b>Ajustes en vivo</b> <small>(O cierra · en amarillo, lo distinto de js/munecoDatos.js)</small><select>${Object.keys(MUNECO_MOVES).map(id => `<option value="${id}">${MUNECO_MOVES[id].name}</option>`).join('')}</select>
+    p.innerHTML = `<b>Ajustes en vivo</b> <small>(O cierra · en amarillo, lo distinto de js/munecoDatos.js)</small><select>${munecoTuneIds().map(id => `<option value="${id}">${id === 'general' ? '⚙️ General (bola, congelados)' : MUNECO_MOVES[id].name}</option>`).join('')}</select>
         <div class="mu-fields"></div><button type="button">📋 Copiar datos</button><textarea readonly hidden rows="6"></textarea>`;
     const sel = p.querySelector('select'), box = p.querySelector('.mu-fields'), ta = p.querySelector('textarea');
-    const fill = () => { box.innerHTML = munecoTuneFields(sel.value).map(([k, v]) => `<label>${MUNECO_TUNE_NAMES[k]}<input type="number" step="${/^(startup|active|recovery|hitstop|shot\.life)$/.test(k) ? 0.01 : 1}" value="${v}" data-k="${k}" class="${munecoTuneChanged(sel.value, k, v) ? 'changed' : ''}"></label>`).join(''); };
+    const fill = () => { box.innerHTML = munecoTuneFields(sel.value).map(([k, v]) => `<label>${MUNECO_TUNE_NAMES[k]}<input type="number" step="${MUNECO_TUNE_TIME.test(k) ? 0.01 : 1}" value="${v}" data-k="${k}" class="${munecoTuneChanged(sel.value, k, v) ? 'changed' : ''}"></label>`).join(''); };
     box.addEventListener('input', e => {
         const i = e.target, v = parseFloat(i.value), ok = munecoTuneSet(sel.value, i.dataset.k, v);
         i.classList.toggle('bad', !ok); i.classList.toggle('changed', ok && munecoTuneChanged(sel.value, i.dataset.k, v));

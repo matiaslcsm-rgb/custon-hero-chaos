@@ -4425,9 +4425,10 @@ test('El muñeco: la onda de corte viaja con su caja, el muñeco tira bolas, el 
 
 test('El muñeco: los números salen del archivo de datos (js/munecoDatos.js)', () => {
     for (const [id, vals] of Object.entries(MUNECO_DATOS)) for (const [k, v] of Object.entries(vals)) {
-        const [a, b] = k.split('.'); checkEq(b ? MUNECO_MOVES[id][a][b] : MUNECO_MOVES[id][a], v, `${id}.${k}`);
+        const [a, b] = k.split('.'), o = munecoTuneTarget(id); checkEq(b ? o[a][b] : o[a], v, `${id}.${k}`);
     }
-    checkEq(Object.keys(MUNECO_DATOS).length, Object.keys(MUNECO_MOVES).length, 'un renglón por movimiento');
+    checkEq(Object.keys(MUNECO_DATOS).length, Object.keys(MUNECO_MOVES).length + 1, 'un renglón por movimiento y uno general');
+    ['shotHitstop', 'parryHitstop', 'hurtHitstop', 'ball.dmg'].forEach(k => check(k in MUNECO_DATOS.general, `lo general trae ${k}`));
 });
 
 test('El muñeco: copiar los datos sin tocar nada da el mismo archivo js/munecoDatos.js', () => {
@@ -4455,6 +4456,9 @@ test('El muñeco: el panel de ajustes cambia los tiempos y las cajas en vivo y n
         const DATOS = new Function(file + '; return MUNECO_DATOS;')(); checkEq(DATOS.swing0.dmg, 33, 'y el archivo copiado se puede cargar');
         checkEq(munecoTuneLoad({ swing0: { dmg: 10, nada: 1 }, noExiste: { dmg: 1 } }), 2, 'cargar datos ignora lo que no existe');
         checkEq(MUNECO_MOVES.swing0.dmg, 10, 'y usa lo que sí');
+        const hs = MUNECO.hurtHitstop; check(munecoTuneSet('general', 'hurtHitstop', 0.2), 'lo general también se ajusta');
+        const M2 = munecoNew(); munecoHurtHero(M2, 1, 1, 0); checkEq(M2.freeze, 0.2, 'y el golpe recibido usa ese congelado');
+        MUNECO.hurtHitstop = hs;
         const p = munecoPanel(document.createElement('div'));
         const sel = p.querySelector('select'); sel.value = 'swing0'; sel.dispatchEvent(new Event('change'));
         checkEq(p.querySelectorAll('input').length, munecoTuneFields('swing0').length, 'el panel arma un campo por número');

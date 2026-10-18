@@ -882,7 +882,8 @@ también tiene que aprender a esquivar los ataques anunciados).
   movimiento y cambiás sus números mientras jugás (tiempos, daño, avance, empujón, congelado, sacudón, caja que pega).
   Mientras escribís, las teclas no le llegan al muñeco y Esc suelta el campo. "📋 Copiar datos" da todo en JSON
   Los números salen de `js/munecoDatos.js` (2b): lo que cambiaste respecto del archivo se ve en amarillo y "Copiar datos"
-  da el archivo entero, listo para pegar y subir.
+  da el archivo entero, listo para pegar y subir. En "⚙️ General" (2c) están la bola del muñeco y los congelados que
+  antes estaban fijos en el código (disparo, parada que devuelve, golpe recibido).
 - **Capturas en los informes** (2026-10-18, fase B2): `python docs/captura.py` levanta el juego sin caché y guarda en
   `docs/informes/img/` los PNG que le manda el navegador (el snippet está en el archivo). Los informes de las corridas que
   cambian algo que se ve traen captura de antes y después, para aprobarlo sin abrir el juego.
