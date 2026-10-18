@@ -878,6 +878,10 @@ Las fases 3 y 4 son las más grandes: hay que rehacer pruebas y volver a medir e
 también tiene que aprender a esquivar los ataques anunciados).
 
 ## Interfaz y calidad de vida (lista viva)
+- **El muñeco: ajustes en vivo** (2026-10-18, fase B2 paso 2a): con O se abre un panel a la derecha; elegís el
+  movimiento y cambiás sus números mientras jugás (tiempos, daño, avance, empujón, congelado, sacudón, caja que pega).
+  Mientras escribís, las teclas no le llegan al muñeco y Esc suelta el campo. "📋 Copiar datos" da todo en JSON
+  (próximo paso: un archivo de datos que el muñeco carga).
 - **Capturas en los informes** (2026-10-18, fase B2): `python docs/captura.py` levanta el juego sin caché y guarda en
   `docs/informes/img/` los PNG que le manda el navegador (el snippet está en el archivo). Los informes de las corridas que
   cambian algo que se ve traen captura de antes y después, para aprobarlo sin abrir el juego.

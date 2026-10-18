@@ -11,7 +11,8 @@
 //
 // Paso 1a: la sala, el muñeco y el héroe que camina y esquiva. 1b: combo de 3 tajos y parada que le pegan al muñeco.
 // 1c: el disparo del héroe (onda de corte), el muñeco que tira bolas de paja, recibir golpe, caída y levantarse,
-// y la parada que devuelve lo que le tiran (ver ROADMAP.md, B2).
+// y la parada que devuelve lo que le tiran (ver ROADMAP.md, B2). 2a: panel para ajustar en vivo tiempos, cajas,
+// congelado y empujón (tecla O).
 
 const MUNECO = {
     W: 240, H: 150,           // la sala, en píxeles del dibujo (se agranda por un entero para que se vea nítido)
@@ -404,19 +405,62 @@ function munecoHud(M) {
     const dd = M.dummy, score = dd.hits ? ` · muñeco: ${dd.hits} golpes, ${dd.total} de daño` : '';
     return `<b>❤ ${h.hp}/${MUNECO.hp}</b> · ${dd.attacking ? '🎯 el muñeco ataca · ' : ''}${M.knight ? '🛡️ caballero · ' : ''}<b>${mv ? d.name : h.crouch ? (h.moving ? 'Caminar agachado' : 'Agachado') : h.moving ? (M.knight ? 'Correr' : 'Caminar') : 'Quieto'}</b>${mv ? ` · ${names[ph.phase]}` : ''}${M.slow ? ' · 🐢 cámara lenta' : ''}${M.paused ? ' · ⏸ pausa' : ''}${score}${bar}`;
 }
+// --- Paso 2a: panel de ajustes en vivo (tecla O). Cambia MUNECO_MOVES al vuelo; "Copiar datos" saca todo en JSON ---
+const MUNECO_TUNE_NAMES = {
+    startup: 'preparación (s)', active: 'activo (s)', recovery: 'recuperación (s)', dmg: 'daño', lunge: 'avance (px)',
+    knock: 'empujón (px)', hitstop: 'congelado al impacto (s)', shake: 'sacudón', speed: 'velocidad (px/s)',
+    'hit.x': 'caja que pega: distancia', 'hit.w': 'caja que pega: ancho', 'hit.h': 'caja que pega: alto',
+    'shot.speed': 'disparo: velocidad', 'shot.dmg': 'disparo: daño', 'shot.w': 'disparo: ancho', 'shot.h': 'disparo: alto', 'shot.life': 'disparo: dura (s)'
+};
+// los números ajustables de un movimiento, como [ruta, valor] (un nivel adentro: hit, shot)
+function munecoTuneFields(id) {
+    const out = [];
+    for (const [k, v] of Object.entries(MUNECO_MOVES[id])) {
+        if (typeof v === 'number' && MUNECO_TUNE_NAMES[k]) out.push([k, v]);
+        else if (v && typeof v === 'object' && !Array.isArray(v)) for (const [k2, v2] of Object.entries(v)) if (typeof v2 === 'number' && MUNECO_TUNE_NAMES[k + '.' + k2]) out.push([k + '.' + k2, v2]);
+    }
+    return out;
+}
+// cambia un valor; solo números finitos y no negativos (la distancia de la caja sí puede ser negativa)
+function munecoTuneSet(id, path, value) {
+    if (!Number.isFinite(value) || (value < 0 && path !== 'hit.x') || !MUNECO_TUNE_NAMES[path]) return false;
+    const [a, b] = path.split('.'), d = MUNECO_MOVES[id];
+    if (b) d[a][b] = value; else d[a] = value;
+    return true;
+}
+function munecoTuneJSON() {
+    const out = {};
+    for (const id of Object.keys(MUNECO_MOVES)) out[id] = Object.fromEntries(munecoTuneFields(id));
+    return JSON.stringify(out, null, 1);
+}
+function munecoPanel(wrap) {
+    const p = document.createElement('div'); p.id = 'mu-panel'; p.hidden = true;
+    p.innerHTML = `<b>Ajustes en vivo</b> <small>(O cierra)</small><select>${Object.keys(MUNECO_MOVES).map(id => `<option value="${id}">${MUNECO_MOVES[id].name}</option>`).join('')}</select>
+        <div class="mu-fields"></div><button type="button">📋 Copiar datos</button><textarea readonly hidden rows="6"></textarea>`;
+    const sel = p.querySelector('select'), box = p.querySelector('.mu-fields'), ta = p.querySelector('textarea');
+    const fill = () => { box.innerHTML = munecoTuneFields(sel.value).map(([k, v]) => `<label>${MUNECO_TUNE_NAMES[k]}<input type="number" step="${/^(startup|active|recovery|hitstop|shot\.life)$/.test(k) ? 0.01 : 1}" value="${v}" data-k="${k}"></label>`).join(''); };
+    box.addEventListener('input', e => e.target.classList.toggle('bad', !munecoTuneSet(sel.value, e.target.dataset.k, parseFloat(e.target.value))));
+    sel.addEventListener('change', fill); fill();
+    p.querySelector('button').addEventListener('click', () => {
+        ta.hidden = false; ta.value = munecoTuneJSON(); ta.select();
+        try { navigator.clipboard.writeText(ta.value); } catch (e) { /* sin permiso: queda seleccionado en el cuadro */ }
+    });
+    wrap.appendChild(p);
+    return p;
+}
 function munecoStart() {
     document.body.classList.add('muneco-on');
     const wrap = document.createElement('div'); wrap.id = 'muneco';
     wrap.innerHTML = `<canvas id="mu-canvas"></canvas><div id="mu-hud"></div>
-        <div id="mu-help">WASD / flechas: caminar · J o clic: atacar (3 tajos) · K o clic derecho: parada · L: onda de corte · Espacio: esquive<br>V: cambiar al caballero · C (mantener): agacharse (caballero) · G: el muñeco ataca · H: cajas · T: cámara lenta · P: pausa · . : un cuadro · R: reiniciar el muñeco · Esc: volver a la portada<br><small>versión: ${GAME_VERSION}</small></div>`;
+        <div id="mu-help">WASD / flechas: caminar · J o clic: atacar (3 tajos) · K o clic derecho: parada · L: onda de corte · Espacio: esquive<br>O: ajustes en vivo · V: cambiar al caballero · C (mantener): agacharse (caballero) · G: el muñeco ataca · H: cajas · T: cámara lenta · P: pausa · . : un cuadro · R: reiniciar el muñeco · Esc: volver a la portada<br><small>versión: ${GAME_VERSION}</small></div>`;
     document.body.appendChild(wrap);
     const cv = wrap.querySelector('#mu-canvas'), ctx = cv.getContext('2d'), hud = wrap.querySelector('#mu-hud');
     cv.width = MUNECO.W; cv.height = MUNECO.H;
     const fit = () => { const s = Math.max(1, Math.floor(Math.min(innerWidth / MUNECO.W, (innerHeight - 90) / MUNECO.H))); cv.style.width = MUNECO.W * s + 'px'; cv.style.height = MUNECO.H * s + 'px'; };
     fit(); addEventListener('resize', fit);
-    const M = (window.muneco = munecoNew()), down = {};
+    const M = (window.muneco = munecoNew()), down = {}, panel = munecoPanel(wrap);
     let dash = false, attack = false, parry = false, shoot = false, aim = null, stepOnce = false;
-    const mine = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'KeyJ', 'KeyK', 'KeyH', 'KeyT', 'KeyP', 'Period', 'KeyR', 'KeyL', 'KeyG', 'KeyV', 'KeyC', 'Escape'];
+    const mine = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'KeyJ', 'KeyK', 'KeyH', 'KeyT', 'KeyP', 'Period', 'KeyR', 'KeyL', 'KeyG', 'KeyV', 'KeyC', 'KeyO', 'Escape'];
     // con el mouse: el clic apunta hacia el cursor
     cv.addEventListener('mousedown', e => {
         const r = cv.getBoundingClientRect(), x = (e.clientX - r.left) * MUNECO.W / r.width, y = (e.clientY - r.top) * MUNECO.H / r.height;
@@ -427,9 +471,10 @@ function munecoStart() {
     cv.addEventListener('contextmenu', e => e.preventDefault());
     // las teclas son del laboratorio: no le llegan al juego que está abajo
     addEventListener('keydown', e => {
+        if (/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) { if (e.code === 'Escape') e.target.blur(); return; } // escribiendo en el panel: Esc suelta el campo
         if (!mine.includes(e.code)) return;
         e.preventDefault(); e.stopImmediatePropagation();
-        if (!e.repeat) { if (e.code === 'Space') dash = true; if (e.code === 'KeyJ') { attack = true; aim = null; } if (e.code === 'KeyK') { parry = true; aim = null; } if (e.code === 'Escape') location.href = location.pathname; if (e.code === 'KeyL') { shoot = true; aim = null; } if (e.code === 'KeyG') M.dummy.attacking = !M.dummy.attacking; if (e.code === 'KeyV') { M.knight = !M.knight; M.hero.move = null; M.hero.comboNext = 0; } if (e.code === 'KeyR') Object.assign(M.dummy, { total: 0, hits: 0 }); if (e.code === 'KeyH') M.showBoxes = !M.showBoxes; if (e.code === 'KeyT') M.slow = !M.slow; if (e.code === 'KeyP') M.paused = !M.paused; if (e.code === 'Period') stepOnce = true; }
+        if (!e.repeat) { if (e.code === 'Space') dash = true; if (e.code === 'KeyJ') { attack = true; aim = null; } if (e.code === 'KeyK') { parry = true; aim = null; } if (e.code === 'Escape') location.href = location.pathname; if (e.code === 'KeyL') { shoot = true; aim = null; } if (e.code === 'KeyG') M.dummy.attacking = !M.dummy.attacking; if (e.code === 'KeyO') panel.hidden = !panel.hidden; if (e.code === 'KeyV') { M.knight = !M.knight; M.hero.move = null; M.hero.comboNext = 0; } if (e.code === 'KeyR') Object.assign(M.dummy, { total: 0, hits: 0 }); if (e.code === 'KeyH') M.showBoxes = !M.showBoxes; if (e.code === 'KeyT') M.slow = !M.slow; if (e.code === 'KeyP') M.paused = !M.paused; if (e.code === 'Period') stepOnce = true; }
         down[e.code] = true;
     }, true);
     addEventListener('keyup', e => { if (mine.includes(e.code)) { e.stopImmediatePropagation(); down[e.code] = false; } }, true);

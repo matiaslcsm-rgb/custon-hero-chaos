@@ -4423,6 +4423,26 @@ test('El muñeco: la onda de corte viaja con su caja, el muñeco tira bolas, el 
     check(!h.move, 'y vuelve a quedar libre');
 });
 
+test('El muñeco: el panel de ajustes cambia los tiempos y las cajas en vivo y no acepta valores rotos', () => {
+    const keep = JSON.stringify(MUNECO_MOVES.swing0);
+    try {
+        const fields = munecoTuneFields('swing0').map(f => f[0]);
+        ['startup', 'active', 'recovery', 'dmg', 'hitstop', 'hit.x', 'hit.w'].forEach(k => check(fields.includes(k), `el tajo muestra ${k}`));
+        check(!fields.includes('hit.y') && !fields.includes('arc'), 'no muestra lo que no se usa');
+        check(munecoTuneSet('swing0', 'dmg', 33), 'cambia el daño');
+        check(!munecoTuneSet('swing0', 'startup', -1) && !munecoTuneSet('swing0', 'dmg', NaN), 'no acepta negativos ni vacío');
+        checkEq(MUNECO_MOVES.swing0.startup, JSON.parse(keep).startup, 'lo rechazado no cambia nada');
+        const M = munecoNew(), h = M.hero, d = M.dummy; h.x = d.x - 22; h.y = d.y;
+        munecoStep(M, 1 / 120, { attack: true });
+        for (let i = 0; i < 60; i++) munecoStep(M, 1 / 120, {});
+        checkEq(d.total, 33, 'el golpe pega con el daño ajustado');
+        check(JSON.parse(munecoTuneJSON()).swing0.dmg === 33, 'copiar datos lleva lo ajustado');
+        const p = munecoPanel(document.createElement('div'));
+        const sel = p.querySelector('select'); sel.value = 'swing0'; sel.dispatchEvent(new Event('change'));
+        checkEq(p.querySelectorAll('input').length, munecoTuneFields('swing0').length, 'el panel arma un campo por número');
+    } finally { Object.assign(MUNECO_MOVES.swing0, JSON.parse(keep)); }
+});
+
 test('El muñeco: el tajo pega en las 8 direcciones y, quieto, la onda sale hacia el último paso', () => {
     for (let k = 0; k < 8; k++) {
         const a = k * Math.PI / 4, ax = Math.round(Math.cos(a) * 100) / 100, ay = Math.round(Math.sin(a) * 100) / 100;

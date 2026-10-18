@@ -1037,4 +1037,11 @@ body.on-title { overflow: hidden; }
 .mu-bar span { display: flex; align-items: center; justify-content: center; overflow: hidden; white-space: nowrap; opacity: 0.55; }
 .mu-bar span.on { opacity: 1; }
 .mu-bar .mu-startup { background: #8a6d1f; } .mu-bar .mu-active { background: #a33a3a; } .mu-bar .mu-recovery { background: #2f5d8a; }
+#mu-panel { position: fixed; top: 12px; right: 12px; width: 230px; max-height: calc(100vh - 24px); overflow: auto; background: #1f1e26; border: 1px solid #3a3946; padding: 8px; display: flex; flex-direction: column; gap: 6px; font-size: 0.75rem; }
+#mu-panel[hidden] { display: none; }
+#mu-panel label { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+#mu-panel input { width: 64px; background: #15141a; color: #ddd; border: 1px solid #3a3946; font: inherit; }
+#mu-panel input.bad { border-color: #ef476f; }
+#mu-panel select, #mu-panel button, #mu-panel textarea { background: #15141a; color: #ddd; border: 1px solid #3a3946; font: inherit; padding: 3px; }
+#mu-panel button { cursor: pointer; }
 .mu-bar i { position: absolute; top: -2px; bottom: -2px; width: 2px; background: #fff; }

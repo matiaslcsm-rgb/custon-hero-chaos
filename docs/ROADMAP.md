@@ -99,7 +99,13 @@ Hoy el juego **no tiene cajas de golpe**: el daño se decide por distancia (si e
 - [ ] **Muñeco, paso 2:** cajas de golpe a la vista con una tecla (rojo: lo que pega, solo en los cuadros activos;
       verde: lo que puede ser golpeado; los proyectiles con su propia caja que viaja con la animación) y un panel para
       ajustar en vivo los tiempos, el tamaño de las cajas, el congelado al impacto y el empujón. Lo ajustado se guarda
-      en un archivo de datos.
+      en un archivo de datos. (Las cajas a la vista ya estaban desde el 1a, tecla H.)
+  - [x] 2a: panel de ajustes en vivo (tecla O): elegís el movimiento y cambiás sus tiempos, daño, avance, empujón,
+        congelado, sacudón y la caja que pega (o el disparo); "Copiar datos" saca todo en JSON. 2026-10-18.
+  - [ ] 2b: el archivo de datos (`js/munecoDatos.js`) que el muñeco carga al empezar, con lo copiado del panel, y que el
+        panel marque lo que cambió respecto de ese archivo.
+  - [ ] 2c: los golpes fijos que hoy no se ajustan (congelado de la parada que devuelve 0,06, de la onda 0,04 y del golpe
+        recibido 0,05; la bola del muñeco) pasan a los datos y al panel.
 - [ ] **Prueba de ida y vuelta entre modos** (riesgo 1 del mapa): jugar un rato la Torre, volver a la portada y
       empezar Custom Hero (y al revés), y revisar que `player`, `COLS`/`ROWS`, `camera`, `autopilot`, `paused`,
       `gameState` y `towerRun` queden limpios. Si algo queda sucio, arreglarlo en un solo lugar (una función que
@@ -469,6 +475,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 
 ## Hecho por el modo automático
 (Fecha · ítem · commit · qué se midió.)
+- 2026-10-18 · Muñeco, paso 2a (panel de ajustes) · ver git log · 10 movimientos con 4-10 números cada uno; probado escribiendo 0.15 en el congelado del remate (antes el punto lo agarraba el muñeco como "un cuadro"); un tajo con el daño en 33 le pega 33; no acepta negativos ni vacío. Pruebas 283/283.
 - 2026-10-18 · Capturas en los informes · ver git log · `docs/captura.py`: servidor sin caché que acepta PUT de PNG solo en `docs/informes/img/` (hasta 2 MB, revisa la firma PNG; un nombre con `..` da 400). Probado: captura del muñeco ×3 = 31 KB. Pruebas sin cambios de código del juego.
 - 2026-10-17 · El juego se actualiza solo (a pedido, en el chat) · ver git log · al abrir compara GAME_VERSION con el main.js del servidor y, si cambió, rebaja la página y sus ~100 archivos y recarga una vez por versión. No corre en ?test.
 - 2026-10-17 · El caballero jugable en el muñeco (a pedido, en el chat) · ver git log · tecla V lo cambia; corre (10 cuadros), combo de 2 golpes (tajo 10 de daño, barrido 12), rueda en el esquive, C agacha (camina al 45% y la caja baja de 22 a 10: las bolas a 14 pasan por arriba), tajo agachado 9; golpe y muerte con sus cuadros. Pruebas 282/282.
