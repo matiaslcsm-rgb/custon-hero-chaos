@@ -53,7 +53,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **El muñeco (2026-10-16, fase B2, lo primero del roadmap):** `index.html?muneco`, laboratorio 2D para pulir cómo se
   siente pegar: terreno, muñeco de práctica y el héroe que camina y esquiva, con los tres tiempos de cada movimiento
   a la vista (REWORK.md). Ya tiene el combo de 3 tajos y la parada (1b), la onda de corte, el muñeco que tira bolas, recibir golpe, la
-  parada que devuelve y la caída (1c). Sigue: capturas en los informes y el panel para ajustar las cajas de golpe.
+  parada que devuelve y la caída (1c). Los informes ya pueden traer capturas (`python docs/captura.py`, 2026-10-18).
+  Sigue: el panel para ajustar las cajas de golpe. Los cuadros de frente y de espaldas esperan el arte del caballero.
 - **Base sólida (2026-10-16, fases B0 y B1 del roadmap):** antes de sumar contenido, entender y estabilizar. Mapa de
   lo que comparten los dos modos en [`MAPA-CODIGO.md`](MAPA-CODIGO.md) (se vuelve a medir con
   `python docs/mapa-codigo.py`): la Torre corre arriba del motor de Custom Hero, el núcleo usa 174 globales de la

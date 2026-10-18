@@ -88,12 +88,14 @@ Hoy el juego **no tiene cajas de golpe**: el daño se decide por distancia (si e
   - [x] 1d-0 (arte, a pedido en el chat 2026-10-17): el héroe de frente y de espaldas se arma por piezas
         (`HERO_PARTS` en `js/towerHeroArt.js`: cabeza, torso, capa abierta/cerrada/espalda, piernas y la espada con
         su punto de agarre), con los mismos rasgos y alto que el de costado. Quieto y caminar ya lo usan.
-  - [ ] 1d (arte): cuadros de ataque, parada y esquive de frente y de espaldas para la espada (hoy hacia arriba y abajo
-        se usa el dibujo de costado).
+  - [ ] 1d (arte) (decisión): cuadros de ataque, parada y esquive de frente y de espaldas para la espada (hoy hacia arriba y abajo
+        se usa el dibujo de costado). El 2026-10-17 el usuario sacó el borrador de estos cuadros y pidió el caballero
+        afuera (`docs/arte/PEDIDO-CABALLERO.md`): el modo automático no lo dibuja hasta saber qué arte se usa.
   - [x] 1c: onda de corte (disparo del héroe), el muñeco que tira bolas de paja con aviso, recibir golpe con empujón,
         esquive intocable en su tiempo activo, parada que devuelve el disparo y caída con levantarse. 2026-10-16.
-- [ ] **Capturas en los informes:** si una corrida cambia algo que se ve, el informe trae captura de antes y después
-      (`docs/informes/img/`, PNG chicos) para aprobarlo sin abrir el juego.
+- [x] **Capturas en los informes:** si una corrida cambia algo que se ve, el informe trae captura de antes y después
+      (`docs/informes/img/`, PNG chicos) para aprobarlo sin abrir el juego. 2026-10-18: `python docs/captura.py`
+      sirve el juego sin caché y guarda los PNG que le manda el navegador (cómo, en el mismo archivo).
 - [ ] **Muñeco, paso 2:** cajas de golpe a la vista con una tecla (rojo: lo que pega, solo en los cuadros activos;
       verde: lo que puede ser golpeado; los proyectiles con su propia caja que viaja con la animación) y un panel para
       ajustar en vivo los tiempos, el tamaño de las cajas, el congelado al impacto y el empujón. Lo ajustado se guarda
@@ -329,10 +331,10 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 - [ ] **Las pruebas escriben en el guardado real de localhost:** al correr toda la batería en `index.html?test`,
       `towerSavePersist` termina en `true` (ninguna prueba sola lo hace; pasa con `runTests`). Solo afecta a la dirección de
       pruebas, no al juego publicado. Encontrar quién lo cambia y forzarlo en falso en `runTests`.
-- [ ] **Ataques de la espada de frente y de espaldas:** los 3 tajos del combo hacia abajo y hacia arriba con su
+- [ ] **(decisión) Ataques de la espada de frente y de espaldas** (igual que el 1d de la fase B2): los 3 tajos del combo hacia abajo y hacia arriba con su
       estela, en el estilo de `docs/arte/vistas-frente-espalda.py` y la paleta de `js/towerHeroArt.js`.
 - [ ] **Golpe recibido y caída propios del héroe dibujado:** hoy se arman con el cuadro de quieto.
-- [ ] **Parada y esquive de frente y de espaldas.**
+- [ ] **(decisión) Parada y esquive de frente y de espaldas** (igual que el 1d de la fase B2).
 - [x] **Señal clara al recibir daño** (2026-10-14: borde rojo según el daño; falta medir golpes sin aviso con el piloto): destello rojo en el borde de la pantalla, un sonido propio y la barra de
       vida que tiembla. Medir con el piloto cuántos golpes recibidos no tenían aviso previo (meta: 0).
 - [x] **Pausa de impacto por peso** (2026-10-14: espada contra jefes, 65 ms; el remate, 75 ms): el remate del combo y el golpe a un guardián frenan 60-90 ms; los golpes chicos,
@@ -437,6 +439,11 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 ## Esperando al usuario
 (El modo automático anota acá las opciones de los ítems **(decisión)**, con una marcada como recomendada.)
 
+- **Cuadros de frente y de espaldas de la espada (B2 1d y T2):** el borrador se sacó el 2026-10-17 y se pidió el caballero
+  afuera. Opciones: (a) **esperar el arte del caballero (o la hoja que elijas) y recortarlo con `extraer-sprites.py`
+  (recomendada: no se dibuja dos veces)**; (b) que el modo automático los dibuje en código sobre las piezas del héroe calcado
+  (`HERO_PARTS`), como se hizo con quieto y caminar; (c) dejar el dibujo de costado para arriba y abajo hasta la 1.0.
+
 - **El Sniper mientras tanto (Custom Hero):** gana 65% de sus partidas (lo parejo es 12,5%) y ningún ajuste chico lo
   baja lo suficiente. Opciones: (a) **dejarlo como está hasta el balance del final (recomendada: el combate nuevo va a
   cambiar los números igual)**; (b) sacarlo de la elección y de los rivales por ahora, sin borrar su código (una marca en su
@@ -462,6 +469,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 
 ## Hecho por el modo automático
 (Fecha · ítem · commit · qué se midió.)
+- 2026-10-18 · Capturas en los informes · ver git log · `docs/captura.py`: servidor sin caché que acepta PUT de PNG solo en `docs/informes/img/` (hasta 2 MB, revisa la firma PNG; un nombre con `..` da 400). Probado: captura del muñeco ×3 = 31 KB. Pruebas sin cambios de código del juego.
 - 2026-10-17 · El juego se actualiza solo (a pedido, en el chat) · ver git log · al abrir compara GAME_VERSION con el main.js del servidor y, si cambió, rebaja la página y sus ~100 archivos y recarga una vez por versión. No corre en ?test.
 - 2026-10-17 · El caballero jugable en el muñeco (a pedido, en el chat) · ver git log · tecla V lo cambia; corre (10 cuadros), combo de 2 golpes (tajo 10 de daño, barrido 12), rueda en el esquive, C agacha (camina al 45% y la caja baja de 22 a 10: las bolas a 14 pasan por arriba), tajo agachado 9; golpe y muerte con sus cuadros. Pruebas 282/282.
 - 2026-10-17 · Caballero con todas las animaciones del pack FreeKnight (a pedido, en el chat) · ver git log · se midió cada cuadro del pack (alto, cabeza, ángulo de la espada) y se pasó a poses del muñeco ×0,54; 23 animaciones, 105 cuadros, mismo conteo que el pack; dibujo propio (yelmo con penacho, capa azul). Por ahora solo en la galería. Pruebas 281/281.
