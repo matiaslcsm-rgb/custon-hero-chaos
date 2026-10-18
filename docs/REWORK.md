@@ -878,6 +878,11 @@ Las fases 3 y 4 son las más grandes: hay que rehacer pruebas y volver a medir e
 también tiene que aprender a esquivar los ataques anunciados).
 
 ## Interfaz y calidad de vida (lista viva)
+- **Custom Hero: pantalla de fin de partida** (2026-10-18, C1, `js/matchSummary.js`): al terminar la partida, o al
+  quedar eliminado, la misma ventana que el fin de run de la Torre: puesto, rondas (o en qué ronda quedaste afuera),
+  duelos ganados y perdidos, oro ganado en toda la partida, nivel, puntos y tu build (habilidades con su nivel y el
+  color de su héroe de origen, ítems y el neutral). Botones: "▶ Otra partida" (directo a elegir héroe), "🏠 Menú" y,
+  si te eliminaron y la partida sigue, "👁 Seguir mirando".
 - **Volver a la portada deja todo limpio** (2026-10-18, fase B0, riesgo 1 del mapa): `resetGame` (game.js) cierra
   primero las ventanas de la Torre (inventario, tienda, herrero, piedra de regreso, Bitácora, mapa) y después suelta al
   jugador; antes varias quedaban abiertas en el menú. También apaga el piloto automático: el de la Torre ya no juega la

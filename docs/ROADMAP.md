@@ -65,6 +65,13 @@ elija; el modo automático anota las opciones en "Esperando al usuario" y los sa
 
 El orden de la lista **es** la prioridad: primero lo que destraba el loop completo, después contenido y pulido.
 
+> **⏸ INFINITE TOWER EN PAUSA (pedido del usuario 2026-10-18: "avanzá solo con Custom, la Tower pausala").**
+> Hasta que el usuario diga otra cosa, el modo automático trabaja **solo en Custom Hero**: la sección CUSTOM HERO en
+> este orden: C1, C3, C4 y **al final el balance** (C2 y "Balance de Custom Hero con números" de B0), como pidió el
+> 2026-10-16. Se saltean como si dijeran (decisión) todos los ítems de INFINITE TOWER y los de la base que son solo de
+> la Torre (B2 1d, "Cajas de golpe en la Torre", la galería y el arte de la Torre). El muñeco y la base compartida
+> (B0) solo si ayudan a Custom Hero. No se borra nada de la Torre: sigue jugable como está.
+
 ---
 
 # BASE SÓLIDA (los dos juegos) — va antes que todo lo demás
@@ -111,8 +118,12 @@ Hoy el juego **no tiene cajas de golpe**: el daño se decide por distancia (si e
       `gameState` y `towerRun` queden limpios. Si algo queda sucio, arreglarlo en un solo lugar (una función que
       deje el estado como al cargar la página).
       Hecho 2026-10-18: salían sucios el piloto automático y las ventanas de la Torre; arreglado en `resetGame` (game.js).
-- [ ] **Cajas de golpe en la Torre:** pasar el sistema del muñeco al juego, primero la espada, después el arco y el
+- [ ] **⏸ Cajas de golpe en la Torre** (en pausa con la Torre): pasar el sistema del muñeco al juego, primero la espada, después el arco y el
       bastón; después Custom Hero. Que se sienta igual que en el muñeco y que pasen todas las pruebas.
+      Medido el 2026-10-18 (17 píxeles del dibujo por casilla, posiciones a 3 casillas en 8 direcciones): la caja del
+      tajo del muñeco agarra todo lo que agarra el cono de hoy (24 de 24) y además las 2 casillas de los costados del
+      héroe (32 en total; el remate, 43). Es casi igual: pasar la caja no cambia el alcance, lo que cambia es el tiempo
+      (hoy pega al instante del clic; en el muñeco, después de la preparación).
 
 ## Fase B1 — Herramientas de arte, animación y menús (pedido del usuario 2026-10-16)
 Herramientas para ver, revisar y mantener coherente lo gráfico. No cambian el estilo elegido: lo ordenan.
@@ -408,7 +419,8 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
       derrotas, mostrado en la barra de oro. Medir que no domine "ahorrar siempre".
 - [x] **Muerte súbita** (2026-10-15: desde la ronda 15, +50% de daño recibido por ronda): desde una ronda fija (medir cuál deja partidas de 15-25 min; Custom Hero Clash usa ~31),
       los duelos y las oleadas pegan cada vez más fuerte hasta que quede uno.
-- [ ] **Pantalla de fin de partida:** puesto, rondas, duelos ganados, oro total, build final y "▶ Otra partida".
+- [x] **Pantalla de fin de partida:** puesto, rondas, duelos ganados, oro total, build final y "▶ Otra partida".
+      2026-10-18: `js/matchSummary.js`; también al quedar eliminado, con "👁 Seguir mirando".
 - [ ] **Historial y perfil:** partidas jugadas, victorias, top 3, héroe favorito, mejor puesto con cada héroe.
 
 ## Fase C2 — Balance medido
@@ -476,6 +488,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 
 ## Hecho por el modo automático
 (Fecha · ítem · commit · qué se midió.)
+- 2026-10-18 · Custom Hero C1: pantalla de fin de partida · ver git log · 2 partidas del piloto a 30 rondas con el Danzante: 7º (eliminado en la 25, 0-7 en duelos, 5330g ganados, nivel 22) y 5º (eliminado en la 20, 3-2, 4572g, nivel 19); "Otra partida" lleva a elegir héroe; el banco no la muestra. Pruebas 287/287.
 - 2026-10-18 · Prueba de ida y vuelta entre modos · ver git log · Torre → portada → Custom Hero → portada → Torre revisando 11 ventanas, 6 paneles, modo, estado, mundo (20×12 en Custom Hero), cámara, pausa, piloto y tema. Salieron 2 cosas sucias: el piloto prendido en la Torre seguía jugando Custom Hero, y el inventario (y la tienda, el herrero, la Bitácora) quedaban abiertos porque `resetGame` soltaba al jugador antes de cerrarlos. Arreglado en `resetGame`. Pruebas 286/286.
 - 2026-10-18 · Muñeco, paso 2c (lo general al panel) · ver git log · 14 números más en "⚙️ General" (caminar, bola del muñeco, congelados del disparo 0,04, de la parada que devuelve 0,06 y del golpe recibido 0,05, × velocidad 1,5 y × daño 2 de la bola devuelta, sacudón 1,5); mismos valores que antes. Con el congelado al recibir en 0,2 el golpe congela 0,2 (prueba). Pruebas 285/285.
 - 2026-10-18 · Muñeco, paso 2b (archivo de datos) · ver git log · `js/munecoDatos.js` con los 9 movimientos y 71 números (los mismos de antes: el muñeco no cambia); "Copiar datos" da el archivo entero e idéntico si no tocaste nada (prueba); lo distinto del archivo se ve en amarillo (probado con la velocidad del esquive 210→250). Pruebas 285/285.

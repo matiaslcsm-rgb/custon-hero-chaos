@@ -50,6 +50,9 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 | Duelo simultáneo con las oleadas de los demás; enfriamientos en el descanso; contador central con pitidos; cartel de apuestas; nombres de jugadores; sonidos propios (`sounds/`) | ✅ |
 
 ## Pendientes y temas abiertos
+- **⏸ Infinite Tower en pausa (2026-10-18, pedido del usuario):** se avanza solo con Custom Hero (ver el aviso arriba
+  de todo en ROADMAP.md). La Torre sigue jugable como está.
+- **Custom Hero: pantalla de fin de partida (2026-10-18):** `js/matchSummary.js`, al terminar o al quedar eliminado.
 - **El muñeco (2026-10-16, fase B2, lo primero del roadmap):** `index.html?muneco`, laboratorio 2D para pulir cómo se
   siente pegar: terreno, muñeco de práctica y el héroe que camina y esquiva, con los tres tiempos de cada movimiento
   a la vista (REWORK.md). Ya tiene el combo de 3 tajos y la parada (1b), la onda de corte, el muñeco que tira bolas, recibir golpe, la

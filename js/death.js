@@ -88,7 +88,7 @@ function handleHeroDeath(hero, killer) {
 
 // Condenado y muerto por un creep: queda fuera de la partida. El jugador sigue mirando (espectador).
 function eliminateHero(hero, cause) {
-    hero.eliminated = true;
+    hero.eliminated = true; hero.outRound = waveNumber;
     hero.hp = 0;
     if (hero.arena) hero.arena.done = true;
     const wasLogMuted = logMuted;
@@ -98,6 +98,7 @@ function eliminateHero(hero, cause) {
         setStateText('ELIMINADO · ESPECTADOR');
         showPanel('restart-btn', true);
         viewedHero = aliveHeroes()[0] || player;
+        showMatchSummary(player); // con "Seguir mirando" (matchSummary.js)
     } else {
         log(`☠️ ${hero.displayName} quedó ELIMINADO.`);
         if (viewedHero === hero) viewedHero = player.eliminated ? (aliveHeroes()[0] || player) : player;

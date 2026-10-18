@@ -997,6 +997,9 @@ body.on-title { overflow: hidden; }
 .run-summary .rs-row { display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding: 2px 0; }
 .run-summary .rs-record { color: #ffd166; font-weight: bold; }
 .run-summary .rs-relics { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; font-size: 1.3rem; }
+.run-summary .ms-chips { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; margin: 4px 0; }
+.run-summary .ms-chip { border: 1px solid #555; border-left-width: 3px; padding: 2px 6px; font-size: 0.85rem; }
+.run-summary button + button { margin-left: 6px; }
 .run-summary .rs-again { font-size: 1.3rem; padding: 10px; }
 
 /* La escena de la Cumbre (towerView.js): las líneas aparecen de a una */

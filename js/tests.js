@@ -4282,10 +4282,10 @@ function benchGame(seed, rounds = 60) {
     const keys = Object.keys(HERO_TEMPLATES), out = {};
     const realEliminate = eliminateHero, realSound = soundOn;
     eliminateHero = (h, cause) => { h.benchOut = waveNumber; return realEliminate(h, cause); };
-    soundOn = false; // los sonidos usan Math.random y se saltean según el tiempo real: con sonido, la semilla no repite
+    soundOn = false; matchSummaryOff = true; // los sonidos usan Math.random y se saltean según el tiempo real: con sonido, la semilla no repite
     try {
         withRandom(seededRandom(seed), () => quietly(() => simulateGame(seed % keys.length, false, rounds)));
-    } finally { eliminateHero = realEliminate; soundOn = realSound; }
+    } finally { eliminateHero = realEliminate; soundOn = realSound; matchSummaryOff = false; }
     rankedHeroes().forEach((h, i) => { out[h.name] = { place: i + 1, out: h.benchOut || null }; });
     return { seed, winner: rankedHeroes()[0].name, round: waveNumber, heroes: out };
 }
@@ -4331,6 +4331,29 @@ Object.keys(HERO_TEMPLATES).forEach((key, i) => {
         checkEq(r.skills, KIT_SIZE, 'kit completo');
         check(r.level > 1, 'subió de nivel');
     }, { random: true });
+});
+
+test('Custom Hero: pantalla de fin de partida — puesto, rondas, duelos, oro, build y otra partida', () => {
+    const r = simulateGame(0, true, 3); // con dios: llega al final de la ronda 3
+    checkEq(r.state, 'ENDED', 'la partida termina');
+    const box = document.getElementById('match-summary');
+    check(box && box.style.display === 'block', 'se ve el resumen');
+    const txt = box.textContent;
+    check(txt.includes(`${heroRank(player)}º de 8`), 'con el puesto');
+    check(/Rondas\s*3/.test(txt), 'las rondas');
+    check(txt.includes(`${player.duelWins} ganados`), 'los duelos');
+    check(player.goldEarned > 0 && txt.includes(`${player.goldEarned}g`), 'el oro ganado en la partida');
+    player.skills.forEach(s => check(txt.includes(s.name), `la habilidad ${s.name}`));
+    check(!box.querySelector('#ms-watch'), 'terminada la partida, no hay "seguir mirando"');
+    box.querySelector('#ms-again').click();
+    checkEq(gameState, 'HERO_SELECT', '"Otra partida" lleva a elegir héroe');
+    check(box.style.display === 'none', 'y cierra el resumen');
+    // eliminado a mitad de partida: el resumen con "seguir mirando"
+    newGame('AXE'); eliminateHero(player, 'Prueba');
+    check(box.style.display === 'block' && box.querySelector('#ms-watch'), 'eliminado: resumen con "seguir mirando"');
+    box.querySelector('#ms-watch').click();
+    check(box.style.display === 'none', 'seguir mirando lo cierra');
+    resetGame();
 });
 
 // Riesgo 1 del mapa (docs/MAPA-CODIGO.md): lo que un modo deja escrito no le puede llegar al otro

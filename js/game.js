@@ -293,6 +293,7 @@ function onRoundWavesDone() {
 function endRound() {
     logMuted = false;
     endRoundEconomy(); // interés y racha (roundEconomy.js)
+    noteRoundGold(); // para el resumen del final (matchSummary.js)
     const top = rankedHeroes().slice(0, 3).map((h, i) => `${i + 1}º ${h.displayName} (${h.points})`).join(' · ');
     log(`📊 Fin de la ronda ${waveNumber}. Ranking: ${top}. Vas ${heroRank(player)}º.`);
     if (aliveHeroes().length <= 1 || waveNumber >= MAX_ROUNDS) { endGame(); return; }
@@ -311,6 +312,7 @@ function endGame() {
     showPanel('restart-btn', true);
     showPanel('shop-container', false);
     showPanel('draft-container', false);
+    showMatchSummary(player); // puesto, rondas, duelos, oro y build (matchSummary.js)
 }
 
 // Vuelve todo al estado inicial (menú) sin recargar la página.
@@ -331,6 +333,7 @@ function resetGame() {
     duelPlan = null; currentBet = null; duelBets = []; nextRoundBoss = null; lastRoundBoss = null; lastDuelPair = [];
     cancelTargeting();
     paused = false; showPanel('pause-menu', false);
+    hideMatchSummary();
     if (autopilot) setAutopilot(false); // el piloto de una partida no juega la siguiente (ni pasa de la Torre a Custom Hero)
     setPhaseTimer(PHASE_TIMES.heroSelect);
     resetHud();
