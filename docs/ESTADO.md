@@ -57,6 +57,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   Con O se abre el panel para ajustar en vivo tiempos, cajas, congelado y empujón (2a, 2026-10-18). Lo ajustado se pega en
   `js/munecoDatos.js` (2b). El paso 2 quedó completo
   (2c: lo general, la bola y los congelados fijos, también en el panel). Sigue: llevar las cajas de golpe a la Torre. Los cuadros de frente y de espaldas esperan el arte del caballero.
+- **Ida y vuelta entre modos (2026-10-18):** hay una prueba que juega Torre → portada → Custom Hero → portada → Torre;
+  encontró el piloto y las ventanas de la Torre que pasaban de un modo al otro (arreglado en `resetGame`).
 - **Base sólida (2026-10-16, fases B0 y B1 del roadmap):** antes de sumar contenido, entender y estabilizar. Mapa de
   lo que comparten los dos modos en [`MAPA-CODIGO.md`](MAPA-CODIGO.md) (se vuelve a medir con
   `python docs/mapa-codigo.py`): la Torre corre arriba del motor de Custom Hero, el núcleo usa 174 globales de la

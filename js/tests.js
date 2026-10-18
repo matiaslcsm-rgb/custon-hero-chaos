@@ -4333,6 +4333,51 @@ Object.keys(HERO_TEMPLATES).forEach((key, i) => {
     }, { random: true });
 });
 
+// Riesgo 1 del mapa (docs/MAPA-CODIGO.md): lo que un modo deja escrito no le puede llegar al otro
+test('Ida y vuelta entre modos: Torre → portada → Custom Hero → portada → Torre, sin estado heredado', () => {
+    const persist = towerSavePersist, realConfirm = window.confirm;
+    towerSavePersist = false; towerRecordsMemory = null; // en memoria, nunca el guardado de verdad
+    window.confirm = () => true; // salir de Custom Hero pregunta si perdés la partida
+    const OPEN = ['bestiaryOpen', 'codexOpen', 'invOpen', 'keysOpen', 'notebookOpen', 'smithOpen', 'statsOpen', 'towerMapOpen', 'waystoneOpen', 'tshopOpen', 'forgeOpen'];
+    const PANELS = ['inv-container', 'tshop-container', 'smith-container', 'logbook-container', 'waystone-container', 'forge-container'];
+    const atMenu = where => {
+        checkEq(gameMode, 'normal', `${where}: vuelve al modo normal`);
+        checkEq(gameState, 'MENU', `${where}: en el menú`);
+        check(player === null && towerRun === null && heroes.length === 0 && arenas.length === 0, `${where}: sin héroe, run ni arenas`);
+        checkEq([COLS, ROWS].join('x'), [VIEW_COLS, VIEW_ROWS].join('x'), `${where}: el mundo vuelve al tamaño de la arena`);
+        checkEq(camera.x + camera.y, 0, `${where}: la cámara vuelve al origen`);
+        check(!paused && !autopilot && !towerLayout, `${where}: sin pausa, sin piloto y sin la vista de la Torre`);
+        check(!document.body.classList.contains('ink-theme') && !document.body.classList.contains('tower-layout'), `${where}: sin el tema de la Torre`);
+        OPEN.forEach(n => check(!(0, eval)(n), `${where}: ${n} quedó abierto`));
+        PANELS.forEach(id => { const el = document.getElementById(id); check(!el || el.style.display !== 'flex' && el.style.display !== 'block', `${where}: se ve ${id}`); });
+    };
+    try {
+        // la Torre, con cosas abiertas, el piloto prendido y en pausa
+        gameMode = 'tower'; startTowerRun(); chooseStarterWeapon('ADVENTURER_SWORD');
+        checkEq(gameState, 'TOWER', 'arranca la Torre');
+        toggleTowerMap(true); toggleInventory(true); toggleNotebook(true); tshopOpen = true; showPanel('tshop-container', true); camera.x = 40; camera.y = 30; autopilot = true; player.relics.brasa = 2;
+        setPaused(true); quitToMenu();
+        atMenu('después de la Torre');
+        // Custom Hero arranca limpio
+        selectHero(HERO_TEMPLATES.AXE);
+        checkEq(heroes.length, 8, 'Custom Hero con sus 8 héroes');
+        check(!player.towerStats && !player.relics && !player.heroClass, 'el héroe no trae nada de la Torre');
+        check(arenas.every(a => a.kind !== 'tower'), 'ninguna arena de la Torre');
+        for (let i = 0; i < 20; i++) updateRestArea(0.05); // camina por la sala de espera sin errores
+        quitToMenu();
+        atMenu('después de Custom Hero');
+        // y la Torre de nuevo, desde cero
+        gameMode = 'tower'; startTowerRun();
+        checkEq(towerRun.floor, 1, 'la run nueva arranca en el piso 1');
+        checkEq(Object.keys(player.relics).length, 0, 'sin las reliquias de la run anterior');
+        checkEq([COLS, ROWS].join('x'), [TOWER.cols, TOWER.rows].join('x'), 'con el mundo de la Torre');
+        check(!autopilot, 'y sin el piloto que estaba prendido');
+    } finally {
+        window.confirm = realConfirm; towerSavePersist = persist; autopilot = false;
+        if (towerMapOpen) toggleTowerMap(false); if (invOpen) toggleInventory(false);
+    }
+});
+
 test('El muñeco: camina, choca con el terreno, el esquive pasa por sus tres tiempos y el muñeco de práctica recibe golpes', () => {
     const M = munecoNew(), h = M.hero, x0 = h.x;
     for (let i = 0; i < 30; i++) munecoStep(M, 1 / 60, { x: 1, y: 0 });

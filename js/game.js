@@ -315,17 +315,23 @@ function endGame() {
 
 // Vuelve todo al estado inicial (menú) sin recargar la página.
 function resetGame() {
-    player = null; heroes = []; arenas = []; viewedHero = null;
+    // primero las ventanas de la Torre, con el jugador todavía puesto: sin él, sus toggle no hacen nada y quedaban abiertas
     if (statsOpen) toggleStatsWindow(false);
     if (invOpen) toggleInventory(false);
     if (forgeOpen) { forgeOpen = false; showPanel('forge-container', false); }
+    if (tshopOpen) { tshopOpen = false; showPanel('tshop-container', false); }
+    if (smithOpen) { smithOpen = false; showPanel('smith-container', false); }
+    if (waystoneOpen) toggleWaystone(false);
+    if (logbookTab) closeLogbook();
     if (typeof towerMapOpen !== 'undefined' && towerMapOpen) toggleTowerMap(false);
+    player = null; heroes = []; arenas = []; viewedHero = null;
     gameMode = 'normal'; towerRun = null; document.body.classList.remove('ink-theme'); if (towerLayout) setTowerLayout(false); COLS = VIEW_COLS; ROWS = VIEW_ROWS; camera.x = 0; camera.y = 0;
     gameState = 'MENU'; waveNumber = 1; gameClock = 0; heroOffers = null;
     currentDraft = null; savedPrepTime = null; nextWave = null; logMuted = false;
     duelPlan = null; currentBet = null; duelBets = []; nextRoundBoss = null; lastRoundBoss = null; lastDuelPair = [];
     cancelTargeting();
     paused = false; showPanel('pause-menu', false);
+    if (autopilot) setAutopilot(false); // el piloto de una partida no juega la siguiente (ni pasa de la Torre a Custom Hero)
     setPhaseTimer(PHASE_TIMES.heroSelect);
     resetHud();
     log('🔄 Nueva partida. Tocá "Iniciar partida" cuando quieras.');

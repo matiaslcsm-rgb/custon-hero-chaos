@@ -878,6 +878,10 @@ Las fases 3 y 4 son las más grandes: hay que rehacer pruebas y volver a medir e
 también tiene que aprender a esquivar los ataques anunciados).
 
 ## Interfaz y calidad de vida (lista viva)
+- **Volver a la portada deja todo limpio** (2026-10-18, fase B0, riesgo 1 del mapa): `resetGame` (game.js) cierra
+  primero las ventanas de la Torre (inventario, tienda, herrero, piedra de regreso, Bitácora, mapa) y después suelta al
+  jugador; antes varias quedaban abiertas en el menú. También apaga el piloto automático: el de la Torre ya no juega la
+  partida de Custom Hero que empezás después. Lo cuida la prueba "Ida y vuelta entre modos".
 - **El muñeco: ajustes en vivo** (2026-10-18, fase B2 paso 2a): con O se abre un panel a la derecha; elegís el
   movimiento y cambiás sus números mientras jugás (tiempos, daño, avance, empujón, congelado, sacudón, caja que pega).
   Mientras escribís, las teclas no le llegan al muñeco y Esc suelta el campo. "📋 Copiar datos" da todo en JSON

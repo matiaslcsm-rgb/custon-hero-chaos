@@ -106,10 +106,11 @@ Hoy el juego **no tiene cajas de golpe**: el daño se decide por distancia (si e
         panel marque lo que cambió respecto de ese archivo. 2026-10-18.
   - [x] 2c: los golpes fijos que hoy no se ajustan (congelado de la parada que devuelve 0,06, de la onda 0,04 y del golpe
         recibido 0,05; la bola del muñeco) pasan a los datos y al panel. 2026-10-18: entrada "⚙️ General" del panel.
-- [ ] **Prueba de ida y vuelta entre modos** (riesgo 1 del mapa): jugar un rato la Torre, volver a la portada y
+- [x] **Prueba de ida y vuelta entre modos** (riesgo 1 del mapa): jugar un rato la Torre, volver a la portada y
       empezar Custom Hero (y al revés), y revisar que `player`, `COLS`/`ROWS`, `camera`, `autopilot`, `paused`,
       `gameState` y `towerRun` queden limpios. Si algo queda sucio, arreglarlo en un solo lugar (una función que
       deje el estado como al cargar la página).
+      Hecho 2026-10-18: salían sucios el piloto automático y las ventanas de la Torre; arreglado en `resetGame` (game.js).
 - [ ] **Cajas de golpe en la Torre:** pasar el sistema del muñeco al juego, primero la espada, después el arco y el
       bastón; después Custom Hero. Que se sienta igual que en el muñeco y que pasen todas las pruebas.
 
@@ -475,6 +476,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 
 ## Hecho por el modo automático
 (Fecha · ítem · commit · qué se midió.)
+- 2026-10-18 · Prueba de ida y vuelta entre modos · ver git log · Torre → portada → Custom Hero → portada → Torre revisando 11 ventanas, 6 paneles, modo, estado, mundo (20×12 en Custom Hero), cámara, pausa, piloto y tema. Salieron 2 cosas sucias: el piloto prendido en la Torre seguía jugando Custom Hero, y el inventario (y la tienda, el herrero, la Bitácora) quedaban abiertos porque `resetGame` soltaba al jugador antes de cerrarlos. Arreglado en `resetGame`. Pruebas 286/286.
 - 2026-10-18 · Muñeco, paso 2c (lo general al panel) · ver git log · 14 números más en "⚙️ General" (caminar, bola del muñeco, congelados del disparo 0,04, de la parada que devuelve 0,06 y del golpe recibido 0,05, × velocidad 1,5 y × daño 2 de la bola devuelta, sacudón 1,5); mismos valores que antes. Con el congelado al recibir en 0,2 el golpe congela 0,2 (prueba). Pruebas 285/285.
 - 2026-10-18 · Muñeco, paso 2b (archivo de datos) · ver git log · `js/munecoDatos.js` con los 9 movimientos y 71 números (los mismos de antes: el muñeco no cambia); "Copiar datos" da el archivo entero e idéntico si no tocaste nada (prueba); lo distinto del archivo se ve en amarillo (probado con la velocidad del esquive 210→250). Pruebas 285/285.
 - 2026-10-18 · Muñeco, paso 2a (panel de ajustes) · ver git log · 10 movimientos con 4-10 números cada uno; probado escribiendo 0.15 en el congelado del remate (antes el punto lo agarraba el muñeco como "un cuadro"); un tajo con el daño en 33 le pega 33; no acepta negativos ni vacío. Pruebas 283/283.
