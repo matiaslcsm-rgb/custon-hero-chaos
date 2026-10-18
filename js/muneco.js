@@ -433,16 +433,35 @@ function munecoTuneJSON() {
     for (const id of Object.keys(MUNECO_MOVES)) out[id] = Object.fromEntries(munecoTuneFields(id));
     return JSON.stringify(out, null, 1);
 }
+// 2b: carga los números del archivo de datos (js/munecoDatos.js); devuelve cuántos no pudo usar (movimiento o número que no existe)
+function munecoTuneLoad(data) {
+    let bad = 0;
+    for (const [id, vals] of Object.entries(data || {})) for (const [k, v] of Object.entries(vals)) if (!MUNECO_MOVES[id] || !munecoTuneSet(id, k, v)) bad++;
+    return bad;
+}
+// el archivo entero, listo para pegar en js/munecoDatos.js (mismo encabezado, un movimiento por línea)
+function munecoTuneFile() {
+    const lines = Object.keys(MUNECO_MOVES).map(id => `    ${id}: ${JSON.stringify(Object.fromEntries(munecoTuneFields(id)))}`);
+    return `// Los números del muñeco (index.html?muneco, fase B2 paso 2b): tiempos, daño, avance, empujón, congelado, sacudón y
+// cajas de cada movimiento. Mandan sobre los de MUNECO_MOVES (js/muneco.js). Para cambiarlos: en el muñeco, O abre el
+// panel, ajustás jugando, "📋 Copiar datos" y pegás acá el texto entero (reemplaza este archivo).
+const MUNECO_DATOS = {\n${lines.join(',\n')}\n};\n`;
+}
+// ¿este número es distinto del archivo de datos? (el panel lo marca para que se vea qué tocaste)
+function munecoTuneChanged(id, k, v) { const f = typeof MUNECO_DATOS !== 'undefined' && MUNECO_DATOS[id]; return !f || f[k] !== v; }
 function munecoPanel(wrap) {
     const p = document.createElement('div'); p.id = 'mu-panel'; p.hidden = true;
-    p.innerHTML = `<b>Ajustes en vivo</b> <small>(O cierra)</small><select>${Object.keys(MUNECO_MOVES).map(id => `<option value="${id}">${MUNECO_MOVES[id].name}</option>`).join('')}</select>
+    p.innerHTML = `<b>Ajustes en vivo</b> <small>(O cierra · en amarillo, lo distinto de js/munecoDatos.js)</small><select>${Object.keys(MUNECO_MOVES).map(id => `<option value="${id}">${MUNECO_MOVES[id].name}</option>`).join('')}</select>
         <div class="mu-fields"></div><button type="button">📋 Copiar datos</button><textarea readonly hidden rows="6"></textarea>`;
     const sel = p.querySelector('select'), box = p.querySelector('.mu-fields'), ta = p.querySelector('textarea');
-    const fill = () => { box.innerHTML = munecoTuneFields(sel.value).map(([k, v]) => `<label>${MUNECO_TUNE_NAMES[k]}<input type="number" step="${/^(startup|active|recovery|hitstop|shot\.life)$/.test(k) ? 0.01 : 1}" value="${v}" data-k="${k}"></label>`).join(''); };
-    box.addEventListener('input', e => e.target.classList.toggle('bad', !munecoTuneSet(sel.value, e.target.dataset.k, parseFloat(e.target.value))));
+    const fill = () => { box.innerHTML = munecoTuneFields(sel.value).map(([k, v]) => `<label>${MUNECO_TUNE_NAMES[k]}<input type="number" step="${/^(startup|active|recovery|hitstop|shot\.life)$/.test(k) ? 0.01 : 1}" value="${v}" data-k="${k}" class="${munecoTuneChanged(sel.value, k, v) ? 'changed' : ''}"></label>`).join(''); };
+    box.addEventListener('input', e => {
+        const i = e.target, v = parseFloat(i.value), ok = munecoTuneSet(sel.value, i.dataset.k, v);
+        i.classList.toggle('bad', !ok); i.classList.toggle('changed', ok && munecoTuneChanged(sel.value, i.dataset.k, v));
+    });
     sel.addEventListener('change', fill); fill();
     p.querySelector('button').addEventListener('click', () => {
-        ta.hidden = false; ta.value = munecoTuneJSON(); ta.select();
+        ta.hidden = false; ta.value = munecoTuneFile(); ta.select();
         try { navigator.clipboard.writeText(ta.value); } catch (e) { /* sin permiso: queda seleccionado en el cuadro */ }
     });
     wrap.appendChild(p);
@@ -491,4 +510,5 @@ function munecoStart() {
     };
     requestAnimationFrame(frame);
 }
+if (typeof MUNECO_DATOS !== 'undefined') munecoTuneLoad(MUNECO_DATOS);
 if (/[?&]muneco\b/.test(location.search)) addEventListener('load', () => setTimeout(munecoStart, 0));

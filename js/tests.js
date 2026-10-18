@@ -4423,6 +4423,19 @@ test('El muñeco: la onda de corte viaja con su caja, el muñeco tira bolas, el 
     check(!h.move, 'y vuelve a quedar libre');
 });
 
+test('El muñeco: los números salen del archivo de datos (js/munecoDatos.js)', () => {
+    for (const [id, vals] of Object.entries(MUNECO_DATOS)) for (const [k, v] of Object.entries(vals)) {
+        const [a, b] = k.split('.'); checkEq(b ? MUNECO_MOVES[id][a][b] : MUNECO_MOVES[id][a], v, `${id}.${k}`);
+    }
+    checkEq(Object.keys(MUNECO_DATOS).length, Object.keys(MUNECO_MOVES).length, 'un renglón por movimiento');
+});
+
+test('El muñeco: copiar los datos sin tocar nada da el mismo archivo js/munecoDatos.js', () => {
+    const x = new XMLHttpRequest(); x.open('GET', 'js/munecoDatos.js?' + Date.now(), false); x.send(); // las pruebas son sincrónicas
+    const disk = x.responseText.replace(/\r\n/g, '\n');
+    checkEq(munecoTuneFile(), disk, 'idéntico (pegarlo no cambia nada)');
+});
+
 test('El muñeco: el panel de ajustes cambia los tiempos y las cajas en vivo y no acepta valores rotos', () => {
     const keep = JSON.stringify(MUNECO_MOVES.swing0);
     try {
@@ -4437,6 +4450,11 @@ test('El muñeco: el panel de ajustes cambia los tiempos y las cajas en vivo y n
         for (let i = 0; i < 60; i++) munecoStep(M, 1 / 120, {});
         checkEq(d.total, 33, 'el golpe pega con el daño ajustado');
         check(JSON.parse(munecoTuneJSON()).swing0.dmg === 33, 'copiar datos lleva lo ajustado');
+        check(munecoTuneChanged('swing0', 'dmg', 33) && !munecoTuneChanged('swing0', 'dmg', MUNECO_DATOS.swing0.dmg), 'marca lo distinto del archivo de datos');
+        const file = munecoTuneFile(); check(/const MUNECO_DATOS = \{/.test(file), 'copia el archivo entero');
+        const DATOS = new Function(file + '; return MUNECO_DATOS;')(); checkEq(DATOS.swing0.dmg, 33, 'y el archivo copiado se puede cargar');
+        checkEq(munecoTuneLoad({ swing0: { dmg: 10, nada: 1 }, noExiste: { dmg: 1 } }), 2, 'cargar datos ignora lo que no existe');
+        checkEq(MUNECO_MOVES.swing0.dmg, 10, 'y usa lo que sí');
         const p = munecoPanel(document.createElement('div'));
         const sel = p.querySelector('select'); sel.value = 'swing0'; sel.dispatchEvent(new Event('change'));
         checkEq(p.querySelectorAll('input').length, munecoTuneFields('swing0').length, 'el panel arma un campo por número');

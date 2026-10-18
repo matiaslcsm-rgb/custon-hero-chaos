@@ -1041,6 +1041,7 @@ body.on-title { overflow: hidden; }
 #mu-panel[hidden] { display: none; }
 #mu-panel label { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
 #mu-panel input { width: 64px; background: #15141a; color: #ddd; border: 1px solid #3a3946; font: inherit; }
+#mu-panel input.changed { border-color: #c9a227; color: #ffd166; }
 #mu-panel input.bad { border-color: #ef476f; }
 #mu-panel select, #mu-panel button, #mu-panel textarea { background: #15141a; color: #ddd; border: 1px solid #3a3946; font: inherit; padding: 3px; }
 #mu-panel button { cursor: pointer; }
