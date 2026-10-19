@@ -2931,6 +2931,15 @@ test('Controles estilo Hades: esquive con Espacio (3 casillas, invulnerable, rec
     checkEq(typeof autoCast, 'boolean', 'existe el modo automático (H)');
 }, { random: true });
 
+test('Custom Hero: Espacio no esquiva (el esquive es de la Torre; MATCH es estilo RTS)', () => {
+    newGame('AXE');
+    const x = player.x, y = player.y;
+    spaceAction();
+    check(player.x === x && player.y === y, 'no se mueve');
+    check(!getEffect(player, 'DASH'), 'ni queda invulnerable');
+    check(!/Espacio/.test(document.getElementById('controls-hint').textContent), 'la ayuda de controles no lo menciona');
+});
+
 test('Torre: las habilidades de movilidad van siempre al espacio, y de última a su ranura', () => {
     newTower(); player.heroClass = null; // prueba el equipo con habilidades (el Guerrero no las usa)
     // Parpadeo (arma, Asesino) es de movilidad: tiene que atarse a Espacio, no a Q.

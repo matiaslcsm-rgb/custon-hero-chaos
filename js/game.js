@@ -347,6 +347,7 @@ function resetGame() {
 // towerItems.js) en vez de a Q/E/R — probá lanzarla primero y, si no se pudo (enfriamiento, maná, nivel 0,
 // o directamente no tenés ninguna equipada), caé al esquive de siempre para que la tecla nunca quede "pegada".
 function spaceAction() {
+    if (gameMode !== 'tower') return; // el esquive es de la Torre: en Custom Hero (MATCH, estilo RTS) uno se defiende con la posición y su kit (pedido del usuario 2026-10-18)
     const skill = canControlPlayer() && player.skillForKey(KEYMAP.dash);
     if (skill && skillLevel(player, skill) > 0 && tryCastSkill(player, skill, { quiet: true })) return;
     playerDash();

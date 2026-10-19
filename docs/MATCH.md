@@ -7,6 +7,9 @@ Decidido por el usuario el 2026-10-18:
   jefes, tienda. No cambia la estructura (las reglas de hoy están en `docs/MECANICAS.md`).
 - **Lo que cambia es el centro del diseño de los héroes:** cada competidor tiene que tener **mecánicas que hagan
   divertido y desafiante pelear contra otros competidores.** El duelo es el momento estelar del programa.
+- **Estilo RTS, como Dota:** te movés y peleás con el mouse, y las habilidades salen con tecla y clic. **No hay esquive
+  con Espacio** (es una mecánica de la Torre, y en Custom Hero ya no está desde el 2026-10-18): uno se defiende con la
+  posición, el momento justo y las defensas de su propio kit.
 
 ---
 
@@ -15,8 +18,11 @@ Decidido por el usuario el 2026-10-18:
 - **Contrajuego** (Riot, los creadores de *League of Legends*): lo fuerte tiene que tener una respuesta **jugando**, no
   solo comprando un ítem. También advierten que, si todo pega demasiado fuerte, el poder tapa las decisiones.
 - **Lectura** (David Sirlin, diseñador de *Street Fighter*, lo llama *yomi*): lo más rico de un duelo es adivinar qué va
-  a hacer el otro. La base es un piedra, papel o tijera entre **atacar, cubrirse y esquivar**, con capas: si sé que vas a
-  esquivar, espero; si sabés que espero, atacás.
+  a hacer el otro. La base es un piedra, papel o tijera entre **atacar, defenderse y esperar**, con capas: si sé que vas
+  a defenderte, espero; si sabés que espero, atacás.
+- **En un RTS, la habilidad está en la posición y en el momento.** En Dota no hay botón de esquivar: se esquiva
+  caminando fuera de un área o de la línea de un proyectil, cortando a tiempo lo que el rival está cargando, usando una
+  habilidad que te saca o te protege, y eligiendo bien cuándo entrar y cuándo irse.
 - **Avisos coherentes:** un golpe fuerte se anuncia **siempre con la misma señal** (un gesto, un color, un sonido), y así
   recibirlo es un error del que se aprende, no una injusticia. Pero si se anuncia todo, se pierde habilidad: los
   **amagues** y los tiempos variados mantienen viva la lectura.
@@ -24,8 +30,9 @@ Decidido por el usuario el 2026-10-18:
 ## 2. Los pilares de los duelos de MATCH
 
 Todo competidor se revisa contra esta lista antes de entrar:
-1. **Lo fuerte se avisa y se puede evitar:** esquivando, cubriéndose o saliendo del área. La señal es la misma en todo
-   el juego.
+1. **Lo fuerte se avisa y se puede evitar jugando:** caminando fuera del área, cortándolo a tiempo o con una defensa del
+   kit. La señal es la misma en todo el juego, y dura lo que hace falta para reaccionar con un clic (más que en un
+   juego de acción como la Torre).
 2. **Todo tiene respuesta jugando.** Si la única respuesta es un ítem, está mal diseñado.
 3. **Ventanas para castigar:** después de un golpe fuerte o de un error, el que lo hizo queda expuesto un instante.
 4. **Una lectura propia:** cada competidor tiene algo que se gana adivinando al rival (una carga, un amague, una trampa).
@@ -39,19 +46,20 @@ Todo competidor se revisa contra esta lista antes de entrar:
 ## 3. La caja de herramientas: lo que ya tenemos y lo que falta
 
 **Ya está en el motor:**
-- Esquive con Espacio (y unos instantes intocable).
+- Controles estilo Dota: caminar con clic derecho, marcar un objetivo, habilidades que salen hacia el cursor.
 - Proyectiles de habilidad que viajan al punto apuntado y pueden fallar.
 - Inmunidad corta después de un aturdimiento y control a la mitad en duelo (nadie queda aturdido para siempre).
 - En la Torre: **avisos de golpe** (los enemigos se preparan antes de pegar) y una **parada** que devuelve proyectiles.
 - En el muñeco: golpes en tres tiempos (preparación, golpe y recuperación) y cajas de golpe.
 
 **Falta para MATCH:**
-- **Que los rivales de la IA también esquiven.** Hoy el esquive con Espacio es solo del jugador (y del piloto en la
-  Torre): los 7 rivales pelean sin esquivar, así que un duelo contra ellos no puede ser una lectura de verdad.
+- **Que los rivales de la IA lean los avisos:** que caminen fuera de las áreas anunciadas, corten lo que se pueda cortar
+  y usen las defensas de su kit, con tiempos de reacción de una persona. Hoy no reaccionan a nada, así que un duelo
+  contra ellos no puede ser una lectura de verdad.
 - Avisos de golpe en los módulos de los competidores (traer lo de la Torre).
 - Zonas y trampas en el piso, objetos que se pueden romper (drones, torretas).
 - Cargas a la vista sobre el competidor.
-- Una forma de cubrirse (ver la decisión de abajo).
+- Habilidades que se cargan o canalizan (y se pueden cortar), y formas de cortarlas.
 
 ## 4. Los 8 competidores, con su mecánica de duelo (borrador)
 
@@ -60,12 +68,12 @@ vienen después, en una ficha por competidor.
 
 | Competidor/a | Cómo gana | Su lectura | Cómo se le gana |
 |---|---|---|---|
-| **Grúa** (operaria con brazo-grúa) | Un gancho lento y anunciado: si engancha, arrastra al rival; contra una pared, lo aturde un instante. | ¿Tirar el gancho ya o esperar a que el rival esquive? | Esquivar el gancho: si falla, Grúa queda expuesta un segundo. |
+| **Grúa** (operaria con brazo-grúa) | Un gancho lento y anunciado: si engancha, arrastra al rival; contra una pared, lo aturde un instante. | ¿Tirar el gancho ya o esperar a que el rival se quede quieto? | Correrse de la línea del gancho: si falla, Grúa queda expuesta un segundo. |
 | **Eco** (DJ con ondas de sonido) | Un pulso que se ve (un metrónomo): los módulos tirados en el pulso pegan el doble. | El rival también ve el pulso: ¿tiro en el pulso, donde me esperan, o fuera, más flojo? | Cortarle el ritmo: empujarlo o aturdirlo reinicia el pulso. |
-| **Flash** (camarógrafa del show) | Un flash en cono, anunciado: el que lo mira de frente queda encandilado (falla sus ataques 2 s). Sus golpes marcan al rival: recibe más daño. | ¿Me doy vuelta para esquivar el flash (y dejo de pegar) o me la juego? | Entrarle de costado y no darle tiempo de girar. |
+| **Flash** (camarógrafa del show) | Un flash en cono, anunciado: el que lo mira de frente queda encandilado (falla sus ataques 2 s). Sus golpes marcan al rival: recibe más daño. | ¿Me alejo del cono del flash (y dejo de pegar) o me la juego? | Entrarle de costado y no darle tiempo de girar. |
 | **Kilo** (repartidor en patines) | Drones de entrega que pegan por él; cuanto más se mueve, más rápido va. | ¿Rompo los drones primero o voy por él? | Romper los drones (que se pueden golpear) y arrinconarlo contra una pared. |
 | **Parche** (técnico de boxes) | Pone torretas en el piso (se ven) y se repara cerca de ellas. | ¿Dónde pongo la torreta? El rival elige pelear lejos. | Sacarlo de su zona o romper las torretas. |
-| **Vector** (esgrimista con hoja de luz) | Esquivar justo cuando le pegan le carga un golpe enorme. | Espera tu golpe para esquivarlo. | **Amagar:** no tirar el golpe fuerte hasta que él esquive primero. |
+| **Vector** (esgrimista con hoja de luz) | **Guardia:** un módulo corto de bloqueo; si le pegan durante la guardia, contraataca con un golpe enorme. | Espera tu golpe fuerte con la guardia. | **Amagar:** no tirar el golpe fuerte hasta que él gaste la guardia. |
 | **Viral** (influencer) | Una "pose" a la vista (quieto medio segundo) que, si nadie la interrumpe, le da un refuerzo grande. Crece con las apuestas a su favor. | ¿Poso ahora, que el rival tiene el golpe en enfriamiento? | Guardar algo para cortar la pose. |
 | **Glitch** (un error de la transmisión) | Copia por un rato el último módulo que lo golpeó. | ¿Qué le conviene que yo le tire? | Pegarle primero con el módulo más flojo y guardar el bueno. |
 
@@ -75,20 +83,28 @@ mismo filtro: se les busca su lectura y su respuesta.
 ## 5. Los duelos de hoy: qué mirar (sin cambiar la estructura)
 
 - **Los ajustes de duelo** (−60% de daño y de curación entre héroes, control a la mitad) se pusieron porque el que
-  aturdía primero ganaba. Con avisos y esquives, puede que sobren: se revisan cuando entren los competidores nuevos.
+  aturdía primero ganaba. Con avisos y respuestas en los kits, puede que sobren: se revisan cuando entren los
+  competidores nuevos.
 - **Qué medir en cada competidor nuevo** (con el banco de partidas y el piloto):
   - cuánto duran los duelos (meta: 15 a 30 s);
   - cuántas veces cambia quién va ganando;
-  - qué parte de los golpes fuertes esquiva el piloto con reflejos humanos (si nadie esquiva nada, no hay habilidad;
-    si se esquiva todo, no hay amenaza);
+  - qué parte de los golpes fuertes evita el piloto con reflejos humanos (si nadie evita nada, no hay habilidad;
+    si se evita todo, no hay amenaza);
   - que ningún cruce sea 80 a 20.
-- **El piloto tiene que esquivar los avisos** (en la Torre ya lo hace, con reflejos humanos que a veces fallan).
+- **El piloto y la IA tienen que reaccionar a los avisos** caminando, con los tiempos de una persona (en la Torre ya hay
+  un piloto con reflejos humanos que a veces falla).
 
 ## 6. Decisiones
 
-1. **Cómo se cubren los competidores:** (a) **cada uno trae su propia defensa en el kit (el esquive con carga de
-   Vector, la pose de Viral, la torreta de Parche), y todos tienen el esquive con Espacio (recomendada: más identidad)**;
-   (b) una parada común para todos (clic derecho), como la de la Torre, además del esquive; (c) solo el esquive.
+- **Decidido por el usuario el 2026-10-18:** sin esquive con Espacio (es de la Torre) y estilo RTS, como Dota. Cada
+  competidor se defiende con la posición y con lo que traiga su kit (la guardia de Vector, la pose de Viral, las
+  torretas de Parche).
+
+1. **Los controles:** hoy en Custom Hero te movés con W A S D o con clic derecho, el clic izquierdo marca un objetivo y
+   las habilidades salen al apretar la tecla, hacia el cursor. (a) **como Dota: clic derecho para caminar y, sobre un
+   rival, para atacarlo; las habilidades con tecla y clic para confirmar, con la opción "lanzamiento rápido" (sale al
+   apretar la tecla, como hoy) en Opciones; W A S D solo si lo prendés en Opciones (recomendada)**; (b) solo mouse, sin
+   W A S D; (c) dejar los controles como están.
 2. **Siguen abiertas de antes:** los atributos (Blindaje, Reflejos y Procesador, recomendados), los competidores de
    arranque (las 8 semillas, recomendadas) y quedarnos con el motor (recomendado).
 
