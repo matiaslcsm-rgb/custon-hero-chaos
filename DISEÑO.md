@@ -187,7 +187,7 @@ El cálculo de daño suma lo que haya, sin conocer cada habilidad.
 | Danzante Cinético `D` | Agilidad | Duelista móvil: el movimiento da daño | Danza Cinética |
 | Zeus `Z` | Inteligencia | Daño mágico masivo a distancia, sin límite de rango en la definitiva | Campo Estático |
 
-**Danzante Cinético** (diseño del usuario, héroe 10 de 3 de Agilidad que se suman de a uno: Danzante → Chakravin → Trampero).
+**Danzante Cinético** (diseño del usuario, héroe 10; los otros dos que venían, Chakravin y Trampero, los descartó el usuario el 2026-10-18).
 Ajustes al pasarlo al motor:
 - Símbolo `D` en vez de `J`: la `J` ya la usan los jefes de oleada en el modo letras.
 - Los enfriamientos del diseño ya venían con el ×0,75 aplicado; en el archivo se guardan sin él (6 → 8 s, etc.).

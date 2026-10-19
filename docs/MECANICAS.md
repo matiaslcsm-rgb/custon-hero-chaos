@@ -206,6 +206,7 @@ No tiene nada de Dota adentro, y rehacerlo desde cero llevaría meses sin que se
 
 Pasos, de a uno y siempre con el juego jugable:
 1. **Identidad:** nombre del juego y mundo (de dónde salen estos héroes, por qué pelean en arenas, qué es el oro).
+   El usuario eligió un mundo **futurista, la antítesis de Dota**: ver `docs/CONCEPTO-FUTURISTA.md`.
 2. **Repasar las reglas 🟠** de esta lista y decidir cuáles se quedan, cuáles cambian y cuáles se van.
 3. **Roster nuevo:** primero los héroes que reemplazan a los 🔴, después el resto. Cada uno con su innato, sus 4
    habilidades y su contra, según los criterios de `DISEÑO.md` §6.

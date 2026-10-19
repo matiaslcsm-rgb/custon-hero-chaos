@@ -59,8 +59,9 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 ## Pendientes y temas abiertos
 - **Custom Hero propio, desde cero (2026-10-18, pedido del usuario):** se rehace como un juego nuestro, sin nada de Dota.
   Todas las mecánicas de hoy, con su origen (propia, del género, estilo Dota o copiada), están en
-  [`MECANICAS.md`](MECANICAS.md). Esperan al usuario: el código (recomendado: quedarse con el motor), el mundo, el nombre,
-  los atributos y el roster de arranque (Fase C0 del roadmap).
+  [`MECANICAS.md`](MECANICAS.md). El mundo: **futurista, la antítesis de Dota** (decidido por el usuario); conceptos,
+  nombres, atributos y semillas de competidores en [`CONCEPTO-FUTURISTA.md`](CONCEPTO-FUTURISTA.md). Esperan al usuario:
+  el código (recomendado: quedarse con el motor), el concepto, el nombre, los atributos y los competidores (Fase C0).
 - **⏸ Infinite Tower en pausa (2026-10-18, pedido del usuario):** se avanza solo con Custom Hero (ver el aviso arriba
   de todo en ROADMAP.md). La Torre sigue jugable como está.
 - **Custom Hero: pantalla de fin de partida y perfil (2026-10-18):** `js/matchSummary.js`: el resumen al terminar o al
@@ -149,8 +150,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   quien apunta mal con el arco.
 - **La espada (2026-10-13):** sin Q; el clic es el combo de 3 tajos (también en automático y con el piloto) y el clic
   derecho la parada que devuelve disparos y para golpes. Daño parejo con antes (medido).
-- **En curso:** 3 héroes de Agilidad del usuario, de a uno y midiendo cada uno: Danzante ✅ → **Chakravin `Y`** (proyectiles
-  de habilidad que vuelven + creep Guardián de Hierro) → **Trampero `P`** (zonas en el piso + creep Saltador).
+- **Héroes de Agilidad del usuario:** Danzante ✅. Chakravin y Trampero, descartados por el usuario el 2026-10-18.
 - **Proyectiles de habilidad:** convertidos los nukes de un solo objetivo de Zeus, Arcanista, Bruja del Hielo y
   Alquimista (el Nigromante perdió el suyo en el rework a Necrophos: Pulso de Muerte pasó a ser un área centrada en
   uno mismo, no se apunta). Quedan afuera a propósito: Distorsión Espacial del Sabio del Vacío (es un blink, no un

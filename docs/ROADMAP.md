@@ -418,7 +418,9 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 Todas las mecánicas de hoy, con su origen, están en `docs/MECANICAS.md`. La propuesta: contenido e identidad nuevos
 (héroes, habilidades, ítems, nombres, mundo y arte), sin nada de Dota; el motor se queda si el usuario lo confirma.
 - [ ] **(decisión) Desde cero: ¿también el código, o solo el contenido?** Ver "Esperando al usuario".
-- [ ] **(decisión) El mundo del juego.** Ver "Esperando al usuario".
+- [x] **El mundo del juego:** decidido por el usuario el 2026-10-18: **futurista, la antítesis de Dota.** Investigado en
+      `docs/CONCEPTO-FUTURISTA.md` (estilos, tres conceptos, nombres para todo, atributos y semillas de competidores).
+- [ ] **(decisión) El concepto futurista** (cuál de los tres de `docs/CONCEPTO-FUTURISTA.md`). Ver "Esperando al usuario".
 - [ ] **(decisión) El nombre del juego** (después del mundo). Ver "Esperando al usuario".
 - [ ] **(decisión) Los atributos.** Ver "Esperando al usuario".
 - [ ] **(decisión) El roster de arranque.** Ver "Esperando al usuario".
@@ -456,8 +458,7 @@ Todas las mecánicas de hoy, con su origen, están en `docs/MECANICAS.md`. La pr
       desde la 5 (ya está). Revisar que el jugador nuevo llegue a la ronda 5 con build armada.
 
 ## Fase C3 — Contenido
-- [ ] **⏸ Chakravin `Y`** (diseño del usuario: entra al roster propio; espera las decisiones de C0) (proyectiles de habilidad que vuelven + creep Guardián de Hierro), midiendo.
-- [ ] **⏸ Trampero `P`** (diseño del usuario: entra al roster propio; espera las decisiones de C0) (zonas en el piso + creep Saltador), midiendo.
+- ~~Chakravin `Y` y Trampero `P`~~ (con sus creeps Guardián de Hierro y Saltador): **descartados por el usuario el 2026-10-18.**
 - [ ] **⏸ Proyectiles de habilidad para el resto del roster** (Danzante, Asesino, Vampiro, Sniper) y forma propia por
       habilidad (`vfx.shape`).
 - [ ] **(decisión) Ítems nuevos** de DISEÑO.md §7: el usuario decide cuáles entran.
@@ -494,21 +495,22 @@ Todas las mecánicas de hoy, con su origen, están en `docs/MECANICAS.md`. La pr
   apuestas, la IA, el banco de partidas y 289 pruebas; rehacerlo llevaría meses sin que se note en el juego)**;
   (b) reescribir también el código desde cero; (c) un juego aparte en otra carpeta, copiando del actual lo que sirva.
 
-- **El mundo del Custom Hero propio:** (a) **el mismo mundo de la Torre (biomas, la expedición de Arén): las arenas son
-  un torneo dentro de ese mundo (recomendada: ya hay historia, gente y arte con estilo propio, y los dos juegos se
-  conectan)**; (b) un mundo nuevo solo para este juego; (c) sin mundo: arenas abstractas, todo en la mecánica.
+- **El concepto futurista** (el usuario eligió futurista, la antítesis de Dota; detalle en `docs/CONCEPTO-FUTURISTA.md`):
+  (a) **"En Vivo": un show de competencia del futuro transmitido en vivo (la tribuna apuesta, los patrocinadores venden,
+  el rating es el ranking), con fondos claros y colores limpios (recomendada: todas nuestras mecánicas ya son de un show)**;
+  (b) "La Simulación": una liga de realidad virtual; (c) "Los Juegos del Sol": una competencia amistosa solarpunk.
 
 - **El nombre del juego:** (a) **que el equipo proponga 8-10 nombres que encajen con el mundo elegido y vos elegís
   (recomendada)**; (b) lo ponés vos directamente; (c) dejar "Custom Hero" hasta la 1.0 (ojo: es casi el nombre del mod).
 
-- **Los atributos:** hoy Fuerza / Agilidad / Inteligencia con las fórmulas de Dota. (a) **tres atributos propios, con
-  nombres y efectos nuestros (recomendada: es lo que más "suena" a Dota en las reglas)**; (b) Fuerza / Agilidad /
-  Inteligencia (son genéricos de cualquier RPG) con fórmulas propias; (c) sin atributos: cada héroe con sus stats directos.
+- **Los atributos:** hoy Fuerza / Agilidad / Inteligencia con las fórmulas de Dota. (a) **Blindaje (vida y armadura),
+  Reflejos (velocidad, movimiento y crítico) y Procesador (energía y potencia de los módulos), con números nuestros
+  (recomendada)**; (b) Fuerza / Agilidad / Inteligencia con fórmulas propias; (c) sin atributos: cada uno con stats directos.
 
-- **El roster de arranque:** (a) **reemplazar primero a los 5 copiados (Zeus, Nigromante, Axe, Sniper, Alquimista) por 5
-  héroes nuevos, de a uno y con el juego siempre jugable, conservando los propios (Danzante, Arcanista, Sabio del Vacío) y
-  sumando tus Chakravin y Trampero (recomendada)**; (b) un roster entero nuevo de 8 a 10 héroes, retirando a todos los
-  actuales; (c) armar todo el roster nuevo aparte y cambiarlo de una sola vez.
+- **Los competidores de arranque:** (a) **8 de las semillas de `docs/CONCEPTO-FUTURISTA.md` (Grúa, Eco, Flash, Kilo,
+  Parche, Vector, Viral, Glitch) y pasar al estilo nuevo al Danzante, el Arcanista y el Sabio del Vacío; los actuales se
+  retiran a medida que entran los nuevos, con el juego siempre jugable (recomendada)**; (b) un roster nuevo entero antes de
+  cambiar nada; (c) otras semillas. (Chakravin y Trampero quedaron descartados por el usuario el 2026-10-18.)
 
 - **Cuadros de frente y de espaldas de la espada (B2 1d y T2):** el borrador se sacó el 2026-10-17 y se pidió el caballero
   afuera. Opciones: (a) **esperar el arte del caballero (o la hoja que elijas) y recortarlo con `extraer-sprites.py`
