@@ -68,8 +68,9 @@ El orden de la lista **es** la prioridad: primero lo que destraba el loop comple
 
 > **⏸ INFINITE TOWER EN PAUSA (pedido del usuario 2026-10-18: "avanzá solo con Custom, la Tower pausala").**
 > Hasta que el usuario diga otra cosa, el modo automático trabaja **solo en Custom Hero**.
-> **Desde el 2026-10-18 (pedido del usuario): Custom Hero se rehace como un juego propio, sin nada de Dota** (Fase C0 y
-> `docs/MECANICAS.md`). Orden: los ítems sin "(decisión)" de C0, después lo que quede de C1. Todo lo marcado ⏸ en C2, C3
+> **Desde el 2026-10-18 (pedido del usuario): Custom Hero se rehace como un juego propio, sin nada de Dota: MATCH**, un
+> show de competencia del futuro donde **todos pelean contra todos** (Fase C0, `docs/MATCH.md`, `docs/MECANICAS.md` y
+> `docs/CONCEPTO-FUTURISTA.md`). Orden: los ítems sin "(decisión)" de C0, después lo que quede de C1. Todo lo marcado ⏸ en C2, C3
 > y C4 espera las decisiones de C0 (no tiene sentido balancear o sumar contenido al roster que se va a reemplazar). Se saltean como si dijeran (decisión) todos los ítems de INFINITE TOWER y los de la base que son solo de
 > la Torre (B2 1d, "Cajas de golpe en la Torre", la galería y el arte de la Torre). El muñeco y la base compartida
 > (B0) solo si ayudan a Custom Hero. No se borra nada de la Torre: sigue jugable como está.
@@ -414,14 +415,21 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 - **Criterios 1.0 (medidos con `simulateGame`):** ningún héroe gana más del 20% de las partidas de 8 (lo esperable
   es 12,5%), partidas de 15 a 25 minutos, el jugador nuevo entiende la economía en la primera partida.
 
-## Fase C0 — Un Custom Hero propio, desde cero (pedido del usuario 2026-10-18)
-Todas las mecánicas de hoy, con su origen, están en `docs/MECANICAS.md`. La propuesta: contenido e identidad nuevos
-(héroes, habilidades, ítems, nombres, mundo y arte), sin nada de Dota; el motor se queda si el usuario lo confirma.
+## Fase C0 — MATCH: un juego propio, desde cero (pedido del usuario 2026-10-18)
+Todas las mecánicas de hoy, con su origen, están en `docs/MECANICAS.md`; el diseño del juego nuevo, en `docs/MATCH.md`.
+Contenido e identidad nuevos (competidores, módulos, equipos, nombres, mundo y arte), sin nada de Dota; el motor se queda
+si el usuario lo confirma.
 - [ ] **(decisión) Desde cero: ¿también el código, o solo el contenido?** Ver "Esperando al usuario".
 - [x] **El mundo del juego:** decidido por el usuario el 2026-10-18: **futurista, la antítesis de Dota.** Investigado en
       `docs/CONCEPTO-FUTURISTA.md` (estilos, tres conceptos, nombres para todo, atributos y semillas de competidores).
-- [ ] **(decisión) El concepto futurista** (cuál de los tres de `docs/CONCEPTO-FUTURISTA.md`). Ver "Esperando al usuario".
-- [ ] **(decisión) El nombre del juego** (después del mundo). Ver "Esperando al usuario".
+- [x] **El concepto:** decidido por el usuario el 2026-10-18: **"En Vivo"**, un show de competencia del año 2099.
+- [x] **El nombre:** decidido por el usuario el 2026-10-18: **MATCH**.
+- [x] **La regla central:** decidido por el usuario el 2026-10-18: **es PvP; todos los competidores combaten entre ellos**
+      y se diseñan para pelear contra otros competidores. Propuesta del núcleo en `docs/MATCH.md`.
+- [ ] **(decisión) Cómo es una ronda** (`docs/MATCH.md` §2). Ver "Esperando al usuario".
+- [ ] **(decisión) La vida del jugador** (la audiencia, `docs/MATCH.md` §3). Ver "Esperando al usuario".
+- [ ] **(decisión) Los drones** (`docs/MATCH.md` §2). Ver "Esperando al usuario".
+- [ ] **(decisión) Las apuestas** (`docs/MATCH.md` §5). Ver "Esperando al usuario".
 - [ ] **(decisión) Los atributos.** Ver "Esperando al usuario".
 - [ ] **(decisión) El roster de arranque.** Ver "Esperando al usuario".
 - [ ] **Inventario de lo que hay que cambiar, archivo por archivo:** buscar en el código, los datos y los textos de la
@@ -495,13 +503,19 @@ Todas las mecánicas de hoy, con su origen, están en `docs/MECANICAS.md`. La pr
   apuestas, la IA, el banco de partidas y 289 pruebas; rehacerlo llevaría meses sin que se note en el juego)**;
   (b) reescribir también el código desde cero; (c) un juego aparte en otra carpeta, copiando del actual lo que sirva.
 
-- **El concepto futurista** (el usuario eligió futurista, la antítesis de Dota; detalle en `docs/CONCEPTO-FUTURISTA.md`):
-  (a) **"En Vivo": un show de competencia del futuro transmitido en vivo (la tribuna apuesta, los patrocinadores venden,
-  el rating es el ranking), con fondos claros y colores limpios (recomendada: todas nuestras mecánicas ya son de un show)**;
-  (b) "La Simulación": una liga de realidad virtual; (c) "Los Juegos del Sol": una competencia amistosa solarpunk.
+- **MATCH: cómo es una ronda** (`docs/MATCH.md` §2): (a) **los 8 en cara a cara simultáneos todas las rondas (con "la
+  repetición" si quedan impares), más un Todos contra Todos cada 5 rondas en lugar de los jefes (recomendada)**; (b) solo
+  cara a cara; (c) siempre Todos contra Todos, los 8 en una arena.
 
-- **El nombre del juego:** (a) **que el equipo proponga 8-10 nombres que encajen con el mundo elegido y vos elegís
-  (recomendada)**; (b) lo ponés vos directamente; (c) dejar "Custom Hero" hasta la 1.0 (ojo: es casi el nombre del mod).
+- **MATCH: la vida del jugador** (`docs/MATCH.md` §3): (a) **la audiencia: 100 puntos que bajan al perder un cara a cara
+  (más cuanto más le quedó al ganador y cuanto más avanzada la ronda); en 0, fuera del aire (recomendada: es lo probado en
+  los auto battlers y le da sentido al show)**; (b) 3 vidas fijas, una por derrota; (c) eliminación directa desde una ronda.
+
+- **MATCH: los drones** (`docs/MATCH.md` §2): (a) **solo la ronda 1, de "prueba de cámara", sin perder audiencia
+  (recomendada)**; (b) nada de drones; (c) una ronda de drones cada 5 para ganar créditos.
+
+- **MATCH: las apuestas** (`docs/MATCH.md` §5): (a) **a otro cara a cara o a vos mismo (apostarte paga menos si sos el
+  favorito) (recomendada)**; (b) solo a otros cara a cara; (c) solo en el Todos contra Todos.
 
 - **Los atributos:** hoy Fuerza / Agilidad / Inteligencia con las fórmulas de Dota. (a) **Blindaje (vida y armadura),
   Reflejos (velocidad, movimiento y crítico) y Procesador (energía y potencia de los módulos), con números nuestros

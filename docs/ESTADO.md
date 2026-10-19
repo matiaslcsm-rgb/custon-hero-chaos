@@ -61,7 +61,9 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   Todas las mecánicas de hoy, con su origen (propia, del género, estilo Dota o copiada), están en
   [`MECANICAS.md`](MECANICAS.md). El mundo: **futurista, la antítesis de Dota** (decidido por el usuario); conceptos,
   nombres, atributos y semillas de competidores en [`CONCEPTO-FUTURISTA.md`](CONCEPTO-FUTURISTA.md). Esperan al usuario:
-  el código (recomendado: quedarse con el motor), el concepto, el nombre, los atributos y los competidores (Fase C0).
+  el código (recomendado: quedarse con el motor), los atributos y los competidores (Fase C0).
+  **Decidido:** concepto "En Vivo", nombre **MATCH** y la regla central: **PvP, todos pelean contra todos**. Propuesta del
+  núcleo (cara a cara para los 8 cada ronda, la audiencia como vida, Todos contra Todos cada 5) en [`MATCH.md`](MATCH.md).
 - **⏸ Infinite Tower en pausa (2026-10-18, pedido del usuario):** se avanza solo con Custom Hero (ver el aviso arriba
   de todo en ROADMAP.md). La Torre sigue jugable como está.
 - **Custom Hero: pantalla de fin de partida y perfil (2026-10-18):** `js/matchSummary.js`: el resumen al terminar o al
