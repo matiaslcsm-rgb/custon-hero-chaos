@@ -17,7 +17,7 @@ Para MATCH (concepto "En Vivo", `docs/CONCEPTO-FUTURISTA.md` §8):
 - **Fondos claros o medios**, nunca negros; las arenas como un estudio de TV (piso con grilla, luces, tribuna).
 - **Pocos colores fuertes por competidor** sobre una base neutra; siluetas con formas grandes (cascos, brazos
   mecánicos, ruedas, mochilas).
-- **El color dice algo:** la señal de peligro es siempre la misma en todo el juego.
+- **El color dice algo:** la señal de peligro es siempre la misma en todo el juego (rojo, el de los avisos de la Torre, con su modo daltónico: decidido por el usuario).
 - Paleta base propuesta: hueso `#f2f0e9`, gris claro `#c9ccd1`, azul tinta `#1e3a5f`, magenta `#ff3ea5`, cian `#29e0ff`,
   amarillo `#ffd23f`, naranja `#ff7a2e`, verde ácido `#8cff4f` (a confirmar por el usuario).
 

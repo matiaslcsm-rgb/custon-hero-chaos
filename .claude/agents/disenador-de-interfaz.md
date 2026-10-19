@@ -15,7 +15,7 @@ Dónde está:
 
 Principios:
 - **Leer al rival es parte del juego:** en el duelo tienen que verse sus módulos listos o en enfriamiento, sus cargas y
-  los avisos (siempre con la misma señal de peligro).
+  los avisos (siempre con la misma señal de peligro (rojo, el de los avisos de la Torre, con su modo daltónico: decidido por el usuario)).
 - **Un vistazo:** jerarquía clara, números grandes donde importan, nada de paredes de texto.
 - **No tapar el combate.** Probá en 1280×720 y 1366×768.
 - **El show:** nombres del concepto "En Vivo" (créditos, módulos, rating, tribuna…) cuando el usuario los apruebe;

@@ -138,7 +138,8 @@ Seguimos con el pixel art dibujado en código, con otras reglas:
   piso con grilla, luces de escenario, tribuna en los bordes.
 - **Pocos colores y fuertes por personaje:** uno o dos de acento sobre una base neutra. Siluetas con formas grandes
   (cascos, hombreras, mochilas, ruedas, brazos mecánicos).
-- **El color dice algo:** lo que pega brilla en un color, lo que se puede usar en otro, el peligro siempre del mismo.
+- **El color dice algo:** lo que pega brilla en un color, lo que se puede usar en otro, y **el peligro siempre en rojo**
+  (decidido por el usuario el 2026-10-19: el rojo de los avisos de la Torre, con su modo daltónico).
 - **Paleta base (propuesta):** hueso `#f2f0e9`, gris claro `#c9ccd1`, azul tinta `#1e3a5f` (sombras y contornos),
   magenta `#ff3ea5`, cian `#29e0ff`, amarillo `#ffd23f`, naranja `#ff7a2e`, verde ácido `#8cff4f`.
 - **Música y sonido:** sintetizadores de los 80, jingles del show, la tribuna que grita en el cara a cara.

@@ -136,10 +136,10 @@ En orden, sin esperar decisiones:
 - **No se pega caminando, como en Dota** (decidido por el usuario el 2026-10-18): para pegar te quedás quieto, moverte
   corta el golpe y el golpe básico tiene una preparación cortita. Está en el roadmap para que lo haga el equipo.
 
-1. **El color del peligro** (siempre el mismo en todo el juego): (a) **el rojo de los avisos de la Torre por ahora
-   (recomendada: ya anda, tiene modo daltónico y se cambia en un solo lugar)**; (b) el magenta del show; (c) el naranja
-   de la paleta.
-2. **Siguen abiertas de antes:** los atributos (Blindaje, Reflejos y Procesador, recomendados), los competidores de
+- **El color del peligro es el rojo** de los avisos de la Torre (decidido por el usuario el 2026-10-19): siempre el
+  mismo en todo el juego; ya tiene modo daltónico (azul y naranja) y se cambia en un solo lugar.
+
+1. **Siguen abiertas de antes:** los atributos (Blindaje, Reflejos y Procesador, recomendados), los competidores de
    arranque (las 8 semillas, recomendadas) y quedarnos con el motor (recomendado).
 
 ## 7. Lo que sigue (una vez decidido)

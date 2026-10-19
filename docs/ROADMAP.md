@@ -456,7 +456,8 @@ si el usuario lo confirma.
 - [ ] **Panel del rival en el duelo** (plan del equipo): sus módulos con el enfriamiento y sus cargas a la vista.
 - [ ] **Arena de duelo con 2 a 4 columnas** que frenan proyectiles (plan del equipo). Medir: nadie trabado más de 3 s,
       menos del 10% de duelos por tiempo.
-- [ ] **(decisión) El color del peligro.** Ver "Esperando al usuario".
+- [x] **El color del peligro: rojo** (decidido por el usuario 2026-10-19): el de los avisos de la Torre, siempre el mismo en
+      todo el juego (con su modo daltónico). Lo usan los avisos de golpe de MATCH cuando se hagan.
 - [ ] **Inventario de lo que hay que cambiar, archivo por archivo:** buscar en el código, los datos y los textos de la
       interfaz todo nombre o kit que venga de Dota (héroes, habilidades, ítems, "objetos neutrales", comentarios que
       dicen "fiel a Dota") y anotarlo como lista en `docs/MECANICAS.md` (apéndice), con dónde está cada uno. Solo
@@ -527,9 +528,6 @@ si el usuario lo confirma.
   nuevos sobre el motor de hoy (recomendada: el motor no tiene nada de Dota y trae las rondas, el draft, los duelos, las
   apuestas, la IA, el banco de partidas y 289 pruebas; rehacerlo llevaría meses sin que se note en el juego)**;
   (b) reescribir también el código desde cero; (c) un juego aparte en otra carpeta, copiando del actual lo que sirva.
-
-- **MATCH: el color del peligro** (`docs/MATCH.md` §6): (a) **el rojo de los avisos de la Torre por ahora (recomendada: ya
-  anda, tiene modo daltónico y se cambia en un solo lugar)**; (b) el magenta del show; (c) el naranja de la paleta.
 
 - **Los atributos:** hoy Fuerza / Agilidad / Inteligencia con las fórmulas de Dota. (a) **Blindaje (vida y armadura),
   Reflejos (velocidad, movimiento y crítico) y Procesador (energía y potencia de los módulos), con números nuestros
