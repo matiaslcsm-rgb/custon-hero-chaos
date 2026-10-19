@@ -450,6 +450,13 @@ si el usuario lo confirma.
       rivales se frenen para pegar y no se queden trabados), qa-jugador (banco antes y después). Medir: duración de los
       duelos, cambios de quién va ganando y ganadores por héroe (en `DISEÑO.md` §9, con "reset" los cuerpo a cuerpo
       ganaban 46% de los duelos; con "libre", 38%).
+  - [ ] 1 (motor, hecho y guardado sin subir el 2026-10-19): `docs/parches/2026-10-19-no-pegar-caminando.patch` (`git apply`).
+        En MATCH el golpe solo avanza quieto, el primero sale a los `ATTACK_WINDUP` 0,25 s y cada paso lo reinicia; la
+        Torre igual. Sus 2 pruebas pasan, pero rompe "Las arenas se juegan en paralelo" (8 de 9 puntos): el Danzante
+        Cinético de la IA gira sin parar (`movesToFight`/`circleStep`, `js/ai.js:39-44`) y no pega nunca. Se deshizo
+        porque la corrida llegó al tope del plan.
+  - [ ] 2 (ia-de-rivales): aplicar el parche y que el que gira por AL_MOVERSE frene con alguien a tiro (y revisar el
+        `retreatStep` de los de distancia). Después sistemas mide con el banco y QA.
 - [ ] **Preparación anunciada para las habilidades** (plan del equipo, `docs/MATCH.md` §5): golpe fuerte con al menos 0,7 s
       de aviso y marca en el piso (la de la Torre), que se corta aturdiendo, y 0,3-0,5 s de exposición después. Probar
       con 1 o 2 habilidades de hoy y medir con el banco de duelos.

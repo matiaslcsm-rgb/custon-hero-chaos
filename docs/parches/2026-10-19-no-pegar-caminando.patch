@@ -1,0 +1,111 @@
+diff --git a/js/game.js b/js/game.js
+index 3105c97..8eb1b3e 100644
+--- a/js/game.js
++++ b/js/game.js
+@@ -14,7 +14,12 @@ const WAVE_HARD_LIMIT = 120;
+ // a la vez sin costo, y los cuerpo a cuerpo casi no ganaban duelos.
+ // Qué pasa con el ataque al moverse: 'reset' (arranca de cero), 'pause' (no avanza mientras caminás, pero no se pierde)
+ // 'reset-ranged' (solo los de distancia reinician) o 'free' (se puede atacar caminando). Es let para poder medir las variantes.
+-let MOVE_ATTACK_RULE = 'free'; // a pedido: se ataca caminando; el equilibrio se hace con stats (ver DISEÑO.md)
++// Solo vale en MATCH: la Torre siempre ataca caminando ('free'). Decisión del usuario 2026-10-18: "no se pega caminando".
++let MOVE_ATTACK_RULE = 'reset';
++// Punto de ataque (como en Dota), solo MATCH: quieto y con alguien a tiro, el primer golpe sale a los ATTACK_WINDUP
++// segundos y no tras el intervalo entero; los siguientes, a 1 / velocidad de ataque. Caminar la vuelve a empezar.
++const ATTACK_WINDUP = 0.25;
++function attackRestTimer(hero) { return gameMode === 'tower' ? 0 : Math.max(0, 1 / effAtkSpeed(hero) - ATTACK_WINDUP); }
+ // Velocidad de movimiento de todos (héroes y creeps): 0,65 = 35% más lentos que al principio, a pedido (se veía muy frenético).
+ // Solo el movimiento: ataques y proyectiles quedan igual.
+ const MOVE_SPEED_MULT = 0.65; // bajado otra vez a pedido (antes 0,8)
+@@ -453,6 +458,7 @@ function updateHero(hero, arena, dt) {
+     }
+ 
+     const stunned = hasFlag(hero, 'stun');
++    const moveRule = gameMode === 'tower' ? 'free' : MOVE_ATTACK_RULE;
+ 
+     // Movimiento: del teclado o de la IA (la velocidad la modifican los efectos: Masacre, Visión de Cazador...)
+     hero.moveTimer = (hero.moveTimer || 0) + dt;
+@@ -484,7 +490,7 @@ function updateHero(hero, arena, dt) {
+         if (hero.x !== x || hero.y !== y) {
+             hero.lastStepDir = { dx: Math.sign(hero.x - x), dy: Math.sign(hero.y - y) };
+             emit(hero, 'onMove', { steps: 1 });
+-            if (MOVE_ATTACK_RULE === 'reset' || (MOVE_ATTACK_RULE === 'reset-ranged' && isRanged(hero))) hero.attackTimer = 0;
++            if (moveRule === 'reset' || (moveRule === 'reset-ranged' && isRanged(hero))) hero.attackTimer = attackRestTimer(hero);
+             // "está caminando" hasta que le tocaría dar el próximo paso
+             hero.movingUntil = gameClock + stepTime + dt;
+         }
+@@ -493,7 +499,8 @@ function updateHero(hero, arena, dt) {
+     // Ataque automático: al enemigo en rango de mayor prioridad (ej: Sanadores) o, si no, al más cercano
+     // (desarmado: como el Manto Fantasma del Nigromante, no ataca pero sigue moviéndose, a diferencia de un aturdimiento)
+     const target = (stunned || hasFlag(hero, 'disarm') || clickAttackOn(hero)) ? null : pickAttackTarget(hero, effRange(hero));
+-    const walking = MOVE_ATTACK_RULE === 'pause' && gameClock < (hero.movingUntil || 0);
++    // "caminando" dura hasta que el dibujo llega a la casilla (drawPos): recién ahí arranca la preparación del golpe
++    const walking = (moveRule === 'pause' || moveRule === 'reset') && gameClock < (hero.movingUntil || 0);
+     if (clickAttackOn(hero)) {
+         clickAttackStep(hero, dt, stunned || hasFlag(hero, 'disarm')); // Torre: el golpe sale con el clic (towerClickAttack.js)
+     } else if (target && walking) {
+@@ -508,7 +515,7 @@ function updateHero(hero, arena, dt) {
+             else { fxAttack(hero, target, 'melee'); fxHeroAttack(hero, target, isCrit); resolveBasicHit(hero, target, dmg, isCrit); } // según el arma (fxSkills.js)
+         }
+     } else {
+-        hero.attackTimer = 0;
++        hero.attackTimer = attackRestTimer(hero);
+     }
+     hero.regenTick(dt);
+     tickCooldowns(hero, dt);
+diff --git a/js/tests.js b/js/tests.js
+index 90c10db..d908237 100644
+--- a/js/tests.js
++++ b/js/tests.js
+@@ -4269,7 +4269,7 @@ test('Objetivo marcado con clic: el ataque lo prioriza aunque haya otro más cer
+     checkEq(validFocus(player), null, 'si muere se desmarca');
+ });
+ 
+-test('Ataque al moverse: libre por defecto; con la regla "reset", moverse reinicia el ataque', () => {
++test('Ataque al moverse: en MATCH, por defecto "reset": moverse vuelve el golpe al inicio de su preparación', () => {
+     const saved = MOVE_ATTACK_RULE;
+     try {
+         for (const rule of ['free', 'reset']) {
+@@ -4280,10 +4280,41 @@ test('Ataque al moverse: libre por defecto; con la regla "reset", moverse reinic
+             keys = { a: true };
+             updateWave(0.001);
+             keys = {};
+-            check(rule === 'reset' ? player.attackTimer < 0.01 : player.attackTimer >= 0.5, rule + ': ' + player.attackTimer);
++            check(rule === 'reset' ? Math.abs(player.attackTimer - attackRestTimer(player)) < 0.01 : player.attackTimer >= 0.5, rule + ': ' + player.attackTimer);
+         }
+     } finally { MOVE_ATTACK_RULE = saved; }
+-    checkEq(saved, 'free', 'por defecto se ataca caminando');
++    checkEq(saved, 'reset', 'por defecto no se pega caminando');
++});
++
++test('MATCH: no se pega caminando; quieto, el primer golpe sale tras la preparación (ATTACK_WINDUP); la Torre no cambia', () => {
++    newGame('AXE');
++    const t = dummy({ hp: 99999, maxHp: 99999 }), arena = player.arena, dt = 0.01;
++    check(1 / effAtkSpeed(player) > ATTACK_WINDUP + 0.05, 'el intervalo es más largo que la preparación');
++    // Quieto con el muñeco a tiro: el primer golpe sale a los ~0,25 s, no tras el intervalo entero
++    keys = {}; player.moveTarget = null; player.attackTimer = attackRestTimer(player);
++    let firstHit = null;
++    for (let s = 0; s < 1 && firstHit === null; s += dt) { gameClock += dt; updateHero(player, arena, dt); if (t.hp < 99999) firstHit = s + dt; }
++    check(firstHit !== null && Math.abs(firstHit - ATTACK_WINDUP) < 0.03, 'primer golpe a los ' + firstHit + ' s');
++    // Caminando con el muñeco siempre al lado: no le pega nunca
++    t.hp = 99999; player.x = 2; player.y = 5; keys = { d: true };
++    for (let s = 0; s < 2; s += dt) { t.x = player.x; t.y = player.y + 1; gameClock += dt; updateHero(player, arena, dt); }
++    keys = {};
++    check(player.x > 4, 'caminó: x=' + player.x);
++    checkEq(t.hp, 99999, 'caminando no pega');
++    // Al frenar, pega tras llegar a la casilla y prepararse
++    for (let s = 0; s < 1.5 && t.hp === 99999; s += dt) { gameClock += dt; updateHero(player, arena, dt); }
++    check(t.hp < 99999, 'quieto otra vez: pega');
++    // Torre: se sigue atacando caminando y sin preparación (todo como antes)
++    const saved = clickAttack; clickAttack = false;
++    try {
++        const level = newTower('AXE', { weapon: 'ADVENTURER_BOW' }); level.creeps.forEach(c => { c.hp = 0; });
++        for (let x = 1; x <= 6; x++) level.walls[player.y][player.x + x] = 0;
++        towerDummy(level, 4, 0);
++        checkEq(attackRestTimer(player), 0, 'en la Torre no hay preparación');
++        const x0 = player.x; player.attackTimer = 0.1; player.moveTimer = 99; keys = { d: true };
++        updateHero(player, level, 0.001); keys = {};
++        check(player.x > x0 && player.attackTimer >= 0.1, 'en la Torre caminar no corta el ataque: ' + player.attackTimer);
++    } finally { clickAttack = saved; keys = {}; gameMode = 'normal'; }
+ });
+ 
+ test('En duelo, la curación y el control entre héroes bajan (el robo de vida no)', () => {
