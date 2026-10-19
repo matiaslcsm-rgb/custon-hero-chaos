@@ -4333,6 +4333,19 @@ Object.keys(HERO_TEMPLATES).forEach((key, i) => {
     }, { random: true });
 });
 
+test('Custom Hero: quinta habilidad en la ronda 9 (la IA también), y en la Torre el kit no cambia', () => {
+    checkEq(kitSize(8), KIT_SIZE, 'hasta la ronda 8, 4 habilidades');
+    checkEq(kitSize(9), KIT_SIZE + 1, 'desde la 9, 5');
+    const r = simulateGame(2, true, 10); // con dios: juega hasta el final de la ronda 10
+    checkEq(r.skills, KIT_SIZE + 1, 'el jugador termina con 5');
+    check(heroes.filter(h => !h.eliminated).every(h => h.skills.length === KIT_SIZE + 1), 'y los rivales que siguen en pie también');
+    const fifth = player.skills[KIT_SIZE];
+    if (fifth.kind === 'active') check(SKILL_KEYS.includes(player.keyBindings[fifth.id]), 'la quinta activa tiene su tecla');
+    resetGame(); gameMode = 'tower'; waveNumber = 12;
+    checkEq(kitSize(), KIT_SIZE, 'en la Torre no cambia');
+    resetGame();
+});
+
 test('Custom Hero: la habilidad baneada no le sale a nadie en el draft, ni en el Fragmento ni en el Libro', () => {
     resetGame(); gameMode = 'normal'; startHeroPick();
     const sel = document.getElementById('ban-select');

@@ -604,7 +604,7 @@ Clic derecho: parada. Tajo corto con una ventana de ${PARRY.window}s: los dispar
         c.innerHTML = `<span class="key">Der</span><span class="nm">Parada</span><span class="combo"><b></b><b></b><b></b></span><div class="cd"></div>`;
         skills.appendChild(c);
     }
-    const slotCount = gameMode === 'tower' ? (swordBar ? 2 : 3) : Math.max(KIT_SIZE, actives.length);
+    const slotCount = gameMode === 'tower' ? (swordBar ? 2 : 3) : Math.max(kitSize(), actives.length);
     for (let i = 0; i < slotCount; i++) {
         const s = actives[i];
         const slot = document.createElement('div');

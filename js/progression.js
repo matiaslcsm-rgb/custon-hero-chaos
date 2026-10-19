@@ -1,7 +1,10 @@
 // Progresión del héroe: experiencia y niveles, puntos y niveles de habilidad (estilo Dota 2),
 // bonus permanentes, opciones de draft y objetos del destino. Reglas en DISEÑO.md §3 y §4.
 
-const KIT_SIZE = 4;            // elecciones de draft en total (activas + pasivas)
+const KIT_SIZE = 4;            // elecciones de draft en las rondas 1 a 4 (activas + pasivas)
+const FIFTH_SKILL_ROUND = 9;   // y una quinta en la ronda 9 (decidido por el usuario 2026-10-18, como el original: la build sigue creciendo)
+// Cuántas habilidades lleva el kit en esta ronda (en la Torre las da el equipo: siempre KIT_SIZE)
+function kitSize(round = waveNumber) { return gameMode !== 'tower' && round >= FIFTH_SKILL_ROUND ? KIT_SIZE + 1 : KIT_SIZE; }
 const MAX_HERO_LEVEL = 30;
 const ULT_LEVEL_STEP = 6;      // la definitiva sube 1 nivel cada 6 niveles del héroe (6, 12, 18)
 const DRAFT_OPTIONS = { normal: 3, fragment: 4, book: 6 };
@@ -99,7 +102,7 @@ function levelUpSkill(hero, skill) {
 // Con el kit completo y todo al máximo, cada punto se convierte en +1 a los tres atributos.
 // Si falta algo (kit incompleto o la definitiva esperando nivel), los puntos se guardan.
 function resolveExcessPoints(hero) {
-    if (hero.skillPoints <= 0 || hero.skills.length < KIT_SIZE) return;
+    if (hero.skillPoints <= 0 || hero.skills.length < kitSize()) return;
     if (!hero.skills.every(s => skillLevel(hero, s) >= maxSkillLevel(s))) return;
     const n = hero.skillPoints;
     hero.skillPoints = 0;

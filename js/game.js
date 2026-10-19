@@ -87,8 +87,9 @@ function selectHero(template, freePick = false) {
 
 // Comienzo de ronda: los rivales draftean al instante; el jugador, si su kit no está completo.
 function startRoundDraft() {
-    quietly(() => aliveHeroes().filter(h => h.isAI && h.skills.length < KIT_SIZE).forEach(h => h.addSkill(aiPickDraft(h, draftOptions(h, DRAFT_OPTIONS.normal)))));
-    if (!player.eliminated && player.skills.length < KIT_SIZE) startSkillDraft();
+    quietly(() => aliveHeroes().filter(h => h.isAI && h.skills.length < kitSize()).forEach(h => h.addSkill(aiPickDraft(h, draftOptions(h, DRAFT_OPTIONS.normal)))));
+    if (waveNumber === FIFTH_SKILL_ROUND && !player.eliminated) log(`🃏 Ronda ${FIFTH_SKILL_ROUND}: ¡elegís una quinta habilidad! (si es activa, va en la primera tecla libre: E R T F Q)`);
+    if (!player.eliminated && player.skills.length < kitSize()) startSkillDraft();
     else startPreparation();
 }
 
