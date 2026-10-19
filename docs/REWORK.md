@@ -878,6 +878,9 @@ Las fases 3 y 4 son las más grandes: hay que rehacer pruebas y volver a medir e
 también tiene que aprender a esquivar los ataques anunciados).
 
 ## Interfaz y calidad de vida (lista viva)
+- **Custom Hero: baneo de una habilidad** (2026-10-18, decidido por el usuario, idea del original): en la elección de
+  héroe, "🚫 Baneá una habilidad" con todas las habilidades agrupadas por héroe. La baneada no le sale a nadie en el
+  draft, ni en el Fragmento ni en el Libro. Solo banea el jugador. Recuerda la última que elegiste.
 - **Custom Hero: historial y perfil** (2026-10-18, C1, `js/matchSummary.js`): el menú de Custom Hero muestra tus
   partidas, victorias, veces en el top 3, tu héroe favorito y el mejor puesto con cada héroe (pasando el mouse, cuántas
   jugaste y ganaste con él). Se anota al terminar la partida o al quedar eliminado, una sola vez. Se guarda aparte

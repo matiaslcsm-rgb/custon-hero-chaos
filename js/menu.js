@@ -44,6 +44,7 @@ function startHeroPick() {
     setPhaseTimer(PHASE_TIMES.heroSelect);
     renderHeroPick();
     const tower = gameMode === 'tower';
+    document.getElementById('ban-row').style.display = tower ? 'none' : ''; renderBanSelect(); // baneo (progression.js)
     document.getElementById('hero-select-title').textContent = tower ? 'Infinite Tower · elegí tu héroe' : 'Custom Hero · elegí tu héroe';
     document.getElementById('hero-select-subtitle').textContent = tower
         ? 'Subís solo con su innato y su ataque básico. Elegí bien: si morís, volvés a la base de la torre.'

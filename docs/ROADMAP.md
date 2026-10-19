@@ -434,7 +434,8 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 - [ ] **¿Rinde más pelear o apostar?** (idea 2 de `docs/REFERENCIA-CHC.md`, el error que *Clash* le corrigió a *Chaos*):
       con el banco, oro que cobra el ganador de un duelo contra la ganancia promedio de apostar. Si apostar rinde más,
       subir lo del duelista. Va con el resto del balance, al final.
-- [ ] **(decisión) Ítem contra aturdimientos** (idea 5 de `docs/REFERENCIA-CHC.md`): ver "Esperando al usuario".
+- [ ] **Ítem contra aturdimientos** (idea 5 de `docs/REFERENCIA-CHC.md`; decidido por el usuario 2026-10-18: un ítem
+      compuesto con resistencia a aturdimientos y control). Medir cuánto tiempo pasás aturdido con y sin él.
 - [ ] **Balance de `mageSpellAmp` en duelos 1v1:** medir con `simulateGame(i, false, 60)`.
 - [ ] **Primeras rondas contra la máquina:** las rondas 1-4 son solo oleadas (aprender sin perder), los duelos
       desde la 5 (ya está). Revisar que el jugador nuevo llegue a la ronda 5 con build armada.
@@ -445,8 +446,10 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 - [ ] **Proyectiles de habilidad para el resto del roster** (Danzante, Asesino, Vampiro, Sniper) y forma propia por
       habilidad (`vfx.shape`).
 - [ ] **(decisión) Ítems nuevos** de DISEÑO.md §7: el usuario decide cuáles entran.
-- [ ] **(decisión) Baneos antes de empezar** (idea 3 de `docs/REFERENCIA-CHC.md`): ver "Esperando al usuario".
-- [ ] **(decisión) Quinta habilidad o más opciones en el draft** (idea 4 de `docs/REFERENCIA-CHC.md`): ver "Esperando al usuario".
+- [x] **Baneo antes de empezar** (idea 3 de `docs/REFERENCIA-CHC.md`; decidido por el usuario 2026-10-18: banear 1
+      habilidad, que no le salga a nadie en el draft). 2026-10-18: selector en la elección de héroe, recuerda la última.
+- [ ] **Quinta habilidad en la ronda 9** (idea 4 de `docs/REFERENCIA-CHC.md`; decidido por el usuario 2026-10-18).
+      Medir con el banco antes y después (ganadores, ronda final).
 
 ## Fase C4 — Metaprogresión y pulido
 - [ ] **Desbloqueos:** arrancás con 6 héroes y desbloqueás el resto jugando (ganar con un atributo, llegar al top
@@ -476,18 +479,6 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
   (recomendada: no se dibuja dos veces)**; (b) que el modo automático los dibuje en código sobre las piezas del héroe calcado
   (`HERO_PARTS`), como se hizo con quieto y caminar; (c) dejar el dibujo de costado para arriba y abajo hasta la 1.0.
 
-- **Baneos en Custom Hero** (de la investigación del original, `docs/REFERENCIA-CHC.md`): (a) **banear 1 habilidad antes
-  de empezar, que no le salga a nadie en el draft (recomendada: da control sin alargar la partida)**; (b) 1 habilidad y 1
-  héroe, como el original; (c) sin baneos, sacando del draft las que el balance marque como rotas.
-
-- **Quinta habilidad o más opciones en el draft (Custom Hero):** hoy son 4 habilidades (rondas 1 a 4) elegidas entre 3;
-  el original da 5 (rondas 1, 1, 3, 6 y 9) entre muchas opciones. (a) **una quinta habilidad en la ronda 9 (recomendada:
-  la build sigue creciendo a mitad de partida)**; (b) 4 opciones en vez de 3; (c) las dos.
-
-- **Ítem contra aturdimientos (Custom Hero):** la queja más grande del original eran los aturdimientos eternos. (a) **un
-  ítem compuesto con resistencia a aturdimientos y control (recomendada)**; (b) aturdimientos seguidos sobre el mismo héroe
-  que duran cada vez menos; (c) nada por ahora.
-
 - **El Sniper mientras tanto (Custom Hero):** gana 65% de sus partidas (lo parejo es 12,5%) y ningún ajuste chico lo
   baja lo suficiente. Opciones: (a) **dejarlo como está hasta el balance del final (recomendada: el combate nuevo va a
   cambiar los números igual)**; (b) sacarlo de la elección y de los rivales por ahora, sin borrar su código (una marca en su
@@ -513,6 +504,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 
 ## Hecho por el modo automático
 (Fecha · ítem · commit · qué se midió.)
+- 2026-10-18 · Custom Hero: baneo de 1 habilidad (decidido por el usuario) · ver git log · con una habilidad de Axe baneada y Axe elegido (su natural sale siempre si puede), 0 apariciones en 300 sorteos × 8 héroes × draft, Fragmento y Libro. Se recuerda la última (en pruebas, en memoria). Pruebas 288/288.
 - 2026-10-18 · Custom Hero C1: historial y perfil · ver git log · 3 partidas del piloto a 30 rondas (en memoria): "3 partidas · 0 victorias · 1 en el top 3 · favorito: Danzante Cinético (2)" y "Mejor puesto: Zeus 3º · Danzante Cinético 6º". Se anota una vez por partida (eliminado y después terminada: 1). De paso, la tarjeta de la última ronda ya no queda arriba en el menú. Pruebas 287/287.
 - 2026-10-18 · Custom Hero C1: pantalla de fin de partida · ver git log · 2 partidas del piloto a 30 rondas con el Danzante: 7º (eliminado en la 25, 0-7 en duelos, 5330g ganados, nivel 22) y 5º (eliminado en la 20, 3-2, 4572g, nivel 19); "Otra partida" lleva a elegir héroe; el banco no la muestra. Pruebas 287/287.
 - 2026-10-18 · Prueba de ida y vuelta entre modos · ver git log · Torre → portada → Custom Hero → portada → Torre revisando 11 ventanas, 6 paneles, modo, estado, mundo (20×12 en Custom Hero), cámara, pausa, piloto y tema. Salieron 2 cosas sucias: el piloto prendido en la Torre seguía jugando Custom Hero, y el inventario (y la tienda, el herrero, la Bitácora) quedaban abiertos porque `resetGame` soltaba al jugador antes de cerrarlos. Arreglado en `resetGame`. Pruebas 286/286.

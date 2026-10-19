@@ -67,6 +67,7 @@ const GOLD_PENALTY_FREE_PICK = 0;
 
 function selectHero(template, freePick = false) {
     if (gameMode === 'tower') { startTowerRun(); return; }
+    applyBanChoice(); // la habilidad baneada (progression.js)
     player = new Hero(template);
     if (freePick) player.gold = GOLD_PENALTY_FREE_PICK;
     player.ownerName = playerName();
@@ -326,7 +327,7 @@ function resetGame() {
     if (waystoneOpen) toggleWaystone(false);
     if (logbookTab) closeLogbook();
     if (typeof towerMapOpen !== 'undefined' && towerMapOpen) toggleTowerMap(false);
-    player = null; heroes = []; arenas = []; viewedHero = null;
+    player = null; heroes = []; arenas = []; viewedHero = null; bannedSkills = new Set();
     gameMode = 'normal'; towerRun = null; document.body.classList.remove('ink-theme'); if (towerLayout) setTowerLayout(false); COLS = VIEW_COLS; ROWS = VIEW_ROWS; camera.x = 0; camera.y = 0;
     gameState = 'MENU'; waveNumber = 1; gameClock = 0; heroOffers = null;
     currentDraft = null; savedPrepTime = null; nextWave = null; logMuted = false;

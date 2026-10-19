@@ -138,12 +138,36 @@ function grantPermanent(hero, stat, amount, sourceName) {
 // Opciones de draft: 1 garantizada entre las naturales del héroe (si le queda alguna) + el resto
 // del pool global. Nunca ofrece habilidades que ya tiene ni las de `exclude` (ej: la recién reemplazada).
 function draftOptions(hero, count, exclude = []) {
-    const blocked = new Set([...hero.skills.map(s => s.id), ...exclude]);
+    const blocked = new Set([...hero.skills.map(s => s.id), ...exclude, ...bannedSkills]);
     const available = ALL_SKILLS.filter(s => !blocked.has(s.id));
     const natural = shuffle(available.filter(s => s.heroKey === hero.key));
     const picks = natural.length ? [natural[0]] : [];
     shuffle(available.filter(s => !picks.includes(s))).forEach(s => { if (picks.length < count) picks.push(s); });
     return shuffle(picks);
+}
+
+// --- BANEO (2026-10-18, del Custom Hero Chaos original: docs/REFERENCIA-CHC.md) ---
+// Antes de empezar baneás 1 habilidad: no le sale a nadie en el draft (tampoco en el Fragmento ni en el Libro).
+// Solo banea el jugador. Se elige en la pantalla de elección de héroe y se recuerda para la próxima partida.
+let bannedSkills = new Set();
+const BAN_KEY = 'chc-ban';
+let banPersist = !/[?&](test|demo|banco)/.test(location.search), banMemory = ''; // en pruebas, en memoria
+function lastBan() { try { return (banPersist ? localStorage.getItem(BAN_KEY) : banMemory) || ''; } catch (e) { return ''; } }
+function renderBanSelect() {
+    const sel = document.getElementById('ban-select');
+    if (!sel) return;
+    const last = lastBan();
+    sel.innerHTML = '<option value="">Ninguna</option>' + Object.values(HERO_TEMPLATES).map(t =>
+        `<optgroup label="${t.name}">${Object.values(HERO_SKILLS[t.key] || {}).map(s => `<option value="${s.id}">${s.name}${s.isUltimate ? ' (definitiva)' : ''}</option>`).join('')}</optgroup>`).join('');
+    sel.value = SKILL_INDEX[last] ? last : '';
+}
+// Al elegir el héroe: lo que quedó en el selector pasa a estar baneado
+function applyBanChoice() {
+    const sel = document.getElementById('ban-select'), id = sel && SKILL_INDEX[sel.value] ? sel.value : null;
+    bannedSkills = new Set(id ? [id] : []);
+    if (sel) sel.value = ''; // ya se aplicó: lo próximo que se muestre sale de lo recordado
+    try { if (banPersist) localStorage.setItem(BAN_KEY, id || ''); else banMemory = id || ''; } catch (e) { /* no se guarda */ }
+    if (id) log(`🚫 Baneaste ${SKILL_INDEX[id].name}: no le va a salir a nadie en el draft.`);
 }
 
 function naturalHeroName(skill) { return HERO_TEMPLATES[skill.heroKey].name; }

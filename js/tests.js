@@ -4333,6 +4333,26 @@ Object.keys(HERO_TEMPLATES).forEach((key, i) => {
     }, { random: true });
 });
 
+test('Custom Hero: la habilidad baneada no le sale a nadie en el draft, ni en el Fragmento ni en el Libro', () => {
+    resetGame(); gameMode = 'normal'; startHeroPick();
+    const sel = document.getElementById('ban-select');
+    checkEq(sel.querySelectorAll('option').length, ALL_SKILLS.length + 1, 'el selector tiene todas las habilidades y "Ninguna"');
+    check(!banPersist, 'en las pruebas no toca lo guardado');
+    try {
+        const ban = HERO_SKILLS.AXE && Object.values(HERO_SKILLS.AXE)[0];
+        sel.value = ban.id;
+        selectHero(HERO_TEMPLATES.AXE); // Axe: su natural sale siempre en el draft si puede
+        check(bannedSkills.has(ban.id), 'queda baneada');
+        let seen = 0;
+        for (let i = 0; i < 300; i++) heroes.forEach(h => { [DRAFT_OPTIONS.normal, DRAFT_OPTIONS.fragment, DRAFT_OPTIONS.book].forEach(n => { if (draftOptions(h, n).some(s => s.id === ban.id)) seen++; }); });
+        checkEq(seen, 0, 'en 300 sorteos de los 8 héroes no aparece');
+        check(heroes.every(h => !h.hasSkill(ban.id)), 'nadie la tiene');
+        resetGame();
+        checkEq(bannedSkills.size, 0, 'una partida nueva arranca sin baneo');
+        startHeroPick(); checkEq(document.getElementById('ban-select').value, ban.id, 'el selector recuerda la última');
+    } finally { banMemory = ''; document.getElementById('ban-select').value = ''; resetGame(); }
+});
+
 test('Custom Hero: pantalla de fin de partida — puesto, rondas, duelos, oro, build y otra partida', () => {
     chProfileMemory = null; check(!chProfilePersist, 'en las pruebas el perfil no toca lo guardado');
     const r = simulateGame(1, true, 3); // el Sniper, con dios: llega al final de la ronda 3
