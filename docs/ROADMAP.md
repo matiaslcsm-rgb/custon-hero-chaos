@@ -54,7 +54,8 @@ elija; el modo automático anota las opciones en "Esperando al usuario" y los sa
 - Trabaja de corrido mientras el límite de 5 horas del plan esté **por debajo del 50%** y frena al llegar.
   Si el límite **semanal** llegó al 50%, no trabaja en el juego.
 - Un ítem por vez (sin tope por corrida), chico y jugable. Si un ítem es grande, lo parte en pasos y hace solo el primero.
-- Sube solo si pasan **todas** las pruebas (`index.html?test`). Si no pasan y no lo puede arreglar, deshace sus
+- Sube solo si pasan **todas** las pruebas (`index.html?test`; sin abrir el navegador: `python docs/correr-pruebas.py`,
+  que sale con código 0 si pasan todas; con `--veces N` las repite para cazar las que fallan a veces). Si no pasan y no lo puede arreglar, deshace sus
   cambios, anota por qué en el ítem y sigue con otro.
 - Balance: se mide (simulación o banco de pruebas) antes y después, y se anotan los números.
 - Rioplatense con voseo en código, comentarios, commits e interfaz. Sube `GAME_VERSION` (js/main.js) en cada entrega.

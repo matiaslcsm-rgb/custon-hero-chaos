@@ -49,6 +49,13 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 | Rework del Nigromante fiel a Necrophos de Dota 2 (Sadista, Pulso de Muerte, Aura que Detiene el Corazón, Manto Fantasma, Guadaña del Segador — ejecuta según vida faltante); sumó las flags `physicalImmune`/`disarm` y corrigió que `hpRegen`/`manaRegen` no reflejaban efectos temporales (ver DISEÑO.md §9 sexies, pedido del usuario 2026-09-28) | ✅ (sin medir balance) |
 | Duelo simultáneo con las oleadas de los demás; enfriamientos en el descanso; contador central con pitidos; cartel de apuestas; nombres de jugadores; sonidos propios (`sounds/`) | ✅ |
 
+## Herramientas (2026-10-18)
+- `python docs/correr-pruebas.py [--veces N]`: corre `index.html?test` en un Chromium invisible (Playwright) y dice
+  "✅ N/N pruebas" (unos 12 s); código de salida 0 si pasan todas. Muestra las que fallan y los errores de la consola.
+- `python docs/captura.py [puerto]`: el juego sin caché, y guarda capturas para los informes en `docs/informes/img/`.
+- `.claude/launch.json` (configuración "juego"): el panel del navegador levanta ese servidor solo.
+- `.gitattributes`: todo el texto en LF (se acabaron los avisos de CRLF en cada commit).
+
 ## Pendientes y temas abiertos
 - **⏸ Infinite Tower en pausa (2026-10-18, pedido del usuario):** se avanza solo con Custom Hero (ver el aviso arriba
   de todo en ROADMAP.md). La Torre sigue jugable como está.

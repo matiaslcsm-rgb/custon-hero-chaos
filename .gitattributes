@@ -1,0 +1,2 @@
+# Todo el texto con LF, en el repo y en la carpeta (los scripts de Python escriben LF; sin esto, Git avisa en cada commit)
+* text=auto eol=lf
