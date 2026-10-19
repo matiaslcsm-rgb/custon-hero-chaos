@@ -38,12 +38,19 @@ function pickDuelPair(list = aliveHeroes()) {
 }
 function duelPlanOfRound() { const pair = pickDuelPair(); return { pairs: pair ? [pair] : [], bye: null }; }
 
+// --- BANCO DE DUELOS (2026-10-18, plan del equipo para MATCH, docs/MATCH.md): por cada duelo, cuánto duró, si terminó
+// por tiempo, cuántas veces cambió quién iba ganando y qué parte del daño entre héroes se podía evitar caminando (el de
+// los proyectiles de habilidad; el resto se engancha solo al rival). Lo junta el banco de partidas (tests.js).
+let duelLog = [];
+const DUEL_LEAD_MARGIN = 0.05; // cambia el que va ganando cuando el otro le saca más de 5 puntos de % de vida
+
 // Arma la arena del duelo de la ronda (se pelea al mismo tiempo que las oleadas de los demás, ver startWave).
 // Al empezar: vida y maná llenos, sin mejoras temporales y con los enfriamientos reiniciados.
 function makeDuelArenas(plan) {
     const { pairs, bye } = plan;
     const list = pairs.map(([a, b]) => {
         const arena = makeArena('duel', [a, b]);
+        arena.stats = { lead: null, changes: 0, dmg: 0, avoidable: 0 };
         [a, b].forEach((h, i) => {
             restoreHero(h);
             h.inRest = false;
@@ -63,6 +70,8 @@ function makeDuelArenas(plan) {
 function resolveDuel(arena, winner, loser, reason) {
     if (arena.done) return;
     arena.done = true;
+    if (arena.stats) duelLog.push({ round: waveNumber, secs: Math.round(arena.elapsed * 10) / 10, byTime: reason === 'se acabó el tiempo', changes: arena.stats.changes,
+        dmg: arena.stats.dmg, avoidable: arena.stats.avoidable, winner: winner.name, loser: loser.name });
     const wasMuted = logMuted;
     const involvesPlayer = winner === player || loser === player;
     logMuted = false; // el resultado se anuncia siempre
@@ -98,6 +107,8 @@ function updateDuelArena(arena, dt) {
     arena.elapsed += dt;
     const [a, b] = arena.heroes;
     if (!a.isAlive() || !b.isAlive()) return; // lo resuelve onHeroDeath
+    const s = arena.stats, diff = a.hp / a.maxHp - b.hp / b.maxHp;
+    if (s) { const lead = diff > DUEL_LEAD_MARGIN ? a : diff < -DUEL_LEAD_MARGIN ? b : s.lead; if (s.lead && lead !== s.lead) s.changes++; s.lead = lead; }
     if (arena.elapsed < DUEL_TIME) return;
     const pa = a.hp / a.maxHp, pb = b.hp / b.maxHp;
     const aWins = pa === pb ? Math.random() < 0.5 : pa > pb;

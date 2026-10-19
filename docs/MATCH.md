@@ -94,6 +94,34 @@ mismo filtro: se les busca su lectura y su respuesta.
 - **El piloto y la IA tienen que reaccionar a los avisos** caminando, con los tiempos de una persona (en la Torre ya hay
   un piloto con reflejos humanos que a veces falla).
 
+### La base de hoy (banco de duelos, 2026-10-18)
+
+Medido con `index.html?banco=66` (66 partidas de la IA contra la IA, 1.404 duelos; dos corridas dan lo mismo):
+
+| Qué | Hoy | Meta de MATCH |
+|---|---|---|
+| Cuánto dura un duelo (mediana) | **5,2 s** (la mitad, entre 1,6 y 11 s) | 15 a 30 s |
+| Duelos que terminan por tiempo (45 s) | 4% | pocos (menos del 10%) |
+| Veces que cambia quién va ganando | **0,7** por duelo | más de 1 |
+| Daño entre héroes que se podía evitar caminando | **14%** | la mayoría del daño fuerte |
+
+O sea: hoy los duelos se deciden en segundos, casi siempre gana el que arranca ganando y casi nada se puede evitar.
+Es lo que el plan del equipo (abajo) quiere cambiar.
+
+### El plan del equipo (director de juego, 2026-10-18)
+
+En orden, sin esperar decisiones:
+1. ✅ **Banco de duelos** (la tabla de arriba): todo lo demás se mide con esto.
+2. **Preparación anunciada para las habilidades** (en Dota se llama "cast point"): el golpe fuerte tarda al menos 0,7 s
+   en salir, con la marca en el piso (la de la Torre), se puede cortar aturdiendo, y el que lo tiró queda expuesto de 0,3
+   a 0,5 s. Se prueba con 1 o 2 habilidades de hoy.
+3. **La IA lee los avisos:** camina para salir de las zonas y de la línea de los proyectiles, y corta preparaciones si
+   tiene un aturdimiento listo, con tiempos de persona. Meta: el piloto evita entre el 30% y el 70% de los golpes
+   anunciados, y los duelos se acercan a 15-30 s.
+4. **Panel del rival en el duelo:** sus módulos con el enfriamiento y sus cargas (para leerlo: ¿tiene el golpe listo?).
+5. **Arena de duelo con 2 a 4 columnas** que frenan proyectiles (para cubrirse, y la pared que va a usar Grúa).
+6. Las herramientas de cada competidor (gancho, torretas, drones, pose) se hacen junto con su ficha, no antes.
+
 ## 6. Decisiones
 
 - **Decidido por el usuario el 2026-10-18:** sin esquive con Espacio (es de la Torre) y estilo RTS, como Dota. Cada
@@ -105,7 +133,13 @@ mismo filtro: se les busca su lectura y su respuesta.
   (clic derecho o Esc cancela); en Opciones, "lanzamiento rápido" (sale al apretar la tecla) y "moverse con W A S D",
   los dos apagados de entrada. En la Torre no cambia nada.
 
-1. **Siguen abiertas de antes:** los atributos (Blindaje, Reflejos y Procesador, recomendados), los competidores de
+1. **¿Se pega caminando?** Hoy sí. (a) dejarlo así; (b) **como Dota: el golpe básico tiene una preparación cortita
+   (0,2 a 0,3 s) en la que te frenás (recomendada, para probarla con el banco: en Dota pegar y moverse a tiempo es
+   parte de la habilidad)**; (c) que se frenen solo los de distancia.
+2. **El color del peligro** (siempre el mismo en todo el juego): (a) **el rojo de los avisos de la Torre por ahora
+   (recomendada: ya anda, tiene modo daltónico y se cambia en un solo lugar)**; (b) el magenta del show; (c) el naranja
+   de la paleta.
+3. **Siguen abiertas de antes:** los atributos (Blindaje, Reflejos y Procesador, recomendados), los competidores de
    arranque (las 8 semillas, recomendadas) y quedarnos con el motor (recomendado).
 
 ## 7. Lo que sigue (una vez decidido)

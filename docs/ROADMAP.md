@@ -435,6 +435,20 @@ si el usuario lo confirma.
       rival, lo ataca; habilidades apuntadas con tecla y clic; "lanzamiento rápido" y W A S D como opciones.
 - [ ] **(decisión) Los atributos.** Ver "Esperando al usuario".
 - [ ] **(decisión) El roster de arranque.** Ver "Esperando al usuario".
+- [x] **Banco de duelos** (plan del equipo, 2026-10-18): el banco de partidas cuenta cuánto dura cada duelo, si termina por
+      tiempo, cuántas veces cambia quién va ganando y qué parte del daño se podía evitar. Base: mediana 5,2 s, 4% por
+      tiempo, 0,7 cambios, 14% evitable (`docs/MATCH.md` §5).
+- [ ] **Preparación anunciada para las habilidades** (plan del equipo, `docs/MATCH.md` §5): golpe fuerte con al menos 0,7 s
+      de aviso y marca en el piso (la de la Torre), que se corta aturdiendo, y 0,3-0,5 s de exposición después. Probar
+      con 1 o 2 habilidades de hoy y medir con el banco de duelos.
+- [ ] **La IA lee los avisos** (plan del equipo): camina fuera de las zonas y de la línea de los proyectiles, y corta
+      preparaciones con un aturdimiento, con tiempos de persona. Meta: evita 30-70% de los golpes anunciados; duelos de
+      15-30 s de mediana.
+- [ ] **Panel del rival en el duelo** (plan del equipo): sus módulos con el enfriamiento y sus cargas a la vista.
+- [ ] **Arena de duelo con 2 a 4 columnas** que frenan proyectiles (plan del equipo). Medir: nadie trabado más de 3 s,
+      menos del 10% de duelos por tiempo.
+- [ ] **(decisión) ¿Se pega caminando?** Ver "Esperando al usuario".
+- [ ] **(decisión) El color del peligro.** Ver "Esperando al usuario".
 - [ ] **Inventario de lo que hay que cambiar, archivo por archivo:** buscar en el código, los datos y los textos de la
       interfaz todo nombre o kit que venga de Dota (héroes, habilidades, ítems, "objetos neutrales", comentarios que
       dicen "fiel a Dota") y anotarlo como lista en `docs/MECANICAS.md` (apéndice), con dónde está cada uno. Solo
@@ -506,6 +520,13 @@ si el usuario lo confirma.
   apuestas, la IA, el banco de partidas y 289 pruebas; rehacerlo llevaría meses sin que se note en el juego)**;
   (b) reescribir también el código desde cero; (c) un juego aparte en otra carpeta, copiando del actual lo que sirva.
 
+- **MATCH: ¿se pega caminando?** (`docs/MATCH.md` §6): hoy sí. (a) dejarlo así; (b) **como Dota: el golpe básico tiene una
+  preparación cortita (0,2 a 0,3 s) en la que te frenás (recomendada, para probarla con el banco de duelos)**; (c) que se
+  frenen solo los de distancia.
+
+- **MATCH: el color del peligro** (`docs/MATCH.md` §6): (a) **el rojo de los avisos de la Torre por ahora (recomendada: ya
+  anda, tiene modo daltónico y se cambia en un solo lugar)**; (b) el magenta del show; (c) el naranja de la paleta.
+
 - **Los atributos:** hoy Fuerza / Agilidad / Inteligencia con las fórmulas de Dota. (a) **Blindaje (vida y armadura),
   Reflejos (velocidad, movimiento y crítico) y Procesador (energía y potencia de los módulos), con números nuestros
   (recomendada)**; (b) Fuerza / Agilidad / Inteligencia con fórmulas propias; (c) sin atributos: cada uno con stats directos.
@@ -545,6 +566,7 @@ si el usuario lo confirma.
 
 ## Hecho por el modo automático
 (Fecha · ítem · commit · qué se midió.)
+- 2026-10-18 · MATCH: banco de duelos (plan del director de juego) · ver git log · 66 partidas, 1.404 duelos, dos corridas idénticas: mediana 5,2 s (25-75%: 1,6-11 s), 4% por tiempo, 0,7 cambios de quién va ganando por duelo, 14% del daño entre héroes evitable caminando. Los duelos se deciden en segundos (meta: 15-30 s). Pruebas 292/292.
 - 2026-10-18 · Custom Hero: controles como Dota (elegido por el usuario) · ver git log · probado con clics de verdad en el navegador: la tecla de Rayo Relámpago entra en modo apuntar (alcance y área en el cursor), el clic izquierdo lo lanza (queda en enfriamiento) y el clic derecho sobre un creep lo marca y lo persigue; en el piso camina y cancela el ataque. Sin la opción, W A S D no mueve (en la Torre sí). Pruebas 291/291 (las 3 de movimiento con teclado corren con la opción prendida).
 - 2026-10-18 · Custom Hero: sin esquive con Espacio (pedido del usuario: es de la Torre; MATCH es estilo RTS) · ver git log · en Custom Hero, Espacio no hace nada (no mueve ni da invulnerabilidad) y la ayuda de controles ya no lo nombra; en la Torre sigue igual (sus dos pruebas del esquive pasan). Pruebas 290/290.
 - 2026-10-18 · Custom Hero: quinta habilidad en la ronda 9 (decidido por el usuario) · a49067e · banco de 132 partidas antes → después: ronda final promedio 24 → 25; Sniper 65% → 68%, Zeus 22 → 18, Guerrero Vampiro 18 → 12, Asesino 16 → 13, Nigromante 8 → 9, Arcanista 2 → 6, Sabio del Vacío 0 → 2, Alquimista 0 → 1 (todo dentro del ruido de ±6). No arregla el dominio del Sniper. Pruebas 289/289.

@@ -878,6 +878,9 @@ Las fases 3 y 4 son las más grandes: hay que rehacer pruebas y volver a medir e
 también tiene que aprender a esquivar los ataques anunciados).
 
 ## Interfaz y calidad de vida (lista viva)
+- **Banco de duelos** (2026-10-18, plan del equipo para MATCH): `index.html?banco=N` ahora también resume los duelos
+  (cuánto duran, cuántos terminan por tiempo, cuántas veces cambia quién va ganando y qué parte del daño se podía evitar
+  caminando). Base: mediana 5,2 s, 0,7 cambios, 14% evitable. Detalle en `docs/MATCH.md` §5.
 - **Custom Hero: controles como Dota** (2026-10-18, elegido por el usuario para MATCH): clic derecho para caminar y,
   sobre un rival, para atacarlo (lo persigue hasta tenerlo a tiro; caminar a otro lado cancela la orden). Las habilidades
   que se apuntan entran en modo apuntar con su tecla (se ve el alcance) y salen con clic izquierdo; clic derecho o Esc

@@ -2963,6 +2963,27 @@ test('Custom Hero, controles estilo Dota: clic derecho camina o ataca, habilidad
     } finally { wasdMove = keepW; quickCast = keepQ; keys.d = false; mouse.over = false; cancelTargeting(); gameMode = 'normal'; }
 });
 
+test('Banco de duelos: cada duelo anota cuánto duró, si fue por tiempo, los cambios de quién va ganando y el daño evitable', () => {
+    newGame('AXE');
+    const a = heroes[1], b = heroes[2];
+    const [arena] = makeDuelArenas({ pairs: [[a, b]], bye: null }); arenas.push(arena);
+    duelLog = [];
+    dealDamage(a, b, 60, 'pure');
+    check(arena.stats.dmg > 0 && arena.stats.avoidable === 0, 'cuenta el daño entre héroes (un golpe común no se podía evitar)');
+    dodgeableHit = true; const before = arena.stats.avoidable; dealDamage(a, b, 20, 'pure'); dodgeableHit = false;
+    check(arena.stats.avoidable > before, 'el de un proyectil de habilidad cuenta como evitable');
+    b.hp = b.maxHp * 0.5; a.hp = a.maxHp; updateDuelArena(arena, 0.1);
+    check(arena.stats.lead === a, 'va ganando el de más vida');
+    a.hp = a.maxHp * 0.2; updateDuelArena(arena, 0.1);
+    checkEq(arena.stats.changes, 1, 'el otro pasó adelante: un cambio');
+    arena.elapsed = DUEL_TIME; updateDuelArena(arena, 0.1);
+    const d = duelLog[duelLog.length - 1];
+    check(d && d.byTime && d.changes === 1 && d.secs >= DUEL_TIME, 'al terminar por tiempo queda anotado');
+    const sum = benchDuels([{ secs: 10, byTime: false, changes: 0, dmg: 100, avoidable: 25 }, { secs: 30, byTime: true, changes: 2, dmg: 100, avoidable: 0 }]);
+    check(sum.n === 2 && sum.byTimePct === 50 && sum.avgChanges === 1 && sum.avoidablePct === 13, 'el resumen del banco cuenta bien');
+    resetGame();
+});
+
 test('Custom Hero: Espacio no esquiva (el esquive es de la Torre; MATCH es estilo RTS)', () => {
     newGame('AXE');
     const x = player.x, y = player.y;
@@ -4321,6 +4342,7 @@ function simulateGame(heroIndex, godMode = true, rounds = 4) {
 // Devuelve una fila por partida: ganador, ronda final y, por héroe, puesto y ronda en que quedó afuera.
 function benchGame(seed, rounds = 60) {
     const keys = Object.keys(HERO_TEMPLATES), out = {};
+    duelLog = [];
     const realEliminate = eliminateHero, realSound = soundOn;
     eliminateHero = (h, cause) => { h.benchOut = waveNumber; return realEliminate(h, cause); };
     soundOn = false; matchSummaryOff = true; // los sonidos usan Math.random y se saltean según el tiempo real: con sonido, la semilla no repite
@@ -4328,7 +4350,7 @@ function benchGame(seed, rounds = 60) {
         withRandom(seededRandom(seed), () => quietly(() => simulateGame(seed % keys.length, false, rounds)));
     } finally { eliminateHero = realEliminate; soundOn = realSound; matchSummaryOff = false; }
     rankedHeroes().forEach((h, i) => { out[h.name] = { place: i + 1, out: h.benchOut || null }; });
-    return { seed, winner: rankedHeroes()[0].name, round: waveNumber, heroes: out };
+    return { seed, winner: rankedHeroes()[0].name, round: waveNumber, heroes: out, duels: duelLog.slice() };
 }
 // Junta las partidas en una tabla por héroe: partidas jugadas, ganadas, puesto promedio y ronda promedio de eliminación.
 function benchTable(games) {
@@ -4343,6 +4365,13 @@ function benchTable(games) {
         .sort((a, b) => b.winPct - a.winPct || a.place - b.place);
 }
 // Corre el banco de a una partida por vez (sin trabar la página) y muestra la tabla. Semillas 1..n.
+// Resumen de los duelos del banco (docs/MATCH.md §5: qué medir en los duelos)
+function benchDuels(list) {
+    const secs = list.map(d => d.secs).sort((a, b) => a - b), q = f => secs.length ? secs[Math.min(secs.length - 1, Math.floor(f * secs.length))] : 0;
+    const dmg = list.reduce((a, d) => a + d.dmg, 0), avoid = list.reduce((a, d) => a + d.avoidable, 0);
+    return { n: list.length, medianSecs: q(0.5), p25: q(0.25), p75: q(0.75), byTimePct: Math.round(100 * list.filter(d => d.byTime).length / (list.length || 1)),
+        avgChanges: Math.round(10 * list.reduce((a, d) => a + d.changes, 0) / (list.length || 1)) / 10, avoidablePct: Math.round(100 * avoid / (dmg || 1)) };
+}
 function runBench(n) {
     testSandbox();
     const games = [], panel = document.createElement('div');
@@ -4355,8 +4384,11 @@ function runBench(n) {
         }
         resetGame();
         const rows = benchTable(games), avgRound = Math.round(games.reduce((a, g) => a + g.round, 0) / n);
-        window.benchResult = { n, avgRound, rows, games };
+        const duels = benchDuels(games.flatMap(g => g.duels));
+        window.benchResult = { n, avgRound, rows, games, duels };
         panel.innerHTML = `<h3>📊 Banco de Custom Hero: ${n} partidas, ronda final promedio ${avgRound}</h3>` +
+            `<p>⚔️ ${duels.n} duelos: duran ${duels.medianSecs} s (la mitad entre ${duels.p25} y ${duels.p75} s), ${duels.byTimePct}% por tiempo, ` +
+            `${duels.avgChanges} cambios de quién va ganando en promedio, ${duels.avoidablePct}% del daño entre héroes se podía evitar caminando</p>` +
             rows.map(r => `<div>${r.name}: ${r.wins}/${r.games} ganadas (${r.winPct}%), puesto ${r.place}, afuera en la ronda ${r.outRound ?? '—'}</div>`).join('');
         document.title = `📊 banco ${n}/${n} listo`;
         console.log('Banco de Custom Hero', window.benchResult);

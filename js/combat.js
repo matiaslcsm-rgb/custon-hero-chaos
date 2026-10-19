@@ -115,6 +115,7 @@ function mitigate(target, amount, type) {
 // → reducción de daño por efectos → armadura/resistencia mágica → daño recibido extra (Condenado) → regla de un solo golpe (oneHit)
 // → no bajar de 1 con preventDeath → evento onDamaged → muerte.
 // Devuelve { dealt, evaded }: dealt es la vida que realmente perdió el objetivo (para robo de vida).
+let dodgeableHit = false; // el golpe viene de un proyectil de habilidad: se podía evitar caminando (banco de duelos, duels.js)
 function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     if (!target.isAlive() || hasFlag(target, 'invulnerable')) return { dealt: 0, evaded: false };
     if (type === 'magical' && hasFlag(target, 'magicImmune')) return { dealt: 0, evaded: false };
@@ -146,6 +147,7 @@ function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     if (target.type && target.type.thorns) beastThorns(target, source, hpLost, opts); // criaturas con espinas (towerBestiary.js)
     if (target.pendingReaction) elementReactionAfter(source, target, final);
     if (source && hpLost > 0) { hitFlinch(source, target); skillKnockback(source, target); } // sacudida y empujón (fxSkills.js)
+    if (hpLost > 0 && source && source.isHero && target.isHero && target.arena && target.arena.stats) { target.arena.stats.dmg += hpLost; if (dodgeableHit) target.arena.stats.avoidable += hpLost; }
     if (hpLost > 0) target.lastHitAt = gameClock; // el campeón Regenerador se corta un rato (towerChampions.js)
     if (source && hpLost > 0) emit(source, 'onDealDamage', { target, dealt: hpLost, type, isCrit: opts.isCrit, relic: opts.relic });
     if (!target.isAlive()) onUnitDeath(target, source);
@@ -247,7 +249,8 @@ function updateProjectiles(arena, dt) {
                 p.hitSet.add(c);
                 projectileElement = p.fxEl; // el proyectil de habilidad marca con su elemento
                 let dealt;
-                try { dealt = p.basic ? resolveBasicHit(p.attacker, c, p.dmg, p.isCrit) : dealDamage(p.attacker, c, p.dmg, p.dmgType, { isCrit: p.isCrit }).dealt; } finally { projectileElement = null; } // basic: el disparo con clic (towerClickAttack.js)
+                dodgeableHit = true;
+                try { dealt = p.basic ? resolveBasicHit(p.attacker, c, p.dmg, p.isCrit) : dealDamage(p.attacker, c, p.dmg, p.dmgType, { isCrit: p.isCrit }).dealt; } finally { projectileElement = null; dodgeableHit = false; } // basic: el disparo con clic (towerClickAttack.js)
                 if (p.onHit) p.onHit(c, dealt);
                 if (p.stopOnHit) stopped = true; // no atraviesa: se queda en el primero
             });
