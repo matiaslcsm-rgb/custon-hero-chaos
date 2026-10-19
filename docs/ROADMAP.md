@@ -48,13 +48,18 @@ Fuentes: [Custom Hero Chaos (FAQ de Respawn)](https://respawn.media/gaming/7p3k8
 ---
 
 ## Cómo trabaja el modo automático
+> **Apagado el 2026-10-19 (pedido del usuario: "la tarea automática sacala también").** La tarea programada quedó
+> desactivada (no corre más; para borrarla del todo, desde la lista de tareas programadas de la app). Su texto está en
+> `~/.claude/scheduled-tasks/mejora-automatica-chc/SKILL.md`. Lo de
+> abajo es cómo funcionaba.
+
 Tarea programada `mejora-automatica-chc`: toma el primer ítem `[ ]` que no diga **(decisión)**, lo hace, lo prueba,
 lo documenta, lo sube y lo marca `[x]` con la fecha y el commit. Los ítems **(decisión)** esperan que el usuario
 elija; el modo automático anota las opciones en "Esperando al usuario" y los saltea.
 - Trabaja de corrido mientras el límite de 5 horas del plan esté **por debajo del 50%** y frena al llegar.
   Si el límite **semanal** llegó al 50%, no trabaja en el juego.
-- **Trabaja con el equipo** (pedido del usuario 2026-10-18): cada trabajo lo hace el agente que corresponde de
-  `.claude/agents/` (skill `equipo`) y ningún agente hace el trabajo de otro; quien coordina integra, prueba, documenta y sube.
+- **Sin agentes** (pedido del usuario 2026-10-19; antes, desde el 2026-10-18, repartía a los agentes): hace todo el
+  trabajo solo. Los agentes de `.claude/agents/` (skill `equipo`) quedan para cuando el usuario pida "el equipo" en el chat.
 - Un ítem por vez (sin tope por corrida), chico y jugable. Si un ítem es grande, lo parte en pasos y hace solo el primero.
 - Sube solo si pasan **todas** las pruebas (`index.html?test`; sin abrir el navegador: `python docs/correr-pruebas.py`,
   que sale con código 0 si pasan todas; con `--veces N` las repite para cazar las que fallan a veces). Si no pasan y no lo puede arreglar, deshace sus
@@ -455,7 +460,7 @@ si el usuario lo confirma.
         Torre igual. Sus 2 pruebas pasan, pero rompe "Las arenas se juegan en paralelo" (8 de 9 puntos): el Danzante
         Cinético de la IA gira sin parar (`movesToFight`/`circleStep`, `js/ai.js:39-44`) y no pega nunca. Se deshizo
         porque la corrida llegó al tope del plan.
-  - [ ] 2 (ia-de-rivales): aplicar el parche y que el que gira por AL_MOVERSE frene con alguien a tiro (y revisar el
+  - [ ] 2 (IA de los rivales): aplicar el parche y que el que gira por AL_MOVERSE frene con alguien a tiro (y revisar el
         `retreatStep` de los de distancia). Después sistemas mide con el banco y QA.
 - [ ] **Preparación anunciada para las habilidades** (plan del equipo, `docs/MATCH.md` §5): golpe fuerte con al menos 0,7 s
       de aviso y marca en el piso (la de la Torre), que se corta aturdiendo, y 0,3-0,5 s de exposición después. Probar

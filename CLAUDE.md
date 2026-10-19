@@ -12,9 +12,9 @@ GitHub Pages con cada push a `main`: https://matiaslcsm-rgb.github.io/custon-her
 - **Infinite Tower está en pausa:** no se toca.
 
 ## El equipo
-Diez agentes en `.claude/agents/` y la forma de trabajar en `.claude/skills/equipo/SKILL.md`. **Regla del usuario:** cada
-trabajo lo hace el agente que corresponde y ninguno hace el de otro. Quien coordina reparte, integra, prueba, documenta
-y sube. Guía y razones en `docs/GUIA-AGENTES.md`.
+**Sin agentes (pedido del usuario 2026-10-19):** el trabajo lo hacés vos, sin lanzar agentes. Los diez agentes de
+`.claude/agents/` y la skill `equipo` quedan solo para cuando el usuario pida "el equipo" o "los agentes" en el chat
+(guía en `docs/GUIA-AGENTES.md`).
 
 ## Cómo se prueba
 - Pruebas: `python docs/correr-pruebas.py` (tiene que decir "✅ N/N pruebas").

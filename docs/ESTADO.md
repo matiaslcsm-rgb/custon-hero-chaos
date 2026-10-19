@@ -70,9 +70,10 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   los controles son los de Dota (clic derecho camina o ataca, habilidades con tecla y clic; W A S D y lanzamiento rápido
   como opciones). **El banco de partidas mide los duelos** (base: duran 5,2 s de mediana, casi nunca cambia quién va
   ganando y solo 14% del daño se puede evitar); el plan del equipo para pulir el motor está en `MATCH.md` §5.
-  **No se pega caminando, como en Dota** (decidido por el usuario; lo hace el equipo, ver la Fase C0).
-- **El equipo (2026-10-18):** 10 agentes en `.claude/agents/` y la skill `equipo`. **Regla del usuario:** cada trabajo lo
-  hace el agente que corresponde y ningún agente hace el trabajo de otro (también en la tarea automática). Cómo armarlo
+  **No se pega caminando, como en Dota** (decidido por el usuario; el paso del motor está guardado en `docs/parches/`, ver la Fase C0).
+- **El equipo (2026-10-18):** 10 agentes en `.claude/agents/` y la skill `equipo`. **Desde el 2026-10-19 (pedido del
+  usuario) no se usan**, tampoco en la tarea automática: gastaban mucho plan y tardaban horas. Quedan solo para cuando el
+  usuario pida "el equipo" en el chat. Cómo armarlo
   bien (fuentes y lo aplicado) en [`GUIA-AGENTES.md`](GUIA-AGENTES.md); hay `CLAUDE.md` en la carpeta del juego. Los
   agentes y la skill también aparecen en las sesiones de `mattbox` (accesos directos a las carpetas del juego).
 - **⏸ Infinite Tower en pausa (2026-10-18, pedido del usuario):** se avanza solo con Custom Hero (ver el aviso arriba

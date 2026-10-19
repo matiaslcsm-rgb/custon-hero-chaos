@@ -64,7 +64,9 @@ decíselo en el encargo.
 5. **Cierre.** Subí `GAME_VERSION` (js/main.js), anotá en REWORK.md, ESTADO.md y ROADMAP.md, y hacé commit y push.
 
 ## Reglas
-- **Regla del usuario (2026-10-18): siempre se llama a los agentes que el trabajo necesita, y cada uno hace solo lo suyo.**
+- **Solo cuando el usuario lo pide (2026-10-19):** el usuario sacó los agentes del trabajo de todos los días y de la tarea
+  automática (gastaban mucho plan). Esta skill se usa únicamente si pide "el equipo" o "los agentes" en el chat.
+- Cuando se usa: cada agente hace solo lo suyo.
   Repartí cada parte al rol que le corresponde (ver "Lo que te toca y lo que no" en cada agente): el diseño de un
   competidor, al de competidores; los números, a sistemas; el código del motor, al ingeniero; la IA, a ia-de-rivales;
   las pantallas, a interfaz; el arte, a arte-pixel; los textos, a narrativa; las arenas, a niveles; las pruebas, a QA.
