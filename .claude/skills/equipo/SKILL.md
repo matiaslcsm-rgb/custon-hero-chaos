@@ -22,9 +22,11 @@ contexto del proyecto y las reglas de la casa):
 | `disenador-de-niveles` | Las arenas de MATCH (obstáculos del duelo) y los pisos de la Torre (en pausa) |
 | `qa-jugador` | Pruebas, bancos, partidas simuladas e informe de problemas con pasos para reproducirlos (no arregla) |
 
-**Si los agentes no aparecen** (pasa cuando la sesión se abrió desde una carpeta de arriba, como `mattbox`): usá el
-agente `general-purpose` y pegale al principio del encargo el contenido del archivo del rol
-(`.claude/agents/<agente>.md`, sin el encabezado). Si el rol no modifica archivos (director-de-juego, qa-jugador),
+**Cómo se llaman:** con el tipo de agente de su nombre (por ejemplo `subagent_type: "ingeniero-de-motor"`). Aparecen
+también en las sesiones que arrancan en `mattbox`, porque `mattbox/.claude/agents` y `mattbox/.claude/skills` son accesos
+directos (junction) a las carpetas del juego (desde el 2026-10-18). **Si igual no aparecen** (una sesión abierta antes
+de crearlos, u otra PC), usá el agente `general-purpose` y pegale al principio del encargo el contenido del archivo del
+rol (`.claude/agents/<agente>.md`, sin el encabezado); si el rol no modifica archivos (director-de-juego, qa-jugador),
 decíselo en el encargo.
 
 ## Cómo se reparte (de `docs/GUIA-AGENTES.md`)

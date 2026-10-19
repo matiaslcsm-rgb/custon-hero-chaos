@@ -75,13 +75,20 @@ Las dos cosas se cumplen si **los roles se reparten por parte del juego y por ar
 - **La skill del equipo** suma una plantilla de encargo, cuántos agentes usar según el tamaño del trabajo y el orden:
   primero el acuerdo, después cada uno lo suyo y al final el QA.
 
-## 4. Lo que falta decidir: que los agentes aparezcan solos
+## 4. Que los agentes aparezcan solos (decidido y hecho: opción a, 2026-10-18)
 
-Hoy las sesiones y la tarea automática arrancan en `mattbox`, la carpeta de arriba. Como Claude Code no mira las
-carpetas de adentro, **los 10 agentes del juego no aparecen**, y hay que usar el agente general con el archivo del rol
-(funciona, pero no usa el modelo ni las herramientas de cada rol).
+Las sesiones y la tarea automática arrancan en `mattbox`, la carpeta de arriba, y Claude Code no mira las carpetas de
+adentro: los 10 agentes del juego no aparecían. **El usuario eligió la opción (a)** y quedó hecho:
+`mattbox/.claude/agents` y `mattbox/.claude/skills` son accesos directos (junction) a las carpetas del juego, así que los
+agentes y la skill `equipo` están en todas las sesiones de `mattbox` y en la tarea automática. Hace falta **reiniciar
+una vez** las sesiones que ya estaban abiertas. Una sesión abierta en la carpeta del juego los ve igual (no se
+duplican: ahí la búsqueda termina en la carpeta del repositorio). Si OneDrive avisa que no puede sincronizar esos
+accesos directos, no pasa nada: los archivos de verdad están en la carpeta del juego y se suben con git.
 
-**(decisión)**
+Ajustes de la misma fecha para que rinda más: tope de pasos para el director (40) y el QA (60), que son los que más
+leen; QA y narrativa con Sonnet; formato fijo de entrega; plantilla de encargo y cantidad de agentes según el tamaño.
+
+Las opciones que se plantearon:
 - **(a) Recomendada:** que `mattbox/.claude/agents` sea un acceso directo de carpeta (en Windows, un "junction") a la
   carpeta de agentes del juego. Aparecen en todas las sesiones de `mattbox` y en la tarea automática, sin copias que se
   desactualicen. Hay que reiniciar la sesión una vez. Ojo: también aparecerían en otros proyectos que abras desde
