@@ -2931,6 +2931,38 @@ test('Controles estilo Hades: esquive con Espacio (3 casillas, invulnerable, rec
     checkEq(typeof autoCast, 'boolean', 'existe el modo automático (H)');
 }, { random: true });
 
+test('Custom Hero, controles estilo Dota: clic derecho camina o ataca, habilidades con tecla y clic, W A S D solo con la opción', () => {
+    const keepW = wasdMove, keepQ = quickCast;
+    try {
+        newGame('AXE'); wasdMove = false; quickCast = false;
+        // W A S D apagado: el teclado no mueve; en la Torre siempre
+        keys.d = true;
+        checkEq(keyboardDirection().dx, 0, 'sin la opción, W A S D no mueve');
+        wasdMove = true; checkEq(keyboardDirection().dx, 1, 'con la opción, sí');
+        wasdMove = false; gameMode = 'tower'; checkEq(keyboardDirection().dx, 1, 'en la Torre siempre'); gameMode = 'normal';
+        keys.d = false;
+        // clic derecho sobre un rival: lo ataca; en el piso: camina y cancela la orden
+        const c = dummy({ x: player.x + 3, y: player.y });
+        rightClickAt({ x: c.x, y: c.y });
+        check(player.focus === c && player.focusChase, 'clic derecho sobre un rival: lo ataca y lo persigue');
+        check(!player.moveTarget, 'sin destino de caminata');
+        rightClickAt({ x: player.x, y: player.y + 3 });
+        check(!player.focus && !player.focusChase, 'clic derecho en el piso cancela el ataque');
+        checkEq(player.moveTarget && player.moveTarget.y, player.y + 3, 'y camina hasta ahí');
+        // una habilidad apuntada: la tecla entra en modo apuntar y el clic izquierdo la lanza
+        const skill = ALL_SKILLS.find(s => s.kind === 'active' && s.pointTarget);
+        player.addSkill(skill); player.skillLevels[skill.id] = 1; player.mana = player.maxMana;
+        const k = player.keyBindings[skill.id];
+        Object.assign(mouse, { over: true, fx: 0.5, fy: 0.5 });
+        handleSkillKeypress(k);
+        check(targeting && targeting.skill === skill, 'la tecla entra en modo apuntar');
+        checkEq(player.cooldowns[skill.id] || 0, 0, 'todavía no la lanzó');
+        cancelTargeting();
+        quickCast = true; handleSkillKeypress(k);
+        check(!targeting && (player.cooldowns[skill.id] || 0) > 0, 'con lanzamiento rápido sale al apretar la tecla');
+    } finally { wasdMove = keepW; quickCast = keepQ; keys.d = false; mouse.over = false; cancelTargeting(); gameMode = 'normal'; }
+});
+
 test('Custom Hero: Espacio no esquiva (el esquive es de la Torre; MATCH es estilo RTS)', () => {
     newGame('AXE');
     const x = player.x, y = player.y;
@@ -4691,6 +4723,7 @@ function testSandbox() {
     bestiaryPersist = false; bestiaryStore = { beasts: {} }; // ni la colección del Bestiario
     arenPersist = false; arenStore = { found: {} }; // ni las Páginas de Arén
     autoCast = false; // las pruebas controlan a mano cuándo se lanza cada habilidad (la de habilidades automáticas lo prende)
+    wasdMove = true; quickCast = false; // las pruebas de movimiento usan el teclado (en Custom Hero, la opción W A S D); las de controles estilo Dota lo apagan
 }
 
 function runTests() {

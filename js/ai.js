@@ -211,7 +211,7 @@ function setAutoCast(on) {
     try { localStorage.setItem('chc-autocast2', on ? 'on' : 'off'); } catch (e) { /* no se guarda */ }
     const btn = document.getElementById('autocast-btn');
     if (btn) { btn.textContent = `✨ Habilidades: ${on ? 'AUTO' : 'MANUAL'}`; btn.classList.toggle('on', on); }
-    log(on ? '✨ Habilidades automáticas: se lanzan solas (H para lanzarlas a mano).' : '✨ Habilidades a mano: lanzalas con E R T F (H para volver a automáticas).');
+    log(on ? '✨ Habilidades automáticas: se lanzan solas (H para lanzarlas a mano).' : '✨ Habilidades a mano: lanzalas con E R T F Q (H para volver a automáticas).');
 }
 let autopilotWait = 0; // pausa en draft/preparación para que se vea lo que hace
 

@@ -994,7 +994,7 @@ function renderRestArea(dt = 0) {
         ctx.beginPath(); ctx.moveTo(px - 5, py - 5); ctx.lineTo(px + 5, py + 5); ctx.moveTo(px + 5, py - 5); ctx.lineTo(px - 5, py + 5); ctx.stroke();
     }
     ctx.font = '11px monospace'; ctx.fillStyle = '#74c69d';
-    ctx.fillText('Podés caminar con W A S D o clic derecho', MAP_W / 2, TILE * 1.5);
+    ctx.fillText(wasdMove ? 'Podés caminar con W A S D o clic derecho' : 'Caminá con clic derecho', MAP_W / 2, TILE * 1.5);
 }
 
 // Portada en el mapa mientras estás en el menú o eligiendo héroe.

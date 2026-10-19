@@ -65,7 +65,9 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   **Decidido:** concepto "En Vivo", nombre **MATCH**, y la regla central: **la estructura de Custom Hero no cambia; los
   competidores se diseñan para que pelear entre ellos sea divertido y desafiante.** Pilares de los duelos, lo que falta en
   el motor (por ejemplo, que los rivales de la IA lean los avisos) y la mecánica de duelo de cada semilla en
-  [`MATCH.md`](MATCH.md). **Estilo RTS, como Dota:** en Custom Hero ya no hay esquive con Espacio (es de la Torre).
+  [`MATCH.md`](MATCH.md). **Estilo RTS, como Dota:** en Custom Hero ya no hay esquive con Espacio (es de la Torre) y
+  los controles son los de Dota (clic derecho camina o ataca, habilidades con tecla y clic; W A S D y lanzamiento rápido
+  como opciones).
 - **⏸ Infinite Tower en pausa (2026-10-18, pedido del usuario):** se avanza solo con Custom Hero (ver el aviso arriba
   de todo en ROADMAP.md). La Torre sigue jugable como está.
 - **Custom Hero: pantalla de fin de partida y perfil (2026-10-18):** `js/matchSummary.js`: el resumen al terminar o al

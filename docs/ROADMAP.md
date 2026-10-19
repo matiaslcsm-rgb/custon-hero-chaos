@@ -431,7 +431,8 @@ si el usuario lo confirma.
       primera propuesta de que los 8 pelearan a la vez con una "audiencia" como vida.)
 - [x] **Estilo RTS, como Dota, y sin esquive con Espacio** (pedido del usuario 2026-10-18): el esquive es de la Torre. En
       Custom Hero, Espacio ya no esquiva (hecho el 2026-10-18); cada competidor se defiende con la posición y su kit.
-- [ ] **(decisión) Los controles estilo Dota** (`docs/MATCH.md` §6). Ver "Esperando al usuario".
+- [x] **Controles como Dota** (elegido por el usuario 2026-10-18, hecho el mismo día): clic derecho camina y, sobre un
+      rival, lo ataca; habilidades apuntadas con tecla y clic; "lanzamiento rápido" y W A S D como opciones.
 - [ ] **(decisión) Los atributos.** Ver "Esperando al usuario".
 - [ ] **(decisión) El roster de arranque.** Ver "Esperando al usuario".
 - [ ] **Inventario de lo que hay que cambiar, archivo por archivo:** buscar en el código, los datos y los textos de la
@@ -505,11 +506,6 @@ si el usuario lo confirma.
   apuestas, la IA, el banco de partidas y 289 pruebas; rehacerlo llevaría meses sin que se note en el juego)**;
   (b) reescribir también el código desde cero; (c) un juego aparte en otra carpeta, copiando del actual lo que sirva.
 
-- **MATCH: los controles estilo Dota** (`docs/MATCH.md` §6): hoy te movés con W A S D o clic derecho, el clic izquierdo
-  marca un objetivo y las habilidades salen al apretar la tecla. (a) **como Dota: clic derecho para caminar y, sobre un
-  rival, para atacarlo; habilidades con tecla y clic para confirmar, con "lanzamiento rápido" como opción; W A S D solo si
-  lo prendés en Opciones (recomendada)**; (b) solo mouse, sin W A S D; (c) dejar los controles como están.
-
 - **Los atributos:** hoy Fuerza / Agilidad / Inteligencia con las fórmulas de Dota. (a) **Blindaje (vida y armadura),
   Reflejos (velocidad, movimiento y crítico) y Procesador (energía y potencia de los módulos), con números nuestros
   (recomendada)**; (b) Fuerza / Agilidad / Inteligencia con fórmulas propias; (c) sin atributos: cada uno con stats directos.
@@ -549,6 +545,7 @@ si el usuario lo confirma.
 
 ## Hecho por el modo automático
 (Fecha · ítem · commit · qué se midió.)
+- 2026-10-18 · Custom Hero: controles como Dota (elegido por el usuario) · ver git log · probado con clics de verdad en el navegador: la tecla de Rayo Relámpago entra en modo apuntar (alcance y área en el cursor), el clic izquierdo lo lanza (queda en enfriamiento) y el clic derecho sobre un creep lo marca y lo persigue; en el piso camina y cancela el ataque. Sin la opción, W A S D no mueve (en la Torre sí). Pruebas 291/291 (las 3 de movimiento con teclado corren con la opción prendida).
 - 2026-10-18 · Custom Hero: sin esquive con Espacio (pedido del usuario: es de la Torre; MATCH es estilo RTS) · ver git log · en Custom Hero, Espacio no hace nada (no mueve ni da invulnerabilidad) y la ayuda de controles ya no lo nombra; en la Torre sigue igual (sus dos pruebas del esquive pasan). Pruebas 290/290.
 - 2026-10-18 · Custom Hero: quinta habilidad en la ronda 9 (decidido por el usuario) · a49067e · banco de 132 partidas antes → después: ronda final promedio 24 → 25; Sniper 65% → 68%, Zeus 22 → 18, Guerrero Vampiro 18 → 12, Asesino 16 → 13, Nigromante 8 → 9, Arcanista 2 → 6, Sabio del Vacío 0 → 2, Alquimista 0 → 1 (todo dentro del ruido de ±6). No arregla el dominio del Sniper. Pruebas 289/289.
 - 2026-10-18 · Custom Hero: baneo de 1 habilidad (decidido por el usuario) · ver git log · con una habilidad de Axe baneada y Axe elegido (su natural sale siempre si puede), 0 apariciones en 300 sorteos × 8 héroes × draft, Fragmento y Libro. Se recuerda la última (en pruebas, en memoria). Pruebas 288/288.

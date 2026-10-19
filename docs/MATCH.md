@@ -100,12 +100,12 @@ mismo filtro: se les busca su lectura y su respuesta.
   competidor se defiende con la posición y con lo que traiga su kit (la guardia de Vector, la pose de Viral, las
   torretas de Parche).
 
-1. **Los controles:** hoy en Custom Hero te movés con W A S D o con clic derecho, el clic izquierdo marca un objetivo y
-   las habilidades salen al apretar la tecla, hacia el cursor. (a) **como Dota: clic derecho para caminar y, sobre un
-   rival, para atacarlo; las habilidades con tecla y clic para confirmar, con la opción "lanzamiento rápido" (sale al
-   apretar la tecla, como hoy) en Opciones; W A S D solo si lo prendés en Opciones (recomendada)**; (b) solo mouse, sin
-   W A S D; (c) dejar los controles como están.
-2. **Siguen abiertas de antes:** los atributos (Blindaje, Reflejos y Procesador, recomendados), los competidores de
+- **Controles como Dota** (elegido por el usuario el 2026-10-18 y hecho): clic derecho para caminar y, sobre un rival,
+  para atacarlo (caminar a otro lado cancela la orden); las habilidades que se apuntan, con tecla y clic para confirmar
+  (clic derecho o Esc cancela); en Opciones, "lanzamiento rápido" (sale al apretar la tecla) y "moverse con W A S D",
+  los dos apagados de entrada. En la Torre no cambia nada.
+
+1. **Siguen abiertas de antes:** los atributos (Blindaje, Reflejos y Procesador, recomendados), los competidores de
    arranque (las 8 semillas, recomendadas) y quedarnos con el motor (recomendado).
 
 ## 7. Lo que sigue (una vez decidido)

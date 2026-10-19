@@ -878,6 +878,12 @@ Las fases 3 y 4 son las más grandes: hay que rehacer pruebas y volver a medir e
 también tiene que aprender a esquivar los ataques anunciados).
 
 ## Interfaz y calidad de vida (lista viva)
+- **Custom Hero: controles como Dota** (2026-10-18, elegido por el usuario para MATCH): clic derecho para caminar y,
+  sobre un rival, para atacarlo (lo persigue hasta tenerlo a tiro; caminar a otro lado cancela la orden). Las habilidades
+  que se apuntan entran en modo apuntar con su tecla (se ve el alcance) y salen con clic izquierdo; clic derecho o Esc
+  cancela. En la pausa, dos opciones apagadas de entrada: "lanzamiento rápido" (como antes: sale al apretar la tecla) y
+  "moverse con W A S D". El tutorial y la ayuda de controles lo explican. La Torre no cambia. Ojo: el joystick, en Custom
+  Hero, mueve solo con la opción de W A S D prendida (aprieta esas teclas).
 - **Custom Hero sin esquive con Espacio** (2026-10-18, pedido del usuario): el esquive es una mecánica de la Torre. En
   Custom Hero (que pasa a ser MATCH, estilo RTS como Dota) uno se defiende con la posición y con su kit. La Torre no cambia.
 - **Custom Hero: quinta habilidad en la ronda 9** (2026-10-18, decidido por el usuario, como el original): en la ronda 9

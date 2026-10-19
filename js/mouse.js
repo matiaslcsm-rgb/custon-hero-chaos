@@ -1,14 +1,34 @@
 // Control con el mouse, estilo MOBA.
 //
-//   Habilidades con objetivo (las que eligen un enemigo: golpes, proyectiles, saltos): apretás la tecla (E R T F) y entrás en
+//   Habilidades con objetivo (las que eligen un enemigo: golpes, proyectiles, saltos): apretás la tecla (E R T F Q) y entrás en
 //   modo apuntar: se ve el alcance y se marca el enemigo más cercano al cursor. Clic izquierdo la lanza sobre ese enemigo;
-//   clic derecho o Esc cancela. Las de área alrededor tuyo y las mejoras se lanzan al apretar la tecla, como antes.
-//   Clic derecho en el mapa (sin estar apuntando): tu héroe camina hasta ahí. Si tocás W A S D, manda el teclado.
+//   clic derecho o Esc cancela. Con "lanzamiento rápido" (Opciones) salen al apretar la tecla. Las de área alrededor tuyo y
+//   las mejoras se lanzan al apretar la tecla.
+//   Clic derecho en el mapa (sin estar apuntando): tu héroe camina hasta ahí; sobre un rival, lo ataca. W A S D, solo si
+//   lo prendés en Opciones (y entonces manda el teclado).
 //   En la Torre, el clic izquierdo es el ataque básico hacia el cursor (towerClickAttack.js; se apaga en la pausa).
 //   Con espada, el clic derecho es la parada en vez de caminar (towerParry.js).
 //
 //   Para apuntar no hace falta tocar cada habilidad: mientras se lanza con el mouse, el héroe tiene aimPoint y
 //   nearestEnemy() (combat.js) elige, entre los enemigos a su alcance, el más cercano a ese punto.
+
+// CONTROLES ESTILO DOTA en Custom Hero (MATCH, pedido del usuario 2026-10-18): clic derecho camina y, sobre un rival,
+// lo ataca; las habilidades apuntadas se confirman con clic (salvo que prendas el "lanzamiento rápido"); W A S D solo si
+// lo prendés en Opciones. En la Torre no cambia nada: es un juego de acción (teclado, esquive y clic para pegar).
+let quickCast = false, wasdMove = false;
+try { quickCast = localStorage.getItem('chc-lanzamiento-rapido') === 'on'; wasdMove = localStorage.getItem('chc-wasd') === 'on'; } catch (e) { /* sin almacenamiento: como Dota */ }
+function setQuickCast(on) {
+    quickCast = on;
+    try { localStorage.setItem('chc-lanzamiento-rapido', on ? 'on' : 'off'); } catch (e) { /* no se guarda */ }
+    log(on ? '⚡ Lanzamiento rápido: las habilidades salen al apretar la tecla, hacia el cursor.' : '🎯 Habilidades con tecla y clic: apretás la tecla, apuntás y confirmás con clic izquierdo.');
+}
+function setWasdMove(on) {
+    wasdMove = on;
+    try { localStorage.setItem('chc-wasd', on ? 'on' : 'off'); } catch (e) { /* no se guarda */ }
+    log(on ? '⌨️ Te podés mover con W A S D (y las flechas), además del clic derecho.' : '🖱️ Te movés con clic derecho, como en Dota.');
+}
+function keyboardMoveOn() { return gameMode === 'tower' || wasdMove; }
+function aimWithClick() { return gameMode !== 'tower' && !quickCast; }
 
 let targeting = null;               // { skill } mientras se está apuntando una habilidad
 const mouse = { x: 0, y: 0, over: false }; // posición del cursor en casillas (con decimales)
@@ -70,17 +90,7 @@ canvas.addEventListener('mousedown', e => {
     if (paused) return;
     const p = mouseToTile(e);
     Object.assign(mouse, p);
-    if (e.button === 2) { // clic derecho: cancela el apuntado o camina
-        if (targeting) { cancelTargeting(); return; }
-        if (secondaryAction(p)) return; // Torre: la parada, el flechazo o la tormenta
-        if (player && player.inRest && !player.eliminated && !autopilot) { // caminar por la sala de espera
-            player.moveTarget = { x: Math.max(0, Math.min(COLS - 1, Math.round(p.x))), y: Math.max(0, Math.min(ROWS - 1, Math.round(p.y))), arena: null, at: fxClock };
-            return;
-        }
-        if (!canControlPlayer()) return;
-        player.moveTarget = { x: Math.max(0, Math.min(COLS - 1, Math.round(p.x))), y: Math.max(0, Math.min(ROWS - 1, Math.round(p.y))), arena: player.arena, at: fxClock };
-        return;
-    }
+    if (e.button === 2) { rightClickAt(p); return; }
     if (e.button === 0 && targeting) {
         const skill = targeting.skill;
         cancelTargeting();
@@ -97,6 +107,25 @@ canvas.addEventListener('mousedown', e => {
         if (enemy) fxRing(enemy, '#ff477e', 0.9, 0.3);
     }
 });
+
+// Clic derecho: cancela el apuntado o, como en Dota, ataca al rival que tenga abajo o camina hasta ahí
+function rightClickAt(p) {
+    if (targeting) { cancelTargeting(); return; }
+    if (secondaryAction(p)) return; // Torre: la parada, el flechazo o la tormenta
+    const tile = { x: Math.max(0, Math.min(COLS - 1, Math.round(p.x))), y: Math.max(0, Math.min(ROWS - 1, Math.round(p.y))), at: fxClock };
+    if (player && player.inRest && !player.eliminated && !autopilot) { player.moveTarget = { ...tile, arena: null }; return; } // caminar por la sala de espera
+    if (!canControlPlayer()) return;
+    if (gameMode !== 'tower') {
+        const enemy = enemyUnderCursor(p.x, p.y);
+        if (enemy) { // sobre un rival: atacarlo (lo persigue hasta tenerlo a tiro)
+            player.focus = enemy; player.focusChase = true; player.moveTarget = null;
+            fxRing(enemy, '#ff477e', 0.9, 0.3);
+            return;
+        }
+        player.focus = null; player.focusChase = false; // caminar cancela la orden de ataque
+    }
+    player.moveTarget = { ...tile, arena: player.arena };
+}
 
 // La acción secundaria de cada clase en la Torre (clic derecho, o la tecla/botón sin mouse: padControls.js)
 function secondaryAction(p) {

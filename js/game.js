@@ -360,6 +360,11 @@ function handleSkillKeypress(k) {
     // Lanzamiento al instante (estilo Hades): las que apuntan salen hacia el cursor sin el paso extra del clic
     if (skill.chargeable) { startCharge(player, skill, k); return; } // se tensa mientras está apretada (towerFeel.js)
     const c = cursorWorld();
+    if (isAimedSkill(skill) && c && aimWithClick()) { // como Dota: tecla, apuntar y clic para confirmar (mouse.js)
+        if ((player.cooldowns[skill.id] || 0) > 0) return;
+        targeting = { skill }; canvas.style.cursor = 'crosshair';
+        return;
+    }
     if (isAimedSkill(skill) && c) { castAt(player, skill, c.x, c.y); return; }
     tryCastSkill(player, skill);
 }
@@ -510,6 +515,7 @@ function updateHero(hero, arena, dt) {
 }
 
 function keyboardDirection() {
+    if (!keyboardMoveOn()) return { dx: 0, dy: 0 }; // en Custom Hero, W A S D solo si lo prendés en Opciones (mouse.js)
     return {
         dx: (keys[KEYMAP.right] || keys['arrowright'] ? 1 : 0) - (keys[KEYMAP.left] || keys['arrowleft'] ? 1 : 0),
         dy: (keys[KEYMAP.down] || keys['arrowdown'] ? 1 : 0) - (keys[KEYMAP.up] || keys['arrowup'] ? 1 : 0)

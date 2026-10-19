@@ -132,8 +132,8 @@ const TUTORIAL_PAGES = [
         <p class="tut-note">⏱ Cada fase tiene tiempo: si se acaba, el juego decide por vos.</p>` },
     { icon: '⌨️', color: '#2dc653', title: 'Teclado', body: `
         <div class="tut-keys">
-            ${tutKey(['W', 'A', 'S', 'D'], 'Moverte (también flechas). Podés atacar mientras caminás.')}
-            ${tutKey(['E', 'R', 'T', 'F'], 'Lanzar tus habilidades a mano, en el orden en que las aprendiste.')}
+            ${tutKey(['E', 'R', 'T', 'F', 'Q'], 'Tus habilidades, en el orden en que las aprendiste. Las que se apuntan se confirman con clic.')}
+            ${tutKey(['W', 'A', 'S', 'D'], 'Moverte con el teclado: solo si lo prendés en Opciones (Esc). Como en Dota, se juega con el mouse.')}
             ${tutKey(['H'], 'Habilidades automáticas: se lanzan solas y vos solo te movés.')}
             ${tutKey(['B'], 'Abrir o cerrar la tienda (en la preparación).')}
             ${tutKey(['M'], 'Agrandar el mapa.')}
@@ -144,9 +144,10 @@ const TUTORIAL_PAGES = [
     { icon: '🖱️', color: '#c77dff', title: 'Mouse', body: `
         <div class="tut-cards">
             ${tutCard('🗡️', 'Ataque automático', 'Tu héroe le pega solo al enemigo más cercano que tenga a tiro (el círculo punteado es tu alcance).')}
-            ${tutCard('🎯', 'Clic izquierdo en un enemigo', 'Lo marcás como objetivo: tu ataque y tus habilidades lo priorizan, y si está lejos caminás hasta él.')}
-            ${tutCard('👣', 'Clic derecho en el mapa', 'Caminás hasta ahí. También en la sala de espera.')}
-            ${tutCard('✨', 'Apuntar una habilidad', 'Tocá su tecla, se ve el alcance y el enemigo marcado; clic izquierdo la lanza, clic derecho cancela.')}
+            ${tutCard('👣', 'Clic derecho en el mapa', 'Caminás hasta ahí, como en Dota. También en la sala de espera.')}
+            ${tutCard('⚔️', 'Clic derecho en un rival', 'Lo atacás: tu héroe va hasta tenerlo a tiro y le pega. Caminar a otro lado cancela la orden.')}
+            ${tutCard('🎯', 'Clic izquierdo en un enemigo', 'Lo marcás como objetivo: tu ataque y tus habilidades lo priorizan.')}
+            ${tutCard('✨', 'Apuntar una habilidad', 'Tocá su tecla, se ve el alcance y el enemigo marcado; clic izquierdo la lanza, clic derecho cancela. Con "lanzamiento rápido" (Opciones) sale al apretar la tecla.')}
         </div>` },
     { icon: '📈', color: '#ff9f1c', title: 'Habilidades y niveles', body: `
         <div class="tut-cards">
