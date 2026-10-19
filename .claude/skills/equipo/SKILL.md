@@ -27,6 +27,26 @@ agente `general-purpose` y pegale al principio del encargo el contenido del arch
 (`.claude/agents/<agente>.md`, sin el encabezado). Si el rol no modifica archivos (director-de-juego, qa-jugador),
 decíselo en el encargo.
 
+## Cómo se reparte (de `docs/GUIA-AGENTES.md`)
+- **Por parte del juego y por archivos, no por etapa.** Una misma función no pasa de mano en mano (se pierde
+  información): el que la programa también escribe sus pruebas.
+- **Primero el acuerdo:** los que diseñan (director, competidores, sistemas) dejan en un archivo qué se hace, con qué
+  números y qué se mide. Eso es lo que reciben los que programan.
+- **Después, cada uno lo suyo:** motor, IA de rivales, interfaz, arte y niveles, cada uno en sus archivos.
+- **Al final, el QA** verifica todo (todas las pruebas, el banco, captura si se ve).
+- **Cuántos agentes:** algo chico (un número, un texto, un arreglo puntual), 1 rol y el QA; algo mediano, 2 o 3 roles y
+  el QA; algo grande, el director primero, después 3 a 5 roles y el QA. Nunca más de los que hacen falta: cada agente
+  gasta unas 4 veces lo de un chat.
+- Los agentes no lanzan otros agentes: coordina solo uno.
+
+## El encargo (lo que le pasás a cada agente)
+- **Objetivo:** qué tiene que quedar hecho y por qué (el pedido del usuario, con sus palabras si hace falta).
+- **Lo ya decidido** que lo afecta (y lo que todavía es "(decisión)": no lo decide el agente).
+- **Hasta dónde llega su parte** y qué es de otro rol.
+- **Archivos** de entrada (el acuerdo, el código a tocar) y dónde deja el resultado.
+- **Cómo se mide** que salió bien (con números si se puede).
+- **Cómo entrega** (el formato de su archivo: qué hizo, archivos, pruebas y números, qué falta y para quién).
+
 ## Cómo se trabaja
 1. **Diseño.** Consultá al `director-de-juego` con el tema y el contexto (qué pidió el usuario, qué dice el roadmap). Si
    lo que vuelve es una decisión del usuario, presentale las opciones con la recomendada y pará ahí.

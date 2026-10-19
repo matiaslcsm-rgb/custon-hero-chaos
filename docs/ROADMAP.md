@@ -528,6 +528,12 @@ si el usuario lo confirma.
   apuestas, la IA, el banco de partidas y 289 pruebas; rehacerlo llevaría meses sin que se note en el juego)**;
   (b) reescribir también el código desde cero; (c) un juego aparte en otra carpeta, copiando del actual lo que sirva.
 
+- **Que los agentes del equipo aparezcan solos** (`docs/GUIA-AGENTES.md` §4): hoy las sesiones y la tarea automática
+  arrancan en `mattbox` y Claude Code no ve los agentes de la carpeta del juego. (a) **que `mattbox/.claude/agents` sea un
+  acceso directo de carpeta ("junction") a los agentes del juego (recomendada: aparecen en todas las sesiones y en la tarea
+  automática, sin copias; hay que reiniciar la sesión una vez)**; (b) abrir las sesiones del juego en la carpeta del juego
+  (la tarea automática igual arranca en `mattbox`); (c) seguir con el agente general y el archivo del rol.
+
 - **MATCH: el color del peligro** (`docs/MATCH.md` §6): (a) **el rojo de los avisos de la Torre por ahora (recomendada: ya
   anda, tiene modo daltónico y se cambia en un solo lugar)**; (b) el magenta del show; (c) el naranja de la paleta.
 
@@ -570,6 +576,7 @@ si el usuario lo confirma.
 
 ## Hecho por el modo automático
 (Fecha · ítem · commit · qué se midió.)
+- 2026-10-18 · Guía del equipo de agentes (pedido en el chat) · ver git log · investigado en la documentación oficial, dos artículos de Anthropic y Claude Code Game Studios (GitHub); aplicado: CLAUDE.md, formato de entrega en los 10 agentes, verificación completa del QA, Sonnet para QA y narrativa, plantilla de encargo y reparto por archivos en la skill. Pendiente: que los agentes aparezcan solos (decisión).
 - 2026-10-18 · MATCH: banco de duelos (plan del director de juego) · ver git log · 66 partidas, 1.404 duelos, dos corridas idénticas: mediana 5,2 s (25-75%: 1,6-11 s), 4% por tiempo, 0,7 cambios de quién va ganando por duelo, 14% del daño entre héroes evitable caminando. Los duelos se deciden en segundos (meta: 15-30 s). Pruebas 292/292.
 - 2026-10-18 · Custom Hero: controles como Dota (elegido por el usuario) · ver git log · probado con clics de verdad en el navegador: la tecla de Rayo Relámpago entra en modo apuntar (alcance y área en el cursor), el clic izquierdo lo lanza (queda en enfriamiento) y el clic derecho sobre un creep lo marca y lo persigue; en el piso camina y cancela el ataque. Sin la opción, W A S D no mueve (en la Torre sí). Pruebas 291/291 (las 3 de movimiento con teclado corren con la opción prendida).
 - 2026-10-18 · Custom Hero: sin esquive con Espacio (pedido del usuario: es de la Torre; MATCH es estilo RTS) · ver git log · en Custom Hero, Espacio no hace nada (no mueve ni da invulnerabilidad) y la ayuda de controles ya no lo nombra; en la Torre sigue igual (sus dos pruebas del esquive pasan). Pruebas 290/290.
