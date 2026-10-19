@@ -69,7 +69,8 @@ El orden de la lista **es** la prioridad: primero lo que destraba el loop comple
 > **⏸ INFINITE TOWER EN PAUSA (pedido del usuario 2026-10-18: "avanzá solo con Custom, la Tower pausala").**
 > Hasta que el usuario diga otra cosa, el modo automático trabaja **solo en Custom Hero**.
 > **Desde el 2026-10-18 (pedido del usuario): Custom Hero se rehace como un juego propio, sin nada de Dota: MATCH**, un
-> show de competencia del futuro donde **todos pelean contra todos** (Fase C0, `docs/MATCH.md`, `docs/MECANICAS.md` y
+> show de competencia del futuro. **La estructura es la misma de Custom Hero; lo que cambia son los competidores, con
+> mecánicas que hagan divertido y desafiante pelear entre ellos** (Fase C0, `docs/MATCH.md`, `docs/MECANICAS.md` y
 > `docs/CONCEPTO-FUTURISTA.md`). Orden: los ítems sin "(decisión)" de C0, después lo que quede de C1. Todo lo marcado ⏸ en C2, C3
 > y C4 espera las decisiones de C0 (no tiene sentido balancear o sumar contenido al roster que se va a reemplazar). Se saltean como si dijeran (decisión) todos los ítems de INFINITE TOWER y los de la base que son solo de
 > la Torre (B2 1d, "Cajas de golpe en la Torre", la galería y el arte de la Torre). El muñeco y la base compartida
@@ -424,12 +425,11 @@ si el usuario lo confirma.
       `docs/CONCEPTO-FUTURISTA.md` (estilos, tres conceptos, nombres para todo, atributos y semillas de competidores).
 - [x] **El concepto:** decidido por el usuario el 2026-10-18: **"En Vivo"**, un show de competencia del año 2099.
 - [x] **El nombre:** decidido por el usuario el 2026-10-18: **MATCH**.
-- [x] **La regla central:** decidido por el usuario el 2026-10-18: **es PvP; todos los competidores combaten entre ellos**
-      y se diseñan para pelear contra otros competidores. Propuesta del núcleo en `docs/MATCH.md`.
-- [ ] **(decisión) Cómo es una ronda** (`docs/MATCH.md` §2). Ver "Esperando al usuario".
-- [ ] **(decisión) La vida del jugador** (la audiencia, `docs/MATCH.md` §3). Ver "Esperando al usuario".
-- [ ] **(decisión) Los drones** (`docs/MATCH.md` §2). Ver "Esperando al usuario".
-- [ ] **(decisión) Las apuestas** (`docs/MATCH.md` §5). Ver "Esperando al usuario".
+- [x] **La regla central:** aclarado por el usuario el 2026-10-18: **el juego es el mismo Custom Hero** (rondas, creeps,
+      un duelo por ronda, apuestas, jefes); **los competidores se diseñan para que pelear entre ellos sea divertido y
+      desafiante.** Pilares, herramientas y la mecánica de duelo de cada semilla en `docs/MATCH.md`. (Se descartó la
+      primera propuesta de que los 8 pelearan a la vez con una "audiencia" como vida.)
+- [ ] **(decisión) Cómo se cubren los competidores en el duelo** (`docs/MATCH.md` §6). Ver "Esperando al usuario".
 - [ ] **(decisión) Los atributos.** Ver "Esperando al usuario".
 - [ ] **(decisión) El roster de arranque.** Ver "Esperando al usuario".
 - [ ] **Inventario de lo que hay que cambiar, archivo por archivo:** buscar en el código, los datos y los textos de la
@@ -503,19 +503,10 @@ si el usuario lo confirma.
   apuestas, la IA, el banco de partidas y 289 pruebas; rehacerlo llevaría meses sin que se note en el juego)**;
   (b) reescribir también el código desde cero; (c) un juego aparte en otra carpeta, copiando del actual lo que sirva.
 
-- **MATCH: cómo es una ronda** (`docs/MATCH.md` §2): (a) **los 8 en cara a cara simultáneos todas las rondas (con "la
-  repetición" si quedan impares), más un Todos contra Todos cada 5 rondas en lugar de los jefes (recomendada)**; (b) solo
-  cara a cara; (c) siempre Todos contra Todos, los 8 en una arena.
-
-- **MATCH: la vida del jugador** (`docs/MATCH.md` §3): (a) **la audiencia: 100 puntos que bajan al perder un cara a cara
-  (más cuanto más le quedó al ganador y cuanto más avanzada la ronda); en 0, fuera del aire (recomendada: es lo probado en
-  los auto battlers y le da sentido al show)**; (b) 3 vidas fijas, una por derrota; (c) eliminación directa desde una ronda.
-
-- **MATCH: los drones** (`docs/MATCH.md` §2): (a) **solo la ronda 1, de "prueba de cámara", sin perder audiencia
-  (recomendada)**; (b) nada de drones; (c) una ronda de drones cada 5 para ganar créditos.
-
-- **MATCH: las apuestas** (`docs/MATCH.md` §5): (a) **a otro cara a cara o a vos mismo (apostarte paga menos si sos el
-  favorito) (recomendada)**; (b) solo a otros cara a cara; (c) solo en el Todos contra Todos.
+- **MATCH: cómo se cubren los competidores en el duelo** (`docs/MATCH.md` §6): (a) **cada uno trae su propia defensa en el
+  kit (el esquive con carga de Vector, la pose de Viral, la torreta de Parche) y todos tienen el esquive con Espacio
+  (recomendada: más identidad)**; (b) una parada común para todos (clic derecho), como la de la Torre, además del
+  esquive; (c) solo el esquive.
 
 - **Los atributos:** hoy Fuerza / Agilidad / Inteligencia con las fórmulas de Dota. (a) **Blindaje (vida y armadura),
   Reflejos (velocidad, movimiento y crítico) y Procesador (energía y potencia de los módulos), con números nuestros

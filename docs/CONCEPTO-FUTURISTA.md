@@ -147,8 +147,9 @@ Seguimos con el pixel art dibujado en código, con otras reglas:
 
 ## Decisiones
 
-> Decidido por el usuario el 2026-10-18: **"En Vivo"**, el juego se llama **MATCH**, y es **PvP: todos pelean contra
-> todos** (el diseño sigue en `docs/MATCH.md`). Quedan abiertos los atributos y los competidores.
+> Decidido por el usuario el 2026-10-18: **"En Vivo"** y el juego se llama **MATCH**. La estructura es la misma de
+> Custom Hero; los competidores se diseñan para que pelear entre ellos sea divertido y desafiante (sigue en
+> `docs/MATCH.md`). Quedan abiertos los atributos y los competidores.
 
 1. **El concepto:** (a) **"En Vivo", el show futurista, con la paleta limpia de "La Simulación" (recomendada)**;
    (b) "La Simulación", la liga virtual; (c) "Los Juegos del Sol", solarpunk.

@@ -1,133 +1,109 @@
 # MATCH: el diseño del juego
 
 Decidido por el usuario el 2026-10-18:
-- El juego propio se llama **MATCH** (un partido: un show de competencia en vivo).
+- El juego propio se llama **MATCH**.
 - El concepto es **"En Vivo"**: un show de competencia del año 2099, transmitido en vivo (ver `docs/CONCEPTO-FUTURISTA.md`).
-- **La regla central: MATCH es PvP.** Todos los competidores combaten entre ellos, y cada uno se diseña para pelear
-  contra otros competidores, no contra creeps.
-
-Este documento es la propuesta para el corazón del juego. Las reglas de hoy, de donde partimos, están en
-`docs/MECANICAS.md`. Lo marcado como decisión espera al usuario (también en el roadmap, Fase C0).
+- **El juego es el mismo Custom Hero:** rondas, creeps, draft mezclado, un duelo por ronda desde la 5, apuestas,
+  jefes, tienda. No cambia la estructura (las reglas de hoy están en `docs/MECANICAS.md`).
+- **Lo que cambia es el centro del diseño de los héroes:** cada competidor tiene que tener **mecánicas que hagan
+  divertido y desafiante pelear contra otros competidores.** El duelo es el momento estelar del programa.
 
 ---
 
-## 1. El cambio de fondo
+## 1. Qué hace bueno un duelo entre personajes (lo que investigamos)
 
-Hoy, Custom Hero es sobre todo PvE: 6 de los 8 pelean contra creeps y solo 2 hacen un duelo por ronda (desde la 5).
-En MATCH se da vuelta: **todas las rondas, todos pelean contra otro competidor.** Los creeps dejan de ser el centro.
+- **Contrajuego** (Riot, los creadores de *League of Legends*): lo fuerte tiene que tener una respuesta **jugando**, no
+  solo comprando un ítem. También advierten que, si todo pega demasiado fuerte, el poder tapa las decisiones.
+- **Lectura** (David Sirlin, diseñador de *Street Fighter*, lo llama *yomi*): lo más rico de un duelo es adivinar qué va
+  a hacer el otro. La base es un piedra, papel o tijera entre **atacar, cubrirse y esquivar**, con capas: si sé que vas a
+  esquivar, espero; si sabés que espero, atacás.
+- **Avisos coherentes:** un golpe fuerte se anuncia **siempre con la misma señal** (un gesto, un color, un sonido), y así
+  recibirlo es un error del que se aprende, no una injusticia. Pero si se anuncia todo, se pierde habilidad: los
+  **amagues** y los tiempos variados mantienen viva la lectura.
 
-Es lo que hacen los auto battlers que funcionan (*Teamfight Tactics*, *Hearthstone Battlegrounds*): cada ronda te toca
-un rival, y perder te saca una parte de una vida que es tuya, no del personaje. Cuando te quedás sin esa vida, quedás
-afuera. Gana el último. Para nosotros, esa vida es **tu audiencia**.
+## 2. Los pilares de los duelos de MATCH
 
-## 2. Una emisión (una partida)
+Todo competidor se revisa contra esta lista antes de entrar:
+1. **Lo fuerte se avisa y se puede evitar:** esquivando, cubriéndose o saliendo del área. La señal es la misma en todo
+   el juego.
+2. **Todo tiene respuesta jugando.** Si la única respuesta es un ítem, está mal diseñado.
+3. **Ventanas para castigar:** después de un golpe fuerte o de un error, el que lo hizo queda expuesto un instante.
+4. **Una lectura propia:** cada competidor tiene algo que se gana adivinando al rival (una carga, un amague, una trampa).
+5. **Recursos con decisión:** energía, cargas y enfriamientos que importan (¿lo gasto ya o lo guardo para su ventana?).
+6. **Moverse importa:** distancia, paredes, zonas en el piso.
+7. **Nada de lo que no es divertido:** aturdir sin fin, invisibilidad sin pista, daño que no se puede evitar, curación
+   que no se puede cortar, ganar sin jugar.
+8. **Duelos con idas y vueltas:** de 15 a 30 segundos (hoy la mediana es de unos 10-14 s), donde quien va ganando cambia
+   más de una vez.
 
-8 competidores. Cada ronda tiene cuatro momentos:
+## 3. La caja de herramientas: lo que ya tenemos y lo que falta
 
-1. **Camarines** (preparación, 30 s): patrocinadores (la tienda), subir módulos y, en las rondas 1 a 4 y 9, el sorteo de
-   un módulo nuevo.
-2. **La previa** (15 s): se anuncian los cruces de la ronda y la tribuna apuesta (vos también).
-3. **Cara a cara** (hasta 45 s): **los 8 pelean al mismo tiempo**, en 4 arenas, uno contra uno. Mirás tu pelea; las
-   otras se ven en el resumen (y podés espiarlas con el ranking).
-   - **Cruces:** nunca contra el mismo rival de la ronda anterior, y rotando para que te toquen todos.
-   - **Si quedan impares,** uno pelea contra **la repetición**: una copia del último competidor que salió del aire (en
-     los auto battlers se llama "fantasma"). Perder contra la repetición cuesta la mitad.
-4. **La tanda** (el resumen): créditos ganados, audiencia perdida, cómo salieron los otros cara a cara y tu rating.
+**Ya está en el motor:**
+- Esquive con Espacio (y unos instantes intocable).
+- Proyectiles de habilidad que viajan al punto apuntado y pueden fallar.
+- Inmunidad corta después de un aturdimiento y control a la mitad en duelo (nadie queda aturdido para siempre).
+- En la Torre: **avisos de golpe** (los enemigos se preparan antes de pegar) y una **parada** que devuelve proyectiles.
+- En el muñeco: golpes en tres tiempos (preparación, golpe y recuperación) y cajas de golpe.
 
-**Cada 5 rondas, el Todos contra Todos:** los que siguen en el aire, juntos en una sola arena grande. Es el momento
-estelar del programa (reemplaza a los jefes de ronda). Premios por puesto: créditos y un **prototipo** (los objetos
-neutrales de hoy) para los primeros. Cuesta audiencia solo a los que caen primero.
+**Falta para MATCH:**
+- **Que los rivales de la IA también esquiven.** Hoy el esquive con Espacio es solo del jugador (y del piloto en la
+  Torre): los 7 rivales pelean sin esquivar, así que un duelo contra ellos no puede ser una lectura de verdad.
+- Avisos de golpe en los módulos de los competidores (traer lo de la Torre).
+- Zonas y trampas en el piso, objetos que se pueden romper (drones, torretas).
+- Cargas a la vista sobre el competidor.
+- Una forma de cubrirse (ver la decisión de abajo).
 
-**La ronda 1 es la "prueba de cámara":** contra drones, para probar el kit sin perder audiencia. Desde la 2, todo es PvP.
+## 4. Los 8 competidores, con su mecánica de duelo (borrador)
 
-## 3. La audiencia (la vida del jugador)
+Para cada uno: **cómo gana**, **su lectura** y **cómo se le gana**. Son ideas para aprobar o cambiar; los números
+vienen después, en una ficha por competidor.
 
-- Arrancás con **100 de audiencia**.
-- **Perder un cara a cara te baja la audiencia:** un poco según la ronda, y más cuanta más vida le haya quedado al
-  ganador (perder apretado cuesta poco; que te pasen por arriba, mucho). Propuesta para medir:
-  **2 + la mitad de la ronda + 10 × (la vida que le quedó al ganador, de 0 a 1)**. En la ronda 2, perdiendo apretado:
-  ~3; en la ronda 10, aplastado: ~17.
-- **Horario central** (desde la ronda 15): la audiencia que se pierde va subiendo cada ronda. Es la muerte súbita de
-  hoy, pero sobre la audiencia: así la emisión siempre termina.
-- **En 0: fuera del aire.** Mirás desde la tribuna.
-- **El rating** (el ranking) se ordena por audiencia.
-- **Reemplaza:** las 2 vidas, la tarjeta amarilla (Condenado), la Voluntad de Titán y la muerte súbita sobre el daño.
+| Competidor/a | Cómo gana | Su lectura | Cómo se le gana |
+|---|---|---|---|
+| **Grúa** (operaria con brazo-grúa) | Un gancho lento y anunciado: si engancha, arrastra al rival; contra una pared, lo aturde un instante. | ¿Tirar el gancho ya o esperar a que el rival esquive? | Esquivar el gancho: si falla, Grúa queda expuesta un segundo. |
+| **Eco** (DJ con ondas de sonido) | Un pulso que se ve (un metrónomo): los módulos tirados en el pulso pegan el doble. | El rival también ve el pulso: ¿tiro en el pulso, donde me esperan, o fuera, más flojo? | Cortarle el ritmo: empujarlo o aturdirlo reinicia el pulso. |
+| **Flash** (camarógrafa del show) | Un flash en cono, anunciado: el que lo mira de frente queda encandilado (falla sus ataques 2 s). Sus golpes marcan al rival: recibe más daño. | ¿Me doy vuelta para esquivar el flash (y dejo de pegar) o me la juego? | Entrarle de costado y no darle tiempo de girar. |
+| **Kilo** (repartidor en patines) | Drones de entrega que pegan por él; cuanto más se mueve, más rápido va. | ¿Rompo los drones primero o voy por él? | Romper los drones (que se pueden golpear) y arrinconarlo contra una pared. |
+| **Parche** (técnico de boxes) | Pone torretas en el piso (se ven) y se repara cerca de ellas. | ¿Dónde pongo la torreta? El rival elige pelear lejos. | Sacarlo de su zona o romper las torretas. |
+| **Vector** (esgrimista con hoja de luz) | Esquivar justo cuando le pegan le carga un golpe enorme. | Espera tu golpe para esquivarlo. | **Amagar:** no tirar el golpe fuerte hasta que él esquive primero. |
+| **Viral** (influencer) | Una "pose" a la vista (quieto medio segundo) que, si nadie la interrumpe, le da un refuerzo grande. Crece con las apuestas a su favor. | ¿Poso ahora, que el rival tiene el golpe en enfriamiento? | Guardar algo para cortar la pose. |
+| **Glitch** (un error de la transmisión) | Copia por un rato el último módulo que lo golpeó. | ¿Qué le conviene que yo le tire? | Pegarle primero con el módulo más flojo y guardar el bueno. |
 
-**Meta:** emisiones de 15 a 20 rondas y 16 a 21 minutos, como hoy. Se ajusta con el banco de partidas.
+Los tres propios que ya teníamos (el Danzante Cinético, el Arcanista y el Sabio del Vacío) pasan al estilo nuevo con el
+mismo filtro: se les busca su lectura y su respuesta.
 
-## 4. La economía (créditos)
+## 5. Los duelos de hoy: qué mirar (sin cambiar la estructura)
 
-- **Por ronda:** una base que crece con las rondas, más un extra por ganar el cara a cara.
-- **Rendimiento** (el interés de hoy, +1 cada 10 ahorrados, tope 25) y **racha en vivo** (ganar o perder seguido paga).
-- **Apuestas** (ver abajo) y **patrocinio**: el que gana el Todos contra Todos cobra el premio grande.
-- **Se va** el oro por matar creeps (y con él la Cacería Veloz).
+- **Los ajustes de duelo** (−60% de daño y de curación entre héroes, control a la mitad) se pusieron porque el que
+  aturdía primero ganaba. Con avisos y esquives, puede que sobren: se revisan cuando entren los competidores nuevos.
+- **Qué medir en cada competidor nuevo** (con el banco de partidas y el piloto):
+  - cuánto duran los duelos (meta: 15 a 30 s);
+  - cuántas veces cambia quién va ganando;
+  - qué parte de los golpes fuertes esquiva el piloto con reflejos humanos (si nadie esquiva nada, no hay habilidad;
+    si se esquiva todo, no hay amenaza);
+  - que ningún cruce sea 80 a 20.
+- **El piloto tiene que esquivar los avisos** (en la Torre ya lo hace, con reflejos humanos que a veces fallan).
 
-## 5. Las apuestas
+## 6. Decisiones
 
-- En la previa, la tribuna apuesta a los cruces de la ronda. **Vos podés apostar a otro cara a cara o a vos mismo**:
-  apostarte a vos paga menos si sos el favorito y mucho si no lo sos.
-- Sigue el **pozo compartido** (la sorpresa paga más) con tope de la mitad de tus créditos.
-- El ganador de un cara a cara cobra el 25% de lo que le apostaron (como hoy).
-- **Ver los módulos y los equipos de cada uno en la previa** (estaba en el roadmap): con PvP es más importante todavía.
+1. **Cómo se cubren los competidores:** (a) **cada uno trae su propia defensa en el kit (el esquive con carga de
+   Vector, la pose de Viral, la torreta de Parche), y todos tienen el esquive con Espacio (recomendada: más identidad)**;
+   (b) una parada común para todos (clic derecho), como la de la Torre, además del esquive; (c) solo el esquive.
+2. **Siguen abiertas de antes:** los atributos (Blindaje, Reflejos y Procesador, recomendados), los competidores de
+   arranque (las 8 semillas, recomendadas) y quedarnos con el motor (recomendado).
 
-## 6. Los competidores, pensados para PvP
+## 7. Lo que sigue (una vez decidido)
 
-Criterios nuevos (reemplazan a los de `DISEÑO.md` §6 donde choquen):
-1. **Un plan claro para el uno contra uno:** cómo gana (presión, aguante, ráfaga, control, trampas, invocaciones) y
-   **cómo se le gana**. Cada uno tiene al menos un mal cruce claro: así importan el baneo, el draft y los patrocinadores.
-2. **Nada que solo sirva contra creeps.** El escalado que hoy sale de bajas de creeps pasa a salir de **cara a cara
-   ganados** o de daño hecho a competidores.
-3. **Contrajuego:** todo control fuerte se avisa antes y se puede esquivar o cortar. Nada de aturdir para siempre.
-4. **Que también funcione en el Todos contra Todos** (con varios rivales a la vez).
-5. **Sello (innato) con identidad** y, si se puede, atado al show (como Viral, que crece con las apuestas a su favor).
-
-Las 8 semillas de `docs/CONCEPTO-FUTURISTA.md` ya son de PvP:
-- **Grúa** agarra y arrastra.
-- **Eco** premia el ritmo.
-- **Flash** marca al rival.
-- **Kilo** pelea con drones.
-- **Parche** aguanta y pone torretas.
-- **Vector** esquiva y castiga.
-- **Viral** juega con la tribuna.
-- **Glitch** copia el último módulo que le pegó.
-
-## 7. Qué pasa con cada mecánica de hoy
-
-| Se queda | Cambia | Se va |
-|---|---|---|
-| Sorteo de módulos (rondas 1-4 y 9) y baneo | El duelo de 1 por ronda → **todos pelean todas las rondas** | Las oleadas de creeps como base (quedan solo en la ronda 1) |
-| Módulos, niveles, sinergias (etiquetas y eventos) | Las 2 vidas y la tarjeta amarilla → **la audiencia** | Los temas de oleada, la presión al líder, el enfurecimiento |
-| Patrocinadores (ítems con ensamblado) | Los jefes de ronda → **el Todos contra Todos** | El oro por bajas y la Cacería Veloz |
-| Rendimiento (interés) y racha | La muerte súbita → **horario central** sobre la audiencia | Los 17 creeps como rivales (algunos pueden volver como peligros en las arenas) |
-| Apuestas con pozo compartido y respaldo | El escalado por bajas → **por cara a cara ganados** | |
-| Reprogramación y Rediseño (Fragmento y Libro) para los de abajo | Ranking por puntos → **rating por audiencia** | |
-| Pantalla de fin, perfil, IA, piloto y banco de partidas | Los ajustes de duelo (−60% de daño entre competidores, etc.) se revisan: ahora todo es duelo | |
-
-## 8. ¿Se puede con el motor de hoy?
-
-Sí, y sin empezar de cero:
-- El motor **ya armó varios duelos a la vez** (en la fase F2 del diseño, todas las parejas peleaban en paralelo) y hoy
-  arma los duelos a partir de una lista de parejas, con lugar para "el que descansa". Que peleen los 8 es,
-  sobre todo, armar 4 parejas en vez de 1.
-- La IA ya pelea contra competidores (duelos), el banco de partidas ya mide quién gana, y el piloto juega solo.
-- Lo nuevo de verdad: la audiencia, la repetición, el Todos contra Todos y la economía sin creeps.
-
-## 9. Decisiones
-
-1. **Cómo es una ronda:** (a) **los 8 en cara a cara simultáneos todas las rondas, más un Todos contra Todos cada 5
-   (recomendada)**; (b) solo cara a cara; (c) siempre Todos contra Todos, los 8 en una arena.
-2. **La vida del jugador:** (a) **la audiencia, 100 puntos que bajan al perder (recomendada: es lo probado en los auto
-   battlers y le da sentido al show)**; (b) 3 vidas fijas, una por derrota; (c) eliminación directa desde una ronda fija.
-3. **Los drones:** (a) **solo la ronda 1 de prueba de cámara (recomendada)**; (b) nada de drones; (c) una ronda de
-   drones cada 5 para ganar créditos, como las rondas contra monstruos de *Teamfight Tactics*.
-4. **Las apuestas:** (a) **a otro cara a cara o a vos mismo (recomendada)**; (b) solo a otros; (c) solo en el Todos
-   contra Todos.
-
-Siguen pendientes de antes: los atributos (Blindaje, Reflejos y Procesador, recomendados) y los competidores de arranque
-(las 8 semillas, recomendadas).
+1. **Una ficha por competidor**, de a uno: sello, 4 módulos con sus números, qué aviso tiene cada golpe fuerte, cuál es
+   su lectura, su respuesta y su mal cruce. Para que vos la apruebes antes de programarla.
+2. **Traer los avisos de golpe de la Torre** a los módulos de MATCH.
+3. **El primer competidor jugable**, reemplazando a uno de los copiados de Dota, medido en duelos con los criterios de §5.
 
 ## Fuentes
 
-- [Cómo se juega *Teamfight Tactics*: rondas, vida y rivales](https://wiki.leagueoflegends.com/en-us/Teamfight_Tactics_(game)) y [cómo se calcula el daño al perder](https://dotesports.com/league-of-legends/news/how-to-calculate-player-damage-teamfight-tactics)
-- [Guía para principiantes de *Teamfight Tactics*](https://www.oneesports.gg/teamfight-tactics/the-beginners-guide-to-teamfight-tactics)
-- [Presentación de *Hearthstone Battlegrounds* (Blizzard)](https://hearthstone.blizzard.com/en-us/news/23156373) y [los "fantasmas"](https://blizzardwatch.com/2022/09/08/how-to-win-hearthstone-battlegrounds/)
+- [Morello (Riot) sobre diseño, contrajuego y exceso de poder](https://www.surrenderat20.net/2013/08/red-post-collection-morello-on-design.html)
+  y [la charla de Riot en la GDC sobre contrajuego en juegos multijugador](https://gdcvault.com/play/1018158/contactUs)
+- [Qué es el *yomi* (David Sirlin)](https://www.gamedeveloper.com/design/what-is-yomi-)
+- [Legibilidad y dificultad en los juegos de acción](https://www.gamedeveloper.com/game-platforms/designing-for-difficulty-readability-in-arpgs),
+  [cómo diseñar avisos de ataque](https://bugnet.io/blog/how-to-design-enemy-attack-telegraphs) y
+  [por qué no conviene anunciar todo](https://www.patreon.com/posts/120704454)
