@@ -435,8 +435,11 @@ si el usuario lo confirma.
       Custom Hero, Espacio ya no esquiva (hecho el 2026-10-18); cada competidor se defiende con la posición y su kit.
 - [x] **Controles como Dota** (elegido por el usuario 2026-10-18, hecho el mismo día): clic derecho camina y, sobre un
       rival, lo ataca; habilidades apuntadas con tecla y clic; "lanzamiento rápido" y W A S D como opciones.
-- [ ] **(decisión) Los atributos.** Ver "Esperando al usuario".
-- [ ] **(decisión) El roster de arranque.** Ver "Esperando al usuario".
+- [x] **Los atributos:** decidido por el usuario el 2026-10-19: **Blindaje** (vida y armadura), **Reflejos** (velocidad de
+      ataque, movimiento y crítico) y **Procesador** (energía y potencia de los módulos), con números propios.
+- [x] **Los competidores de arranque:** decidido por el usuario el 2026-10-19: **las 8 semillas** (Grúa, Eco, Flash, Kilo,
+      Parche, Vector, Viral y Glitch), y el Danzante, el Arcanista y el Sabio del Vacío pasan al estilo nuevo. Los actuales
+      se retiran a medida que entran los nuevos, con el juego siempre jugable.
 - [x] **Banco de duelos** (plan del equipo, 2026-10-18): el banco de partidas cuenta cuánto dura cada duelo, si termina por
       tiempo, cuántas veces cambia quién va ganando y qué parte del daño se podía evitar. Base: mediana 5,2 s, 4% por
       tiempo, 0,7 cambios, 14% evitable (`docs/MATCH.md` §5).
@@ -458,6 +461,11 @@ si el usuario lo confirma.
       menos del 10% de duelos por tiempo.
 - [x] **El color del peligro: rojo** (decidido por el usuario 2026-10-19): el de los avisos de la Torre, siempre el mismo en
       todo el juego (con su modo daltónico). Lo usan los avisos de golpe de MATCH cuando se hagan.
+- [ ] **Los atributos nuevos, el acuerdo** (disenador-de-sistemas): las fórmulas de Blindaje, Reflejos y Procesador (qué da
+      cada punto, base y ganancia por nivel) partiendo de las de hoy, con la medición prevista. Solo el documento; después
+      lo programa el ingeniero-de-motor y lo muestra el disenador-de-interfaz.
+- [ ] **Ficha del primer competidor** (disenador-de-competidores): una ficha por competidor en `docs/competidores/`, de a
+      una, para que el usuario la apruebe antes de programarla. Empezar por el que reemplaza al que más gana hoy (el Sniper).
 - [ ] **Inventario de lo que hay que cambiar, archivo por archivo:** buscar en el código, los datos y los textos de la
       interfaz todo nombre o kit que venga de Dota (héroes, habilidades, ítems, "objetos neutrales", comentarios que
       dicen "fiel a Dota") y anotarlo como lista en `docs/MECANICAS.md` (apéndice), con dónde está cada uno. Solo
@@ -528,15 +536,6 @@ si el usuario lo confirma.
   nuevos sobre el motor de hoy (recomendada: el motor no tiene nada de Dota y trae las rondas, el draft, los duelos, las
   apuestas, la IA, el banco de partidas y 289 pruebas; rehacerlo llevaría meses sin que se note en el juego)**;
   (b) reescribir también el código desde cero; (c) un juego aparte en otra carpeta, copiando del actual lo que sirva.
-
-- **Los atributos:** hoy Fuerza / Agilidad / Inteligencia con las fórmulas de Dota. (a) **Blindaje (vida y armadura),
-  Reflejos (velocidad, movimiento y crítico) y Procesador (energía y potencia de los módulos), con números nuestros
-  (recomendada)**; (b) Fuerza / Agilidad / Inteligencia con fórmulas propias; (c) sin atributos: cada uno con stats directos.
-
-- **Los competidores de arranque:** (a) **8 de las semillas de `docs/CONCEPTO-FUTURISTA.md` (Grúa, Eco, Flash, Kilo,
-  Parche, Vector, Viral, Glitch) y pasar al estilo nuevo al Danzante, el Arcanista y el Sabio del Vacío; los actuales se
-  retiran a medida que entran los nuevos, con el juego siempre jugable (recomendada)**; (b) un roster nuevo entero antes de
-  cambiar nada; (c) otras semillas. (Chakravin y Trampero quedaron descartados por el usuario el 2026-10-18.)
 
 - **Cuadros de frente y de espaldas de la espada (B2 1d y T2):** el borrador se sacó el 2026-10-17 y se pidió el caballero
   afuera. Opciones: (a) **esperar el arte del caballero (o la hoja que elijas) y recortarlo con `extraer-sprites.py`

@@ -61,7 +61,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   Todas las mecánicas de hoy, con su origen (propia, del género, estilo Dota o copiada), están en
   [`MECANICAS.md`](MECANICAS.md). El mundo: **futurista, la antítesis de Dota** (decidido por el usuario); conceptos,
   nombres, atributos y semillas de competidores en [`CONCEPTO-FUTURISTA.md`](CONCEPTO-FUTURISTA.md). Esperan al usuario:
-  el código (recomendado: quedarse con el motor), los atributos y los competidores (Fase C0).
+  el código (recomendado: quedarse con el motor). Decidido el 2026-10-19: atributos Blindaje, Reflejos y Procesador, y
+  las 8 semillas de competidores (Fase C0).
   **Decidido:** concepto "En Vivo", nombre **MATCH**, y la regla central: **la estructura de Custom Hero no cambia; los
   competidores se diseñan para que pelear entre ellos sea divertido y desafiante.** Pilares de los duelos, lo que falta en
   el motor (por ejemplo, que los rivales de la IA lean los avisos) y la mecánica de duelo de cada semilla en

@@ -139,8 +139,10 @@ En orden, sin esperar decisiones:
 - **El color del peligro es el rojo** de los avisos de la Torre (decidido por el usuario el 2026-10-19): siempre el
   mismo en todo el juego; ya tiene modo daltónico (azul y naranja) y se cambia en un solo lugar.
 
-1. **Siguen abiertas de antes:** los atributos (Blindaje, Reflejos y Procesador, recomendados), los competidores de
-   arranque (las 8 semillas, recomendadas) y quedarnos con el motor (recomendado).
+- **Atributos y competidores** (decidido por el usuario el 2026-10-19): Blindaje, Reflejos y Procesador, y las 8 semillas
+  (más el Danzante, el Arcanista y el Sabio del Vacío pasados al estilo nuevo).
+
+1. **Sigue abierta:** quedarnos con el motor de hoy (recomendado).
 
 ## 7. Lo que sigue (una vez decidido)
 
