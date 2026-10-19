@@ -53,6 +53,8 @@ lo documenta, lo sube y lo marca `[x]` con la fecha y el commit. Los ítems **(d
 elija; el modo automático anota las opciones en "Esperando al usuario" y los saltea.
 - Trabaja de corrido mientras el límite de 5 horas del plan esté **por debajo del 50%** y frena al llegar.
   Si el límite **semanal** llegó al 50%, no trabaja en el juego.
+- **Trabaja con el equipo** (pedido del usuario 2026-10-18): cada trabajo lo hace el agente que corresponde de
+  `.claude/agents/` (skill `equipo`) y ningún agente hace el trabajo de otro; quien coordina integra, prueba, documenta y sube.
 - Un ítem por vez (sin tope por corrida), chico y jugable. Si un ítem es grande, lo parte en pasos y hace solo el primero.
 - Sube solo si pasan **todas** las pruebas (`index.html?test`; sin abrir el navegador: `python docs/correr-pruebas.py`,
   que sale con código 0 si pasan todas; con `--veces N` las repite para cazar las que fallan a veces). Si no pasan y no lo puede arreglar, deshace sus
@@ -438,6 +440,13 @@ si el usuario lo confirma.
 - [x] **Banco de duelos** (plan del equipo, 2026-10-18): el banco de partidas cuenta cuánto dura cada duelo, si termina por
       tiempo, cuántas veces cambia quién va ganando y qué parte del daño se podía evitar. Base: mediana 5,2 s, 4% por
       tiempo, 0,7 cambios, 14% evitable (`docs/MATCH.md` §5).
+- [ ] **No se pega caminando, como en Dota** (decidido por el usuario 2026-10-18): para pegar, el competidor se queda
+      quieto; moverse corta el golpe (el motor ya tiene esa regla, `MOVE_ATTACK_RULE = 'reset'` en `js/game.js`; hoy está
+      en `'free'`), y el golpe básico tiene una preparación cortita (0,2-0,3 s). Solo en MATCH; la Torre no cambia.
+      Equipo: disenador-de-sistemas (los números), ingeniero-de-motor (la preparación del golpe), ia-de-rivales (que los
+      rivales se frenen para pegar y no se queden trabados), qa-jugador (banco antes y después). Medir: duración de los
+      duelos, cambios de quién va ganando y ganadores por héroe (en `DISEÑO.md` §9, con "reset" los cuerpo a cuerpo
+      ganaban 46% de los duelos; con "libre", 38%).
 - [ ] **Preparación anunciada para las habilidades** (plan del equipo, `docs/MATCH.md` §5): golpe fuerte con al menos 0,7 s
       de aviso y marca en el piso (la de la Torre), que se corta aturdiendo, y 0,3-0,5 s de exposición después. Probar
       con 1 o 2 habilidades de hoy y medir con el banco de duelos.
@@ -447,7 +456,6 @@ si el usuario lo confirma.
 - [ ] **Panel del rival en el duelo** (plan del equipo): sus módulos con el enfriamiento y sus cargas a la vista.
 - [ ] **Arena de duelo con 2 a 4 columnas** que frenan proyectiles (plan del equipo). Medir: nadie trabado más de 3 s,
       menos del 10% de duelos por tiempo.
-- [ ] **(decisión) ¿Se pega caminando?** Ver "Esperando al usuario".
 - [ ] **(decisión) El color del peligro.** Ver "Esperando al usuario".
 - [ ] **Inventario de lo que hay que cambiar, archivo por archivo:** buscar en el código, los datos y los textos de la
       interfaz todo nombre o kit que venga de Dota (héroes, habilidades, ítems, "objetos neutrales", comentarios que
@@ -519,10 +527,6 @@ si el usuario lo confirma.
   nuevos sobre el motor de hoy (recomendada: el motor no tiene nada de Dota y trae las rondas, el draft, los duelos, las
   apuestas, la IA, el banco de partidas y 289 pruebas; rehacerlo llevaría meses sin que se note en el juego)**;
   (b) reescribir también el código desde cero; (c) un juego aparte en otra carpeta, copiando del actual lo que sirva.
-
-- **MATCH: ¿se pega caminando?** (`docs/MATCH.md` §6): hoy sí. (a) dejarlo así; (b) **como Dota: el golpe básico tiene una
-  preparación cortita (0,2 a 0,3 s) en la que te frenás (recomendada, para probarla con el banco de duelos)**; (c) que se
-  frenen solo los de distancia.
 
 - **MATCH: el color del peligro** (`docs/MATCH.md` §6): (a) **el rojo de los avisos de la Torre por ahora (recomendada: ya
   anda, tiene modo daltónico y se cambia en un solo lugar)**; (b) el magenta del show; (c) el naranja de la paleta.

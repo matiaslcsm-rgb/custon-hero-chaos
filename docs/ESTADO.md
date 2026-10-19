@@ -69,6 +69,9 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   los controles son los de Dota (clic derecho camina o ataca, habilidades con tecla y clic; W A S D y lanzamiento rápido
   como opciones). **El banco de partidas mide los duelos** (base: duran 5,2 s de mediana, casi nunca cambia quién va
   ganando y solo 14% del daño se puede evitar); el plan del equipo para pulir el motor está en `MATCH.md` §5.
+  **No se pega caminando, como en Dota** (decidido por el usuario; lo hace el equipo, ver la Fase C0).
+- **El equipo (2026-10-18):** 10 agentes en `.claude/agents/` y la skill `equipo`. **Regla del usuario:** cada trabajo lo
+  hace el agente que corresponde y ningún agente hace el trabajo de otro (también en la tarea automática).
 - **⏸ Infinite Tower en pausa (2026-10-18, pedido del usuario):** se avanza solo con Custom Hero (ver el aviso arriba
   de todo en ROADMAP.md). La Torre sigue jugable como está.
 - **Custom Hero: pantalla de fin de partida y perfil (2026-10-18):** `js/matchSummary.js`: el resumen al terminar o al

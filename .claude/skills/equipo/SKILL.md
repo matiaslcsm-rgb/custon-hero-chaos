@@ -37,12 +37,19 @@ decíselo en el encargo.
    - Una pantalla nueva: interfaz y arte.
    - Si dos especialistas tocan el mismo archivo, hacelo en orden, no en paralelo.
 3. **Integración.** Revisá lo que hizo cada uno, uní las partes y corré las pruebas (`python docs/correr-pruebas.py`).
-4. **QA.** Pasale el cambio al `qa-jugador` para que lo pruebe y arreglá lo grave que encuentre.
+4. **QA.** Pasale el cambio al `qa-jugador` para que lo pruebe, y lo grave que encuentre mandáselo al rol que corresponde
+   para que lo arregle.
 5. **Cierre.** Subí `GAME_VERSION` (js/main.js), anotá en REWORK.md, ESTADO.md y ROADMAP.md, y hacé commit y push.
 
 ## Reglas
+- **Regla del usuario (2026-10-18): siempre se llama a los agentes que el trabajo necesita, y cada uno hace solo lo suyo.**
+  Repartí cada parte al rol que le corresponde (ver "Lo que te toca y lo que no" en cada agente): el diseño de un
+  competidor, al de competidores; los números, a sistemas; el código del motor, al ingeniero; la IA, a ia-de-rivales;
+  las pantallas, a interfaz; el arte, a arte-pixel; los textos, a narrativa; las arenas, a niveles; las pruebas, a QA.
+  Vos (quien coordina) integrás, corrés las pruebas, documentás y subís; no hacés el trabajo de un rol.
 - Cada agente arranca sin el contexto de la conversación: dale el pedido del usuario, los archivos y lo que ya se decidió.
-- No lances a todo el equipo para algo chico: un ajuste de un número o un texto lo hacés vos directamente.
-- **Cuidá el plan:** cada agente lee mucho código. Antes de lanzar varios, mirá el uso (`get_usage`); si el límite de
-  5 horas pasa el 50%, preferí hacerlo vos o lanzar de a uno.
+- Un ajuste muy chico (un número o un texto) igual va al rol que corresponde, pero con un encargo corto.
+- **Cuidá el plan:** cada agente lee mucho código. Antes de lanzar varios, mirá el uso (`get_usage`). Si no alcanza,
+  lanzalos de a uno y con encargos chicos; si igual no alcanza, pará y dejá anotado en el roadmap dónde quedó (no hagas
+  vos el trabajo de un rol para ahorrar).
 - Al usuario le contás el resultado en rioplatense simple: qué se hizo, qué se midió, qué falta y qué tiene que decidir.

@@ -133,13 +133,13 @@ En orden, sin esperar decisiones:
   (clic derecho o Esc cancela); en Opciones, "lanzamiento rápido" (sale al apretar la tecla) y "moverse con W A S D",
   los dos apagados de entrada. En la Torre no cambia nada.
 
-1. **¿Se pega caminando?** Hoy sí. (a) dejarlo así; (b) **como Dota: el golpe básico tiene una preparación cortita
-   (0,2 a 0,3 s) en la que te frenás (recomendada, para probarla con el banco: en Dota pegar y moverse a tiempo es
-   parte de la habilidad)**; (c) que se frenen solo los de distancia.
-2. **El color del peligro** (siempre el mismo en todo el juego): (a) **el rojo de los avisos de la Torre por ahora
+- **No se pega caminando, como en Dota** (decidido por el usuario el 2026-10-18): para pegar te quedás quieto, moverte
+  corta el golpe y el golpe básico tiene una preparación cortita. Está en el roadmap para que lo haga el equipo.
+
+1. **El color del peligro** (siempre el mismo en todo el juego): (a) **el rojo de los avisos de la Torre por ahora
    (recomendada: ya anda, tiene modo daltónico y se cambia en un solo lugar)**; (b) el magenta del show; (c) el naranja
    de la paleta.
-3. **Siguen abiertas de antes:** los atributos (Blindaje, Reflejos y Procesador, recomendados), los competidores de
+2. **Siguen abiertas de antes:** los atributos (Blindaje, Reflejos y Procesador, recomendados), los competidores de
    arranque (las 8 semillas, recomendadas) y quedarnos con el motor (recomendado).
 
 ## 7. Lo que sigue (una vez decidido)

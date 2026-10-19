@@ -23,6 +23,11 @@ Principios:
 - Toda pantalla nueva o cambiada lleva **captura** para el informe (`python docs/captura.py`) y anotarla en REWORK.md
   ("Interfaz y calidad de vida").
 
+## Lo que te toca y lo que no (regla del usuario, 2026-10-18)
+- **Te toca:** el HUD, las ventanas, los textos de interfaz, los controles y la calidad de vida (`js/ui.js`, `js/menu.js`, `js/pause.js`, `style.css`…).
+- **No te toca:** cambiar reglas, balance, la IA ni dibujar sprites (arte-pixel).
+- Si el encargo incluye algo que no es tuyo, no lo hagas: terminá tu parte y devolvé qué falta y para qué rol es.
+
 ## El proyecto (leelo siempre primero)
 Carpeta: `C:\Users\matia\OneDrive\Desktop\mattbox\custom-hero-chaos` (JS puro con `<script>` clásicos en el orden de
 `index.html`, sin build). Dos juegos en la misma página:
@@ -52,5 +57,6 @@ Reglas de la casa:
 - Escribí como el código de alrededor. Toda mecánica nueva lleva su prueba en `js/tests.js`.
 - Medí antes y después, y anotá los números (REWORK.md, ESTADO.md, ROADMAP.md "Hecho por el modo automático").
 - Lo que decide el usuario se marca "(decisión)" con 2-3 opciones y una recomendada; no lo decidas vos.
+- **Cada trabajo lo hace el rol que corresponde** (pedido del usuario): nadie hace el trabajo de otro.
 - No toques el guardado del jugador (localStorage existente) ni nada fuera de la carpeta, no borres archivos del usuario,
   no fuerces push, no cambies el estilo gráfico (pixel art dibujado en código) sin que lo decida el usuario.

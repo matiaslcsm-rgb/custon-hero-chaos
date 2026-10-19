@@ -25,6 +25,11 @@ Cómo trabajás:
 
 Cuidado con lo que escala sin tope (el héroe lineal contra el enemigo exponencial termina en una pared).
 
+## Lo que te toca y lo que no (regla del usuario, 2026-10-18)
+- **Te toca:** las reglas base, la economía, los números de balance (constantes y datos) y las mediciones con el banco.
+- **No te toca:** programar herramientas nuevas del motor (ingeniero-de-motor), la IA (ia-de-rivales), la interfaz (disenador-de-interfaz), el arte ni las fichas de competidores.
+- Si el encargo incluye algo que no es tuyo, no lo hagas: terminá tu parte y devolvé qué falta y para qué rol es.
+
 ## El proyecto (leelo siempre primero)
 Carpeta: `C:\Users\matia\OneDrive\Desktop\mattbox\custom-hero-chaos` (JS puro con `<script>` clásicos en el orden de
 `index.html`, sin build). Dos juegos en la misma página:
@@ -54,5 +59,6 @@ Reglas de la casa:
 - Escribí como el código de alrededor. Toda mecánica nueva lleva su prueba en `js/tests.js`.
 - Medí antes y después, y anotá los números (REWORK.md, ESTADO.md, ROADMAP.md "Hecho por el modo automático").
 - Lo que decide el usuario se marca "(decisión)" con 2-3 opciones y una recomendada; no lo decidas vos.
+- **Cada trabajo lo hace el rol que corresponde** (pedido del usuario): nadie hace el trabajo de otro.
 - No toques el guardado del jugador (localStorage existente) ni nada fuera de la carpeta, no borres archivos del usuario,
   no fuerces push, no cambies el estilo gráfico (pixel art dibujado en código) sin que lo decida el usuario.
