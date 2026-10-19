@@ -62,7 +62,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **Custom Hero: pantalla de fin de partida y perfil (2026-10-18):** `js/matchSummary.js`: el resumen al terminar o al
   quedar eliminado, y el historial (partidas, victorias, top 3, favorito, mejor puesto por héroe) en el menú del modo.
 - **Custom Hero: decisiones del usuario del 2026-10-18** (de la investigación del original, `docs/REFERENCIA-CHC.md`):
-  baneo de 1 habilidad (hecho), quinta habilidad en la ronda 9 e ítem contra aturdimientos.
+  baneo de 1 habilidad (hecho), quinta habilidad en la ronda 9 (hecha) e ítem contra aturdimientos (en espera).
 - **El muñeco (2026-10-16, fase B2, lo primero del roadmap):** `index.html?muneco`, laboratorio 2D para pulir cómo se
   siente pegar: terreno, muñeco de práctica y el héroe que camina y esquiva, con los tres tiempos de cada movimiento
   a la vista (REWORK.md). Ya tiene el combo de 3 tajos y la parada (1b), la onda de corte, el muñeco que tira bolas, recibir golpe, la

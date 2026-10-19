@@ -448,8 +448,8 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 - [ ] **(decisión) Ítems nuevos** de DISEÑO.md §7: el usuario decide cuáles entran.
 - [x] **Baneo antes de empezar** (idea 3 de `docs/REFERENCIA-CHC.md`; decidido por el usuario 2026-10-18: banear 1
       habilidad, que no le salga a nadie en el draft). 2026-10-18: selector en la elección de héroe, recuerda la última.
-- [ ] **Quinta habilidad en la ronda 9** (idea 4 de `docs/REFERENCIA-CHC.md`; decidido por el usuario 2026-10-18).
-      Medir con el banco antes y después (ganadores, ronda final).
+- [x] **Quinta habilidad en la ronda 9** (idea 4 de `docs/REFERENCIA-CHC.md`; decidido por el usuario 2026-10-18).
+      Medir con el banco antes y después (ganadores, ronda final). 2026-10-18: hecho y medido (ver abajo).
 
 ## Fase C4 — Metaprogresión y pulido
 - [ ] **Desbloqueos:** arrancás con 6 héroes y desbloqueás el resto jugando (ganar con un atributo, llegar al top
@@ -504,6 +504,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 
 ## Hecho por el modo automático
 (Fecha · ítem · commit · qué se midió.)
+- 2026-10-18 · Custom Hero: quinta habilidad en la ronda 9 (decidido por el usuario) · a49067e · banco de 132 partidas antes → después: ronda final promedio 24 → 25; Sniper 65% → 68%, Zeus 22 → 18, Guerrero Vampiro 18 → 12, Asesino 16 → 13, Nigromante 8 → 9, Arcanista 2 → 6, Sabio del Vacío 0 → 2, Alquimista 0 → 1 (todo dentro del ruido de ±6). No arregla el dominio del Sniper. Pruebas 289/289.
 - 2026-10-18 · Custom Hero: baneo de 1 habilidad (decidido por el usuario) · ver git log · con una habilidad de Axe baneada y Axe elegido (su natural sale siempre si puede), 0 apariciones en 300 sorteos × 8 héroes × draft, Fragmento y Libro. Se recuerda la última (en pruebas, en memoria). Pruebas 288/288.
 - 2026-10-18 · Custom Hero C1: historial y perfil · ver git log · 3 partidas del piloto a 30 rondas (en memoria): "3 partidas · 0 victorias · 1 en el top 3 · favorito: Danzante Cinético (2)" y "Mejor puesto: Zeus 3º · Danzante Cinético 6º". Se anota una vez por partida (eliminado y después terminada: 1). De paso, la tarjeta de la última ronda ya no queda arriba en el menú. Pruebas 287/287.
 - 2026-10-18 · Custom Hero C1: pantalla de fin de partida · ver git log · 2 partidas del piloto a 30 rondas con el Danzante: 7º (eliminado en la 25, 0-7 en duelos, 5330g ganados, nivel 22) y 5º (eliminado en la 20, 3-2, 4572g, nivel 19); "Otra partida" lleva a elegir héroe; el banco no la muestra. Pruebas 287/287.
