@@ -424,10 +424,17 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
       2026-10-18: `js/matchSummary.js`; también al quedar eliminado, con "👁 Seguir mirando".
 - [x] **Historial y perfil:** partidas jugadas, victorias, top 3, héroe favorito, mejor puesto con cada héroe.
       2026-10-18: en el menú de Custom Hero (clave nueva `chc-perfil-ch`; no toca nada de lo guardado antes).
+- [ ] **Ver el kit de los duelistas al apostar** (idea 1 de `docs/REFERENCIA-CHC.md`): en la ventana de apuestas, las
+      habilidades (con su nivel) y los ítems de cada duelista. En el original es lo que hace que apostar sea leer el
+      duelo. No cambia el balance.
 
 ## Fase C2 — Balance medido
 - [ ] **Sniper gana 8 de 14 partidas largas:** medir con `simulateGame` y bajarlo hasta ≤20%.
 - [ ] **Vampiro y Nigromante siguen abajo:** medir y subirlos sin pasarse.
+- [ ] **¿Rinde más pelear o apostar?** (idea 2 de `docs/REFERENCIA-CHC.md`, el error que *Clash* le corrigió a *Chaos*):
+      con el banco, oro que cobra el ganador de un duelo contra la ganancia promedio de apostar. Si apostar rinde más,
+      subir lo del duelista. Va con el resto del balance, al final.
+- [ ] **(decisión) Ítem contra aturdimientos** (idea 5 de `docs/REFERENCIA-CHC.md`): ver "Esperando al usuario".
 - [ ] **Balance de `mageSpellAmp` en duelos 1v1:** medir con `simulateGame(i, false, 60)`.
 - [ ] **Primeras rondas contra la máquina:** las rondas 1-4 son solo oleadas (aprender sin perder), los duelos
       desde la 5 (ya está). Revisar que el jugador nuevo llegue a la ronda 5 con build armada.
@@ -438,6 +445,8 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 - [ ] **Proyectiles de habilidad para el resto del roster** (Danzante, Asesino, Vampiro, Sniper) y forma propia por
       habilidad (`vfx.shape`).
 - [ ] **(decisión) Ítems nuevos** de DISEÑO.md §7: el usuario decide cuáles entran.
+- [ ] **(decisión) Baneos antes de empezar** (idea 3 de `docs/REFERENCIA-CHC.md`): ver "Esperando al usuario".
+- [ ] **(decisión) Quinta habilidad o más opciones en el draft** (idea 4 de `docs/REFERENCIA-CHC.md`): ver "Esperando al usuario".
 
 ## Fase C4 — Metaprogresión y pulido
 - [ ] **Desbloqueos:** arrancás con 6 héroes y desbloqueás el resto jugando (ganar con un atributo, llegar al top
@@ -445,6 +454,8 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 - [ ] **Dificultad de la máquina:** Fácil / Normal / Difícil (cuánto piensa la IA, cómo apuesta y cómo arma build).
 - [ ] **El mismo pulido de golpe que la Torre:** pausa de impacto y señal de daño recibido en las arenas.
 - [ ] **Tutorial jugado** en la primera partida en vez de páginas (una idea por ronda).
+- [ ] **Modo de a dos** (idea 6 de `docs/REFERENCIA-CHC.md`): vos y un compañero de la IA contra 3 parejas. Según una
+      reseña, el modo más divertido del original. Grande: proponer el diseño antes de hacerlo.
 
 ---
 
@@ -464,6 +475,18 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
   afuera. Opciones: (a) **esperar el arte del caballero (o la hoja que elijas) y recortarlo con `extraer-sprites.py`
   (recomendada: no se dibuja dos veces)**; (b) que el modo automático los dibuje en código sobre las piezas del héroe calcado
   (`HERO_PARTS`), como se hizo con quieto y caminar; (c) dejar el dibujo de costado para arriba y abajo hasta la 1.0.
+
+- **Baneos en Custom Hero** (de la investigación del original, `docs/REFERENCIA-CHC.md`): (a) **banear 1 habilidad antes
+  de empezar, que no le salga a nadie en el draft (recomendada: da control sin alargar la partida)**; (b) 1 habilidad y 1
+  héroe, como el original; (c) sin baneos, sacando del draft las que el balance marque como rotas.
+
+- **Quinta habilidad o más opciones en el draft (Custom Hero):** hoy son 4 habilidades (rondas 1 a 4) elegidas entre 3;
+  el original da 5 (rondas 1, 1, 3, 6 y 9) entre muchas opciones. (a) **una quinta habilidad en la ronda 9 (recomendada:
+  la build sigue creciendo a mitad de partida)**; (b) 4 opciones en vez de 3; (c) las dos.
+
+- **Ítem contra aturdimientos (Custom Hero):** la queja más grande del original eran los aturdimientos eternos. (a) **un
+  ítem compuesto con resistencia a aturdimientos y control (recomendada)**; (b) aturdimientos seguidos sobre el mismo héroe
+  que duran cada vez menos; (c) nada por ahora.
 
 - **El Sniper mientras tanto (Custom Hero):** gana 65% de sus partidas (lo parejo es 12,5%) y ningún ajuste chico lo
   baja lo suficiente. Opciones: (a) **dejarlo como está hasta el balance del final (recomendada: el combate nuevo va a
