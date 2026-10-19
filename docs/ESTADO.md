@@ -57,6 +57,10 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - `.gitattributes`: todo el texto en LF (se acabaron los avisos de CRLF en cada commit).
 
 ## Pendientes y temas abiertos
+- **Custom Hero propio, desde cero (2026-10-18, pedido del usuario):** se rehace como un juego nuestro, sin nada de Dota.
+  Todas las mecánicas de hoy, con su origen (propia, del género, estilo Dota o copiada), están en
+  [`MECANICAS.md`](MECANICAS.md). Esperan al usuario: el código (recomendado: quedarse con el motor), el mundo, el nombre,
+  los atributos y el roster de arranque (Fase C0 del roadmap).
 - **⏸ Infinite Tower en pausa (2026-10-18, pedido del usuario):** se avanza solo con Custom Hero (ver el aviso arriba
   de todo en ROADMAP.md). La Torre sigue jugable como está.
 - **Custom Hero: pantalla de fin de partida y perfil (2026-10-18):** `js/matchSummary.js`: el resumen al terminar o al

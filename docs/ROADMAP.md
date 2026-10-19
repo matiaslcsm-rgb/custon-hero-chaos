@@ -67,9 +67,10 @@ elija; el modo automático anota las opciones en "Esperando al usuario" y los sa
 El orden de la lista **es** la prioridad: primero lo que destraba el loop completo, después contenido y pulido.
 
 > **⏸ INFINITE TOWER EN PAUSA (pedido del usuario 2026-10-18: "avanzá solo con Custom, la Tower pausala").**
-> Hasta que el usuario diga otra cosa, el modo automático trabaja **solo en Custom Hero**: la sección CUSTOM HERO en
-> este orden: C1, C3, C4 y **al final el balance** (C2 y "Balance de Custom Hero con números" de B0), como pidió el
-> 2026-10-16. Se saltean como si dijeran (decisión) todos los ítems de INFINITE TOWER y los de la base que son solo de
+> Hasta que el usuario diga otra cosa, el modo automático trabaja **solo en Custom Hero**.
+> **Desde el 2026-10-18 (pedido del usuario): Custom Hero se rehace como un juego propio, sin nada de Dota** (Fase C0 y
+> `docs/MECANICAS.md`). Orden: los ítems sin "(decisión)" de C0, después lo que quede de C1. Todo lo marcado ⏸ en C2, C3
+> y C4 espera las decisiones de C0 (no tiene sentido balancear o sumar contenido al roster que se va a reemplazar). Se saltean como si dijeran (decisión) todos los ítems de INFINITE TOWER y los de la base que son solo de
 > la Torre (B2 1d, "Cajas de golpe en la Torre", la galería y el arte de la Torre). El muñeco y la base compartida
 > (B0) solo si ayudan a Custom Hero. No se borra nada de la Torre: sigue jugable como está.
 
@@ -413,6 +414,19 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 - **Criterios 1.0 (medidos con `simulateGame`):** ningún héroe gana más del 20% de las partidas de 8 (lo esperable
   es 12,5%), partidas de 15 a 25 minutos, el jugador nuevo entiende la economía en la primera partida.
 
+## Fase C0 — Un Custom Hero propio, desde cero (pedido del usuario 2026-10-18)
+Todas las mecánicas de hoy, con su origen, están en `docs/MECANICAS.md`. La propuesta: contenido e identidad nuevos
+(héroes, habilidades, ítems, nombres, mundo y arte), sin nada de Dota; el motor se queda si el usuario lo confirma.
+- [ ] **(decisión) Desde cero: ¿también el código, o solo el contenido?** Ver "Esperando al usuario".
+- [ ] **(decisión) El mundo del juego.** Ver "Esperando al usuario".
+- [ ] **(decisión) El nombre del juego** (después del mundo). Ver "Esperando al usuario".
+- [ ] **(decisión) Los atributos.** Ver "Esperando al usuario".
+- [ ] **(decisión) El roster de arranque.** Ver "Esperando al usuario".
+- [ ] **Inventario de lo que hay que cambiar, archivo por archivo:** buscar en el código, los datos y los textos de la
+      interfaz todo nombre o kit que venga de Dota (héroes, habilidades, ítems, "objetos neutrales", comentarios que
+      dicen "fiel a Dota") y anotarlo como lista en `docs/MECANICAS.md` (apéndice), con dónde está cada uno. Solo
+      documentar, sin tocar el juego.
+
 ## Fase C1 — Cerrar el loop
 - [x] **Resumen después de cada ronda** (2026-10-15): oro ganado, de dónde salió (bajas, interés, racha, apuesta), vida
       perdida y la posición en el ranking. Enseña la economía sin texto largo.
@@ -429,21 +443,22 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
       duelo. No cambia el balance.
 
 ## Fase C2 — Balance medido
-- [ ] **Sniper gana 8 de 14 partidas largas:** medir con `simulateGame` y bajarlo hasta ≤20%.
-- [ ] **Vampiro y Nigromante siguen abajo:** medir y subirlos sin pasarse.
+- [ ] **⏸ Sniper gana 8 de 14 partidas largas** (el Sniper es de Dota: se va con el roster nuevo): medir con `simulateGame` y bajarlo hasta ≤20%.
+- [ ] **⏸ Vampiro y Nigromante siguen abajo** (se mide con el roster nuevo): medir y subirlos sin pasarse.
 - [ ] **¿Rinde más pelear o apostar?** (idea 2 de `docs/REFERENCIA-CHC.md`, el error que *Clash* le corrigió a *Chaos*):
       con el banco, oro que cobra el ganador de un duelo contra la ganancia promedio de apostar. Si apostar rinde más,
       subir lo del duelista. Va con el resto del balance, al final.
-- [ ] **Ítem contra aturdimientos** (idea 5 de `docs/REFERENCIA-CHC.md`; decidido por el usuario 2026-10-18: un ítem
+- [ ] **⏸ Ítem contra aturdimientos** (idea 5 de `docs/REFERENCIA-CHC.md`; decidido por el usuario 2026-10-18: un ítem
       compuesto con resistencia a aturdimientos y control). Medir cuánto tiempo pasás aturdido con y sin él.
+      El 2026-10-18 se frenó a mitad (el usuario cortó la corrida) y se deshizo: se diseña junto con los ítems nuevos de C0.
 - [ ] **Balance de `mageSpellAmp` en duelos 1v1:** medir con `simulateGame(i, false, 60)`.
 - [ ] **Primeras rondas contra la máquina:** las rondas 1-4 son solo oleadas (aprender sin perder), los duelos
       desde la 5 (ya está). Revisar que el jugador nuevo llegue a la ronda 5 con build armada.
 
 ## Fase C3 — Contenido
-- [ ] **Chakravin `Y`** (proyectiles de habilidad que vuelven + creep Guardián de Hierro), midiendo.
-- [ ] **Trampero `P`** (zonas en el piso + creep Saltador), midiendo.
-- [ ] **Proyectiles de habilidad para el resto del roster** (Danzante, Asesino, Vampiro, Sniper) y forma propia por
+- [ ] **⏸ Chakravin `Y`** (diseño del usuario: entra al roster propio; espera las decisiones de C0) (proyectiles de habilidad que vuelven + creep Guardián de Hierro), midiendo.
+- [ ] **⏸ Trampero `P`** (diseño del usuario: entra al roster propio; espera las decisiones de C0) (zonas en el piso + creep Saltador), midiendo.
+- [ ] **⏸ Proyectiles de habilidad para el resto del roster** (Danzante, Asesino, Vampiro, Sniper) y forma propia por
       habilidad (`vfx.shape`).
 - [ ] **(decisión) Ítems nuevos** de DISEÑO.md §7: el usuario decide cuáles entran.
 - [x] **Baneo antes de empezar** (idea 3 de `docs/REFERENCIA-CHC.md`; decidido por el usuario 2026-10-18: banear 1
@@ -452,7 +467,7 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
       Medir con el banco antes y después (ganadores, ronda final). 2026-10-18: hecho y medido (ver abajo).
 
 ## Fase C4 — Metaprogresión y pulido
-- [ ] **Desbloqueos:** arrancás con 6 héroes y desbloqueás el resto jugando (ganar con un atributo, llegar al top
+- [ ] **⏸ Desbloqueos** (con el roster nuevo): arrancás con 6 héroes y desbloqueás el resto jugando (ganar con un atributo, llegar al top
       3...). Logros con ícono en el perfil.
 - [ ] **Dificultad de la máquina:** Fácil / Normal / Difícil (cuánto piensa la IA, cómo apuesta y cómo arma build).
 - [ ] **El mismo pulido de golpe que la Torre:** pausa de impacto y señal de daño recibido en las arenas.
@@ -473,6 +488,27 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
 
 ## Esperando al usuario
 (El modo automático anota acá las opciones de los ítems **(decisión)**, con una marcada como recomendada.)
+
+- **Custom Hero propio: ¿desde cero también el código?** (Fase C0, `docs/MECANICAS.md`): (a) **contenido e identidad
+  nuevos sobre el motor de hoy (recomendada: el motor no tiene nada de Dota y trae las rondas, el draft, los duelos, las
+  apuestas, la IA, el banco de partidas y 289 pruebas; rehacerlo llevaría meses sin que se note en el juego)**;
+  (b) reescribir también el código desde cero; (c) un juego aparte en otra carpeta, copiando del actual lo que sirva.
+
+- **El mundo del Custom Hero propio:** (a) **el mismo mundo de la Torre (biomas, la expedición de Arén): las arenas son
+  un torneo dentro de ese mundo (recomendada: ya hay historia, gente y arte con estilo propio, y los dos juegos se
+  conectan)**; (b) un mundo nuevo solo para este juego; (c) sin mundo: arenas abstractas, todo en la mecánica.
+
+- **El nombre del juego:** (a) **que el equipo proponga 8-10 nombres que encajen con el mundo elegido y vos elegís
+  (recomendada)**; (b) lo ponés vos directamente; (c) dejar "Custom Hero" hasta la 1.0 (ojo: es casi el nombre del mod).
+
+- **Los atributos:** hoy Fuerza / Agilidad / Inteligencia con las fórmulas de Dota. (a) **tres atributos propios, con
+  nombres y efectos nuestros (recomendada: es lo que más "suena" a Dota en las reglas)**; (b) Fuerza / Agilidad /
+  Inteligencia (son genéricos de cualquier RPG) con fórmulas propias; (c) sin atributos: cada héroe con sus stats directos.
+
+- **El roster de arranque:** (a) **reemplazar primero a los 5 copiados (Zeus, Nigromante, Axe, Sniper, Alquimista) por 5
+  héroes nuevos, de a uno y con el juego siempre jugable, conservando los propios (Danzante, Arcanista, Sabio del Vacío) y
+  sumando tus Chakravin y Trampero (recomendada)**; (b) un roster entero nuevo de 8 a 10 héroes, retirando a todos los
+  actuales; (c) armar todo el roster nuevo aparte y cambiarlo de una sola vez.
 
 - **Cuadros de frente y de espaldas de la espada (B2 1d y T2):** el borrador se sacó el 2026-10-17 y se pidió el caballero
   afuera. Opciones: (a) **esperar el arte del caballero (o la hoja que elijas) y recortarlo con `extraer-sprites.py`
