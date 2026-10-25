@@ -9,13 +9,21 @@
         body { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
         canvas { image-rendering: pixelated; border: 2px solid #3a3242; }
         a { color: #ffd166; }
+        #t2d-tune { position: fixed; top: 8px; right: 8px; width: 260px; max-height: calc(100% - 16px); overflow-y: auto; background: rgba(22,18,26,0.95);
+            border: 2px solid #3a3242; padding: 8px 10px; font-size: 12px; z-index: 5; }
+        #t2d-tune label { display: block; margin: 6px 0 0; }
+        #t2d-tune label span { float: right; color: #ffd166; }
+        #t2d-tune input { width: 100%; }
+        #t2d-tune button { margin-top: 8px; width: 100%; background: #3a3242; color: #f2f0e9; border: 0; padding: 6px; cursor: pointer; }
     </style>
 </head>
 <body>
     <canvas id="t2d"></canvas>
+    <div id="t2d-tune" hidden></div>
     <div>Infinite Tower 2D · prototipo · <a href="index.html">← volver al juego</a></div>
+    <script src="js/audio.js"></script>
     <script src="js/towerHeroArt.js"></script>
     <script src="js/tower2d.js"></script>
-    <script>t2dStart(document.getElementById('t2d'));</script>
+    <script>t2dStart(document.getElementById('t2d'), document.getElementById('t2d-tune'));</script>
 </body>
 </html>

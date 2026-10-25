@@ -4750,6 +4750,7 @@ test('Nueva Partida deja todo como al empezar', () => {
 test('Torre 2D: correr, saltar (más alto si mantenés), plataformas, tajo, salas conectadas y la Pluma de Arén', () => {
     const dt = T2D.DT, run = (inp, secs) => { for (let t = 0; t < secs; t += dt) { t2dUpdate(Object.assign({ left: false, right: false, down: false, jump: false, jumpHeld: false, attack: false }, inp), dt); inp.jump = inp.attack = false; } };
     const peak = held => { const h = t2d.hero, y0 = h.y; let top = y0; run({ jump: true, jumpHeld: true }, dt); for (let t = 0; t < 0.8; t += dt) { t2dUpdate({ jumpHeld: held(t) }, dt); top = Math.min(top, h.y); } return y0 - top; };
+    Object.assign(T2D.hero, T2D_DEFAULTS.hero); Object.assign(T2D.feel, T2D_DEFAULTS.feel); // sin lo ajustado en el panel
     t2d = null; t2dEnterRoom('base'); run({}, 0.3);
     check(t2d.hero.onGround, 'arranca parado en el piso');
     const high = peak(() => true), low = peak(t => t < 0.05);
@@ -4757,6 +4758,18 @@ test('Torre 2D: correr, saltar (más alto si mantenés), plataformas, tajo, sala
     const e = t2d.enemies[0], hp = e.hp; Object.assign(e, { x: t2d.hero.x + 16, y: t2d.hero.y + t2d.hero.h - e.h, vx: 0.001 }); t2d.hero.facing = 1;
     run({ attack: true }, 0.2);
     check(e.hp < hp, 'el tajo le pega al caminante');
+    // el tajo hacia abajo en el aire rebota (pogo)
+    run({}, 0.5); const h = t2d.hero, e2 = t2d.enemies.find(o => o.hp > 0) || e; e2.hp = 3;
+    Object.assign(e2, { x: h.x - 2, y: h.y + h.h - e2.h, vx: 0.001 }); h.y -= 30; h.vy = 50; h.onGround = false;
+    run({ down: true, attack: true }, 0.1);
+    check(e2.hp < 3 && h.vy < -100, 'el tajo hacia abajo pega y rebota');
+    // el dash recorre unas casillas en un instante
+    run({}, 0.8); const x0 = h.x; run({ dash: true }, T2D.hero.dashTime);
+    check(Math.abs(h.x - x0) > T2D.TILE * 1.5, `el dash avanza (${Math.round(Math.abs(h.x - x0))} px)`);
+    // la cabeza roza una esquina: te corre en vez de frenarte
+    const corner = { rows: ['.#..', '....', '....', '....', '####'] }, hc = { x: 28, y: 40, w: 10, h: 22, vx: 0, vy: -250, facing: 1, onGround: false, t: 0 };
+    for (let i = 0; i < 20; i++) t2dStepHero(corner, hc, { jumpHeld: true }, dt);
+    check(hc.y < 16, 'la corrección de esquinas lo deja seguir subiendo');
     // plataforma que se atraviesa desde abajo y frena desde arriba
     const room = { rows: ['....', '....', '====', '....', '####'] }, b = { x: 4, y: 40, w: 8, h: 8 };
     check(!t2dMoveAxis(room, b, 0, -20) && b.y === 20, 'desde abajo, la plataforma se atraviesa');

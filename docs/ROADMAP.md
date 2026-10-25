@@ -216,9 +216,16 @@ Modo nuevo en paralelo: `torre2d.html` + `js/tower2d.js` (se entra desde el men�
       para bajar); pinchos; el héroe dibujado con el combo de 3 tajos; caminantes; vida y respawn; **la Pluma de Arén
       da el doble salto y abre el mirador de arriba** (la primera puerta metroidvania). Medido: salto 49 px (3 bloques),
       con toque corto 25 px, doble salto 97 px. 2026-10-25.
-- [ ] **(decisión) El mapa:** cuántas zonas y cómo se conectan (propuesta: la torre como un mapa vertical, un bioma por
-      zona — base, atrio, cisternas, salas del reloj, galerías, fragua — unidas por un pozo central, con atajos que se
-      abren al volver), y qué habilidad abre cada zona (doble salto, deslizar en paredes, dash, nado, gancho).
+- [x] **Sensación del personaje (game feel)** (2026-10-25, "me es importante el game feel"): flotar en la punta del
+      salto y caer más rápido (subida 0,34 s, bajada 0,32 s, 44 px); corrección de esquinas; estirar y aplastar con polvo;
+      tajos en 3 direcciones con el **pogo** (el tajo abajo rebota en enemigos y pinchos); pausa de impacto, temblor,
+      chispas y retroceso al pegar; **dash** (Shift o clic derecho, 51 px, uno en el aire); cámara suave que mira adelante;
+      sonidos del juego; **panel de ajuste en vivo (tecla T)** con 20 números, guardado en el navegador.
+- [ ] **Afinar la sensación con el usuario:** jugarlo, tocar el panel (T) y pasar a los valores de fábrica lo que guste.
+- [x] **El mapa (decidido por el usuario 2026-10-25): pisos fijos y partes procedurales.** Cada piso tiene salas hechas
+      a mano (la entrada, el pueblo, el jefe, los caminos que abre cada habilidad) y tramos que se arman al azar con
+      piezas (salas de pelea, de plataformas, secretos), distintos en cada run.
+  - [ ] Proponer cuántos pisos fijos, qué habilidad abre cada uno y cómo se arman las piezas al azar (con 2-3 opciones).
 - [ ] **El héroe 2D completo:** cuadros de salto y caída propios, golpe recibido, deslizarse por la pared, tajo hacia
       arriba y hacia abajo (rebote sobre enemigos, como Hollow Knight).
 - [ ] **Enemigos 2D:** pasar el bestiario a costado (caminante, volador, tirador, el que embiste) con sus avisos.

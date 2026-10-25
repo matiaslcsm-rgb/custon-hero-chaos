@@ -878,6 +878,12 @@ Las fases 3 y 4 son las más grandes: hay que rehacer pruebas y volver a medir e
 también tiene que aprender a esquivar los ataques anunciados).
 
 ## Interfaz y calidad de vida (lista viva)
+- ✅ **Torre 2D: la sensación del personaje** (2026-10-25, `js/tower2d.js`, `torre2d.html`): apex (gravedad ×0,5 en la punta
+  si mantenés el salto), caída ×1,45, coyote 0,1 s, salto guardado 0,12 s, corrección de esquinas de 5 px, estirar y
+  aplastar 25%, polvo, tajos en 3 direcciones con pogo (×0,9 del salto), pausa de impacto 60 ms (90 el remate), temblor,
+  chispas, retroceso 70 al pegar, dash 270 px/s × 0,15 s con estela, cámara con 28 px de mirada adelante, sonidos de
+  `audio.js`. **Panel de ajuste (T):** 20 números en vivo, se guardan en el navegador (`t2d-feel`). Medido: salto 44 px,
+  subida 0,34 s y bajada 0,32 s; dash 51 px; el pogo deja la velocidad en −174 px/s.
 - **Banco de duelos** (2026-10-18, plan del equipo para MATCH): `index.html?banco=N` ahora también resume los duelos
   (cuánto duran, cuántos terminan por tiempo, cuántas veces cambia quién va ganando y qué parte del daño se podía evitar
   caminando). Base: mediana 5,2 s, 0,7 cambios, 14% evitable. Detalle en `docs/MATCH.md` §5.
