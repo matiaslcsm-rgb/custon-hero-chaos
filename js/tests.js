@@ -4776,6 +4776,22 @@ test('Torre 2D: correr, saltar (más alto si mantenés), plataformas, tajo, sala
     check(t2d.hero.onWall === -1 && t2d.hero.vy <= T2D.hero.wallSlide, 'pegado a la pared, baja despacio');
     run({ left: true, jump: true, jumpHeld: true }, dt);
     check(t2d.hero.vx > 100 && t2d.hero.vy < -200, 'el salto de pared lo despega hacia el otro lado');
+    // combate: golpe cargado, embestidor que avisa y parada
+    ['charge', 'parry', 'charger'].forEach(k => Object.assign(T2D[k], T2D_DEFAULTS[k]));
+    t2d = null; t2dEnterRoom('base'); run({}, 0.3); t2d.hero.facing = 1;
+    const w = t2d.enemies.find(o => o.kind === 'walker'), hh = t2d.hero; t2d.enemies = [w];
+    run({ attack: true, attackHeld: true }, dt); run({ attackHeld: true }, T2D.charge.full + 0.1);
+    check(hh.chargeReady, 'mantener el tajo lo carga');
+    Object.assign(w, { x: hh.x + 40, y: hh.y + hh.h - w.h, hp: 5, knockUntil: 1e9, knockVx: 0 }); const xc = hh.x;
+    run({}, 0.3);
+    check(w.hp === 5 - T2D.slash.dmg[3] && hh.x - xc > 20, 'al soltar, el golpe cargado avanza y pega fuerte');
+    t2d = null; t2dEnterRoom('base'); run({}, 0.3);
+    const c = t2d.enemies.find(o => o.kind === 'charger'), hp0 = t2d.hero.hp;
+    Object.assign(c, { x: t2d.hero.x + 60, y: t2d.hero.y + t2d.hero.h - c.h, state: 'walk', stateAt: -9 }); t2d.enemies = [c];
+    run({}, 0.05);
+    checkEq(c.state, 'windup', 'el embestidor avisa antes de embestir');
+    for (let t = 0; t < 1.5 && c.state !== 'stun'; t += dt) run({ parry: c.state === 'rush' && Math.abs(c.x - t2d.hero.x) < 22 }, dt);
+    check(c.state === 'stun' && t2d.hero.hp === hp0, 'la parada justo a tiempo lo aturde y no te saca vida');
     // plataforma que se atraviesa desde abajo y frena desde arriba
     const room = { rows: ['....', '....', '====', '....', '####'] }, b = { x: 4, y: 40, w: 8, h: 8 };
     check(!t2dMoveAxis(room, b, 0, -20) && b.y === 20, 'desde abajo, la plataforma se atraviesa');
