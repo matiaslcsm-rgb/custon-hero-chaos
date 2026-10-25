@@ -391,6 +391,8 @@ Las clases (diseño del usuario, 2026-10-14; clic izquierdo = básico, clic dere
       escribe la última página) antes de ofrecer seguir subiendo.
 
 ## Fase T2 — Sensación de juego y claridad
+- [ ] **Prueba que falla al azar (2026-10-25):** "el camino se pierde hacia arriba" falló 1 vez en ~10 corridas (pasó 8 de 8
+      al repetir). Es del mapa al azar de la Torre de arriba; revisar el margen cuando se toque esa Torre.
 - [ ] **Prueba que falla a veces: "pedidos que cruzan pisos"** (la llave del Guardián de Arena abre las compuertas del piso 3,
       "los cofres hundidos quedan al alcance"): falló 1 de 2 corridas el 2026-10-17 sin cambios en esa parte. Buscar qué depende del azar.
 - [ ] **Las pruebas escriben en el guardado real de localhost:** al correr toda la batería en `index.html?test`,
