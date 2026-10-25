@@ -21,7 +21,7 @@ const T2D = {
     hero: { w: 10, h: 22, accel: 1500, airAccel: 1000, friction: 1800, maxRun: 115, jumpV: 290, gravity: 950, fallMult: 1.45,
         apexBand: 45, apexMult: 0.5, fallMax: 400, cutJump: 0.45, coyote: 0.1, buffer: 0.12, corner: 5,
         hp: 5, iframes: 1, knock: 160, attackGap: 0.28, comboWindow: 0.6, recoil: 70, pogo: 0.9,
-        dashSpeed: 270, dashTime: 0.15, dashCd: 0.4 },
+        dashSpeed: 270, dashTime: 0.15, dashCd: 0.4, walls: true, wallSlide: 55, wallJumpX: 165, wallLock: 0.14 },
     slash: { w: 26, h: 20, dmg: [1, 1, 2], active: [0.04, 0.15] },
     feel: { hitStop: 0.06, hurtStop: 0.12, shake: 2.5, hurtShake: 5, camLook: 28, camLerp: 7, squash: 0.25 },
     walker: { w: 14, h: 12, speed: 30, hp: 3, knock: 140 }
@@ -36,6 +36,7 @@ const T2D_TUNE = [
     ['hero', 'dashSpeed', 'Velocidad del dash', 120, 500, 10], ['hero', 'dashTime', 'Duración del dash (s)', 0.05, 0.35, 0.01],
     ['hero', 'attackGap', 'Tiempo entre tajos (s)', 0.12, 0.6, 0.01], ['hero', 'recoil', 'Retroceso al pegar', 0, 200, 5],
     ['hero', 'pogo', 'Rebote del tajo abajo (×)', 0.4, 1.3, 0.05],
+    ['hero', 'wallSlide', 'Pared: velocidad al bajar', 10, 200, 5], ['hero', 'wallJumpX', 'Pared: empuje del salto', 60, 300, 5],
     ['feel', 'hitStop', 'Pausa de impacto (s)', 0, 0.2, 0.01], ['feel', 'shake', 'Temblor al pegar', 0, 8, 0.5],
     ['feel', 'camLook', 'Cámara: mira adelante', 0, 80, 2], ['feel', 'camLerp', 'Cámara: rapidez', 2, 20, 0.5],
     ['feel', 'squash', 'Estirar y aplastar', 0, 0.5, 0.05]
@@ -126,8 +127,9 @@ function t2dMoveAxis(room, b, dx, dy, dropping) {
 }
 // Un paso del héroe. input: { left, right, up, down, jump (apretado ahora), jumpHeld, dash (apretado ahora) }
 function t2dStepHero(room, h, input, dt) {
-    const H = T2D.hero, dir = (input.right ? 1 : 0) - (input.left ? 1 : 0);
+    const H = T2D.hero, rawDir = (input.right ? 1 : 0) - (input.left ? 1 : 0);
     h.t = (h.t || 0) + dt;
+    const dir = h.t < (h.wallLockUntil || 0) ? 0 : rawDir; // recién saltado de una pared: un instante sin control, para despegarse
     h.events = h.events || [];
     // dash: rápido, recto, sin gravedad; uno en el aire hasta tocar el piso
     if (input.dash && h.t >= (h.dashReadyAt || 0) && (h.onGround || h.airDash !== false)) {
@@ -145,10 +147,18 @@ function t2dStepHero(room, h, input, dt) {
         if (h.onGround && dir !== h.facing && Math.abs(h.vx) > 40) h.events.push('turn');
         h.vx += dir * (h.onGround ? H.accel : H.airAccel) * dt; h.facing = dir;
     } else if (h.onGround) { const f = H.friction * dt; h.vx = Math.abs(h.vx) <= f ? 0 : h.vx - Math.sign(h.vx) * f; }
-    else h.vx *= Math.pow(0.2, dt); // en el aire, sin teclas, frena de a poco (no se queda patinando)
+    else if (h.t >= (h.wallLockUntil || 0)) h.vx *= Math.pow(0.2, dt); // en el aire, sin teclas, frena de a poco (no se queda patinando)
     if (Math.abs(h.vx) > H.maxRun) h.vx = Math.sign(h.vx) * Math.max(H.maxRun, Math.abs(h.vx) - H.friction * dt); // pasado de velocidad (dash, golpe): baja de a poco
     if (h.onGround) { h.coyoteUntil = h.t + H.coyote; h.jumpsLeft = h.doubleJump ? 1 : 0; h.airDash = true; }
     if (input.jump) h.bufferUntil = h.t + H.buffer;
+    // la pared: en el aire, empujando contra ella y bajando, te pegás y bajás despacio; con salto, saltás para el otro lado
+    const wall = H.walls && !h.onGround ? t2dWallDir(room, h) : 0;
+    h.onWall = wall && rawDir === wall && h.vy > 0 ? wall : 0;
+    if (h.onWall) { h.wallCoyoteUntil = h.t + H.coyote; h.lastWall = wall; h.airDash = true; if (h.doubleJump) h.jumpsLeft = 1; h.facing = wall; }
+    if (h.bufferUntil > h.t && !h.onGround && h.t > (h.coyoteUntil || 0) && h.t <= (h.wallCoyoteUntil || 0)) {
+        h.vy = -H.jumpV * 0.95; h.vx = -h.lastWall * H.wallJumpX; h.facing = -h.lastWall; h.wallLockUntil = h.t + H.wallLock;
+        h.bufferUntil = 0; h.wallCoyoteUntil = 0; h.jumped = true; h.onWall = 0; h.events.push('wallJump');
+    }
     const dropping = input.down && input.jump && h.onGround && t2dStandingOn(room, h) === '=';
     if (dropping) { h.y += 2; h.bufferUntil = 0; h.dropUntil = h.t + 0.2; }
     else if (h.bufferUntil > h.t && (h.t <= h.coyoteUntil || h.jumpsLeft > 0)) {
@@ -160,7 +170,7 @@ function t2dStepHero(room, h, input, dt) {
     if (!input.jumpHeld && h.vy < 0 && h.jumped) { h.vy *= H.cutJump; h.jumped = false; } // soltar corta el salto
     // gravedad: flota en la punta si mantenés el salto, cae más rápido de lo que sube
     const g = H.gravity * (Math.abs(h.vy) < H.apexBand && input.jumpHeld ? H.apexMult : h.vy > 0 ? H.fallMult : 1);
-    h.vy = Math.min(H.fallMax, h.vy + g * dt);
+    h.vy = Math.min(h.onWall ? H.wallSlide : H.fallMax, h.vy + g * dt);
     if (t2dMoveAxis(room, h, h.vx * dt, 0)) h.vx = 0;
     const wasGround = h.onGround, vyBefore = h.vy;
     let hitY = t2dMoveAxis(room, h, 0, h.vy * dt, h.t < (h.dropUntil || 0));
@@ -174,6 +184,15 @@ function t2dStepHero(room, h, input, dt) {
     h.onGround = hitY && vyBefore > 0;
     if (hitY) { if (h.vy < 0) h.jumped = false; h.vy = 0; }
     if (h.onGround && !wasGround) h.events.push(vyBefore > H.fallMax * 0.7 ? 'bigLand' : 'land');
+}
+// ¿Hay pared pegada a un costado? -1 a la izquierda, 1 a la derecha, 0 nada (mira la mitad del cuerpo, no los pies)
+function t2dWallDir(room, b) {
+    const T = T2D.TILE, y1 = Math.floor((b.y + 4) / T), y2 = Math.floor((b.y + b.h - 6) / T);
+    for (const side of [-1, 1]) {
+        const tx = Math.floor((side > 0 ? b.x + b.w + 1 : b.x - 1) / T);
+        for (let ty = y1; ty <= y2; ty++) if (t2dSolid(t2dTile(room, tx, ty))) return side;
+    }
+    return 0;
 }
 function t2dStandingOn(room, b) { const T = T2D.TILE; return t2dTile(room, Math.floor((b.x + b.w / 2) / T), Math.floor((b.y + b.h + 1) / T)); }
 function t2dStandingSolid(room, b) { const c = t2dStandingOn(room, b); return t2dSolid(c) || c === '='; }
@@ -222,9 +241,11 @@ function t2dUpdate(input, dt) {
         if (ev === 'jump' || ev === 'doubleJump') { g.squash = { x: 1 - F.squash, y: 1 + F.squash }; t2dDust(fx, fy, ev === 'jump' ? 5 : 8); t2dSfx('swing'); }
         if (ev === 'land' || ev === 'bigLand') { g.squash = { x: 1 + F.squash, y: 1 - F.squash }; t2dDust(fx, fy, ev === 'bigLand' ? 10 : 5, 1.5); if (ev === 'bigLand') g.shake = Math.max(g.shake, F.shake * 0.8); }
         if (ev === 'turn') t2dDust(fx, fy, 3);
+        if (ev === 'wallJump') { g.squash = { x: 1 - F.squash, y: 1 + F.squash }; t2dDust(h.lastWall > 0 ? h.x + h.w : h.x, h.y + h.h / 2, 6); t2dSfx('swing'); }
         if (ev === 'dash') { g.squash = { x: 1 + F.squash, y: 1 - F.squash * 0.6 }; t2dSfx('dash'); }
     });
     h.events = [];
+    if (h.onWall && Math.floor(g.clock * 20) % 3 === 0) t2dDust(h.onWall > 0 ? h.x + h.w : h.x, h.y + 6, 1, 0.3); // polvo de la pared al bajar
     if (g.clock < (h.dashUntil || 0) && Math.floor(g.clock * 60) % 2 === 0) g.ghosts.push({ x: h.x, y: h.y, facing: h.facing, frame: t2dHeroFrame(h, g.clock), at: g.realClock });
     // salir por un borde: la sala vecina
     const ex = g.room.exits;

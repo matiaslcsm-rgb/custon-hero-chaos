@@ -221,6 +221,9 @@ Modo nuevo en paralelo: `torre2d.html` + `js/tower2d.js` (se entra desde el men�
       tajos en 3 direcciones con el **pogo** (el tajo abajo rebota en enemigos y pinchos); pausa de impacto, temblor,
       chispas y retroceso al pegar; **dash** (Shift o clic derecho, 51 px, uno en el aire); cámara suave que mira adelante;
       sonidos del juego; **panel de ajuste en vivo (tecla T)** con 20 números, guardado en el navegador.
+- [x] **Paredes** (2026-10-25, pedido del usuario): en el aire, empujando contra una pared, te pegás y bajás a 55 px/s;
+      con salto, saltás para el otro lado (165 px/s de empuje, 0,14 s sin control para despegarte). Recarga el dash y el
+      doble salto. Por ahora está desde el principio; puede volverse una habilidad que abre zonas.
 - [ ] **Afinar la sensación con el usuario:** jugarlo, tocar el panel (T) y pasar a los valores de fábrica lo que guste.
 - [x] **El mapa (decidido por el usuario 2026-10-25): pisos fijos y partes procedurales.** Cada piso tiene salas hechas
       a mano (la entrada, el pueblo, el jefe, los caminos que abre cada habilidad) y tramos que se arman al azar con

@@ -4770,6 +4770,12 @@ test('Torre 2D: correr, saltar (más alto si mantenés), plataformas, tajo, sala
     const corner = { rows: ['.#..', '....', '....', '....', '####'] }, hc = { x: 28, y: 40, w: 10, h: 22, vx: 0, vy: -250, facing: 1, onGround: false, t: 0 };
     for (let i = 0; i < 20; i++) t2dStepHero(corner, hc, { jumpHeld: true }, dt);
     check(hc.y < 16, 'la corrección de esquinas lo deja seguir subiendo');
+    // la pared: en el aire, empujando contra ella, baja despacio; con salto, sale despedido para el otro lado
+    t2d = null; t2dEnterRoom('base'); Object.assign(t2d.hero, { x: 16, y: 40, vy: 0, onGround: false });
+    run({ left: true }, 0.5);
+    check(t2d.hero.onWall === -1 && t2d.hero.vy <= T2D.hero.wallSlide, 'pegado a la pared, baja despacio');
+    run({ left: true, jump: true, jumpHeld: true }, dt);
+    check(t2d.hero.vx > 100 && t2d.hero.vy < -200, 'el salto de pared lo despega hacia el otro lado');
     // plataforma que se atraviesa desde abajo y frena desde arriba
     const room = { rows: ['....', '....', '====', '....', '####'] }, b = { x: 4, y: 40, w: 8, h: 8 };
     check(!t2dMoveAxis(room, b, 0, -20) && b.y === 20, 'desde abajo, la plataforma se atraviesa');
