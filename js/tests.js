@@ -4792,6 +4792,12 @@ test('Torre 2D: correr, saltar (más alto si mantenés), plataformas, tajo, sala
     checkEq(c.state, 'windup', 'el embestidor avisa antes de embestir');
     for (let t = 0; t < 1.5 && c.state !== 'stun'; t += dt) run({ parry: c.state === 'rush' && Math.abs(c.x - t2d.hero.x) < 22 }, dt);
     check(c.state === 'stun' && t2d.hero.hp === hp0, 'la parada justo a tiempo lo aturde y no te saca vida');
+    // cada estado tiene su cuadro dibujado (saltar, punta, caer, aterrizar, dash, golpe, pared, correr)
+    const states = [{ onGround: false, vy: -200 }, { onGround: false, vy: 0 }, { onGround: false, vy: 200 }, { onGround: true, vx: 0, landAt: 5 },
+        { dashUntil: 9 }, { hurtAt: 5 }, { onWall: 1 }, { onGround: true, vx: 110 }, { onGround: true, vx: 0 }];
+    const names = states.map(st => t2dHeroFrame(Object.assign({ facing: 1, onGround: true, vx: 0, vy: 0 }, st), 5));
+    checkEq(names.join(','), 'jump,apex,fall,land,dash,hurt,wall,' + names[7] + ',idle', 'cada estado elige su cuadro');
+    check(names.every(n => HERO_ART.frames[n] && HERO_ART.frames[n].rows.length), 'y todos están dibujados');
     // plataforma que se atraviesa desde abajo y frena desde arriba
     const room = { rows: ['....', '....', '====', '....', '####'] }, b = { x: 4, y: 40, w: 8, h: 8 };
     check(!t2dMoveAxis(room, b, 0, -20) && b.y === 20, 'desde abajo, la plataforma se atraviesa');

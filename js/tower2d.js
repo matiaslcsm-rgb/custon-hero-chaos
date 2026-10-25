@@ -250,7 +250,7 @@ function t2dUpdate(input, dt) {
     (h.events || []).forEach(ev => {
         const fx = h.x + h.w / 2, fy = h.y + h.h;
         if (ev === 'jump' || ev === 'doubleJump') { g.squash = { x: 1 - F.squash, y: 1 + F.squash }; t2dDust(fx, fy, ev === 'jump' ? 5 : 8); t2dSfx('swing'); }
-        if (ev === 'land' || ev === 'bigLand') { g.squash = { x: 1 + F.squash, y: 1 - F.squash }; t2dDust(fx, fy, ev === 'bigLand' ? 10 : 5, 1.5); if (ev === 'bigLand') g.shake = Math.max(g.shake, F.shake * 0.8); }
+        if (ev === 'land' || ev === 'bigLand') { h.landAt = g.clock; g.squash = { x: 1 + F.squash, y: 1 - F.squash }; t2dDust(fx, fy, ev === 'bigLand' ? 10 : 5, 1.5); if (ev === 'bigLand') g.shake = Math.max(g.shake, F.shake * 0.8); }
         if (ev === 'turn') t2dDust(fx, fy, 3);
         if (ev === 'wallJump') { g.squash = { x: 1 - F.squash, y: 1 + F.squash }; t2dDust(h.lastWall > 0 ? h.x + h.w : h.x, h.y + h.h / 2, 6); t2dSfx('swing'); }
         if (ev === 'dash') { g.squash = { x: 1 + F.squash, y: 1 - F.squash * 0.6 }; t2dSfx('dash'); }
@@ -391,14 +391,18 @@ function t2dHeroFrame(h, clock) {
     }
     if (clock < (h.blockFrameUntil || 0)) return 'block';
     if (h.charging) return 'ready';
-    if (clock < (h.dashUntil || 0)) return 'walk1';
-    if (!h.onGround) return h.vy < -40 ? 'walk1' : h.vy > 40 ? 'walk3' : 'walk2';
-    if (Math.abs(h.vx) > 10) return ['walk1', 'walk2', 'walk3'][Math.floor(clock * 10) % 3];
+    if (clock - (h.hurtAt ?? -9) < 0.25) return 'hurt';
+    if (clock < (h.dashUntil || 0)) return 'dash';
+    if (h.onWall) return 'wall';
+    if (!h.onGround) return h.vy < -60 ? 'jump' : h.vy > 60 ? 'fall' : 'apex';
+    if (clock - (h.landAt ?? -9) < 0.09) return 'land';
+    const sp = Math.abs(h.vx);
+    if (sp > 10) return ['walk1', 'walk2', 'walk3'][Math.floor(clock * (sp > 90 ? 14 : 9)) % 3]; // corriendo, el ciclo va más rápido
     return 'idle';
 }
 function t2dDrawHero(ctx, h, frame, sx, sy, alpha) {
-    const s = t2dHeroSprite(frame), fx = Math.round(h.x + h.w / 2), fy = Math.round(h.y + h.h);
-    ctx.save(); ctx.globalAlpha = alpha; ctx.translate(fx, fy); ctx.scale((h.facing < 0 ? -1 : 1) * sx, sy);
+    const s = t2dHeroSprite(frame), fx = Math.round(h.x + h.w / 2), fy = Math.round(h.y + h.h), face = frame === 'wall' ? -(h.onWall || h.facing) : h.facing; // en la pared, mira hacia afuera
+    ctx.save(); ctx.globalAlpha = alpha; ctx.translate(fx, fy); ctx.scale((face < 0 ? -1 : 1) * sx, sy);
     ctx.drawImage(s.img, -Math.round(s.ax), -s.img.height); ctx.restore();
 }
 function t2dDraw(ctx, scale) {

@@ -236,8 +236,10 @@ Modo nuevo en paralelo: `torre2d.html` + `js/tower2d.js` (se entra desde el men�
       a mano (la entrada, el pueblo, el jefe, los caminos que abre cada habilidad) y tramos que se arman al azar con
       piezas (salas de pelea, de plataformas, secretos), distintos en cada run.
   - [ ] Proponer cuántos pisos fijos, qué habilidad abre cada uno y cómo se arman las piezas al azar (con 2-3 opciones).
-- [ ] **El héroe 2D completo:** cuadros de salto y caída propios, golpe recibido, deslizarse por la pared, tajo hacia
-      arriba y hacia abajo (rebote sobre enemigos, como Hollow Knight).
+- [x] **Animaciones propias del héroe 2D** (2026-10-25, pedido del usuario): saltar, punta, caer (la capa se levanta),
+      aterrizar, dash (inclinado, capa atrás), golpe recibido y pared (mirando hacia afuera); el ciclo de correr va más
+      rápido cuanto más corrés. Se generan desde los dibujos del usuario con `docs/arte/torre2d-cuadros.py` (mismo estilo
+      y paleta; muestra en `docs/arte/torre2d-cuadros.png`). Falta: tajo hacia abajo propio y la capa que flamea en el ciclo.
 - [ ] **Enemigos 2D:** pasar el bestiario a costado (caminante, volador, tirador, el que embiste) con sus avisos.
 - [ ] **Bancos de guardado y mapa del jugador** (como los bancos de Hollow Knight): curan, guardan y son el punto de
       reaparición; el mapa se va dibujando a medida que explorás.
