@@ -73,7 +73,18 @@ elija; el modo automático anota las opciones en "Esperando al usuario" y los sa
 
 El orden de la lista **es** la prioridad: primero lo que destraba el loop completo, después contenido y pulido.
 
-> **⏸ INFINITE TOWER EN PAUSA (pedido del usuario 2026-10-18: "avanzá solo con Custom, la Tower pausala").**
+> **🆕 2026-10-25 (decidido por el usuario): el nuevo rumbo.**
+> - **Infinite Tower vuelve, pero en 2D lateral**, estilo **metroidvania conectado** (como Hollow Knight: salas hechas a
+>   mano y conectadas, caminos que se abren con habilidades nuevas). Se arma como **modo nuevo en paralelo**
+>   (`torre2d.html`, `js/tower2d.js`) que reusa lo que sirve (clases, reliquias, bestiario, historia y el héroe dibujado,
+>   que ya es de costado); la Torre de vista desde arriba sigue jugable hasta que la nueva la alcance. **Va primero.**
+> - **MATCH: el foco pasa a la creación de personajes y los menús.** Primero los 8 competidores del show (aspecto,
+>   habilidades, sello y frases, cada uno aprobado por el usuario) y después un **creador de competidor para el
+>   jugador** con las mismas piezas; además, los menús del juego.
+> - **MATCH: el RTS queda en pausa** (los duelos, los controles estilo Dota, "no se pega caminando", la IA de rivales y
+>   el banco de duelos). El parche `docs/parches/2026-10-19-no-pegar-caminando.patch` sigue guardado sin aplicar.
+
+> **⏸ (reemplazado el 2026-10-25, ver arriba) INFINITE TOWER EN PAUSA (pedido del usuario 2026-10-18: "avanzá solo con Custom, la Tower pausala").**
 > Hasta que el usuario diga otra cosa, el modo automático trabaja **solo en Custom Hero**.
 > **Desde el 2026-10-18 (pedido del usuario): Custom Hero se rehace como un juego propio, sin nada de Dota: MATCH**, un
 > show de competencia del futuro. **La estructura es la misma de Custom Hero; lo que cambia son los competidores, con
@@ -197,6 +208,24 @@ solo cuando un cambio en un modo rompe el otro de verdad, y de a un paso que pas
 - **Criterios 1.0 (medidos con el piloto):** primera Cumbre entre la 3.ª y la 8.ª run de un jugador nuevo, ninguna
   muerte "sin entender por qué" (cada golpe que pega se anuncia), cada piso dura entre 3 y 5 minutos, 60 cuadros
   por segundo en una PC común, 0 errores en la consola en 10 runs del piloto.
+
+## Fase T2D — Infinite Tower en 2D lateral, metroidvania conectado (decidido por el usuario 2026-10-25)
+Modo nuevo en paralelo: `torre2d.html` + `js/tower2d.js` (se entra desde el menú de Infinite Tower, "🧗 Torre 2D").
+- [x] **Prototipo jugable:** 3 salas hechas a mano y conectadas por los bordes; correr con aceleración, salto que llega
+      más alto si lo mantenés, tiempo de coyote y salto guardado; plataformas que se atraviesan desde abajo (↓ + salto
+      para bajar); pinchos; el héroe dibujado con el combo de 3 tajos; caminantes; vida y respawn; **la Pluma de Arén
+      da el doble salto y abre el mirador de arriba** (la primera puerta metroidvania). Medido: salto 49 px (3 bloques),
+      con toque corto 25 px, doble salto 97 px. 2026-10-25.
+- [ ] **(decisión) El mapa:** cuántas zonas y cómo se conectan (propuesta: la torre como un mapa vertical, un bioma por
+      zona — base, atrio, cisternas, salas del reloj, galerías, fragua — unidas por un pozo central, con atajos que se
+      abren al volver), y qué habilidad abre cada zona (doble salto, deslizar en paredes, dash, nado, gancho).
+- [ ] **El héroe 2D completo:** cuadros de salto y caída propios, golpe recibido, deslizarse por la pared, tajo hacia
+      arriba y hacia abajo (rebote sobre enemigos, como Hollow Knight).
+- [ ] **Enemigos 2D:** pasar el bestiario a costado (caminante, volador, tirador, el que embiste) con sus avisos.
+- [ ] **Bancos de guardado y mapa del jugador** (como los bancos de Hollow Knight): curan, guardan y son el punto de
+      reaparición; el mapa se va dibujando a medida que explorás.
+- [ ] **El primer jefe 2D** (la Raíz Madre de costado, con sus fases).
+- [ ] **Reusar de la Torre de arriba:** clases, reliquias, Páginas de Arén y la gente de cada piso.
 
 ## Fase T0 — La Torre por dentro: mundo, historia y secretos (pedido del usuario, diseño en `docs/TORRE-MUNDO.md`)
 - [x] **Adentro de la torre (pisos 2+):** muro exterior de piedra, salones con muros gruesos y portones, y columnas.

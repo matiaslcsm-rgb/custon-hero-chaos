@@ -209,7 +209,7 @@ const TS_LOBBY = {
         desc: 'Despertás al pie de una torre sin nada. Cada piso es un bioma con su pueblo, su laberinto y su guardián. Tu clase la arma el equipo que encontrás.',
         facts: () => ['🗡 Arrancás eligiendo espada, arco o bastón', '🌲 5 biomas, dos pisos cada uno, con día y noche', '🎒 Cada pieza de equipo trae una habilidad', '🦴 Morir no es el final: tus restos te esperan', `📖 Bestiario guardado: ${typeof bestiaryStore !== 'undefined' ? Object.keys(bestiaryStore.beasts || {}).length : 0} criaturas vistas`],
         art: () => tsImg(pxbHeroFrame(tsHero, 'idle', 0).img, 3) + tsImg(pxbFrame('wolf', '#8d8d8d', ['horns'], 'idle', 0).img, 3) + tsImg(pxbFrame('boss:volcano', '#d00000', [], 'idle', 0).img, 2),
-        extra: () => [] }
+        extra: () => [['🧗 Torre 2D (prototipo)', () => { location.href = 'torre2d.html'; }]] } // la Torre de costado (js/tower2d.js)
 };
 let tsLobbyMode = null;
 function openLobby(mode) {

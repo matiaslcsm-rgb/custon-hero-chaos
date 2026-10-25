@@ -7,9 +7,11 @@ GitHub Pages con cada push a `main`: https://matiaslcsm-rgb.github.io/custon-her
 - Leé `docs/ESTADO.md` (qué está hecho y qué falta) y el aviso de arriba de `docs/ROADMAP.md`.
 - **MATCH** es el foco: juego propio sin nada de Dota, concepto "En Vivo" (un show del 2099), la estructura de Custom Hero
   (rondas, creeps, draft, un duelo por ronda, apuestas, jefes) y competidores pensados para que **pelear entre héroes sea
-  divertido y desafiante**. Estilo RTS como Dota (mouse; sin esquive con Espacio; no se pega caminando). Diseño en
-  `docs/MATCH.md`; reglas de hoy en `docs/MECANICAS.md`.
-- **Infinite Tower está en pausa:** no se toca.
+  divertido y desafiante**. Diseño en `docs/MATCH.md`; reglas de hoy en `docs/MECANICAS.md`.
+  **Desde el 2026-10-25 el foco de MATCH es la creación de personajes** (los 8 competidores y después un creador para
+  el jugador) **y los menús. El RTS (duelos, controles estilo Dota, IA de rivales) está en pausa.**
+- **Infinite Tower vuelve en 2D lateral (2026-10-25):** metroidvania conectado, como modo nuevo en paralelo
+  (`torre2d.html`, `js/tower2d.js`, fase T2D del roadmap). La Torre de vista desde arriba no se toca: sigue jugable.
 
 ## El equipo
 **Sin agentes (pedido del usuario 2026-10-19):** el trabajo lo hacés vos, sin lanzar agentes. Los diez agentes de

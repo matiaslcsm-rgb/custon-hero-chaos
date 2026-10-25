@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infinite Tower 2D · prototipo</title>
+    <style>
+        html, body { margin: 0; height: 100%; background: #16121a; color: #f2f0e9; font-family: monospace; }
+        body { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
+        canvas { image-rendering: pixelated; border: 2px solid #3a3242; }
+        a { color: #ffd166; }
+    </style>
+</head>
+<body>
+    <canvas id="t2d"></canvas>
+    <div>Infinite Tower 2D · prototipo · <a href="index.html">← volver al juego</a></div>
+    <script src="js/towerHeroArt.js"></script>
+    <script src="js/tower2d.js"></script>
+    <script>t2dStart(document.getElementById('t2d'));</script>
+</body>
+</html>

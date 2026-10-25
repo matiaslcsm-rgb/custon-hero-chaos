@@ -4747,6 +4747,28 @@ test('Nueva Partida deja todo como al empezar', () => {
     checkEq(document.getElementById('menu-panel').style.display, 'block', 'menú visible');
 });
 
+test('Torre 2D: correr, saltar (más alto si mantenés), plataformas, tajo, salas conectadas y la Pluma de Arén', () => {
+    const dt = T2D.DT, run = (inp, secs) => { for (let t = 0; t < secs; t += dt) { t2dUpdate(Object.assign({ left: false, right: false, down: false, jump: false, jumpHeld: false, attack: false }, inp), dt); inp.jump = inp.attack = false; } };
+    const peak = held => { const h = t2d.hero, y0 = h.y; let top = y0; run({ jump: true, jumpHeld: true }, dt); for (let t = 0; t < 0.8; t += dt) { t2dUpdate({ jumpHeld: held(t) }, dt); top = Math.min(top, h.y); } return y0 - top; };
+    t2d = null; t2dEnterRoom('base'); run({}, 0.3);
+    check(t2d.hero.onGround, 'arranca parado en el piso');
+    const high = peak(() => true), low = peak(t => t < 0.05);
+    check(high > 40 && low < high * 0.7, `mantener el salto llega más alto (${Math.round(high)} contra ${Math.round(low)} px)`);
+    const e = t2d.enemies[0], hp = e.hp; Object.assign(e, { x: t2d.hero.x + 16, y: t2d.hero.y + t2d.hero.h - e.h, vx: 0.001 }); t2d.hero.facing = 1;
+    run({ attack: true }, 0.2);
+    check(e.hp < hp, 'el tajo le pega al caminante');
+    // plataforma que se atraviesa desde abajo y frena desde arriba
+    const room = { rows: ['....', '....', '====', '....', '####'] }, b = { x: 4, y: 40, w: 8, h: 8 };
+    check(!t2dMoveAxis(room, b, 0, -20) && b.y === 20, 'desde abajo, la plataforma se atraviesa');
+    check(t2dMoveAxis(room, b, 0, 15) && b.y === 2 * T2D.TILE - b.h, 'desde arriba, frena');
+    // salas conectadas y la pluma
+    t2d = null; t2dEnterRoom('base'); t2d.hero.x = t2d.W + 1; run({}, dt);
+    checkEq(t2d.key, 'salon', 'saliendo por la derecha se entra a la sala vecina');
+    const f = t2d.feathers[0]; Object.assign(t2d.hero, { x: f.x, y: f.y }); run({}, dt);
+    check(t2d.hero.doubleJump, 'la Pluma de Arén da el doble salto');
+    t2d = null;
+});
+
 // ============================================================ EJECUCIÓN
 // Lo guardado del jugador no se toca mientras corren las pruebas o el banco
 function testSandbox() {
