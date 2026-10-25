@@ -228,6 +228,9 @@ Modo nuevo en paralelo: `torre2d.html` + `js/tower2d.js` (se entra desde el men�
       soltar avanza 33 px y saca 3 de vida); **el dash corta el tajo**; **parada (E)**: ventana de 0,18 s, si algo te pega
       adentro no hace daño y lo aturde 1,2 s; **el embestidor**: te ve, avisa con un "!" rojo 0,55 s, embiste (2 de daño),
       se frena en paredes y bordes, y pegarle corta la embestida.
+- [x] **Pulido** (2026-10-25, pedido del usuario): destello blanco en el punto de impacto, números de daño que suben
+      (dorados en el remate y el cargado), polvo al correr, fundido a negro entre salas y pausa con Esc (con los controles).
+      Sin sonido de pasos (podía cansar); la capa que flamea va con las animaciones.
 - [ ] **Afinar la sensación con el usuario:** jugarlo, tocar el panel (T) y pasar a los valores de fábrica lo que guste.
 - [x] **El mapa (decidido por el usuario 2026-10-25): pisos fijos y partes procedurales.** Cada piso tiene salas hechas
       a mano (la entrada, el pueblo, el jefe, los caminos que abre cada habilidad) y tramos que se arman al azar con

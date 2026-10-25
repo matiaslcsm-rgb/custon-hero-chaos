@@ -226,7 +226,8 @@ function t2dEnterRoom(key, from) {
     const mk = (p, kind) => { const D = T2D[kind]; return { kind, x: p.x * T + 1, y: (p.y + 1) * T - D.h, w: D.w, h: D.h, vx: D.speed, vy: 0, hp: D.hp, hurtAt: -9, state: 'walk', stateAt: 0 }; };
     const enemies = t2dFind(room, 'E').map(p => mk(p, 'walker')).concat(t2dFind(room, 'C').map(p => mk(p, 'charger')));
     const feathers = (t2d && t2d.hero.doubleJump) ? [] : t2dFind(room, 'F').map(p => ({ x: p.x * T + 3, y: p.y * T + 3, w: 10, h: 10 }));
-    t2d = Object.assign(t2d || { clock: 0, msg: null, freeze: 0, shake: 0, parts: [], ghosts: [], squash: { x: 1, y: 1 } }, { key, room, W, H, hero: h, enemies, feathers });
+    t2d = Object.assign(t2d || { clock: 0, realClock: 0, msg: null, freeze: 0, shake: 0, parts: [], ghosts: [], squash: { x: 1, y: 1 } }, { key, room, W, H, hero: h, enemies, feathers, nums: [], flashes: [] });
+    t2d.fadeAt = t2d.realClock; // fundido al entrar a la sala
     t2d.cam = { x: Math.max(0, Math.min(W - T2D.VIEW_W, h.x - T2D.VIEW_W / 2)), y: Math.max(0, Math.min(H - T2D.VIEW_H, h.y - T2D.VIEW_H / 2)) };
     t2d.spawn = { x: h.x, y: h.y };
 }
@@ -240,7 +241,7 @@ function t2dSparks(x, y, n, color) {
 function t2dUpdate(input, dt) {
     const g = t2d, h = g.hero, T = T2D.TILE, F = T2D.feel;
     // pausa de impacto: el mundo se frena un instante (la cámara y las partículas siguen)
-    g.realClock = (g.realClock || 0) + dt;
+    g.realClock += dt;
     if (g.freeze > 0) { g.freeze -= dt; t2dFx(dt); return; }
     g.clock += dt;
     if (h.hp <= 0) { if (g.clock - h.diedAt > 1.2) { const dj = h.doubleJump; t2d = null; t2dEnterRoom('base'); t2d.hero.doubleJump = dj; t2dMsg('Volviste a la puerta de la Torre.'); } return; }
@@ -256,6 +257,7 @@ function t2dUpdate(input, dt) {
     });
     h.events = [];
     if (h.onWall && Math.floor(g.clock * 20) % 3 === 0) t2dDust(h.onWall > 0 ? h.x + h.w : h.x, h.y + 6, 1, 0.3); // polvo de la pared al bajar
+    if (h.onGround && Math.abs(h.vx) > 80 && g.clock - (h.stepDustAt || 0) > 0.14) { h.stepDustAt = g.clock; t2dDust(h.x + h.w / 2 - h.facing * 3, h.y + h.h, 1, 0.4); } // polvo al correr
     if (g.clock < (h.dashUntil || 0) && Math.floor(g.clock * 60) % 2 === 0) g.ghosts.push({ x: h.x, y: h.y, facing: h.facing, frame: t2dHeroFrame(h, g.clock), at: g.realClock });
     // salir por un borde: la sala vecina
     const ex = g.room.exits;
@@ -296,6 +298,8 @@ function t2dUpdate(input, dt) {
             g.freeze = F.hitStop * heavy; g.shake = Math.max(g.shake, F.shake * heavy);
             if (e.kind === 'charger' && e.state !== 'stun') { e.state = 'walk'; e.stateAt = g.clock; } // pegarle corta su embestida
             t2dSparks(e.x + e.w / 2, e.y + e.h / 2, e.hp <= 0 ? 14 : 7, e.hp <= 0 ? '#ffd166' : '#ffffff');
+            g.flashes.push({ x: (Math.max(box.x, e.x) + Math.min(box.x + box.w, e.x + e.w)) / 2, y: e.y + e.h / 2, at: g.realClock, big: heavy > 1 });
+            g.nums.push({ x: e.x + e.w / 2, y: e.y - 2, text: String(T2D.slash.dmg[h.combo] || 1), at: g.realClock, color: heavy > 1 ? '#ffd166' : '#f2f0e9' });
             t2dSfx(e.hp <= 0 ? 'crit' : 'hit');
             if (h.aim === 'side' && h.combo !== 3) h.vx -= h.facing * T2D.hero.recoil; // retroceso: el golpe empuja también al que pega
             if (h.aim === 'down') t2dPogo(h);
@@ -348,6 +352,7 @@ function t2dFx(dt) {
     const s = 1 - Math.exp(-14 * dt); g.squash.x += (1 - g.squash.x) * s; g.squash.y += (1 - g.squash.y) * s;
     g.parts = g.parts.filter(p => { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 300 * dt; return g.clock - p.at < p.life; });
     g.ghosts = g.ghosts.filter(gh => g.realClock - gh.at < 0.18);
+    g.nums = g.nums.filter(n => g.realClock - n.at < 0.7); g.flashes = g.flashes.filter(f => g.realClock - f.at < 0.1);
 }
 function t2dHurt(n, dir, src) {
     const g = t2d, h = g.hero;
@@ -428,6 +433,8 @@ function t2dDraw(ctx, scale) {
         ctx.save(); ctx.globalAlpha = 1 - k; ctx.strokeStyle = h.combo >= 2 ? '#ffd166' : '#f2f0e9'; ctx.lineWidth = h.combo === 3 ? 6 : h.combo === 2 ? 4 : 3;
         ctx.beginPath(); ctx.arc(cx, cy, Math.max(b.w, b.h) * 0.75, base - 1.1 * swing, base - 1.1 * swing + 2.2 * swing * Math.min(1, k * 2.5), swing < 0); ctx.stroke(); ctx.restore();
     }
+    g.flashes.forEach(f => { const k = (g.realClock - f.at) / 0.1; ctx.globalAlpha = 1 - k; ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(f.x, f.y, (f.big ? 9 : 6) * (0.5 + k), 0, Math.PI * 2); ctx.fill(); });
+    ctx.font = 'bold 7px monospace'; g.nums.forEach(n => { const k = (g.realClock - n.at) / 0.7; ctx.globalAlpha = 1 - k * k; ctx.fillStyle = '#1d1712'; ctx.fillText(n.text, n.x - 2 + 1, n.y - k * 14 + 1); ctx.fillStyle = n.color; ctx.fillText(n.text, n.x - 2, n.y - k * 14); });
     g.parts.forEach(p => { ctx.globalAlpha = Math.max(0, 1 - (g.clock - p.at) / p.life); ctx.fillStyle = p.color; ctx.fillRect(Math.round(p.x), Math.round(p.y), p.size, p.size); });
     ctx.globalAlpha = 1;
     ctx.restore();
@@ -442,6 +449,12 @@ function t2dDraw(ctx, scale) {
         ctx.fillStyle = '#ffd166'; lines.forEach((l, i) => ctx.fillText(l, 6, 36 + i * 9));
     }
     if (h.hp <= 0) { ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(0, 0, VW, VH); ctx.fillStyle = '#ff2a1f'; ctx.font = '14px monospace'; ctx.fillText('Caíste', VW / 2 - 24, VH / 2); }
+    const fade = 1 - (g.realClock - g.fadeAt) / 0.25; if (fade > 0) { ctx.fillStyle = `rgba(10,8,14,${fade.toFixed(2)})`; ctx.fillRect(0, 0, VW, VH); } // fundido entre salas
+    if (g.paused) {
+        ctx.fillStyle = 'rgba(10,8,14,0.75)'; ctx.fillRect(0, 0, VW, VH); ctx.fillStyle = '#ffd166'; ctx.font = 'bold 12px monospace'; ctx.fillText('PAUSA', VW / 2 - 18, 40);
+        ctx.font = '7px monospace'; ctx.fillStyle = '#f2f0e9';
+        ['A / D: moverte', 'Espacio: saltar (mantené para más alto)', 'J o clic: tajo · W: arriba · S en el aire: abajo (rebota)', 'Mantené el tajo: golpe cargado', 'Shift o clic derecho: dash', 'E: parada (justo antes del golpe)', 'Contra una pared en el aire: deslizar y saltar', 'T: ajustes · Esc: seguir'].forEach((l, i) => ctx.fillText(l, 40, 62 + i * 11));
+    }
     ctx.restore();
 }
 
@@ -467,6 +480,7 @@ function t2dStart(canvas, panel) {
     const pressed = {};
     const map = k => ({ a: 'left', arrowleft: 'left', d: 'right', arrowright: 'right', s: 'down', arrowdown: 'down', w: 'up', arrowup: 'up', ' ': 'jump', k: 'jump', j: 'attack', x: 'attack', shift: 'dash', l: 'dash', c: 'jump', z: 'attack', e: 'parry', i: 'parry' })[k];
     window.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && t2d) { t2d.paused = !t2d.paused; return; }
         if (e.key.toLowerCase() === 't' && panel) { panel.hidden = !panel.hidden; if (!panel.hidden) t2dTunePanel(panel); return; }
         const a = map(e.key.toLowerCase()); if (!a || e.target.tagName === 'INPUT') return; e.preventDefault(); if (!keys[a]) pressed[a] = true; keys[a] = true;
     });
@@ -475,10 +489,11 @@ function t2dStart(canvas, panel) {
     window.addEventListener('mouseup', e => { if (e.button === 0) keys.attack = false; });
     canvas.addEventListener('contextmenu', e => e.preventDefault());
     t2dEnterRoom('base');
-    t2dMsg('A/D: moverte · Espacio: saltar (mantené para más alto) · J o clic: tajo (con W arriba, con S abajo en el aire: rebota) · Shift o clic derecho: dash · mantené el tajo: golpe cargado · E: parada justo antes del golpe · T: ajustes');
+    t2dMsg('A/D: moverte · Espacio: saltar (mantené para más alto) · J o clic: tajo (con W arriba, con S abajo en el aire: rebota) · Shift o clic derecho: dash · mantené el tajo: golpe cargado · E: parada justo antes del golpe · Esc: pausa · T: ajustes');
     let last = performance.now(), acc = 0;
     const frame = now => {
         acc += Math.min(0.1, (now - last) / 1000); last = now;
+        if (t2d.paused) acc = 0;
         while (acc >= T2D.DT) {
             t2dUpdate({ left: keys.left, right: keys.right, up: keys.up, down: keys.down, jump: !!pressed.jump, jumpHeld: !!keys.jump, attack: !!pressed.attack, attackHeld: !!keys.attack, dash: !!pressed.dash, parry: !!pressed.parry }, T2D.DT);
             pressed.jump = pressed.attack = pressed.dash = pressed.parry = false; acc -= T2D.DT;
