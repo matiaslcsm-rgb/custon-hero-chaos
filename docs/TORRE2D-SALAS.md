@@ -19,6 +19,7 @@ Se puede dibujar con cualquier programa de pixel art (Aseprite, Piskel, LibreSpr
 | Gris azulado claro | `#d0d0e0` | espinas | lastiman (el tajo hacia abajo rebota en ellas) |
 | Gris piedrita | `#9a9488` | grava | cae como la arena y se hunde en el agua (sale de la piedra rota) |
 | Marrón muy oscuro | `#3a2a1a` | aceite | líquido que flota sobre el agua y prende fuego enseguida |
+| Verde ácido | `#80e020` | ácido | líquido que carcome todo menos la roca, y se gasta; quema |
 
 **Marcas** (un solo píxel; el juego no lo dibuja, solo ubica cosas ahí, apoyadas sobre ese punto):
 | Color | Código | Qué pone |

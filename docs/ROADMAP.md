@@ -274,6 +274,10 @@ Modo nuevo en paralelo: `torre2d.html` + `js/tower2d.js` (se entra desde el men�
       **Hecho 2026-10-26: la sala de pruebas** (muelle de la playa → izquierda): 4 piletas (agua, aceite, arena y grava,
       lava) con un dique de tierra que se rompe con el tajo; abajo, lo que reciben (agua, madera y aceite para ver el fuego).
       Ahí se mide cada cambio de fluidos y sustancias.
+      **Hecho 2026-10-26 (fluidos estilo Noita):** densidad por material (lo pesado se hunde: agua bajo aceite, arena en
+      el agua, ceniza que flota), ácido (carcome todo menos la roca, se gasta, quema), vapor (sube y se condensa en agua),
+      ceniza de la madera quemada. Quinta pileta (ácido) en la sala de pruebas. Falta: lo que le pasa al héroe y a los
+      enemigos (mojarse, quemarse, aceite, ahogarse, enterrado) y corrientes.
 - [ ] **Afinar la sensación con el usuario:** jugarlo, tocar el panel (T) y pasar a los valores de fábrica lo que guste.
 - [x] **El mapa (decidido por el usuario 2026-10-25): pisos fijos y partes procedurales.** Cada piso tiene salas hechas
       a mano (la entrada, el pueblo, el jefe, los caminos que abre cada habilidad) y tramos que se arman al azar con

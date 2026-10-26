@@ -52,7 +52,7 @@ try { const saved = JSON.parse(localStorage.getItem('t2d-feel') || '{}'); T2D_TU
 
 // --- LAS SALAS. Cada una es una imagen en torre2d/salas/<nombre>.png (cada color, un material: docs/TORRE2D-SALAS.md).
 //     Si la imagen no carga (o en las pruebas), se arma desde estas filas de bloques de 16 px:
-//     # roca · p piedra · t tierra · s arena · g grava · ~ agua · o aceite · = tabla de madera · w madera · L lava · ^ espinas
+//     # roca · p piedra · t tierra · s arena · g grava · ~ agua · o aceite · a ácido · = tabla de madera · w madera · L lava · ^ espinas
 //     h hueco angosto (6 px de aire a la izquierda: pasa el fluido, no el héroe)
 //     P entrada · E caminante · C embestidor (avisa y embiste) · F la Pluma de Arén (doble salto) · T antorcha
 //     Los bordes abiertos llevan a la sala que dice `exits`.
@@ -81,11 +81,11 @@ const T2D_ROOMS = {
         '#.......................................',
         '#.......................................',
         '#.......................................',
-        '#########LLLt..#gggt..#ooot..#~~~t......',
-        '#########LLLt.T#ssst.T#ooot.T#~~~t.T.P..',
-        '#############h######h######h######h#####',
-        '#..w...........#......#......#.........#',
-        '#..www.oooo#~~~#......#~~~~~~#.....#...#',
+        '##aaat..#LLLt..#gggt..#ooot..#~~~t......',
+        '##aaat.T#LLLt.T#ssst.T#ooot.T#~~~t.T.P..',
+        '######h######h######h######h######h#####',
+        '#....ppw.......#......#......#.........#',
+        '#....pppwoo#~~~#......#~~~~~~#.....#...#',
         '########################################'] },
     base: { name: 'La puerta de la Torre', dark: 0.74, exits: { left: 'playa', right: 'salon' }, rows: [
         '########################################',
@@ -138,10 +138,11 @@ const T2D_SIGNS = {
     playa: [[2, 7, '← La sala de pruebas: los materiales de la Torre, uno por uno.']],
     pruebas: [
         [37, 9, 'Sala de pruebas. Cada pileta tiene un dique de tierra: rompelo con el tajo y mirá qué pasa abajo.'],
-        [36, 9, 'AGUA: corre, llena los huecos y se nivela. Adentro te frena y podés nadar (saltá para bracear). Apaga el fuego.'],
+        [36, 9, 'AGUA: corre, llena los huecos y se nivela. Adentro te frena y podés nadar (saltá para bracear). Apaga el fuego (sale vapor).'],
         [28, 9, 'ACEITE: corre más lento y es más liviano: flota sobre el agua. Se prende fuego enseguida.'],
         [21, 9, 'ARENA y GRAVA: caen y se amontonan (la grava, más pesada). El tajo las cava; el agua las atraviesa.'],
-        [14, 9, 'LAVA: corre lenta y quema. Con el agua se hace piedra y vapor; prende la madera y el aceite.']
+        [14, 9, 'LAVA: la más pesada, corre lenta y quema. Con el agua se hace piedra y vapor (el vapor sube y vuelve a llover); prende la madera y el aceite, y la madera quemada deja ceniza que flota.'],
+        [7, 9, 'ÁCIDO: carcome la piedra, la tierra, la arena y la madera (la roca de la torre no) y se va gastando. Te quema.']
     ]
 };
 const T2D_WORLDS = {}; // el mundo de cada sala (lo que rompiste queda roto mientras dure la partida)
@@ -406,8 +407,8 @@ function t2dUpdate(input, dt) {
         if (!h.dug) { h.dug = true; const n = w2dDig(g.world, box, h.combo === 3, h.aim === 'side' ? h.facing : 0); if (n) { t2dDust(box.x + box.w / 2, box.y + box.h / 2, Math.min(12, 2 + n / 20), 1.5); T2D_SND.dig(); } }
     }
     if (input.parry) t2dParry(h, g.clock);
-    // espinas, lava y fuego: lastiman y te tiran para arriba
-    if (t2dTouches(g.world, h, MAT.SPIKE, MAT.LAVA) || w2dBoxFraction(g.world, h, MAT.FIRE) > 0.1) { if (g.clock >= (h.invulnUntil || 0)) { t2dHurt(1, -h.facing); h.vy = -T2D.hero.jumpV * 0.7; } }
+    // espinas, lava, fuego y ácido: lastiman y te tiran para arriba
+    if (t2dTouches(g.world, h, MAT.SPIKE, MAT.LAVA) || w2dBoxFraction(g.world, h, MAT.FIRE, MAT.ACID) > 0.1) { if (g.clock >= (h.invulnUntil || 0)) { t2dHurt(1, -h.facing); h.vy = -T2D.hero.jumpV * 0.7; } }
     // enemigos: caminan y se dan vuelta en las paredes y los bordes; al recibir un golpe salen despedidos
     g.enemies.forEach(e => {
         if (e.hp <= 0) return;

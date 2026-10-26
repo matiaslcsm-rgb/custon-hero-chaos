@@ -4825,6 +4825,20 @@ test('Torre 2D: correr, saltar (más alto si mantenés), plataformas, tajo, sala
     const wo = w2dFromRows(['#o#', '#~#', '###']); for (let i = 0; i < 200; i++) w2dStep(wo);
     let oilY = 0, waterY = 0, no = 0, nw = 0; for (let y = 0; y < wo.H; y++) for (let x = 0; x < wo.W; x++) { const m = wo.mat[y * wo.W + x]; if (m === MAT.OIL) { oilY += y; no++; } if (m === MAT.WATER) { waterY += y; nw++; } }
     check(no && nw && oilY / no < waterY / nw, 'el aceite queda arriba del agua');
+    // densidad, ácido, vapor y ceniza (pedido del usuario 2026-10-26: fluidos estilo Noita)
+    const cnt = (w, m) => w.mat.filter(v => v === m).length, avgY = (w, m) => { let t = 0, n = 0; for (let i = 0; i < w.mat.length; i++) if (w.mat[i] === m) { t += (i / w.W) | 0; n++; } return n ? t / n : -1; };
+    const wsd = w2dFromRows(['#s#', '#~#', '###']); for (let i = 0; i < 300; i++) w2dStep(wsd);
+    check(avgY(wsd, MAT.SAND) > avgY(wsd, MAT.WATER), 'la arena se hunde en el agua (más densa)');
+    const was = w2dFromRows(['#~#', '#~#', '###']); was.mat.fill(MAT.ASH, 0, was.W * 4); for (let i = 0; i < 300; i++) w2dStep(was);
+    check(cnt(was, MAT.ASH) > 0 && avgY(was, MAT.ASH) < avgY(was, MAT.WATER), 'la ceniza flota en el agua');
+    const wac = w2dFromRows(['.a.', 'ptp', '###']), stone0 = cnt(wac, MAT.STONE) + cnt(wac, MAT.DIRT), acid0 = cnt(wac, MAT.ACID);
+    for (let i = 0; i < 400; i++) w2dStep(wac);
+    check(cnt(wac, MAT.STONE) + cnt(wac, MAT.DIRT) < stone0 && cnt(wac, MAT.ACID) < acid0 && cnt(wac, MAT.ROCK) === 3 * 16 * 16, 'el ácido carcome la piedra y la tierra, se gasta y la roca aguanta');
+    const wst = w2dMake(16, 40); for (let x = 0; x < 16; x++) { wst.mat[39 * 16 + x] = MAT.ROCK; for (let y = 20; y < 24; y++) w2dSet(wst, x, y, MAT.STEAM, 30); }
+    for (let i = 0; i < 300; i++) w2dStep(wst);
+    check(cnt(wst, MAT.STEAM) === 0 && cnt(wst, MAT.WATER) > 0, 'el vapor sube y se condensa en agua');
+    const wfa = w2dFromRows(['ww', '##']); w2dIgnite(wfa, 8, 8, 3); for (let i = 0; i < 1500; i++) w2dStep(wfa);
+    check(cnt(wfa, MAT.ASH) > 0, 'la madera quemada deja ceniza');
     const wv = w2dFromRows(['....', '....', '####']), before = wv.mat.filter(m => m === MAT.SAND).length;
     w2dFling(wv, 10, 5, 60, -50, MAT.SAND); for (let i = 0; i < 120 && wv.fly.length; i++) w2dStep(wv);
     check(!wv.fly.length && wv.mat.filter(m => m === MAT.SAND).length === before + 1, 'lo que vuela cae y vuelve a ser arena');
