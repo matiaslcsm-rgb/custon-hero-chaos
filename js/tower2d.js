@@ -53,7 +53,7 @@ try { const saved = JSON.parse(localStorage.getItem('t2d-feel') || '{}'); T2D_TU
 // --- LAS SALAS. Cada una es una imagen en torre2d/salas/<nombre>.png (cada color, un material: docs/TORRE2D-SALAS.md).
 //     Si la imagen no carga (o en las pruebas), se arma desde estas filas de bloques de 16 px:
 //     # roca · p piedra · t tierra · s arena · g grava · ~ agua · o aceite · = tabla de madera · w madera · L lava · ^ espinas
-//     P entrada · E caminante · C embestidor (avisa y embiste) · F la Pluma de Arén (doble salto)
+//     P entrada · E caminante · C embestidor (avisa y embiste) · F la Pluma de Arén (doble salto) · T antorcha
 //     Los bordes abiertos llevan a la sala que dice `exits`.
 const T2D_ROOMS = {
     playa: { name: 'La playa', bg: 'beach', camUp: 45, waves: true, exits: { right: 'base' }, rows: [
@@ -71,25 +71,25 @@ const T2D_ROOMS = {
         '#~~~~~~~~~~~~~~~sssssssssssssssssssssssssssssssssssss#######',
         '#ssssssssssssssssssssssssssssssssssssssssssssssssssss#######',
         '############################################################'] },
-    base: { name: 'La puerta de la Torre', exits: { left: 'playa', right: 'salon' }, rows: [
+    base: { name: 'La puerta de la Torre', dark: 0.74, exits: { left: 'playa', right: 'salon' }, rows: [
         '########################################',
         '#......................................#',
         '#......................................#',
         '#......................................#',
         '#......................................#',
-        '#......................................#',
+        '#.......................T..............#',
         '......................======...........#',
         '.......................................#',
         '...............====....................#',
         '#......................................#',
         '#.....=====........................tt...',
         '#..................................tt...',
-        '#..P....ss..C....E...#~~~~#....^^^.tt...',
+        '#..P....ss..C.T..E...#~~~~#..T.^^^.tt...',
         '########################################'] },
-    salon: { name: 'El Atrio Verde', exits: { left: 'base', up: 'alto' }, rows: [
+    salon: { name: 'El Atrio Verde', dark: 0.7, exits: { left: 'base', up: 'alto' }, rows: [
         '###############################...######',
         '#......................................#',
-        '#..............................F.......#',
+        '#...........................T..F.......#',
         '#..........................=====.......#',
         '#......................................#',
         '#....................=====.............#',
@@ -99,22 +99,22 @@ const T2D_ROOMS = {
         '#.......wwww...........................#',
         '.......................................#',
         '....##.................................#',
-        '..........E.............C...#LLL#......#',
+        '....T.....E.............C...#LLL#...T..#',
         '########################################'] },
-    alto: { name: 'El mirador de Arén', exits: { down: 'salon' }, rows: [
+    alto: { name: 'El mirador de Arén', dark: 0.62, exits: { down: 'salon' }, rows: [
         '########################################',
         '#......................................#',
         '#......................................#',
         '#......................................#',
         '#......................................#',
-        '#......................................#',
+        '#............T.........................#',
         '#..........======.........======.......#',
         '#......................................#',
         '#......................................#',
         '#...............====...................#',
         '#.........................gggg.........#',
         '#....#ooooo#...............E...........#',
-        '#....#~~~~~#...........................#',
+        '#....#~~~~~#........T..............T...#',
         '###############################...######'] }
 };
 const T2D_WORLDS = {}; // el mundo de cada sala (lo que rompiste queda roto mientras dure la partida)
@@ -259,8 +259,9 @@ function t2dEnterRoom(key, from) {
     const mk = (p, kind) => { const D = T2D[kind], e = { kind, x: p.x - D.w / 2, y: p.y - D.h, w: D.w, h: D.h, vx: D.speed, vy: 0, hp: D.hp, hurtAt: -9, state: 'walk', stateAt: 0 }; while (w2dBoxHits(w, e) && e.y > 0) e.y--; return e; };
     const enemies = w.markers.E.map(p => mk(p, 'walker')).concat(w.markers.C.map(p => mk(p, 'charger')));
     const feathers = (t2d && t2d.hero.doubleJump) ? [] : w.markers.F.map(p => ({ x: p.x - 5, y: p.y - 12, w: 10, h: 10 }));
+    const torches = w.markers.T.map(p => ({ x: p.x, y: p.y }));
     w.waves = !!room.waves;
-    t2d = Object.assign(t2d || { clock: 0, realClock: 0, msg: null, freeze: 0, shake: 0, parts: [], ghosts: [], squash: { x: 1, y: 1 } }, { key, room, world: w, W, H, hero: h, enemies, feathers, nums: [], flashes: [] });
+    t2d = Object.assign(t2d || { clock: 0, realClock: 0, msg: null, freeze: 0, shake: 0, parts: [], ghosts: [], squash: { x: 1, y: 1 } }, { key, room, world: w, W, H, hero: h, enemies, feathers, torches, nums: [], flashes: [] });
     t2d.fadeAt = t2d.realClock; // fundido al entrar a la sala
     t2d.cam = { x: Math.max(0, Math.min(W - T2D.VIEW_W, h.x - T2D.VIEW_W / 2)), y: Math.max(0, Math.min(H - T2D.VIEW_H, h.y - T2D.VIEW_H / 2)) };
     t2d.spawn = { x: h.x, y: h.y };
@@ -465,10 +466,15 @@ function t2dDraw(ctx, scale) {
     const camX = Math.round(g.cam.x + (Math.random() - 0.5) * sh), camY = Math.round(g.cam.y + (Math.random() - 0.5) * sh);
     ctx.save(); ctx.imageSmoothingEnabled = false; ctx.scale(scale, scale);
     if (g.room.bg === 'beach') t2dBeachSky(ctx, camX, camY, g.realClock);
-    else { ctx.fillStyle = '#9a93ab'; ctx.fillRect(0, 0, VW, VH); } // fondo claro: el encapuchado es oscuro y tiene que recortarse
+    else { ctx.fillStyle = g.room.dark ? '#6a6276' : '#9a93ab'; ctx.fillRect(0, 0, VW, VH); } // fondo: más oscuro en las salas sin luz (el encapuchado se recorta con su luz)
     if (g.room.bg !== 'beach') for (let i = 0; i < 6; i++) { ctx.fillStyle = 'rgba(70,62,85,0.25)'; ctx.fillRect(((i * 97 - camX * 0.3) % (VW + 60) + VW + 60) % (VW + 60) - 30, 20 + (i % 3) * 30, 18, VH); } // columnas al fondo (paralaje)
     ctx.translate(-camX, -camY);
     w2dFlicker(g.world); ctx.drawImage(w2dRender(g.world), 0, 0); w2dDrawFly(ctx, g.world); // el mundo de píxeles y lo que vuela (js/tower2dWorld.js)
+    (g.torches || []).forEach(t => {
+        ctx.fillStyle = '#5e3c22'; ctx.fillRect(t.x - 1, t.y - 9, 2, 10); ctx.fillStyle = '#3a2516'; ctx.fillRect(t.x - 2, t.y - 10, 4, 2);
+        const fl = Math.sin(g.realClock * 13 + t.x) * 0.5 + Math.sin(g.realClock * 7.3 + t.y) * 0.5;
+        ctx.fillStyle = '#ff7a1a'; ctx.fillRect(t.x - 2, t.y - 14 - (fl > 0.3 ? 1 : 0), 4, 4); ctx.fillStyle = '#ffd23f'; ctx.fillRect(t.x - 1, t.y - 13 - (fl > 0 ? 1 : 0), 2, 3);
+    });
     g.feathers.forEach(f => { ctx.fillStyle = '#ffd166'; ctx.fillRect(f.x + 3, f.y + Math.sin(g.clock * 3) * 2, 4, 10); ctx.fillStyle = '#fff3c4'; ctx.fillRect(f.x + 4, f.y + 1 + Math.sin(g.clock * 3) * 2, 2, 6); });
     g.enemies.forEach(e => { if (e.hp <= 0) return; const base = e.kind === 'charger' ? (e.state === 'stun' ? '#7fd8ff' : '#bc6c25') : '#6a994e';
         const wob = e.state === 'windup' ? Math.round(Math.sin(g.clock * 60)) : 0;
@@ -499,10 +505,12 @@ function t2dDraw(ctx, scale) {
     g.parts.forEach(p => { ctx.globalAlpha = Math.max(0, 1 - (g.clock - p.at) / p.life); ctx.fillStyle = p.color; ctx.fillRect(Math.round(p.x), Math.round(p.y), p.size, p.size); });
     ctx.globalAlpha = 1;
     ctx.restore();
+    if (g.room.dark) t2dDrawLight(ctx, g, camX, camY, scale);
     // interfaz (en píxeles del dibujo, así se ve igual con cualquier zoom): vida, nombre de la sala, mensajes
     ctx.save(); ctx.imageSmoothingEnabled = false; ctx.scale(scale, scale);
     for (let i = 0; i < T2D.hero.hp; i++) { ctx.fillStyle = '#1d1712'; ctx.fillRect(5 + i * 9, 5, 8, 8); ctx.fillStyle = i < h.hp ? '#ff2a1f' : '#4a3a3a'; ctx.fillRect(6 + i * 9, 6, 6, 6); }
-    ctx.font = '7px monospace'; ctx.fillStyle = '#1d1712'; ctx.fillText(g.room.name + (h.doubleJump ? ' · doble salto' : '') + ' · T: ajustes', 6, 22);
+    ctx.font = '7px monospace'; const label = g.room.name + (h.doubleJump ? ' · doble salto' : '') + ' · Esc: controles';
+    ctx.fillStyle = '#1d1712'; ctx.fillText(label, 7, 23); ctx.fillStyle = '#f2f0e9'; ctx.fillText(label, 6, 22); // claro con sombra: se lee de día y en la oscuridad
     if (g.msg && g.clock - g.msg.at < 5) {
         const words = g.msg.text.split(' '), lines = [''];
         words.forEach(w => { if (ctx.measureText(lines[lines.length - 1] + ' ' + w).width > VW - 12) lines.push(w); else lines[lines.length - 1] += (lines[lines.length - 1] ? ' ' : '') + w; });
@@ -591,4 +599,46 @@ function t2dBeachSky(ctx, camX, camY, t) {
     ctx.fillStyle = '#5a7a9a'; const tx = 250 - camX * 0.2; ctx.fillRect(tx, -10, 14, VH * 0.8); ctx.fillRect(tx - 3, -10, 20, 10); // la torre, perdida en las nubes
     ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.fillRect(tx - 10, 4, 40, 6);
     ctx.fillStyle = '#3f7fb8'; ctx.fillRect(0, VH * 0.62 - camY * 0.1, VW, 3); // el horizonte del mar
+}
+
+// --- LUZ Y OSCURIDAD (2026-10-25, decidido por el usuario) ---
+// Adentro de la torre está oscuro (room.dark: 0 a 1). Alumbran: una luz suave alrededor del héroe (para ver dónde pisás),
+// sus ojos rojos, las antorchas, el fuego y la lava (por trozo de 16×16, más fuerte cuanto más hay), la pluma y los golpes.
+// Se arma en una capa del tamaño de la vista: oscuridad entera y cada luz la "borra" con un degradé; después, un brillo
+// cálido encima (el fuego tiñe de naranja lo que tiene cerca).
+let t2dLightCanvas = null;
+function t2dLights(g) {
+    const h = g.hero, L = [], t = g.realClock, C = W2D.chunk, w = g.world;
+    L.push({ x: h.x + h.w / 2, y: h.y + h.h / 2, r: 54, a: 0.85 });
+    L.push({ x: h.x + h.w / 2 + h.facing * 2, y: h.y + 7, r: 10, a: 0.5, color: '255,42,31' }); // los ojos rojos
+    (g.torches || []).forEach(o => L.push({ x: o.x, y: o.y - 12, r: 78 + Math.sin(t * 11 + o.x) * 5 + Math.sin(t * 5.7) * 3, a: 0.95, color: '255,150,60' }));
+    for (let cy = 0; cy < w.ch; cy++) for (let cx = 0; cx < w.cw; cx++) {
+        const n = w.glow[cy * w.cw + cx];
+        if (n) L.push({ x: cx * C + C / 2, y: cy * C + C / 2, r: Math.min(70, 18 + Math.sqrt(n) * 4) + Math.sin(t * 9 + cx) * 3, a: Math.min(0.95, 0.4 + n / 120), color: '255,110,30' });
+    }
+    g.feathers.forEach(f => L.push({ x: f.x + 5, y: f.y + 5, r: 34, a: 0.8, color: '255,210,100' }));
+    g.flashes.forEach(f => L.push({ x: f.x, y: f.y, r: 40, a: 0.9 * (1 - (t - f.at) / 0.1), color: '255,255,255' }));
+    return L;
+}
+function t2dDrawLight(ctx, g, camX, camY, scale) {
+    const VW = T2D.VIEW_W, VH = T2D.VIEW_H;
+    if (!t2dLightCanvas) { t2dLightCanvas = document.createElement('canvas'); t2dLightCanvas.width = VW; t2dLightCanvas.height = VH; }
+    const lc = t2dLightCanvas.getContext('2d'), lights = t2dLights(g).filter(l => l.x + l.r > camX && l.x - l.r < camX + VW && l.y + l.r > camY && l.y - l.r < camY + VH);
+    lc.globalCompositeOperation = 'source-over'; lc.clearRect(0, 0, VW, VH);
+    lc.fillStyle = `rgba(8,6,18,${g.room.dark})`; lc.fillRect(0, 0, VW, VH);
+    lc.globalCompositeOperation = 'destination-out';
+    lights.forEach(l => {
+        const x = l.x - camX, y = l.y - camY, gr = lc.createRadialGradient(x, y, 0, x, y, l.r);
+        gr.addColorStop(0, `rgba(0,0,0,${l.a})`); gr.addColorStop(0.5, `rgba(0,0,0,${l.a * 0.6})`); gr.addColorStop(1, 'rgba(0,0,0,0)');
+        lc.fillStyle = gr; lc.fillRect(x - l.r, y - l.r, l.r * 2, l.r * 2);
+    });
+    ctx.save(); ctx.imageSmoothingEnabled = true; ctx.scale(scale, scale);
+    ctx.drawImage(t2dLightCanvas, 0, 0);
+    ctx.globalCompositeOperation = 'lighter'; // el brillo cálido de cada luz de color
+    lights.filter(l => l.color).forEach(l => {
+        const x = l.x - camX, y = l.y - camY, gr = ctx.createRadialGradient(x, y, 0, x, y, l.r * 0.8);
+        gr.addColorStop(0, `rgba(${l.color},0.34)`); gr.addColorStop(1, `rgba(${l.color},0)`);
+        ctx.fillStyle = gr; ctx.fillRect(x - l.r, y - l.r, l.r * 2, l.r * 2);
+    });
+    ctx.restore();
 }

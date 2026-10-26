@@ -27,6 +27,7 @@ Se puede dibujar con cualquier programa de pixel art (Aseprite, Piskel, LibreSpr
 | Verde | `#00ff00` | un caminante |
 | Naranja | `#ff8800` | un embestidor |
 | Amarillo | `#ffff00` | la Pluma de Arén |
+| Violeta | `#aa00ff` | una antorcha (alumbra en las salas oscuras) |
 
 Los colores parecidos también sirven (el juego toma el más cercano). Un color que no está en la lista queda como aire.
 

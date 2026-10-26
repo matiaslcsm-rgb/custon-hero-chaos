@@ -4824,6 +4824,13 @@ test('Torre 2D: correr, saltar (más alto si mantenés), plataformas, tajo, sala
     check(kicked > 0 && ws.fly.length === kicked, 'pisar o caer sobre la arena la levanta');
     const wc = w2dFromRows(['tt', '..', '..', '##']); for (let i = 0; i < 300; i++) w2dStep(wc);
     check(wc.mat.slice(0, wc.W * 16).filter(m => m === MAT.DIRT).length < 512 * 0.6, 'la tierra sin apoyo se desmorona');
+    // luz y oscuridad: las salas de adentro son oscuras; alumbran el héroe, las antorchas y la lava
+    Object.keys(T2D_WORLDS).forEach(k => delete T2D_WORLDS[k]); t2d = null; t2dEnterRoom('salon');
+    check(T2D_ROOMS.salon.dark > 0 && !T2D_ROOMS.playa.dark, 'adentro está oscuro; la playa, de día');
+    w2dRender(t2d.world); const lights = t2dLights(t2d);
+    check(t2d.torches.length >= 2 && lights.filter(l => l.color === '255,150,60').length === t2d.torches.length, 'cada antorcha alumbra');
+    check(lights.some(l => l.color === '255,110,30'), 'la lava alumbra');
+    t2d = null;
     t2d = null;
     // píxeles: frena justo sobre el píxel de piso, y sube solo un escalón chico (pendiente) pero no una pared
     const flat = w2dFromRows(['....', '....', '....', '....', '####']), b = { x: 4, y: 20, w: 8, h: 8 };

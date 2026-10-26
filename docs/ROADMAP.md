@@ -250,6 +250,14 @@ Modo nuevo en paralelo: `torre2d.html` + `js/tower2d.js` (se entra desde el men�
       y se hunde en el agua); **aceite** (flota sobre el agua y prende enseguida); el agua corre más rápido; **olas** en el
       mar de la playa; el cuerpo mueve el material (aterrizar levanta arena, correr patea, entrar al agua salpica); **la
       tierra sin apoyo se desmorona** (solo donde algo se movió). El mirador tiene grava y aceite sobre el agua.
+- [x] **Luz y oscuridad** (2026-10-25, elegido por el usuario): las salas de adentro son oscuras (`dark` por sala; la
+      playa, de día); alumbran una luz suave alrededor del héroe, sus ojos rojos, **antorchas** que titilan (marca
+      violeta `#aa00ff` / letra `T`), el fuego y la lava (por trozo, más fuerte cuanto más hay; con tinte cálido), la
+      pluma y los golpes. **Texturas:** cuatro tonos por material con vetas (ruido), piedritas y grietas en la roca y la
+      tierra, ondas en la arena y el borde brillante del agua.
+- [ ] **Rebanada vertical** (propuesta 2026-10-25, aceptada empezando por la luz): de la playa al primer jefe, terminado.
+      Siguen: enemigos dibujados que sufren la física, un acertijo de física por sala, el primer jefe, bancos de
+      guardado y el mapa.
 - [ ] **Animar todo** (pedido del usuario 2026-10-25: "faltan animaciones a todo"): enemigos con dibujo y animación
       propios (hoy son rectángulos), la capa que flamea, el tajo hacia abajo, antorchas y fondos con movimiento.
 - [ ] **Afinar la sensación con el usuario:** jugarlo, tocar el panel (T) y pasar a los valores de fábrica lo que guste.

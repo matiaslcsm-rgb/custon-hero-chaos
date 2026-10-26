@@ -13,13 +13,16 @@ const MAT = { AIR: 0, ROCK: 1, STONE: 2, DIRT: 3, SAND: 4, WATER: 5, WOOD: 6, FI
 const T2D_COLORS = [
     [MAT.ROCK, 0x505050], [MAT.STONE, 0x7a7a7a], [MAT.DIRT, 0x7d5a3a], [MAT.SAND, 0xe6c35c], [MAT.WATER, 0x2f6fd6],
     [MAT.WOOD, 0xc08040], [MAT.LAVA, 0xff4000], [MAT.SPIKE, 0xd0d0e0], [MAT.GRAVEL, 0x9a9488], [MAT.OIL, 0x3a2a1a],
-    ['P', 0xff00ff], ['E', 0x00ff00], ['C', 0xff8800], ['F', 0xffff00]
+    ['P', 0xff00ff], ['E', 0x00ff00], ['C', 0xff8800], ['F', 0xffff00], ['T', 0xaa00ff]
 ];
 // Cómo se dibuja cada material (dos tonos: el píxel elige uno según su "veta")
 const MAT_LOOK = {
-    [MAT.ROCK]: [0x3e3846, 0x4a4352], [MAT.STONE]: [0x6c6478, 0x7a7286], [MAT.DIRT]: [0x6e4f35, 0x7d5a3a], [MAT.SAND]: [0xd9b45a, 0xe6c35c],
-    [MAT.WATER]: [0x2f6fd6, 0x3a7fe6], [MAT.WOOD]: [0x9a6534, 0xb07440], [MAT.FIRE]: [0xff7a1a, 0xffd23f], [MAT.LAVA]: [0xff4000, 0xff7a1a],
-    [MAT.SMOKE]: [0x6a6470, 0x7d7783], [MAT.SPIKE]: [0xc9ccd1, 0xe6e8ec], [MAT.GRAVEL]: [0x8a8478, 0xa29c90], [MAT.OIL]: [0x2e2016, 0x3d2c1e]
+    [MAT.ROCK]: [0x34303c, 0x3e3846, 0x4a4352, 0x554e5e], [MAT.STONE]: [0x625a6e, 0x6c6478, 0x7a7286, 0x877f92],
+    [MAT.DIRT]: [0x5e4330, 0x6e4f35, 0x7d5a3a, 0x8a6442], [MAT.SAND]: [0xcfa64e, 0xd9b45a, 0xe6c35c, 0xefd27a],
+    [MAT.WATER]: [0x2a63c4, 0x2f6fd6, 0x3a7fe6, 0x4a8ef0], [MAT.WOOD]: [0x8a5a2e, 0x9a6534, 0xb07440, 0xbf8150],
+    [MAT.FIRE]: [0xff5a10, 0xff7a1a, 0xffb02a, 0xffd23f], [MAT.LAVA]: [0xe03000, 0xff4000, 0xff6010, 0xff7a1a],
+    [MAT.SMOKE]: [0x5e5864, 0x6a6470, 0x75707b, 0x7d7783], [MAT.SPIKE]: [0xb8bbc1, 0xc9ccd1, 0xdadde2, 0xe6e8ec],
+    [MAT.GRAVEL]: [0x7a7468, 0x8a8478, 0x9a9488, 0xa29c90], [MAT.OIL]: [0x261a10, 0x2e2016, 0x352619, 0x3d2c1e]
 };
 const MAT_SOLID = new Uint8Array(16), MAT_LIQUID = new Uint8Array(16);
 [MAT.ROCK, MAT.STONE, MAT.DIRT, MAT.SAND, MAT.WOOD, MAT.SPIKE, MAT.GRAVEL].forEach(m => { MAT_SOLID[m] = 1; });
@@ -29,9 +32,18 @@ const W2D = { chunk: 16, waterSpread: 5, oilSpread: 4, fireLife: [40, 90], burnC
 function w2dMake(W, H) {
     const n = W * H, C = W2D.chunk;
     const cw = Math.ceil(W / C), ch = Math.ceil(H / C);
-    return { W, H, mat: new Uint8Array(n), life: new Uint8Array(n), shade: new Uint8Array(n).map(() => Math.random() < 0.5 ? 0 : 1),
+    const w = { W, H, mat: new Uint8Array(n), life: new Uint8Array(n), shade: new Uint8Array(n),
         tick: new Uint8Array(n), frame: 0, cw, ch, active: new Uint8Array(cw * ch).fill(1), next: new Uint8Array(cw * ch), dirty: new Uint8Array(cw * ch).fill(1),
-        markers: { P: [], E: [], C: [], F: [] }, fly: [], waves: false };
+        markers: { P: [], E: [], C: [], F: [], T: [] }, fly: [], waves: false, glow: new Uint16Array(cw * ch) };
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) w.shade[y * W + x] = Math.min(3, (w2dNoise(x, y) * 4) | 0);
+    return w;
+}
+// Ruido suave (valor en una grilla de 5 px, interpolado): de ahí salen las vetas y manchas de cada material
+function w2dHash(x, y) { let h = (x * 374761393 + y * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
+function w2dNoise(x, y) {
+    const gx = x / 5, gy = y / 5, ix = Math.floor(gx), iy = Math.floor(gy), fx = gx - ix, fy = gy - iy;
+    const a = w2dHash(ix, iy) * (1 - fx) + w2dHash(ix + 1, iy) * fx, b = w2dHash(ix, iy + 1) * (1 - fx) + w2dHash(ix + 1, iy + 1) * fx;
+    return a * (1 - fy) + b * fy;
 }
 const w2dIn = (w, x, y) => x >= 0 && y >= 0 && x < w.W && y < w.H;
 function w2dGet(w, x, y) { return w2dIn(w, x, y) ? w.mat[y * w.W + x] : (y >= w.H ? MAT.ROCK : MAT.AIR); } // abajo del mundo es piso; los costados y arriba, aire (salidas)
@@ -243,16 +255,22 @@ function w2dRender(w) {
     const C = W2D.chunk; let any = false;
     for (let cy = 0; cy < w.ch; cy++) for (let cx = 0; cx < w.cw; cx++) {
         if (!w.dirty[cy * w.cw + cx]) continue;
-        w.dirty[cy * w.cw + cx] = 0; any = true;
+        w.dirty[cy * w.cw + cx] = 0; any = true; let glow = 0;
         for (let y = cy * C; y < Math.min(w.H, cy * C + C); y++) for (let x = cx * C; x < Math.min(w.W, cx * C + C); x++) {
             const i = y * w.W + x, m = w.mat[i];
             if (m === MAT.AIR) { w.px[i] = 0; continue; }
-            let c = MAT_LOOK[m][m === MAT.FIRE || m === MAT.LAVA ? (Math.random() < 0.5 ? 0 : 1) : w.shade[i]];
+            const L = MAT_LOOK[m]; let t = w.shade[i];
+            if (m === MAT.FIRE || m === MAT.LAVA) { t = (Math.random() * 4) | 0; glow++; }
+            else if (m === MAT.SAND) t = ((x + y * 3 + w.shade[i] * 2) % 9 < 2) ? 3 : Math.min(2, t + 1); // ondas
+            else if ((m === MAT.DIRT || m === MAT.ROCK || m === MAT.STONE) && w2dHash(x, y) < 0.04) t = 0; // piedritas y grietas
+            else if (m === MAT.WATER && !MAT_LIQUID[w2dGet(w, x, y - 1)]) t = 3; // el borde del agua brilla
+            let c = L[t];
             // borde: el píxel de arriba es aire → un tono más claro (se lee la superficie); abajo aire → más oscuro
             if (MAT_SOLID[m]) { const up = w2dGet(w, x, y - 1), dn = w2dGet(w, x, y + 1); if (!MAT_SOLID[up] && !MAT_LIQUID[up]) c = w2dTint(c, 34); else if (!MAT_SOLID[dn] && !MAT_LIQUID[dn]) c = w2dTint(c, -26); }
             const a = m === MAT.WATER ? 0xc0 : m === MAT.SMOKE ? 0x90 : 0xff;
             w.px[i] = (a << 24) | ((c & 255) << 16) | (c & 0xff00) | ((c >> 16) & 255); // ABGR
         }
+        w.glow[cy * w.cw + cx] = glow; // cuánto fuego y lava hay en el trozo: alumbra (t2dDrawLight)
     }
     if (any) w.ctx.putImageData(w.img, 0, 0);
     return w.canvas;
