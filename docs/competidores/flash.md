@@ -34,70 +34,75 @@ Atributo principal: **Reflejos**. Los números siguen la escala de hoy (la de lo
 | Velocidad | 2,3 | **2,1** | Rueda, pero no es rápido. |
 | Blindaje / Reflejos / Procesador | 16 / 22 / 15 | **18 / 19 / 16** | Ganancia por nivel: 2,0 / 2,4 / 1,6. |
 
-## Su sello (innato): **Primer Plano**
-Cada golpe básico suyo le pone al rival una **marca de cámara** (se ven sobre su cabeza, como cargas): hasta **3**, duran
-**4 s**. Cada marca hace que el rival reciba **+4% de daño de todos** (máximo +12%).
-- **Lectura:** las marcas están a la vista; cuanto más te quedás en su rango, peor.
-- **Respuesta:** salir del rango 4 s y se borran.
+## Su sello (innato): **Equipo de Rodaje** (diseño del usuario)
+**Cámara no pega: pegan sus 3 drones.** Cada ataque básico manda a los tres contra el objetivo, y llegan **siempre en
+este orden**:
+
+| Orden | Dron | Daño | Por golpe (propuesta) | Velocidad propia (propuesta) |
+|---|---|---|---|---|
+| 1º | **Aéreo** (graba desde arriba) | **físico** | 50% de su daño | rápido: 6 casillas/s |
+| 2º | **Sonido** (el micrófono) | **mágico** | 35% de su daño | medio: 4,5 casillas/s |
+| 3º | **Luz** (el reflector) | **puro, y quema** | 15% de su daño + quemadura | lento: 3,5 casillas/s |
+
+- **La quemadura de la luz:** 2 de daño puro por segundo durante 2 s (no se acumula: cada golpe la renueva).
+- **Cada dron se mueve solo**, con su velocidad: vuelan desde Cámara hasta el objetivo y vuelven. Si el objetivo se
+  aleja corriendo, los lentos llegan tarde (el de luz es el que más cuesta que llegue).
+- **Los drones no se pueden atacar** (ni con golpes ni con daño de área).
+- **Se aturden de a uno con ataques mágicos:** un módulo mágico que alcanza a un dron lo deja **aturdido 1,5 s** (quieto
+  y sin pegar; no le hace daño). Así se le puede sacar, por ejemplo, el de luz.
+- **Si aturden a Cámara, se frenan los tres:** mientras Cámara está aturdido, ningún dron ataca ni se mueve.
+- **Lectura:** se ve dónde está cada dron y cuál está aturdido. ¿Le saco un dron con mi mágico, o guardo el
+  aturdimiento para él y freno a los tres?
+- **Respuesta:** aturdir a Cámara (frena todo) o aturdir drones sueltos con mágicos; correrse para que los lentos no
+  lleguen.
 
 ## Sus módulos
 
-### 1. **Destello** (el dron de luz)
-- **Aviso:** 0,7 s. El dron de luz sale de su bahía y en el piso aparece un **cono rojo** (60°, 4 casillas). Se corta si lo
-  aturden.
-- **Efecto:** daño chico (puro, 15 + 10% de Procesador). Al que está en el cono **viniendo hacia él o quieto** lo
-  **encandila**: sus golpes fallan el **50% por 2 s**. Al que se está alejando, solo el daño.
-- **Después:** queda expuesto 0,4 s.
-- **Enfriamiento:** 12 s · **Energía:** 40.
-- **Lectura y respuesta:** ¿me salgo del cono o me la juego? Entrarle de costado o salir caminando.
+### Las 3 que faltan: **las diseña el usuario**
+Quedan tres lugares (dos módulos y una pasiva, o como prefieras). Los que había propuesto antes quedan acá abajo solo
+como ideas, por si alguno sirve:
+- *Destello* (el dron de luz): 0,7 s de aviso con un cono rojo; encandila al que viene de frente (falla el 50% de sus
+  golpes 2 s).
+- *Travelling* (las ruedas): rueda 2,5 casillas para atrás y su próximo ataque llega más lejos y pega más.
+- *Trípode* (pasiva): quieto 1 s, clava las patas y ataca 20% más rápido.
+- *Primer Plano* (marcas): cada ataque marca al rival, hasta 3, y cada marca le suma +4% de daño recibido.
 
-### 2. **Travelling** (las ruedas)
-- Pliega las patas y **rueda 2,5 casillas para atrás** mirando al rival; su próximo golpe en 3 s tiene **+2 de rango y
-  +40% de daño** (y pone 2 marcas de una).
-- **Enfriamiento:** 10 s · **Energía:** 30.
-- **Lectura y respuesta:** si lo perseguís, se aleja y te castiga. Esperá a que lo gaste y recién ahí cerrá la distancia.
-
-### 3. **Trípode** (pasiva)
-- Si se queda **quieto 1 s**, clava las patas: **+20% de velocidad de ataque** mientras no se mueva.
-- **Se ve:** las patas se abren y la luz de "grabando" queda fija. Moverlo o hacerlo caminar le saca la ventaja.
-
-### 4. Definitiva: **Cámara Fija** (diseño del usuario)
+### Definitiva: **Cámara Fija** (diseño del usuario)
 - **Aviso:** 0,5 s. Clava el trípode y en el piso aparece **un cono rojo delante de él** (60°, 5 casillas). Al terminar el
   aviso, **fija como objetivo al rival más cercano dentro del cono** (si no hay nadie, no pasa nada y el enfriamiento
   queda en 10 s).
-- **Canalización de 3 s:** Flash se queda **fijo** (no camina ni ataca). El objetivo queda **ralentizado 40%** y los **3
-  drones se despliegan y lo atacan**: cada dron le pega **una vez por segundo** con **daño fijo** (no depende de los
-  atributos):
+- **Canalización de 3 s:** Cámara se queda **fijo**. El objetivo queda **ralentizado 40%** y **los 3 drones lo atacan**:
+  cada uno le pega **una vez por segundo**, en el orden de siempre (físico, mágico, puro), con **daño fijo** (no
+  depende de los atributos):
 
   | Dron | Tipo | Por golpe (nivel 1 / 2 / 3) | En los 3 s |
   |---|---|---|---|
   | Aéreo | físico | 10 / 15 / 20 | 30 / 45 / 60 |
   | Sonido | mágico | 10 / 15 / 20 | 30 / 45 / 60 |
-  | Luz | puro | 6 / 9 / 12 | 18 / 27 / 36 |
+  | Luz | puro, y quema | 6 / 9 / 12 | 18 / 27 / 36 (+ la quemadura) |
 
   En total, 78 / 117 / 156 antes de armadura, resistencia y el ajuste de duelo (en duelo, hoy, −60%).
-- **Se corta si:** lo aturden o lo empujan, el objetivo sale a más de **7 casillas**, o muere. Al cortarse, los drones
-  vuelven a su cuerpo.
+- **Se corta si:** aturden a Cámara (los tres drones se frenan), el objetivo sale a más de **7 casillas**, o muere. Si
+  aturden **un** dron con un mágico, solo ese deja de pegar; los otros siguen.
 - **Enfriamiento:** 60 / 50 / 40 s · **Energía:** 100 / 120 / 140.
 - **Lectura:** el cono avisa medio segundo antes: el rival puede salirse. Una vez fijado, ¿corro (lento) para salir del
-  alcance, o me quedo y le pego para cortarlo?
-- **Respuesta:** salir del cono en el aviso; guardar un aturdimiento para cortar la canalización; o correr lejos (con la
-  ralentización llega justo: los golpes del final no le pegan).
+  alcance, aturdo a Cámara, o le saco un dron con un mágico?
+- **Respuesta:** salir del cono en el aviso; aturdir a Cámara para cortar todo; aturdir drones sueltos; o correr lejos.
 - **Por qué tres tipos de daño:** ninguna defensa sola alcanza (la armadura frena al aéreo, la resistencia al de sonido y
   nada frena al de luz). Premia armar defensa mezclada contra él.
 
 ## Cómo pelea un duelo
-1. Se planta (Trípode) y pega de lejos poniendo marcas.
-2. Si el rival se acerca: Travelling para atrás y un golpe fuerte.
-3. Si viene de frente: Destello, y lo deja fallando la mitad.
-4. Con el rival marcado y lento: Cámara Fija.
+1. Se planta lejos y sus drones pegan en cadena: físico, mágico y puro con quemadura.
+2. Con el rival encuadrado y cerca de la punta del cono: Cámara Fija.
+3. (Lo demás depende de las 3 habilidades que faltan.)
 
-**Cómo se le gana:** de costado y sin darle tiempo; obligarlo a moverse; guardar el aturdimiento para la Cámara Fija.
+**Cómo se le gana:** guardar el aturdimiento para Cámara (frena a los tres drones), sacarle drones sueltos con
+mágicos (el de luz, que quema, es el mejor para sacar) y moverse para que los lentos lleguen tarde.
 
 **Cruces (a medir):**
-- Bien contra los de cuerpo a cuerpo que vienen de frente.
-- Mal contra **Glitch** (le copia la Cámara Fija) y contra quien tenga aturdimientos rápidos.
-- Parejo contra **Vector** (la guardia contra el Destello).
+- Bien contra los que se defienden con un solo tipo de defensa (los tres tipos de daño).
+- Mal contra quien tenga aturdimientos rápidos y mágicos de área (le frenan los drones).
+- Mal contra **Glitch** (le copia la Cámara Fija).
 - ⚠️ **Kilo también tenía drones** (de entrega). Para que no se pisen, propongo que Kilo cambie los drones por otra cosa
   cuando hagamos su ficha (por ejemplo, paquetes que tira y explotan).
 
@@ -111,12 +116,12 @@ Cada golpe básico suyo le pone al rival una **marca de cámara** (se ven sobre 
 | Pieza | ¿Existe? |
 |---|---|
 | Daño físico, mágico y puro | Sí (`dealDamage` en `js/combat.js`). |
-| Marcas con cargas a la vista y +% de daño recibido | Casi: existe `dmgTakenPct`; faltan las cargas sobre la cabeza. |
-| Aviso con cono en el piso que se corta aturdiendo | La Torre tiene avisos (`towerTelegraph.js`); falta traerlos a MATCH, con forma de cono. |
-| **Canalización** (quieto, se corta con aturdimiento, empuje o distancia) | **Nuevo.** Pieza general: la van a usar otros competidores. |
-| Drones que salen del cuerpo y pegan (dibujo y animación) | Nuevo: dibujarlos y animarlos saliendo y volviendo. |
-| Encandilado (falla el 50%) y "viniendo hacia él" | Nuevo, chico. |
-| Rodar para atrás | Hay movimientos de habilidad (Danzante); se reusa. |
+| Quemadura (daño puro por segundo) | Hay daño en el tiempo en otros héroes; se reusa con daño puro. |
+| **Drones: unidades que vuelan solas** con su velocidad, que no se pueden atacar y pegan por él | **Nuevo**, la pieza grande. |
+| Aturdir un dron solo con un mágico; aturdir a Cámara frena a los tres | Nuevo, sale con los drones. |
+| Aviso con cono en el piso | La Torre tiene avisos (`towerTelegraph.js`); falta traerlos a MATCH, con forma de cono. |
+| **Canalización** (quieto, se corta con aturdimiento o distancia) | **Nuevo.** Pieza general: la van a usar otros. |
+| Dibujo y animación de los drones saliendo, volando y volviendo | Nuevo. |
 
 ## Qué medir cuando esté jugable
 - Gana entre el **45% y el 55%** de sus duelos en el banco.
@@ -125,13 +130,17 @@ Cada golpe básico suyo le pone al rival una **marca de cámara** (se ven sobre 
 - Ningún cruce 80 a 20.
 
 ## (decisión) Para aprobar
-1. **¿Cámara Fija es su definitiva?**
-   - **a) Sí, definitiva (recomendado):** 3 s con 3 drones es mucho; con enfriamiento largo se lee como "su momento".
-   - b) Módulo común: enfriamiento de 18 s, pero 2 s de canalización y la mitad del daño.
-2. **¿Los drones se pueden romper durante la Cámara Fija?**
-   - **a) No (recomendado):** la respuesta es cortarlo a él (aturdir) o escaparse; más simple de leer.
-   - b) Sí: cada dron tiene poca vida; romperlo saca su daño. Más profundo, pero se parece a Kilo.
-3. **El nombre:** ¿sigue siendo **Flash** (el dron de luz) o le ponemos otro, como **Rec**, **Toma** o **Trípode**?
-4. **El encandilado del Destello:** **a) falla el 50% de sus golpes 2 s (recomendado)**; b) falla todos 1,2 s; c) no puede
-   tirar módulos 2 s.
-5. **El aspecto:** ¿el boceto va?
+**Ya decidido por el usuario (2026-10-26):** robot con trípode de ruedas, cara de cámara de TV, brazo con herramientas y
+3 drones que son parte de su cuerpo. Los drones son su ataque (en orden: físico, mágico, puro que quema), cada uno con su
+velocidad; no se pueden atacar; se aturden de a uno con ataques mágicos, o los tres aturdiendo a Cámara. Cámara Fija es
+suya. Faltan 3 habilidades, que diseña el usuario.
+
+Queda abierto:
+1. **¿Cámara Fija es su definitiva?** **a) Sí (recomendado)**; b) módulo común (18 s, 2 s de canalización, la mitad del
+   daño).
+2. **¿Qué es un "ataque mágico" que aturde un dron?**
+   - **a) Cualquier módulo de daño mágico que lo alcance (recomendado):** lo deja 1,5 s quieto. Simple y se aprende rápido.
+   - b) Solo los módulos mágicos que ya aturden (más raro de lograr).
+3. **El nombre:** ¿**Flash**, o como le venís diciendo, **Cámara**? (Otras: Rec, Toma, Trípode.)
+4. **El aspecto:** ¿el boceto va?
+5. **Las 3 habilidades que faltan:** contámelas cuando las tengas y las paso a la ficha con números, aviso y respuesta.
