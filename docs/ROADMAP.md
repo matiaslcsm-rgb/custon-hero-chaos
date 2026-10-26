@@ -255,6 +255,12 @@ Modo nuevo en paralelo: `torre2d.html` + `js/tower2d.js` (se entra desde el men�
       violeta `#aa00ff` / letra `T`), el fuego y la lava (por trozo, más fuerte cuanto más hay; con tinte cálido), la
       pluma y los golpes. **Texturas:** cuatro tonos por material con vetas (ruido), piedritas y grietas en la roca y la
       tierra, ondas en la arena y el borde brillante del agua.
+- [x] **Joystick y sonido** (2026-10-25, elegido por el usuario; `js/tower2dAudio.js`): **joystick** con el mando estándar
+      (palanca o cruz, A saltar, X tajo y cargado, B/RB dash, Y/LB parada, Start pausa) que se suma al teclado, y
+      **vibra** al recibir un golpe, al pegar fuerte y al caer de alto. **Sonidos sintetizados del mundo:** pisadas según
+      el material (arena, piedra, madera, agua), aterrizajes, salpicones, el crujido al cavar, chisporroteo de antorchas y
+      fuego cerca, burbujas de lava; de fondo, **olas en la playa** y viento sordo adentro. **Música por zona** (las
+      pistas de la Torre): el bosque en la playa, la cueva adentro; con un enemigo atacando entra la de combate.
 - [ ] **Rebanada vertical** (propuesta 2026-10-25, aceptada empezando por la luz): de la playa al primer jefe, terminado.
       Siguen: enemigos dibujados que sufren la física, un acertijo de física por sala, el primer jefe, bancos de
       guardado y el mapa.

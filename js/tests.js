@@ -4847,6 +4847,20 @@ test('Torre 2D: correr, saltar (más alto si mantenés), plataformas, tajo, sala
     t2d = null;
 }, { random: true }); // la arena y el fuego usan azar de verdad
 
+test('Torre 2D: joystick (palanca, A saltar, X tajo, Start pausa; apretar sostenido no repite)', () => {
+    const real = navigator.getGamepads, st = { axes: [0.9, 0, 0, 0], buttons: Array.from({ length: 17 }, () => ({ pressed: false })) };
+    navigator.getGamepads = () => [st];
+    try {
+        Object.keys(t2dPadPrev).forEach(k => delete t2dPadPrev[k]);
+        check(t2dPad().held.right, 'la palanca a la derecha camina');
+        st.buttons[0] = { pressed: true }; st.buttons[2] = { pressed: true };
+        const p = t2dPad();
+        check(p.pressed.jump && p.pressed.attack, 'A salta y X pega');
+        check(!t2dPad().pressed.jump, 'sostenido no repite el salto');
+        st.buttons[9] = { pressed: true }; check(t2dPad().pressed.pause, 'Start pausa');
+    } finally { navigator.getGamepads = real; }
+});
+
 // ============================================================ EJECUCIÓN
 // Lo guardado del jugador no se toca mientras corren las pruebas o el banco
 function testSandbox() {

@@ -294,7 +294,8 @@ function t2dUpdate(input, dt) {
     (h.events || []).forEach(ev => {
         const fx = h.x + h.w / 2, fy = h.y + h.h;
         if (ev === 'jump' || ev === 'doubleJump') { g.squash = { x: 1 - F.squash, y: 1 + F.squash }; t2dDust(fx, fy, ev === 'jump' ? 5 : 8); t2dSfx('swing'); }
-        if (ev === 'land' || ev === 'bigLand') { w2dKick(g.world, h.x - 3, h.y + h.h, h.x + h.w + 3, h.y + h.h + 1, 0, ev === 'bigLand' ? -120 : -70, ev === 'bigLand' ? 18 : 8); // levanta arena
+        if (ev === 'land' || ev === 'bigLand') { T2D_SND.land(w2dGet(g.world, (h.x + h.w / 2) | 0, (h.y + h.h + 1) | 0), ev === 'bigLand'); if (ev === 'bigLand') t2dRumble(0.3, 0.2, 80);
+            w2dKick(g.world, h.x - 3, h.y + h.h, h.x + h.w + 3, h.y + h.h + 1, 0, ev === 'bigLand' ? -120 : -70, ev === 'bigLand' ? 18 : 8); // levanta arena
             h.landAt = g.clock; g.squash = { x: 1 + F.squash, y: 1 - F.squash }; t2dDust(fx, fy, ev === 'bigLand' ? 10 : 5, 1.5); if (ev === 'bigLand') g.shake = Math.max(g.shake, F.shake * 0.8); }
         if (ev === 'turn') t2dDust(fx, fy, 3);
         if (ev === 'wallJump') { g.squash = { x: 1 - F.squash, y: 1 + F.squash }; t2dDust(h.lastWall > 0 ? h.x + h.w : h.x, h.y + h.h / 2, 6); t2dSfx('swing'); }
@@ -305,7 +306,7 @@ function t2dUpdate(input, dt) {
     if (h.onGround && Math.abs(h.vx) > 80 && Math.random() < 0.15) w2dKick(g.world, h.x + h.w / 2 - 2, h.y + h.h, h.x + h.w / 2 + 2, h.y + h.h, -h.vx * 0.4, -50, 1); // pisadas en la arena
     // chapuzón: al entrar rápido al agua salpica; nadando, el agua se mueve alrededor
     const wet = w2dBoxFraction(g.world, h, MAT.WATER, MAT.OIL) > 0.1;
-    if (wet && !h.wasWet && Math.abs(h.vy) > 80) { w2dKick(g.world, h.x - 4, h.y, h.x + h.w + 4, h.y + h.h, h.vx * 0.3, -Math.abs(h.vy) * 0.7, 30); t2dSfx('pop'); }
+    if (wet && !h.wasWet && Math.abs(h.vy) > 80) { w2dKick(g.world, h.x - 4, h.y, h.x + h.w + 4, h.y + h.h, h.vx * 0.3, -Math.abs(h.vy) * 0.7, 30); T2D_SND.splash(Math.min(1.5, Math.abs(h.vy) / 200)); }
     else if (wet && (Math.abs(h.vx) > 40 || Math.abs(h.vy) > 40) && Math.random() < 0.3) w2dKick(g.world, h.x, h.y, h.x + h.w, h.y + h.h, h.vx * 0.5, -40, 2);
     h.wasWet = wet;
     if (h.onGround && Math.abs(h.vx) > 80 && g.clock - (h.stepDustAt || 0) > 0.14) { h.stepDustAt = g.clock; t2dDust(h.x + h.w / 2 - h.facing * 3, h.y + h.h, 1, 0.4); } // polvo al correr
@@ -347,6 +348,7 @@ function t2dUpdate(input, dt) {
             e.vx = kx * T2D.walker.speed; e.knockVx = kx * T2D.walker.knock; e.knockUntil = g.clock + 0.15; e.vy = h.aim === 'up' ? -150 : -60;
             const heavy = h.combo >= 2 ? (h.combo === 3 ? 2.2 : 1.5) : 1;
             g.freeze = F.hitStop * heavy; g.shake = Math.max(g.shake, F.shake * heavy);
+            t2dRumble(0.15 * heavy, 0.4 * heavy, 60 + 40 * heavy); // el golpe se siente en las manos
             if (e.kind === 'charger' && e.state !== 'stun') { e.state = 'walk'; e.stateAt = g.clock; } // pegarle corta su embestida
             t2dSparks(e.x + e.w / 2, e.y + e.h / 2, e.hp <= 0 ? 14 : 7, e.hp <= 0 ? '#ffd166' : '#ffffff');
             g.flashes.push({ x: (Math.max(box.x, e.x) + Math.min(box.x + box.w, e.x + e.w)) / 2, y: e.y + e.h / 2, at: g.realClock, big: heavy > 1 });
@@ -358,7 +360,7 @@ function t2dUpdate(input, dt) {
         // el tajo hacia abajo también rebota en las espinas
         if (h.aim === 'down' && !h.pogoDone && t2dTouches(g.world, box, MAT.SPIKE)) { t2dPogo(h); t2dSparks(h.x + h.w / 2, box.y + box.h, 6, '#c9ccd1'); }
         // el tajo rompe la tierra y la arena; el golpe cargado, también piedra y madera
-        if (!h.dug) { h.dug = true; const n = w2dDig(g.world, box, h.combo === 3, h.aim === 'side' ? h.facing : 0); if (n) { t2dDust(box.x + box.w / 2, box.y + box.h / 2, Math.min(12, 2 + n / 20), 1.5); t2dSfx('hit'); } }
+        if (!h.dug) { h.dug = true; const n = w2dDig(g.world, box, h.combo === 3, h.aim === 'side' ? h.facing : 0); if (n) { t2dDust(box.x + box.w / 2, box.y + box.h / 2, Math.min(12, 2 + n / 20), 1.5); T2D_SND.dig(); } }
     }
     if (input.parry) t2dParry(h, g.clock);
     // espinas, lava y fuego: lastiman y te tiran para arriba
@@ -419,7 +421,7 @@ function t2dHurt(n, dir, src) {
     }
     h.hp -= n; h.invulnUntil = g.clock + T2D.hero.iframes; h.hurtAt = g.clock;
     h.vx = dir * T2D.hero.knock; h.vy = -T2D.hero.knock; h.dashUntil = 0;
-    g.freeze = T2D.feel.hurtStop; g.shake = T2D.feel.hurtShake;
+    g.freeze = T2D.feel.hurtStop; g.shake = T2D.feel.hurtShake; t2dRumble(0.8, 0.5, 220);
     t2dSfx('heroHit');
     if (h.hp <= 0) { h.diedAt = g.clock; t2dSfx('lose'); }
 }
@@ -522,7 +524,7 @@ function t2dDraw(ctx, scale) {
     if (g.paused) {
         ctx.fillStyle = 'rgba(10,8,14,0.75)'; ctx.fillRect(0, 0, VW, VH); ctx.fillStyle = '#ffd166'; ctx.font = 'bold 12px monospace'; ctx.fillText('PAUSA', VW / 2 - 18, 40);
         ctx.font = '7px monospace'; ctx.fillStyle = '#f2f0e9';
-        ['A / D: moverte', 'Espacio: saltar (mantené para más alto)', 'J o clic: tajo · W: arriba · S en el aire: abajo (rebota)', 'Mantené el tajo: golpe cargado', 'Shift o clic derecho: dash', 'E: parada (justo antes del golpe)', 'Contra una pared en el aire: deslizar y saltar', 'T: ajustes · Esc: seguir'].forEach((l, i) => ctx.fillText(l, 40, 62 + i * 11));
+        ['A / D: moverte', 'Espacio: saltar (mantené para más alto)', 'J o clic: tajo · W: arriba · S en el aire: abajo (rebota)', 'Mantené el tajo: golpe cargado', 'Shift o clic derecho: dash', 'E: parada (justo antes del golpe)', 'Contra una pared en el aire: deslizar y saltar', 'T: ajustes · Esc: seguir', 'Joystick: A saltar · X tajo · B dash · Y parada · Start pausa'].forEach((l, i) => ctx.fillText(l, 40, 58 + i * 11));
     }
     ctx.restore();
 }
@@ -569,12 +571,18 @@ async function t2dStart(canvas, panel) {
     t2dMsg('Zzz… (cualquier tecla para despertar)');
     let last = performance.now(), acc = 0;
     const frame = now => {
-        acc += Math.min(0.1, (now - last) / 1000); last = now;
+        const fdt = Math.min(0.1, (now - last) / 1000); acc += fdt; last = now;
+        const pad = t2dPad(); // el joystick se suma al teclado (js/tower2dAudio.js)
+        if (pad) { ['jump', 'attack', 'dash', 'parry'].forEach(k => { if (pad.pressed[k]) pressed[k] = true; }); if (pad.pressed.pause) t2d.paused = !t2d.paused; }
+        const ph = pad ? pad.held : {};
+        if (typeof paused !== 'undefined') paused = !!t2d.paused; // la música baja en la pausa (towerMusic.js)
         if (t2d.paused) acc = 0;
         while (acc >= T2D.DT) {
-            t2dUpdate({ left: keys.left, right: keys.right, up: keys.up, down: keys.down, jump: !!pressed.jump, jumpHeld: !!keys.jump, attack: !!pressed.attack, attackHeld: !!keys.attack, dash: !!pressed.dash, parry: !!pressed.parry }, T2D.DT);
+            t2dUpdate({ left: keys.left || ph.left, right: keys.right || ph.right, up: keys.up || ph.up, down: keys.down || ph.down, jump: !!pressed.jump, jumpHeld: !!(keys.jump || ph.jump),
+                attack: !!pressed.attack, attackHeld: !!(keys.attack || ph.attack), dash: !!pressed.dash, parry: !!pressed.parry }, T2D.DT);
             pressed.jump = pressed.attack = pressed.dash = pressed.parry = false; acc -= T2D.DT;
         }
+        t2dAudioTick(t2d, fdt);
         t2dDraw(ctx, scale);
         requestAnimationFrame(frame);
     };
