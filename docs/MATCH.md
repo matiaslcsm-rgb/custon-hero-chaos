@@ -124,6 +124,10 @@ En orden, sin esperar decisiones:
 
 ## 6. Decisiones
 
+- **La estética de todo MATCH: ciencia ficción industrial y dura** (decidido por el usuario el 2026-10-26; detalle en
+  `docs/CONCEPTO-FUTURISTA.md`). Reemplaza a la paleta limpia; el rojo sigue siendo solo el del peligro.
+- **Primer competidor aprobado: Rec** (2026-10-26), tirador de control a distancia: `docs/competidores/rec.md`.
+
 - **Decidido por el usuario el 2026-10-18:** sin esquive con Espacio (es de la Torre) y estilo RTS, como Dota. Cada
   competidor se defiende con la posición y con lo que traiga su kit (la guardia de Vector, la pose de Viral, las
   torretas de Parche).

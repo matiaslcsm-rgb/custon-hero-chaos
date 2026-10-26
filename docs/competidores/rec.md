@@ -187,20 +187,19 @@ lentos lleguen tarde.
 - El piloto evita entre el **30% y el 70%** de sus Destellos y Cámaras Fijas (saliéndose en el aviso o cortándolas).
 - Ningún cruce 80 a 20.
 
-## (decisión) Para aprobar
-**Ya decidido por el usuario (2026-10-26):**
+## Decisiones
+**Ficha aprobada por el usuario el 2026-10-26.**
 - Se llama **Rec**; con sus drones son el **Equipo de Grabación**.
-- Robot con trípode de ruedas, cara de cámara de TV, brazo con herramientas y 3 drones que son parte de su cuerpo.
+- **Tirador de control a distancia.**
+- Robot con trípode de ruedas, cara de cámara de TV, brazo con herramientas y 3 drones que son parte de su cuerpo, con la
+  **estética industrial** (que pasa a ser la de todo MATCH).
 - Los drones son su ataque, en orden: físico (aéreo), mágico (sonido), puro que quema (luz); cada uno con su velocidad.
-- No se pueden atacar. Se frenan de a uno con habilidades de punto de objetivo que aturden, ralentizan, silencian
-  (callado: el de sonido y el de luz no pegan) o atan al suelo; aturdir a Rec frena a los tres.
-- **Cámara Fija es su definitiva** (por ahora).
+  No se pueden atacar. Se frenan de a uno con habilidades de punto de objetivo que aturden, ralentizan, silencian (el de
+  sonido y el de luz no pegan) o atan al suelo; aturdir a Rec frena a los tres.
+- Habilidades: **Acople**, **Travelling**, **Trípode** (pasiva) y la definitiva **Cámara Fija** (por ahora).
 
-Queda abierto:
-1. **La categoría:** **a) Tirador de control (recomendado)**; b) Controlador puro (menos daño de ataque, más control).
-2. **Las 3 habilidades:** ¿van Acople, Travelling y Trípode, o cambiás alguna?
-3. **El boceto industrial:** ¿así va, o le cambiamos algo?
-4. **¿La estética industrial es para todo MATCH o solo para Rec?** Hoy el concepto del juego es "En Vivo" con colores
-   limpios y fondos claros (`docs/CONCEPTO-FUTURISTA.md`). **a) Para todo MATCH (recomendado):** los competidores, las
-   arenas y los menús en el mismo estilo, y el show pasa a ser "en vivo desde un taller/arena industrial"; b) solo Rec
-   (queda distinto al resto).
+## Lo que sigue
+- **Ítems para que Rec escale** (pedido del usuario, para más adelante): que mejoren el daño de sus drones (sus
+  "súbditos") y el control de área. Ideas a pensar: más velocidad o alcance de los drones, que el de luz queme más,
+  conos más anchos o más largos, ralentizaciones que duran más.
+- Programarlo, con las piezas de "Lo que hace falta en el motor", y medirlo con los criterios de arriba.

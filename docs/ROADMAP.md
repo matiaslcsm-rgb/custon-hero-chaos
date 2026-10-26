@@ -583,7 +583,12 @@ si el usuario lo confirma.
 - [ ] **Ficha del primer competidor** (disenador-de-competidores): una ficha por competidor en `docs/competidores/`, de a
       una, para que el usuario la apruebe antes de programarla. Empezar por el que reemplaza al que más gana hoy (el Sniper).
       **2026-10-26: borrador de Rec** (antes "Flash"; elegido por el usuario; reemplaza al Sniper; rediseñado por el usuario como robot camarógrafo con 3 drones, el Equipo de Grabación, y Cámara Fija) en `docs/competidores/rec.md`, con
-      boceto (`rec.png`). Falta aprobar la categoría, las 3 habilidades y el boceto.
+      boceto (`rec.png`). **Aprobada por el usuario el 2026-10-26:** tirador de control a distancia; Acople, Travelling,
+      Trípode y Cámara Fija; estética industrial (que pasa a ser la de todo MATCH).
+- [ ] **Ítems para que Rec escale** (pedido del usuario 2026-10-26, para después): mejorar el daño de sus drones y el
+      control de área.
+- [ ] **Programar a Rec** (reemplaza al Sniper): drones como unidades que vuelan solas, canalización, atar al suelo,
+      aviso con cono y en línea, silencio por dron. Medir con el banco de duelos.
 - [ ] **Inventario de lo que hay que cambiar, archivo por archivo:** buscar en el código, los datos y los textos de la
       interfaz todo nombre o kit que venga de Dota (héroes, habilidades, ítems, "objetos neutrales", comentarios que
       dicen "fiel a Dota") y anotarlo como lista en `docs/MECANICAS.md` (apéndice), con dónde está cada uno. Solo

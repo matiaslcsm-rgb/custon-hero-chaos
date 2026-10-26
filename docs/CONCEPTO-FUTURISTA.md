@@ -148,6 +148,15 @@ Seguimos con el pixel art dibujado en código, con otras reglas:
 
 ## Decisiones
 
+> **Decidido por el usuario el 2026-10-26: la estética de todo MATCH pasa a ser ciencia ficción industrial y dura**
+> ("la forma sigue a la función"), en lugar de la paleta limpia de arriba. Piezas en bloque y en ángulo, paneles con
+> tornillos, rejillas, pistones y juntas hidráulicas, cables a la vista, sensores, carteles de peligro y letras de
+> plantilla; todo gastado, raspado y sucio, de metal mate. **Colores:** gris mate, verde oliva y blanco hueso, con naranja
+> de alta visibilidad y amarillo de precaución en los acentos; el esqueleto, gris oscuro y carbono. Presentación de
+> concepto: estudio gris neutro con líneas de boceto. El show "En Vivo" sigue: se transmite desde una arena industrial.
+> **El rojo sigue siendo solo el color del peligro** (los avisos). Primer ejemplo: Rec (`docs/competidores/rec.png`, y el
+> prompt completo en `docs/competidores/rec.md`). Vale para competidores, arenas y menús.
+
 > Decidido por el usuario el 2026-10-18: **"En Vivo"** y el juego se llama **MATCH**. La estructura es la misma de
 > Custom Hero; los competidores se diseñan para que pelear entre ellos sea divertido y desafiante (sigue en
 > `docs/MATCH.md`). El 2026-10-19 eligió los atributos (Blindaje, Reflejos y Procesador) y las 8 semillas de competidores.

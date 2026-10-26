@@ -11,6 +11,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   `js/tower2d.js`; fase T2D del roadmap). Prototipo jugable: playa + 3 salas + sala de pruebas de materiales (por el
   muelle de la playa, a la izquierda), mundo de píxeles, enemigos dibujados con cajas de golpe a medida, luz, sonido y joystick.
 - **MATCH:** foco en la creación de personajes (los 8 competidores y después un creador para el jugador) y los menús.
+  Estética nueva para todo MATCH: ciencia ficción industrial (2026-10-26). Primer competidor aprobado: **Rec**
+  (`docs/competidores/rec.md`), reemplaza al Sniper; falta programarlo.
 - **MATCH: el RTS en pausa** (duelos, controles estilo Dota, IA de rivales, banco de duelos).
 
 ## Qué está hecho
