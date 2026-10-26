@@ -18,7 +18,7 @@
 const T2D = {
     TILE: 16, VIEW_W: 320, VIEW_H: 180, DT: 1 / 120, stepUp: 3, // stepUp: escalones que se suben solos (pendientes)
     // el héroe (en píxeles del dibujo, por segundo)
-    hero: { w: 10, h: 22, accel: 1500, airAccel: 1000, friction: 1800, maxRun: 115, jumpV: 290, gravity: 950, fallMult: 1.45,
+    hero: { breath: 8, w: 10, h: 22, accel: 1500, airAccel: 1000, friction: 1800, maxRun: 115, jumpV: 290, gravity: 950, fallMult: 1.45,
         apexBand: 45, apexMult: 0.5, fallMax: 400, cutJump: 0.45, coyote: 0.1, buffer: 0.12, corner: 5,
         hp: 5, iframes: 1, knock: 160, attackGap: 0.28, comboWindow: 0.6, recoil: 70, pogo: 0.9,
         dashSpeed: 270, dashTime: 0.15, dashCd: 0.4, walls: true, wallSlide: 55, wallJumpX: 165, wallLock: 0.14 },
@@ -53,7 +53,7 @@ try { const saved = JSON.parse(localStorage.getItem('t2d-feel') || '{}'); T2D_TU
 // --- LAS SALAS. Cada una es una imagen en torre2d/salas/<nombre>.png (cada color, un material: docs/TORRE2D-SALAS.md).
 //     Si la imagen no carga (o en las pruebas), se arma desde estas filas de bloques de 16 px:
 //     # roca · p piedra · t tierra · s arena · g grava · ~ agua · o aceite · a ácido · = tabla de madera · w madera · L lava · ^ espinas
-//     h hueco angosto (6 px de aire a la izquierda: pasa el fluido, no el héroe)
+//     h hueco angosto (6 px de aire a la izquierda: pasa el fluido, no el héroe) · b aire atrapado (burbuja, para respirar)
 //     P entrada · E caminante · C embestidor (avisa y embiste) · F la Pluma de Arén (doble salto) · T antorcha
 //     Los bordes abiertos llevan a la sala que dice `exits`.
 const T2D_ROOMS = {
@@ -73,20 +73,20 @@ const T2D_ROOMS = {
         '#ssssssssssssssssssssssssssssssssssssssssssssssssssss#######',
         '############################################################'] },
     pruebas: { name: 'La sala de pruebas', dark: 0.5, exits: { right: 'playa' }, winds: [[37, 1, 2, 9, 0, -300]], rows: [
-        '########################################',
-        '#.......................................',
-        '#.......................................',
-        '#.......................................',
-        '#.......................................',
-        '#.......................................',
-        '#.......................................',
-        '#.......................................',
-        '##aaat..#LLLt..#gggt..#ooot..#~~~t......',
-        '##aaat.T#LLLt.T#ssst.T#ooot.T#~~~t.T.P..',
-        '######h######h######h######h######h#####',
-        '#....ppw.......#......#......#.........#',
-        '#....pppwoo#~~~#......#~~~~~~#.....#...#',
-        '########################################'] },
+        '####################################################',
+        '#...................................................',
+        '#...................................................',
+        '#...................................................',
+        '#...................................................',
+        '#...................................................',
+        '#...................................................',
+        '#...................................................',
+        '##aaat..#LLLt..#gggt..#ooot..#~~~t..................',
+        '##aaat.T#LLLt.T#ssst.T#ooot.T#~~~t.T.P..............',
+        '######h######h######h######h######h#######~~#####~##',
+        '#....ppw.......#......#......#.........###~~~bbb~~##',
+        '#....pppwoo#~~~#......#~~~~~~#.....#...###~~~~~~~~##',
+        '####################################################'] },
     base: { name: 'La puerta de la Torre', dark: 0.74, exits: { left: 'playa', right: 'salon' }, rows: [
         '########################################',
         '#......................................#',
@@ -142,6 +142,7 @@ const T2D_SIGNS = {
         [28, 9, 'ACEITE: corre más lento y es más liviano: flota sobre el agua. Se prende fuego enseguida.'],
         [21, 9, 'ARENA y GRAVA: caen y se amontonan (la grava, más pesada). El tajo las cava; el agua las atraviesa.'],
         [14, 9, 'LAVA: la más pesada, corre lenta y quema. Con el agua se hace piedra y vapor (el vapor sube y vuelve a llover); prende la madera y el aceite, y la madera quemada deja ceniza que flota.'],
+        [41, 9, 'AIRE ATRAPADO: bajo el agua se te acaba el aire (las burbujas sobre tu cabeza). Abajo de la losa quedó una burbuja grande: metete con la cabeza adentro y respirás. Cavar bajo el agua también suelta burbujas.'],
         [7, 9, 'ÁCIDO: carcome la piedra, la tierra, la arena y la madera (la roca de la torre no) y se va gastando. Te quema.']
     ]
 };
@@ -334,6 +335,7 @@ function t2dUpdate(input, dt) {
     }
     if (g.clock - (h.wakeAt ?? -9) < 0.45) { t2dFx(dt); return; } // levantándose
     t2dWindHero(g, h, dt);
+    t2dBreath(g, h, dt);
     t2dStepHero(g.world, h, input, dt);
     // lo que pasó en el paso: polvo, estirar y aplastar, sonido
     (h.events || []).forEach(ev => {
@@ -456,6 +458,15 @@ function t2dFx(dt) {
     g.ghosts = g.ghosts.filter(gh => g.realClock - gh.at < 0.18);
     g.nums = g.nums.filter(n => g.realClock - n.at < 0.7); g.flashes = g.flashes.filter(f => g.realClock - f.at < 0.1);
 }
+// El aire: con la cabeza adentro de un líquido se te acaba (las burbujas sobre la cabeza); sin aire, te ahogás de a poco.
+// Afuera o con la cabeza en una burbuja (una campana de aire), respirás y se llena enseguida.
+function t2dBreath(g, h, dt) {
+    const max = T2D.hero.breath, head = w2dGet(g.world, (h.x + h.w / 2) | 0, (h.y + 4) | 0), under = MAT_LIQUID[head] === 1;
+    h.air = Math.max(0, Math.min(max, (h.air ?? max) + (under ? -dt : dt * 4)));
+    if (under && Math.random() < dt * 2.5) g.parts.push({ x: h.x + h.w / 2 + h.facing * 3, y: h.y + 5, vx: (Math.random() - 0.5) * 10, vy: -45, life: 0.5, at: g.clock, color: 'rgba(220,245,255,0.85)', size: 1, float: true }); // burbujitas al respirar
+    if (h.air > 0) { h.drownAt = g.clock; return; }
+    if (g.clock - h.drownAt > 1.5) { h.drownAt = g.clock; t2dHurt(1, 0); t2dMsg('¡Te ahogás! Subí a respirar o buscá una burbuja de aire.'); }
+}
 // El viento empuja al héroe: de costado lo corre (menos si está parado en el piso); para arriba lo levanta (corrientes)
 function t2dWindHero(g, h, dt) {
     const [wx, wy] = w2dWindAt(g.world, h.x + h.w / 2, h.y + h.h / 2);
@@ -542,6 +553,7 @@ function t2dDraw(ctx, scale) {
     g.ghosts.forEach(gh => t2dDrawHero(ctx, gh, gh.frame, 1, 1, 0.35 * (1 - (g.realClock - gh.at) / 0.18)));
     // el héroe: si recién lo golpearon, titila
     if (!(h.invulnUntil > g.clock && Math.floor(g.clock * 20) % 2) && h.hp > 0) t2dDrawHero(ctx, h, t2dHeroFrame(h, g.clock), g.squash.x, g.squash.y, 1);
+    if ((h.air ?? T2D.hero.breath) < T2D.hero.breath) { const n = Math.ceil(5 * h.air / T2D.hero.breath); for (let i = 0; i < 5; i++) { ctx.fillStyle = i < n ? '#c8f0ff' : 'rgba(200,240,255,0.25)'; ctx.fillRect(h.x - 4 + i * 4, h.y - 8, 3, 3); } } // el aire que te queda
     if (h.charging) { ctx.globalAlpha = h.chargeReady ? 0.6 + 0.4 * Math.sin(g.clock * 30) : 0.35; ctx.fillStyle = h.chargeReady ? '#ffd166' : '#f2f0e9'; ctx.fillRect(h.x - 2, h.y - 4, h.w + 4, 2); ctx.globalAlpha = 1; } // la carga, sobre la capucha
     // la estela del tajo (arco blanco hacia donde pega)
     const at = g.clock - (h.attackAt ?? -9);

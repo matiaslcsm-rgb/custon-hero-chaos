@@ -4851,6 +4851,20 @@ test('Torre 2D: correr, saltar (más alto si mantenés), plataformas, tajo, sala
     let smx = 0, smn = 0; for (let i = 0; i < wg.mat.length; i++) if (wg.mat[i] === MAT.SMOKE) { smx += i % wg.W; smn++; }
     check(smn && smx / smn > 70, 'el viento se lleva el humo');
     for (let i = 0; i < 200; i++) w2dStep(wg); check(Math.abs(w2dWindAt(wg, 64, 16)[0]) < 5, 'y después se calma');
+    // burbujas: suben y revientan en la superficie; abajo de un techo se quedan (campana de aire); cavar bajo el agua las suelta
+    const wb = w2dFromRows(['#~#', '#~#', '#~#', '###']); w2dSet(wb, 24, 40, MAT.BUBBLE); for (let i = 0; i < 60; i++) w2dStep(wb);
+    check(cnt(wb, MAT.BUBBLE) === 0 && cnt(wb, MAT.WATER) === 3 * 256 - 1, 'la burbuja sube y revienta arriba');
+    const wbell = w2dFromRows(['~###~', '~~b~~', '~~~~~', '#####']), air0 = cnt(wbell, MAT.BUBBLE); for (let i = 0; i < 300; i++) w2dStep(wbell);
+    check(air0 === 256 && cnt(wbell, MAT.BUBBLE) === air0, 'abajo de un techo el aire queda atrapado');
+    const wdg = w2dFromRows(['#~~#', '#tt#', '####']); w2dDig(wdg, { x: 16, y: 16, w: 32, h: 6 }, false);
+    check(cnt(wdg, MAT.BUBBLE) > 0, 'cavar bajo el agua suelta burbujas');
+    // ahogarse: con la cabeza bajo el agua se acaba el aire y lastima; en la campana de aire se respira
+    t2d = null; t2dEnterRoom('pruebas'); run({}, 0.2);
+    const hd = t2d.hero, hp1 = hd.hp; Object.assign(hd, { x: 42 * 16 + 4, y: 13 * 16 - hd.h - 1, vx: 0, vy: 0 });
+    run({}, T2D.hero.breath + 3);
+    check(hd.hp < hp1, 'bajo el agua se te acaba el aire y te ahogás');
+    Object.assign(hd, { x: 46 * 16 + 3, y: 13 * 16 - hd.h - 1, vx: 0, vy: 0 }); run({}, 1);
+    check(hd.air > 1, 'con la cabeza en la burbuja respirás');
     const wv = w2dFromRows(['....', '....', '####']), before = wv.mat.filter(m => m === MAT.SAND).length;
     w2dFling(wv, 10, 5, 60, -50, MAT.SAND); for (let i = 0; i < 120 && wv.fly.length; i++) w2dStep(wv);
     check(!wv.fly.length && wv.mat.filter(m => m === MAT.SAND).length === before + 1, 'lo que vuela cae y vuelve a ser arena');

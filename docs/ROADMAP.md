@@ -281,6 +281,10 @@ Modo nuevo en paralelo: `torre2d.html` + `js/tower2d.js` (se entra desde el men�
       **Hecho 2026-10-26 (viento, opción 2 del usuario):** un viento por trozo de 16×16 (no aire píxel por píxel: sería
       muy caro). Lo generan el calor del fuego y la lava, las corrientes de cada sala (`winds`) y el golpe cargado; se reparte
       y se calma. Empuja humo, vapor, lo que vuela y al héroe (en la sala de pruebas, una corriente que te hace flotar).
+      **Hecho 2026-10-26 (burbujas y respiración, opción 1):** material nuevo "aire atrapado" (burbuja): sube por el
+      líquido de a un píxel, revienta en la superficie y bajo un techo se queda (campana de aire). Sale al cavar bajo el
+      agua y cuando un líquido cae en un hueco. El héroe tiene 8 s de aire con la cabeza bajo el agua (se ve sobre la
+      cabeza) y después se ahoga de a poco; en la campana respira. Sala de pruebas: pileta honda con campana.
 - [ ] **Afinar la sensación con el usuario:** jugarlo, tocar el panel (T) y pasar a los valores de fábrica lo que guste.
 - [x] **El mapa (decidido por el usuario 2026-10-25): pisos fijos y partes procedurales.** Cada piso tiene salas hechas
       a mano (la entrada, el pueblo, el jefe, los caminos que abre cada habilidad) y tramos que se arman al azar con

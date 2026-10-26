@@ -7,6 +7,8 @@
 //   · espinas: sólidas y lastiman
 //   · ácido: líquido que disuelve lo que toca (menos la roca) y se gasta · vapor: sube y se condensa en gotas de agua
 //   · ceniza: lo que queda de la madera quemada; es liviana y flota en el agua
+//   · burbuja: aire atrapado en un líquido. Sube, revienta en la superficie y abajo de un techo se queda (una campana de
+//     aire donde se puede respirar). Sale al cavar bajo el agua y cuando un líquido cae en un hueco.
 //   Cada material tiene su densidad (MAT_DENS): lo más pesado se hunde debajo de lo más liviano (el aceite flota en el
 //   agua, la arena se hunde, la ceniza flota).
 //   Solo se simulan los trozos (16×16) donde algo se movió: así anda liviano en el navegador.
@@ -15,11 +17,11 @@
 //   fuertes; se reparte a los trozos vecinos y se calma solo. Empuja el humo, el vapor, lo que vuela y al héroe.
 //   Las salas fijas son imágenes (torre2d/salas/*.png): cada color es un material (guía en docs/TORRE2D-SALAS.md).
 
-const MAT = { AIR: 0, ROCK: 1, STONE: 2, DIRT: 3, SAND: 4, WATER: 5, WOOD: 6, FIRE: 7, LAVA: 8, SMOKE: 9, SPIKE: 10, GRAVEL: 11, OIL: 12, STEAM: 13, ACID: 14, ASH: 15 };
+const MAT = { AIR: 0, ROCK: 1, STONE: 2, DIRT: 3, SAND: 4, WATER: 5, WOOD: 6, FIRE: 7, LAVA: 8, SMOKE: 9, SPIKE: 10, GRAVEL: 11, OIL: 12, STEAM: 13, ACID: 14, ASH: 15, BUBBLE: 16 };
 // Colores de la imagen de cada sala → material (y marcas: entrada, enemigos, la pluma)
 const T2D_COLORS = [
     [MAT.ROCK, 0x505050], [MAT.STONE, 0x7a7a7a], [MAT.DIRT, 0x7d5a3a], [MAT.SAND, 0xe6c35c], [MAT.WATER, 0x2f6fd6],
-    [MAT.WOOD, 0xc08040], [MAT.LAVA, 0xff4000], [MAT.SPIKE, 0xd0d0e0], [MAT.GRAVEL, 0x9a9488], [MAT.OIL, 0x3a2a1a], [MAT.ACID, 0x80e020],
+    [MAT.WOOD, 0xc08040], [MAT.LAVA, 0xff4000], [MAT.SPIKE, 0xd0d0e0], [MAT.GRAVEL, 0x9a9488], [MAT.OIL, 0x3a2a1a], [MAT.ACID, 0x80e020], [MAT.BUBBLE, 0xc8f0ff],
     ['P', 0xff00ff], ['E', 0x00ff00], ['C', 0xff8800], ['F', 0xffff00], ['T', 0xaa00ff]
 ];
 // Cómo se dibuja cada material (dos tonos: el píxel elige uno según su "veta")
@@ -31,13 +33,13 @@ const MAT_LOOK = {
     [MAT.SMOKE]: [0x5e5864, 0x6a6470, 0x75707b, 0x7d7783], [MAT.SPIKE]: [0xb8bbc1, 0xc9ccd1, 0xdadde2, 0xe6e8ec],
     [MAT.GRAVEL]: [0x7a7468, 0x8a8478, 0x9a9488, 0xa29c90], [MAT.OIL]: [0x261a10, 0x2e2016, 0x352619, 0x3d2c1e],
     [MAT.STEAM]: [0xc8ced8, 0xd2d8e0, 0xdce1e8, 0xe6eaef], [MAT.ACID]: [0x5cc21e, 0x6ad12a, 0x80e020, 0x9cf04a],
-    [MAT.ASH]: [0x45404a, 0x504a55, 0x5a545f, 0x655f6a]
+    [MAT.ASH]: [0x45404a, 0x504a55, 0x5a545f, 0x655f6a], [MAT.BUBBLE]: [0xb8e4ff, 0xc8f0ff, 0xd8f6ff, 0xeefbff]
 };
-const MAT_SOLID = new Uint8Array(16), MAT_LIQUID = new Uint8Array(16);
+const MAT_SOLID = new Uint8Array(32), MAT_LIQUID = new Uint8Array(32);
 [MAT.ROCK, MAT.STONE, MAT.DIRT, MAT.SAND, MAT.WOOD, MAT.SPIKE, MAT.GRAVEL].forEach(m => { MAT_SOLID[m] = 1; });
 [MAT.WATER, MAT.LAVA, MAT.OIL, MAT.ACID].forEach(m => { MAT_LIQUID[m] = 1; });
 // Densidad: decide quién se hunde debajo de quién (líquidos y polvos). Los gases (humo, vapor, fuego) no pesan nada.
-const MAT_DENS = new Float32Array(16);
+const MAT_DENS = new Float32Array(32);
 Object.entries({ OIL: 0.8, WATER: 1, ACID: 1.05, ASH: 0.6, SAND: 1.6, GRAVEL: 2, LAVA: 2.5 }).forEach(([k, d]) => { MAT_DENS[MAT[k]] = d; });
 const W2D = { chunk: 16, waterSpread: 5, oilSpread: 4, acidSpread: 4, acidEat: 0.06, fireLife: [40, 90], burnChance: 0.04, oilBurn: 0.35, smokeLife: [40, 80], maxFly: 700, gravity: 320,
     windCalm: 0.9, windSpread: 0.12, heatLift: 0.15, windMax: 320 }; // viento: cuánto se calma por cuadro, cuánto pasa a los vecinos, cuánto levanta el calor
@@ -100,7 +102,7 @@ function w2dFromImage(img) {
 // # roca · p piedra · t tierra · s arena · g grava · ~ agua · o aceite · = madera (tabla de 4 px) · w madera · L lava · ^ espinas · h hueco angosto · P E C F marcas
 function w2dFromRows(rows, T = 16) {
     const w = w2dMake(rows[0].length * T, rows.length * T);
-    const fill = { '#': MAT.ROCK, p: MAT.STONE, t: MAT.DIRT, s: MAT.SAND, '~': MAT.WATER, w: MAT.WOOD, L: MAT.LAVA, g: MAT.GRAVEL, o: MAT.OIL, a: MAT.ACID };
+    const fill = { '#': MAT.ROCK, p: MAT.STONE, t: MAT.DIRT, s: MAT.SAND, '~': MAT.WATER, w: MAT.WOOD, L: MAT.LAVA, g: MAT.GRAVEL, o: MAT.OIL, a: MAT.ACID, b: MAT.BUBBLE };
     rows.forEach((r, ty) => [...r].forEach((c, tx) => {
         const x0 = tx * T, y0 = ty * T;
         if (fill[c] !== undefined) { for (let y = y0; y < y0 + T; y++) w.mat.fill(fill[c], y * w.W + x0, y * w.W + x0 + T); }
@@ -131,6 +133,7 @@ function w2dStep(w) {
             else if (m === MAT.LAVA) { if ((w.frame + x) % 3 === 0) w2dLiquid(w, x, y, i, 1); w2dLava(w, x, y); }
             else if (m === MAT.FIRE) w2dFire(w, x, y, i);
             else if (m === MAT.SMOKE || m === MAT.STEAM) w2dSmoke(w, x, y, i);
+            else if (m === MAT.BUBBLE) w2dBubble(w, x, y, i);
             else if (m === MAT.DIRT && y + 1 < w.H && w.mat[i + w.W] === MAT.AIR) w2dCrumble(w, x, y, i);
         }
     }
@@ -179,13 +182,14 @@ function w2dCanFall(m) { return m === MAT.AIR || m === MAT.SMOKE || m === MAT.FI
 const w2dSinks = (m, under) => MAT_LIQUID[under] === 1 && MAT_DENS[m] > MAT_DENS[under];
 function w2dPowder(w, x, y, i) {
     const below = w2dGet(w, x, y + 1);
-    if (y + 1 < w.H && (w2dCanFall(below) || w2dSinks(w.mat[i], below))) return w2dSwap(w, i, i + w.W);
+    if (y + 1 < w.H && (w2dCanFall(below) || (below === MAT.BUBBLE && w.tick[i + w.W] !== w.frame) || w2dSinks(w.mat[i], below))) return w2dSwap(w, i, i + w.W);
     const d = Math.random() < 0.5 ? 1 : -1;
     for (const dx of [d, -d]) if (y + 1 < w.H && w2dIn(w, x + dx, y + 1) && w2dCanFall(w2dGet(w, x + dx, y + 1)) && w2dCanFall(w2dGet(w, x + dx, y))) return w2dSwap(w, i, i + w.W + dx);
 }
 function w2dLiquid(w, x, y, i, spread) {
     const under = w2dGet(w, x, y + 1);
-    if (y + 1 < w.H && (w2dCanFall(under) || w2dSinks(w.mat[i], under))) return w2dSwap(w, i, i + w.W);
+    if (y + 1 < w.H && under === MAT.AIR && MAT_LIQUID[w2dGet(w, x, y - 1)] && w2dSolid(w, x - 1, y + 1) && w2dSolid(w, x + 1, y + 1)) { w2dSwap(w, i, i + w.W); w.mat[i] = MAT.BUBBLE; return; } // cae en un hueco: el aire queda atrapado y sube
+    if (y + 1 < w.H && (w2dCanFall(under) || (under === MAT.BUBBLE && w.tick[i + w.W] !== w.frame) || w2dSinks(w.mat[i], under))) return w2dSwap(w, i, i + w.W);
     const d = Math.random() < 0.5 ? 1 : -1;
     for (const dx of [d, -d]) if (y + 1 < w.H && w2dIn(w, x + dx, y + 1) && w2dCanFall(w2dGet(w, x + dx, y + 1)) && w2dCanFall(w2dGet(w, x + dx, y))) return w2dSwap(w, i, i + w.W + dx);
     for (const dx of [d, -d]) { // de costado: hasta `spread` píxeles
@@ -226,6 +230,13 @@ function w2dAcid(w, x, y, i) {
     }
     if (food) w2dWake(w, x, y); // mientras tenga algo para comer, sigue despierto
     return false;
+}
+// La burbuja: sube por el líquido (cambia de lugar con el de arriba), revienta al llegar al aire y abajo de un techo se queda
+function w2dBubble(w, x, y, i) {
+    const up = w2dGet(w, x, y - 1);
+    const around = [[1, 0], [-1, 0], [0, 1], [0, -1]].map(([dx, dy]) => w2dGet(w, x + dx, y + dy));
+    if (around[3] === MAT.AIR || !around.some(n => MAT_LIQUID[n] || n === MAT.BUBBLE)) { w2dSet(w, x, y, MAT.AIR); return; } // aire arriba (la superficie) o sola entre piedras: revienta
+    if (MAT_LIQUID[up]) return w2dSwap(w, i, i - w.W); // con un techo arriba se queda: la campana de aire
 }
 function w2dSmoke(w, x, y, i) {
     w2dWake(w, x, y);
@@ -292,7 +303,7 @@ function w2dDig(w, b, strong, dirX = 0) {
     for (let y = Math.max(0, Math.floor(b.y)); y < Math.min(w.H, b.y + b.h); y++) for (let x = Math.max(0, Math.floor(b.x)); x < Math.min(w.W, b.x + b.w); x++) {
         const m = w.mat[y * w.W + x];
         if (!(m === MAT.DIRT || m === MAT.SAND || m === MAT.GRAVEL || (strong && (m === MAT.STONE || m === MAT.WOOD)))) continue;
-        w2dSet(w, x, y, MAT.AIR); n++;
+        w2dSet(w, x, y, MAT_LIQUID[w2dGet(w, x, y - 1)] ? MAT.BUBBLE : MAT.AIR); n++; // bajo el agua (líquido arriba), el hueco es aire: burbujas
         if (Math.random() < 0.3) { // un pedazo sale volando para el lado del golpe y vuelve a caer (la tierra suelta es arena; la piedra rota, grava)
             const piece = m === MAT.STONE ? MAT.GRAVEL : m === MAT.WOOD ? MAT.WOOD : m === MAT.GRAVEL ? MAT.GRAVEL : MAT.SAND;
             w2dFling(w, x, y, dirX * (40 + Math.random() * 110) + (Math.random() - 0.5) * 50, -30 - Math.random() * 110, piece);
@@ -338,7 +349,8 @@ function w2dRender(w) {
             let c = L[t];
             // borde: el píxel de arriba es aire → un tono más claro (se lee la superficie); abajo aire → más oscuro
             if (MAT_SOLID[m]) { const up = w2dGet(w, x, y - 1), dn = w2dGet(w, x, y + 1); if (!MAT_SOLID[up] && !MAT_LIQUID[up]) c = w2dTint(c, 34); else if (!MAT_SOLID[dn] && !MAT_LIQUID[dn]) c = w2dTint(c, -26); }
-            const a = m === MAT.WATER ? 0xc0 : m === MAT.SMOKE ? 0x90 : m === MAT.STEAM ? 0x70 : m === MAT.ACID ? 0xd8 : 0xff;
+            const a = m === MAT.WATER ? 0xc0 : m === MAT.SMOKE ? 0x90 : m === MAT.STEAM ? 0x70 : m === MAT.ACID ? 0xd8 : m === MAT.BUBBLE ? 0x50 : 0xff;
+            if (m === MAT.BUBBLE && MAT_LIQUID[w2dGet(w, x, y + 1)] + MAT_LIQUID[w2dGet(w, x, y - 1)] + MAT_LIQUID[w2dGet(w, x - 1, y)] + MAT_LIQUID[w2dGet(w, x + 1, y)]) c = L[3]; // el borde de la burbuja brilla
             w.px[i] = (a << 24) | ((c & 255) << 16) | (c & 0xff00) | ((c >> 16) & 255); // ABGR
         }
         w.glow[cy * w.cw + cx] = glow; // cuánto fuego y lava hay en el trozo: alumbra (t2dDrawLight)
