@@ -10,6 +10,9 @@
 //   Cada material tiene su densidad (MAT_DENS): lo más pesado se hunde debajo de lo más liviano (el aceite flota en el
 //   agua, la arena se hunde, la ceniza flota).
 //   Solo se simulan los trozos (16×16) donde algo se movió: así anda liviano en el navegador.
+//   EL VIENTO (2026-10-26): el aire no se simula píxel por píxel (sería muy caro); hay una grilla gruesa, un viento por
+//   trozo de 16×16. Lo generan el calor (fuego y lava: el aire caliente sube), las corrientes de cada sala y los golpes
+//   fuertes; se reparte a los trozos vecinos y se calma solo. Empuja el humo, el vapor, lo que vuela y al héroe.
 //   Las salas fijas son imágenes (torre2d/salas/*.png): cada color es un material (guía en docs/TORRE2D-SALAS.md).
 
 const MAT = { AIR: 0, ROCK: 1, STONE: 2, DIRT: 3, SAND: 4, WATER: 5, WOOD: 6, FIRE: 7, LAVA: 8, SMOKE: 9, SPIKE: 10, GRAVEL: 11, OIL: 12, STEAM: 13, ACID: 14, ASH: 15 };
@@ -36,14 +39,16 @@ const MAT_SOLID = new Uint8Array(16), MAT_LIQUID = new Uint8Array(16);
 // Densidad: decide quién se hunde debajo de quién (líquidos y polvos). Los gases (humo, vapor, fuego) no pesan nada.
 const MAT_DENS = new Float32Array(16);
 Object.entries({ OIL: 0.8, WATER: 1, ACID: 1.05, ASH: 0.6, SAND: 1.6, GRAVEL: 2, LAVA: 2.5 }).forEach(([k, d]) => { MAT_DENS[MAT[k]] = d; });
-const W2D = { chunk: 16, waterSpread: 5, oilSpread: 4, acidSpread: 4, acidEat: 0.06, fireLife: [40, 90], burnChance: 0.04, oilBurn: 0.35, smokeLife: [40, 80], maxFly: 700, gravity: 320 };
+const W2D = { chunk: 16, waterSpread: 5, oilSpread: 4, acidSpread: 4, acidEat: 0.06, fireLife: [40, 90], burnChance: 0.04, oilBurn: 0.35, smokeLife: [40, 80], maxFly: 700, gravity: 320,
+    windCalm: 0.9, windSpread: 0.12, heatLift: 0.15, windMax: 320 }; // viento: cuánto se calma por cuadro, cuánto pasa a los vecinos, cuánto levanta el calor
 
 function w2dMake(W, H) {
     const n = W * H, C = W2D.chunk;
     const cw = Math.ceil(W / C), ch = Math.ceil(H / C);
     const w = { W, H, mat: new Uint8Array(n), life: new Uint8Array(n), shade: new Uint8Array(n),
         tick: new Uint8Array(n), frame: 0, cw, ch, active: new Uint8Array(cw * ch).fill(1), next: new Uint8Array(cw * ch), dirty: new Uint8Array(cw * ch).fill(1),
-        markers: { P: [], E: [], C: [], F: [], T: [] }, fly: [], waves: false, glow: new Uint16Array(cw * ch) };
+        markers: { P: [], E: [], C: [], F: [], T: [] }, fly: [], waves: false, glow: new Uint16Array(cw * ch),
+        wind: new Float32Array(cw * ch * 2), heat: new Uint16Array(cw * ch), zones: [] };
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) w.shade[y * W + x] = Math.min(3, (w2dNoise(x, y) * 4) | 0);
     return w;
 }
@@ -129,6 +134,7 @@ function w2dStep(w) {
             else if (m === MAT.DIRT && y + 1 < w.H && w.mat[i + w.W] === MAT.AIR) w2dCrumble(w, x, y, i);
         }
     }
+    w2dWindStep(w);
     w2dFlyStep(w, 1 / 60);
     if (w.waves && w.frame % 3 === 0) for (let k = 0; k < 6; k++) { // olas: el mar salpica de a poco
         const i = (Math.random() * w.mat.length) | 0;
@@ -144,6 +150,7 @@ function w2dFling(w, x, y, vx, vy, m) {
 function w2dFlyStep(w, dt) {
     w.fly = w.fly.filter(f => {
         f.vy += W2D.gravity * dt;
+        const [wx, wy] = w2dWindAt(w, f.x, f.y); f.vx += (wx - f.vx) * 1.5 * dt; f.vy += wy * 1.5 * dt; // el viento lo arrastra
         const steps = Math.max(1, Math.ceil(Math.max(Math.abs(f.vx), Math.abs(f.vy)) * dt));
         for (let k = 0; k < steps; k++) {
             const nx = f.x + f.vx * dt / steps, ny = f.y + f.vy * dt / steps;
@@ -223,8 +230,47 @@ function w2dAcid(w, x, y, i) {
 function w2dSmoke(w, x, y, i) {
     w2dWake(w, x, y);
     if (--w.life[i] <= 0) { w.mat[i] = w.mat[i] === MAT.STEAM && Math.random() < 0.35 ? MAT.WATER : MAT.AIR; return; } // el vapor se condensa: vuelve a caer agua
-    const dx = w2dRand(-1, 1);
-    if (y > 0 && w2dIn(w, x + dx, y - 1) && w2dGet(w, x + dx, y - 1) === MAT.AIR) w2dSwap(w, i, i - w.W + dx);
+    const [wx, wy] = w2dWindAt(w, x, y);
+    const dx = Math.random() < Math.min(0.9, Math.abs(wx) / 60) ? Math.sign(wx) : w2dRand(-1, 1), dy = Math.random() < Math.min(0.8, wy / 100) ? 1 : -1; // sube, salvo que el viento lo baje
+    if (w2dIn(w, x + dx, y + dy) && w2dGet(w, x + dx, y + dy) === MAT.AIR) w2dSwap(w, i, i + dy * w.W + dx);
+    else if (dx && w2dIn(w, x + dx, y) && w2dGet(w, x + dx, y) === MAT.AIR) w2dSwap(w, i, i + dx); // arriba tapado: se corre con el viento
+}
+
+// --- EL VIENTO ---
+function w2dWindAt(w, x, y) {
+    const cx = Math.max(0, Math.min(w.cw - 1, (x / W2D.chunk) | 0)), cy = Math.max(0, Math.min(w.ch - 1, (y / W2D.chunk) | 0)), k = (cy * w.cw + cx) * 2;
+    return [w.wind[k], w.wind[k + 1]];
+}
+// Un golpe de aire (el golpe cargado, una explosión): empuja los trozos cercanos, más fuerte en el centro
+function w2dGust(w, x, y, r, vx, vy) {
+    const C = W2D.chunk;
+    for (let cy = 0; cy < w.ch; cy++) for (let cx = 0; cx < w.cw; cx++) {
+        const d = Math.hypot(cx * C + C / 2 - x, cy * C + C / 2 - y); if (d > r) continue;
+        const k = (cy * w.cw + cx) * 2, f = 1 - d / r; w.wind[k] += vx * f; w.wind[k + 1] += vy * f; w.next[cy * w.cw + cx] = 1;
+    }
+}
+function w2dWindStep(w) {
+    const C = W2D.chunk, cw = w.cw, ch = w.ch, v = w.wind;
+    if (w.frame % 8 === 0) { // el calor de cada trozo (fuego y lava), cada 8 cuadros
+        w.heat.fill(0);
+        for (let i = 0; i < w.mat.length; i++) { const m = w.mat[i]; if (m === MAT.FIRE || m === MAT.LAVA) w.heat[(((i / w.W) | 0) / C | 0) * cw + ((i % w.W) / C | 0)]++; }
+    }
+    const old = v.slice(), s = W2D.windSpread;
+    for (let cy = 0; cy < ch; cy++) for (let cx = 0; cx < cw; cx++) {
+        const c = cy * cw + cx, k = c * 2;
+        for (const a of [0, 1]) { // se reparte con los vecinos (el que no tiene vecino de un lado, se lo queda)
+            const me = old[k + a], l = cx > 0 ? old[k - 2 + a] : me, r = cx < cw - 1 ? old[k + 2 + a] : me, u = cy > 0 ? old[k - cw * 2 + a] : me, d = cy < ch - 1 ? old[k + cw * 2 + a] : me;
+            v[k + a] = (me * (1 - 4 * s) + (l + r + u + d) * s) * W2D.windCalm;
+        }
+        const heat = w.heat[c] + (cy < ch - 1 ? w.heat[c + cw] : 0); // el aire caliente sube: el trozo y el de arriba
+        if (heat) v[k + 1] -= Math.min(15, heat * W2D.heatLift);
+    }
+    w.zones.forEach(z => { // las corrientes fijas de la sala: el viento va hacia el de la zona
+        for (let cy = Math.max(0, (z.y / C) | 0); cy < Math.min(ch, Math.ceil((z.y + z.h) / C)); cy++) for (let cx = Math.max(0, (z.x / C) | 0); cx < Math.min(cw, Math.ceil((z.x + z.w) / C)); cx++) {
+            const k = (cy * cw + cx) * 2; v[k] += (z.vx - v[k]) * 0.3; v[k + 1] += (z.vy - v[k + 1]) * 0.3;
+        }
+    });
+    for (let k = 0; k < v.length; k += 2) { const m = Math.hypot(v[k], v[k + 1]); if (m > W2D.windMax) { v[k] *= W2D.windMax / m; v[k + 1] *= W2D.windMax / m; } else if (m < 0.5) v[k] = v[k + 1] = 0; }
 }
 
 // --- CHOQUES (contra los píxeles reales) ---

@@ -4839,6 +4839,18 @@ test('Torre 2D: correr, saltar (más alto si mantenés), plataformas, tajo, sala
     check(cnt(wst, MAT.STEAM) === 0 && cnt(wst, MAT.WATER) > 0, 'el vapor sube y se condensa en agua');
     const wfa = w2dFromRows(['ww', '##']); w2dIgnite(wfa, 8, 8, 3); for (let i = 0; i < 1500; i++) w2dStep(wfa);
     check(cnt(wfa, MAT.ASH) > 0, 'la madera quemada deja ceniza');
+    // el viento: el calor sube, las corrientes de la sala soplan, un golpe de aire se calma solo y arrastra el humo
+    const wwi = w2dFromRows(['....', '....', '.LL.', '####']); for (let i = 0; i < 20; i++) w2dStep(wwi);
+    check(w2dWindAt(wwi, 24, 20)[1] < -5, 'arriba de la lava el aire sube');
+    const wz = w2dFromRows(['....', '....', '####']); wz.zones = [{ x: 0, y: 0, w: 64, h: 32, vx: 0, vy: -300 }]; for (let i = 0; i < 20; i++) w2dStep(wz);
+    check(w2dWindAt(wz, 30, 16)[1] < -150, 'la corriente de la sala sopla');
+    const wg = w2dFromRows(['........', '........', '########']); w2dGust(wg, 64, 16, 40, 250, 0);
+    check(w2dWindAt(wg, 64, 16)[0] > 100, 'el golpe de aire empuja');
+    for (let y = 8; y < 24; y++) w2dSet(wg, 64, y, MAT.SMOKE, 200);
+    for (let i = 0; i < 25; i++) { w2dGust(wg, 64, 16, 40, 30, 0); w2dStep(wg); }
+    let smx = 0, smn = 0; for (let i = 0; i < wg.mat.length; i++) if (wg.mat[i] === MAT.SMOKE) { smx += i % wg.W; smn++; }
+    check(smn && smx / smn > 70, 'el viento se lleva el humo');
+    for (let i = 0; i < 200; i++) w2dStep(wg); check(Math.abs(w2dWindAt(wg, 64, 16)[0]) < 5, 'y después se calma');
     const wv = w2dFromRows(['....', '....', '####']), before = wv.mat.filter(m => m === MAT.SAND).length;
     w2dFling(wv, 10, 5, 60, -50, MAT.SAND); for (let i = 0; i < 120 && wv.fly.length; i++) w2dStep(wv);
     check(!wv.fly.length && wv.mat.filter(m => m === MAT.SAND).length === before + 1, 'lo que vuela cae y vuelve a ser arena');

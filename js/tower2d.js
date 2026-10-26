@@ -72,7 +72,7 @@ const T2D_ROOMS = {
         '#~~~~~~~~~~~~~~~sssssssssssssssssssssssssssssssssssss#######',
         '#ssssssssssssssssssssssssssssssssssssssssssssssssssss#######',
         '############################################################'] },
-    pruebas: { name: 'La sala de pruebas', dark: 0.5, exits: { right: 'playa' }, rows: [
+    pruebas: { name: 'La sala de pruebas', dark: 0.5, exits: { right: 'playa' }, winds: [[37, 1, 2, 9, 0, -300]], rows: [
         '########################################',
         '#.......................................',
         '#.......................................',
@@ -137,7 +137,7 @@ const T2D_ROOMS = {
 const T2D_SIGNS = {
     playa: [[2, 7, '← La sala de pruebas: los materiales de la Torre, uno por uno.']],
     pruebas: [
-        [37, 9, 'Sala de pruebas. Cada pileta tiene un dique de tierra: rompelo con el tajo y mirá qué pasa abajo.'],
+        [37, 9, 'Sala de pruebas. Cada pileta tiene un dique de tierra: rompelo con el tajo y mirá qué pasa abajo. Acá sube una corriente de aire: metete y flotás.'],
         [36, 9, 'AGUA: corre, llena los huecos y se nivela. Adentro te frena y podés nadar (saltá para bracear). Apaga el fuego (sale vapor).'],
         [28, 9, 'ACEITE: corre más lento y es más liviano: flota sobre el agua. Se prende fuego enseguida.'],
         [21, 9, 'ARENA y GRAVA: caen y se amontonan (la grava, más pesada). El tajo las cava; el agua las atraviesa.'],
@@ -304,6 +304,7 @@ function t2dEnterRoom(key, from) {
     const feathers = (t2d && t2d.hero.doubleJump) ? [] : w.markers.F.map(p => ({ x: p.x - 5, y: p.y - 12, w: 10, h: 10 }));
     const torches = w.markers.T.map(p => ({ x: p.x, y: p.y }));
     w.waves = !!room.waves;
+    w.zones = (room.winds || []).map(([c, r, cw, chh, vx, vy]) => ({ x: c * T, y: r * T, w: cw * T, h: chh * T, vx, vy })); // corrientes de aire fijas
     t2d = Object.assign(t2d || { clock: 0, realClock: 0, msg: null, freeze: 0, shake: 0, parts: [], ghosts: [], squash: { x: 1, y: 1 } }, { key, room, world: w, W, H, hero: h, enemies, feathers, torches, nums: [], flashes: [] });
     t2d.fadeAt = t2d.realClock; // fundido al entrar a la sala
     t2d.cam = { x: Math.max(0, Math.min(W - T2D.VIEW_W, h.x - T2D.VIEW_W / 2)), y: Math.max(0, Math.min(H - T2D.VIEW_H, h.y - T2D.VIEW_H / 2)) };
@@ -332,6 +333,7 @@ function t2dUpdate(input, dt) {
         t2dFx(dt); return;
     }
     if (g.clock - (h.wakeAt ?? -9) < 0.45) { t2dFx(dt); return; } // levantándose
+    t2dWindHero(g, h, dt);
     t2dStepHero(g.world, h, input, dt);
     // lo que pasó en el paso: polvo, estirar y aplastar, sonido
     (h.events || []).forEach(ev => {
@@ -378,6 +380,7 @@ function t2dUpdate(input, dt) {
         if (h.chargeReady) {
             h.aim = 'side'; h.combo = 3; h.attackAt = g.clock; h.hitThisSwing = new Set(); h.dug = false; h.lungeUntil = (h.t || 0) + C.lungeTime;
             g.shake = Math.max(g.shake, F.shake); t2dSfx('crit');
+            w2dGust(g.world, h.x + h.w / 2 + h.facing * 20, h.y + h.h / 2, 56, h.facing * 260, -30); // el golpe cargado empuja el aire
         }
         h.charging = false; h.chargeReady = false;
     }
@@ -449,9 +452,19 @@ function t2dFx(dt) {
     g.cam.x += (tx - g.cam.x) * k; g.cam.y += (ty - g.cam.y) * k;
     g.shake *= Math.pow(0.002, dt);
     const s = 1 - Math.exp(-14 * dt); g.squash.x += (1 - g.squash.x) * s; g.squash.y += (1 - g.squash.y) * s;
-    g.parts = g.parts.filter(p => { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 300 * dt; return g.clock - p.at < p.life; });
+    g.parts = g.parts.filter(p => { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += (p.float ? 0 : 300) * dt; return g.clock - p.at < p.life; });
     g.ghosts = g.ghosts.filter(gh => g.realClock - gh.at < 0.18);
     g.nums = g.nums.filter(n => g.realClock - n.at < 0.7); g.flashes = g.flashes.filter(f => g.realClock - f.at < 0.1);
+}
+// El viento empuja al héroe: de costado lo corre (menos si está parado en el piso); para arriba lo levanta (corrientes)
+function t2dWindHero(g, h, dt) {
+    const [wx, wy] = w2dWindAt(g.world, h.x + h.w / 2, h.y + h.h / 2);
+    if (Math.abs(wx) > 20 && (Math.sign(h.vx) !== Math.sign(wx) || Math.abs(h.vx) < Math.abs(wx))) h.vx += wx * (h.onGround ? 1 : 3) * dt;
+    if (wy < -20 && h.vy > wy * 0.6) h.vy += wy * 5 * dt; // lo bastante fuerte gana a la gravedad: flotás y subís
+    else if (wy > 20) h.vy += wy * 2 * dt;
+    // se ve: rayitas de aire donde sopla fuerte
+    if (Math.random() < 0.5) { const x = g.cam.x + Math.random() * T2D.VIEW_W, y = g.cam.y + Math.random() * T2D.VIEW_H, [vx, vy] = w2dWindAt(g.world, x, y);
+        if (Math.hypot(vx, vy) > 60 && !w2dSolid(g.world, x, y)) g.parts.push({ x, y, vx, vy, life: 0.35, at: g.clock, color: 'rgba(235,240,255,0.55)', size: 1, float: true }); }
 }
 function t2dHurt(n, dir, src) {
     const g = t2d, h = g.hero;
