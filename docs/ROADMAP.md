@@ -271,6 +271,9 @@ Modo nuevo en paralelo: `torre2d.html` + `js/tower2d.js` (se entra desde el men�
       más chica que la de choque (se ven con H). Falta: la capa, el tajo hacia abajo y los fondos.
 - [ ] **Sustancias y fluidos** (pedido del usuario 2026-10-26): quemarse, mojarse, aceite, ahogarse y quedar enterrado
       (héroe y enemigos); el agua que se nivela, corrientes, vapor que condensa y burbujas.
+      **Hecho 2026-10-26: la sala de pruebas** (muelle de la playa → izquierda): 4 piletas (agua, aceite, arena y grava,
+      lava) con un dique de tierra que se rompe con el tajo; abajo, lo que reciben (agua, madera y aceite para ver el fuego).
+      Ahí se mide cada cambio de fluidos y sustancias.
 - [ ] **Afinar la sensación con el usuario:** jugarlo, tocar el panel (T) y pasar a los valores de fábrica lo que guste.
 - [x] **El mapa (decidido por el usuario 2026-10-25): pisos fijos y partes procedurales.** Cada piso tiene salas hechas
       a mano (la entrada, el pueblo, el jefe, los caminos que abre cada habilidad) y tramos que se arman al azar con

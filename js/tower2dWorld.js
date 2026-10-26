@@ -83,7 +83,7 @@ function w2dFromImage(img) {
     return w;
 }
 // Desde filas de texto (bloques de 16 px; para las pruebas y por si la imagen no carga):
-// # roca · p piedra · t tierra · s arena · g grava · ~ agua · o aceite · = madera (tabla de 4 px) · w madera · L lava · ^ espinas · P E C F marcas
+// # roca · p piedra · t tierra · s arena · g grava · ~ agua · o aceite · = madera (tabla de 4 px) · w madera · L lava · ^ espinas · h hueco angosto · P E C F marcas
 function w2dFromRows(rows, T = 16) {
     const w = w2dMake(rows[0].length * T, rows.length * T);
     const fill = { '#': MAT.ROCK, p: MAT.STONE, t: MAT.DIRT, s: MAT.SAND, '~': MAT.WATER, w: MAT.WOOD, L: MAT.LAVA, g: MAT.GRAVEL, o: MAT.OIL };
@@ -91,6 +91,7 @@ function w2dFromRows(rows, T = 16) {
         const x0 = tx * T, y0 = ty * T;
         if (fill[c] !== undefined) { for (let y = y0; y < y0 + T; y++) w.mat.fill(fill[c], y * w.W + x0, y * w.W + x0 + T); }
         else if (c === '=') { for (let y = y0; y < y0 + 4; y++) w.mat.fill(MAT.WOOD, y * w.W + x0, y * w.W + x0 + T); }
+        else if (c === 'h') { for (let y = y0; y < y0 + T; y++) w.mat.fill(MAT.ROCK, y * w.W + x0 + 6, y * w.W + x0 + T); } // hueco angosto
         else if (c === '^') { for (let k = 0; k < T; k++) { const hh = 7 - Math.abs((k % 4) - 2) * 3; for (let y = y0 + T - hh; y < y0 + T; y++) w.mat[y * w.W + x0 + k] = MAT.SPIKE; } } // dientes de 1-7 px
         else if (w.markers[c]) w.markers[c].push({ x: x0 + T / 2, y: y0 + T - 1 });
     }));

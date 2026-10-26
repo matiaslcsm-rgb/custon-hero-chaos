@@ -53,10 +53,11 @@ try { const saved = JSON.parse(localStorage.getItem('t2d-feel') || '{}'); T2D_TU
 // --- LAS SALAS. Cada una es una imagen en torre2d/salas/<nombre>.png (cada color, un material: docs/TORRE2D-SALAS.md).
 //     Si la imagen no carga (o en las pruebas), se arma desde estas filas de bloques de 16 px:
 //     # roca · p piedra · t tierra · s arena · g grava · ~ agua · o aceite · = tabla de madera · w madera · L lava · ^ espinas
+//     h hueco angosto (6 px de aire a la izquierda: pasa el fluido, no el héroe)
 //     P entrada · E caminante · C embestidor (avisa y embiste) · F la Pluma de Arén (doble salto) · T antorcha
 //     Los bordes abiertos llevan a la sala que dice `exits`.
 const T2D_ROOMS = {
-    playa: { name: 'La playa', bg: 'beach', camUp: 45, waves: true, exits: { right: 'base' }, rows: [
+    playa: { name: 'La playa', bg: 'beach', camUp: 45, waves: true, exits: { left: 'pruebas', right: 'base' }, rows: [
         '.....................................................#######',
         '.....................................................#######',
         '.....................................................#######',
@@ -64,13 +65,28 @@ const T2D_ROOMS = {
         '.....................................................#######',
         '.....................................................#######',
         '............................................................',
-        '#............................##.......ss....................',
-        '#................ss....ww.P..##.....sssss...................',
+        '.............................##.......ss....................',
+        '================.ss....ww.P..##.....sssss...................',
         '#~~~~~~~~~~~~~~~sssssssssssssssssssssssssssssssssssss#######',
         '#~~~~~~~~~~~~~~~sssssssssssssssssssssssssssssssssssss#######',
         '#~~~~~~~~~~~~~~~sssssssssssssssssssssssssssssssssssss#######',
         '#ssssssssssssssssssssssssssssssssssssssssssssssssssss#######',
         '############################################################'] },
+    pruebas: { name: 'La sala de pruebas', dark: 0.5, exits: { right: 'playa' }, rows: [
+        '########################################',
+        '#.......................................',
+        '#.......................................',
+        '#.......................................',
+        '#.......................................',
+        '#.......................................',
+        '#.......................................',
+        '#.......................................',
+        '#########LLLt..#gggt..#ooot..#~~~t......',
+        '#########LLLt.T#ssst.T#ooot.T#~~~t.T.P..',
+        '#############h######h######h######h#####',
+        '#..w...........#......#......#.........#',
+        '#..www.oooo#~~~#......#~~~~~~#.....#...#',
+        '########################################'] },
     base: { name: 'La puerta de la Torre', dark: 0.74, exits: { left: 'playa', right: 'salon' }, rows: [
         '########################################',
         '#......................................#',
@@ -116,6 +132,17 @@ const T2D_ROOMS = {
         '#....#ooooo#...............E...........#',
         '#....#~~~~~#........T..............T...#',
         '###############################...######'] }
+};
+// Carteles de cada sala: [columna, fila, texto] (al pasar cerca se lee el texto)
+const T2D_SIGNS = {
+    playa: [[2, 7, '← La sala de pruebas: los materiales de la Torre, uno por uno.']],
+    pruebas: [
+        [37, 9, 'Sala de pruebas. Cada pileta tiene un dique de tierra: rompelo con el tajo y mirá qué pasa abajo.'],
+        [36, 9, 'AGUA: corre, llena los huecos y se nivela. Adentro te frena y podés nadar (saltá para bracear). Apaga el fuego.'],
+        [28, 9, 'ACEITE: corre más lento y es más liviano: flota sobre el agua. Se prende fuego enseguida.'],
+        [21, 9, 'ARENA y GRAVA: caen y se amontonan (la grava, más pesada). El tajo las cava; el agua las atraviesa.'],
+        [14, 9, 'LAVA: corre lenta y quema. Con el agua se hace piedra y vapor; prende la madera y el aceite.']
+    ]
 };
 const T2D_WORLDS = {}; // el mundo de cada sala (lo que rompiste queda roto mientras dure la partida)
 
@@ -326,6 +353,7 @@ function t2dUpdate(input, dt) {
     h.wasWet = wet;
     if (h.onGround && Math.abs(h.vx) > 80 && g.clock - (h.stepDustAt || 0) > 0.14) { h.stepDustAt = g.clock; t2dDust(h.x + h.w / 2 - h.facing * 3, h.y + h.h, 1, 0.4); } // polvo al correr
     if (g.clock < (h.dashUntil || 0) && Math.floor(g.clock * 60) % 2 === 0) g.ghosts.push({ x: h.x, y: h.y, facing: h.facing, frame: t2dHeroFrame(h, g.clock), at: g.realClock });
+    (T2D_SIGNS[g.key] || []).forEach(sg => { if (Math.abs(h.x + h.w / 2 - (sg[0] * T + T / 2)) < 20 && g.signAt !== sg) { g.signAt = sg; t2dMsg(sg[2]); } }); // carteles
     // salir por un borde: la sala vecina
     const ex = g.room.exits;
     if (h.x + h.w < 0 && ex.left) return t2dEnterRoom(ex.left, 'right');
@@ -492,6 +520,7 @@ function t2dDraw(ctx, scale) {
         const fl = Math.sin(g.realClock * 13 + t.x) * 0.5 + Math.sin(g.realClock * 7.3 + t.y) * 0.5;
         ctx.fillStyle = '#ff7a1a'; ctx.fillRect(t.x - 2, t.y - 14 - (fl > 0.3 ? 1 : 0), 4, 4); ctx.fillStyle = '#ffd23f'; ctx.fillRect(t.x - 1, t.y - 13 - (fl > 0 ? 1 : 0), 2, 3);
     });
+    (T2D_SIGNS[g.key] || []).forEach(([c, r]) => { const x = c * T + T / 2, y = (r + 1) * T; ctx.fillStyle = '#5e3c22'; ctx.fillRect(x - 1, y - 12, 2, 12); ctx.fillStyle = '#b07440'; ctx.fillRect(x - 6, y - 17, 12, 7); ctx.fillStyle = '#3a2516'; ctx.fillRect(x - 4, y - 15, 8, 1); ctx.fillRect(x - 4, y - 13, 6, 1); }); // carteles
     g.feathers.forEach(f => { ctx.fillStyle = '#ffd166'; ctx.fillRect(f.x + 3, f.y + Math.sin(g.clock * 3) * 2, 4, 10); ctx.fillStyle = '#fff3c4'; ctx.fillRect(f.x + 4, f.y + 1 + Math.sin(g.clock * 3) * 2, 2, 6); });
     g.enemies.forEach(e => { if (e.hp > 0) t2dDrawEnemy(ctx, g, e, 1, 1); });
     (g.corpses || []).forEach(c => { const k = (g.realClock - c.at) / 0.4; if (k < 1) t2dDrawEnemy(ctx, g, c.e, 1 + k * 0.4, 1 - k * 0.9, 1 - k); }); // se aplasta y se apaga

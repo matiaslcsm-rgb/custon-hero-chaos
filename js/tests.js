@@ -4795,6 +4795,13 @@ test('Torre 2D: correr, saltar (más alto si mantenés), plataformas, tajo, sala
     check(c.state === 'stun' && t2d.hero.hp === hp0, 'la parada justo a tiempo lo aturde y no te saca vida');
     // los modelos: cada criatura tiene su dibujo y su caja es el contorno del dibujo; el héroe recibe daño en una caja más chica
     ['walker', 'charger'].forEach(k => { const B = t2dBody(k), e = { kind: k, x: 0, y: 0, w: B.w, h: B.h, vx: 1, state: 'walk', hurtAt: -9 }; check(B.w > 4 && B.h > 4 && B.w < 40, k + ': su caja sale del dibujo'); t2dDrawEnemy(document.createElement('canvas').getContext('2d'), t2d, e, 1, 1); });
+    // la sala de pruebas (a la izquierda de la playa): romper el dique del agua la hace caer por el hueco angosto
+    check(T2D_ROOMS.playa.exits.left === 'pruebas' && T2D_ROOMS.pruebas.exits.right === 'playa', 'la playa lleva a la sala de pruebas');
+    t2d = null; t2dEnterRoom('pruebas'); run({}, 0.3);
+    const lw = t2d.world, wetBelow = () => { let n = 0; for (let i = 176 * lw.W; i < lw.mat.length; i++) if (lw.mat[i] === MAT.WATER) n++; return n; }, w0 = wetBelow();
+    Object.assign(t2d.hero, { x: 34 * 16 + 7, y: 138, vx: 0, vy: 0, facing: -1 }); run({}, 0.2); t2d.hero.facing = -1;
+    run({ attack: true }, 0.3); run({}, 3);
+    check(wetBelow() - w0 > 200, 'el tajo rompe el dique y el agua cae abajo');
     const hb = t2dHurtBox(t2d.hero); check(hb.w < t2d.hero.w && hb.h < t2d.hero.h && hb.x > t2d.hero.x, 'la caja de daño del héroe es más chica que la de choque');
     // cada estado tiene su cuadro dibujado (saltar, punta, caer, aterrizar, dash, golpe, pared, correr)
     const states = [{ onGround: false, vy: -200 }, { onGround: false, vy: 0 }, { onGround: false, vy: 200 }, { onGround: true, vx: 0, landAt: 5 },

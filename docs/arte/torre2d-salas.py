@@ -39,6 +39,8 @@ for name, rows in rooms.items():
                 px[x, y] = COL[c] + (255,)
             elif c == '=':
                 if y % T < 4: px[x, y] = COL[c] + (255,)
+            elif c == 'h':  # hueco angosto: 6 px de aire a la izquierda, el resto roca
+                if x % T >= 6: px[x, y] = COL['#'] + (255,)
             elif c == '^':
                 k = x % T; hh = 7 - abs((k % 4) - 2) * 3
                 if y % T >= T - hh: px[x, y] = COL[c] + (255,)

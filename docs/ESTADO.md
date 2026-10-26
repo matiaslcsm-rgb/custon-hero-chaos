@@ -8,7 +8,8 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 
 ## Rumbo actual (2026-10-25, decidido por el usuario)
 - **Infinite Tower vuelve en 2D lateral**, metroidvania conectado, como modo nuevo en paralelo (`torre2d.html`,
-  `js/tower2d.js`; fase T2D del roadmap). Prototipo jugable hecho: 3 salas, saltos, plataformas, tajos, doble salto.
+  `js/tower2d.js`; fase T2D del roadmap). Prototipo jugable: playa + 3 salas + sala de pruebas de materiales (por el
+  muelle de la playa, a la izquierda), mundo de píxeles, enemigos dibujados con cajas de golpe a medida, luz, sonido y joystick.
 - **MATCH:** foco en la creación de personajes (los 8 competidores y después un creador para el jugador) y los menús.
 - **MATCH: el RTS en pausa** (duelos, controles estilo Dota, IA de rivales, banco de duelos).
 
