@@ -1,110 +1,137 @@
-# Ficha: Flash, la camarógrafa del show
+# Ficha: Flash, el camarógrafo robot del show
 
 > **Estado: borrador para aprobar** (2026-10-26). Primera ficha de MATCH. Reemplaza al **Sniper**, el que más gana hoy
-> (59% de las partidas en el banco). Nada de esto está programado todavía: primero lo aprobás o lo cambiás.
+> (59% de las partidas en el banco). Nada de esto está programado todavía.
+> **Rediseñado por el usuario (2026-10-26):** robot sobre un trípode de ruedas, con la cara de cámara de TV, un brazo con
+> herramientas y 3 drones que salen de su cuerpo; su habilidad principal es **Cámara Fija** (canalizada).
 
 ![Boceto de Flash](flash.png)
 
 *(Boceto para aprobar el aspecto: `docs/arte/competidor-flash.py`. No es el sprite final.)*
 
 ## Quién es
-Camarógrafa del propio show "En Vivo". Se metió a competir porque conoce cada ángulo de la arena. Pelea con lo que
-tiene: la cámara al hombro, un flash enorme y el ojo para el "primer plano".
-- **Silueta:** la cámara grande al hombro, con el flash arriba (se reconoce de lejos). Visor cian, campera hueso.
-- **Colores:** amarillo del flash (lo que pega) y cian del visor y la lente; la luz magenta "EN VIVO" de la cámara.
-- **Rol:** distancia y control. Gana pegando de lejos y encandilando; pierde si la agarran de costado o de cerca.
+El camarógrafo del propio show "En Vivo": un robot de estudio que se metió a competir. No tiene cara: **su rostro es una
+cámara de TV**, con la lente como ojo y la luz roja de "grabando".
+- **Cuerpo:** un **trípode de 3 patas con ruedas** (se planta o rueda), un torso con 3 bahías y **un brazo con varias
+  herramientas** (llave, pinza, destornillador).
+- **Sus 3 drones son parte de su cuerpo** y se despliegan de él:
+  - **el aéreo**, que graba desde arriba (pega **físico**);
+  - **el de sonido**, un micrófono volador (pega **mágico**);
+  - **el de luz**, el reflector (pega **puro**: ignora armadura y resistencia). Es el "flash" del nombre.
+- **Colores:** hueso y gris de estudio, cian de la lente, magenta de la luz "grabando", amarillo de la luz y las
+  herramientas.
+- **Rol:** distancia y control. Se planta, encuadra y castiga; pierde si lo agarran de costado o lo obligan a moverse.
 
 ## Atributos y base (comparada con el Sniper)
 Atributo principal: **Reflejos**. Los números siguen la escala de hoy (la de los atributos nuevos está pendiente).
 
 | | Sniper hoy | **Flash** | Por qué |
 |---|---|---|---|
-| Vida base | 85 | **90** | Un poco más firme: su juego es aguantar el cara a cara de lejos. |
-| Daño base | 8 | **7** | Pega menos por golpe: el daño extra sale de su marca. |
-| Velocidad de ataque | 0,85 | **0,9** | |
+| Vida base | 85 | **95** | Es un robot de estudio, más firme; su juego es plantarse. |
+| Daño base | 8 | **7** | Pega menos por golpe: el daño grande es de los drones. |
+| Velocidad de ataque | 0,85 | **0,85** | |
 | Rango | 5 | **4** | Menos que el Sniper: hoy el rango largo gana sin que el otro pueda hacer nada. |
-| Blindaje / Reflejos / Procesador | 16 / 22 / 15 | **17 / 20 / 16** | Ganancia por nivel: 1,8 / 2,6 / 1,6. |
+| Velocidad | 2,3 | **2,1** | Rueda, pero no es rápido. |
+| Blindaje / Reflejos / Procesador | 16 / 22 / 15 | **18 / 19 / 16** | Ganancia por nivel: 2,0 / 2,4 / 1,6. |
 
 ## Su sello (innato): **Primer Plano**
 Cada golpe básico suyo le pone al rival una **marca de cámara** (se ven sobre su cabeza, como cargas): hasta **3**, duran
 **4 s**. Cada marca hace que el rival reciba **+4% de daño de todos** (máximo +12%).
-- **Lectura:** las marcas están a la vista. El rival sabe que, cuanto más tiempo se quede en su rango, peor.
+- **Lectura:** las marcas están a la vista; cuanto más te quedás en su rango, peor.
 - **Respuesta:** salir del rango 4 s y se borran.
 
 ## Sus módulos
 
-### 1. **Flash** (el golpe fuerte, anunciado)
-- **Aviso:** 0,7 s de preparación. En el piso aparece un **cono rojo** (60°, 4 casillas de largo) hacia donde apunta, y
-  la cámara se ilumina. Se corta si la aturden en ese tiempo.
-- **Efecto:** daño chico (40% de su daño + 10% de Procesador). Al que está en el cono **viniendo hacia ella o quieto** lo
-  **encandila**: sus golpes fallan el **50% por 2 s**. Al que se está **alejando** solo le hace el daño.
-- **Después:** queda **expuesta 0,4 s** (no puede atacar ni moverse).
+### 1. **Destello** (el dron de luz)
+- **Aviso:** 0,7 s. El dron de luz sale de su bahía y en el piso aparece un **cono rojo** (60°, 4 casillas). Se corta si lo
+  aturden.
+- **Efecto:** daño chico (puro, 15 + 10% de Procesador). Al que está en el cono **viniendo hacia él o quieto** lo
+  **encandila**: sus golpes fallan el **50% por 2 s**. Al que se está alejando, solo el daño.
+- **Después:** queda expuesto 0,4 s.
 - **Enfriamiento:** 12 s · **Energía:** 40.
-- **Lectura:** ¿me salgo del cono (y dejo de pegarle) o me la juego? ¿O le corto la preparación?
-- **Respuesta:** **entrarle de costado**, salir del cono caminando o darse vuelta.
+- **Lectura y respuesta:** ¿me salgo del cono o me la juego? Entrarle de costado o salir caminando.
 
-### 2. **Zoom** (la posición)
-- Da **2 casillas para atrás** de un salto, mirando al rival, y su próximo golpe en 3 s tiene **+2 de rango y +40% de
-  daño** (y pone 2 marcas de una).
+### 2. **Travelling** (las ruedas)
+- Pliega las patas y **rueda 2,5 casillas para atrás** mirando al rival; su próximo golpe en 3 s tiene **+2 de rango y
+  +40% de daño** (y pone 2 marcas de una).
 - **Enfriamiento:** 10 s · **Energía:** 30.
-- **Lectura:** si te acercás, ella se aleja y te castiga. ¿La perseguís o esperás a que lo gaste?
-- **Respuesta:** esperar el Zoom y recién ahí cerrar la distancia.
+- **Lectura y respuesta:** si lo perseguís, se aleja y te castiga. Esperá a que lo gaste y recién ahí cerrá la distancia.
 
-### 3. **Toma Larga** (pasiva)
-- Si se queda **quieta 1 s** filmando, gana **+20% de velocidad de ataque** mientras no se mueva. Se pierde al caminar.
-- Encaja con "no se pega caminando": su fuerza está en plantarse.
-- **Lectura y respuesta:** se ve en la cámara (la luz "EN VIVO" fija). Moverla, obligarla a caminar, le saca la ventaja.
+### 3. **Trípode** (pasiva)
+- Si se queda **quieto 1 s**, clava las patas: **+20% de velocidad de ataque** mientras no se mueva.
+- **Se ve:** las patas se abren y la luz de "grabando" queda fija. Moverlo o hacerlo caminar le saca la ventaja.
 
-### 4. Definitiva: **Repetición**
-- **Aviso:** 1,2 s canalizando, con el símbolo de "rebobinar" grande sobre el rival. Se corta aturdiéndola.
-- **Efecto:** el rival **revive el 60% del daño que ella le hizo en los últimos 3 s**, de una.
+### 4. Definitiva: **Cámara Fija** (diseño del usuario)
+- **Aviso:** 0,5 s. Clava el trípode y en el piso aparece **un cono rojo delante de él** (60°, 5 casillas). Al terminar el
+  aviso, **fija como objetivo al rival más cercano dentro del cono** (si no hay nadie, no pasa nada y el enfriamiento
+  queda en 10 s).
+- **Canalización de 3 s:** Flash se queda **fijo** (no camina ni ataca). El objetivo queda **ralentizado 40%** y los **3
+  drones se despliegan y lo atacan**: cada dron le pega **una vez por segundo** con **daño fijo** (no depende de los
+  atributos):
+
+  | Dron | Tipo | Por golpe (nivel 1 / 2 / 3) | En los 3 s |
+  |---|---|---|---|
+  | Aéreo | físico | 10 / 15 / 20 | 30 / 45 / 60 |
+  | Sonido | mágico | 10 / 15 / 20 | 30 / 45 / 60 |
+  | Luz | puro | 6 / 9 / 12 | 18 / 27 / 36 |
+
+  En total, 78 / 117 / 156 antes de armadura, resistencia y el ajuste de duelo (en duelo, hoy, −60%).
+- **Se corta si:** lo aturden o lo empujan, el objetivo sale a más de **7 casillas**, o muere. Al cortarse, los drones
+  vuelven a su cuerpo.
 - **Enfriamiento:** 60 / 50 / 40 s · **Energía:** 100 / 120 / 140.
-- **Lectura:** cuanto más le pegó antes, más duele. Ella busca el momento justo después de una buena racha.
-- **Respuesta:** cortarle la canalización, o no comerse golpes justo antes (salir del rango cuando ves que la carga).
+- **Lectura:** el cono avisa medio segundo antes: el rival puede salirse. Una vez fijado, ¿corro (lento) para salir del
+  alcance, o me quedo y le pego para cortarlo?
+- **Respuesta:** salir del cono en el aviso; guardar un aturdimiento para cortar la canalización; o correr lejos (con la
+  ralentización llega justo: los golpes del final no le pegan).
+- **Por qué tres tipos de daño:** ninguna defensa sola alcanza (la armadura frena al aéreo, la resistencia al de sonido y
+  nada frena al de luz). Premia armar defensa mezclada contra él.
 
-## Cómo pelea un duelo con ella
-1. Planta (Toma Larga) y pega de lejos poniendo marcas.
-2. Si el rival se acerca: Zoom para atrás y un golpe fuerte.
-3. Cuando el rival viene de frente: Flash, y lo deja fallando la mitad.
-4. Después de una buena racha: Repetición.
+## Cómo pelea un duelo
+1. Se planta (Trípode) y pega de lejos poniendo marcas.
+2. Si el rival se acerca: Travelling para atrás y un golpe fuerte.
+3. Si viene de frente: Destello, y lo deja fallando la mitad.
+4. Con el rival marcado y lento: Cámara Fija.
 
-**Cómo se le gana:** de costado y sin darle tiempo. Guardar un aturdimiento para el Flash o la Repetición. Hacerla
-caminar para que pierda la Toma Larga.
+**Cómo se le gana:** de costado y sin darle tiempo; obligarlo a moverse; guardar el aturdimiento para la Cámara Fija.
 
-**Buenos y malos cruces (a medir):**
-- Bien contra los de cuerpo a cuerpo que vienen de frente (los encandila).
-- Mal contra **Kilo** (los drones pegan por él: encandilarlo a él no los frena).
-- Mal contra **Glitch** (le copia el Flash).
-- Parejo contra **Vector**: él guarda la guardia para su golpe cargado, ella guarda el Flash.
+**Cruces (a medir):**
+- Bien contra los de cuerpo a cuerpo que vienen de frente.
+- Mal contra **Glitch** (le copia la Cámara Fija) y contra quien tenga aturdimientos rápidos.
+- Parejo contra **Vector** (la guardia contra el Destello).
+- ⚠️ **Kilo también tenía drones** (de entrega). Para que no se pisen, propongo que Kilo cambie los drones por otra cosa
+  cuando hagamos su ficha (por ejemplo, paquetes que tira y explotan).
 
 ## Frases del show
-- **Al entrar:** "¡Luces, cámara... y vos, al piso!" · "Sonreí, que salís en todas las pantallas."
-- **Al ganar un duelo:** "Corte. Se imprime." · "Esa toma va a la repetición."
-- **Al perder:** "Se me fue de foco..." · "¡Corten! ¡Corten!"
-- **El conductor la presenta:** "¡Desde detrás de cámara, la que nunca se pierde un ángulo... FLASH!"
+- **Al entrar:** "Grabando." · "Tres, dos, uno... ¡al aire!"
+- **Al ganar un duelo:** "Corte. Se imprime." · "Esta va a la repetición."
+- **Al perder:** "Señal... perdida..." · "Fuera de foco."
+- **El conductor lo presenta:** "¡El que nunca se pierde una toma, el ojo del show... FLASH!"
 
 ## Lo que hace falta en el motor
 | Pieza | ¿Existe? |
 |---|---|
-| Marcas con cargas a la vista y +% de daño recibido | Casi: existe `dmgTakenPct` (lo usa Condenado); faltan las cargas sobre la cabeza. |
-| Preparación anunciada con marca en el piso (cono) y que se corte aturdiendo | La Torre tiene avisos (`towerTelegraph.js`); falta traerlos a MATCH, con forma de cono. |
-| Encandilado (falla el 50% de sus golpes) | Nuevo, chico: una probabilidad de fallar en el golpe básico. |
-| "Viniendo hacia ella o quieto" | Nuevo, chico: mirar hacia dónde camina el rival. |
-| Salto para atrás (Zoom) | Hay movimientos de habilidad (Danzante); se reusa. |
-| Repetición (guardar el daño de los últimos 3 s) | Nuevo, chico: un registro del daño que ella hizo. |
+| Daño físico, mágico y puro | Sí (`dealDamage` en `js/combat.js`). |
+| Marcas con cargas a la vista y +% de daño recibido | Casi: existe `dmgTakenPct`; faltan las cargas sobre la cabeza. |
+| Aviso con cono en el piso que se corta aturdiendo | La Torre tiene avisos (`towerTelegraph.js`); falta traerlos a MATCH, con forma de cono. |
+| **Canalización** (quieto, se corta con aturdimiento, empuje o distancia) | **Nuevo.** Pieza general: la van a usar otros competidores. |
+| Drones que salen del cuerpo y pegan (dibujo y animación) | Nuevo: dibujarlos y animarlos saliendo y volviendo. |
+| Encandilado (falla el 50%) y "viniendo hacia él" | Nuevo, chico. |
+| Rodar para atrás | Hay movimientos de habilidad (Danzante); se reusa. |
 
 ## Qué medir cuando esté jugable
-- Gana entre el **45% y el 55%** de sus duelos en el banco (el Sniper hoy, mucho más).
+- Gana entre el **45% y el 55%** de sus duelos en el banco.
 - Sus duelos duran más que los del Sniper (meta del juego: 15 a 30 s).
-- El piloto evita entre el **30% y el 70%** de sus Flash.
+- El piloto evita entre el **30% y el 70%** de sus Destellos y Cámaras Fijas (saliéndose en el aviso o cortándolas).
 - Ningún cruce 80 a 20.
 
 ## (decisión) Para aprobar
-1. **El encandilado:**
-   - **a) Falla el 50% de sus golpes 2 s (recomendado):** fuerte pero no anula; se sigue peleando.
-   - b) Falla todos sus golpes 1,2 s: más claro, más frustrante.
-   - c) No puede apuntar módulos 2 s: pega, pero no tira habilidades.
-2. **La definitiva:**
-   - **a) Repetición (recomendada):** premia jugar bien antes; se lee y se corta.
-   - b) Corte a Comerciales: saca al rival del duelo 1,5 s y ella se cura un 15%.
-3. **El aspecto:** ¿el boceto va (camarógrafa con cámara al hombro y flash), o la querés distinta?
+1. **¿Cámara Fija es su definitiva?**
+   - **a) Sí, definitiva (recomendado):** 3 s con 3 drones es mucho; con enfriamiento largo se lee como "su momento".
+   - b) Módulo común: enfriamiento de 18 s, pero 2 s de canalización y la mitad del daño.
+2. **¿Los drones se pueden romper durante la Cámara Fija?**
+   - **a) No (recomendado):** la respuesta es cortarlo a él (aturdir) o escaparse; más simple de leer.
+   - b) Sí: cada dron tiene poca vida; romperlo saca su daño. Más profundo, pero se parece a Kilo.
+3. **El nombre:** ¿sigue siendo **Flash** (el dron de luz) o le ponemos otro, como **Rec**, **Toma** o **Trípode**?
+4. **El encandilado del Destello:** **a) falla el 50% de sus golpes 2 s (recomendado)**; b) falla todos 1,2 s; c) no puede
+   tirar módulos 2 s.
+5. **El aspecto:** ¿el boceto va?

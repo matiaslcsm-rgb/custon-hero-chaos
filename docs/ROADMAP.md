@@ -582,7 +582,7 @@ si el usuario lo confirma.
       lo programa el ingeniero-de-motor y lo muestra el disenador-de-interfaz.
 - [ ] **Ficha del primer competidor** (disenador-de-competidores): una ficha por competidor en `docs/competidores/`, de a
       una, para que el usuario la apruebe antes de programarla. Empezar por el que reemplaza al que más gana hoy (el Sniper).
-      **2026-10-26: borrador de Flash** (elegida por el usuario; reemplaza al Sniper) en `docs/competidores/flash.md`, con
+      **2026-10-26: borrador de Flash** (elegido por el usuario; reemplaza al Sniper; rediseñado por el usuario como robot camarógrafo con 3 drones y Cámara Fija) en `docs/competidores/flash.md`, con
       boceto (`flash.png`). Falta que el usuario apruebe el encandilado, la definitiva y el aspecto.
 - [ ] **Inventario de lo que hay que cambiar, archivo por archivo:** buscar en el código, los datos y los textos de la
       interfaz todo nombre o kit que venga de Dota (héroes, habilidades, ítems, "objetos neutrales", comentarios que
