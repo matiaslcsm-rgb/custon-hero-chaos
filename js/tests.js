@@ -4788,11 +4788,14 @@ test('Torre 2D: correr, saltar (más alto si mantenés), plataformas, tajo, sala
     check(w.hp === 5 - T2D.slash.dmg[3] && hh.x - xc > 20, 'al soltar, el golpe cargado avanza y pega fuerte');
     t2d = null; t2dEnterRoom('base'); run({}, 0.3);
     const c = t2d.enemies.find(o => o.kind === 'charger'), hp0 = t2d.hero.hp;
-    Object.assign(c, { x: t2d.hero.x + 60, y: t2d.hero.y + t2d.hero.h - c.h, state: 'walk', stateAt: -9 }); t2d.enemies = [c];
+    Object.assign(c, { x: t2d.hero.x + 60 - c.w, y: t2d.hero.y + t2d.hero.h - c.h, state: 'walk', stateAt: -9 }); t2d.enemies = [c];
     run({}, 0.05);
     checkEq(c.state, 'windup', 'el embestidor avisa antes de embestir');
     for (let t = 0; t < 1.5 && c.state !== 'stun'; t += dt) run({ parry: c.state === 'rush' && Math.abs(c.x - t2d.hero.x) < 22 }, dt);
     check(c.state === 'stun' && t2d.hero.hp === hp0, 'la parada justo a tiempo lo aturde y no te saca vida');
+    // los modelos: cada criatura tiene su dibujo y su caja es el contorno del dibujo; el héroe recibe daño en una caja más chica
+    ['walker', 'charger'].forEach(k => { const B = t2dBody(k), e = { kind: k, x: 0, y: 0, w: B.w, h: B.h, vx: 1, state: 'walk', hurtAt: -9 }; check(B.w > 4 && B.h > 4 && B.w < 40, k + ': su caja sale del dibujo'); t2dDrawEnemy(document.createElement('canvas').getContext('2d'), t2d, e, 1, 1); });
+    const hb = t2dHurtBox(t2d.hero); check(hb.w < t2d.hero.w && hb.h < t2d.hero.h && hb.x > t2d.hero.x, 'la caja de daño del héroe es más chica que la de choque');
     // cada estado tiene su cuadro dibujado (saltar, punta, caer, aterrizar, dash, golpe, pared, correr)
     const states = [{ onGround: false, vy: -200 }, { onGround: false, vy: 0 }, { onGround: false, vy: 200 }, { onGround: true, vx: 0, landAt: 5 },
         { dashUntil: 9 }, { hurtAt: 5 }, { onWall: 1 }, { onGround: true, vx: 110 }, { onGround: true, vx: 0 }];

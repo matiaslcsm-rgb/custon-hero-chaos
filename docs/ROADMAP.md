@@ -266,6 +266,11 @@ Modo nuevo en paralelo: `torre2d.html` + `js/tower2d.js` (se entra desde el men�
       guardado y el mapa.
 - [ ] **Animar todo** (pedido del usuario 2026-10-25: "faltan animaciones a todo"): enemigos con dibujo y animación
       propios (hoy son rectángulos), la capa que flamea, el tajo hacia abajo, antorchas y fondos con movimiento.
+      **Hecho 2026-10-26:** los enemigos usan dibujos de la Torre (babosa y jabalí) que caminan, avisan, embisten, quedan
+      aturdidos y se aplastan al morir; su caja de golpe sale del contorno del dibujo y el héroe recibe daño en una caja
+      más chica que la de choque (se ven con H). Falta: la capa, el tajo hacia abajo y los fondos.
+- [ ] **Sustancias y fluidos** (pedido del usuario 2026-10-26): quemarse, mojarse, aceite, ahogarse y quedar enterrado
+      (héroe y enemigos); el agua que se nivela, corrientes, vapor que condensa y burbujas.
 - [ ] **Afinar la sensación con el usuario:** jugarlo, tocar el panel (T) y pasar a los valores de fábrica lo que guste.
 - [x] **El mapa (decidido por el usuario 2026-10-25): pisos fijos y partes procedurales.** Cada piso tiene salas hechas
       a mano (la entrada, el pueblo, el jefe, los caminos que abre cada habilidad) y tramos que se arman al azar con

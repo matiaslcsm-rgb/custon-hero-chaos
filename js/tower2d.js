@@ -26,8 +26,8 @@ const T2D = {
     charge: { start: 0.3, full: 0.75, slow: 0.35, lunge: 230, lungeTime: 0.12, size: 1.5 }, // mantener el tajo: empieza a cargar a los 0,3 s, listo a los 0,75
     parry: { window: 0.18, cd: 0.6, stun: 1.2 },
     feel: { hitStop: 0.06, hurtStop: 0.12, shake: 2.5, hurtShake: 5, camLook: 28, camLerp: 7, squash: 0.25 },
-    walker: { w: 14, h: 12, speed: 30, hp: 3, knock: 140 },
-    charger: { w: 16, h: 14, speed: 20, hp: 5, sight: 96, windup: 0.55, rush: 190, rushTime: 0.6, rest: 0.8 } // el embestidor: avisa (!) y embiste
+    walker: { body: 'blob', color: '#6a994e', w: 14, h: 12, speed: 30, hp: 3, knock: 140 }, // body: el dibujo (js/towerPixelBeasts.js); w/h: si no hay dibujo
+    charger: { body: 'boar', color: '#8b5e3c', w: 16, h: 14, speed: 20, hp: 5, sight: 96, windup: 0.55, rush: 190, rushTime: 0.6, rest: 0.8 } // el embestidor: avisa (!) y embiste
 };
 // Lo que se ajusta en el panel (tecla T): [grupo, clave, nombre, mínimo, máximo, paso]
 const T2D_TUNE = [
@@ -149,6 +149,21 @@ function t2dMoveAxis(w, b, dx, dy) {
     }
     return false;
 }
+// --- MODELOS Y CAJAS DE GOLPE (2026-10-26, "pulir los modelos de los personajes y los hitbox") ---
+// Cada criatura usa un dibujo de la Torre (pxbFrame, de costado) y su caja sale del contorno real del dibujo: lo que ves
+// es lo que te pega y lo que le pegás. El héroe tiene dos cajas: la de choque (pisa y choca con el mundo) y la de daño,
+// más chica y centrada en el cuerpo (la capa y la espada que sobresalen no cuentan como golpe recibido).
+const t2dBodies = {};
+function t2dBody(kind) {
+    if (t2dBodies[kind]) return t2dBodies[kind];
+    const D = T2D[kind];
+    if (typeof pxbFrame !== 'function' || !D.body) return (t2dBodies[kind] = { w: D.w, h: D.h, ox: 0, oy: 0 });
+    const img = pxbFrame(D.body, D.color, [], 'idle', 0).img, d = img.getContext('2d').getImageData(0, 0, img.width, img.height).data;
+    let x0 = img.width, y0 = img.height, x1 = -1, y1 = -1;
+    for (let y = 0; y < img.height; y++) for (let x = 0; x < img.width; x++) if (d[(y * img.width + x) * 4 + 3] > 0) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+    return (t2dBodies[kind] = { w: x1 - x0 + 1, h: y1 - y0 + 1, ox: x0, oy: y0 });
+}
+const t2dHurtBox = h => ({ x: h.x + 2, y: h.y + 4, w: h.w - 4, h: h.h - 5 });
 const t2dOnGround = (w, b) => w2dBoxHits(w, { x: b.x, y: b.y + 1, w: b.w, h: b.h });
 // Si quedó metido en material (la arena que cae lo tapó, una pared que se cerró), sube hasta quedar libre
 function t2dUnstick(w, b) {
@@ -256,7 +271,7 @@ function t2dEnterRoom(key, from) {
     else if (from === 'left') h.x = 2; else if (from === 'right') h.x = W - h.w - 2;
     else if (from === 'down') { h.y = H - h.h - T - 1; h.vy = -T2D.hero.jumpV; } else if (from === 'up') h.y = 2;
     while (w2dBoxHits(w, h) && h.y > 0) h.y--; // que no arranque metido en la piedra
-    const mk = (p, kind) => { const D = T2D[kind], e = { kind, x: p.x - D.w / 2, y: p.y - D.h, w: D.w, h: D.h, vx: D.speed, vy: 0, hp: D.hp, hurtAt: -9, state: 'walk', stateAt: 0 }; while (w2dBoxHits(w, e) && e.y > 0) e.y--; return e; };
+    const mk = (p, kind) => { const D = T2D[kind], B = t2dBody(kind), e = { kind, x: p.x - B.w / 2, y: p.y - B.h, w: B.w, h: B.h, vx: D.speed, vy: 0, hp: D.hp, hurtAt: -9, state: 'walk', stateAt: 0 }; while (w2dBoxHits(w, e) && e.y > 0) e.y--; return e; };
     const enemies = w.markers.E.map(p => mk(p, 'walker')).concat(w.markers.C.map(p => mk(p, 'charger')));
     const feathers = (t2d && t2d.hero.doubleJump) ? [] : w.markers.F.map(p => ({ x: p.x - 5, y: p.y - 12, w: 10, h: 10 }));
     const torches = w.markers.T.map(p => ({ x: p.x, y: p.y }));
@@ -389,9 +404,9 @@ function t2dUpdate(input, dt) {
             if (e.state === 'rush') { e.state = 'walk'; e.stateAt = g.clock; g.shake = Math.max(g.shake, F.shake * 0.6); t2dDust(e.x + e.w / 2, e.y + e.h, 6); } // se dio contra la pared
         }
         if (e.state === 'rush' && !groundAhead) { e.state = 'walk'; e.stateAt = g.clock; e.vx = -dir * D.speed; } // no se tira por el borde
-        if (t2dOverlap(h, e) && g.clock >= (h.dashUntil || 0) && e.state !== 'stun') t2dHurt(e.state === 'rush' ? 2 : 1, Math.sign(h.x - e.x) || 1, e);
+        if (t2dOverlap(t2dHurtBox(h), e) && g.clock >= (h.dashUntil || 0) && e.state !== 'stun') t2dHurt(e.state === 'rush' ? 2 : 1, Math.sign(h.x - e.x) || 1, e);
     });
-    g.enemies.filter(e => e.hp <= 0 && !e.gone).forEach(e => { e.gone = true; t2dSparks(e.x + e.w / 2, e.y + e.h / 2, 10, '#6a994e'); });
+    g.enemies.filter(e => e.hp <= 0 && !e.gone).forEach(e => { e.gone = true; t2dSparks(e.x + e.w / 2, e.y + e.h / 2, 10, T2D[e.kind].color || '#6a994e'); (g.corpses = g.corpses || []).push({ e, at: g.realClock }); });
     // la Pluma de Arén: doble salto (el camino al mirador)
     g.feathers = g.feathers.filter(f => { if (!t2dOverlap(h, f)) return true; h.doubleJump = true; t2dSfx('levelup'); t2dMsg('🪶 La Pluma de Arén: ahora podés saltar otra vez en el aire. Arriba se abre el mirador.'); return false; });
     t2dFx(dt);
@@ -478,10 +493,8 @@ function t2dDraw(ctx, scale) {
         ctx.fillStyle = '#ff7a1a'; ctx.fillRect(t.x - 2, t.y - 14 - (fl > 0.3 ? 1 : 0), 4, 4); ctx.fillStyle = '#ffd23f'; ctx.fillRect(t.x - 1, t.y - 13 - (fl > 0 ? 1 : 0), 2, 3);
     });
     g.feathers.forEach(f => { ctx.fillStyle = '#ffd166'; ctx.fillRect(f.x + 3, f.y + Math.sin(g.clock * 3) * 2, 4, 10); ctx.fillStyle = '#fff3c4'; ctx.fillRect(f.x + 4, f.y + 1 + Math.sin(g.clock * 3) * 2, 2, 6); });
-    g.enemies.forEach(e => { if (e.hp <= 0) return; const base = e.kind === 'charger' ? (e.state === 'stun' ? '#7fd8ff' : '#bc6c25') : '#6a994e';
-        const wob = e.state === 'windup' ? Math.round(Math.sin(g.clock * 60)) : 0;
-        if (e.state === 'windup') { ctx.fillStyle = '#ff2a1f'; ctx.fillRect(e.x + e.w / 2 - 1, e.y - 12, 2, 6); ctx.fillRect(e.x + e.w / 2 - 1, e.y - 4, 2, 2); } // el aviso
-        ctx.save(); ctx.translate(wob, 0); ctx.fillStyle = g.clock - e.hurtAt < 0.1 ? '#ffffff' : base; ctx.fillRect(e.x, e.y + 2, e.w, e.h - 2); ctx.fillRect(e.x + 2, e.y, e.w - 4, 2); ctx.fillStyle = e.state === 'windup' || e.state === 'rush' ? '#ff2a1f' : '#1d1712'; ctx.fillRect(e.x + (e.vx > 0 ? e.w - 5 : 2), e.y + 4, 2, 2); ctx.restore(); });
+    g.enemies.forEach(e => { if (e.hp > 0) t2dDrawEnemy(ctx, g, e, 1, 1); });
+    (g.corpses || []).forEach(c => { const k = (g.realClock - c.at) / 0.4; if (k < 1) t2dDrawEnemy(ctx, g, c.e, 1 + k * 0.4, 1 - k * 0.9, 1 - k); }); // se aplasta y se apaga
     // estelas del dash
     g.ghosts.forEach(gh => t2dDrawHero(ctx, gh, gh.frame, 1, 1, 0.35 * (1 - (g.realClock - gh.at) / 0.18)));
     // el héroe: si recién lo golpearon, titila
@@ -500,7 +513,8 @@ function t2dDraw(ctx, scale) {
     ctx.font = 'bold 7px monospace'; g.nums.forEach(n => { const k = (g.realClock - n.at) / 0.7; ctx.globalAlpha = 1 - k * k; ctx.fillStyle = '#1d1712'; ctx.fillText(n.text, n.x - 2 + 1, n.y - k * 14 + 1); ctx.fillStyle = n.color; ctx.fillText(n.text, n.x - 2, n.y - k * 14); });
     if (g.debug) { // tecla H: las cajas de choque (lo que de verdad choca), encima del dibujo
         ctx.lineWidth = 1; // (el terreno ya es exacto: lo que se ve es lo que choca)
-        ctx.strokeStyle = '#ff00ff'; ctx.strokeRect(h.x + 0.5, h.y + 0.5, h.w - 1, h.h - 1);
+        ctx.strokeStyle = '#ff00ff'; ctx.strokeRect(h.x + 0.5, h.y + 0.5, h.w - 1, h.h - 1); // choque
+        const hb = t2dHurtBox(h); ctx.strokeStyle = '#00e5ff'; ctx.strokeRect(hb.x + 0.5, hb.y + 0.5, hb.w - 1, hb.h - 1); // daño
         ctx.strokeStyle = '#ffaa00'; g.enemies.forEach(e => { if (e.hp > 0) ctx.strokeRect(e.x + 0.5, e.y + 0.5, e.w - 1, e.h - 1); });
         if (g.clock - (h.attackAt ?? -9) < T2D.slash.active[1]) { const b = t2dSlashBox(h, h.aim); ctx.strokeStyle = '#ff3333'; ctx.strokeRect(b.x + 0.5, b.y + 0.5, b.w - 1, b.h - 1); }
     }
@@ -649,4 +663,21 @@ function t2dDrawLight(ctx, g, camX, camY, scale) {
         ctx.fillStyle = gr; ctx.fillRect(x - l.r, y - l.r, l.r * 2, l.r * 2);
     });
     ctx.restore();
+}
+
+// Una criatura: su dibujo animado según lo que hace, alineado a su caja de golpe (que es su contorno)
+function t2dDrawEnemy(ctx, g, e, sx, sy, alpha = 1) {
+    const D = T2D[e.kind], B = t2dBody(e.kind), facing = e.vx < 0 ? -1 : 1;
+    if (typeof pxbFrame !== 'function' || !D.body) { ctx.fillStyle = D.color || '#6a994e'; ctx.fillRect(e.x, e.y, e.w, e.h); return; }
+    const moving = e.state === 'rush' || (e.state === 'walk' && Math.abs(e.vx) > 1);
+    const k = moving ? Math.floor(g.clock * (e.state === 'rush' ? 16 : 8)) % 4 : Math.floor(g.clock * 2) % 2;
+    const fr = pxbFrame(D.body, D.color, [], moving ? 'walk' : 'idle', k);
+    const white = g.clock - e.hurtAt < 0.1 || (e.state === 'windup' && Math.floor(g.clock * 12) % 2 === 0); // golpeada, o el destello del aviso
+    const wob = e.state === 'windup' ? Math.round(Math.sin(g.clock * 60)) : 0;
+    ctx.save(); ctx.globalAlpha = alpha;
+    ctx.translate(Math.round(e.x + e.w / 2) + wob, Math.round(e.y + e.h)); ctx.scale(facing * sx, sy);
+    ctx.drawImage(white ? fr.white : fr.img, -B.ox - B.w / 2, -B.oy - B.h);
+    ctx.restore();
+    if (e.state === 'windup') { ctx.fillStyle = '#ff2a1f'; ctx.fillRect(e.x + e.w / 2 - 1, e.y - 12, 2, 6); ctx.fillRect(e.x + e.w / 2 - 1, e.y - 4, 2, 2); } // el aviso
+    if (e.state === 'stun') for (let i = 0; i < 3; i++) { const a = g.clock * 6 + i * 2.1; ctx.fillStyle = '#ffd166'; ctx.fillRect(Math.round(e.x + e.w / 2 + Math.cos(a) * 7), Math.round(e.y - 4 + Math.sin(a) * 2), 2, 2); } // aturdida: estrellitas
 }
