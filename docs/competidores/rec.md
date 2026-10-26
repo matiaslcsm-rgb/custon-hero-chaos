@@ -19,9 +19,32 @@ cámara de TV**, con la lente como ojo y la luz roja de "grabando".
   - **el de sonido**, un micrófono volador (pega **mágico**);
   - **el de luz**, el reflector (pega **puro**: ignora armadura y resistencia, y quema).
 - **Su nombre es Rec** (decidido por el usuario). Rec y sus tres drones, juntos, son el **Equipo de Grabación**.
-- **Colores:** hueso y gris de estudio, cian de la lente, magenta de la luz "grabando", amarillo de la luz y las
-  herramientas.
 - **Rol:** distancia y control. Se planta, encuadra y castiga; pierde si lo agarran de costado o lo obligan a moverse.
+
+## Estética (pedido del usuario 2026-10-26)
+**Ciencia ficción industrial y dura, "la forma sigue a la función":** piezas en bloque y en ángulo, paneles con
+tornillos, rejillas de ventilación, pistones y juntas hidráulicas, cables a la vista, sensores ópticos, carteles de
+peligro y letras de plantilla ("04"); todo gastado, raspado y sucio, de metal mate.
+- **Colores:** gris mate, verde oliva y blanco hueso; naranja de alta visibilidad y amarillo de precaución en los
+  acentos (franjas de peligro, juntas, agarres); el esqueleto, gris oscuro y carbono. La lente, cian.
+- **El boceto** (`rec.png`) es una lámina de concepto: fondo de estudio gris con grilla y líneas de construcción, la vista
+  grande, la silueta y el tamaño real.
+- **Prompt para generar la imagen de concepto** en otra herramienta (el que pasó el usuario, completado con Rec):
+
+  > Conceptual art of a robotic TV cameraman named REC: a bulky studio robot whose head is a heavy broadcast TV camera
+  > (the lens is its face, with a red "recording" light), mounted on a hydraulic three-legged tripod with chunky rubber
+  > wheels, one hydraulic tool arm (wrench, pliers and a cutting disc), a battery backpack with cables, and three
+  > armored drones deploying from bays in its chest: an aerial quadcopter camera drone, a caged boom-microphone sound
+  > drone, and a square floodlight drone. Full-body view, designed in a heavy Industrial Sci-Fi and Hard Sci-Fi
+  > aesthetic, "form follows function" concept art style. Focus on mechanical practicality with dense hard-surface
+  > detailing, exposed wiring, pistons, hydraulic joints, and armored plating. Built from utilitarian, blocky, and angular
+  > components, with bolts, panel lines, sensors, vents, grilles, and circular joints; optical sensors, warning labels,
+  > and stencil lettering ("REC", "04", "HAZARD"). Rugged, bulky and heavily used, with visible wear, scuffs, dirt, and
+  > matte metallic surfaces. Color palette: industrial matte gray, military olive green, and off-white, with
+  > high-visibility orange and caution yellow hazard accents; internal frame in dark gray, carbon and metal. Grounded
+  > pose on a neutral, minimalist gray studio background with sketching lines, orthographic or multiple-angle design
+  > vibes, reminiscent of 2D/3D concept art. Natural, cinematic studio lighting highlighting the mechanical textures and
+  > wear.
 
 ## Atributos y base (comparada con el Sniper)
 Atributo principal: **Reflejos**. Los números siguen la escala de hoy (la de los atributos nuevos está pendiente).
@@ -176,4 +199,8 @@ lentos lleguen tarde.
 Queda abierto:
 1. **La categoría:** **a) Tirador de control (recomendado)**; b) Controlador puro (menos daño de ataque, más control).
 2. **Las 3 habilidades:** ¿van Acople, Travelling y Trípode, o cambiás alguna?
-3. **El boceto nuevo:** ¿así va, o le cambiamos algo (colores, forma de la cabeza, drones)?
+3. **El boceto industrial:** ¿así va, o le cambiamos algo?
+4. **¿La estética industrial es para todo MATCH o solo para Rec?** Hoy el concepto del juego es "En Vivo" con colores
+   limpios y fondos claros (`docs/CONCEPTO-FUTURISTA.md`). **a) Para todo MATCH (recomendado):** los competidores, las
+   arenas y los menús en el mismo estilo, y el show pasa a ser "en vivo desde un taller/arena industrial"; b) solo Rec
+   (queda distinto al resto).
