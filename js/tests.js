@@ -4811,6 +4811,19 @@ test('Torre 2D: correr, saltar (más alto si mantenés), plataformas, tajo, sala
     check(wf.mat.filter(m => m === MAT.WOOD).length < 256 * 2 * 0.8, 'el fuego quema la madera');
     const wd = w2dFromRows(['tt', '##']), dug = w2dDig(wd, { x: 0, y: 0, w: 16, h: 16 }, false);
     check(dug > 200 && !w2dDig(w2dFromRows(['##']), { x: 0, y: 0, w: 16, h: 16 }, true), 'el tajo cava la tierra; la roca no se rompe nunca');
+    // el aceite flota sobre el agua; lo que vuela vuelve a ser material; cavar tira pedazos; aterrizar levanta arena
+    const wo = w2dFromRows(['#o#', '#~#', '###']); for (let i = 0; i < 200; i++) w2dStep(wo);
+    let oilY = 0, waterY = 0, no = 0, nw = 0; for (let y = 0; y < wo.H; y++) for (let x = 0; x < wo.W; x++) { const m = wo.mat[y * wo.W + x]; if (m === MAT.OIL) { oilY += y; no++; } if (m === MAT.WATER) { waterY += y; nw++; } }
+    check(no && nw && oilY / no < waterY / nw, 'el aceite queda arriba del agua');
+    const wv = w2dFromRows(['....', '....', '####']), before = wv.mat.filter(m => m === MAT.SAND).length;
+    w2dFling(wv, 10, 5, 60, -50, MAT.SAND); for (let i = 0; i < 120 && wv.fly.length; i++) w2dStep(wv);
+    check(!wv.fly.length && wv.mat.filter(m => m === MAT.SAND).length === before + 1, 'lo que vuela cae y vuelve a ser arena');
+    const wk = w2dFromRows(['tt', '##']); w2dDig(wk, { x: 0, y: 0, w: 32, h: 16 }, false, 1);
+    check(wk.fly.length > 20, `cavar tira pedazos (${wk.fly.length})`);
+    const ws = w2dFromRows(['..', 'ss', '##']), kicked = w2dKick(ws, 0, 16, 31, 17, 0, -80, 10);
+    check(kicked > 0 && ws.fly.length === kicked, 'pisar o caer sobre la arena la levanta');
+    const wc = w2dFromRows(['tt', '..', '..', '##']); for (let i = 0; i < 300; i++) w2dStep(wc);
+    check(wc.mat.slice(0, wc.W * 16).filter(m => m === MAT.DIRT).length < 512 * 0.6, 'la tierra sin apoyo se desmorona');
     t2d = null;
     // píxeles: frena justo sobre el píxel de piso, y sube solo un escalón chico (pendiente) pero no una pared
     const flat = w2dFromRows(['....', '....', '....', '....', '####']), b = { x: 4, y: 20, w: 8, h: 8 };

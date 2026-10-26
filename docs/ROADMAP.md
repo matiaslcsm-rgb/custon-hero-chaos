@@ -245,6 +245,11 @@ Modo nuevo en paralelo: `torre2d.html` + `js/tower2d.js` (se entra desde el men�
 - [x] **La sala de la pluma alcanzable** (2026-10-25, "no llego a agarrar el ítem"): las tablas ya no se atraviesan desde
       abajo, así que se rearmó con escalones de 32 px (el salto llega a 44). Verificado simulando los 5 saltos, la pluma y
       la salida de arriba con el doble salto. De paso: al aterrizar quedaba 1 px arriba del piso (corregido).
+- [x] **Más física** (2026-10-25, pedido del usuario: "más físicas a la arena, fluidos, rocas"): **píxeles que vuelan**
+      (al cavar, los pedazos salen para el lado del golpe y vuelven a ser material al caer); **grava** (la piedra rota; cae
+      y se hunde en el agua); **aceite** (flota sobre el agua y prende enseguida); el agua corre más rápido; **olas** en el
+      mar de la playa; el cuerpo mueve el material (aterrizar levanta arena, correr patea, entrar al agua salpica); **la
+      tierra sin apoyo se desmorona** (solo donde algo se movió). El mirador tiene grava y aceite sobre el agua.
 - [ ] **Animar todo** (pedido del usuario 2026-10-25: "faltan animaciones a todo"): enemigos con dibujo y animación
       propios (hoy son rectángulos), la capa que flamea, el tajo hacia abajo, antorchas y fondos con movimiento.
 - [ ] **Afinar la sensación con el usuario:** jugarlo, tocar el panel (T) y pasar a los valores de fábrica lo que guste.

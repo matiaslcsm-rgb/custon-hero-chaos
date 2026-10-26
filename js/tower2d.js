@@ -52,11 +52,11 @@ try { const saved = JSON.parse(localStorage.getItem('t2d-feel') || '{}'); T2D_TU
 
 // --- LAS SALAS. Cada una es una imagen en torre2d/salas/<nombre>.png (cada color, un material: docs/TORRE2D-SALAS.md).
 //     Si la imagen no carga (o en las pruebas), se arma desde estas filas de bloques de 16 px:
-//     # roca · p piedra · t tierra · s arena · ~ agua · = tabla de madera · w madera · L lava · ^ espinas
+//     # roca · p piedra · t tierra · s arena · g grava · ~ agua · o aceite · = tabla de madera · w madera · L lava · ^ espinas
 //     P entrada · E caminante · C embestidor (avisa y embiste) · F la Pluma de Arén (doble salto)
 //     Los bordes abiertos llevan a la sala que dice `exits`.
 const T2D_ROOMS = {
-    playa: { name: 'La playa', bg: 'beach', camUp: 45, exits: { right: 'base' }, rows: [
+    playa: { name: 'La playa', bg: 'beach', camUp: 45, waves: true, exits: { right: 'base' }, rows: [
         '.....................................................#######',
         '.....................................................#######',
         '.....................................................#######',
@@ -112,8 +112,8 @@ const T2D_ROOMS = {
         '#......................................#',
         '#......................................#',
         '#...............====...................#',
-        '#.........................ssss.........#',
-        '#..........................E...........#',
+        '#.........................gggg.........#',
+        '#....#ooooo#...............E...........#',
         '#....#~~~~~#...........................#',
         '###############################...######'] }
 };
@@ -259,6 +259,7 @@ function t2dEnterRoom(key, from) {
     const mk = (p, kind) => { const D = T2D[kind], e = { kind, x: p.x - D.w / 2, y: p.y - D.h, w: D.w, h: D.h, vx: D.speed, vy: 0, hp: D.hp, hurtAt: -9, state: 'walk', stateAt: 0 }; while (w2dBoxHits(w, e) && e.y > 0) e.y--; return e; };
     const enemies = w.markers.E.map(p => mk(p, 'walker')).concat(w.markers.C.map(p => mk(p, 'charger')));
     const feathers = (t2d && t2d.hero.doubleJump) ? [] : w.markers.F.map(p => ({ x: p.x - 5, y: p.y - 12, w: 10, h: 10 }));
+    w.waves = !!room.waves;
     t2d = Object.assign(t2d || { clock: 0, realClock: 0, msg: null, freeze: 0, shake: 0, parts: [], ghosts: [], squash: { x: 1, y: 1 } }, { key, room, world: w, W, H, hero: h, enemies, feathers, nums: [], flashes: [] });
     t2d.fadeAt = t2d.realClock; // fundido al entrar a la sala
     t2d.cam = { x: Math.max(0, Math.min(W - T2D.VIEW_W, h.x - T2D.VIEW_W / 2)), y: Math.max(0, Math.min(H - T2D.VIEW_H, h.y - T2D.VIEW_H / 2)) };
@@ -292,13 +293,20 @@ function t2dUpdate(input, dt) {
     (h.events || []).forEach(ev => {
         const fx = h.x + h.w / 2, fy = h.y + h.h;
         if (ev === 'jump' || ev === 'doubleJump') { g.squash = { x: 1 - F.squash, y: 1 + F.squash }; t2dDust(fx, fy, ev === 'jump' ? 5 : 8); t2dSfx('swing'); }
-        if (ev === 'land' || ev === 'bigLand') { h.landAt = g.clock; g.squash = { x: 1 + F.squash, y: 1 - F.squash }; t2dDust(fx, fy, ev === 'bigLand' ? 10 : 5, 1.5); if (ev === 'bigLand') g.shake = Math.max(g.shake, F.shake * 0.8); }
+        if (ev === 'land' || ev === 'bigLand') { w2dKick(g.world, h.x - 3, h.y + h.h, h.x + h.w + 3, h.y + h.h + 1, 0, ev === 'bigLand' ? -120 : -70, ev === 'bigLand' ? 18 : 8); // levanta arena
+            h.landAt = g.clock; g.squash = { x: 1 + F.squash, y: 1 - F.squash }; t2dDust(fx, fy, ev === 'bigLand' ? 10 : 5, 1.5); if (ev === 'bigLand') g.shake = Math.max(g.shake, F.shake * 0.8); }
         if (ev === 'turn') t2dDust(fx, fy, 3);
         if (ev === 'wallJump') { g.squash = { x: 1 - F.squash, y: 1 + F.squash }; t2dDust(h.lastWall > 0 ? h.x + h.w : h.x, h.y + h.h / 2, 6); t2dSfx('swing'); }
         if (ev === 'dash') { g.squash = { x: 1 + F.squash, y: 1 - F.squash * 0.6 }; t2dSfx('dash'); }
     });
     h.events = [];
     if (h.onWall && Math.floor(g.clock * 20) % 3 === 0) t2dDust(h.onWall > 0 ? h.x + h.w : h.x, h.y + 6, 1, 0.3); // polvo de la pared al bajar
+    if (h.onGround && Math.abs(h.vx) > 80 && Math.random() < 0.15) w2dKick(g.world, h.x + h.w / 2 - 2, h.y + h.h, h.x + h.w / 2 + 2, h.y + h.h, -h.vx * 0.4, -50, 1); // pisadas en la arena
+    // chapuzón: al entrar rápido al agua salpica; nadando, el agua se mueve alrededor
+    const wet = w2dBoxFraction(g.world, h, MAT.WATER, MAT.OIL) > 0.1;
+    if (wet && !h.wasWet && Math.abs(h.vy) > 80) { w2dKick(g.world, h.x - 4, h.y, h.x + h.w + 4, h.y + h.h, h.vx * 0.3, -Math.abs(h.vy) * 0.7, 30); t2dSfx('pop'); }
+    else if (wet && (Math.abs(h.vx) > 40 || Math.abs(h.vy) > 40) && Math.random() < 0.3) w2dKick(g.world, h.x, h.y, h.x + h.w, h.y + h.h, h.vx * 0.5, -40, 2);
+    h.wasWet = wet;
     if (h.onGround && Math.abs(h.vx) > 80 && g.clock - (h.stepDustAt || 0) > 0.14) { h.stepDustAt = g.clock; t2dDust(h.x + h.w / 2 - h.facing * 3, h.y + h.h, 1, 0.4); } // polvo al correr
     if (g.clock < (h.dashUntil || 0) && Math.floor(g.clock * 60) % 2 === 0) g.ghosts.push({ x: h.x, y: h.y, facing: h.facing, frame: t2dHeroFrame(h, g.clock), at: g.realClock });
     // salir por un borde: la sala vecina
@@ -349,7 +357,7 @@ function t2dUpdate(input, dt) {
         // el tajo hacia abajo también rebota en las espinas
         if (h.aim === 'down' && !h.pogoDone && t2dTouches(g.world, box, MAT.SPIKE)) { t2dPogo(h); t2dSparks(h.x + h.w / 2, box.y + box.h, 6, '#c9ccd1'); }
         // el tajo rompe la tierra y la arena; el golpe cargado, también piedra y madera
-        if (!h.dug) { h.dug = true; const n = w2dDig(g.world, box, h.combo === 3); if (n) { t2dDust(box.x + box.w / 2, box.y + box.h / 2, Math.min(12, 2 + n / 20), 1.5); t2dSfx('hit'); } }
+        if (!h.dug) { h.dug = true; const n = w2dDig(g.world, box, h.combo === 3, h.aim === 'side' ? h.facing : 0); if (n) { t2dDust(box.x + box.w / 2, box.y + box.h / 2, Math.min(12, 2 + n / 20), 1.5); t2dSfx('hit'); } }
     }
     if (input.parry) t2dParry(h, g.clock);
     // espinas, lava y fuego: lastiman y te tiran para arriba
@@ -460,7 +468,7 @@ function t2dDraw(ctx, scale) {
     else { ctx.fillStyle = '#9a93ab'; ctx.fillRect(0, 0, VW, VH); } // fondo claro: el encapuchado es oscuro y tiene que recortarse
     if (g.room.bg !== 'beach') for (let i = 0; i < 6; i++) { ctx.fillStyle = 'rgba(70,62,85,0.25)'; ctx.fillRect(((i * 97 - camX * 0.3) % (VW + 60) + VW + 60) % (VW + 60) - 30, 20 + (i % 3) * 30, 18, VH); } // columnas al fondo (paralaje)
     ctx.translate(-camX, -camY);
-    w2dFlicker(g.world); ctx.drawImage(w2dRender(g.world), 0, 0); // el mundo de píxeles (js/tower2dWorld.js)
+    w2dFlicker(g.world); ctx.drawImage(w2dRender(g.world), 0, 0); w2dDrawFly(ctx, g.world); // el mundo de píxeles y lo que vuela (js/tower2dWorld.js)
     g.feathers.forEach(f => { ctx.fillStyle = '#ffd166'; ctx.fillRect(f.x + 3, f.y + Math.sin(g.clock * 3) * 2, 4, 10); ctx.fillStyle = '#fff3c4'; ctx.fillRect(f.x + 4, f.y + 1 + Math.sin(g.clock * 3) * 2, 2, 6); });
     g.enemies.forEach(e => { if (e.hp <= 0) return; const base = e.kind === 'charger' ? (e.state === 'stun' ? '#7fd8ff' : '#bc6c25') : '#6a994e';
         const wob = e.state === 'windup' ? Math.round(Math.sin(g.clock * 60)) : 0;

@@ -17,6 +17,8 @@ Se puede dibujar con cualquier programa de pixel art (Aseprite, Piskel, LibreSpr
 | Marrón claro | `#c08040` | madera | sólida; se quema |
 | Naranja rojizo | `#ff4000` | lava | corre lenta, quema; con el agua se hace piedra |
 | Gris azulado claro | `#d0d0e0` | espinas | lastiman (el tajo hacia abajo rebota en ellas) |
+| Gris piedrita | `#9a9488` | grava | cae como la arena y se hunde en el agua (sale de la piedra rota) |
+| Marrón muy oscuro | `#3a2a1a` | aceite | líquido que flota sobre el agua y prende fuego enseguida |
 
 **Marcas** (un solo píxel; el juego no lo dibuja, solo ubica cosas ahí, apoyadas sobre ese punto):
 | Color | Código | Qué pone |
