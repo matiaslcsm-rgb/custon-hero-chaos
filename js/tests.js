@@ -4751,6 +4751,7 @@ test('Torre 2D: correr, saltar (más alto si mantenés), plataformas, tajo, sala
     const dt = T2D.DT, run = (inp, secs) => { for (let t = 0; t < secs; t += dt) { t2dUpdate(Object.assign({ left: false, right: false, down: false, jump: false, jumpHeld: false, attack: false }, inp), dt); inp.jump = inp.attack = false; } };
     const peak = held => { const h = t2d.hero, y0 = h.y; let top = y0; run({ jump: true, jumpHeld: true }, dt); for (let t = 0; t < 0.8; t += dt) { t2dUpdate({ jumpHeld: held(t) }, dt); top = Math.min(top, h.y); } return y0 - top; };
     Object.assign(T2D.hero, T2D_DEFAULTS.hero); Object.assign(T2D.feel, T2D_DEFAULTS.feel); // sin lo ajustado en el panel
+    Object.keys(T2D_WORLDS).forEach(k => delete T2D_WORLDS[k]); // salas nuevas (sin lo que se rompió antes)
     t2d = null; t2dEnterRoom('base'); run({}, 0.3);
     check(t2d.hero.onGround, 'arranca parado en el piso');
     const high = peak(() => true), low = peak(t => t < 0.05);
@@ -4767,7 +4768,7 @@ test('Torre 2D: correr, saltar (más alto si mantenés), plataformas, tajo, sala
     run({}, 0.8); const x0 = h.x; run({ dash: true }, T2D.hero.dashTime);
     check(Math.abs(h.x - x0) > T2D.TILE * 1.5, `el dash avanza (${Math.round(Math.abs(h.x - x0))} px)`);
     // la cabeza roza una esquina: te corre en vez de frenarte
-    const corner = { rows: ['.#..', '....', '....', '....', '####'] }, hc = { x: 28, y: 40, w: 10, h: 22, vx: 0, vy: -250, facing: 1, onGround: false, t: 0 };
+    const corner = w2dFromRows(['.#..', '....', '....', '....', '####']), hc = { x: 28, y: 40, w: 10, h: 22, vx: 0, vy: -250, facing: 1, onGround: false, t: 0 };
     for (let i = 0; i < 20; i++) t2dStepHero(corner, hc, { jumpHeld: true }, dt);
     check(hc.y < 16, 'la corrección de esquinas lo deja seguir subiendo');
     // la pared: en el aire, empujando contra ella, baja despacio; con salto, sale despedido para el otro lado
@@ -4798,17 +4799,33 @@ test('Torre 2D: correr, saltar (más alto si mantenés), plataformas, tajo, sala
     const names = states.map(st => t2dHeroFrame(Object.assign({ facing: 1, onGround: true, vx: 0, vy: 0 }, st), 5));
     checkEq(names.join(','), 'jump,apex,fall,land,dash,hurt,wall,' + names[7] + ',idle', 'cada estado elige su cuadro');
     check(names.every(n => HERO_ART.frames[n] && HERO_ART.frames[n].rows.length), 'y todos están dibujados');
-    // plataforma que se atraviesa desde abajo y frena desde arriba
-    const room = { rows: ['....', '....', '====', '....', '####'] }, b = { x: 4, y: 40, w: 8, h: 8 };
-    check(!t2dMoveAxis(room, b, 0, -20) && b.y === 20, 'desde abajo, la plataforma se atraviesa');
-    check(t2dMoveAxis(room, b, 0, 15) && b.y === 2 * T2D.TILE - b.h, 'desde arriba, frena');
+    // el mundo de píxeles: la arena cae, el agua corre, la lava apaga el agua (piedra), el fuego quema la madera, el tajo cava
+    const wm = w2dFromRows(['......', '..s...', '......', '..~...', '######']);
+    for (let i = 0; i < 60; i++) w2dStep(wm);
+    let sandLow = 0, waterSpread = new Set(); for (let y = 0; y < wm.H; y++) for (let x = 0; x < wm.W; x++) { if (wm.mat[y * wm.W + x] === MAT.SAND && y > 40) sandLow++; if (wm.mat[y * wm.W + x] === MAT.WATER) waterSpread.add(x); }
+    check(sandLow > 100, 'la arena cae');
+    check(waterSpread.size > 20, 'el agua se desparrama por el piso');
+    const wl = w2dFromRows(['L~', '##']); for (let i = 0; i < 30; i++) w2dStep(wl);
+    check(wl.mat.some(m => m === MAT.STONE), 'lava contra agua: se hace piedra');
+    const wf = w2dFromRows(['ww', '##']); w2dIgnite(wf, 8, 8, 3); for (let i = 0; i < 400; i++) w2dStep(wf);
+    check(wf.mat.filter(m => m === MAT.WOOD).length < 256 * 2 * 0.8, 'el fuego quema la madera');
+    const wd = w2dFromRows(['tt', '##']), dug = w2dDig(wd, { x: 0, y: 0, w: 16, h: 16 }, false);
+    check(dug > 200 && !w2dDig(w2dFromRows(['##']), { x: 0, y: 0, w: 16, h: 16 }, true), 'el tajo cava la tierra; la roca no se rompe nunca');
+    t2d = null;
+    // píxeles: frena justo sobre el píxel de piso, y sube solo un escalón chico (pendiente) pero no una pared
+    const flat = w2dFromRows(['....', '....', '....', '....', '####']), b = { x: 4, y: 20, w: 8, h: 8 };
+    check(t2dMoveAxis(flat, b, 0, 60) && b.y + b.h === 4 * 16, 'cae y queda apoyado justo sobre el piso');
+    for (let x = 20; x < 24; x++) for (let y = 61; y < 64; y++) flat.mat[y * flat.W + x] = MAT.ROCK; // un escalón de 3 px
+    check(!t2dMoveAxis(flat, b, 14, 0) && b.y + b.h === 61, 'sube solo un escalón de 3 píxeles');
+    for (let x = 40; x < 44; x++) for (let y = 40; y < 64; y++) flat.mat[y * flat.W + x] = MAT.ROCK; // una pared
+    check(t2dMoveAxis(flat, b, 30, 0), 'una pared lo frena');
     // salas conectadas y la pluma
     t2d = null; t2dEnterRoom('base'); t2d.hero.x = t2d.W + 1; run({}, dt);
     checkEq(t2d.key, 'salon', 'saliendo por la derecha se entra a la sala vecina');
     const f = t2d.feathers[0]; Object.assign(t2d.hero, { x: f.x, y: f.y }); run({}, dt);
     check(t2d.hero.doubleJump, 'la Pluma de Arén da el doble salto');
     t2d = null;
-});
+}, { random: true }); // la arena y el fuego usan azar de verdad
 
 // ============================================================ EJECUCIÓN
 // Lo guardado del jugador no se toca mientras corren las pruebas o el banco

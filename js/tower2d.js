@@ -16,7 +16,7 @@
 // Se juega en torre2d.html. La física es pura (sin dibujar) y tiene pruebas en js/tests.js.
 
 const T2D = {
-    TILE: 16, VIEW_W: 320, VIEW_H: 180, DT: 1 / 120,
+    TILE: 16, VIEW_W: 320, VIEW_H: 180, DT: 1 / 120, stepUp: 3, // stepUp: escalones que se suben solos (pendientes)
     // el héroe (en píxeles del dibujo, por segundo)
     hero: { w: 10, h: 22, accel: 1500, airAccel: 1000, friction: 1800, maxRun: 115, jumpV: 290, gravity: 950, fallMult: 1.45,
         apexBand: 45, apexMult: 0.5, fallMax: 400, cutJump: 0.45, coyote: 0.1, buffer: 0.12, corner: 5,
@@ -50,8 +50,11 @@ const T2D_TUNED = ['hero', 'feel', 'charge', 'parry', 'charger'];
 const T2D_DEFAULTS = JSON.parse(JSON.stringify(Object.fromEntries(T2D_TUNED.map(k => [k, T2D[k]]))));
 try { const saved = JSON.parse(localStorage.getItem('t2d-feel') || '{}'); T2D_TUNED.forEach(k => Object.assign(T2D[k], saved[k] || {})); } catch (e) { /* valores de fábrica */ }
 
-// --- LAS SALAS (hechas a mano). # piedra · = plataforma que se atraviesa · ^ pinchos · P entrada · E caminante ·
-//     C embestidor (avisa y embiste) · F la Pluma de Arén (doble salto). Los bordes abiertos llevan a la sala que dice `exits`.
+// --- LAS SALAS. Cada una es una imagen en torre2d/salas/<nombre>.png (cada color, un material: docs/TORRE2D-SALAS.md).
+//     Si la imagen no carga (o en las pruebas), se arma desde estas filas de bloques de 16 px:
+//     # roca · p piedra · t tierra · s arena · ~ agua · = tabla de madera · w madera · L lava · ^ espinas
+//     P entrada · E caminante · C embestidor (avisa y embiste) · F la Pluma de Arén (doble salto)
+//     Los bordes abiertos llevan a la sala que dice `exits`.
 const T2D_ROOMS = {
     base: { name: 'La puerta de la Torre', exits: { right: 'salon' }, rows: [
         '########################################',
@@ -64,9 +67,9 @@ const T2D_ROOMS = {
         '#......................................#',
         '#..............====....................#',
         '#......................................#',
-        '#.....=====...........................',
-        '#.....................................',
-        '#..P.............E....C.....^^^.......',
+        '#.....=====........................tt...',
+        '#..................................tt...',
+        '#..P....ss..C....E...#~~~~#....^^^.tt...',
         '########################################'] },
     salon: { name: 'El Atrio Verde', exits: { left: 'base', up: 'alto' }, rows: [
         '###############################...######',
@@ -77,11 +80,11 @@ const T2D_ROOMS = {
         '#......................................#',
         '#..............====....................#',
         '#......................................#',
-        '#.......====...........................#',
+        '#.......wwww...........................#',
         '.......................................#',
         '.......................................#',
         '..........E.............C..............#',
-        '#.....................^^^..............#',
+        '#....................#LLL#.............#',
         '########################################'] },
     alto: { name: 'El mirador de Arén', exits: { down: 'salon' }, rows: [
         '########################################',
@@ -94,42 +97,44 @@ const T2D_ROOMS = {
         '#......................................#',
         '#......................................#',
         '#...............====...................#',
-        '#......................................#',
+        '#.........................ssss.........#',
         '#..........................E...........#',
-        '#......................................#',
+        '#....#~~~~~#...........................#',
         '###############################...######'] }
 };
+const T2D_WORLDS = {}; // el mundo de cada sala (lo que rompiste queda roto mientras dure la partida)
 
-
-// --- FÍSICA (pura: sin dibujar; se prueba en js/tests.js) ---
-function t2dTile(room, tx, ty) { const r = room.rows[ty]; return r === undefined ? (ty < 0 ? '.' : '#') : (r[tx] === undefined ? '.' : r[tx]); }
-function t2dSolid(c) { return c === '#'; }
-function t2dBoxHits(room, b) { // ¿la caja está metida en piedra?
-    const T = T2D.TILE;
-    for (let ty = Math.floor(b.y / T); ty <= Math.floor((b.y + b.h - 0.01) / T); ty++)
-        for (let tx = Math.floor(b.x / T); tx <= Math.floor((b.x + b.w - 0.01) / T); tx++) if (t2dSolid(t2dTile(room, tx, ty))) return true;
-    return false;
-}
-// Choca una caja contra la grilla moviéndose por un eje. Devuelve true si tocó algo.
-function t2dMoveAxis(room, b, dx, dy, dropping) {
-    const T = T2D.TILE;
+// --- FÍSICA contra los píxeles reales (js/tower2dWorld.js). Es pura: se prueba en js/tests.js. ---
+function t2dBoxHits(w, b) { return w2dBoxHits(w, b); }
+// Mueve una caja por un eje de a 1 píxel. De costado sube escalones de hasta T2D.stepUp píxeles (pendientes suaves).
+// Devuelve true si chocó.
+function t2dMoveAxis(w, b, dx, dy) {
     if (dx) {
-        b.x += dx;
-        const tx = Math.floor((dx > 0 ? b.x + b.w - 0.01 : b.x) / T);
-        for (let ty = Math.floor(b.y / T); ty <= Math.floor((b.y + b.h - 0.01) / T); ty++)
-            if (t2dSolid(t2dTile(room, tx, ty))) { b.x = dx > 0 ? tx * T - b.w : (tx + 1) * T; return true; }
+        const s = Math.sign(dx); let rest = Math.abs(dx);
+        while (rest > 1e-6) {
+            const st = Math.min(1, rest), nx = b.x + s * st;
+            if (!w2dBoxHits(w, { x: nx, y: b.y, w: b.w, h: b.h })) { b.x = nx; rest -= st; continue; }
+            let up = 0;
+            if (b.onGround !== false) for (let k = 1; k <= T2D.stepUp; k++) if (!w2dBoxHits(w, { x: nx, y: b.y - k, w: b.w, h: b.h })) { up = k; break; }
+            if (!up) return true;
+            b.x = nx; b.y -= up; rest -= st;
+        }
     }
     if (dy) {
-        const prevBottom = b.y + b.h;
-        b.y += dy;
-        const ty = Math.floor((dy > 0 ? b.y + b.h - 0.01 : b.y) / T);
-        for (let tx = Math.floor(b.x / T); tx <= Math.floor((b.x + b.w - 0.01) / T); tx++) {
-            const c = t2dTile(room, tx, ty);
-            const oneWay = c === '=' && dy > 0 && !dropping && prevBottom <= ty * T + 0.01; // la plataforma solo frena desde arriba
-            if (t2dSolid(c) || oneWay) { b.y = dy > 0 ? ty * T - b.h : (ty + 1) * T; return true; }
+        const s = Math.sign(dy); let rest = Math.abs(dy);
+        while (rest > 1e-6) {
+            const st = Math.min(1, rest), ny = b.y + s * st;
+            if (w2dBoxHits(w, { x: b.x, y: ny, w: b.w, h: b.h })) { if (s > 0) b.y = Math.floor(b.y + b.h) - b.h; return true; } // apoyado justo sobre el píxel
+            b.y = ny; rest -= st;
         }
     }
     return false;
+}
+const t2dOnGround = (w, b) => w2dBoxHits(w, { x: b.x, y: b.y + 1, w: b.w, h: b.h });
+// Si quedó metido en material (la arena que cae lo tapó, una pared que se cerró), sube hasta quedar libre
+function t2dUnstick(w, b) {
+    if (!w2dBoxHits(w, b)) return;
+    for (let k = 1; k <= 24; k++) if (!w2dBoxHits(w, { x: b.x, y: b.y - k, w: b.w, h: b.h })) { b.y -= k; return; }
 }
 // Un paso del héroe. input: { left, right, up, down, jump (apretado ahora), jumpHeld, dash (apretado ahora) }
 function t2dStepHero(room, h, input, dt) {
@@ -137,6 +142,7 @@ function t2dStepHero(room, h, input, dt) {
     h.t = (h.t || 0) + dt;
     const dir = h.t < (h.wallLockUntil || 0) ? 0 : rawDir; // recién saltado de una pared: un instante sin control, para despegarse
     h.events = h.events || [];
+    t2dUnstick(room, h);
     // dash: rápido, recto, sin gravedad; uno en el aire hasta tocar el piso
     if (input.dash && h.t >= (h.dashReadyAt || 0) && (h.onGround || h.airDash !== false)) {
         h.dashDir = dir || h.facing || 1; h.dashUntil = h.t + H.dashTime; h.dashReadyAt = h.t + H.dashCd;
@@ -147,7 +153,7 @@ function t2dStepHero(room, h, input, dt) {
     if (h.t < (h.dashUntil || 0)) {
         h.vx = h.dashDir * H.dashSpeed; h.vy = 0; h.facing = h.dashDir;
         if (t2dMoveAxis(room, h, h.vx * dt, 0)) h.dashUntil = 0;
-        h.onGround = t2dStandingSolid(room, h);
+        h.onGround = t2dOnGround(room, h);
         return;
     }
     if (dir) {
@@ -155,7 +161,7 @@ function t2dStepHero(room, h, input, dt) {
         h.vx += dir * (h.onGround ? H.accel : H.airAccel) * dt; h.facing = dir;
     } else if (h.onGround) { const f = H.friction * dt; h.vx = Math.abs(h.vx) <= f ? 0 : h.vx - Math.sign(h.vx) * f; }
     else if (h.t >= (h.wallLockUntil || 0)) h.vx *= Math.pow(0.2, dt); // en el aire, sin teclas, frena de a poco (no se queda patinando)
-    const maxRun = H.maxRun * (h.charging ? T2D.charge.slow : 1); // cargando un golpe, camina lento
+    const maxRun = H.maxRun * (h.charging ? T2D.charge.slow : 1) * (h.inWater ? 0.6 : 1); // cargando un golpe o en el agua, más lento
     if (h.t < (h.lungeUntil || 0)) h.vx = h.facing * T2D.charge.lunge; // el golpe cargado avanza como un mini dash
     else if (Math.abs(h.vx) > maxRun) h.vx = Math.sign(h.vx) * Math.max(maxRun, Math.abs(h.vx) - H.friction * dt); // pasado de velocidad (dash, golpe): baja de a poco
     if (h.onGround) { h.coyoteUntil = h.t + H.coyote; h.jumpsLeft = h.doubleJump ? 1 : 0; h.airDash = true; }
@@ -168,8 +174,9 @@ function t2dStepHero(room, h, input, dt) {
         h.vy = -H.jumpV * 0.95; h.vx = -h.lastWall * H.wallJumpX; h.facing = -h.lastWall; h.wallLockUntil = h.t + H.wallLock;
         h.bufferUntil = 0; h.wallCoyoteUntil = 0; h.jumped = true; h.onWall = 0; h.events.push('wallJump');
     }
-    const dropping = input.down && input.jump && h.onGround && t2dStandingOn(room, h) === '=';
-    if (dropping) { h.y += 2; h.bufferUntil = 0; h.dropUntil = h.t + 0.2; }
+    // en el agua: se nada (cada salto es una brazada hacia arriba)
+    h.inWater = w2dBoxFraction(room, h, MAT.WATER) > 0.35;
+    if (h.inWater && h.bufferUntil > h.t && h.t >= (h.strokeAt || 0)) { h.vy = -H.jumpV * 0.6; h.strokeAt = h.t + 0.25; h.bufferUntil = 0; h.events.push('swim'); }
     else if (h.bufferUntil > h.t && (h.t <= h.coyoteUntil || h.jumpsLeft > 0)) {
         const air = h.t > h.coyoteUntil;
         if (air) h.jumpsLeft--; // en el aire: gasta el doble salto
@@ -178,11 +185,12 @@ function t2dStepHero(room, h, input, dt) {
     }
     if (!input.jumpHeld && h.vy < 0 && h.jumped) { h.vy *= H.cutJump; h.jumped = false; } // soltar corta el salto
     // gravedad: flota en la punta si mantenés el salto, cae más rápido de lo que sube
-    const g = H.gravity * (Math.abs(h.vy) < H.apexBand && input.jumpHeld ? H.apexMult : h.vy > 0 ? H.fallMult : 1);
-    h.vy = Math.min(h.onWall ? H.wallSlide : H.fallMax, h.vy + g * dt);
+    const g = H.gravity * (h.inWater ? 0.3 : Math.abs(h.vy) < H.apexBand && input.jumpHeld ? H.apexMult : h.vy > 0 ? H.fallMult : 1);
+    h.vy = Math.min(h.onWall ? H.wallSlide : h.inWater ? 70 : H.fallMax, h.vy + g * dt);
+    if (h.inWater) h.vx *= Math.pow(0.15, dt); // el agua frena
     if (t2dMoveAxis(room, h, h.vx * dt, 0)) h.vx = 0;
     const wasGround = h.onGround, vyBefore = h.vy;
-    let hitY = t2dMoveAxis(room, h, 0, h.vy * dt, h.t < (h.dropUntil || 0));
+    let hitY = t2dMoveAxis(room, h, 0, h.vy * dt);
     if (hitY && vyBefore < 0) { // la cabeza tocó: si fue solo una esquina, corre y sigue subiendo
         corner: for (const nx of [1, -1]) for (let k = 1; k <= H.corner; k++) {
             const test = { x: h.x + nx * k, y: h.y + vyBefore * dt, w: h.w, h: h.h };
@@ -190,23 +198,27 @@ function t2dStepHero(room, h, input, dt) {
         }
         if (!hitY) { h.onGround = false; return; }
     }
-    h.onGround = hitY && vyBefore > 0;
+    h.onGround = hitY && vyBefore >= 0;
+    // bajando una pendiente: si recién estaba en el piso y el piso sigue a 1-3 píxeles, se pega (no "salta" cada escalón)
+    if (!h.onGround && wasGround && vyBefore >= 0 && !h.jumped) for (let k = 1; k <= T2D.stepUp; k++) if (w2dBoxHits(room, { x: h.x, y: h.y + k, w: h.w, h: h.h })) { h.y += k - 1; h.onGround = true; hitY = true; break; }
     if (hitY) { if (h.vy < 0) h.jumped = false; h.vy = 0; }
     if (h.onGround && !wasGround) h.events.push(vyBefore > H.fallMax * 0.7 ? 'bigLand' : 'land');
 }
 // ¿Hay pared pegada a un costado? -1 a la izquierda, 1 a la derecha, 0 nada (mira la mitad del cuerpo, no los pies)
-function t2dWallDir(room, b) {
-    const T = T2D.TILE, y1 = Math.floor((b.y + 4) / T), y2 = Math.floor((b.y + b.h - 6) / T);
+function t2dWallDir(w, b) {
     for (const side of [-1, 1]) {
-        const tx = Math.floor((side > 0 ? b.x + b.w + 1 : b.x - 1) / T);
-        for (let ty = y1; ty <= y2; ty++) if (t2dSolid(t2dTile(room, tx, ty))) return side;
+        const x = side > 0 ? Math.ceil(b.x + b.w) : Math.floor(b.x) - 1; let n = 0, t = 0;
+        for (let y = Math.floor(b.y + 4); y < b.y + b.h - 6; y++) { t++; if (w2dSolid(w, x, y)) n++; }
+        if (t && n / t > 0.6) return side;
     }
     return 0;
 }
-function t2dStandingOn(room, b) { const T = T2D.TILE; return t2dTile(room, Math.floor((b.x + b.w / 2) / T), Math.floor((b.y + b.h + 1) / T)); }
-function t2dStandingSolid(room, b) { const c = t2dStandingOn(room, b); return t2dSolid(c) || c === '='; }
+// ¿Toca un material? (la caja agrandada 1 píxel: espinas, lava, fuego)
+function t2dTouches(w, b, m1, m2 = -1) {
+    for (let y = Math.floor(b.y) - 1; y <= b.y + b.h; y++) for (let x = Math.floor(b.x) - 1; x <= b.x + b.w; x++) { const m = w2dGet(w, x, y); if (m === m1 || m === m2) return true; }
+    return false;
+}
 function t2dOverlap(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
-function t2dFind(room, ch) { const out = []; room.rows.forEach((r, y) => [...r].forEach((c, x) => { if (c === ch) out.push({ x, y }); })); return out; }
 // La caja del tajo según hacia dónde: 'side', 'up', 'down'
 function t2dSlashBox(h, aim) {
     const k = h.combo === 3 ? T2D.charge.size : 1, S = { w: T2D.slash.w * k, h: T2D.slash.h * k };
@@ -217,16 +229,18 @@ function t2dSlashBox(h, aim) {
 
 // --- EL JUEGO ---
 let t2d = null;
+function t2dWorld(key) { return T2D_WORLDS[key] || (T2D_WORLDS[key] = w2dFromRows(T2D_ROOMS[key].rows)); }
 function t2dEnterRoom(key, from) {
-    const room = T2D_ROOMS[key], T = T2D.TILE, W = room.rows[0].length * T, H = room.rows.length * T;
+    const room = T2D_ROOMS[key], w = t2dWorld(key), W = w.W, H = w.H, T = T2D.TILE;
     const h = t2d ? t2d.hero : { w: T2D.hero.w, h: T2D.hero.h, vx: 0, vy: 0, facing: 1, hp: T2D.hero.hp, doubleJump: false };
-    if (!from) { const p = t2dFind(room, 'P')[0] || { x: 2, y: 2 }; h.x = p.x * T + 3; h.y = (p.y + 1) * T - h.h; }
+    if (!from) { const p = w.markers.P[0] || { x: 40, y: 40 }; h.x = p.x - h.w / 2; h.y = p.y - h.h; }
     else if (from === 'left') h.x = 2; else if (from === 'right') h.x = W - h.w - 2;
     else if (from === 'down') { h.y = H - h.h - T - 1; h.vy = -T2D.hero.jumpV; } else if (from === 'up') h.y = 2;
-    const mk = (p, kind) => { const D = T2D[kind]; return { kind, x: p.x * T + 1, y: (p.y + 1) * T - D.h, w: D.w, h: D.h, vx: D.speed, vy: 0, hp: D.hp, hurtAt: -9, state: 'walk', stateAt: 0 }; };
-    const enemies = t2dFind(room, 'E').map(p => mk(p, 'walker')).concat(t2dFind(room, 'C').map(p => mk(p, 'charger')));
-    const feathers = (t2d && t2d.hero.doubleJump) ? [] : t2dFind(room, 'F').map(p => ({ x: p.x * T + 3, y: p.y * T + 3, w: 10, h: 10 }));
-    t2d = Object.assign(t2d || { clock: 0, realClock: 0, msg: null, freeze: 0, shake: 0, parts: [], ghosts: [], squash: { x: 1, y: 1 } }, { key, room, W, H, hero: h, enemies, feathers, nums: [], flashes: [] });
+    while (w2dBoxHits(w, h) && h.y > 0) h.y--; // que no arranque metido en la piedra
+    const mk = (p, kind) => { const D = T2D[kind], e = { kind, x: p.x - D.w / 2, y: p.y - D.h, w: D.w, h: D.h, vx: D.speed, vy: 0, hp: D.hp, hurtAt: -9, state: 'walk', stateAt: 0 }; while (w2dBoxHits(w, e) && e.y > 0) e.y--; return e; };
+    const enemies = w.markers.E.map(p => mk(p, 'walker')).concat(w.markers.C.map(p => mk(p, 'charger')));
+    const feathers = (t2d && t2d.hero.doubleJump) ? [] : w.markers.F.map(p => ({ x: p.x - 5, y: p.y - 12, w: 10, h: 10 }));
+    t2d = Object.assign(t2d || { clock: 0, realClock: 0, msg: null, freeze: 0, shake: 0, parts: [], ghosts: [], squash: { x: 1, y: 1 } }, { key, room, world: w, W, H, hero: h, enemies, feathers, nums: [], flashes: [] });
     t2d.fadeAt = t2d.realClock; // fundido al entrar a la sala
     t2d.cam = { x: Math.max(0, Math.min(W - T2D.VIEW_W, h.x - T2D.VIEW_W / 2)), y: Math.max(0, Math.min(H - T2D.VIEW_H, h.y - T2D.VIEW_H / 2)) };
     t2d.spawn = { x: h.x, y: h.y };
@@ -245,7 +259,8 @@ function t2dUpdate(input, dt) {
     if (g.freeze > 0) { g.freeze -= dt; t2dFx(dt); return; }
     g.clock += dt;
     if (h.hp <= 0) { if (g.clock - h.diedAt > 1.2) { const dj = h.doubleJump; t2d = null; t2dEnterRoom('base'); t2d.hero.doubleJump = dj; t2dMsg('Volviste a la puerta de la Torre.'); } return; }
-    t2dStepHero(g.room, h, input, dt);
+    if ((g.simTick = (g.simTick || 0) + 1) % 2 === 0) w2dStep(g.world); // el mundo de píxeles, 60 veces por segundo
+    t2dStepHero(g.world, h, input, dt);
     // lo que pasó en el paso: polvo, estirar y aplastar, sonido
     (h.events || []).forEach(ev => {
         const fx = h.x + h.w / 2, fy = h.y + h.h;
@@ -272,7 +287,7 @@ function t2dUpdate(input, dt) {
     if (input.attack && g.clock - (h.attackAt ?? -9) >= T2D.hero.attackGap) {
         h.aim = input.up ? 'up' : input.down && !h.onGround ? 'down' : 'side';
         h.combo = h.aim === 'side' && g.clock - (h.attackAt ?? -9) < T2D.hero.comboWindow ? ((h.combo ?? -1) % 3 + 1) % 3 : 0;
-        h.attackAt = g.clock; h.hitThisSwing = new Set(); h.pogoDone = false;
+        h.attackAt = g.clock; h.hitThisSwing = new Set(); h.pogoDone = false; h.dug = false;
         t2dSfx('swing');
     }
     // golpe cargado: mantené el tajo; brilla al estar listo; al soltar sale el golpe grande hacia adelante
@@ -280,7 +295,7 @@ function t2dUpdate(input, dt) {
     if (h.charging && input.attackHeld && g.clock - h.pressAt >= C.full && !h.chargeReady) { h.chargeReady = true; t2dSparks(h.x + h.w / 2, h.y + 6, 8, '#ffd166'); t2dSfx('cast'); }
     if (h.charging && !input.attackHeld) {
         if (h.chargeReady) {
-            h.aim = 'side'; h.combo = 3; h.attackAt = g.clock; h.hitThisSwing = new Set(); h.lungeUntil = (h.t || 0) + C.lungeTime;
+            h.aim = 'side'; h.combo = 3; h.attackAt = g.clock; h.hitThisSwing = new Set(); h.dug = false; h.lungeUntil = (h.t || 0) + C.lungeTime;
             g.shake = Math.max(g.shake, F.shake); t2dSfx('crit');
         }
         h.charging = false; h.chargeReady = false;
@@ -304,21 +319,21 @@ function t2dUpdate(input, dt) {
             if (h.aim === 'side' && h.combo !== 3) h.vx -= h.facing * T2D.hero.recoil; // retroceso: el golpe empuja también al que pega
             if (h.aim === 'down') t2dPogo(h);
         });
-        // el tajo hacia abajo también rebota en los pinchos
-        if (h.aim === 'down' && !h.pogoDone) {
-            for (let tx = Math.floor(box.x / T); tx <= Math.floor((box.x + box.w) / T); tx++) if (t2dTile(g.room, tx, Math.floor((box.y + box.h) / T)) === '^') { t2dPogo(h); t2dSparks(h.x + h.w / 2, box.y + box.h, 6, '#c9ccd1'); break; }
-        }
+        // el tajo hacia abajo también rebota en las espinas
+        if (h.aim === 'down' && !h.pogoDone && t2dTouches(g.world, box, MAT.SPIKE)) { t2dPogo(h); t2dSparks(h.x + h.w / 2, box.y + box.h, 6, '#c9ccd1'); }
+        // el tajo rompe la tierra y la arena; el golpe cargado, también piedra y madera
+        if (!h.dug) { h.dug = true; const n = w2dDig(g.world, box, h.combo === 3); if (n) { t2dDust(box.x + box.w / 2, box.y + box.h / 2, Math.min(12, 2 + n / 20), 1.5); t2dSfx('hit'); } }
     }
     if (input.parry) t2dParry(h, g.clock);
-    // pinchos: se tocan con los pies
-    const feet = t2dTile(g.room, Math.floor((h.x + h.w / 2) / T), Math.floor((h.y + h.h - 1) / T));
-    if (feet === '^') { t2dHurt(1, -h.facing); h.vy = -T2D.hero.jumpV * 0.7; }
+    // espinas, lava y fuego: lastiman y te tiran para arriba
+    if (t2dTouches(g.world, h, MAT.SPIKE, MAT.LAVA) || w2dBoxFraction(g.world, h, MAT.FIRE) > 0.1) { if (g.clock >= (h.invulnUntil || 0)) { t2dHurt(1, -h.facing); h.vy = -T2D.hero.jumpV * 0.7; } }
     // enemigos: caminan y se dan vuelta en las paredes y los bordes; al recibir un golpe salen despedidos
     g.enemies.forEach(e => {
         if (e.hp <= 0) return;
         const D = T2D[e.kind], knocked = g.clock < (e.knockUntil || 0), dir = Math.sign(e.vx) || 1, since = g.clock - e.stateAt;
         e.vy = Math.min(T2D.hero.fallMax, (e.vy || 0) + T2D.hero.gravity * dt);
-        if (t2dMoveAxis(g.room, e, 0, e.vy * dt)) e.vy = 0;
+        t2dUnstick(g.world, e);
+        if (t2dMoveAxis(g.world, e, 0, e.vy * dt)) e.vy = 0;
         // el embestidor: te ve a su altura → se prepara (avisa con un "!") → embiste derecho → descansa
         if (e.kind === 'charger' && !knocked) {
             const seen = Math.abs(h.x - e.x) < D.sight && Math.abs((h.y + h.h) - (e.y + e.h)) < 20;
@@ -328,12 +343,14 @@ function t2dUpdate(input, dt) {
             else if (e.state === 'stun' && since > T2D.parry.stun) { e.state = 'walk'; e.stateAt = g.clock; }
         }
         const speed = knocked ? e.knockVx : e.state === 'windup' || e.state === 'stun' ? 0 : e.state === 'rush' ? Math.sign(e.vx) * D.rush : dir * D.speed;
-        const ahead = t2dTile(g.room, Math.floor((dir > 0 ? e.x + e.w + 1 : e.x - 1) / T), Math.floor((e.y + e.h + 1) / T));
-        if (t2dMoveAxis(g.room, e, speed * dt, 0) || (!knocked && e.state !== 'rush' && !t2dSolid(ahead) && ahead !== '=')) {
+        const fx = dir > 0 ? e.x + e.w + 1 : e.x - 2; let groundAhead = false; // ¿hay piso adelante (hasta 8 px abajo: las pendientes cuentan)? si no, se da vuelta
+        for (let k = 1; k <= 8 && !groundAhead; k++) groundAhead = w2dSolid(g.world, fx, e.y + e.h + k);
+        const steady = e.state === 'windup' || e.state === 'stun'; // preparándose o aturdido: no se da vuelta
+        if ((t2dMoveAxis(g.world, e, speed * dt, 0) && !steady) || (!knocked && e.state === 'walk' && !groundAhead)) {
             e.vx = -dir * D.speed;
             if (e.state === 'rush') { e.state = 'walk'; e.stateAt = g.clock; g.shake = Math.max(g.shake, F.shake * 0.6); t2dDust(e.x + e.w / 2, e.y + e.h, 6); } // se dio contra la pared
         }
-        if (e.state === 'rush' && (!t2dSolid(ahead) && ahead !== '=')) { e.state = 'walk'; e.stateAt = g.clock; e.vx = -dir * D.speed; } // no se tira por el borde
+        if (e.state === 'rush' && !groundAhead) { e.state = 'walk'; e.stateAt = g.clock; e.vx = -dir * D.speed; } // no se tira por el borde
         if (t2dOverlap(h, e) && g.clock >= (h.dashUntil || 0) && e.state !== 'stun') t2dHurt(e.state === 'rush' ? 2 : 1, Math.sign(h.x - e.x) || 1, e);
     });
     g.enemies.filter(e => e.hp <= 0 && !e.gone).forEach(e => { e.gone = true; t2dSparks(e.x + e.w / 2, e.y + e.h / 2, 10, '#6a994e'); });
@@ -413,11 +430,7 @@ function t2dDraw(ctx, scale) {
     ctx.fillStyle = '#9a93ab'; ctx.fillRect(0, 0, VW, VH); // fondo claro: el encapuchado es oscuro y tiene que recortarse
     for (let i = 0; i < 6; i++) { ctx.fillStyle = 'rgba(70,62,85,0.25)'; ctx.fillRect(((i * 97 - camX * 0.3) % (VW + 60) + VW + 60) % (VW + 60) - 30, 20 + (i % 3) * 30, 18, VH); } // columnas al fondo (paralaje)
     ctx.translate(-camX, -camY);
-    g.room.rows.forEach((r, y) => [...r].forEach((c, x) => {
-        if (c === '#') { ctx.fillStyle = (x + y) % 2 ? '#5b5266' : '#544b5e'; ctx.fillRect(x * T, y * T, T, T); ctx.fillStyle = '#6e6479'; ctx.fillRect(x * T, y * T, T, 2); }
-        else if (c === '=') { ctx.fillStyle = '#8a6f4e'; ctx.fillRect(x * T, y * T, T, 4); ctx.fillStyle = '#5e4a33'; ctx.fillRect(x * T, y * T + 4, T, 1); }
-        else if (c === '^') { ctx.fillStyle = '#c9ccd1'; for (let k = 0; k < 4; k++) { ctx.beginPath(); ctx.moveTo(x * T + k * 4, y * T + T); ctx.lineTo(x * T + k * 4 + 2, y * T + T - 7); ctx.lineTo(x * T + k * 4 + 4, y * T + T); ctx.fill(); } }
-    }));
+    w2dFlicker(g.world); ctx.drawImage(w2dRender(g.world), 0, 0); // el mundo de píxeles (js/tower2dWorld.js)
     g.feathers.forEach(f => { ctx.fillStyle = '#ffd166'; ctx.fillRect(f.x + 3, f.y + Math.sin(g.clock * 3) * 2, 4, 10); ctx.fillStyle = '#fff3c4'; ctx.fillRect(f.x + 4, f.y + 1 + Math.sin(g.clock * 3) * 2, 2, 6); });
     g.enemies.forEach(e => { if (e.hp <= 0) return; const base = e.kind === 'charger' ? (e.state === 'stun' ? '#7fd8ff' : '#bc6c25') : '#6a994e';
         const wob = e.state === 'windup' ? Math.round(Math.sin(g.clock * 60)) : 0;
@@ -439,6 +452,12 @@ function t2dDraw(ctx, scale) {
     }
     g.flashes.forEach(f => { const k = (g.realClock - f.at) / 0.1; ctx.globalAlpha = 1 - k; ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(f.x, f.y, (f.big ? 9 : 6) * (0.5 + k), 0, Math.PI * 2); ctx.fill(); });
     ctx.font = 'bold 7px monospace'; g.nums.forEach(n => { const k = (g.realClock - n.at) / 0.7; ctx.globalAlpha = 1 - k * k; ctx.fillStyle = '#1d1712'; ctx.fillText(n.text, n.x - 2 + 1, n.y - k * 14 + 1); ctx.fillStyle = n.color; ctx.fillText(n.text, n.x - 2, n.y - k * 14); });
+    if (g.debug) { // tecla H: las cajas de choque (lo que de verdad choca), encima del dibujo
+        ctx.lineWidth = 1; // (el terreno ya es exacto: lo que se ve es lo que choca)
+        ctx.strokeStyle = '#ff00ff'; ctx.strokeRect(h.x + 0.5, h.y + 0.5, h.w - 1, h.h - 1);
+        ctx.strokeStyle = '#ffaa00'; g.enemies.forEach(e => { if (e.hp > 0) ctx.strokeRect(e.x + 0.5, e.y + 0.5, e.w - 1, e.h - 1); });
+        if (g.clock - (h.attackAt ?? -9) < T2D.slash.active[1]) { const b = t2dSlashBox(h, h.aim); ctx.strokeStyle = '#ff3333'; ctx.strokeRect(b.x + 0.5, b.y + 0.5, b.w - 1, b.h - 1); }
+    }
     g.parts.forEach(p => { ctx.globalAlpha = Math.max(0, 1 - (g.clock - p.at) / p.life); ctx.fillStyle = p.color; ctx.fillRect(Math.round(p.x), Math.round(p.y), p.size, p.size); });
     ctx.globalAlpha = 1;
     ctx.restore();
@@ -478,13 +497,14 @@ function t2dTunePanel(el) {
 }
 
 // --- ARRANQUE (torre2d.html) ---
-function t2dStart(canvas, panel) {
+async function t2dStart(canvas, panel) {
     const ctx = canvas.getContext('2d'), keys = {}, scale = Math.max(2, Math.floor(Math.min(window.innerWidth / T2D.VIEW_W, (window.innerHeight - 40) / T2D.VIEW_H)));
     canvas.width = T2D.VIEW_W * scale; canvas.height = T2D.VIEW_H * scale;
     const pressed = {};
     const map = k => ({ a: 'left', arrowleft: 'left', d: 'right', arrowright: 'right', s: 'down', arrowdown: 'down', w: 'up', arrowup: 'up', ' ': 'jump', k: 'jump', j: 'attack', x: 'attack', shift: 'dash', l: 'dash', c: 'jump', z: 'attack', e: 'parry', i: 'parry' })[k];
     window.addEventListener('keydown', e => {
         if (e.key === 'Escape' && t2d) { t2d.paused = !t2d.paused; return; }
+        if (e.key.toLowerCase() === 'h' && t2d) { t2d.debug = !t2d.debug; return; } // ver las cajas de choque
         if (e.key.toLowerCase() === 't' && panel) { panel.hidden = !panel.hidden; if (!panel.hidden) t2dTunePanel(panel); return; }
         const a = map(e.key.toLowerCase()); if (!a || e.target.tagName === 'INPUT') return; e.preventDefault(); if (!keys[a]) pressed[a] = true; keys[a] = true;
     });
@@ -492,6 +512,13 @@ function t2dStart(canvas, panel) {
     canvas.addEventListener('mousedown', e => { if (e.button === 0) { pressed.attack = true; keys.attack = true; } if (e.button === 2) pressed.dash = true; });
     window.addEventListener('mouseup', e => { if (e.button === 0) keys.attack = false; });
     canvas.addEventListener('contextmenu', e => e.preventDefault());
+    const loads = Object.keys(T2D_ROOMS).map(key => new Promise(done => {
+        const img = new Image();
+        img.onload = () => { const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; const g = c.getContext('2d'); g.drawImage(img, 0, 0); try { T2D_WORLDS[key] = w2dFromImage(g.getImageData(0, 0, img.width, img.height)); } catch (e) { /* sin permiso de leer la imagen (abierto como archivo): bloques */ } done(); };
+        img.onerror = () => done(); // sin imagen: se arma desde las filas de bloques
+        img.src = `torre2d/salas/${key}.png`;
+    }));
+    await Promise.all(loads);
     t2dEnterRoom('base');
     t2dMsg('A/D: moverte · Espacio: saltar (mantené para más alto) · J o clic: tajo (con W arriba, con S abajo en el aire: rebota) · Shift o clic derecho: dash · mantené el tajo: golpe cargado · E: parada justo antes del golpe · Esc: pausa · T: ajustes');
     let last = performance.now(), acc = 0;

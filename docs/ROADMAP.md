@@ -231,6 +231,16 @@ Modo nuevo en paralelo: `torre2d.html` + `js/tower2d.js` (se entra desde el men�
 - [x] **Pulido** (2026-10-25, pedido del usuario): destello blanco en el punto de impacto, números de daño que suben
       (dorados en el remate y el cargado), polvo al correr, fundido a negro entre salas y pausa con Esc (con los controles).
       Sin sonido de pasos (podía cansar); la capa que flamea va con las animaciones.
+- [x] **Mundo de píxeles estilo Noita liviano** (2026-10-25, decidido por el usuario; `js/tower2dWorld.js`): cada píxel es
+      un material (roca, piedra, tierra, arena, agua, madera, fuego, lava, humo, espinas); arena y agua caen y corren,
+      el fuego quema la madera, la lava y el agua se hacen piedra; el héroe y los enemigos chocan contra los píxeles reales
+      (sube escalones de 3 px, se pega al bajar pendientes, sale si la arena lo tapa); el tajo cava tierra y arena, el
+      golpe cargado también piedra y madera; en el agua se nada; lava, fuego y espinas lastiman. Se simulan solo los
+      trozos de 16×16 que se mueven. **Arregla lo de "las superficies no coinciden con el dibujo"** (ahora el dibujo es el
+      choque). **Salas dibujadas como imagen** (`torre2d/salas/*.png`, guía de colores en `docs/TORRE2D-SALAS.md`; las 3
+      de hoy salen de `docs/arte/torre2d-salas.py`). Tecla **H**: ver las cajas de choque.
+- [ ] **Animar todo** (pedido del usuario 2026-10-25: "faltan animaciones a todo"): enemigos con dibujo y animación
+      propios (hoy son rectángulos), la capa que flamea, el tajo hacia abajo, antorchas y fondos con movimiento.
 - [ ] **Afinar la sensación con el usuario:** jugarlo, tocar el panel (T) y pasar a los valores de fábrica lo que guste.
 - [x] **El mapa (decidido por el usuario 2026-10-25): pisos fijos y partes procedurales.** Cada piso tiene salas hechas
       a mano (la entrada, el pueblo, el jefe, los caminos que abre cada habilidad) y tramos que se arman al azar con

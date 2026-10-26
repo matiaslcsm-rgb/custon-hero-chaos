@@ -1,0 +1,203 @@
+// Infinite Tower 2D: el mundo de píxeles, estilo Noita liviano (decidido por el usuario 2026-10-25).
+//
+//   Cada píxel del dibujo es un material. Lo que ves es exactamente con lo que chocás.
+//   · roca: no se rompe nunca (el armazón de la torre) · piedra: la rompe el golpe cargado · tierra: la rompe cualquier tajo
+//   · arena: cae y se amontona · agua: corre y llena huecos (te frena y podés nadar) · madera: sólida, se quema
+//   · fuego: quema la madera y se apaga solo · lava: corre lenta, quema, vuelve piedra al agua · humo: sube y se va
+//   · espinas: sólidas y lastiman
+//   Solo se simulan los trozos (16×16) donde algo se movió: así anda liviano en el navegador.
+//   Las salas fijas son imágenes (torre2d/salas/*.png): cada color es un material (guía en docs/TORRE2D-SALAS.md).
+
+const MAT = { AIR: 0, ROCK: 1, STONE: 2, DIRT: 3, SAND: 4, WATER: 5, WOOD: 6, FIRE: 7, LAVA: 8, SMOKE: 9, SPIKE: 10 };
+// Colores de la imagen de cada sala → material (y marcas: entrada, enemigos, la pluma)
+const T2D_COLORS = [
+    [MAT.ROCK, 0x505050], [MAT.STONE, 0x7a7a7a], [MAT.DIRT, 0x7d5a3a], [MAT.SAND, 0xe6c35c], [MAT.WATER, 0x2f6fd6],
+    [MAT.WOOD, 0xc08040], [MAT.LAVA, 0xff4000], [MAT.SPIKE, 0xd0d0e0],
+    ['P', 0xff00ff], ['E', 0x00ff00], ['C', 0xff8800], ['F', 0xffff00]
+];
+// Cómo se dibuja cada material (dos tonos: el píxel elige uno según su "veta")
+const MAT_LOOK = {
+    [MAT.ROCK]: [0x3e3846, 0x4a4352], [MAT.STONE]: [0x6c6478, 0x7a7286], [MAT.DIRT]: [0x6e4f35, 0x7d5a3a], [MAT.SAND]: [0xd9b45a, 0xe6c35c],
+    [MAT.WATER]: [0x2f6fd6, 0x3a7fe6], [MAT.WOOD]: [0x9a6534, 0xb07440], [MAT.FIRE]: [0xff7a1a, 0xffd23f], [MAT.LAVA]: [0xff4000, 0xff7a1a],
+    [MAT.SMOKE]: [0x6a6470, 0x7d7783], [MAT.SPIKE]: [0xc9ccd1, 0xe6e8ec]
+};
+const MAT_SOLID = new Uint8Array(16), MAT_LIQUID = new Uint8Array(16);
+[MAT.ROCK, MAT.STONE, MAT.DIRT, MAT.SAND, MAT.WOOD, MAT.SPIKE].forEach(m => { MAT_SOLID[m] = 1; });
+[MAT.WATER, MAT.LAVA].forEach(m => { MAT_LIQUID[m] = 1; });
+const W2D = { chunk: 16, waterSpread: 3, fireLife: [40, 90], burnChance: 0.04, smokeLife: [40, 80] };
+
+function w2dMake(W, H) {
+    const n = W * H, C = W2D.chunk;
+    const cw = Math.ceil(W / C), ch = Math.ceil(H / C);
+    return { W, H, mat: new Uint8Array(n), life: new Uint8Array(n), shade: new Uint8Array(n).map(() => Math.random() < 0.5 ? 0 : 1),
+        tick: new Uint8Array(n), frame: 0, cw, ch, active: new Uint8Array(cw * ch).fill(1), next: new Uint8Array(cw * ch), dirty: new Uint8Array(cw * ch).fill(1),
+        markers: { P: [], E: [], C: [], F: [] } };
+}
+const w2dIn = (w, x, y) => x >= 0 && y >= 0 && x < w.W && y < w.H;
+function w2dGet(w, x, y) { return w2dIn(w, x, y) ? w.mat[y * w.W + x] : (y >= w.H ? MAT.ROCK : MAT.AIR); } // abajo del mundo es piso; los costados y arriba, aire (salidas)
+function w2dWake(w, x, y) { // algo cambió acá: el trozo y sus vecinos se simulan y se redibujan
+    const C = W2D.chunk, cx = (x / C) | 0, cy = (y / C) | 0;
+    for (let oy = -1; oy <= 1; oy++) for (let ox = -1; ox <= 1; ox++) {
+        const nx = cx + ox, ny = cy + oy;
+        if (nx >= 0 && ny >= 0 && nx < w.cw && ny < w.ch) { w.next[ny * w.cw + nx] = 1; w.dirty[ny * w.cw + nx] = 1; }
+    }
+}
+function w2dSet(w, x, y, m, life = 0) {
+    if (!w2dIn(w, x, y)) return;
+    const i = y * w.W + x;
+    w.mat[i] = m; w.life[i] = life; w.tick[i] = w.frame; w2dWake(w, x, y);
+}
+function w2dSwap(w, i, j) {
+    const m = w.mat[i], l = w.life[i]; w.mat[i] = w.mat[j]; w.life[i] = w.life[j]; w.mat[j] = m; w.life[j] = l;
+    w.tick[i] = w.tick[j] = w.frame;
+    w2dWake(w, i % w.W, (i / w.W) | 0); w2dWake(w, j % w.W, (j / w.W) | 0);
+}
+const w2dRand = (a, b) => a + ((Math.random() * (b - a + 1)) | 0);
+
+// --- ARMAR UN MUNDO ---
+// Desde una imagen (ImageData de la sala): el color más cercano de T2D_COLORS; transparente o blanco = aire
+function w2dFromImage(img) {
+    const w = w2dMake(img.width, img.height), d = img.data;
+    for (let i = 0; i < img.width * img.height; i++) {
+        const r = d[i * 4], g = d[i * 4 + 1], b = d[i * 4 + 2], a = d[i * 4 + 3];
+        if (a < 128 || (r > 245 && g > 245 && b > 245)) continue;
+        let best = null, bd = 1e9;
+        for (const [m, c] of T2D_COLORS) { const dd = (r - (c >> 16)) ** 2 + (g - ((c >> 8) & 255)) ** 2 + (b - (c & 255)) ** 2; if (dd < bd) { bd = dd; best = m; } }
+        if (bd > 3000) continue; // un color que no es de la guía: aire
+        const x = i % img.width, y = (i / img.width) | 0;
+        if (typeof best === 'string') { w.markers[best].push({ x, y }); continue; }
+        w.mat[i] = best;
+    }
+    return w;
+}
+// Desde filas de texto (bloques de 16 px; para las pruebas y por si la imagen no carga):
+// # roca · p piedra · t tierra · s arena · ~ agua · = madera (tabla de 4 px) · w madera · L lava · ^ espinas · P E C F marcas
+function w2dFromRows(rows, T = 16) {
+    const w = w2dMake(rows[0].length * T, rows.length * T);
+    const fill = { '#': MAT.ROCK, p: MAT.STONE, t: MAT.DIRT, s: MAT.SAND, '~': MAT.WATER, w: MAT.WOOD, L: MAT.LAVA };
+    rows.forEach((r, ty) => [...r].forEach((c, tx) => {
+        const x0 = tx * T, y0 = ty * T;
+        if (fill[c] !== undefined) { for (let y = y0; y < y0 + T; y++) w.mat.fill(fill[c], y * w.W + x0, y * w.W + x0 + T); }
+        else if (c === '=') { for (let y = y0; y < y0 + 4; y++) w.mat.fill(MAT.WOOD, y * w.W + x0, y * w.W + x0 + T); }
+        else if (c === '^') { for (let k = 0; k < T; k++) { const hh = 7 - Math.abs((k % 4) - 2) * 3; for (let y = y0 + T - hh; y < y0 + T; y++) w.mat[y * w.W + x0 + k] = MAT.SPIKE; } } // dientes de 1-7 px
+        else if (w.markers[c]) w.markers[c].push({ x: x0 + T / 2, y: y0 + T - 1 });
+    }));
+    return w;
+}
+
+// --- SIMULACIÓN (una vez por cuadro) ---
+function w2dStep(w) {
+    w.frame = (w.frame + 1) & 255;
+    const C = W2D.chunk, W = w.W, flip = w.frame & 1;
+    w.next.fill(0);
+    for (let cy = w.ch - 1; cy >= 0; cy--) for (let k = 0; k < w.cw; k++) {
+        const cx = flip ? k : w.cw - 1 - k;
+        if (!w.active[cy * w.cw + cx]) continue;
+        const x0 = cx * C, y0 = cy * C, x1 = Math.min(W, x0 + C), y1 = Math.min(w.H, y0 + C);
+        for (let y = y1 - 1; y >= y0; y--) for (let j = 0; j < x1 - x0; j++) {
+            const x = flip ? x0 + j : x1 - 1 - j, i = y * W + x, m = w.mat[i];
+            if (m === MAT.AIR || w.tick[i] === w.frame) continue;
+            if (m === MAT.SAND) w2dPowder(w, x, y, i);
+            else if (m === MAT.WATER) w2dLiquid(w, x, y, i, W2D.waterSpread);
+            else if (m === MAT.LAVA) { if ((w.frame + x) % 3 === 0) w2dLiquid(w, x, y, i, 1); w2dLava(w, x, y); }
+            else if (m === MAT.FIRE) w2dFire(w, x, y, i);
+            else if (m === MAT.SMOKE) w2dSmoke(w, x, y, i);
+        }
+    }
+    const t = w.active; w.active = w.next; w.next = t;
+}
+function w2dCanFall(m) { return m === MAT.AIR || m === MAT.SMOKE || m === MAT.FIRE; }
+function w2dPowder(w, x, y, i) {
+    const below = w2dGet(w, x, y + 1);
+    if (y + 1 < w.H && (w2dCanFall(below) || MAT_LIQUID[below])) return w2dSwap(w, i, i + w.W);
+    const d = Math.random() < 0.5 ? 1 : -1;
+    for (const dx of [d, -d]) if (y + 1 < w.H && w2dIn(w, x + dx, y + 1) && w2dCanFall(w2dGet(w, x + dx, y + 1)) && w2dCanFall(w2dGet(w, x + dx, y))) return w2dSwap(w, i, i + w.W + dx);
+}
+function w2dLiquid(w, x, y, i, spread) {
+    if (y + 1 < w.H && w2dCanFall(w2dGet(w, x, y + 1))) return w2dSwap(w, i, i + w.W);
+    const d = Math.random() < 0.5 ? 1 : -1;
+    for (const dx of [d, -d]) if (y + 1 < w.H && w2dIn(w, x + dx, y + 1) && w2dCanFall(w2dGet(w, x + dx, y + 1)) && w2dCanFall(w2dGet(w, x + dx, y))) return w2dSwap(w, i, i + w.W + dx);
+    for (const dx of [d, -d]) { // de costado: hasta `spread` píxeles
+        let to = 0;
+        for (let k = 1; k <= spread && w2dIn(w, x + dx * k, y) && w2dCanFall(w2dGet(w, x + dx * k, y)); k++) to = k;
+        if (to) return w2dSwap(w, i, i + dx * to);
+    }
+}
+function w2dLava(w, x, y) {
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const n = w2dGet(w, x + dx, y + dy);
+        if (n === MAT.WATER) { w2dSet(w, x, y, MAT.STONE); w2dSet(w, x + dx, y + dy, MAT.SMOKE, w2dRand(...W2D.smokeLife)); return; } // lava + agua = piedra y vapor
+        if (n === MAT.WOOD && Math.random() < W2D.burnChance) w2dSet(w, x + dx, y + dy, MAT.FIRE, w2dRand(...W2D.fireLife));
+        if (n === MAT.AIR && dy === -1 && Math.random() < 0.002) w2dSet(w, x, y - 1, MAT.SMOKE, w2dRand(...W2D.smokeLife));
+    }
+}
+function w2dFire(w, x, y, i) {
+    w2dWake(w, x, y);
+    if (--w.life[i] <= 0) { w.mat[i] = Math.random() < 0.3 ? MAT.SMOKE : MAT.AIR; w.life[i] = w2dRand(...W2D.smokeLife); return; }
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, -1], [-1, -1]]) {
+        const n = w2dGet(w, x + dx, y + dy);
+        if (n === MAT.WOOD && Math.random() < W2D.burnChance) w2dSet(w, x + dx, y + dy, MAT.FIRE, w2dRand(...W2D.fireLife));
+        if (n === MAT.WATER) { w.mat[i] = MAT.SMOKE; w.life[i] = w2dRand(...W2D.smokeLife); return; } // el agua lo apaga
+    }
+    if (Math.random() < 0.05 && w2dGet(w, x, y - 1) === MAT.AIR) w2dSet(w, x, y - 1, MAT.SMOKE, w2dRand(10, 30));
+}
+function w2dSmoke(w, x, y, i) {
+    w2dWake(w, x, y);
+    if (--w.life[i] <= 0) { w.mat[i] = MAT.AIR; return; }
+    const dx = w2dRand(-1, 1);
+    if (y > 0 && w2dIn(w, x + dx, y - 1) && w2dGet(w, x + dx, y - 1) === MAT.AIR) w2dSwap(w, i, i - w.W + dx);
+}
+
+// --- CHOQUES (contra los píxeles reales) ---
+function w2dSolid(w, x, y) { return MAT_SOLID[w2dGet(w, x | 0, y | 0)] === 1; }
+function w2dBoxHits(w, b) {
+    const x0 = Math.floor(b.x), y0 = Math.floor(b.y), x1 = Math.ceil(b.x + b.w) - 1, y1 = Math.ceil(b.y + b.h) - 1;
+    for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) if (MAT_SOLID[w2dGet(w, x, y)]) return true;
+    return false;
+}
+// Cuánto de la caja está en un material (0 a 1): agua para nadar, lava/fuego para quemarse
+function w2dBoxFraction(w, b, m1, m2 = -1) {
+    let n = 0, t = 0;
+    for (let y = Math.floor(b.y); y < b.y + b.h; y += 2) for (let x = Math.floor(b.x); x < b.x + b.w; x += 2) { t++; const m = w2dGet(w, x, y); if (m === m1 || m === m2) n++; }
+    return t ? n / t : 0;
+}
+// Rompe los materiales que se pueden romper dentro de una caja (el tajo cava). Devuelve cuántos píxeles rompió.
+function w2dDig(w, b, strong) {
+    let n = 0;
+    for (let y = Math.max(0, Math.floor(b.y)); y < Math.min(w.H, b.y + b.h); y++) for (let x = Math.max(0, Math.floor(b.x)); x < Math.min(w.W, b.x + b.w); x++) {
+        const m = w.mat[y * w.W + x];
+        if (m === MAT.DIRT || m === MAT.SAND || (strong && (m === MAT.STONE || m === MAT.WOOD))) { w2dSet(w, x, y, m === MAT.DIRT && Math.random() < 0.25 ? MAT.SAND : MAT.AIR); n++; } // algo de la tierra queda como arena que cae
+    }
+    return n;
+}
+// Prende fuego en un punto (para golpes de fuego, lava…)
+function w2dIgnite(w, x, y, r) {
+    for (let oy = -r; oy <= r; oy++) for (let ox = -r; ox <= r; ox++) if (ox * ox + oy * oy <= r * r) {
+        const m = w2dGet(w, x + ox, y + oy);
+        if (m === MAT.AIR || m === MAT.WOOD) w2dSet(w, x + ox, y + oy, MAT.FIRE, w2dRand(...W2D.fireLife));
+    }
+}
+
+// --- DIBUJO: una imagen del tamaño de la sala; solo se rehacen los trozos que cambiaron ---
+function w2dRender(w) {
+    if (!w.canvas) { w.canvas = document.createElement('canvas'); w.canvas.width = w.W; w.canvas.height = w.H; w.ctx = w.canvas.getContext('2d'); w.img = w.ctx.createImageData(w.W, w.H); w.px = new Uint32Array(w.img.data.buffer); w.dirty.fill(1); }
+    const C = W2D.chunk; let any = false;
+    for (let cy = 0; cy < w.ch; cy++) for (let cx = 0; cx < w.cw; cx++) {
+        if (!w.dirty[cy * w.cw + cx]) continue;
+        w.dirty[cy * w.cw + cx] = 0; any = true;
+        for (let y = cy * C; y < Math.min(w.H, cy * C + C); y++) for (let x = cx * C; x < Math.min(w.W, cx * C + C); x++) {
+            const i = y * w.W + x, m = w.mat[i];
+            if (m === MAT.AIR) { w.px[i] = 0; continue; }
+            let c = MAT_LOOK[m][m === MAT.FIRE || m === MAT.LAVA ? (Math.random() < 0.5 ? 0 : 1) : w.shade[i]];
+            // borde: el píxel de arriba es aire → un tono más claro (se lee la superficie); abajo aire → más oscuro
+            if (MAT_SOLID[m]) { const up = w2dGet(w, x, y - 1), dn = w2dGet(w, x, y + 1); if (!MAT_SOLID[up] && !MAT_LIQUID[up]) c = w2dTint(c, 34); else if (!MAT_SOLID[dn] && !MAT_LIQUID[dn]) c = w2dTint(c, -26); }
+            const a = m === MAT.WATER ? 0xc0 : m === MAT.SMOKE ? 0x90 : 0xff;
+            w.px[i] = (a << 24) | ((c & 255) << 16) | (c & 0xff00) | ((c >> 16) & 255); // ABGR
+        }
+    }
+    if (any) w.ctx.putImageData(w.img, 0, 0);
+    return w.canvas;
+}
+function w2dTint(c, k) { const f = v => Math.max(0, Math.min(255, v + k)); return (f(c >> 16) << 16) | (f((c >> 8) & 255) << 8) | f(c & 255); }
+// Lava y fuego titilan: sus trozos se redibujan siempre
+function w2dFlicker(w) { const C = W2D.chunk; for (let i = 0; i < w.mat.length; i += 7) { const m = w.mat[i]; if (m === MAT.FIRE || m === MAT.LAVA) w.dirty[(((i / w.W) | 0) / C | 0) * w.cw + ((i % w.W) / C | 0)] = 1; } }
