@@ -7,7 +7,7 @@ from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 src = open(os.path.join(ROOT, 'js', 'tower2d.js'), encoding='utf-8').read()
-rooms = {m.group(1): re.findall(r"'([^']*)'", m.group(2)) for m in re.finditer(r"(\w+): \{ name: '[^']*', exits: \{[^}]*\}, rows: \[(.*?)\] \}", src, re.S)}
+rooms = {m.group(1): re.findall(r"'([^']*)'", m.group(2)) for m in re.finditer(r"(\w+): \{ name: '[^']*',[^\[]*rows: \[(.*?)\] \}", src, re.S)}
 T = 16
 COL = {'#': (0x50, 0x50, 0x50), 'p': (0x7a, 0x7a, 0x7a), 't': (0x7d, 0x5a, 0x3a), 's': (0xe6, 0xc3, 0x5c), '~': (0x2f, 0x6f, 0xd6),
        'w': (0xc0, 0x80, 0x40), '=': (0xc0, 0x80, 0x40), 'L': (0xff, 0x40, 0x00), '^': (0xd0, 0xd0, 0xe0)}

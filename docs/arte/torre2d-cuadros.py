@@ -88,6 +88,9 @@ ax, g = grid('ready'); g = squash(g, 3); new['land'] = trim(g, ax)
 ax, g = grid('walk1'); g = pad(g, 4, 0); ax += 4; g = shear(g, 3); ax += 3; g = cape_move(g, ax, -1, -1); new['dash'] = trim(g, ax)
 ax, g = grid('idle'); g = shear(g, -2); ax += 2; new['hurt'] = trim(g, ax)
 ax, g = grid('idle'); g = squash(g, 2); g = cape_move(g, ax, 1, 0); new['wall'] = trim(g, ax)
+# dormido en la arena: el de quieto acostado (girado, con la cabeza hacia la derecha) y los ojos cerrados (sin el rojo)
+ax, g = grid('idle'); g = [list(r) for r in zip(*g[::-1])]  # girado 90° (los pies quedan a la izquierda)
+g = [['N' if c == '!' else c for c in r] for r in g]; new['sleep'] = trim(g, len(g[0]) / 2)
 
 # escribir el bloque en js/towerHeroArt.js (antes del cierre de frames)
 lines = ["\n// --- CUADROS 2D (docs/arte/torre2d-cuadros.py; no editar a mano: se regeneran) ---"]

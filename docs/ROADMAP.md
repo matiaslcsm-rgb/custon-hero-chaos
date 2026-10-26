@@ -239,6 +239,12 @@ Modo nuevo en paralelo: `torre2d.html` + `js/tower2d.js` (se entra desde el men�
       trozos de 16×16 que se mueven. **Arregla lo de "las superficies no coinciden con el dibujo"** (ahora el dibujo es el
       choque). **Salas dibujadas como imagen** (`torre2d/salas/*.png`, guía de colores en `docs/TORRE2D-SALAS.md`; las 3
       de hoy salen de `docs/arte/torre2d-salas.py`). Tecla **H**: ver las cajas de choque.
+- [x] **La playa** (2026-10-25, pedido del usuario): la primera sala es una playa (mar contra el acantilado, médanos que se
+      derrumban, una roca, un tronco y la entrada a la torre) con cielo, sol, nubes y la torre a lo lejos. **El héroe
+      arranca dormido en la arena** (cuadro propio, con "z") y cualquier tecla lo despierta.
+- [x] **La sala de la pluma alcanzable** (2026-10-25, "no llego a agarrar el ítem"): las tablas ya no se atraviesan desde
+      abajo, así que se rearmó con escalones de 32 px (el salto llega a 44). Verificado simulando los 5 saltos, la pluma y
+      la salida de arriba con el doble salto. De paso: al aterrizar quedaba 1 px arriba del piso (corregido).
 - [ ] **Animar todo** (pedido del usuario 2026-10-25: "faltan animaciones a todo"): enemigos con dibujo y animación
       propios (hoy son rectángulos), la capa que flamea, el tajo hacia abajo, antorchas y fondos con movimiento.
 - [ ] **Afinar la sensación con el usuario:** jugarlo, tocar el panel (T) y pasar a los valores de fábrica lo que guste.

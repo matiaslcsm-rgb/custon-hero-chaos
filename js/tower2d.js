@@ -56,16 +56,31 @@ try { const saved = JSON.parse(localStorage.getItem('t2d-feel') || '{}'); T2D_TU
 //     P entrada · E caminante · C embestidor (avisa y embiste) · F la Pluma de Arén (doble salto)
 //     Los bordes abiertos llevan a la sala que dice `exits`.
 const T2D_ROOMS = {
-    base: { name: 'La puerta de la Torre', exits: { right: 'salon' }, rows: [
+    playa: { name: 'La playa', bg: 'beach', camUp: 45, exits: { right: 'base' }, rows: [
+        '.....................................................#######',
+        '.....................................................#######',
+        '.....................................................#######',
+        '.....................................................#######',
+        '.....................................................#######',
+        '.....................................................#######',
+        '............................................................',
+        '#............................##.......ss....................',
+        '#................ss....ww.P..##.....sssss...................',
+        '#~~~~~~~~~~~~~~~sssssssssssssssssssssssssssssssssssss#######',
+        '#~~~~~~~~~~~~~~~sssssssssssssssssssssssssssssssssssss#######',
+        '#~~~~~~~~~~~~~~~sssssssssssssssssssssssssssssssssssss#######',
+        '#ssssssssssssssssssssssssssssssssssssssssssssssssssss#######',
+        '############################################################'] },
+    base: { name: 'La puerta de la Torre', exits: { left: 'playa', right: 'salon' }, rows: [
         '########################################',
         '#......................................#',
         '#......................................#',
         '#......................................#',
         '#......................................#',
         '#......................................#',
-        '#.....................======...........#',
-        '#......................................#',
-        '#..............====....................#',
+        '......................======...........#',
+        '.......................................#',
+        '...............====....................#',
         '#......................................#',
         '#.....=====........................tt...',
         '#..................................tt...',
@@ -73,18 +88,18 @@ const T2D_ROOMS = {
         '########################################'] },
     salon: { name: 'El Atrio Verde', exits: { left: 'base', up: 'alto' }, rows: [
         '###############################...######',
+        '#......................................#',
         '#..............................F.......#',
-        '#............................=====.....#',
+        '#..........................=====.......#',
         '#......................................#',
-        '#.....................=====............#',
+        '#....................=====.............#',
         '#......................................#',
-        '#..............====....................#',
+        '#.............=====....................#',
         '#......................................#',
         '#.......wwww...........................#',
         '.......................................#',
-        '.......................................#',
-        '..........E.............C..............#',
-        '#....................#LLL#.............#',
+        '....##.................................#',
+        '..........E.............C...#LLL#......#',
         '########################################'] },
     alto: { name: 'El mirador de Arén', exits: { down: 'salon' }, rows: [
         '########################################',
@@ -124,7 +139,11 @@ function t2dMoveAxis(w, b, dx, dy) {
         const s = Math.sign(dy); let rest = Math.abs(dy);
         while (rest > 1e-6) {
             const st = Math.min(1, rest), ny = b.y + s * st;
-            if (w2dBoxHits(w, { x: b.x, y: ny, w: b.w, h: b.h })) { if (s > 0) b.y = Math.floor(b.y + b.h) - b.h; return true; } // apoyado justo sobre el píxel
+            if (w2dBoxHits(w, { x: b.x, y: ny, w: b.w, h: b.h })) { // apoyado justo sobre el píxel (ni flotando ni metido)
+                const fy = s > 0 ? Math.ceil(b.y + b.h) - b.h : Math.floor(b.y);
+                if (!w2dBoxHits(w, { x: b.x, y: fy, w: b.w, h: b.h })) b.y = fy;
+                return true;
+            }
             b.y = ny; rest -= st;
         }
     }
@@ -260,6 +279,14 @@ function t2dUpdate(input, dt) {
     g.clock += dt;
     if (h.hp <= 0) { if (g.clock - h.diedAt > 1.2) { const dj = h.doubleJump; t2d = null; t2dEnterRoom('base'); t2d.hero.doubleJump = dj; t2dMsg('Volviste a la puerta de la Torre.'); } return; }
     if ((g.simTick = (g.simTick || 0) + 1) % 2 === 0) w2dStep(g.world); // el mundo de píxeles, 60 veces por segundo
+    if (h.sleeping) { // dormido en la arena: cualquier tecla lo despierta
+        if (input.left || input.right || input.jump || input.attack || input.dash || input.up || input.down) {
+            h.sleeping = false; h.wakeAt = g.clock; g.squash = { x: 0.85, y: 1.15 };
+            t2dMsg('Despertaste en una playa, sin recordar nada. A lo lejos, una torre que se pierde en las nubes. (Esc: controles)');
+        } else if (g.clock - (h.zzzAt ?? -9) > 0.9) { h.zzzAt = g.clock; g.nums.push({ x: h.x + h.w, y: h.y + 6, text: 'z', at: g.realClock, color: '#f2f0e9' }); }
+        t2dFx(dt); return;
+    }
+    if (g.clock - (h.wakeAt ?? -9) < 0.45) { t2dFx(dt); return; } // levantándose
     t2dStepHero(g.world, h, input, dt);
     // lo que pasó en el paso: polvo, estirar y aplastar, sonido
     (h.events || []).forEach(ev => {
@@ -362,7 +389,7 @@ function t2dPogo(h) { if (h.pogoDone) return; h.pogoDone = true; h.vy = -T2D.her
 // Cámara, temblor, estirar/aplastar, partículas y estelas (corren también durante la pausa de impacto)
 function t2dFx(dt) {
     const g = t2d, h = g.hero, F = T2D.feel, VW = T2D.VIEW_W, VH = T2D.VIEW_H;
-    const tx = Math.max(0, Math.min(g.W - VW, h.x + h.w / 2 - VW / 2 + h.facing * F.camLook)), ty = Math.max(0, Math.min(g.H - VH, h.y + h.h / 2 - VH / 2 - 10));
+    const tx = Math.max(0, Math.min(g.W - VW, h.x + h.w / 2 - VW / 2 + h.facing * F.camLook)), ty = Math.max(0, Math.min(g.H - VH, h.y + h.h / 2 - VH / 2 - (g.room.camUp || 10))); // camUp: cuánto más mira para arriba
     const k = 1 - Math.exp(-F.camLerp * dt);
     g.cam.x += (tx - g.cam.x) * k; g.cam.y += (ty - g.cam.y) * k;
     g.shake *= Math.pow(0.002, dt);
@@ -400,6 +427,8 @@ function t2dHeroSprite(name) {
     return (t2dArtCache[name] = { img: c, ax: F.ax });
 }
 function t2dHeroFrame(h, clock) {
+    if (h.sleeping) return 'sleep';
+    if (clock - (h.wakeAt ?? -9) < 0.45) return 'land'; // se levanta
     const at = clock - (h.attackAt ?? -9);
     if (at < 0.24) {
         if (h.aim === 'up') return at < 0.08 ? 'ready' : 'raise';
@@ -427,8 +456,9 @@ function t2dDraw(ctx, scale) {
     const sh = g.shake > 0.2 ? g.shake : 0;
     const camX = Math.round(g.cam.x + (Math.random() - 0.5) * sh), camY = Math.round(g.cam.y + (Math.random() - 0.5) * sh);
     ctx.save(); ctx.imageSmoothingEnabled = false; ctx.scale(scale, scale);
-    ctx.fillStyle = '#9a93ab'; ctx.fillRect(0, 0, VW, VH); // fondo claro: el encapuchado es oscuro y tiene que recortarse
-    for (let i = 0; i < 6; i++) { ctx.fillStyle = 'rgba(70,62,85,0.25)'; ctx.fillRect(((i * 97 - camX * 0.3) % (VW + 60) + VW + 60) % (VW + 60) - 30, 20 + (i % 3) * 30, 18, VH); } // columnas al fondo (paralaje)
+    if (g.room.bg === 'beach') t2dBeachSky(ctx, camX, camY, g.realClock);
+    else { ctx.fillStyle = '#9a93ab'; ctx.fillRect(0, 0, VW, VH); } // fondo claro: el encapuchado es oscuro y tiene que recortarse
+    if (g.room.bg !== 'beach') for (let i = 0; i < 6; i++) { ctx.fillStyle = 'rgba(70,62,85,0.25)'; ctx.fillRect(((i * 97 - camX * 0.3) % (VW + 60) + VW + 60) % (VW + 60) - 30, 20 + (i % 3) * 30, 18, VH); } // columnas al fondo (paralaje)
     ctx.translate(-camX, -camY);
     w2dFlicker(g.world); ctx.drawImage(w2dRender(g.world), 0, 0); // el mundo de píxeles (js/tower2dWorld.js)
     g.feathers.forEach(f => { ctx.fillStyle = '#ffd166'; ctx.fillRect(f.x + 3, f.y + Math.sin(g.clock * 3) * 2, 4, 10); ctx.fillStyle = '#fff3c4'; ctx.fillRect(f.x + 4, f.y + 1 + Math.sin(g.clock * 3) * 2, 2, 6); });
@@ -519,8 +549,8 @@ async function t2dStart(canvas, panel) {
         img.src = `torre2d/salas/${key}.png`;
     }));
     await Promise.all(loads);
-    t2dEnterRoom('base');
-    t2dMsg('A/D: moverte · Espacio: saltar (mantené para más alto) · J o clic: tajo (con W arriba, con S abajo en el aire: rebota) · Shift o clic derecho: dash · mantené el tajo: golpe cargado · E: parada justo antes del golpe · Esc: pausa · T: ajustes');
+    t2dEnterRoom('playa'); t2d.hero.sleeping = true;
+    t2dMsg('Zzz… (cualquier tecla para despertar)');
     let last = performance.now(), acc = 0;
     const frame = now => {
         acc += Math.min(0.1, (now - last) / 1000); last = now;
@@ -540,4 +570,17 @@ function t2dParry(h, clock) {
     if (clock < (h.parryReadyAt || 0) || h.hp <= 0) return false;
     h.parryAt = clock; h.parryReadyAt = clock + T2D.parry.cd; h.blockFrameUntil = clock + 0.25;
     return true;
+}
+
+// El cielo de la playa: degradé, sol, nubes que pasan, el mar en el horizonte y la torre a lo lejos (paralaje)
+function t2dBeachSky(ctx, camX, camY, t) {
+    const VW = T2D.VIEW_W, VH = T2D.VIEW_H, sky = ctx.createLinearGradient(0, 0, 0, VH);
+    sky.addColorStop(0, '#7fb8e0'); sky.addColorStop(0.7, '#cfe6ef'); sky.addColorStop(1, '#f2e6c9');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, VW, VH);
+    ctx.fillStyle = '#fff4c2'; ctx.beginPath(); ctx.arc(60 - camX * 0.05, 34 - camY * 0.05, 12, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.8)';
+    for (let i = 0; i < 4; i++) { const x = ((i * 120 + t * 4 - camX * 0.15) % (VW + 80) + VW + 80) % (VW + 80) - 40; ctx.fillRect(x, 18 + i * 9, 34, 5); ctx.fillRect(x + 6, 15 + i * 9, 18, 4); }
+    ctx.fillStyle = '#5a7a9a'; const tx = 250 - camX * 0.2; ctx.fillRect(tx, -10, 14, VH * 0.8); ctx.fillRect(tx - 3, -10, 20, 10); // la torre, perdida en las nubes
+    ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.fillRect(tx - 10, 4, 40, 6);
+    ctx.fillStyle = '#3f7fb8'; ctx.fillRect(0, VH * 0.62 - camY * 0.1, VW, 3); // el horizonte del mar
 }
