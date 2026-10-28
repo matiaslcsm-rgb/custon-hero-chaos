@@ -74,6 +74,7 @@ function castAt(hero, skill, x, y) {
 }
 
 function mouseToTile(e) {
+    if (window.M3D && M3D.active) { const t = M3D.screenToTile(e.clientX, e.clientY); if (t) return t; } // MATCH 3D: rayo contra el piso
     const rect = canvas.getBoundingClientRect();
     return { x: (e.clientX - rect.left) / rect.width * viewCols() - 0.5 + camera.x, y: (e.clientY - rect.top) / rect.height * viewRows() - 0.5 + camera.y }; // viewCols: con el zoom de la Torre (towerView.js)
 }

@@ -7,6 +7,13 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **Carpeta local:** `Desktop\mattbox\custom-hero-chaos`
 
 ## Rumbo actual (2026-10-25, decidido por el usuario)
+- **MATCH 3D (2026-10-28, decisión del usuario, todo opción A):** Custom Hero se fusiona con MATCH y pasa a 3D. Se
+  mantienen las reglas, la IA y las pruebas; cambia el dibujo de las arenas de combate (oleada, duelo, jefe): escena
+  3D con cámara en diagonal como Dota (se juega igual, con el mouse), competidores y creeps como robots por piezas con
+  el motor de `arena-robots` (copiado en `js/m3d/`), look PS1 industrial. El 2D queda como opción en la pausa
+  (🧊 Vista 3D) mientras el 3D se completa. Esto **reactiva el RTS de MATCH** que estaba en pausa. El repo aparte
+  `match` (una copia vieja del 19/10) se archiva desde GitHub. Primer paso hecho: la arena en 3D jugable; faltan
+  efectos de habilidades en 3D (tajos, áreas, avisos), el descanso y el garaje para armar competidores.
 - **Infinite Tower vuelve en 2D lateral**, metroidvania conectado, como modo nuevo en paralelo (`torre2d.html`,
   `js/tower2d.js`; fase T2D del roadmap). Prototipo jugable: playa + 3 salas + sala de pruebas de materiales (por el
   muelle de la playa, a la izquierda), mundo de píxeles, enemigos dibujados con cajas de golpe a medida, luz, sonido y joystick.

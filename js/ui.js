@@ -1015,8 +1015,50 @@ function renderTitle() {
     });
 }
 
+// MATCH 3D: la arena se dibuja en 3D (js/m3d/match3d.js) y este canvas, transparente encima, lleva los carteles, las
+// barras de vida con el nombre de cada competidor y los números de daño, en el lugar de la pantalla de cada uno.
+function render3d(arena, dt) {
+    updateArenaFx(arena, dt);
+    M3D.active = true;
+    canvas.style.backgroundColor = 'transparent';
+    ctx.clearRect(0, 0, MAP_W, MAP_H);
+    M3D.frame(arena, dt);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    if (arena.kind === 'duel') { ctx.font = 'bold 13px monospace'; ctx.fillStyle = '#ffb703'; ctx.fillText(`⚔ DUELO: ${arena.heroes[0].displayName}  vs  ${arena.heroes[1].displayName}`, MAP_W / 2, TILE * 0.5); }
+    if (arena.kind === 'boss' && arena.boss) {
+        const b = arena.boss;
+        ctx.font = 'bold 13px monospace'; ctx.fillStyle = b.color; ctx.fillText(`👹 ${b.label}: ${Math.max(0, b.hp)} / ${b.maxHp}`, MAP_W / 2, TILE * 0.5);
+        ctx.fillStyle = '#330010'; ctx.fillRect(TILE * 3, TILE * 0.8, MAP_W - TILE * 6, 5);
+        ctx.fillStyle = '#ff0055'; ctx.fillRect(TILE * 3, TILE * 0.8, (MAP_W - TILE * 6) * Math.max(0, b.hp) / b.maxHp, 5);
+    }
+    const bar = u => {
+        const p = M3D.project(u.rx ?? u.x, u.ry ?? u.y, M3D.headHeight(u)), w = u.isRoundBoss ? 56 : u.isHero ? 34 : 24, top = p.y - 4;
+        const pct = Math.max(0, u.hp / u.maxHp);
+        ctx.fillStyle = 'rgba(0,0,0,0.75)'; ctx.fillRect(p.x - w / 2 - 1, top - 1, w + 2, u.isHero ? 7 : 5);
+        ctx.fillStyle = u.isHero ? (u === player ? '#2dc653' : '#e8a33a') : pct > 0.5 ? '#c8402e' : '#e0703a'; ctx.fillRect(p.x - w / 2, top, w * pct, 3);
+        if (u.isHero && u.maxMana) { ctx.fillStyle = '#4895ef'; ctx.fillRect(p.x - w / 2, top + 4, w * Math.max(0, u.mana / u.maxMana), 2); }
+        if (u.isHero) { ctx.font = 'bold 10px monospace'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,0.85)'; ctx.strokeText(u.displayName, p.x, top - 8); ctx.fillStyle = u === player ? '#00f5d4' : '#ffd27a'; ctx.fillText(u.displayName, p.x, top - 8); }
+    };
+    arena.creeps.forEach(c => { if (c.isAlive()) bar(c); });
+    arena.heroes.forEach(h => { if (!h.eliminated && h.isAlive()) bar(h); });
+    // Números de daño y textos, sobre la cabeza de cada uno
+    (arena.fx || []).forEach(f => {
+        if (f.kind !== 'text') return;
+        const t = (fxClock - f.born) / f.life; if (t < 0) return;
+        const p = M3D.project(f.x, f.y, 1.4);
+        ctx.globalAlpha = Math.max(0, 1 - t * t);
+        if (typeof pxNumberText === 'function' && pxNumberText(f.text)) pxDrawNumber(f.text, p.x, p.y, f.color, Math.max(2, Math.round(2 * f.size / 12 * A11Y.combatText)) + (t < 0.12 ? 1 : 0));
+        else { ctx.font = `bold ${Math.round(f.size * A11Y.combatText)}px monospace`; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,0.8)'; ctx.strokeText(f.text, p.x, p.y); ctx.fillStyle = f.color; ctx.fillText(f.text, p.x, p.y); }
+    });
+    ctx.globalAlpha = 1;
+    if (targeting && !canControlPlayer()) cancelTargeting();
+    if (viewedHero && viewedHero !== player) { ctx.font = '11px monospace'; ctx.fillStyle = '#ffb703'; ctx.fillText(`👁 Mirando a ${viewedHero.displayName} (clic en tu fila del ranking para volver)`, MAP_W / 2, MAP_H - 8); }
+    if (paused) { ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(0, 0, MAP_W, MAP_H); ctx.font = 'bold 30px monospace'; ctx.fillStyle = '#ffb703'; ctx.fillText('PAUSA', MAP_W / 2, MAP_H / 2); }
+}
+
 function render() {
     const dt = tickFx();
+    if (window.M3D) { M3D.active = false; M3D.hide(); canvas.style.backgroundColor = ''; } // MATCH 3D: solo si esta arena se dibuja en 3D (render3d)
     if (typeof pxUiSync === 'function') pxUiSync(); // tema de interfaz en pixel art (towerPixelUi.js)
     document.body.classList.toggle('on-title', gameState === 'MENU'); // portada (titleScreen.js)
     musicTick(dt); // música del menú y de Custom Hero (en la Torre la maneja renderTower, towerMusic.js)
@@ -1033,6 +1075,7 @@ function render() {
     }
     const arena = hero.arena;
     if (arena.kind === 'tower') { renderTower(arena, dt); return; }
+    if (window.M3D && M3D.wants(arena)) { render3d(arena, dt); return; } // MATCH 3D (js/m3d/match3d.js)
     updateArenaFx(arena, dt);
     ctx.save();
     if (shakeAmount) ctx.translate((Math.random() - 0.5) * shakeAmount * 2, (Math.random() - 0.5) * shakeAmount * 2);

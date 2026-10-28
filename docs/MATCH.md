@@ -163,3 +163,19 @@ En orden, sin esperar decisiones:
 - [Legibilidad y dificultad en los juegos de acción](https://www.gamedeveloper.com/game-platforms/designing-for-difficulty-readability-in-arpgs),
   [cómo diseñar avisos de ataque](https://bugnet.io/blog/how-to-design-enemy-attack-telegraphs) y
   [por qué no conviene anunciar todo](https://www.patreon.com/posts/120704454)
+
+## MATCH 3D (decisión del usuario, 2026-10-28)
+"Pasemos Custom Hero a 3D y fusionémoslo con MATCH", con todas las opciones A:
+- **Cámara y control (A):** desde arriba en diagonal, como Dota; clic derecho para caminar, clic izquierdo para marcar
+  objetivo, habilidades hacia el cursor (igual que en 2D). Elegida sobre la cámara detrás del robot con WASD (B).
+- **Primer paso (A):** una arena de combate jugable en 3D (antes que el garaje para armar competidores, B).
+- **El 2D (A):** queda como opción en la pausa (🧊 Vista 3D) mientras el 3D se completa.
+- **El repo `match` (A):** se archiva en GitHub (era una copia del 19/10, todo lo suyo está acá).
+
+Cómo está hecho: `js/m3d/match3d.js` dibuja el mismo estado del juego (arenas, competidores, creeps, proyectiles) con
+three.js; los robots salen del motor de `arena-robots` (`js/m3d/robot.js`, `parts.js`, `skeleton.js`, `ps1.js`). Cada
+competidor tiene su armado de piezas (Rec, el Sniper de hoy, ya con cabeza de cámara y ruedas) y el color de su
+atributo; los creeps, un armado según cómo pelean y su color. Las barras de vida, los nombres y los números de daño
+van en el canvas 2D, transparente encima.
+**Falta:** tajos, áreas y avisos de las habilidades en 3D; el descanso y el menú en 3D; el garaje para armar
+competidores (el creador para el jugador).

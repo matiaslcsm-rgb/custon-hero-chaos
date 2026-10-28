@@ -31,6 +31,7 @@ function renderPauseMenu() {
         opt('sprites', '🎨 Pixel art (G)', spritesOn) +
         opt('colorblind', '🎨 Zonas de ataque para daltonismo (azul y naranja)', A11Y.colorblind) +
         opt('weather', '🌧 Clima (lluvia, nieve, ceniza…)', weatherOn) +
+        (gameMode !== 'tower' && window.M3D ? opt('view3d', '🧊 Vista 3D (MATCH)', M3D.enabled()) : '') +
 
         (gameMode === 'tower' ? `<button class="pm-toggle on" data-opt="loot">🎒 Levantar botín<span>${LOOT_FILTERS[lootFilter].name.toUpperCase()}</span></button>` : '') +
         (gameMode === 'tower' ? opt('clickattack', '🖱️ Ataque con clic (si no, automático)', clickAttack) : '') +
@@ -55,7 +56,7 @@ function renderPauseMenu() {
     });
     document.querySelectorAll('#pause-options .pm-toggle').forEach(btn => {
         btn.onclick = () => {
-            ({ sound: () => setSound(!soundOn), music: () => setMusic(!musicOn), colorblind: () => setA11y('colorblind', !A11Y.colorblind), weather: () => setWeather(!weatherOn), pixel: () => setPixelStyle(!pixelEnabled), loot: cycleLootFilter, sprites: () => setSprites(!spritesOn), autocast: () => setAutoCast(!autoCast), quickcast: () => setQuickCast(!quickCast), wasd: () => setWasdMove(!wasdMove), clickattack: () => setClickAttack(!clickAttack),
+            ({ sound: () => setSound(!soundOn), music: () => setMusic(!musicOn), colorblind: () => setA11y('colorblind', !A11Y.colorblind), weather: () => setWeather(!weatherOn), view3d: () => M3D.set(!M3D.enabled()), pixel: () => setPixelStyle(!pixelEnabled), loot: cycleLootFilter, sprites: () => setSprites(!spritesOn), autocast: () => setAutoCast(!autoCast), quickcast: () => setQuickCast(!quickCast), wasd: () => setWasdMove(!wasdMove), clickattack: () => setClickAttack(!clickAttack),
                autopilot: () => setAutopilot(!autopilot), bigmap: toggleBigMap })[btn.dataset.opt]();
             renderPauseMenu();
         };
