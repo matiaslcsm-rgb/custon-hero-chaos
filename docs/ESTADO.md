@@ -12,8 +12,9 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   3D con cámara en diagonal como Dota (se juega igual, con el mouse), competidores y creeps como robots por piezas con
   el motor de `arena-robots` (copiado en `js/m3d/`), look PS1 industrial. El 2D queda como opción en la pausa
   (🧊 Vista 3D) mientras el 3D se completa. Esto **reactiva el RTS de MATCH** que estaba en pausa. El repo aparte
-  `match` (una copia vieja del 19/10) se archiva desde GitHub. Primer paso hecho: la arena en 3D jugable; faltan
-  efectos de habilidades en 3D (tajos, áreas, avisos), el descanso y el garaje para armar competidores.
+  `match` (una copia vieja del 19/10) quedó archivado en GitHub. Hecho: la arena en 3D jugable y los efectos de
+  habilidades en 3D (tajos, áreas y mira en el piso; rayos, trazadoras, meteoros y chispas en el aire; los robots se
+  caen al morir). Faltan el descanso en 3D, jefes robot más grandes y el garaje para armar competidores.
 - **Infinite Tower vuelve en 2D lateral**, metroidvania conectado, como modo nuevo en paralelo (`torre2d.html`,
   `js/tower2d.js`; fase T2D del roadmap). Prototipo jugable: playa + 3 salas + sala de pruebas de materiales (por el
   muelle de la playa, a la izquierda), mundo de píxeles, enemigos dibujados con cajas de golpe a medida, luz, sonido y joystick.

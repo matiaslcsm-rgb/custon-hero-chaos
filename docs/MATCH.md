@@ -179,3 +179,10 @@ atributo; los creeps, un armado según cómo pelean y su color. Las barras de vi
 van en el canvas 2D, transparente encima.
 **Falta:** tajos, áreas y avisos de las habilidades en 3D; el descanso y el menú en 3D; el garaje para armar
 competidores (el creador para el jugador).
+
+**Efectos de habilidades en 3D (2026-10-28, hecho):** lo que pasa en el piso (tajos, aros, zonas, auras, la mira y el
+área de la habilidad que apuntás, la cruz de a dónde caminás, el aura del jefe) se dibuja con el mismo código 2D en un
+canvas aparte que se apoya sobre el piso 3D como calcomanía: cada efecto nuevo del 2D aparece solo en el 3D. Lo del
+aire es 3D de verdad: rayos que caen del cielo con destello de luz, rayos en cadena, trazadoras, meteoros, chispas,
+burbujas de escudo y estelas de los proyectiles. Al morir, el robot se cae de espaldas, se hunde y larga chispas; los
+golpes fuertes hacen temblar la cámara. El cartel de la definitiva y el de cómo lanzar van encima, en 2D.

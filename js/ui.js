@@ -1052,6 +1052,8 @@ function render3d(arena, dt) {
     });
     ctx.globalAlpha = 1;
     if (targeting && !canControlPlayer()) cancelTargeting();
+    drawTargetingHint(); // la mira y el área de la habilidad van en el piso 3D (match3d.js)
+    drawUltBanner(MAP_W / 2, MAP_H * 0.72);
     if (viewedHero && viewedHero !== player) { ctx.font = '11px monospace'; ctx.fillStyle = '#ffb703'; ctx.fillText(`👁 Mirando a ${viewedHero.displayName} (clic en tu fila del ranking para volver)`, MAP_W / 2, MAP_H - 8); }
     if (paused) { ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(0, 0, MAP_W, MAP_H); ctx.font = 'bold 30px monospace'; ctx.fillStyle = '#ffb703'; ctx.fillText('PAUSA', MAP_W / 2, MAP_H / 2); }
 }

@@ -4897,6 +4897,22 @@ test('Torre 2D: correr, saltar (más alto si mantenés), plataformas, tajo, sala
     t2d = null;
 }, { random: true }); // la arena y el fuego usan azar de verdad
 
+test('MATCH 3D: los efectos del piso se dibujan en otro canvas (la calcomanía del 3D) sin tocar la pantalla', () => {
+    const c = document.createElement('canvas'); c.width = MAP_W; c.height = MAP_H;
+    const g = c.getContext('2d'), before = ctx;
+    const arena = { fx: [] };
+    pushFx(arena, { kind: 'ring', x: 5, y: 5, color: '#ff0000', radius: 2, life: 1 });
+    pushFx(arena, { kind: 'zone', x: 8, y: 6, color: '#00ff00', color2: '#ffffff', radius: 2, life: 1 });
+    pushFx(arena, { kind: 'slash', x: 3, y: 3, angle: 0, flip: true, color: '#ffffff', width: 5, life: 1 });
+    arena.fx.forEach(f => { f.born = fxClock - 0.1; });
+    withCtx(g, () => drawArenaFx(arena));
+    check(ctx === before, 'la pantalla vuelve a ser el contexto de dibujo');
+    const px = g.getImageData(0, 0, MAP_W, MAP_H).data;
+    let painted = 0; for (let i = 3; i < px.length; i += 4) if (px[i]) painted++;
+    check(painted > 100, 'los efectos quedaron pintados en el canvas aparte');
+    check(typeof drawTargetingHint === 'function' && drawMouseOverlay.length === 2, 'el cartel de apuntar se puede dibujar aparte del piso');
+});
+
 test('Torre 2D: joystick (palanca, A saltar, X tajo, Start pausa; apretar sostenido no repite)', () => {
     const real = navigator.getGamepads, st = { axes: [0.9, 0, 0, 0], buttons: Array.from({ length: 17 }, () => ({ pressed: false })) };
     navigator.getGamepads = () => [st];

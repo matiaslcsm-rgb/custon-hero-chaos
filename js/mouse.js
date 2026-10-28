@@ -166,7 +166,8 @@ function moveTargetDirection(hero) {
 }
 
 // Dibujo: alcance, enemigo marcado y mira al apuntar; marca del destino del clic derecho.
-function drawMouseOverlay(arena) {
+// noHint: sin el cartel de abajo (el 3D dibuja todo esto en el piso y el cartel aparte, match3d.js)
+function drawMouseOverlay(arena, noHint) {
     if (!player || player.arena !== arena) return;
     drawPadAim(arena); // la mira sin mouse (padControls.js)
     const px = x => x * TILE + TILE / 2;
@@ -209,6 +210,11 @@ function drawMouseOverlay(arena) {
         const mx = px(mouse.x), my = px(mouse.y);
         ctx.beginPath(); ctx.moveTo(mx - 8, my); ctx.lineTo(mx + 8, my); ctx.moveTo(mx, my - 8); ctx.lineTo(mx, my + 8); ctx.stroke();
     }
-    ctx.font = 'bold 12px monospace'; ctx.fillStyle = color; ctx.textAlign = 'center';
+    if (!noHint) drawTargetingHint();
+}
+// El cartel de cómo lanzar la habilidad que estás apuntando
+function drawTargetingHint() {
+    if (!targeting) return;
+    ctx.font = 'bold 12px monospace'; ctx.fillStyle = '#ffd166'; ctx.textAlign = 'center';
     ctx.fillText(`${targeting.skill.name}: clic izquierdo para lanzar · clic derecho o Esc para cancelar`, screenW() / 2, screenH() - 12);
 }

@@ -107,8 +107,7 @@ function ringMesh(r0, r1, color, opacity) {
     const m = new THREE.Mesh(new THREE.RingGeometry(r0, r1, 32), new THREE.MeshBasicMaterial({ color, transparent: true, opacity, depthWrite: false }));
     m.rotation.x = -Math.PI / 2; m.position.y = 0.03; return m;
 }
-const rangeRing = ringMesh(0.97, 1, '#e8b4a0', 0.55); scene.add(rangeRing);
-const moveMark = ringMesh(0.12, 0.26, '#2dc653', 0.9); scene.add(moveMark);
+const rangeRing = ringMesh(0.97, 1, '#e8b4a0', 0.55); scene.add(rangeRing); // (la cruz de a dónde caminás va con los efectos del piso)
 
 // Cámara: arriba y atrás, mirando el centro de la arena con unos 55° de inclinación (como Dota)
 function placeCamera(aspect) {
@@ -156,6 +155,126 @@ function shotMesh(i, color, big) {
     return shots[i];
 }
 
+// --- EFECTOS DE HABILIDADES (2026-10-28) ---
+// Lo que pasa en el PISO (tajos, áreas, aros, zonas, auras, la mira y el área de la habilidad que estás apuntando, el
+// aura del jefe) se dibuja con el mismo código 2D de siempre (fx.js, fxSkills.js, mouse.js) en un canvas aparte que
+// se apoya sobre el piso 3D como una calcomanía: así cada efecto nuevo del 2D aparece solo en el 3D. Lo que va en el
+// AIRE es 3D de verdad: rayos que caen del cielo, rayos en cadena, disparos trazadores, meteoros, chispas y burbujas.
+const AIR = new Set(['text', 'particle', 'skybolt', 'zigzag', 'tracer', 'streak', 'bolt', 'bubble', 'corpse']); // corpse: en 3D el robot se cae (ver frame)
+const decalCv = document.createElement('canvas');
+decalCv.width = MAP_W; decalCv.height = MAP_H;
+const dctx = decalCv.getContext('2d');
+const decalTex = new THREE.CanvasTexture(decalCv); decalTex.colorSpace = THREE.SRGBColorSpace;
+const decal = new THREE.Mesh(new THREE.PlaneGeometry(COLS, ROWS), new THREE.MeshBasicMaterial({ map: decalTex, transparent: true, depthWrite: false, fog: false, toneMapped: false }));
+decal.rotation.x = -Math.PI / 2; decal.position.set(COLS / 2, 0.025, ROWS / 2); decal.renderOrder = 1; scene.add(decal);
+function drawDecal(arena) {
+    withCtx(dctx, () => {
+        dctx.setTransform(1, 0, 0, 1, 0, 0); dctx.clearRect(0, 0, MAP_W, MAP_H);
+        dctx.textAlign = 'center'; dctx.textBaseline = 'middle';
+        if (arena.boss && arena.boss.isAlive()) { // el aura del jefe
+            const b = arena.boss;
+            dctx.strokeStyle = 'rgba(255,0,85,0.55)'; dctx.lineWidth = 2;
+            dctx.beginPath(); dctx.arc((b.rx ?? b.x) * TILE + TILE / 2, (b.ry ?? b.y) * TILE + TILE / 2, b.auraRadius * TILE, 0, Math.PI * 2); dctx.stroke();
+        }
+        const all = arena.fx || [], pass = fxTextPass;
+        arena.fx = all.filter(f => !AIR.has(f.kind)); fxTextPass = 'skip'; // sin textos ni el cartel de la definitiva (van encima, en ui.js)
+        try { drawArenaFx(arena); } finally { arena.fx = all; fxTextPass = pass; }
+        drawMouseOverlay(arena, true);
+    });
+    decalTex.needsUpdate = true;
+}
+// Colores (los efectos usan hex y a veces rgba: el alfa se ignora)
+const colors = new Map();
+const col = c => { let v = colors.get(c); if (!v) { v = new THREE.Color(); try { v.setStyle(String(c)); } catch (e) { v.set('#ffffff'); } colors.set(c, v); } return v; };
+// Haces de luz: cajas finas estiradas entre dos puntos, que suman luz (brillan sobre lo oscuro)
+const beamGeo = new THREE.BoxGeometry(1, 1, 1); beamGeo.translate(0, 0, 0.5);
+const beams = []; let nBeam = 0;
+const glowMat = () => new THREE.MeshBasicMaterial({ transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, fog: false, toneMapped: false });
+function beam(a, b, w, color, op = 1) {
+    const len = a.distanceTo(b); if (len < 1e-3 || w <= 0) return;
+    let m = beams[nBeam]; if (!m) { m = beams[nBeam] = new THREE.Mesh(beamGeo, glowMat()); scene.add(m); }
+    nBeam++;
+    m.material.color.copy(col(color)); m.material.opacity = op; m.visible = true;
+    m.position.copy(a); m.lookAt(b); m.scale.set(w, w, len);
+}
+// Rayo quebrado de a hacia b (se vuelve a quebrar cada cuadro: titila)
+const jit3 = new THREE.Vector3();
+function jagged(a, b, jit, w, outer, inner, op) {
+    const seg = 7; let prev = a.clone();
+    for (let i = 1; i <= seg; i++) {
+        const p = a.clone().lerp(b, i / seg);
+        if (i < seg) p.add(jit3.set((Math.random() - 0.5) * jit, (Math.random() - 0.5) * jit, (Math.random() - 0.5) * jit));
+        beam(prev, p, w, outer, op * 0.7); beam(prev, p, w * 0.4, inner, op); prev = p;
+    }
+}
+// Esferas que brillan: cabeza del meteoro, destellos, burbujas de escudo
+const orbGeo = new THREE.SphereGeometry(1, 12, 8);
+const orbs = []; let nOrb = 0;
+function orb(p, r, color, op = 1) {
+    let m = orbs[nOrb]; if (!m) { m = orbs[nOrb] = new THREE.Mesh(orbGeo, glowMat()); scene.add(m); }
+    nOrb++;
+    m.material.color.copy(col(color)); m.material.opacity = op; m.visible = true; m.position.copy(p); m.scale.setScalar(r);
+}
+// Chispas: puntos que suman luz y se apagan (el color va hacia negro = transparente)
+const PMAX = 600, pPos = new Float32Array(PMAX * 3), pCol = new Float32Array(PMAX * 3), pGeo = new THREE.BufferGeometry();
+pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3)); pGeo.setAttribute('color', new THREE.BufferAttribute(pCol, 3));
+const sparks = new THREE.Points(pGeo, new THREE.PointsMaterial({ size: 0.16, vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, fog: false, toneMapped: false }));
+sparks.frustumCulled = false; scene.add(sparks);
+// El destello de los rayos que caen: una luz que ilumina a los robots de alrededor
+const flash = new THREE.PointLight('#fffbe0', 0, 7, 1.5); scene.add(flash);
+const W = (x, y, h) => new THREE.Vector3((x + 0.5) * U, h * U, (y + 0.5) * U);
+const CHEST = 0.9;
+function drawAirFx(arena) {
+    nBeam = 0; nOrb = 0;
+    let np = 0, flashK = 0;
+    const lightAt = (k, x, y, color) => { if (k > flashK) { flashK = k; flash.position.copy(W(x, y, 1.4)); flash.color.copy(col(color)); } };
+    for (const f of arena.fx || []) {
+        const t = (fxClock - f.born) / f.life;
+        if (t < 0 || t > 1 || !AIR.has(f.kind)) continue;
+        const fade = Math.max(0, 1 - t * t);
+        if (f.kind === 'particle') {
+            if (np >= PMAX) continue;
+            const h = f.style === 'drop' ? 1.1 - t : ['smoke', 'ember', 'rune', 'bubble'].includes(f.style) ? 0.4 + t * 1.1 : 0.5 + Math.sin(t * Math.PI) * 0.6;
+            pPos[np * 3] = (f.x + 0.5) * U; pPos[np * 3 + 1] = Math.max(0.05, h); pPos[np * 3 + 2] = (f.y + 0.5) * U;
+            const c = col(f.color); pCol[np * 3] = c.r * fade; pCol[np * 3 + 1] = c.g * fade; pCol[np * 3 + 2] = c.b * fade; np++;
+        } else if (f.kind === 'tracer') {
+            const a = W(f.x, f.y, CHEST), b = W(f.tx, f.ty, CHEST), w = (f.wide ? 0.2 : 0.11) * (1 - t);
+            beam(a, b, w, f.color2, 0.8); beam(a, b, w * 0.4, f.color, 1);
+        } else if (f.kind === 'zigzag') {
+            jagged(W(f.x, f.y, CHEST), W(f.tx, f.ty, CHEST), 0.45, 0.13, f.color2, f.color, fade);
+        } else if (f.kind === 'skybolt') {
+            jagged(W(f.x + (Math.random() - 0.5) * 0.3, f.y, 9), W(f.x, f.y, 0), 0.7, 0.16, f.color2, f.color, fade);
+            if (t < 0.3) { orb(W(f.x, f.y, 0.1), 0.8 * (1 - t / 0.3), '#ffffff', 0.5); lightAt(1 - t / 0.3, f.x, f.y, f.color); }
+        } else if (f.kind === 'streak') { // meteoro: baja en diagonal desde el cielo
+            const a = W(f.tx - 2, f.ty - 1, 8), b = W(f.tx, f.ty, 0), k = Math.min(1, t * 1.2);
+            const head = a.clone().lerp(b, k);
+            beam(a.clone().lerp(b, Math.max(0, k - 0.4)), head, 0.22, f.color, 0.9); orb(head, 0.25, '#ffffff');
+            if (k >= 1) lightAt(Math.max(0, 1 - (t - 0.83) * 6), f.tx, f.ty, f.color);
+        } else if (f.kind === 'bolt') {
+            const a = W(f.x, f.y, CHEST), b = W(f.tx, f.ty, CHEST), head = Math.min(1, t * 2.5);
+            beam(a.clone().lerp(b, Math.max(0, head - 0.35)), a.clone().lerp(b, head), f.cast ? 0.1 : 0.06, f.color, fade);
+            orb(a.clone().lerp(b, head), f.cast ? 0.12 : 0.08, '#ffffff', fade);
+        } else if (f.kind === 'bubble') { // escudo: una burbuja alrededor del robot
+            const ux = f.unit ? (f.unit.rx ?? f.unit.x) : f.x, uy = f.unit ? (f.unit.ry ?? f.unit.y) : f.y, r = (f.unit ? sizeOf(f.unit) : 2) * 0.5;
+            orb(W(ux, uy, r), r * (1 + 0.04 * Math.sin(t * 20)), f.color2, 0.22 * fade); orb(W(ux, uy, r), r * 1.06, f.color, 0.1 * fade);
+        }
+    }
+    pGeo.setDrawRange(0, np); pGeo.attributes.position.needsUpdate = true; pGeo.attributes.color.needsUpdate = true;
+    flash.intensity = flashK * 40;
+}
+// Lo que sobró de los haces y esferas de cuadros anteriores se esconde
+function hideUnused() {
+    for (let i = nBeam; i < beams.length; i++) beams[i].visible = false;
+    for (let i = nOrb; i < orbs.length; i++) orbs[i].visible = false;
+}
+// Proyectiles: estela de luz detrás de cada uno
+const trailOf = new WeakMap();
+function projectileTrail(pr, pos, color) {
+    let tr = trailOf.get(pr); if (!tr) trailOf.set(pr, tr = []);
+    tr.push(pos.clone()); if (tr.length > 6) tr.shift();
+    if (tr.length > 1) beam(tr[0], pos, pr.radius ? 0.12 : 0.06, color, 0.45);
+}
+
 // --- CADA CUADRO ---
 let frameNo = 0;
 const tmp = new THREE.Vector3();
@@ -169,6 +288,7 @@ function frame(arena, dt) {
     const rw = Math.max(64, Math.round(w / PIXEL)), rh = Math.max(48, Math.round(h / PIXEL));
     if (rw !== RES.w || rh !== RES.h) { setRes(rw, rh); renderer.setSize(rw, rh, false); }
     placeCamera(w / Math.max(1, h));
+    if (shakeAmount) { camera.position.x += (Math.random() - 0.5) * shakeAmount * 0.03; camera.position.z += (Math.random() - 0.5) * shakeAmount * 0.03; } // temblor de los golpes fuertes
     // Jefe: luz más roja
     const boss = arena.kind === 'boss';
     hemi.color.set(boss ? '#f0b8b0' : '#dfe6f2'); scene.fog.color.set(boss ? '#1a0b0c' : '#0c0d10');
@@ -178,6 +298,7 @@ function frame(arena, dt) {
     for (const u of list) {
         const o = unitObj(u), p = drawPos(u, dt);
         o.seen = frameNo;
+        if (o.dieT !== undefined) { o.dieT = undefined; o.robot.rotation.x = 0; o.g.position.y = 0; } // revivió
         const x = (p.x + 0.5) * U, z = (p.y + 0.5) * U;
         let speed = 0;
         if (o.last && dt > 0) { const dx = x - o.last.x, dz = z - o.last.z; speed = Math.hypot(dx, dz) / dt; if (Math.hypot(dx, dz) > 0.004) o.yaw = Math.atan2(dx, dz); }
@@ -191,23 +312,41 @@ function frame(arena, dt) {
         o.robot.scale.setScalar(o.scale * (hit ? 1.07 : 1));
         o.g.visible = true;
     }
-    // Los que ya no están (muertos o de otra arena): se esconden; si hace rato que no se ven, se liberan
-    for (const [u, o] of units) if (o.seen !== frameNo) { o.g.visible = false; if (frameNo - o.seen > 600) { scene.remove(o.g); units.delete(u); } }
+    // Los que ya no están: si se murieron recién, el robot se cae de espaldas, se hunde y larga chispas; los demás
+    // (de otra arena) se esconden. Si hace rato que no se ven, se liberan.
+    for (const [u, o] of units) {
+        if (o.seen === frameNo) continue;
+        if (o.dieT === undefined && o.seen === frameNo - 1 && !u.isAlive()) {
+            o.dieT = 0;
+            fxParticles(arena, o.g.position.x / U - 0.5, o.g.position.z / U - 0.5, 'lightning', 10, 3, { style: 'spark' });
+            fxParticles(arena, o.g.position.x / U - 0.5, o.g.position.z / U - 0.5, 'steel', 6, 1.5, { style: 'smoke', size: 5, life: 0.8 });
+        }
+        if (o.dieT !== undefined && o.dieT < 1) {
+            o.dieT += dt;
+            o.robot.rotation.x = -Math.min(1, o.dieT * 3.5) * Math.PI * 0.45;
+            o.g.position.y = -Math.max(0, o.dieT - 0.45) * sizeOf(u) * 0.6;
+            o.g.visible = true;
+        } else o.g.visible = false;
+        if (frameNo - o.seen > 600) { scene.remove(o.g); units.delete(u); }
+    }
+    drawAirFx(arena);
 
     // Proyectiles
     let n = 0;
     for (const pr of arena.projectiles) {
         const color = (pr.vfx && pr.vfx.color) || (pr.attacker.isHero ? heroColor(pr.attacker) : pr.attacker.color || '#fefae0');
-        shotMesh(n++, pr.isCrit ? '#ffd166' : color, !!pr.radius).position.set((pr.x + 0.5) * U, 0.8, (pr.y + 0.5) * U);
+        const s = shotMesh(n++, pr.isCrit ? '#ffd166' : color, !!pr.radius);
+        s.position.set((pr.x + 0.5) * U, 0.8, (pr.y + 0.5) * U);
+        projectileTrail(pr, s.position, color);
     }
     for (let i = n; i < shots.length; i++) shots[i].visible = false;
 
-    // El aro de rango y la marca de a dónde caminás
+    // El aro de rango; la cruz de a dónde caminás, el objetivo marcado y la mira van en el piso (drawDecal)
     const me = typeof player !== 'undefined' ? player : null;
     rangeRing.visible = !!(me && me.isAlive() && me.arena === arena);
     if (rangeRing.visible) { const o = units.get(me); if (o) { rangeRing.position.set(o.g.position.x, 0.03, o.g.position.z); rangeRing.scale.setScalar(effRange(me)); } }
-    moveMark.visible = !!(me && me.moveTarget && me.arena === arena);
-    if (moveMark.visible) moveMark.position.set((me.moveTarget.x + 0.5) * U, 0.04, (me.moveTarget.y + 0.5) * U);
+    drawDecal(arena);
+    hideUnused();
 
     renderer.render(scene, camera);
 }
